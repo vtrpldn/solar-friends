@@ -459,6 +459,7 @@ impl Construction {
                     || self.working_upkeep(index)
                     || self.working_water(index)
                     || self.gathering.workers_at_site(index)
+                    || self.farming.has_worker(index)
                     || self.residents[index].health.task.is_some())
             {
                 self.refresh_resident_route(index, catalog, site);
@@ -495,19 +496,21 @@ impl Construction {
 
     fn refresh_resident_route(&mut self, index: usize, catalog: &Catalog, site: ConstructionSite) {
         let worker = &self.residents[index];
-        let blocked_waypoint = worker.path.front().copied().filter(|waypoint| {
+        let grid_count = self.farm_grid_waypoints(index).unwrap_or(worker.path.len());
+        let blocked_waypoint = (grid_count > 0).then(|| worker.path[0]).filter(|waypoint| {
             let cell = waypoint.round().as_ivec2();
             cell != worker.position.round().as_ivec2()
                 && self.blocked(catalog, site.terrain, site.land, site.camp, cell)
         });
         let replacement = blocked_waypoint
-            .and_then(|_| worker.path.back())
+            .and_then(|_| worker.path.get(grid_count - 1))
             .and_then(|&goal| {
                 let mut path =
                     self.resident_route(catalog, site, worker.position, goal.round().as_ivec2())?;
                 if path.back().copied().unwrap_or(worker.position) != goal {
                     path.push_back(goal);
                 }
+                path.extend(worker.path.iter().skip(grid_count).copied());
                 Some(path)
             });
         let worker = &mut self.residents[index];

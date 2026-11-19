@@ -748,6 +748,21 @@ impl Construction {
         })
     }
 
+    pub(super) fn farm_grid_waypoints(&self, worker: usize) -> Option<usize> {
+        let job = self
+            .farming
+            .jobs
+            .iter()
+            .find(|job| job.worker == Some(worker))?;
+        let path = &self.residents[worker].path;
+        Some(match job.phase {
+            // The final three points follow the authored bed aisle beyond the grid route.
+            FarmPhase::Walk => path.len().saturating_sub(3),
+            FarmPhase::Return if path.front().is_some_and(|point| point.round() != *point) => 0,
+            _ => path.len(),
+        })
+    }
+
     fn path_from_bed(
         &self,
         catalog: &Catalog,
@@ -857,6 +872,7 @@ mod resize_tests {
         village.residents[0].position = (corner - IVec2::X).as_vec2();
         let mut reached_bed = false;
         for step in 0..1_800 {
+            village.refresh_resident_crowding(&catalog, ground);
             village.tick_farm_jobs(&catalog, &mut stock, ground, f64::from(step) * 0.1, 0.1);
             let Some(job) = village.farming.jobs.first() else {
                 break;
