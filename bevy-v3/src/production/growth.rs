@@ -97,6 +97,37 @@ impl Growth {
         }
     }
 
+    fn rate(biology: &Biology, soil: &Ground, season: f64) -> f64 {
+        let season = if biology.seasonal { season } else { 1.0 };
+        if biology.care.is_none() {
+            return season;
+        }
+        if soil.moisture < 0.1 {
+            return 0.0;
+        }
+        season * (soil.moisture / 0.4).min(1.0) * (0.5 + 0.5 * soil.fertility)
+    }
+
+    pub fn collection_forecast(
+        &self,
+        biology: &Biology,
+        soil: &Ground,
+        clock: f64,
+        season: f64,
+    ) -> Option<f64> {
+        if self.damage >= 1.0 {
+            return None;
+        }
+        if let Some(ripe) = self.ripe_at {
+            return biology
+                .window
+                .is_none_or(|window| clock < ripe + 2.0 * window * DAY)
+                .then_some(0.0);
+        }
+        let rate = Self::rate(biology, soil, season);
+        (rate > 0.0).then(|| self.remaining / rate / DAY)
+    }
+
     pub fn tick(
         &mut self,
         biology: &Biology,
@@ -104,11 +135,6 @@ impl Growth {
         climate: Conditions,
         mut irrigate: impl FnMut(f64) -> bool,
     ) {
-        let mut factor = if biology.seasonal {
-            climate.season
-        } else {
-            1.0
-        };
         if let Some([area, liters]) = biology.care {
             let days = climate.elapsed / DAY;
             let need = liters * days;
@@ -141,13 +167,8 @@ impl Growth {
                 self.ripe_at.get_or_insert(climate.clock);
                 return;
             }
-            factor *= if soil.moisture < 0.1 {
-                0.0
-            } else {
-                (soil.moisture / 0.4).min(1.0)
-            };
-            factor *= 0.5 + 0.5 * soil.fertility;
         }
+        let factor = Self::rate(biology, soil, climate.season);
         if self.ripe_at.is_none() {
             self.remaining = (self.remaining - climate.elapsed * factor).max(0.0);
             if self.remaining == 0.0 {
@@ -204,6 +225,10 @@ mod tests {
         let mut soil = Ground::default();
         let mut first = Growth::start("fruit", biology, &mut soil);
         assert_eq!(first.remaining, 730.0 * DAY);
+        assert_eq!(
+            first.collection_forecast(biology, &soil, 0.0, 1.0),
+            Some(730.0)
+        );
         first.tick(
             biology,
             &mut soil,

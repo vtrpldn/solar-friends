@@ -60,6 +60,37 @@ impl Construction {
                 }
             }
         }
+        let default_soil = crate::production::growth::Ground::default();
+        for job in &self.production.jobs {
+            use crate::production::Phase;
+            if !matches!(job.phase, Phase::Growing | Phase::Harvest)
+                || matches!(job.recipe.as_str(), "eggs" | "milk")
+            {
+                continue;
+            }
+            let recipe = &catalog.production[&job.recipe];
+            let (Some(growth), Some(biology)) = (&job.growth, &recipe.biology) else {
+                continue;
+            };
+            let soil = self
+                .production
+                .growing_sites
+                .get(&job.site)
+                .unwrap_or(&default_soil);
+            if let Some(remaining) = growth.collection_forecast(biology, soil, clock, season) {
+                let site = job.site;
+                let project = &catalog.projects[&self.plans[site].key];
+                events.push((
+                    remaining,
+                    format!(
+                        "{} · {} #{} ready to collect",
+                        recipe.name,
+                        project.name,
+                        site + 1
+                    ),
+                ));
+            }
+        }
         for (&site, pen) in &self.livestock.animals {
             let project = &catalog.projects[&self.plans[site].key];
             let Some(ration) = catalog.animal_rations.get(&project.kind) else {
@@ -89,7 +120,7 @@ impl Construction {
                 .total_cmp(&right.0)
                 .then_with(|| left.1.cmp(&right.1))
         });
-        let mut label = String::from("\nUpcoming harvests and animal produce");
+        let mut label = String::from("\nUpcoming harvests and collection");
         if events.is_empty() {
             label.push_str("\nNo upcoming milestones.");
         }
