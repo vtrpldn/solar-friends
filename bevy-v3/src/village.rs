@@ -1925,7 +1925,6 @@ fn animate_arrival(
                     step_height: 0.0,
                     visible: visible
                         && !village.construction.driver_away(index)
-                        && !village.construction.resident_sleeping(index)
                         && !village.construction.away_for_work(index),
                 }
             }

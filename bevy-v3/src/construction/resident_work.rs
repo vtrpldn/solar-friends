@@ -48,6 +48,13 @@ fn recreation_activity(plans: &[Blueprint], task: &NeedTask) -> (Motion, &'stati
     }
 }
 
+struct RestPose {
+    position: Vec2,
+    yaw: f32,
+    visible: bool,
+    motion: Motion,
+}
+
 impl Construction {
     fn resident_working(&self, index: usize) -> bool {
         self.residents[index]
@@ -1065,7 +1072,45 @@ impl Construction {
         Some((anchor, inward.x.atan2(inward.y)))
     }
 
+    fn rest_pose(&self, index: usize, catalog: &Catalog) -> Option<RestPose> {
+        let worker = &self.residents[index];
+        let task = worker.health.task.as_ref()?;
+        if !worker.path.is_empty()
+            || !matches!(task.kind, Need::Rest | Need::Sleep)
+            || task.elapsed <= 0.0
+        {
+            return None;
+        }
+        let shelter = task
+            .facility
+            .and_then(|id| id.checked_sub(1))
+            .and_then(|id| self.plans.get(id));
+        let home = shelter.is_some_and(|plan| catalog.projects[&plan.key].kind == "home");
+        let recessed = shelter
+            .is_some_and(|plan| plan.key.contains("veranda") || plan.key.contains("courtyard"));
+        let travel = if home {
+            if recessed { 1.15 } else { 0.75 }
+        } else {
+            1.35
+        };
+        let facing = shelter.map_or(0., |plan| {
+            f32::from(plan.rotation) * std::f32::consts::FRAC_PI_2
+        });
+        let remaining = task.duration - task.elapsed;
+        let entering = task.elapsed < remaining;
+        let inward = (task.elapsed.min(remaining) / 1.5).clamp(0.0, 1.0) as f32;
+        Some(RestPose {
+            position: worker.position - Vec2::new(facing.sin(), facing.cos()) * (travel * inward),
+            yaw: facing + if entering { std::f32::consts::PI } else { 0. },
+            visible: inward < if home { 0.82 } else { 0.64 },
+            motion: if home { Motion::Walk } else { Motion::DuckWalk },
+        })
+    }
+
     pub fn resident_visual_position(&self, index: usize, catalog: &Catalog) -> (Vec2, bool) {
+        if let Some(rest) = self.rest_pose(index, catalog) {
+            return (rest.position, rest.visible);
+        }
         let position = self.residents[index].position;
         let Some((task, plan)) = self.private_visit(index, catalog) else {
             let anchor = self
@@ -1081,6 +1126,9 @@ impl Construction {
     }
 
     pub fn resident_visual_yaw(&self, index: usize, catalog: &Catalog) -> f32 {
+        if let Some(rest) = self.rest_pose(index, catalog) {
+            return rest.yaw;
+        }
         if let Some((_, yaw)) = self.resident_service_anchor(index, catalog) {
             return yaw;
         }
@@ -1154,7 +1202,9 @@ impl Construction {
                 Need::Bowels => Motion::Toilet,
                 Need::Social => self.conversation_motion(index, task),
                 Need::Fun => recreation_activity(&self.plans, task).0,
-                Need::Sleep | Need::Rest => Motion::Rest,
+                Need::Sleep | Need::Rest => self
+                    .rest_pose(index, catalog)
+                    .map_or(Motion::Rest, |rest| rest.motion),
                 Need::FilterWater | Need::FetchWater => Motion::Work,
             };
         }
@@ -1923,6 +1973,41 @@ mod tests {
             assert!(village.resident_motion(0, &catalog, &land) == expected);
             village.gathering.orders.clear();
         }
+    }
+
+    #[test]
+    fn residents_duck_into_tents_and_face_out_when_leaving() {
+        let catalog = Catalog::default();
+        let mut village = Construction::default();
+        let entrance = Vec2::new(40., 38.);
+        village.residents[0].position = entrance;
+        village.residents[0].health.task = Some(NeedTask {
+            kind: Need::Sleep,
+            facility: None,
+            elapsed: 0.5,
+            started_at: None,
+            duration: 100.,
+            water: 0.,
+            returning: false,
+            partner: None,
+            conversation: None,
+        });
+        let (entry, visible) = village.resident_visual_position(0, &catalog);
+        assert!(visible && entry.y < entrance.y);
+        assert_eq!(
+            village.resident_visual_yaw(0, &catalog),
+            std::f32::consts::PI
+        );
+        assert!(matches!(
+            village.resident_motion(0, &catalog, &Land::default()),
+            Motion::DuckWalk
+        ));
+        village.residents[0].health.task.as_mut().unwrap().elapsed = 50.;
+        assert!(!village.resident_visual_position(0, &catalog).1);
+        village.residents[0].health.task.as_mut().unwrap().elapsed = 99.5;
+        assert_eq!(village.resident_visual_position(0, &catalog), (entry, true));
+        assert_eq!(village.resident_visual_yaw(0, &catalog), 0.);
+        assert_eq!(village.residents[0].position, entrance);
     }
 
     #[test]
