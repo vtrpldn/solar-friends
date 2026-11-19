@@ -16,6 +16,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   desktop:
     runs-on: macos-latest
@@ -39,12 +43,20 @@ jobs:
           cd "$standalone"
           cat > scenario.json <<'JSON'
           {
-            "steps": 1200,
+            "steps": 8000,
             "orders": [
               {"step": 0, "order": {"type": "build", "key": "gathering", "x": 40, "z": 36}}
             ]
           }
           JSON
           ./solar-friends-v3 --lab scenario.json > report.json
-          jq -e '.end_step == 1200 and .orders == [{"step": 0, "error": null}]' report.json
+          jq -e '
+            .end_step == 8000
+            and .orders == [{"step": 0, "error": null}]
+            and (.village.construction.plans | length == 1)
+            and (.village.construction.plans[0] |
+              .key == "gathering" and .loads == 3 and .delivered == 3
+              and .staged == 0 and .work == 134 and .removed == false)
+            and .village.stock.materials.wood == 28
+          ' report.json
           ./solar-friends-v3 --lab-replay report.json
