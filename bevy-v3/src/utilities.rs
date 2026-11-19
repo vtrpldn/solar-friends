@@ -22,6 +22,16 @@ pub enum NetworkView {
 
 const LIQUID_NAMES: [&str; 4] = ["Drinking water", "Irrigation", "Greywater", "Sewage"];
 
+fn waste_tank_warning(liters: f64, capacity: f64) -> Option<&'static str> {
+    if capacity <= 0.0 || liters < 0.9 * capacity {
+        None
+    } else if liters >= capacity - 0.1 {
+        Some("full")
+    } else {
+        Some("nearly full")
+    }
+}
+
 impl NetworkView {
     fn channels(self) -> std::ops::Range<usize> {
         match self {
@@ -651,11 +661,22 @@ impl Utilities {
             };
             status.push_str(&format!("{state} · J Switch"));
         }
-        if node.capacity.iter().any(|capacity| *capacity > 0.0) {
-            if !status.is_empty() {
-                status.push_str(" · ");
+        for (channel, name) in LIQUID_NAMES.iter().enumerate() {
+            let capacity = node.capacity[channel];
+            if capacity <= 0.0 {
+                continue;
             }
-            status.push_str(&format!("Water {:.1} L", node.water[0] + node.water[1]));
+            let liters = node.water[channel];
+            if !status.is_empty() {
+                status.push('\n');
+            }
+            use std::fmt::Write;
+            let _ = write!(status, "{name} · {liters:.1}/{capacity:.1} L");
+            if channel >= 2
+                && let Some(warning) = waste_tank_warning(liters, capacity)
+            {
+                let _ = write!(status, " · Tank {warning}");
+            }
         }
         if node.cold_storage {
             status.push_str("\nCold storage ");
@@ -723,7 +744,7 @@ impl Utilities {
             "Camp latrine fallback".into()
         } else if enabled().any(|node| {
             (2..4).any(|channel| {
-                node.capacity[channel] > 0.0 && node.water[channel] >= 0.9 * node.capacity[channel]
+                waste_tank_warning(node.water[channel], node.capacity[channel]).is_some()
             })
         }) {
             "Waste tanks filling".into()
@@ -1612,6 +1633,27 @@ mod tests {
 
     use super::*;
     use crate::catalog::Catalog;
+
+    #[test]
+    fn selected_sanitation_facility_shows_each_tank_and_its_warning() {
+        let mut utilities = Utilities::default();
+        utilities.sync(std::iter::once(Facility {
+            id: 1,
+            kind: "eco_toilet",
+            location: IVec2::new(44, 36),
+            size: IVec2::ONE,
+            batteries: 0,
+            panels: 0,
+            working: false,
+        }));
+        utilities.nodes.get_mut(&1).unwrap().water = [4.0, 0.0, 14.5, 16.0];
+
+        let status = utilities.facility_status(0).unwrap();
+        assert!(status.contains("Drinking water · 4.0/8.0 L"));
+        assert!(status.contains("Greywater · 14.5/16.0 L · Tank nearly full"));
+        assert!(status.contains("Sewage · 16.0/16.0 L · Tank full"));
+        assert!(!status.contains("Irrigation"));
+    }
 
     #[test]
     fn cooling_switch_removes_load_without_switching_off_the_kitchen() {
