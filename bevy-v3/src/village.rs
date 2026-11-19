@@ -52,6 +52,7 @@ use crate::{
 };
 
 pub(crate) const SIMULATION_HZ: f64 = 10.0;
+pub(crate) const SIMULATION_STEP: f64 = 1.0 / SIMULATION_HZ;
 
 const SPEEDS: [(KeyCode, u8); 4] = [
     (KeyCode::Digit1, 1),
@@ -2395,6 +2396,60 @@ mod tests {
         let exported = save_library::export(&directory, id, Mode::Story, &catalog).unwrap();
         assert_eq!(save::read(&exported, &catalog).unwrap().clock, 0.0);
         std::fs::remove_dir_all(directory).unwrap();
+    }
+
+    #[test]
+    fn exact_advance_matches_fixed_simulation_and_checkpoints_the_result() {
+        let setup = WorldSetup::default().session();
+        let catalog = Catalog::default();
+        let camp = IVec2::new(36, 36);
+        let opening = Village {
+            setup: Some(setup.clone()),
+            camp: Some(camp),
+            clock: crate::weather::DAY - crate::weather::HOUR,
+            arrival_time: ARRIVAL_DURATION,
+            stock: Stock::for_start(&setup, &catalog),
+            ..default()
+        };
+        let opening_save = serde_json::to_vec(&opening).unwrap();
+        let mut app = App::new();
+        app.insert_resource(setup.clone())
+            .insert_resource(catalog)
+            .init_resource::<Land>()
+            .init_resource::<SaveMenu>()
+            .insert_resource(opening)
+            .add_systems(Update, advance_days);
+        {
+            let mut village = app.world_mut().resource_mut::<Village>();
+            village.apply_advance_action(AdvanceAction::Toggle);
+            village.apply_advance_action(AdvanceAction::Start);
+        }
+
+        let mut fixed: Village = serde_json::from_slice(&opening_save).unwrap();
+        let terrain = fixed.terrain(&setup);
+        let land = app.world().resource::<Land>();
+        let catalog = app.world().resource::<Catalog>();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land,
+            camp,
+        };
+        let steps = (crate::weather::DAY / SIMULATION_STEP).round() as u64;
+        for _ in 0..steps {
+            step(&mut fixed, catalog, &setup, site, SIMULATION_STEP);
+        }
+        fixed.paused = true;
+
+        for _ in 0..steps {
+            if app.world().resource::<Village>().advance.running.is_none() {
+                break;
+            }
+            app.update();
+        }
+        let advanced = app.world().resource::<Village>();
+        assert!(advanced.advance_checkpoint);
+        assert_eq!(advanced.clock, fixed.clock);
+        assert!(serde_json::to_value(advanced).unwrap() == serde_json::to_value(fixed).unwrap());
     }
 
     #[test]

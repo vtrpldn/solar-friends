@@ -88,7 +88,7 @@ fn main() {
     }
     app.insert_resource(WinitSettings {
         unfocused_mode: UpdateMode::reactive_low_power(std::time::Duration::from_secs_f64(
-            1.0 / village::SIMULATION_HZ,
+            village::SIMULATION_STEP,
         )),
         ..WinitSettings::game()
     })

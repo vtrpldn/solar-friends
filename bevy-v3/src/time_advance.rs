@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::weather::DAY;
+use crate::{village::SIMULATION_STEP, weather::DAY};
 
 pub struct Advance {
     pub open: bool,
@@ -182,7 +182,11 @@ impl Advance {
 
 impl Run {
     fn new(days: u16, fast: bool) -> Self {
-        let dt = if fast { 1.0 } else { 0.1 };
+        let dt = if fast {
+            10.0 * SIMULATION_STEP
+        } else {
+            SIMULATION_STEP
+        };
         Self {
             total: (f64::from(days) * DAY / dt).round() as u64,
             steps: 0,

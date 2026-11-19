@@ -249,7 +249,7 @@ fn compare_replay(runner: &Runner, expected: serde_json::Value, version: u64) ->
     Ok(())
 }
 
-const STEP: f64 = 0.1;
+const STEP: f64 = SIMULATION_STEP;
 const SPEEDS: [(KeyCode, u16); 9] = [
     (KeyCode::Digit1, 1),
     (KeyCode::Digit2, 4),
