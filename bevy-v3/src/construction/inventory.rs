@@ -49,7 +49,7 @@ impl Construction {
             } else {
                 Location::Reserved
             };
-            record(&mut ledger, &def.materials, location);
+            record(&mut ledger, plan.materials(catalog), location);
             for (recipe, installed) in [
                 ("cold_storage", self.utilities.has_cold_storage(index)),
                 ("solar_upgrade", self.utilities.has_rooftop_solar(index)),
@@ -217,6 +217,38 @@ impl Construction {
 mod tests {
     use super::*;
     use crate::setup::WorldSetup;
+
+    #[test]
+    fn a_paid_blueprint_keeps_its_material_bill_after_catalog_changes() {
+        let mut catalog = Catalog::default();
+        let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);
+        let mut village = Construction::default();
+        let mut plan = village.proposed_site(&catalog, "well", IVec2::ZERO);
+        Construction::reserve_project(
+            &mut village.market,
+            &mut stock,
+            &catalog,
+            &mut plan,
+            TownClock {
+                seconds: 0.0,
+                round_trip_km: 12,
+            },
+        )
+        .unwrap();
+        let paid = plan.materials(&catalog)["plumbing"];
+        let saved = serde_json::to_vec(&plan).unwrap();
+        catalog
+            .projects
+            .get_mut("well")
+            .unwrap()
+            .materials
+            .insert("plumbing".into(), paid + 10);
+        village.plans.push(serde_json::from_slice(&saved).unwrap());
+        assert_eq!(
+            village.inventory(&catalog, &stock)["plumbing"][Location::Reserved as usize],
+            u64::from(paid)
+        );
+    }
 
     #[test]
     fn paid_seed_inputs_remain_in_the_ledger_until_they_reach_the_bed() {

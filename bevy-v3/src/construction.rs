@@ -191,6 +191,16 @@ struct Blueprint {
     removed: bool,
     #[serde(default)]
     purchase: Option<lifecycle::Purchase>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    materials_paid: Option<BTreeMap<String, u32>>,
+}
+
+impl Blueprint {
+    fn materials<'a>(&'a self, catalog: &'a Catalog) -> &'a BTreeMap<String, u32> {
+        self.materials_paid
+            .as_ref()
+            .unwrap_or(&catalog.projects[&self.key].materials)
+    }
 }
 
 #[derive(Clone, Copy, PartialEq, Deserialize, Serialize)]
@@ -727,10 +737,11 @@ impl Construction {
         blueprint: &mut Blueprint,
         clock: TownClock,
     ) -> Result<(), String> {
+        let materials = &catalog.projects[&blueprint.key].materials;
+        blueprint.materials_paid = Some(materials.clone());
         if stock.sandbox {
             return Ok(());
         }
-        let materials = &catalog.projects[&blueprint.key].materials;
         let quote = market.quote(
             catalog,
             materials,
@@ -832,6 +843,7 @@ impl Construction {
             fare: 0,
             removed: false,
             purchase: None,
+            materials_paid: None,
         }
     }
 
@@ -1189,8 +1201,16 @@ impl Construction {
                         kind: &definition.kind,
                         location: project.position,
                         size: project.size,
-                        batteries: definition.materials.get("batteries").copied().unwrap_or(0),
-                        panels: definition.materials.get("panels").copied().unwrap_or(0),
+                        batteries: project
+                            .materials(catalog)
+                            .get("batteries")
+                            .copied()
+                            .unwrap_or(0),
+                        panels: project
+                            .materials(catalog)
+                            .get("panels")
+                            .copied()
+                            .unwrap_or(0),
                         working,
                     })
                 }),
@@ -1331,7 +1351,10 @@ impl Construction {
                             plan.size == size(definition, plan.rotation)
                         }
                         && (plan.position + plan.size).cmple(IVec2::splat(94)).all()
-                        && plan.loads == catalog.loads(definition)
+                        && plan.materials(catalog).iter().all(|(id, &amount)| {
+                            amount <= 100_000 && catalog.materials.contains_key(id)
+                        })
+                        && plan.loads == catalog.loads_for(plan.materials(catalog))
                         && plan.delivered <= plan.loads
                         && (plan.pickups == 0 || plan.delivered == 0 && plan.work == 0.0)
                         && (0.0..=definition.work).contains(&plan.work)

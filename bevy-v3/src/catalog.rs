@@ -185,8 +185,11 @@ impl Default for Catalog {
 
 impl Catalog {
     pub fn loads(&self, project: &Project) -> u32 {
-        project
-            .materials
+        self.loads_for(&project.materials)
+    }
+
+    pub fn loads_for(&self, materials: &BTreeMap<String, u32>) -> u32 {
+        materials
             .iter()
             .map(|(id, units)| units.div_ceil(self.materials[id].batch))
             .sum()

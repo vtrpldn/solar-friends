@@ -70,6 +70,7 @@ impl Construction {
                 fare: 0,
                 removed: false,
                 purchase: None,
+                materials_paid: None,
             };
             if let Some(reason) = self.placement_error(
                 site.terrain,

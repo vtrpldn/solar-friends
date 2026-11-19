@@ -240,6 +240,7 @@ impl Construction {
             fare: plan.fare,
             removed: false,
             purchase: None,
+            materials_paid: plan.materials_paid.clone(),
         };
         let ConstructionSite {
             terrain,
@@ -263,7 +264,7 @@ impl Construction {
 
     fn cancel_plan(&mut self, catalog: &Catalog, stock: &mut Stock, index: usize) {
         let plan = &self.plans[index];
-        let mut returned = catalog.projects[&plan.key].materials.clone();
+        let mut returned = plan.materials(catalog).clone();
         if plan.pickups > 0 {
             let active = self
                 .active_trips()
@@ -417,7 +418,7 @@ impl Construction {
                 let kind = job.kind;
                 let plan = &self.plans[index];
                 let definition = &catalog.projects[&plan.key];
-                let mut installed = definition.materials.clone();
+                let mut installed = plan.materials(catalog).clone();
                 for (recipe, upgraded) in [
                     ("cold_storage", self.utilities.has_cold_storage(index)),
                     ("solar_upgrade", self.utilities.has_rooftop_solar(index)),
