@@ -193,7 +193,7 @@ impl Construction {
         const VISIBLE_WARNINGS: usize = 4;
         let mut details = String::new();
         let mut count = 0;
-        for (id, tank, warning) in self.utilities.waste_tanks_needing_attention() {
+        for (id, _, tank, warning) in self.utilities.waste_tanks_needing_attention() {
             count += 1;
             if count > VISIBLE_WARNINGS {
                 continue;
@@ -216,7 +216,7 @@ impl Construction {
         } else {
             "tanks need"
         };
-        format!("\n{count} waste {subject} attention{details}")
+        format!("\n{count} waste {subject} attention · Page Down Next tank{details}")
     }
 
     pub fn water_panel(

@@ -427,6 +427,30 @@ impl Village {
         }
     }
 
+    fn focus_next_waste_tank(&mut self, setup: &WorldSetup, camera: &mut VillageCamera) {
+        let current = (self.water_panel.target, self.water_panel.channel);
+        let mut tanks = self
+            .construction
+            .utilities
+            .waste_tanks_needing_attention()
+            .map(|(id, channel, _, _)| (id, channel));
+        let Some(first) = tanks.next() else { return };
+        let (id, channel) = if first > current {
+            first
+        } else {
+            tanks.find(|&tank| tank > current).unwrap_or(first)
+        };
+        let Some(site) = self.construction.utilities.water_site(id) else {
+            return;
+        };
+        let center = site.location.as_vec2() + (site.size.as_vec2() - Vec2::ONE) * 0.5;
+        let point = world_position(center.x, center.y);
+        let terrain = self.terrain(setup);
+        camera.target = Vec3::new(point.x, terrain.height_at(point.x, point.y), point.y);
+        self.water_panel.select_facility(id, false);
+        self.water_panel.channel = channel;
+    }
+
     fn focus_project_row(
         &mut self,
         catalog: &Catalog,
@@ -1368,6 +1392,10 @@ fn village_input(
             };
         }
         if town.utility_panel == Some(UtilityPanel::Water) {
+            if keyboard.just_pressed(KeyCode::PageDown) {
+                town.focus_next_waste_tank(&setup, camera);
+                return;
+            }
             town.water_panel
                 .input(&keyboard, pointer.clicked, &mut town.construction);
             return;
@@ -2494,6 +2522,40 @@ mod tests {
             180.0
         );
         std::fs::remove_dir_all(directory).unwrap();
+    }
+
+    #[test]
+    fn waste_tank_navigation_cycles_channels_and_wraps_between_sites() {
+        let setup = WorldSetup::default().session();
+        let mut village = Village::default();
+        let utilities = &mut village.construction.utilities;
+        utilities.sync([1, 2].into_iter().map(|id| crate::utilities::Facility {
+            id,
+            kind: "eco_toilet",
+            location: IVec2::new(40 + id as i32, 36),
+            size: IVec2::ONE,
+            batteries: 0,
+            panels: 0,
+            working: false,
+        }));
+        utilities.deliver_water(1, 2, 16.0);
+        utilities.deliver_water(1, 3, 16.0);
+        utilities.deliver_water(2, 3, 16.0);
+
+        let mut camera = VillageCamera {
+            target: Vec3::ZERO,
+            heading: 0.0,
+            polar: crate::default_camera_polar(),
+        };
+        for (id, channel) in [(1, 2), (1, 3), (2, 3), (1, 2)] {
+            village.focus_next_waste_tank(&setup, &mut camera);
+            assert_eq!(
+                (village.water_panel.target, village.water_panel.channel),
+                (id, channel)
+            );
+            let expected = world_position(40.0 + id as f32, 36.0);
+            assert_eq!(Vec2::new(camera.target.x, camera.target.z), expected);
+        }
     }
 
     #[test]

@@ -84,6 +84,7 @@ enum Action {
     BuildingPower,
     Cooling,
     Water(WaterCommand),
+    NextWasteTank,
     AutomaticUpkeep,
     UpkeepBudget { restock: bool, increase: bool },
 }
@@ -229,6 +230,15 @@ impl Action {
                     && self.facility_switch(village).is_some()
             }
             Self::Water(_) => village.utility_panel == Some(UtilityPanel::Water),
+            Self::NextWasteTank => {
+                village.utility_panel == Some(UtilityPanel::Water)
+                    && village
+                        .construction
+                        .utilities
+                        .waste_tanks_needing_attention()
+                        .next()
+                        .is_some()
+            }
             Self::AutomaticUpkeep | Self::UpkeepBudget { .. } => {
                 village.utility_panel == Some(UtilityPanel::Upkeep)
             }
@@ -523,6 +533,7 @@ impl Action {
             Self::BuildingPower => "Switch building on".into(),
             Self::Cooling if self.facility_switch(village) == Some(true) => "Pause cooling".into(),
             Self::Cooling => "Resume cooling".into(),
+            Self::NextWasteTank => "Next waste tank".into(),
             Self::Water(command) => match command {
                 WaterCommand::Camp { source: true } => "Camp source".into(),
                 WaterCommand::Camp { source: false } => "Camp destination".into(),
@@ -793,6 +804,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 ] {
                     spawn_button(menu, &assets, Action::Water(command));
                 }
+                spawn_button(menu, &assets, Action::NextWasteTank);
                 spawn_button(menu, &assets, Action::AutomaticUpkeep);
                 for restock in [false, true] {
                     for increase in [false, true] {
@@ -1154,6 +1166,9 @@ fn handle_buttons(
                 Action::UpkeepBudget { restock, increase } if !picker.open => {
                     village.construction.adjust_upkeep_budget(restock, increase);
                 }
+                Action::NextWasteTank if !picker.open => {
+                    village.focus_next_waste_tank(&setup, camera)
+                }
                 Action::Water(command) if !picker.open => {
                     let town = &mut *village;
                     town.water_panel.apply(command, &mut town.construction);
@@ -1298,6 +1313,7 @@ fn handle_buttons(
                 | Action::BuildingPower
                 | Action::Cooling
                 | Action::Water(_)
+                | Action::NextWasteTank
                 | Action::AutomaticUpkeep
                 | Action::UpkeepBudget { .. } => {}
             }
@@ -1500,6 +1516,7 @@ fn refresh(
                 show_facility_switches && action.available(&village)
             }
             Action::Water(_) => show_water,
+            Action::NextWasteTank => show_water && action.available(&village),
             Action::AutomaticUpkeep | Action::UpkeepBudget { .. } => show_upkeep,
             Action::Panel(_) => picker.open,
             _ => true,

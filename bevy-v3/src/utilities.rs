@@ -792,7 +792,7 @@ impl Utilities {
 
     pub fn waste_tanks_needing_attention(
         &self,
-    ) -> impl Iterator<Item = (usize, &'static str, &'static str)> + '_ {
+    ) -> impl Iterator<Item = (usize, usize, &'static str, &'static str)> + '_ {
         self.nodes.iter().flat_map(|(&id, node)| {
             LIQUID_NAMES
                 .iter()
@@ -800,7 +800,7 @@ impl Utilities {
                 .skip(2)
                 .filter_map(move |(channel, &name)| {
                     let warning = waste_tank_warning(node.water[channel], node.capacity[channel])?;
-                    Some((id, name, warning))
+                    Some((id, channel, name, warning))
                 })
         })
     }
