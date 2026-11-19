@@ -10,6 +10,22 @@ pub(super) struct Purchase {
     pub trips: u32,
 }
 
+impl Purchase {
+    pub(super) fn receive_cargo(&mut self, catalog: &Catalog, cargo: &BTreeMap<String, u32>) {
+        let value = |units: &BTreeMap<String, u32>| {
+            units.iter().fold(0.0, |total, (id, &quantity)| {
+                let item = &catalog.materials[id];
+                total + f64::from(quantity) * item.price / f64::from(item.pack)
+            })
+        };
+        let full_value = value(&self.units);
+        crate::market::subtract_cargo(&mut self.units, cargo);
+        if full_value > 0.0 {
+            self.price = (self.price as f64 * (value(&self.units) / full_value)).floor() as u64;
+        }
+    }
+}
+
 #[derive(Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
 enum Change {
     Move,

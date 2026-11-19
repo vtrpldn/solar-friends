@@ -308,16 +308,26 @@ impl Construction {
                 .pickups -= 1;
         } else {
             let plan = &mut self.plans[trip.project];
-            plan.pickups -= 1;
-            if plan.pickups == 0 {
-                plan.purchase = None;
-            }
+            Self::receive_construction_pickup(catalog, plan);
         }
         self.record_event(
             clock.seconds,
             format!("Vehicle {} returned with supplies.", trip.vehicle + 1),
         );
         true
+    }
+
+    fn receive_construction_pickup(catalog: &Catalog, plan: &mut Blueprint) {
+        plan.pickups -= 1;
+        if plan.pickups == 0 {
+            plan.purchase = None;
+        } else if let Some(order) = &mut plan.purchase
+            && order.trips == plan.pickups + 1
+        {
+            let cargo = crate::market::pickup_cargo(catalog, &order.units);
+            order.receive_cargo(catalog, &cargo);
+            order.trips = plan.pickups;
+        }
     }
 
     fn dispatch_trip(
@@ -387,6 +397,39 @@ impl Construction {
 mod tests {
     use super::*;
     use crate::setup::WorldSetup;
+
+    #[test]
+    fn returned_pickup_keeps_only_the_uncollected_construction_order() {
+        let catalog = Catalog::default();
+        let mut village = Construction::default();
+        let mut plan = village.proposed_site(&catalog, "well", IVec2::new(36, 36));
+        let goods = BTreeMap::from([("stone".to_owned(), 200)]);
+        let first_load = crate::market::pickup_cargo(&catalog, &goods)["stone"];
+        assert!((1..200).contains(&first_load));
+        let trips = 200u32.div_ceil(first_load);
+
+        plan.pickups = trips;
+        plan.purchase = Some(super::super::lifecycle::Purchase {
+            units: goods,
+            price: 20_000,
+            day: 0,
+            trips,
+        });
+        Construction::receive_construction_pickup(&catalog, &mut plan);
+        let pending = plan.purchase.as_ref().unwrap();
+        assert_eq!(plan.pickups, trips - 1);
+        assert_eq!(pending.trips, plan.pickups);
+        assert_eq!(pending.units["stone"], 200 - first_load);
+        assert!((1..20_000).contains(&pending.price));
+
+        village.plans.push(plan);
+        let restored: Construction =
+            serde_json::from_slice(&serde_json::to_vec(&village).unwrap()).unwrap();
+        assert_eq!(
+            restored.plans[0].purchase.as_ref().unwrap().units["stone"],
+            200 - first_load
+        );
+    }
 
     #[test]
     fn construction_freight_replaces_reserved_pickup_fare_and_survives_a_save() {

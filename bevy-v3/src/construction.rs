@@ -1793,6 +1793,16 @@ impl Construction {
                         && plan.materials(catalog).iter().all(|(id, &amount)| {
                             amount <= 100_000 && catalog.materials.contains_key(id)
                         })
+                        && plan.purchase.as_ref().is_none_or(|order| {
+                            order.trips >= plan.pickups
+                                && order.units.iter().all(|(id, &units)| {
+                                    units > 0
+                                        && plan
+                                            .materials(catalog)
+                                            .get(id)
+                                            .is_some_and(|&bill| units <= bill)
+                                })
+                        })
                         && plan.loads == catalog.loads_for(plan.materials(catalog))
                         && plan.staged <= plan.loads.saturating_sub(plan.delivered)
                         && plan.depot.map_or(plan.staged == 0, |depot| {

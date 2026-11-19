@@ -249,25 +249,47 @@ impl Market {
     }
 }
 
+pub(crate) fn pack_cargo(
+    catalog: &Catalog,
+    pending: &BTreeMap<String, u32>,
+    (mass, volume): &mut (f64, f64),
+) -> BTreeMap<String, u32> {
+    let mut cargo = BTreeMap::new();
+    for (id, &remaining) in pending {
+        let item = &catalog.materials[id];
+        let fit = ((*mass / item.mass).min(*volume / item.volume) + 1e-8).floor() as u32;
+        let load = remaining.min(fit);
+        if load > 0 {
+            cargo.insert(id.clone(), load);
+            *mass -= f64::from(load) * item.mass;
+            *volume -= f64::from(load) * item.volume;
+        }
+    }
+    cargo
+}
+
+pub(crate) fn pickup_cargo(
+    catalog: &Catalog,
+    pending: &BTreeMap<String, u32>,
+) -> BTreeMap<String, u32> {
+    pack_cargo(catalog, pending, &mut (CARGO_MASS, CARGO_VOLUME))
+}
+
+pub(crate) fn subtract_cargo(pending: &mut BTreeMap<String, u32>, cargo: &BTreeMap<String, u32>) {
+    pending.retain(|id, remaining| {
+        *remaining -= cargo.get(id).copied().unwrap_or(0);
+        *remaining > 0
+    });
+}
+
 fn cargo_trips(catalog: &Catalog, mut pending: BTreeMap<String, u32>) -> Result<u32, String> {
     let mut trips = 0;
     while !pending.is_empty() {
-        let mut mass = CARGO_MASS;
-        let mut volume = CARGO_VOLUME;
-        let mut loaded_any = false;
-        pending.retain(|id, remaining| {
-            let item = &catalog.materials[id];
-            let fit = ((mass / item.mass).min(volume / item.volume) + 1e-8).floor() as u32;
-            let load = (*remaining).min(fit);
-            *remaining -= load;
-            mass -= f64::from(load) * item.mass;
-            volume -= f64::from(load) * item.volume;
-            loaded_any |= load != 0;
-            *remaining > 0
-        });
-        if !loaded_any {
+        let load = pickup_cargo(catalog, &pending);
+        if load.is_empty() {
             return Err("These materials need a larger delivery vehicle.".into());
         }
+        subtract_cargo(&mut pending, &load);
         trips += 1;
     }
     Ok(trips)
