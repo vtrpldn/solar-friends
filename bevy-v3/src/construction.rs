@@ -217,6 +217,8 @@ pub struct Construction {
     #[serde(default)]
     second_trip: Option<TownTrip>,
     #[serde(default)]
+    pickup_manifests: [town_pickup::PickupManifest; 2],
+    #[serde(default)]
     supplier_construction: bool,
     #[serde(default)]
     construction_delivery: Option<town_pickup::ConstructionDelivery>,
@@ -372,6 +374,7 @@ impl Default for Construction {
             reservation_pass: None,
             trip: None,
             second_trip: None,
+            pickup_manifests: Default::default(),
             supplier_construction: false,
             construction_delivery: None,
             logistics_policy: town_pickup::LogisticsPolicy::default(),
@@ -1705,11 +1708,6 @@ impl Construction {
         if self.foundations.len() > 4094 || !self.foundations.iter().all(|pad| pad.valid()) {
             return false;
         }
-        let active: Vec<_> = self
-            .active_trips()
-            .filter(|trip| trip.boarded && trip.farm_bed.is_none() && !trip.market_order)
-            .map(|trip| trip.project)
-            .collect();
         let fares = self
             .plans
             .iter()
@@ -1717,8 +1715,8 @@ impl Construction {
             .fold(0u64, |total, (index, project)| {
                 let trips = self
                     .remaining_freight_pickups(catalog, index)
-                    .unwrap_or(project.pickups)
-                    .saturating_sub(u32::from(active.contains(&index)));
+                    .or_else(|| self.remaining_boarded_pickups(catalog, index))
+                    .unwrap_or(project.pickups);
                 total.saturating_add(project.fare.saturating_mul(u64::from(trips)))
             });
         let fares = self.farming.jobs.iter().fold(fares, |total, job| {
@@ -1810,6 +1808,7 @@ impl Construction {
                     })
             });
         if !self.valid_construction_delivery(catalog)
+            || !self.valid_pickup_manifests(catalog)
             || !self.logistics_policy.valid()
             || !self.work_policy.valid()
             || !self.events.valid()

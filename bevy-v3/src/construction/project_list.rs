@@ -85,6 +85,12 @@ impl Construction {
             "Complete".to_owned()
         } else if self.construction_delivery_at(index) {
             "Supplier delivery on its way".into()
+        } else if let Some(trip) = self.booked_construction_trip(index) {
+            if trip.boarded {
+                format!("Vehicle {} collecting materials", trip.vehicle + 1)
+            } else {
+                format!("Vehicle {} booked for materials", trip.vehicle + 1)
+            }
         } else if plan.pickups > 0 {
             format!("{} town pickup(s) pending", plan.pickups)
         } else if plan.delivered < plan.loads {

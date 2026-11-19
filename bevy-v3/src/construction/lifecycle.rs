@@ -329,10 +329,7 @@ impl Construction {
         let plan = &self.plans[index];
         let mut returned = plan.materials(catalog).clone();
         if plan.pickups > 0 {
-            let active = self
-                .active_trips()
-                .find(|trip| !trip.market_order && trip.farm_bed.is_none() && trip.project == index)
-                .copied();
+            let active = self.booked_construction_trip(index).copied();
             let Some(order) = plan
                 .purchase
                 .as_ref()

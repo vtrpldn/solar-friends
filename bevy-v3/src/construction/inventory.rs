@@ -67,7 +67,10 @@ impl Construction {
             } else {
                 Location::Reserved
             };
-            if let Some(shipment) = self.construction_freight_cargo(index) {
+            if let Some(shipment) = self
+                .construction_freight_cargo(index)
+                .or_else(|| self.construction_pickup_cargo(index))
+            {
                 for (id, &amount) in plan.materials(catalog) {
                     let cargo = shipment.get(id).copied().unwrap_or(0).min(amount);
                     add(&mut ledger, id, cargo, Location::Transit);
