@@ -18,6 +18,7 @@ enum Change {
 }
 
 const BUILDING_HISTORY_LIMIT: usize = 64;
+const MIN_DISMANTLING_ENERGY: f64 = 25.0;
 
 #[derive(Deserialize, Serialize)]
 pub(super) struct DismantledBuilding {
@@ -406,17 +407,24 @@ impl Construction {
     ) {
         let changes: Vec<_> = self.changes.keys().copied().collect();
         for index in changes {
-            self.changes.get_mut(&index).expect("active change").retry -= f64::from(dt);
-            if self.changes[&index].retry > 0.0 {
+            let job = self.changes.get_mut(&index).expect("active change");
+            if let Some(worker) = job.worker
+                && self.residents[worker].health.energy < MIN_DISMANTLING_ENERGY
+            {
+                self.residents[worker].path.clear();
+                job.worker = None;
+                job.retry = 0.0;
+            }
+            job.retry -= f64::from(dt);
+            if job.retry > 0.0 {
                 continue;
             }
-            if let Some(worker) = self.changes[&index].worker {
+            if let Some(worker) = job.worker {
                 let resident = &mut self.residents[worker];
                 resident.move_along_path(dt, false);
                 if !resident.path.is_empty() {
                     continue;
                 }
-                let job = self.changes.get_mut(&index).expect("working project");
                 let labor = f64::from(dt).min(job.required - job.work);
                 job.work += labor;
                 resident.health.energy = (resident.health.energy - labor * 0.12).max(0.0);
@@ -517,7 +525,8 @@ impl Construction {
             let parcel = &self.plans[index];
             self.changes.get_mut(&index).expect("pending change").retry = 2.0;
             for (worker_index, resident) in self.residents.iter().enumerate() {
-                if resident.assignment.is_some()
+                if resident.health.energy < MIN_DISMANTLING_ENERGY
+                    || resident.assignment.is_some()
                     || resident.health.task.is_some()
                     || resident.town_work.active()
                     || self.production.has_worker(worker_index)
@@ -710,6 +719,15 @@ mod tests {
         construction.livestock.animals.insert(0, Default::default());
         construction.production.selected = Some(0);
         construction.apply_project_action(&catalog, &mut stock, ProjectAction::Demolish);
+        construction.tick_changes(&catalog, &mut stock, site, 42.0, 0.1);
+        let original_worker = construction.changes[&0].worker.unwrap();
+        construction.changes.get_mut(&0).unwrap().work = 10.0;
+        construction.residents[original_worker].health.energy = 24.0;
+        construction.tick_changes(&catalog, &mut stock, site, 42.0, 0.1);
+        let replacement = construction.changes[&0].worker.unwrap();
+        assert_ne!(replacement, original_worker);
+        assert!(construction.residents[original_worker].path.is_empty());
+        assert_eq!(construction.changes[&0].work, 10.0);
 
         for _ in 0..2_000 {
             construction.tick_changes(&catalog, &mut stock, site, 42.0, 0.1);
