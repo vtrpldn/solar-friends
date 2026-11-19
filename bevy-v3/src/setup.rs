@@ -148,11 +148,11 @@ impl WorldSetup {
     }
 
     pub fn round_trip_km(&self) -> u32 {
-        [8, 12, 36][self.town]
+        crate::economy_reference::ROUND_TRIP_KM[self.town]
     }
 
     pub fn starting_cash(&self) -> u32 {
-        [3_000, 10_000, 20_000][self.savings]
+        crate::economy_reference::STARTING_CASH[self.savings]
     }
 
     pub fn supply_scale(&self) -> (u32, u32) {

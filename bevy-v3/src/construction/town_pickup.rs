@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 
 use super::*;
 
-const FREIGHT_CAPACITY: (f64, f64) = (5000.0, 12.0);
+use crate::economy_reference::FREIGHT_CAPACITY;
 
 pub(super) type PickupManifest = BTreeMap<usize, BTreeMap<String, u32>>;
 

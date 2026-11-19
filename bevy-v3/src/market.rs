@@ -4,6 +4,10 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     catalog::Catalog,
+    economy_reference::{
+        FREIGHT_CAPACITY, GASOLINE_REAIS_PER_LITER, HANDLING_MINUTES, KM_PER_LITER,
+        ROAD_KM_PER_HOUR,
+    },
     stock::{CashKind, Stock},
 };
 
@@ -12,7 +16,7 @@ const MAX_EXPANSION_RESERVE: u64 = 10_000_000;
 const fn default_expansion_reserve() -> u64 {
     10_000
 }
-pub(crate) const PICKUP_CAPACITY: (f64, f64) = (350.0, 1.2);
+pub(crate) use crate::economy_reference::PICKUP_CAPACITY;
 
 #[derive(Clone, Deserialize, Serialize)]
 pub struct Market {
@@ -168,9 +172,9 @@ impl Market {
             return Err("This resource is produced locally.");
         }
         let (mass_limit, volume_limit) = if freight {
-            (5000.0, 12.0)
+            FREIGHT_CAPACITY
         } else {
-            (350.0, 1.2)
+            PICKUP_CAPACITY
         };
         if item.mass * f64::from(quantity) > mass_limit + 1e-8
             || item.volume * f64::from(quantity) > volume_limit + 1e-8
@@ -363,11 +367,11 @@ pub fn freight_cents(distance: u32) -> u64 {
 }
 
 pub fn fare_cents(round_trip_km: u32) -> u64 {
-    ((f64::from(round_trip_km) / 10.0) * 6.47 * 100.0).round() as u64
+    ((f64::from(round_trip_km) / KM_PER_LITER) * GASOLINE_REAIS_PER_LITER * 100.0).round() as u64
 }
 
 pub fn trip_seconds(round_trip_km: u32) -> f64 {
-    (f64::from(round_trip_km) / 40.0 * 60.0 + 12.0) / 0.45
+    (f64::from(round_trip_km) / ROAD_KM_PER_HOUR * 60.0 + HANDLING_MINUTES) / 0.45
 }
 
 #[cfg(test)]

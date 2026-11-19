@@ -9,6 +9,7 @@ mod arrival;
 mod audio;
 mod catalog;
 mod construction;
+mod economy_reference;
 mod equipment;
 mod farming;
 mod food;

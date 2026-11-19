@@ -138,8 +138,9 @@ impl Trade {
         if sold + quantity > item.buyer.batches * item.pack {
             return Err("The buyer has enough for today.");
         }
-        if f64::from(quantity) * item.mass > 350.0 + 1e-8
-            || f64::from(quantity) * item.volume > 1.2 + 1e-8
+        let (mass_limit, volume_limit) = crate::market::PICKUP_CAPACITY;
+        if f64::from(quantity) * item.mass > mass_limit + 1e-8
+            || f64::from(quantity) * item.volume > volume_limit + 1e-8
         {
             return Err("This batch needs a larger vehicle.");
         }

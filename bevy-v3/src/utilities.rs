@@ -5,14 +5,12 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     arrival::world_position,
+    economy_reference::{GRID_CAPACITY, GRID_TARIFF_CENTS},
     setup::WorldSetup,
     stock::{CashKind, Stock},
     terrain::Terrain,
     weather::{DAY, recharge_season, sun_height, weather_at},
 };
-
-const GRID_CAPACITY: f64 = 4.0;
-const GRID_TARIFF_CENTS: f64 = 95.0;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum NetworkView {
