@@ -508,6 +508,34 @@ fn zero_retry_ticks(ticks: &u8) -> bool {
 }
 
 impl Construction {
+    pub(crate) fn clear_arrival_positions(&mut self, catalog: &Catalog, site: ConstructionSite) {
+        for index in 0..self.residents.len() {
+            let position = self.residents[index].position;
+            let origin = position.round().as_ivec2();
+            let blocked = |cell| self.blocked(catalog, site.terrain, site.land, site.camp, cell);
+            if !blocked(origin) {
+                continue;
+            }
+            let destination = (-8..=8)
+                .flat_map(|x| (-8..=8).map(move |z| origin + IVec2::new(x, z)))
+                .filter(|&cell| {
+                    !blocked(cell)
+                        && self.residents.iter().enumerate().all(|(other, resident)| {
+                            other == index
+                                || resident.position.distance_squared(cell.as_vec2()) > 0.49
+                        })
+                })
+                .min_by(|left, right| {
+                    left.as_vec2()
+                        .distance_squared(position)
+                        .total_cmp(&right.as_vec2().distance_squared(position))
+                });
+            if let Some(cell) = destination {
+                self.residents[index].position = cell.as_vec2();
+            }
+        }
+    }
+
     pub(crate) fn project_count(&self) -> usize {
         self.plans.iter().filter(|plan| !plan.removed).count()
     }
@@ -3048,6 +3076,40 @@ mod tests {
         assert_eq!(construction.plans[0].pickups, 0);
         assert_eq!(stock.balance(), 872_824);
         assert!(construction.valid_save(&catalog, &stock));
+    }
+
+    #[test]
+    fn pitching_tents_moves_only_residents_whose_arrival_spots_are_blocked() {
+        let terrain = WorldSetup::default().terrain();
+        let catalog = Catalog::default();
+        let land = Land::default();
+        let camp = IVec2::new(33, -9);
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let mut village = Construction::default();
+        let before = village
+            .residents
+            .each_ref()
+            .map(|resident| resident.position);
+        let blocked = before.map(|position| {
+            village.blocked(&catalog, &terrain, &land, camp, position.round().as_ivec2())
+        });
+        assert!(blocked.iter().any(|&occupied| occupied));
+        assert!(blocked.iter().any(|&occupied| !occupied));
+        village.clear_arrival_positions(&catalog, site);
+        for ((resident, before), was_blocked) in village.residents.iter().zip(before).zip(blocked) {
+            assert_eq!(resident.position != before, was_blocked);
+            assert!(!village.blocked(
+                &catalog,
+                &terrain,
+                &land,
+                camp,
+                resident.position.round().as_ivec2()
+            ));
+        }
     }
 
     #[test]

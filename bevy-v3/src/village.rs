@@ -1975,6 +1975,14 @@ fn village_input(
     }
     village.camp_error = None;
     village.camp = Some(cell);
+    village.construction.clear_arrival_positions(
+        &catalog,
+        ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp: cell,
+        },
+    );
     let clock = village.clock;
     village.stock.update_finance_clock(clock);
     village.construction.record_event(
