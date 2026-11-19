@@ -77,8 +77,6 @@ pub struct WorldSetup {
     confirming_new: bool,
     #[serde(skip)]
     seed_entry: Option<String>,
-    #[serde(skip)]
-    scenario_launch_failed: bool,
     #[serde(default)]
     pub mode: Mode,
     seed: u32,
@@ -104,7 +102,6 @@ impl Default for WorldSetup {
             restart: 0,
             confirming_new: false,
             seed_entry: None,
-            scenario_launch_failed: false,
             mode: Mode::Story,
             seed: 42,
             biome: 0,
@@ -124,7 +121,6 @@ impl WorldSetup {
             open: false,
             confirming_new: false,
             seed_entry: None,
-            scenario_launch_failed: false,
             ..self.clone()
         }
     }
@@ -273,8 +269,6 @@ impl WorldSetup {
             Action::Continue => "Continue last autosave".into(),
             Action::Library => "Saved villages".into(),
             Action::Sound => "Sound settings".into(),
-            Action::CreateScenario if self.scenario_launch_failed => "Retry scenario editor".into(),
-            Action::CreateScenario => "Create scenario".into(),
         }
     }
 }
@@ -297,7 +291,6 @@ pub(crate) enum Action {
     Continue,
     Library,
     Sound,
-    CreateScenario,
 }
 
 #[derive(Component)]
@@ -359,7 +352,6 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
                 Action::Continue,
                 Action::Library,
                 Action::Sound,
-                Action::CreateScenario,
                 Action::Explore,
             ] {
                 panel
@@ -420,7 +412,6 @@ fn setup_input(
     keyboard: Res<ButtonInput<KeyCode>>,
     buttons: Query<(&Interaction, &Action), Changed<Interaction>>,
     window: Single<&Window, With<PrimaryWindow>>,
-    mut scenario_process: Local<Option<std::process::Child>>,
     (mut saves, mut sound, mut village, catalog): (
         ResMut<SaveMenu>,
         ResMut<crate::audio::SoundSettings>,
@@ -428,12 +419,6 @@ fn setup_input(
         Res<crate::catalog::Catalog>,
     ),
 ) {
-    if scenario_process
-        .as_mut()
-        .is_some_and(|child| child.try_wait().is_ok_and(|status| status.is_some()))
-    {
-        *scenario_process = None;
-    }
     if !window.focused || saves.open || sound.open {
         return;
     }
@@ -515,18 +500,6 @@ fn setup_input(
                     setup.open = false;
                 }
             }
-            Action::CreateScenario if scenario_process.is_none() => {
-                let launched = (|| -> std::io::Result<_> {
-                    let settings = serde_json::to_string(&setup.session())?;
-                    std::process::Command::new(std::env::current_exe()?)
-                        .arg("--create-scenario")
-                        .arg(settings)
-                        .spawn()
-                })();
-                setup.scenario_launch_failed = launched.is_err();
-                *scenario_process = launched.ok();
-            }
-            Action::CreateScenario => {}
             Action::Continue | Action::Library => {}
             Action::Sound => sound.open = true,
             Action::Resume => {

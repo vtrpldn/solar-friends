@@ -21,21 +21,6 @@ struct Scenario {
     stop: LabStop,
 }
 
-// Keep the editable orders at the top level, where existing scenarios put them.
-#[derive(Serialize)]
-struct ScenarioExport<'a> {
-    #[serde(flatten)]
-    scenario: &'a Scenario,
-    initial: &'a serde_json::Value,
-}
-
-#[derive(Deserialize)]
-struct ScenarioInput {
-    #[serde(flatten)]
-    scenario: Scenario,
-    initial: Option<Village>,
-}
-
 #[derive(Deserialize, Serialize)]
 struct ScheduledOrder {
     step: u64,
@@ -108,23 +93,8 @@ fn load_inputs(
     save: Option<&Path>,
     catalog: &Catalog,
 ) -> io::Result<(Scenario, Option<Village>)> {
-    let input = crate::save::read_bytes(scenario, 2 * crate::save::MAX_BYTES)?;
-    let ScenarioInput { scenario, initial } = serde_json::from_slice(&input)?;
-    if let Some(village) = initial {
-        if save.is_some() {
-            return Err(io::Error::new(
-                io::ErrorKind::InvalidInput,
-                "This scenario already includes its starting village.",
-            ));
-        }
-        if !village.valid_save(catalog) {
-            return Err(io::Error::new(
-                io::ErrorKind::InvalidData,
-                "Invalid starting village.",
-            ));
-        }
-        return Ok((scenario, Some(village)));
-    }
+    let input = crate::save::read_bytes(scenario, 1024 * 1024)?;
+    let scenario: Scenario = serde_json::from_slice(&input)?;
     if scenario.setup.is_some() && save.is_some() {
         return Err(io::Error::new(
             io::ErrorKind::InvalidInput,
@@ -541,62 +511,6 @@ impl Runner {
         Ok(())
     }
 
-    fn schedule(
-        &mut self,
-        catalog: &Catalog,
-        scheduled: ScheduledOrder,
-    ) -> Result<(), &'static str> {
-        if !(self.index..=self.scenario.steps).contains(&scheduled.step) {
-            return Err("Choose a step between the current step and the end of the scenario.");
-        }
-        if self.done() {
-            return Err("The scenario is complete.");
-        }
-        if scheduled.step == self.index {
-            return self.submit(catalog, scheduled.order);
-        }
-        let insertion = self
-            .scenario
-            .orders
-            .partition_point(|order| order.step <= scheduled.step);
-        self.scenario.orders.insert(insertion, scheduled);
-        Ok(())
-    }
-
-    fn reschedule(&mut self, index: usize, step: u64) -> Result<(), &'static str> {
-        if !(self.index.saturating_add(1)..=self.scenario.steps).contains(&step) {
-            return Err("Choose a future step within the scenario.");
-        }
-        if index < self.next_order || index >= self.scenario.orders.len() {
-            return Err("Only scheduled orders can be moved.");
-        }
-        if self.scenario.orders[index].step != step {
-            let mut order = self.scenario.orders.remove(index);
-            order.step = step;
-            let insertion = self
-                .scenario
-                .orders
-                .partition_point(|order| order.step <= step);
-            self.scenario.orders.insert(insertion, order);
-        }
-        Ok(())
-    }
-
-    fn replace_pending_action(
-        &mut self,
-        index: usize,
-        order: LabOrder,
-    ) -> Result<(), &'static str> {
-        let scheduled = self
-            .scenario
-            .orders
-            .get_mut(index)
-            .filter(|_| index >= self.next_order)
-            .ok_or("Only scheduled orders can be edited.")?;
-        scheduled.order = order;
-        Ok(())
-    }
-
     fn latest_bed_outcome(&self, site: usize, bed: usize) -> Option<&Outcome> {
         self.scenario
             .orders
@@ -645,14 +559,6 @@ impl Runner {
             .with_file_name(format!("lab-{kind}-{}.json", nonce.as_nanos())))
     }
 
-    fn write_scenario(&self, path: &Path) -> io::Result<()> {
-        let bytes = serde_json::to_vec_pretty(&ScenarioExport {
-            scenario: &self.scenario,
-            initial: &self.initial,
-        })?;
-        crate::save::atomic_write(path, &bytes, 2 * crate::save::MAX_BYTES)
-    }
-
     fn export(&self) -> io::Result<std::path::PathBuf> {
         let path = self.output_path("report")?;
         let bytes = serde_json::to_vec(&self.report())?;
@@ -670,7 +576,7 @@ fn run(scenario: Scenario, village: Option<Village>, catalog: &Catalog) -> io::R
 }
 
 pub(crate) fn run_ui(scenario: &Path, save: Option<&Path>) -> io::Result<()> {
-    let source = LabSource::File {
+    let source = LabSource {
         scenario: scenario.to_owned(),
         checkpoint: save.map(Path::to_owned),
     };
@@ -688,51 +594,16 @@ pub(crate) fn replay_ui(path: &Path) -> io::Result<()> {
     Ok(())
 }
 
-pub(crate) fn create_ui(setup: WorldSetup) -> io::Result<()> {
-    let source = LabSource::New(setup);
-    let catalog = Catalog::default();
-    let runner = source.load(&catalog)?;
-    open_lab(catalog, runner, None, Some(source));
-    Ok(())
-}
-
-#[derive(Clone, Resource)]
-enum LabSource {
-    New(WorldSetup),
-    File {
-        scenario: PathBuf,
-        checkpoint: Option<PathBuf>,
-    },
+#[derive(Resource)]
+struct LabSource {
+    scenario: PathBuf,
+    checkpoint: Option<PathBuf>,
 }
 
 impl LabSource {
     fn load(&self, catalog: &Catalog) -> io::Result<Runner> {
-        match self {
-            Self::New(setup) => Runner::new(
-                Scenario {
-                    steps: (24.0 * 3600.0 / STEP) as u64,
-                    setup: Some(setup.clone()),
-                    orders: Vec::new(),
-                    stop: LabStop::None,
-                },
-                None,
-                catalog,
-            ),
-            Self::File {
-                scenario,
-                checkpoint,
-            } => {
-                let (scenario, village) = load_inputs(scenario, checkpoint.as_deref(), catalog)?;
-                Runner::new(scenario, village, catalog)
-            }
-        }
-    }
-
-    fn path(&self) -> Option<&Path> {
-        match self {
-            Self::New(_) => None,
-            Self::File { scenario, .. } => Some(scenario),
-        }
+        let (scenario, village) = load_inputs(&self.scenario, self.checkpoint.as_deref(), catalog)?;
+        Runner::new(scenario, village, catalog)
     }
 }
 
@@ -868,47 +739,36 @@ fn lab_job_page(jobs: &[String], page: &mut usize, focus: &str, waiting_only: bo
     text
 }
 
-const ORDER_ROWS: usize = 9;
-
-fn lab_order_page(runner: &Runner, page: &mut usize, selected_row: Option<usize>) -> String {
+fn lab_order_page(runner: &Runner, page: &mut usize) -> String {
     use std::fmt::Write as _;
-    let count = runner.scenario.orders.len();
-    let pages = count.div_ceil(ORDER_ROWS).max(1);
+    const ROWS: usize = 9;
+    let count = runner.outcomes.len();
+    let pages = count.div_ceil(ROWS).max(1);
     *page = (*page).min(pages - 1);
     let mut text = format!(
-        "Scenario orders · Page {} of {pages}\nTab Switch view · Page Up/Down Browse\n",
+        "Order history · Page {} of {pages}\nTab Switch view · Page Up/Down Browse\n",
         *page + 1
     );
-    if selected_row.is_some() {
-        text.push_str("↑/↓ Select · Enter Move · Shift+Enter Edit · Delete Remove\n");
-    }
     if count == 0 {
-        text.push_str("\nNo scenario orders.");
+        text.push_str("\nNo orders processed.");
     }
-    for (row, (index, scheduled)) in runner
+    for (index, (scheduled, outcome)) in runner
         .scenario
         .orders
         .iter()
+        .zip(&runner.outcomes)
         .enumerate()
         .rev()
-        .skip(*page * ORDER_ROWS)
-        .take(ORDER_ROWS)
-        .enumerate()
+        .skip(*page * ROWS)
+        .take(ROWS)
     {
-        let marker = if selected_row == Some(row) {
-            "› "
-        } else {
-            ""
-        };
         let action = order_label(&scheduled.order);
-        let result = runner.outcomes.get(index).map_or("Scheduled", |outcome| {
-            outcome.error.as_deref().unwrap_or("Accepted")
-        });
+        let result = outcome.error.as_deref().unwrap_or("Accepted");
         let _ = write!(
             text,
-            "\n{marker}#{} · Step {} · {action} · {result}",
+            "\n#{} · Step {} · {action} · {result}",
             index + 1,
-            scheduled.step
+            outcome.step
         );
     }
     text
@@ -1081,30 +941,6 @@ impl SpeedMeter {
     }
 }
 
-#[derive(Clone, Copy)]
-enum OrderEdit {
-    Timing,
-    Action,
-}
-
-impl OrderEdit {
-    fn prompt(self, index: usize, scheduled: &ScheduledOrder, draft: &str, notice: &str) -> String {
-        let details = match self {
-            Self::Timing => format!("New step · {draft}▏"),
-            Self::Action => {
-                let current = serde_json::to_string(&scheduled.order)
-                    .unwrap_or_else(|_| order_label(&scheduled.order));
-                format!("Current · {current}\nReplacement · {draft}▏")
-            }
-        };
-        format!(
-            "Edit order #{} at step {}\nEnter Submit · Esc Cancel\n\n{details}\n{notice}",
-            index + 1,
-            scheduled.step
-        )
-    }
-}
-
 struct Playback {
     running: bool,
     replaying: bool,
@@ -1115,16 +951,14 @@ struct Playback {
     stop: usize,
     pause_at: Option<u64>,
     order: Option<String>,
-    order_edit: Option<(usize, OrderEdit)>,
     notice: String,
     view: LabView,
     inventory_page: usize,
-    order_row: usize,
     job_focus: Option<usize>,
     waiting_only: bool,
     farm_site: Option<usize>,
     clear_confirmation: Option<(usize, Option<usize>)>,
-    pending_source: Option<LabSource>,
+    reload_confirmation: bool,
 }
 
 impl Playback {
@@ -1240,16 +1074,14 @@ impl Default for Playback {
             stop: 0,
             pause_at: None,
             order: None,
-            order_edit: None,
             notice: String::new(),
             view: LabView::default(),
             inventory_page: 0,
-            order_row: 0,
             job_focus: None,
             waiting_only: false,
             farm_site: None,
             clear_confirmation: None,
-            pending_source: None,
+            reload_confirmation: false,
         }
     }
 }
@@ -1430,64 +1262,48 @@ fn update_lab_window(
     mut runner: ResMut<Runner>,
     catalog: Res<Catalog>,
     time: Res<Time<bevy::time::Real>>,
-    (keys, mut events, mut dropped): (
+    (keys, mut events): (
         Res<ButtonInput<KeyCode>>,
         MessageReader<bevy::input::keyboard::KeyboardInput>,
-        MessageReader<bevy::window::FileDragAndDrop>,
     ),
     mut playback: Local<Playback>,
     mut panel: Single<&mut Text>,
-    (mut replay, mut map, mut source): (
+    (mut replay, mut map, source): (
         Option<ResMut<Replay>>,
         ResMut<map::MapState>,
-        Option<ResMut<LabSource>>,
+        Option<Res<LabSource>>,
     ),
 ) {
     playback.replaying = replay.is_some();
-    let dropped_path = dropped
-        .read()
-        .filter_map(|event| match event {
-            bevy::window::FileDragAndDrop::DroppedFile { path_buf, .. } => Some(path_buf),
-            _ => None,
-        })
-        .last();
-    if let Some(source) = source.as_deref_mut()
+    if let Some(source) = &source
         && playback.order.is_none()
     {
-        if playback.pending_source.is_some() && keys.just_pressed(KeyCode::Escape) {
-            playback.pending_source = None;
-        } else if let Some(path) = dropped_path {
-            playback.running = false;
-            playback.reset_timing();
-            playback.pending_source = Some(LabSource::File {
-                scenario: path.clone(),
-                checkpoint: None,
-            });
+        if playback.reload_confirmation && keys.just_pressed(KeyCode::Escape) {
+            playback.reload_confirmation = false;
         } else if keys.just_pressed(KeyCode::F8) {
-            if let Some(candidate) = playback.pending_source.take() {
-                match candidate.load(&catalog) {
-                    Ok(opened) => {
-                        *source = candidate;
-                        *runner = opened;
+            if playback.reload_confirmation {
+                playback.reload_confirmation = false;
+                match source.load(&catalog) {
+                    Ok(reloaded) => {
+                        *runner = reloaded;
                         *playback = Playback::default();
                         *map = map::MapState::default();
-                        playback.notice = "Scenario opened at step 0.".into();
+                        playback.notice = "Scenario reloaded at step 0.".into();
                     }
-                    Err(error) => playback.notice = format!("Could not open scenario · {error}"),
+                    Err(error) => playback.notice = format!("Could not reload scenario · {error}"),
                 }
             } else {
                 playback.running = false;
                 playback.reset_timing();
-                playback.pending_source = Some(source.clone());
+                playback.reload_confirmation = true;
             }
         }
-        if let Some(candidate) = &playback.pending_source {
+        if playback.reload_confirmation {
             map.visible = false;
             events.clear();
-            panel.set_if_neq(Text::new(format!(
-                "Open scenario?\n{}\nF8 Confirm · Esc Cancel\nThis replaces the current lab run and its unsaved orders.",
-                candidate.path().map_or_else(|| "New scenario".into(), |path| path.display().to_string())
-            )));
+            panel.set_if_neq(Text::new(
+                "Reload scenario?\nF8 Confirm · Esc Cancel\nThis replaces the current lab run and its unsaved orders.",
+            ));
             return;
         }
     }
@@ -1498,55 +1314,13 @@ fn update_lab_window(
     if let Some(mut order) = playback.order.take() {
         if keys.just_pressed(KeyCode::Escape) {
             events.clear();
-            playback.order_edit = None;
         } else if keys.just_pressed(KeyCode::Enter) {
             events.clear();
-            #[derive(Deserialize)]
-            #[serde(untagged)]
-            enum OrderInput {
-                Scheduled(ScheduledOrder),
-                Now(LabOrder),
-            }
-            let result = if let Some((index, OrderEdit::Timing)) = playback.order_edit {
-                order
-                    .trim()
-                    .parse::<u64>()
-                    .map_err(|_| "Enter a step number.".to_owned())
-                    .and_then(|step| {
-                        runner.reschedule(index, step).map_err(str::to_owned)?;
-                        Ok(format!("Order moved to step {step}."))
-                    })
-            } else if let Some((index, OrderEdit::Action)) = playback.order_edit {
-                serde_json::from_str::<LabOrder>(&order)
-                    .map_err(|error| error.to_string())
-                    .and_then(|replacement| {
-                        runner
-                            .replace_pending_action(index, replacement)
-                            .map_err(str::to_owned)?;
-                        Ok(format!("Updated order #{}.", index + 1))
-                    })
-            } else {
-                serde_json::from_str::<OrderInput>(&order)
-                    .map_err(|error| error.to_string())
-                    .and_then(|input| match input {
-                        OrderInput::Scheduled(scheduled) => {
-                            let step = scheduled.step;
-                            runner
-                                .schedule(&catalog, scheduled)
-                                .map_err(str::to_owned)?;
-                            Ok(format!("Order submitted for step {step}."))
-                        }
-                        OrderInput::Now(order) => {
-                            runner.submit(&catalog, order).map_err(str::to_owned)?;
-                            Ok(String::new())
-                        }
-                    })
-            };
+            let result = serde_json::from_str(&order)
+                .map_err(|error| error.to_string())
+                .and_then(|order| runner.submit(&catalog, order).map_err(str::to_owned));
             match result {
-                Ok(notice) => {
-                    playback.notice = notice;
-                    playback.order_edit = None;
-                }
+                Ok(()) => playback.notice.clear(),
                 Err(error) => {
                     playback.notice = error;
                     playback.order = Some(order);
@@ -1584,15 +1358,6 @@ fn update_lab_window(
                 Err(error) => format!("Could not save checkpoint · {error}"),
             };
         }
-        if keys.just_pressed(KeyCode::F7) && !playback.replaying {
-            playback.notice = match runner.output_path("scenario").and_then(|path| {
-                runner.write_scenario(&path)?;
-                Ok(path)
-            }) {
-                Ok(path) => format!("Scenario saved to {}", path.display()),
-                Err(error) => format!("Could not save scenario · {error}"),
-            };
-        }
         if keys.just_pressed(KeyCode::F5) {
             playback.notice = match runner.export() {
                 Ok(path) => format!("Report saved to {}", path.display()),
@@ -1602,17 +1367,8 @@ fn update_lab_window(
     }
     if let Some(order) = &playback.order {
         map.visible = false;
-        if let Some((index, mode)) = playback.order_edit {
-            panel.set_if_neq(Text::new(mode.prompt(
-                index,
-                &runner.scenario.orders[index],
-                order,
-                &playback.notice,
-            )));
-            return;
-        }
         panel.set_if_neq(Text::new(format!(
-            "Order at step {}\nEnter Submit · Esc Cancel\n\nNow {{\"type\":\"grid\",\"enabled\":false}}\nLater {{\"step\":120,\"order\":{{\"type\":\"grid\",\"enabled\":false}}}}\n\n{order}▏\n{}",
+            "Order at step {}\nEnter Submit · Esc Cancel\n\nExample {{\"type\":\"grid\",\"enabled\":false}}\n\n{order}▏\n{}",
             runner.index, playback.notice
         )));
         return;
@@ -1708,53 +1464,6 @@ fn update_lab_window(
             Err(error) => error.into(),
         };
     }
-    if playback.view == LabView::Orders && !playback.replaying && !runner.done() {
-        let count = runner.scenario.orders.len();
-        let page = playback
-            .inventory_page
-            .min(count.div_ceil(ORDER_ROWS).saturating_sub(1));
-        playback.inventory_page = page;
-        let offset = page * ORDER_ROWS;
-        let rows = (count - offset).min(ORDER_ROWS);
-        if keys.just_pressed(KeyCode::PageDown) || keys.just_pressed(KeyCode::PageUp) {
-            playback.order_row = 0;
-        } else if keys.just_pressed(KeyCode::ArrowDown) {
-            playback.order_row += 1;
-        } else if keys.just_pressed(KeyCode::ArrowUp) {
-            playback.order_row = playback.order_row.saturating_sub(1);
-        }
-        playback.order_row = playback.order_row.min(rows.saturating_sub(1));
-        let remove = keys.just_pressed(KeyCode::Delete);
-        let edit = keys.just_pressed(KeyCode::Enter);
-        if (remove || edit) && rows > 0 {
-            let index = count - 1 - offset - playback.order_row;
-            if index < runner.next_order {
-                playback.notice = "Only scheduled orders can be edited.".into();
-            } else if playback.running {
-                playback.notice = "Pause the scenario before editing an order.".into();
-            } else if edit {
-                let mode = if keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]) {
-                    OrderEdit::Action
-                } else {
-                    OrderEdit::Timing
-                };
-                playback.notice.clear();
-                playback.order_edit = Some((index, mode));
-                playback.order = Some(String::new());
-                panel.set_if_neq(Text::new(mode.prompt(
-                    index,
-                    &runner.scenario.orders[index],
-                    "",
-                    "",
-                )));
-                return;
-            } else {
-                runner.scenario.orders.remove(index);
-                playback.order_row = playback.order_row.min(rows.saturating_sub(2));
-                playback.notice = format!("Removed order #{}.", index + 1);
-            }
-        }
-    }
     let village = &runner.village;
     let status = if playback.replaying {
         if reached_end(&runner) {
@@ -1789,11 +1498,6 @@ fn update_lab_window(
         },
     );
     let interval_controls = playback.interval_controls();
-    let scenario_control = if playback.replaying {
-        ""
-    } else {
-        " · F7 Save scenario"
-    };
     if playback.view != LabView::Overview {
         let playback = &mut *playback;
         let details = if playback.view == LabView::Jobs {
@@ -1846,11 +1550,7 @@ fn update_lab_window(
         } else if playback.view == LabView::Beds {
             lab_bed_page(&mut runner, &catalog, &keys, playback)
         } else if playback.view == LabView::Orders {
-            lab_order_page(
-                &runner,
-                &mut playback.inventory_page,
-                (!playback.replaying && !runner.done()).then_some(playback.order_row),
-            )
+            lab_order_page(&runner, &mut playback.inventory_page)
         } else if playback.view == LabView::Events {
             let (pages, text) = village
                 .construction
@@ -1914,14 +1614,14 @@ fn update_lab_window(
             )
         };
         panel.set_if_neq(Text::new(format!(
-            "Simulation lab · {status} · Step {} / {} · {}\nSpace Run/Pause · J Single step · 1–9 Speed · {order_control}F5 Report · F6 Checkpoint{scenario_control}\n{interval_controls}{}\n\n{details}",
+            "Simulation lab · {status} · Step {} / {} · {}\nSpace Run/Pause · J Single step · 1–9 Speed · {order_control}F5 Report · F6 Checkpoint\n{interval_controls}{}\n\n{details}",
             runner.index, limit, playback.speed_label(), playback.notice,
         )));
         return;
     }
     let weather = lab_weather(village, &runner.setup);
     let reload_control = if source.is_some() {
-        " · F8 Reload · Drop scenario file to open"
+        " · F8 Reload"
     } else {
         ""
     };
@@ -1933,7 +1633,7 @@ fn update_lab_window(
         .copied()
         .fold(0, u64::saturating_add);
     let text = format!(
-        "Simulation lab · {status}\nStep {} / {} · {:.1} simulation seconds · {}\nSpace Run/Pause · J Single step · 1–9 Speed\n{order_control}F5 Export report · F6 Checkpoint{scenario_control}{reload_control} · Tab Browse lab views\n{interval_controls}{}\n\nR${:.2} · {} timber · {} meals · {:.1} L drinking water · {spoiled} units spoiled\nWeather · {:.1} °C · {:.2} mm/h rain · {:.0}% cloud\n{}\n{last}\n\n{}",
+        "Simulation lab · {status}\nStep {} / {} · {:.1} simulation seconds · {}\nSpace Run/Pause · J Single step · 1–9 Speed\n{order_control}F5 Export report · F6 Checkpoint{reload_control} · Tab Browse lab views\n{interval_controls}{}\n\nR${:.2} · {} timber · {} meals · {:.1} L drinking water · {spoiled} units spoiled\nWeather · {:.1} °C · {:.2} mm/h rain · {:.0}% cloud\n{}\n{last}\n\n{}",
         runner.index,
         limit,
         village.clock,
@@ -2457,164 +2157,6 @@ mod tests {
     }
 
     #[test]
-    fn live_scheduled_orders_take_effect_at_their_step_in_submission_order() {
-        let catalog = Catalog::default();
-        let scenario = serde_json::from_str(r#"{"steps":5}"#).unwrap();
-        let mut runner = Runner::new(scenario, None, &catalog).unwrap();
-        for (step, enabled) in [(4, true), (2, false), (4, false)] {
-            runner
-                .schedule(
-                    &catalog,
-                    ScheduledOrder {
-                        step,
-                        order: LabOrder::Grid { enabled },
-                    },
-                )
-                .unwrap();
-        }
-        assert!(
-            runner
-                .schedule(
-                    &catalog,
-                    ScheduledOrder {
-                        step: 6,
-                        order: LabOrder::Grid { enabled: true }
-                    }
-                )
-                .is_err()
-        );
-        runner.advance(&catalog);
-        assert!(!runner.village.construction.utilities.grid_off);
-        assert!(runner.outcomes.is_empty());
-        runner.advance(&catalog);
-        assert!(runner.village.construction.utilities.grid_off);
-        assert_eq!(runner.outcomes.len(), 1);
-        while !runner.done() {
-            runner.advance(&catalog);
-        }
-        assert!(runner.village.construction.utilities.grid_off);
-        assert_eq!(
-            runner
-                .outcomes
-                .iter()
-                .map(|outcome| outcome.step)
-                .collect::<Vec<_>>(),
-            [2, 4, 4]
-        );
-        let report =
-            serde_json::from_slice(&serde_json::to_vec(&runner.report()).unwrap()).unwrap();
-        assert_eq!(verify_report(report, &catalog).unwrap(), 5);
-    }
-
-    #[test]
-    fn new_scenario_uses_the_menu_world_settings() {
-        let mut setup = WorldSetup::default();
-        setup.mode = Mode::Sandbox;
-        let catalog = Catalog::default();
-        let source = LabSource::New(setup.clone());
-        let runner = source.load(&catalog).unwrap();
-        assert!(runner.setup == setup.session());
-        assert!(runner.village.stock.sandbox);
-        assert_eq!(runner.index, 0);
-        assert!(runner.scenario.orders.is_empty());
-        assert_eq!(runner.scenario.steps as f64 * STEP, 24.0 * 3600.0);
-    }
-
-    #[test]
-    fn replacing_pending_action_preserves_step_and_replays() {
-        let catalog = Catalog::default();
-        let scenario = serde_json::from_str(
-            r#"{"steps":3,"orders":[
-            {"step":0,"order":{"type":"grid","enabled":false}},
-            {"step":2,"order":{"type":"grid","enabled":false}}
-        ]}"#,
-        )
-        .unwrap();
-        let mut runner = Runner::new(scenario, None, &catalog).unwrap();
-        assert!(
-            runner
-                .replace_pending_action(0, LabOrder::Grid { enabled: true })
-                .is_err()
-        );
-        runner
-            .replace_pending_action(1, LabOrder::Grid { enabled: true })
-            .unwrap();
-        runner.advance(&catalog);
-        assert!(runner.village.construction.utilities.grid_off);
-        runner.advance(&catalog);
-        assert!(!runner.village.construction.utilities.grid_off);
-        assert_eq!(runner.outcomes[1].step, 2);
-        let report =
-            serde_json::from_slice(&serde_json::to_vec(&runner.report()).unwrap()).unwrap();
-        assert_eq!(verify_report(report, &catalog).unwrap(), 2);
-    }
-
-    #[test]
-    fn moving_pending_orders_keeps_the_timeline_replayable() {
-        let catalog = Catalog::default();
-        let scenario = serde_json::from_str(
-            r#"{"steps":5,"orders":[
-            {"step":0,"order":{"type":"grid","enabled":false}},
-            {"step":2,"order":{"type":"grid","enabled":true}},
-            {"step":3,"order":{"type":"grid","enabled":false}}
-        ]}"#,
-        )
-        .unwrap();
-        let mut runner = Runner::new(scenario, None, &catalog).unwrap();
-        assert!(runner.reschedule(0, 4).is_err());
-        assert!(runner.reschedule(1, 0).is_err());
-        runner.reschedule(1, 4).unwrap();
-        while !runner.done() {
-            runner.advance(&catalog);
-        }
-        assert_eq!(
-            runner
-                .outcomes
-                .iter()
-                .map(|outcome| outcome.step)
-                .collect::<Vec<_>>(),
-            [0, 3, 4]
-        );
-        assert!(!runner.village.construction.utilities.grid_off);
-        let report =
-            serde_json::from_slice(&serde_json::to_vec(&runner.report()).unwrap()).unwrap();
-        assert_eq!(verify_report(report, &catalog).unwrap(), 5);
-    }
-
-    #[test]
-    fn an_exported_scenario_preserves_its_start_and_live_orders() {
-        let catalog = Catalog::default();
-        let source = serde_json::from_str(r#"{"steps": 4}"#).unwrap();
-        let initial = run(source, None, &catalog).unwrap().village;
-        let mut runner = Runner::new(
-            serde_json::from_str(r#"{"steps": 2}"#).unwrap(),
-            Some(initial),
-            &catalog,
-        )
-        .unwrap();
-        runner
-            .submit(&catalog, LabOrder::Grid { enabled: false })
-            .unwrap();
-        while !runner.done() {
-            runner.advance(&catalog);
-        }
-
-        let path = std::env::temp_dir().join(format!(
-            "solar-lab-scenario-export-{}.json",
-            std::process::id()
-        ));
-        runner.write_scenario(&path).unwrap();
-        assert!(load_inputs(&path, Some(&path), &catalog).is_err());
-        let (scenario, initial) = load_inputs(&path, None, &catalog).unwrap();
-        std::fs::remove_file(path).unwrap();
-        let reopened = run(scenario, initial, &catalog).unwrap();
-        assert_eq!(
-            serde_json::to_vec(&runner.report()).unwrap(),
-            serde_json::to_vec(&reopened.report()).unwrap()
-        );
-    }
-
-    #[test]
     fn partial_reports_replay_through_the_exported_step_only() {
         let catalog = Catalog::default();
         let scenario = Scenario {
@@ -2663,7 +2205,6 @@ mod tests {
             .init_resource::<ButtonInput<KeyCode>>()
             .init_resource::<map::MapState>()
             .add_message::<bevy::input::keyboard::KeyboardInput>()
-            .add_message::<bevy::window::FileDragAndDrop>()
             .add_systems(Update, update_lab_window);
         let panel = app.world_mut().spawn(Text::default()).id();
         let key = |app: &mut App, key| {
@@ -2692,60 +2233,11 @@ mod tests {
     }
 
     #[test]
-    fn desktop_orders_view_removes_pending_orders_and_preserves_history() {
-        let catalog = Catalog::default();
-        let scenario = serde_json::from_str(
-            r#"{"steps":5,"orders":[
-            {"step":0,"order":{"type":"grid","enabled":false}},
-            {"step":2,"order":{"type":"grid","enabled":true}},
-            {"step":3,"order":{"type":"grid","enabled":false}}
-        ]}"#,
-        )
-        .unwrap();
-        let runner = Runner::new(scenario, None, &catalog).unwrap();
-        let mut app = App::new();
-        app.add_plugins(MinimalPlugins)
-            .insert_resource(catalog)
-            .insert_resource(runner)
-            .init_resource::<ButtonInput<KeyCode>>()
-            .init_resource::<map::MapState>()
-            .add_message::<bevy::input::keyboard::KeyboardInput>()
-            .add_message::<bevy::window::FileDragAndDrop>()
-            .add_systems(Update, update_lab_window);
-        app.world_mut().spawn(Text::default());
-        let key = |app: &mut App, key| {
-            let mut keys = app.world_mut().resource_mut::<ButtonInput<KeyCode>>();
-            keys.reset_all();
-            keys.press(key);
-            app.update();
-        };
-        for _ in 0..5 {
-            key(&mut app, KeyCode::Tab);
-        }
-        key(&mut app, KeyCode::ArrowDown);
-        key(&mut app, KeyCode::Delete);
-        key(&mut app, KeyCode::Delete);
-        let runner = app.world().resource::<Runner>();
-        assert_eq!(
-            runner
-                .scenario
-                .orders
-                .iter()
-                .map(|order| order.step)
-                .collect::<Vec<_>>(),
-            [0, 3]
-        );
-        assert_eq!(runner.outcomes.len(), 1);
-        assert_eq!(runner.next_order, 1);
-        assert!(runner.village.construction.utilities.grid_off);
-    }
-
-    #[test]
     fn desktop_lab_reloads_an_edited_scenario_only_after_confirmation() {
         let path =
             std::env::temp_dir().join(format!("solar-lab-reload-{}.json", std::process::id()));
         std::fs::write(&path, r#"{"steps":3}"#).unwrap();
-        let source = LabSource::File {
+        let source = LabSource {
             scenario: path.clone(),
             checkpoint: None,
         };
@@ -2760,7 +2252,6 @@ mod tests {
             .init_resource::<ButtonInput<KeyCode>>()
             .init_resource::<map::MapState>()
             .add_message::<bevy::input::keyboard::KeyboardInput>()
-            .add_message::<bevy::window::FileDragAndDrop>()
             .add_systems(Update, update_lab_window);
         let panel = app.world_mut().spawn(Text::default()).id();
         let press_reload = |app: &mut App| {
@@ -2783,38 +2274,6 @@ mod tests {
         let reloaded = app.world().resource::<Runner>();
         assert_eq!(reloaded.index, 0);
         assert_eq!(reloaded.scenario.steps, 8);
-
-        let replacement = path.with_extension("replacement.json");
-        let window = app.world_mut().spawn_empty().id();
-        let drop_replacement = |app: &mut App| {
-            app.world_mut()
-                .resource_mut::<ButtonInput<KeyCode>>()
-                .reset_all();
-            app.world_mut()
-                .write_message(bevy::window::FileDragAndDrop::DroppedFile {
-                    window,
-                    path_buf: replacement.clone(),
-                });
-            app.update();
-        };
-        drop_replacement(&mut app);
-        press_reload(&mut app);
-        assert_eq!(
-            app.world().resource::<LabSource>().path(),
-            Some(path.as_path())
-        );
-        assert_eq!(app.world().resource::<Runner>().scenario.steps, 8);
-
-        std::fs::write(&replacement, r#"{"steps":12}"#).unwrap();
-        drop_replacement(&mut app);
-        assert_eq!(app.world().resource::<Runner>().scenario.steps, 8);
-        press_reload(&mut app);
-        assert_eq!(
-            app.world().resource::<LabSource>().path(),
-            Some(replacement.as_path())
-        );
-        assert_eq!(app.world().resource::<Runner>().scenario.steps, 12);
-        std::fs::remove_file(replacement).unwrap();
         std::fs::remove_file(path).unwrap();
     }
 
@@ -2912,7 +2371,7 @@ mod tests {
         runner
             .submit(&catalog, LabOrder::Grid { enabled: true })
             .unwrap();
-        let history = lab_order_page(&runner, &mut 0, None);
+        let history = lab_order_page(&runner, &mut 0);
         assert!(history.contains("#2 · Step 1 · Enable grid power · Accepted"));
         assert!(history.contains("#1 · Step 1 · Disable grid power · Accepted"));
         assert!(history.find("#2").unwrap() < history.find("#1").unwrap());
