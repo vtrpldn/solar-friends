@@ -60,6 +60,17 @@ Regenerate native trees, deposits, and scenery with `node scripts/export-v3-land
 
 Regenerate the build catalog models with `node scripts/export-v3-building-models.mjs`.
 
+## macOS desktop bundle
+
+The Bevy desktop CI job uploads a macOS app archive after the standalone simulation check. Unzip it and open **Solar Friends V3.app**.
+
+To package a local build from the repository root:
+
+```sh
+cargo build --locked --manifest-path bevy-v3/Cargo.toml
+bash scripts/package-bevy-macos.sh bevy-v3/target/debug/solar-friends-v3 dist/solar-friends-v3-macos.zip
+```
+
 ## Simulation lab
 
 Run a headless scenario through the same 0.1-second simulation steps as the desktop game.

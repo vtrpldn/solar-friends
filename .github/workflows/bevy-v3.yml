@@ -7,11 +7,13 @@ on:
       - 'bevy-v3/**'
       - 'rust-toolchain.toml'
       - '.github/workflows/bevy-v3.yml'
+      - 'scripts/package-bevy-macos.sh'
   pull_request:
     paths:
       - 'bevy-v3/**'
       - 'rust-toolchain.toml'
       - '.github/workflows/bevy-v3.yml'
+      - 'scripts/package-bevy-macos.sh'
 
 permissions:
   contents: read
@@ -71,3 +73,13 @@ jobs:
             and .village.stock.materials.wood == 32
           ' report.json
           ./solar-friends-v3 --lab-replay report.json
+      - name: Package the macOS desktop game
+        run: >-
+          bash scripts/package-bevy-macos.sh
+          bevy-v3/target/debug/solar-friends-v3
+          "dist/solar-friends-v3-macos-$(uname -m).zip"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: solar-friends-v3-macos
+          path: dist/solar-friends-v3-macos-*.zip
+          if-no-files-found: error
