@@ -134,6 +134,17 @@ impl Construction {
         stock: &mut Stock,
         keys: &ButtonInput<KeyCode>,
     ) {
+        if keys.just_pressed(KeyCode::KeyD)
+            && keys.any_pressed([
+                KeyCode::ControlLeft,
+                KeyCode::ControlRight,
+                KeyCode::SuperLeft,
+                KeyCode::SuperRight,
+            ])
+        {
+            self.apply_project_action(catalog, stock, ProjectAction::Copy);
+            return;
+        }
         let shift = keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]);
         for (key, action) in [
             (KeyCode::KeyZ, ProjectAction::Prioritize),

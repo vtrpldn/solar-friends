@@ -3253,7 +3253,10 @@ mod tests {
             ..default()
         };
         village.production.selected = Some(0);
-        village.apply_project_action(&catalog, &mut stock, lifecycle::ProjectAction::Copy);
+        let mut keys = ButtonInput::default();
+        keys.press(KeyCode::ControlLeft);
+        keys.press(KeyCode::KeyD);
+        village.lifecycle_input(&catalog, &mut stock, &keys);
 
         assert_eq!(village.selection.as_deref(), Some("field"));
         assert_eq!(village.rotation, 1);
