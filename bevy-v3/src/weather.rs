@@ -216,12 +216,42 @@ fn sunlight(
     );
 }
 
+const RAIN_DROPS: usize = 600;
+const RAIN_HEIGHT: f32 = 20.;
+
+#[derive(Default)]
+struct RainField {
+    seed: Option<u32>,
+    offsets: Vec<Vec3>,
+    phase: f32,
+}
+
+impl RainField {
+    fn update(&mut self, seed: u32, seconds: f32) {
+        if self.seed != Some(seed) {
+            self.seed = Some(seed);
+            self.phase = 0.;
+            let mut rng = land_random(seed ^ 0x36a1);
+            self.offsets = (0..RAIN_DROPS)
+                .map(|_| {
+                    Vec3::new(
+                        (rng() as f32 - 0.5) * 50.,
+                        rng() as f32 * RAIN_HEIGHT,
+                        (rng() as f32 - 0.5) * 50.,
+                    )
+                })
+                .collect();
+        }
+        self.phase = (self.phase + seconds.min(0.1) * 12.).rem_euclid(RAIN_HEIGHT);
+    }
+}
+
 fn rain(
     setup: Res<WorldSetup>,
     village: Res<Village>,
     camera: Single<&VillageCamera>,
-    time: Res<Time>,
-    mut phase: Local<f32>,
+    time: Res<Time<Real>>,
+    mut field: Local<RainField>,
     mut gizmos: Gizmos,
 ) {
     if setup.open || village.camp.is_none() {
@@ -231,20 +261,17 @@ fn rain(
     if weather.rain <= 0.05 {
         return;
     }
-    if !village.is_paused() {
-        *phase = (*phase + time.delta_secs() * 12.0) % 24.0;
-    }
-    let terrain = setup.terrain();
-    let mut rng = land_random(setup.seed() ^ 0x36a1);
-    for _ in 0..180 {
-        let x = camera.target.x + (rng() as f32 - 0.5) * 50.0;
-        let z = camera.target.z + (rng() as f32 - 0.5) * 50.0;
-        let height = (rng() as f32 * 24.0 - *phase).rem_euclid(24.0);
+    field.update(setup.seed(), time.delta_secs());
+    let terrain = village.terrain(&setup);
+    for offset in &field.offsets {
+        let x = camera.target.x + offset.x;
+        let z = camera.target.z + offset.z;
+        let height = (offset.y - field.phase).rem_euclid(RAIN_HEIGHT);
         let point = Vec3::new(x, terrain.height_at(x, z) + height, z);
         gizmos.line(
             point,
-            point + Vec3::new(0.06, 0.55, 0.0),
-            Color::srgba(0.74, 0.83, 0.97, 0.35),
+            point + Vec3::Y * 0.16,
+            Color::srgba_u8(219, 232, 236, 178),
         );
     }
 }
