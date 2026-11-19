@@ -371,6 +371,7 @@ impl Runner {
                     ground,
                     clock,
                     &order.order,
+                    self.setup.richness(),
                 )
                 .err();
             self.outcomes.push(Outcome {
@@ -692,6 +693,7 @@ fn order_label(order: &LabOrder) -> String {
     match order {
         LabOrder::Build { key, x, z, .. } => format!("Build {key} at ({x}, {z})"),
         LabOrder::Produce { site, recipe } => format!("Produce {recipe} at project #{site}"),
+        LabOrder::Gather { resource } => format!("Gather at resource #{resource}"),
         LabOrder::Buy { material, freight } => {
             let transport = if *freight { "freight" } else { "pickup" };
             format!("Buy {material} by {transport}")
@@ -1076,6 +1078,26 @@ fn update_lab_window(
             };
         }
     }
+    if playback.view == LabView::Map
+        && !playback.replaying
+        && !runner.done()
+        && keys.just_pressed(KeyCode::KeyG)
+        && let Some(index) = map.resource
+    {
+        playback.notice = match runner.submit(
+            &catalog,
+            LabOrder::Gather {
+                resource: index + 1,
+            },
+        ) {
+            Ok(()) => runner
+                .outcomes
+                .last()
+                .and_then(|outcome| outcome.error.clone())
+                .unwrap_or_else(|| "Gathering queued.".into()),
+            Err(error) => error.into(),
+        };
+    }
     let village = &runner.village;
     let status = if playback.replaying {
         if reached_end(&runner) {
@@ -1180,8 +1202,13 @@ fn update_lab_window(
                         .and_then(|site| map::resource_status(&runner, &catalog, site))
                 })
                 .unwrap_or_else(|| "Click a project or resource to inspect it".into());
+            let gather = if map.resource.is_some() && !playback.replaying && !runner.done() {
+                " · G Queue gathering"
+            } else {
+                ""
+            };
             format!(
-                "Village map · {selection}\nTab Switch view · Enter Inspect selected jobs\nBlue Camp · Cream Residents · Green Completed · Gold Construction · Purple Resources"
+                "Village map · {selection}\nTab Switch view · Enter Inspect selected jobs{gather}\nBlue Camp · Cream Residents · Green Completed · Gold Construction · Purple Resources"
             )
         } else {
             lab_inventory(

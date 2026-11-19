@@ -19,6 +19,9 @@ pub(crate) enum LabOrder {
         site: usize,
         recipe: String,
     },
+    Gather {
+        resource: usize,
+    },
     Buy {
         material: String,
         #[serde(default)]
@@ -253,6 +256,7 @@ impl Construction {
         ground: ConstructionSite,
         clock: TownClock,
         order: &LabOrder,
+        richness: f64,
     ) -> Result<(), String> {
         match order {
             LabOrder::Build {
@@ -302,6 +306,17 @@ impl Construction {
                 if self.production.jobs.len() == previous {
                     return Err(self.production.notice.clone());
                 }
+            }
+            LabOrder::Gather { resource } => {
+                let index = resource
+                    .checked_sub(1)
+                    .ok_or("Resource numbers start at 1.")?;
+                self.gathering.queue_resource(
+                    catalog,
+                    ground.land,
+                    index,
+                    (ground.terrain.seed, richness, clock.seconds),
+                )?;
             }
             LabOrder::Buy { material, freight } => {
                 self.buy_from_town(catalog, stock, clock, material, *freight)?;

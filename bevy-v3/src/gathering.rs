@@ -165,30 +165,45 @@ impl Gathering {
     }
 
     pub fn queue(&mut self, catalog: &Catalog, land: &Land, seed: u32, richness: f64, clock: f64) {
-        let Some(index) = self.selected else { return };
-        let Some(site) = land.site(index) else { return };
+        if let Some(index) = self.selected {
+            self.notice = self
+                .queue_resource(catalog, land, index, (seed, richness, clock))
+                .err()
+                .unwrap_or_default()
+                .into();
+        }
+    }
+
+    pub fn queue_resource(
+        &mut self,
+        catalog: &Catalog,
+        land: &Land,
+        index: usize,
+        (seed, richness, clock): (u32, f64, f64),
+    ) -> Result<(), &'static str> {
+        let site = land.site(index).ok_or("Choose a natural resource site.")?;
         let recipe = &catalog.gathering[site.recipe()];
-        if self.orders.contains_key(&index) || self.felled(index) {
-            return;
+        if self.orders.contains_key(&index) {
+            return Err("Gathering is already queued.");
+        }
+        if self.felled(index) {
+            return Err("This site has been cleared.");
         }
         if let Some(state) = self.markers.get(&index) {
             if clock < state.ready {
-                return;
+                return Err("This site is still recovering.");
             }
             if recipe.gather_limit > 0 && state.extracted >= recipe.gather_limit {
-                self.notice = "This patch is exhausted.".into();
-                return;
+                return Err("This patch is exhausted.");
             }
-            if recipe.deposit > 0 {
-                let limit = Self::deposit_limit(site, recipe, seed, richness);
-                if state.extracted >= limit {
-                    self.notice = "This deposit is exhausted.".into();
-                    return;
-                }
+            if recipe.deposit > 0
+                && state.extracted >= Self::deposit_limit(site, recipe, seed, richness)
+            {
+                return Err("This deposit is exhausted.");
             }
         }
-        self.notice.clear();
         self.queue_site(index);
+        Ok(())
     }
 
     pub fn queue_forage(&mut self, land: &Land, origin: IVec2, clock: f64) {
