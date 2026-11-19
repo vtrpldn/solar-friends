@@ -116,6 +116,15 @@ impl Market {
         }
     }
 
+    pub fn supplier_available(&self, catalog: &Catalog, id: &str, day: u64) -> u32 {
+        let used = self
+            .suppliers
+            .get(id)
+            .filter(|entry| entry.day == day)
+            .map_or(0, |entry| entry.units);
+        catalog.materials[id].supplier.saturating_sub(used)
+    }
+
     pub fn buy_pack(
         &mut self,
         catalog: &Catalog,
@@ -138,12 +147,7 @@ impl Market {
         {
             return Err("This pack is too large for the chosen vehicle.");
         }
-        let used = self
-            .suppliers
-            .get(id)
-            .filter(|entry| entry.day == day)
-            .map_or(0, |entry| entry.units);
-        if item.supplier.saturating_sub(used) < quantity {
+        if self.supplier_available(catalog, id, day) < quantity {
             return Err("The supplier has not got enough stock today.");
         }
         let price = (item.price * 100.0).round() as u64;
@@ -267,6 +271,10 @@ fn cargo_trips(catalog: &Catalog, mut pending: BTreeMap<String, u32>) -> Result<
         trips += 1;
     }
     Ok(trips)
+}
+
+pub fn freight_cents(distance: u32) -> u64 {
+    3500 + u64::from(distance) * 80
 }
 
 pub fn fare_cents(round_trip_km: u32) -> u64 {

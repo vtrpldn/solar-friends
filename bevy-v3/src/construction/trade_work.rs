@@ -1,4 +1,4 @@
-use crate::market::fare_cents;
+use crate::market::{fare_cents, freight_cents};
 
 use super::*;
 
@@ -199,6 +199,16 @@ impl Construction {
         let (id, item) = options[self.trade.selected];
         let buyer = &item.buyer.name;
         let day = ((540.0 + clock.seconds * 0.45) / 1440.0).floor() as u64;
+        let supplier = self.market.supplier_available(catalog, id, day);
+        let pack = item.quantity_text(u64::from(item.pack));
+        let available = item.quantity_text(u64::from(supplier));
+        let price = (item.price * 100.0).round() / 100.0;
+        let pickup = fare_cents(clock.round_trip_km) as f64 / 100.0;
+        let freight = freight_cents(clock.round_trip_km) as f64 / 100.0;
+        display.push_str(&format!(
+            "{} · Pack {pack} at R${price:.2} · Supplier has {available} today\nPickup fuel R${pickup:.2} · Freight R${freight:.2}\n",
+            item.name
+        ));
         let quote = match self.trade.quote(catalog, stock, id, day, 0) {
             Ok((qty, cents)) => format!(
                 "{} for R${:.2} · Fuel R${:.2}",

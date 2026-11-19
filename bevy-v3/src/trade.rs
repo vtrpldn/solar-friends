@@ -201,7 +201,7 @@ impl Trade {
         }
         let day = ((540.0 + clock * 0.45) / 1440.0).floor() as u64;
         let fare = if freight {
-            3500 + u64::from(distance) * 80
+            crate::market::freight_cents(distance)
         } else {
             crate::market::fare_cents(distance)
         };
