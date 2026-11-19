@@ -165,7 +165,12 @@ fn main() {
         wildlife::WildlifePlugin,
     ))
     .add_systems(Startup, setup_scene)
-    .add_systems(PostUpdate, (update_land, animate_river).chain())
+    .add_systems(
+        PostUpdate,
+        (update_land, animate_river)
+            .chain()
+            .after(land::advance_landscape_motion),
+    )
     .run();
 }
 
@@ -319,7 +324,7 @@ fn update_land(
 
 fn animate_river(
     setup: Res<WorldSetup>,
-    village: Res<village::Village>,
+    motion: Res<land::LandscapeMotion>,
     river: Query<(&Mesh3d, &RiverMesh)>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut previous: Local<Option<(AssetId<Mesh>, u64)>>,
@@ -327,7 +332,7 @@ fn animate_river(
     let Ok((river, rocks)) = river.single() else {
         return;
     };
-    let frame = (village.seconds() * 12.0).floor() as u64;
+    let frame = (motion.seconds * 12.0).floor() as u64;
     let key = (river.0.id(), frame);
     if *previous != Some(key)
         && let Some(mesh) = meshes.get_mut(&river.0)
@@ -625,6 +630,9 @@ mod tests {
         world
             .resource_mut::<Time<Fixed>>()
             .advance_by(std::time::Duration::from_millis(100));
+        world
+            .resource_mut::<Time<Real>>()
+            .advance_by(std::time::Duration::from_millis(100));
         world.run_schedule(FixedUpdate);
         world.run_schedule(PostUpdate);
     }
@@ -704,7 +712,12 @@ mod tests {
             wildlife::WildlifePlugin,
         ))
         .add_systems(Startup, setup_scene)
-        .add_systems(PostUpdate, (update_land, animate_river).chain());
+        .add_systems(
+            PostUpdate,
+            (update_land, animate_river)
+                .chain()
+                .after(land::advance_landscape_motion),
+        );
         app.finish();
         app.cleanup();
         app.update();

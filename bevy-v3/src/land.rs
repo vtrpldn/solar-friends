@@ -4,6 +4,7 @@ use bevy::{
     asset::{AssetPath, embedded_asset, embedded_path},
     gltf::GltfAssetLabel,
     prelude::*,
+    window::{PrimaryWindow, WindowOccluded},
 };
 
 use crate::{
@@ -29,10 +30,17 @@ impl Plugin for LandPlugin {
     fn build(&self, app: &mut App) {
         embedded_asset!(app, "land.glb");
         app.init_resource::<Land>()
+            .init_resource::<LandscapeMotion>()
+            .add_message::<WindowOccluded>()
             .add_systems(PreUpdate, generate_land)
             .add_systems(
                 PostUpdate,
-                (draw_land, update_harvested_land, sway_trees)
+                (
+                    advance_landscape_motion,
+                    draw_land,
+                    update_harvested_land,
+                    sway_trees,
+                )
                     .chain()
                     .before(TransformSystems::Propagate),
             );
@@ -80,6 +88,31 @@ struct TreeSway {
     phase: f32,
 }
 
+#[derive(Resource, Default)]
+pub(crate) struct LandscapeMotion {
+    pub seconds: f64,
+    occluded: bool,
+}
+
+pub(crate) fn advance_landscape_motion(
+    setup: Res<WorldSetup>,
+    village: Res<Village>,
+    time: Res<Time<Real>>,
+    primary: Query<(), With<PrimaryWindow>>,
+    mut visibility: MessageReader<WindowOccluded>,
+    mut motion: ResMut<LandscapeMotion>,
+) {
+    for event in visibility.read() {
+        if primary.contains(event.window) {
+            motion.occluded = event.occluded;
+        }
+    }
+    let delta = time.delta_secs_f64().clamp(0.0, 0.1);
+    if !setup.open && !village.is_paused() && !motion.occluded && delta > 0.0 {
+        motion.seconds += delta;
+    }
+}
+
 impl TreeSway {
     fn rotation(&self, seconds: f32) -> Quat {
         let gust = 0.65 + 0.35 * (seconds * 0.37 + self.phase * 0.6).sin();
@@ -96,23 +129,18 @@ impl TreeSway {
 }
 
 fn sway_trees(
-    setup: Res<WorldSetup>,
-    village: Res<Village>,
-    time: Res<Time>,
-    mut wind_time: Local<f32>,
+    motion: Res<LandscapeMotion>,
     mut trees: Query<(&TreeSway, &mut Transform, &Visibility)>,
 ) {
-    if setup.open || village.camp.is_none() || village.is_paused() {
+    if motion.seconds == 0.0 {
         return;
     }
-    let delta = time.delta_secs().clamp(0.0, 0.1);
-    if delta == 0.0 {
-        return;
-    }
-    *wind_time += delta;
     for (tree, mut transform, visibility) in &mut trees {
         if *visibility != Visibility::Hidden {
-            transform.rotation = tree.rotation(*wind_time);
+            let rotation = tree.rotation(motion.seconds as f32);
+            if transform.rotation != rotation {
+                transform.rotation = rotation;
+            }
         }
     }
 }
@@ -530,10 +558,12 @@ mod tests {
     #[test]
     fn wind_moves_visible_trees_without_moving_their_ground_anchor() {
         let mut app = App::new();
-        app.init_resource::<Time>()
+        app.init_resource::<Time<Real>>()
             .init_resource::<WorldSetup>()
             .init_resource::<Village>()
-            .add_systems(Update, sway_trees);
+            .init_resource::<LandscapeMotion>()
+            .add_message::<WindowOccluded>()
+            .add_systems(Update, (advance_landscape_motion, sway_trees).chain());
         let world = app.world_mut();
         world.resource_mut::<WorldSetup>().open = false;
         world.resource_mut::<Village>().camp = Some(IVec2::splat(36));
@@ -560,7 +590,7 @@ mod tests {
             ))
             .id();
         world
-            .resource_mut::<Time>()
+            .resource_mut::<Time<Real>>()
             .advance_by(std::time::Duration::from_millis(100));
         world.run_schedule(Update);
         let swayed = *world.get::<Transform>(tree).unwrap();
@@ -568,11 +598,26 @@ mod tests {
         assert_ne!(swayed.rotation, planted);
         assert_eq!(world.get::<Transform>(hidden).unwrap().rotation, planted);
 
-        world.resource_mut::<WorldSetup>().open = true;
-        world
-            .resource_mut::<Time>()
-            .advance_by(std::time::Duration::from_millis(100));
+        let window = world.spawn(PrimaryWindow).id();
+        world.write_message(WindowOccluded {
+            window,
+            occluded: true,
+        });
         world.run_schedule(Update);
         assert_eq!(*world.get::<Transform>(tree).unwrap(), swayed);
+        world.write_message(WindowOccluded {
+            window,
+            occluded: false,
+        });
+        world.run_schedule(Update);
+        let resumed = *world.get::<Transform>(tree).unwrap();
+        assert_ne!(resumed.rotation, swayed.rotation);
+
+        world.resource_mut::<WorldSetup>().open = true;
+        world
+            .resource_mut::<Time<Real>>()
+            .advance_by(std::time::Duration::from_millis(100));
+        world.run_schedule(Update);
+        assert_eq!(*world.get::<Transform>(tree).unwrap(), resumed);
     }
 }
