@@ -197,7 +197,7 @@ pub struct Village {
     #[serde(skip)]
     camp_error: Option<&'static str>,
     #[serde(skip)]
-    save_notice: String,
+    pub(crate) save_notice: String,
     #[serde(skip)]
     rebuild_scene: bool,
     #[serde(skip)]
@@ -705,6 +705,20 @@ fn restore_continuation(
         return Ok((village, Some(id)));
     }
     Ok((snapshot, None))
+}
+
+pub(crate) fn save_active_village(
+    menu: &SaveMenu,
+    village: &Village,
+    catalog: &Catalog,
+) -> std::io::Result<()> {
+    let Some((mode, id, serial)) = menu.attached else {
+        return Ok(());
+    };
+    if village.session_serial == serial && village.mode() == Some(mode) {
+        save_library::autosave(&menu.directory(mode)?, id, mode, village, catalog)?;
+    }
+    Ok(())
 }
 
 fn write_continuation(
@@ -2450,8 +2464,11 @@ mod tests {
         };
         write_continuation(&menu, Mode::Story, &village, &catalog).unwrap();
         village.clock = 120.0;
-        save_library::autosave(&directory, id, Mode::Story, &village, &catalog).unwrap();
+        save_active_village(&menu, &village, &catalog).unwrap();
 
+        village.session_serial += 1;
+        village.clock = 240.0;
+        save_active_village(&menu, &village, &catalog).unwrap();
         menu.attached = None;
         let (restored, slot) = restore_continuation(&menu, Mode::Story, &catalog).unwrap();
         assert_eq!(slot, Some(id));

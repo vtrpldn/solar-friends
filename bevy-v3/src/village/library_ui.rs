@@ -439,7 +439,7 @@ pub(super) fn autosave_named(
     {
         return;
     }
-    let Some((mode, id, serial)) = menu.attached else {
+    let Some((mode, _, serial)) = menu.attached else {
         return;
     };
     if village.session_serial != serial || village.mode() != Some(mode) {
@@ -447,11 +447,7 @@ pub(super) fn autosave_named(
         return;
     }
     menu.next_autosave = time.elapsed_secs_f64() + 3.0;
-    let result = menu
-        .directory(mode)
-        .and_then(|path| save_library::autosave(&path, id, mode, &village, &catalog));
-    if let Err(error) = result {
-        village.save_notice = format!("Named autosave stopped: {error}");
-        menu.attached = None;
+    if let Err(error) = save_active_village(&menu, &village, &catalog) {
+        village.save_notice = format!("Could not autosave named village: {error}");
     }
 }

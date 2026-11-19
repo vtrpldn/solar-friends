@@ -409,10 +409,11 @@ fn setup_input(
     keyboard: Res<ButtonInput<KeyCode>>,
     buttons: Query<(&Interaction, &Action), Changed<Interaction>>,
     window: Single<&Window, With<PrimaryWindow>>,
-    (saves, sound, village): (
-        Res<SaveMenu>,
+    (mut saves, sound, mut village, catalog): (
+        ResMut<SaveMenu>,
         Res<crate::audio::SoundSettings>,
-        Res<crate::village::Village>,
+        ResMut<crate::village::Village>,
+        Res<crate::catalog::Catalog>,
     ),
 ) {
     if !window.focused || saves.open || sound.open {
@@ -477,6 +478,14 @@ fn setup_input(
                 if village.session_setup().is_some() && !setup.confirming_new {
                     setup.confirming_new = true;
                 } else {
+                    if let Err(error) =
+                        crate::village::save_active_village(&saves, &village, &catalog)
+                    {
+                        village.save_notice =
+                            format!("Could not preserve the named village: {error}");
+                        return;
+                    }
+                    saves.attached = None;
                     setup.restart = setup.restart.wrapping_add(1);
                     setup.confirming_new = false;
                     setup.open = false;
