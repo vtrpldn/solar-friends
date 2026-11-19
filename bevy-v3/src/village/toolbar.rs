@@ -27,6 +27,9 @@ enum Action {
     ClosePanel,
     Page(bool),
     Project(usize),
+    Recipes,
+    Recipe(usize),
+    RecipePage(bool),
     SelectedProject(ProjectAction),
     TradeItem(usize),
     Trade(TradeOrder),
@@ -95,6 +98,12 @@ impl Action {
                 false
             }
             Self::Advance(_) => false,
+            Self::Recipes => village.utility_panel.is_none() && !village.construction.menu,
+            Self::Recipe(_) | Self::RecipePage(_) => {
+                village.utility_panel.is_none()
+                    && village.construction.production.open
+                    && !village.construction.menu
+            }
             Self::Build => village.utility_panel.is_none(),
             Self::RotatePlacement | Self::CancelPlacement => village.construction.placing_project(),
             Self::ResizeField(_) => village.construction.placing_field(),
@@ -210,7 +219,11 @@ impl Action {
             Self::Page(true) => "Next page".into(),
             Self::ProjectFilter if village.open_projects_only => "Show all projects".into(),
             Self::ProjectFilter => "Show underway".into(),
-            Self::Project(_) | Self::TradeItem(_) => String::new(),
+            Self::Project(_) | Self::TradeItem(_) | Self::Recipe(_) => String::new(),
+            Self::Recipes if village.construction.production.open => "Close recipes".into(),
+            Self::Recipes => "Recipes".into(),
+            Self::RecipePage(false) => "Previous recipes".into(),
+            Self::RecipePage(true) => "Next recipes".into(),
             Self::SelectedProject(action) => match action {
                 ProjectAction::Prioritize => "Prioritize project",
                 ProjectAction::Move => "Move building",
@@ -328,6 +341,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 Action::Page(false),
                 Action::Page(true),
                 Action::Build,
+                Action::Recipes,
                 Action::RotatePlacement,
                 Action::CancelPlacement,
                 Action::ConnectRoad,
@@ -451,8 +465,11 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 ] {
                     spawn_button(menu, &assets, Action::TradePolicy(policy));
                 }
+                spawn_button(menu, &assets, Action::RecipePage(false));
+                spawn_button(menu, &assets, Action::RecipePage(true));
                 for row in 0..crate::construction::PAGE_KEYS.len() {
                     spawn_button(menu, &assets, Action::Project(row));
+                    spawn_button(menu, &assets, Action::Recipe(row));
                     spawn_button(menu, &assets, Action::TradeItem(row));
                 }
             });
@@ -631,8 +648,22 @@ fn handle_buttons(
                     town.construction
                         .apply_project_action(&catalog, &mut town.stock, action);
                 }
+                Action::Recipes => {
+                    village.construction.toggle_recipes(&catalog);
+                    picker.open = false;
+                }
+                Action::RecipePage(forward) if !picker.open => {
+                    village.construction.page_recipes(&catalog, forward)
+                }
+                Action::Recipe(row) if !picker.open => {
+                    let town = &mut *village;
+                    town.construction
+                        .queue_recipe_row(&catalog, &mut town.stock, row);
+                }
                 Action::Panel(_)
                 | Action::Project(_)
+                | Action::Recipe(_)
+                | Action::RecipePage(_)
                 | Action::SelectedProject(_)
                 | Action::TradeItem(_)
                 | Action::Trade(_)
@@ -685,6 +716,12 @@ fn refresh(
     if toolbar.display == Display::None {
         return;
     }
+    let show_recipes = !picker.open && Action::RecipePage(true).available(&village);
+    let recipes = if show_recipes {
+        village.construction.recipe_page_labels(&catalog)
+    } else {
+        Vec::new()
+    };
     let show_selected_project = !picker.open
         && Action::SelectedProject(ProjectAction::Salvage).available(&village)
         && village
@@ -724,7 +761,8 @@ fn refresh(
     picker.home_page = picker.home_page.min(home_pages - 1);
     let homes = &homes[(picker.home_page * HOME_ROWS)..];
     picker.visible_homes = std::array::from_fn(|row| homes.get(row).map(|option| option.0));
-    menu.display = if show_selected_project
+    menu.display = if show_recipes
+        || show_selected_project
         || show_advance
         || show_terrain
         || show_field_size
@@ -761,6 +799,11 @@ fn refresh(
                 show_terrain
             }
             Action::Project(row) => projects.get(row).is_some(),
+            Action::Recipes => {
+                action.available(&village) && village.construction.has_recipes(&catalog)
+            }
+            Action::RecipePage(_) => show_recipes,
+            Action::Recipe(row) => recipes.get(row).is_some(),
             Action::SelectedProject(action) => {
                 show_selected_project
                     && village
@@ -797,6 +840,7 @@ fn refresh(
         if let Ok(mut text) = labels.get_mut(children[0]) {
             let label = match action {
                 Action::Project(row) => projects[row].clone(),
+                Action::Recipe(row) => recipes[row].clone(),
                 Action::TradeItem(row) => trade_items[row].clone(),
                 Action::ListedHome(row) => {
                     let (home, name, occupants, beds) = homes[row];

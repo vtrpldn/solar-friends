@@ -76,23 +76,63 @@ impl Construction {
             let ground = self.production.growing_sites.entry(index).or_default();
             ground.irrigation = ground.irrigation.cycle();
         }
-        if keyboard.just_pressed(KeyCode::KeyC) && !recipes.is_empty() {
-            self.production.open = !self.production.open;
+        if keyboard.just_pressed(KeyCode::KeyC) {
+            self.toggle_recipes(catalog);
         }
         if !self.production.open || self.menu {
             return;
         }
-        let pages = recipes.len().div_ceil(PAGE_KEYS.len()).max(1);
-        if keyboard.just_pressed(KeyCode::PageDown) {
-            self.production.page = (self.production.page + 1) % pages;
-        } else if keyboard.just_pressed(KeyCode::PageUp) {
-            self.production.page = (self.production.page + pages - 1) % pages;
+        if keyboard.any_just_pressed([KeyCode::PageDown, KeyCode::PageUp]) {
+            self.page_recipes(catalog, keyboard.just_pressed(KeyCode::PageDown));
         }
-        let Some(number) = PAGE_KEYS.iter().position(|key| keyboard.just_pressed(*key)) else {
+        if let Some(row) = PAGE_KEYS.iter().position(|key| keyboard.just_pressed(*key)) {
+            self.queue_recipe_row(catalog, stock, row);
+        }
+    }
+
+    pub fn has_recipes(&self, catalog: &Catalog) -> bool {
+        self.production
+            .selected
+            .is_some_and(|index| !self.recipes(catalog, index).is_empty())
+    }
+
+    pub fn toggle_recipes(&mut self, catalog: &Catalog) {
+        if self.has_recipes(catalog) {
+            self.production.open = !self.production.open;
+        }
+    }
+
+    pub fn page_recipes(&mut self, catalog: &Catalog, forward: bool) {
+        if let Some(index) = self.production.selected {
+            let pages = self
+                .recipes(catalog, index)
+                .len()
+                .div_ceil(PAGE_KEYS.len())
+                .max(1);
+            self.production.page =
+                (self.production.page + if forward { 1 } else { pages - 1 }) % pages;
+        }
+    }
+
+    pub fn recipe_page_labels(&self, catalog: &Catalog) -> Vec<String> {
+        let Some(index) = self.production.selected else {
+            return Vec::new();
+        };
+        self.recipes(catalog, index)
+            .iter()
+            .skip(self.production.page * PAGE_KEYS.len())
+            .take(PAGE_KEYS.len())
+            .map(|(_, recipe)| recipe.name.clone())
+            .collect()
+    }
+
+    pub fn queue_recipe_row(&mut self, catalog: &Catalog, stock: &mut Stock, row: usize) {
+        let Some(index) = self.production.selected else {
             return;
         };
+        let recipes = self.recipes(catalog, index);
         let Some((id, _)) = recipes
-            .get(self.production.page * PAGE_KEYS.len() + number)
+            .get(self.production.page * PAGE_KEYS.len() + row)
             .copied()
         else {
             return;
