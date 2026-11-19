@@ -4,6 +4,8 @@ use serde::{Deserialize, Serialize};
 pub struct TownWork {
     pub repeating: bool,
     pub booked: bool,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub route_blocked: bool,
     pub last_day: Option<u64>,
     pub shift: Option<Shift>,
 }

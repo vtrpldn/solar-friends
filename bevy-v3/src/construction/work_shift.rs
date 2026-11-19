@@ -61,6 +61,7 @@ impl Construction {
         let resident = &mut self.residents[index];
         if !resident.town_work.active() {
             resident.town_work.booked = !resident.town_work.booked;
+            resident.town_work.route_blocked = false;
         }
     }
 
@@ -98,7 +99,11 @@ impl Construction {
             if work.booked {
                 let blocker = self
                     .booked_shift_due(selected, seconds)
-                    .then(|| self.shift_departure_blocker(selected))
+                    .then(|| {
+                        self.shift_departure_blocker(selected).or(work
+                            .route_blocked
+                            .then_some("No walking route to the bus stop"))
+                    })
                     .flatten();
                 if let Some(blocker) = blocker {
                     format!("Booked for {when}, 08:00–11:00 · {blocker}")
@@ -142,6 +147,7 @@ impl Construction {
         }
         for (index, &(job_name, wages)) in JOBS.iter().enumerate() {
             let worker = &mut self.residents[index];
+            worker.town_work.route_blocked = false;
             if let Some(mut shift) = worker.town_work.shift.take() {
                 match shift.phase {
                     Commute::Outbound => {
@@ -199,6 +205,7 @@ impl Construction {
                 continue;
             }
             let Some(path) = self.resident_route(catalog, site, from, BUS_STOP) else {
+                self.residents[index].town_work.route_blocked = true;
                 continue;
             };
             let fare_due = stock
@@ -272,6 +279,25 @@ mod tests {
         );
         assert!(construction.residents[0].town_work.booked);
         construction.residents[0].health.energy = 85.0;
+        let starting_position = construction.residents[0].position;
+        construction.residents[0].position = Vec2::splat(-100.0);
+        construction.tick_shifts(
+            &catalog,
+            &mut stock,
+            site,
+            TownClock {
+                seconds: 0.0,
+                round_trip_km: 12,
+            },
+            1.0,
+        );
+        assert!(
+            construction
+                .finance_summary(&stock, 0, 0.0)
+                .contains("No walking route")
+        );
+        assert_eq!(stock.balance(), 0);
+        construction.residents[0].position = starting_position;
         let mut left_camp = false;
         for seconds in 0..1_500 {
             let clock = TownClock {
@@ -286,6 +312,7 @@ mod tests {
             assert_eq!(stock.balance(), 0);
         }
         assert!(left_camp);
+        assert!(!construction.residents[0].town_work.route_blocked);
         assert_eq!(stock.balance(), 15_200);
         assert!(construction.residents[0].town_work.last_day.is_some());
     }
