@@ -303,6 +303,7 @@ fn show_model(
             viewport_height: viewport_height(project, workshop.zoom),
         };
     }
+    light.shadows_enabled = !matches!(workshop.surface, Surface::Wireframe);
     let mode = if workshop.night {
         light.illuminance = 800.0;
         light.color = Color::srgb_u8(157, 176, 227);
