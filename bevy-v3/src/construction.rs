@@ -2070,12 +2070,19 @@ impl Construction {
             self.record_event(clock.seconds, message);
         }
         let space = self.storage_space(catalog, stock);
-        self.trade.maintain_pantry(
-            catalog,
-            stock,
-            &mut self.market,
-            (clock.seconds, clock.round_trip_km, space),
-        );
+        if !self.supplier_construction || self.construction_delivery.is_none() {
+            self.trade.maintain_pantry(
+                catalog,
+                stock,
+                &mut self.market,
+                (
+                    clock.seconds,
+                    clock.round_trip_km,
+                    space,
+                    self.supplier_construction,
+                ),
+            );
+        }
         self.trade.auto_sell(
             catalog,
             stock,

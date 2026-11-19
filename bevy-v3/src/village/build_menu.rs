@@ -198,9 +198,9 @@ fn refresh(
                 };
                 Some(
                     if village.construction.supplier_construction() {
-                        "Construction · Supplier freight"
+                        "Automatic supplies · Supplier freight"
                     } else {
-                        "Construction · Resident pickup"
+                        "Automatic supplies · Resident pickup"
                     }
                     .into(),
                 )
