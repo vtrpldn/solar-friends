@@ -11,6 +11,8 @@ enum Action {
     Build,
     Setup,
     Library,
+    Sound,
+    Volume { effects: bool, delta: i16 },
     RotatePlacement,
     CancelPlacement,
     ConnectRoad,
@@ -128,7 +130,8 @@ impl Action {
                     && !village.construction.is_placing()
                     && village.construction.gathering.has_selection()
             }
-            Self::Setup | Self::Library => true,
+            Self::Setup | Self::Library | Self::Sound => true,
+            Self::Volume { .. } => false,
             Self::Build => village.utility_panel.is_none(),
             Self::RotatePlacement | Self::CancelPlacement => village.construction.placing_project(),
             Self::ResizeField(_) => {
@@ -201,6 +204,8 @@ impl Action {
             Self::Build => "Build".into(),
             Self::Setup => "Setup".into(),
             Self::Library => "Saved villages".into(),
+            Self::Sound => "Sound settings".into(),
+            Self::Volume { .. } => String::new(),
             Self::RotatePlacement => "Rotate".into(),
             Self::CancelPlacement => "Cancel placement".into(),
             Self::ConnectRoad if village.connect_road_strokes => "Connected route".into(),
@@ -366,7 +371,7 @@ pub(super) fn install(app: &mut App) {
 }
 
 fn visible(village: &Village, setup: &WorldSetup, saves: &SaveMenu, sound: &SoundSettings) -> bool {
-    !sound.open && (saves.open || (!setup.open && village.camp.is_some()))
+    sound.open || saves.open || (!setup.open && village.camp.is_some())
 }
 
 fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
@@ -391,6 +396,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 Action::Build,
                 Action::Setup,
                 Action::Library,
+                Action::Sound,
                 Action::Recipes,
                 Action::Gather,
                 Action::Beds,
@@ -408,6 +414,11 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 Action::Guide,
             ] {
                 spawn_button(row, &assets, action);
+            }
+            for effects in [false, true] {
+                for delta in [-5, 5] {
+                    spawn_button(row, &assets, Action::Volume { effects, delta });
+                }
             }
             row.spawn((
                 PanelMenu,
@@ -565,7 +576,11 @@ fn spawn_button(parent: &mut ChildSpawnerCommands, assets: &AssetServer, action:
 }
 
 fn handle_buttons(
-    (mut setup, mut saves, sound): (ResMut<WorldSetup>, ResMut<SaveMenu>, Res<SoundSettings>),
+    (mut setup, mut saves, mut sound): (
+        ResMut<WorldSetup>,
+        ResMut<SaveMenu>,
+        ResMut<SoundSettings>,
+    ),
     (catalog, land): (Res<Catalog>, Res<Land>),
     mut village: ResMut<Village>,
     mut picker: ResMut<PanelPicker>,
@@ -584,6 +599,14 @@ fn handle_buttons(
         if interaction != Interaction::Pressed {
             continue;
         }
+        if sound.open {
+            match action {
+                Action::Sound => sound.open = false,
+                Action::Volume { effects, delta } => sound.adjust_volume(effects, delta),
+                _ => {}
+            }
+            continue;
+        }
         if saves.open {
             if matches!(action, Action::Library) {
                 library_ui::toggle_library(&mut saves, setup.mode);
@@ -592,6 +615,11 @@ fn handle_buttons(
         }
         if !setup.open && action.available(&village) {
             match action {
+                Action::Sound => {
+                    sound.open = true;
+                    picker.open = false;
+                }
+                Action::Volume { .. } => {}
                 Action::Setup => {
                     setup.open = true;
                     picker.open = false;
@@ -920,12 +948,13 @@ fn refresh(
     } else {
         Display::None
     };
-    if saves.open {
+    if saves.open || sound.open {
         menu.display = Display::None;
     }
     for (&action, &interaction, children, mut background, mut node) in &mut buttons {
         let show = match action {
             Action::Advance(AdvanceAction::Toggle) => true,
+            Action::Volume { .. } => false,
             Action::Advance(_) => show_advance,
             Action::Page(_) if village.utility_panel == Some(UtilityPanel::Residents) => {
                 show_residents && home_pages > 1
@@ -971,7 +1000,9 @@ fn refresh(
             Action::Panel(_) => picker.open,
             _ => true,
         };
-        let show = if saves.open {
+        let show = if sound.open {
+            matches!(action, Action::Sound | Action::Volume { .. })
+        } else if saves.open {
             matches!(action, Action::Library)
         } else {
             show
@@ -980,7 +1011,11 @@ fn refresh(
         if !show {
             continue;
         }
-        background.0 = if !action.available(&village) {
+        background.0 = if !action.available(&village)
+            && !matches!(
+                action,
+                Action::Volume { .. } | Action::Library | Action::Sound
+            ) {
             Color::srgb_u8(40, 53, 43)
         } else if interaction == Interaction::None {
             Color::srgb_u8(58, 78, 61)
@@ -989,6 +1024,13 @@ fn refresh(
         };
         if let Ok(mut text) = labels.get_mut(children[0]) {
             let label = match action {
+                Action::Sound if sound.open => "Close sound settings".into(),
+                Action::Volume { effects, delta } => format!(
+                    "{} {}% {}",
+                    if effects { "Effects" } else { "Music" },
+                    sound.volume(effects),
+                    if delta < 0 { "−" } else { "+" }
+                ),
                 Action::Library if saves.open => "Close saved villages".into(),
                 Action::Project(row) => projects[row].clone(),
                 Action::Recipe(row) => recipes[row].clone(),

@@ -138,15 +138,28 @@ impl SoundSettings {
         let step = 5
             * (i16::from(keys.just_pressed(KeyCode::ArrowRight))
                 - i16::from(keys.just_pressed(KeyCode::ArrowLeft)));
-        let volume = if self.effects_selected {
+        if keys.just_pressed(KeyCode::KeyM) {
+            self.set_volume(self.effects_selected, 0);
+        } else {
+            self.adjust_volume(self.effects_selected, step);
+        }
+        true
+    }
+
+    pub fn volume(&self, effects: bool) -> u8 {
+        if effects { self.effects } else { self.music }
+    }
+
+    pub fn adjust_volume(&mut self, effects: bool, delta: i16) {
+        let next = (i16::from(self.volume(effects)) + delta).clamp(0, 100) as u8;
+        self.set_volume(effects, next);
+    }
+
+    fn set_volume(&mut self, effects: bool, next: u8) {
+        let volume = if effects {
             &mut self.effects
         } else {
             &mut self.music
-        };
-        let next = if keys.just_pressed(KeyCode::KeyM) {
-            0
-        } else {
-            (i16::from(*volume) + step).clamp(0, 100) as u8
         };
         if next != *volume {
             *volume = next;
@@ -154,7 +167,6 @@ impl SoundSettings {
                 .and_then(|path| save::atomic_write(&path, &serde_json::to_vec(self)?, 1024))
                 .is_err();
         }
-        true
     }
 
     pub fn label(&self) -> String {
