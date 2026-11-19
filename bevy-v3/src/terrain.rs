@@ -237,7 +237,7 @@ impl TerrainEditor {
             .map_or_else(String::new, |h| format!(" · Grade {h:.2} m"));
         let instruction = match (self.brush, self.level) {
             (Brush::Flatten, None) => "Click to sample a grade",
-            _ => "Click to shape the ground",
+            _ => "Click or drag to shape the ground",
         };
         format!(
             "Terrain · {tool} · {} m radius{level}
@@ -254,16 +254,49 @@ impl TerrainEditor {
         terrain
     }
 
+    #[cfg(test)]
     pub fn stroke(&mut self, terrain: &Terrain, point: Vec3, occupied: impl Fn(IVec2) -> bool) {
+        self.stroke_path(terrain, &[point], occupied);
+    }
+
+    pub fn stroke_path(
+        &mut self,
+        terrain: &Terrain,
+        points: &[Vec3],
+        occupied: impl Fn(IVec2) -> bool,
+    ) {
+        let previous = Arc::clone(&self.vertices);
+        let mut changed = false;
+        for &point in points {
+            let terrain = self.terrain(terrain.clone());
+            changed |= self.apply_brush(&terrain, point, &occupied);
+        }
+        if changed {
+            if self.history.len() == 20 {
+                self.history.pop_front();
+            }
+            self.history.push_back(previous);
+            self.redo.clear();
+            self.revision = self.revision.wrapping_add(1);
+            self.status = "";
+        }
+    }
+
+    fn apply_brush(
+        &mut self,
+        terrain: &Terrain,
+        point: Vec3,
+        occupied: impl Fn(IVec2) -> bool,
+    ) -> bool {
         let (x, z) = (f64::from(point.x), f64::from(point.z));
         if !(-HALF_WIDTH..=HALF_WIDTH).contains(&x) || !(-HALF_WIDTH..=HALF_WIDTH).contains(&z) {
-            return;
+            return false;
         }
         if matches!(self.brush, Brush::Flatten) && self.level.is_none() {
             let height = f64::from(point.y);
             if !(0.0..=12.0).contains(&height) {
                 self.status = "Choose a grade between 0 and 12 m.";
-                return;
+                return false;
             }
             self.level = Some(height);
         }
@@ -274,7 +307,6 @@ impl TerrainEditor {
             let max = ((center + radius) / 2.0).floor().min(HALF_WIDTH / 2.0) as i32;
             min..=max
         };
-        let previous = Arc::clone(&self.vertices);
         let mut changed = false;
         for column in bounds(x) {
             for row in bounds(z) {
@@ -314,14 +346,7 @@ impl TerrainEditor {
         } else {
             "No ground changed at this location."
         };
-        if changed {
-            if self.history.len() == 20 {
-                self.history.pop_front();
-            }
-            self.history.push_back(previous);
-            self.redo.clear();
-            self.revision = self.revision.wrapping_add(1);
-        }
+        changed
     }
 }
 
@@ -748,6 +773,26 @@ mod tests {
         let revision = editor.revision;
         editor.redo();
         assert_eq!(editor.revision, revision);
+    }
+
+    #[test]
+    fn a_drag_is_one_undoable_stroke() {
+        let base = Terrain::new(0, 1.0, 1.0);
+        let mut editor = TerrainEditor::default();
+        let first = Vec3::new(40.0, 0.0, 24.0);
+        let second = Vec3::new(42.0, 0.0, 24.0);
+        editor.stroke_path(&base, &[first, second], |_| false);
+        let raised = editor.terrain(base.clone());
+        assert!(raised.elevation(40.0, 24.0) > 0.6);
+        assert!(raised.elevation(42.0, 24.0) > 0.6);
+        assert_eq!(editor.revision, 1);
+        editor.undo();
+        assert_eq!(editor.terrain(base.clone()).elevation(40.0, 24.0), 0.0);
+        editor.redo();
+        assert_eq!(
+            editor.terrain(base).elevation(42.0, 24.0),
+            raised.elevation(42.0, 24.0)
+        );
     }
 
     #[test]

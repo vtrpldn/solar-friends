@@ -395,6 +395,10 @@ impl Village {
         self.clock
     }
 
+    pub fn editing_terrain(&self) -> bool {
+        self.terrain_editor.open
+    }
+
     pub fn map_input_blocked(&self) -> bool {
         self.guide.open()
             || self.lenses.open
@@ -1071,6 +1075,7 @@ struct CampPointer {
     preset: Option<IVec2>,
     clicked: Option<GroundHit>,
     hovered: Option<GroundHit>,
+    terrain_stroke: Vec<Vec3>,
 }
 
 #[derive(Resource, Default, PartialEq)]
@@ -1092,11 +1097,17 @@ fn read_camp_pointer(
     ground: Query<(), With<GroundMesh>>,
     ui: Query<&Interaction>,
     mut raycast: MeshRayCast,
-    (mut input, mut pointer): (Local<Option<Vec2>>, ResMut<CampPointer>),
+    (mut input, mut stroke, mut pointer): (
+        Local<Option<Vec2>>,
+        Local<Vec<Vec3>>,
+        ResMut<CampPointer>,
+    ),
 ) {
     pointer.preset = None;
     pointer.clicked = None;
     pointer.hovered = None;
+    pointer.terrain_stroke.clear();
+    let painting = village.terrain_editor.open;
     if !window.focused
         || setup.open
         || village.map_input_blocked()
@@ -1104,7 +1115,11 @@ fn read_camp_pointer(
         || crate::pointer_over_ui(&ui)
     {
         *input = None;
+        stroke.clear();
         return;
+    }
+    if !painting || mouse.just_pressed(MouseButton::Left) {
+        stroke.clear();
     }
     if mouse.just_pressed(MouseButton::Left) {
         *input = window.cursor_position();
@@ -1142,6 +1157,24 @@ fn read_camp_pointer(
         if clicked {
             pointer.clicked = Some(hit);
         }
+        if painting && mouse.just_pressed(MouseButton::Left) {
+            stroke.push(hit.world);
+        } else if painting
+            && !stroke.is_empty()
+            && (mouse.pressed(MouseButton::Left) || mouse.just_released(MouseButton::Left))
+        {
+            let last = *stroke.last().expect("active terrain stroke");
+            let distance = last.xz().distance(hit.world.xz());
+            if distance >= 2.0 {
+                let steps = (distance / 2.0).floor() as usize;
+                for step in 1..=steps.min(256 - stroke.len()) {
+                    stroke.push(last.lerp(hit.world, step as f32 * 2.0 / distance));
+                }
+            }
+        }
+    }
+    if painting && mouse.just_released(MouseButton::Left) {
+        pointer.terrain_stroke = std::mem::take(&mut *stroke);
     }
 }
 
@@ -1384,10 +1417,11 @@ fn village_input(
         let town = &mut *village;
         town.terrain_editor.controls(&keyboard);
         if town.terrain_editor.open {
-            if let Some(hit) = pointer.clicked {
-                town.terrain_editor.stroke(&terrain, hit.world, |cell| {
-                    town.construction.protects_terrain(cell)
-                });
+            if !pointer.terrain_stroke.is_empty() {
+                town.terrain_editor
+                    .stroke_path(&terrain, &pointer.terrain_stroke, |cell| {
+                        town.construction.protects_terrain(cell)
+                    });
             }
             return;
         }

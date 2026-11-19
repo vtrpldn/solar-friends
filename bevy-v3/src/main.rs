@@ -371,15 +371,15 @@ fn camera_controls(
     if drag_button.is_some_and(|button| !mouse.pressed(button)) {
         *drag_button = None;
     }
+    let left_pan = !village.planning_roads() && !village.editing_terrain();
     if drag_button.is_none() && !over_ui {
         *drag_button = [MouseButton::Left, MouseButton::Right, MouseButton::Middle]
             .into_iter()
             .find(|&button| {
-                mouse.just_pressed(button)
-                    && (button != MouseButton::Left || !village.planning_roads())
+                mouse.just_pressed(button) && (button != MouseButton::Left || left_pan)
             });
     }
-    if *drag_button == Some(MouseButton::Left) && !village.planning_roads() {
+    if *drag_button == Some(MouseButton::Left) && left_pan {
         let distance_per_pixel = CAMERA_HEIGHT * ortho.scale / window.height().max(1.0);
         let drag = Vec3::new(-motion.delta.x, 0.0, -motion.delta.y);
         view.target += orientation * drag * distance_per_pixel;
