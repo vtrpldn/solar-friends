@@ -2,6 +2,7 @@ pub mod garden;
 mod garden_connections;
 mod garden_terrain;
 
+pub mod lineup;
 mod model_export;
 mod sprites;
 

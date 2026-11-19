@@ -177,3 +177,7 @@ Select a prop with a resident interaction. Press **I** to choose a resident, **O
 Press **/** to search the catalog by model name, key, or category. **Enter** focuses an existing prop or starts placement for a model missing from the scene. Use the mouse or arrow keys to position a placement preview, then click or press **Enter** to confirm.
 
 Press **N** for the night view, or start with `--asset-garden --night` followed by an optional scene path.
+
+### Resident lineup
+
+Pass `--residents` to view the six resident rigs and V2’s 31 poses. Pass a pose name as the next argument to start with it. Use **Up/Down** to select a pose, **V** to switch between front, side, and back, and **N** to change the light. Press **Space** to freeze, **Left/Right** to scrub, or **Home** to reset time. Hold **Shift** while scrubbing to step by half a second.

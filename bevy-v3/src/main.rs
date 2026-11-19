@@ -52,6 +52,11 @@ fn default_camera_polar() -> f32 {
 fn main() {
     let mut args = std::env::args_os().skip(1);
     let option = args.next();
+    if option.as_deref().is_some_and(|flag| flag == "--residents") {
+        let pose = args.next();
+        workshop::lineup::run(pose.as_deref().and_then(std::ffi::OsStr::to_str));
+        return;
+    }
     if option
         .as_deref()
         .is_some_and(|flag| flag == "--asset-garden")

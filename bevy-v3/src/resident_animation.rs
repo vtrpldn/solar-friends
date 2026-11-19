@@ -10,7 +10,7 @@ use bevy::{
 
 use crate::{setup::WorldSetup, village::Village};
 
-const CLIPS: usize = 22;
+const CLIPS: usize = 31;
 const RESIDENTS: usize = 6;
 
 // Matches the baked clip order in scripts/export-v3-opening-models.mjs.
@@ -38,6 +38,15 @@ pub enum Motion {
     Water,
     Tend,
     Carry,
+    DuckWalk,
+    Look,
+    Bathe,
+    Pee,
+    Toilet,
+    Play,
+    Wave,
+    Listen,
+    Laugh,
 }
 
 #[derive(Component)]
@@ -45,6 +54,9 @@ pub struct ResidentAnimation(pub usize);
 
 #[derive(Component)]
 pub struct RehearsalPose(pub Motion, pub bool);
+
+#[derive(Component)]
+pub struct PreviewPose(pub Motion, pub f32);
 
 #[derive(Component)]
 struct AnimatedResident {
@@ -57,6 +69,7 @@ struct AnimatedResident {
 struct Library {
     graph: Handle<AnimationGraph>,
     indices: Vec<AnimationNodeIndex>,
+    clips: Vec<Handle<AnimationClip>>,
 }
 
 pub struct ResidentAnimationPlugin;
@@ -75,17 +88,20 @@ fn load_graph(
     mut graphs: ResMut<Assets<AnimationGraph>>,
 ) {
     let source = AssetPath::from_path_buf(embedded_path!("opening.glb")).with_source("embedded");
-    let clips = (0..RESIDENTS * CLIPS).map(|index| {
-        assets.load(
-            source
-                .clone()
-                .with_label(GltfAssetLabel::Animation(index).to_string()),
-        )
-    });
-    let (graph, indices) = AnimationGraph::from_clips(clips);
+    let clips: Vec<_> = (0..RESIDENTS * CLIPS)
+        .map(|index| {
+            assets.load(
+                source
+                    .clone()
+                    .with_label(GltfAssetLabel::Animation(index).to_string()),
+            )
+        })
+        .collect();
+    let (graph, indices) = AnimationGraph::from_clips(clips.iter().cloned());
     commands.insert_resource(Library {
         graph: graphs.add(graph),
         indices,
+        clips,
     });
 }
 
@@ -119,7 +135,8 @@ fn bind_animation_player(
 fn animate(
     setup: Option<Res<WorldSetup>>,
     village: Option<Res<Village>>,
-    rehearsals: Query<&RehearsalPose>,
+    (rehearsals, previews): (Query<&RehearsalPose>, Query<&PreviewPose>),
+    clips: Res<Assets<AnimationClip>>,
     library: Res<Library>,
     mut players: Query<(
         &mut AnimatedResident,
@@ -128,7 +145,10 @@ fn animate(
     )>,
 ) {
     for (mut resident, mut player, mut transitions) in &mut players {
-        let (pose, paused) = if let Ok(rehearsal) = rehearsals.get(resident.actor) {
+        let preview = previews.get(resident.actor).ok();
+        let (pose, paused) = if let Some(preview) = preview {
+            (preview.0, true)
+        } else if let Ok(rehearsal) = rehearsals.get(resident.actor) {
             (rehearsal.0, rehearsal.1)
         } else if let (Some(setup), Some(village)) = (&setup, &village) {
             (
@@ -138,14 +158,26 @@ fn animate(
         } else {
             (Motion::Idle, false)
         };
-        let index = library.indices[resident.index * CLIPS + pose as usize];
+        let clip = resident.index * CLIPS + pose as usize;
+        let index = library.indices[clip];
         if resident.pose != Some(pose) {
             transitions
-                .play(&mut player, index, Duration::from_millis(450))
+                .play(
+                    &mut player,
+                    index,
+                    if preview.is_some() {
+                        Duration::ZERO
+                    } else {
+                        Duration::from_millis(450)
+                    },
+                )
                 .repeat();
             resident.pose = Some(pose);
         }
         if let Some(active) = player.animation_mut(index) {
+            if let Some((preview, clip)) = preview.zip(clips.get(&library.clips[clip])) {
+                active.set_seek_time(preview.1.rem_euclid(clip.duration().max(f32::EPSILON)));
+            }
             if paused {
                 active.pause();
             } else {

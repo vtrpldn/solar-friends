@@ -45,6 +45,15 @@ const cycle = [
   ["water", Math.PI * 2 / 3],
   ["tend", Math.PI * 2 / 3],
   ["carry", Math.PI],
+  ["duck-walk", Math.PI / 4],
+  ["look", Math.PI * 2],
+  ["bathe", 4],
+  ["pee", 4],
+  ["toilet", 4],
+  ["play", 4],
+  ["wave", 4],
+  ["listen", 4],
+  ["laugh", 4],
 ];
 
 function bakeResident(name, root) {
