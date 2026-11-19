@@ -322,7 +322,13 @@ pub(super) fn library_controls(
                         menu.attached = Some((mode, id, village.session_serial));
                         menu.next_autosave = time.elapsed_secs_f64() + 3.0;
                     }
-                    menu.status = "Village saved.".into();
+                    menu.status = if entry.rename.is_none()
+                        && let Err(error) = write_continuation(&menu, mode, &village, &catalog)
+                    {
+                        format!("Village saved. Could not update Continue: {error}")
+                    } else {
+                        "Village saved.".into()
+                    };
                     refresh_library(&mut menu, &path, mode);
                     menu.selected = menu.rows.iter().position(|row| row.id == id).unwrap_or(0);
                 }
@@ -384,6 +390,10 @@ pub(super) fn library_controls(
                 menu.attached = Some((mode, slot, loaded.session_serial));
                 menu.next_autosave = time.elapsed_secs_f64() + 3.0;
                 menu.open = false;
+                if let Err(error) = write_continuation(&menu, mode, &loaded, &catalog) {
+                    loaded.save_notice =
+                        format!("Named village loaded. Could not update Continue: {error}");
+                }
                 *village = loaded;
             }
             Err(error) => menu.status = format!("Could not open saved village: {error}"),

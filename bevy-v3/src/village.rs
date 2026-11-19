@@ -657,18 +657,20 @@ fn save_controls(
             *interaction == Interaction::Pressed && matches!(action, crate::setup::Action::Continue)
         });
     if resume || keyboard.just_pressed(KeyCode::F9) {
-        let path = if resume {
-            save::autosave_location(setup.mode)
+        let restored = if resume {
+            restore_continuation(&saves, setup.mode, &catalog)
         } else {
             save::location(setup.mode)
+                .and_then(|path| save::read(&path, &catalog))
+                .map(|village| (village, None))
         };
-        match path.and_then(|path| save::read(&path, &catalog)) {
-            Ok(mut loaded) => {
+        match restored {
+            Ok((mut loaded, named_slot)) => {
                 *setup = loaded.setup.as_ref().expect("validated setup").session();
                 loaded.save_notice = "Village loaded.".into();
                 loaded.rebuild_scene = true;
                 loaded.session_serial = village.session_serial.wrapping_add(1);
-                saves.attached = None;
+                saves.attached = named_slot.map(|id| (setup.mode, id, loaded.session_serial));
                 *village = loaded;
             }
             Err(error) => village.save_notice = format!("Could not load village: {error}"),
@@ -684,6 +686,37 @@ fn save_controls(
             }
         };
     }
+}
+
+fn restore_continuation(
+    menu: &SaveMenu,
+    mode: Mode,
+    catalog: &Catalog,
+) -> std::io::Result<(Village, Option<u64>)> {
+    let (snapshot, slot) = save::read_continuation(&menu.continue_path(mode)?, catalog)?;
+    if snapshot.mode() != Some(mode) {
+        return Err(std::io::Error::other("autosave belongs to another mode"));
+    }
+    if let Some(id) = slot
+        && let Ok(village) = menu
+            .directory(mode)
+            .and_then(|path| save_library::load(&path, id, mode, catalog))
+    {
+        return Ok((village, Some(id)));
+    }
+    Ok((snapshot, None))
+}
+
+fn write_continuation(
+    menu: &SaveMenu,
+    mode: Mode,
+    village: &Village,
+    catalog: &Catalog,
+) -> std::io::Result<()> {
+    let slot = menu.attached.and_then(|(attached_mode, id, serial)| {
+        (attached_mode == mode && serial == village.session_serial).then_some(id)
+    });
+    save::write_continuation(&menu.continue_path(mode)?, village, slot, catalog)
 }
 
 fn autosave_continue(
@@ -704,10 +737,7 @@ fn autosave_continue(
     village.advance_checkpoint = false;
     *next = now + 10.0;
     let Some(mode) = village.mode() else { return };
-    if let Err(error) = saves
-        .continue_path(mode)
-        .and_then(|path| save::write_continuation(&path, &village, &catalog))
-    {
+    if let Err(error) = write_continuation(&saves, mode, &village, &catalog) {
         village.save_notice = format!("Could not autosave village: {error}");
     }
 }
@@ -2350,14 +2380,14 @@ mod tests {
             "solar-v3-continue-test-{}.json",
             std::process::id()
         ));
-        save::write_continuation(&path, &village, &catalog).unwrap();
+        save::write_continuation(&path, &village, None, &catalog).unwrap();
         village.clock = 12.0;
-        save::write_continuation(&path, &village, &catalog).unwrap();
+        save::write_continuation(&path, &village, None, &catalog).unwrap();
         assert_eq!(save::read(&path, &catalog).unwrap().clock, 12.0);
 
         let damaged = b"{\"version\":1,\"village\":";
         std::fs::write(&path, damaged).unwrap();
-        assert!(save::write_continuation(&path, &village, &catalog).is_err());
+        assert!(save::write_continuation(&path, &village, None, &catalog).is_err());
         assert_eq!(std::fs::read(&path).unwrap(), damaged);
         std::fs::remove_file(path).unwrap();
     }
@@ -2395,6 +2425,43 @@ mod tests {
         );
         let exported = save_library::export(&directory, id, Mode::Story).unwrap();
         assert_eq!(save::read(&exported, &catalog).unwrap().clock, 0.0);
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+
+    #[test]
+    fn continue_reopens_the_named_slot_and_falls_back_if_it_is_removed() {
+        let setup = WorldSetup::default().session();
+        let catalog = Catalog::default();
+        let mut village = Village {
+            setup: Some(setup.clone()),
+            stock: Stock::for_start(&setup, &catalog),
+            session_serial: 7,
+            ..default()
+        };
+        let directory = std::env::temp_dir().join(format!(
+            "solar-v3-named-continue-test-{}",
+            std::process::id()
+        ));
+        let id = save_library::create(&directory, Mode::Story, "River camp", &village).unwrap();
+        let mut menu = SaveMenu {
+            test_directory: Some(directory.clone()),
+            attached: Some((Mode::Story, id, village.session_serial)),
+            ..default()
+        };
+        write_continuation(&menu, Mode::Story, &village, &catalog).unwrap();
+        village.clock = 120.0;
+        save_library::autosave(&directory, id, Mode::Story, &village, &catalog).unwrap();
+
+        menu.attached = None;
+        let (restored, slot) = restore_continuation(&menu, Mode::Story, &catalog).unwrap();
+        assert_eq!(slot, Some(id));
+        assert_eq!(restored.clock, 120.0);
+
+        save_library::remove(&directory, id).unwrap();
+        let (restored, slot) = restore_continuation(&menu, Mode::Story, &catalog).unwrap();
+        assert_eq!(slot, None);
+        assert_eq!(restored.clock, 0.0);
+
         std::fs::remove_dir_all(directory).unwrap();
     }
 

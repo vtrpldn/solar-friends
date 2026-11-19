@@ -15,6 +15,8 @@ pub(crate) const MAX_BYTES: u64 = 16 * 1024 * 1024;
 #[derive(Serialize, Deserialize)]
 struct SaveFile<T> {
     version: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    named_slot: Option<u64>,
     village: T,
 }
 
@@ -53,14 +55,28 @@ pub fn write(path: &Path, village: &Village) -> io::Result<()> {
 }
 
 pub(crate) fn write_payload(path: &Path, village: &impl Serialize) -> io::Result<()> {
+    write_snapshot(path, village, None)
+}
+
+fn write_snapshot(
+    path: &Path,
+    village: &impl Serialize,
+    named_slot: Option<u64>,
+) -> io::Result<()> {
     let json = serde_json::to_vec(&SaveFile {
         version: VERSION,
+        named_slot,
         village,
     })?;
     atomic_write(path, &json, MAX_BYTES)
 }
 
-pub fn write_continuation(path: &Path, village: &Village, catalog: &Catalog) -> io::Result<()> {
+pub fn write_continuation(
+    path: &Path,
+    village: &Village,
+    named_slot: Option<u64>,
+    catalog: &Catalog,
+) -> io::Result<()> {
     match read(path, catalog) {
         Ok(saved) if saved.mode() == village.mode() => {}
         Err(error) if error.kind() == io::ErrorKind::NotFound => {}
@@ -70,7 +86,7 @@ pub fn write_continuation(path: &Path, village: &Village, catalog: &Catalog) -> 
             ));
         }
     }
-    write(path, village)
+    write_snapshot(path, village, named_slot)
 }
 
 pub(crate) fn atomic_write(path: &Path, json: &[u8], max_bytes: u64) -> io::Result<()> {
@@ -102,6 +118,10 @@ pub(crate) fn atomic_write(path: &Path, json: &[u8], max_bytes: u64) -> io::Resu
 }
 
 pub fn read(path: &Path, catalog: &Catalog) -> io::Result<Village> {
+    read_continuation(path, catalog).map(|(village, _)| village)
+}
+
+pub fn read_continuation(path: &Path, catalog: &Catalog) -> io::Result<(Village, Option<u64>)> {
     let bytes = read_bytes(path, MAX_BYTES)?;
     let save: SaveFile<Village> = serde_json::from_slice(&bytes)?;
     if save.version != VERSION || !save.village.valid_save(catalog) {
@@ -110,7 +130,7 @@ pub fn read(path: &Path, catalog: &Catalog) -> io::Result<Village> {
             "unsupported or invalid village save",
         ));
     }
-    Ok(save.village)
+    Ok((save.village, save.named_slot))
 }
 
 pub(crate) fn read_bytes(path: &Path, limit: u64) -> io::Result<Vec<u8>> {
