@@ -1856,10 +1856,19 @@ impl Construction {
             }
             if let Some(job) = &self.residents[index].assignment {
                 let project = &self.plans[job.project];
-                if project.removed || project.work >= catalog.projects[&project.key].work {
+                if project.removed
+                    || project.work >= catalog.projects[&project.key].work
+                    || (job.activity != Activity::Carry
+                        && self.residents[index].health.energy < 25.0)
+                {
                     self.residents[index].assignment = None;
                     self.residents[index].path.clear();
                 }
+            }
+            if self.residents[index].assignment.is_none()
+                && self.residents[index].health.energy < 25.0
+            {
+                continue;
             }
             if self.residents[index].assignment.is_none() {
                 self.residents[index].retry -= dt;
@@ -1919,6 +1928,11 @@ impl Construction {
                     let skill = if skilled { 1.25 } else { 1.0 };
                     let experience = 1.0 + (worker.experience / 10_000.0).min(0.15);
                     let efficiency = construction_crew_efficiency(crew + 1);
+                    let hunger = if worker.health.levels[Need::Hunger as usize] < 15.0 {
+                        0.65
+                    } else {
+                        1.0
+                    };
                     let tools = stock.use_tool(
                         index,
                         "carpentry-tools",
@@ -1932,6 +1946,7 @@ impl Construction {
                             * tools
                             * experience
                             * efficiency
+                            * hunger
                             * worker.health.hydration_factor())
                     .min(catalog.projects[&project.key].work);
                     if project.work >= catalog.projects[&project.key].work {
@@ -2691,6 +2706,50 @@ mod tests {
         );
         assert_eq!(construction.finished_models(&catalog).count(), 1);
         assert_eq!(stock.available("wood"), 36);
+    }
+
+    #[test]
+    fn exhausted_builders_stop_and_hungry_builders_work_more_slowly() {
+        let setup = WorldSetup::default();
+        let catalog = Catalog::default();
+        let camp = IVec2::new(36, 36);
+        let terrain = setup.terrain().with_camp(camp);
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
+        let work_in_one_tick = |energy, food| {
+            let mut stock = Stock::for_start(&setup, &catalog);
+            let mut village = Construction::default();
+            let mut plan = village.proposed_site(&catalog, "gathering", IVec2::new(44, 36));
+            plan.delivered = plan.loads;
+            village.plans.push(plan);
+            for resident in &mut village.residents {
+                resident.health.energy = 0.0;
+            }
+            let worker = &mut village.residents[0];
+            worker.health.energy = energy;
+            worker.health.levels[Need::Hunger as usize] = food;
+            worker.assignment = Some(Assignment {
+                project: 0,
+                spot: IVec2::new(43, 36),
+                activity: Activity::Build,
+                to_site: VecDeque::new(),
+                haul: Haul::Direct,
+            });
+            village.tick(&catalog, &mut stock, site, clock, 1.0);
+            village.plans[0].work
+        };
+        let normal = work_in_one_tick(75.0, 80.0);
+        assert!(normal > 0.0);
+        assert!((work_in_one_tick(75.0, 10.0) / normal - 0.65).abs() < 1e-8);
+        assert_eq!(work_in_one_tick(24.0, 80.0), 0.0);
     }
 
     #[test]
