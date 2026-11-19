@@ -305,6 +305,28 @@ impl Construction {
         Some(center)
     }
 
+    pub fn select_power_shortage(&mut self) -> Option<Vec2> {
+        let selected = self.production.selected;
+        let index = {
+            let mut shortages = self
+                .utilities
+                .power_shortages()
+                .filter_map(|id| id.checked_sub(1));
+            let first = shortages.next()?;
+            if Some(first) > selected {
+                first
+            } else {
+                shortages
+                    .find(|&index| Some(index) > selected)
+                    .unwrap_or(first)
+            }
+        };
+        let plan = self.plans.get(index)?;
+        let center = project_center(plan);
+        self.select_project(Some(index));
+        Some(center)
+    }
+
     pub fn selected_project_center(&self) -> Option<Vec2> {
         let plan = self.plans.get(self.production.selected?)?;
         (!plan.removed).then(|| project_center(plan))

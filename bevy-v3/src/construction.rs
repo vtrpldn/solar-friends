@@ -3180,6 +3180,46 @@ mod tests {
     }
 
     #[test]
+    fn selecting_power_shortages_visits_only_affected_projects_and_wraps() {
+        let setup = WorldSetup::default();
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut village = Construction::default();
+        for x in [40, 42, 44] {
+            village.plans.push(Construction::proposal(
+                &catalog,
+                "streetlight",
+                IVec2::new(x, 36),
+                default_field_size(),
+                0,
+            ));
+        }
+        village
+            .utilities
+            .sync(village.plans.iter().enumerate().map(|(index, plan)| {
+                crate::utilities::Facility {
+                    id: index + 1,
+                    kind: "streetlight",
+                    location: plan.position,
+                    size: plan.size,
+                    batteries: 0,
+                    panels: 0,
+                    working: false,
+                }
+            }));
+        village.utilities.toggle(1);
+        village.utilities.grid_off = true;
+        village
+            .utilities
+            .tick(&setup, &mut stock, 0, 16.0 * crate::weather::HOUR, 0.1);
+
+        for index in [0, 2, 0] {
+            assert!(village.select_power_shortage().is_some());
+            assert_eq!(village.production.selected, Some(index));
+        }
+    }
+
+    #[test]
     fn copying_a_field_preserves_its_rotation_and_footprint() {
         let setup = WorldSetup::default();
         let catalog = Catalog::default();

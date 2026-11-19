@@ -195,7 +195,7 @@ impl Construction {
         if shortages.peek().is_none() {
             return String::new();
         }
-        let mut text = String::from("\nWaiting for power");
+        let mut text = String::from("\nWaiting for power · Page Down Next building");
         for id in shortages.by_ref().take(VISIBLE_SHORTAGES) {
             if let Some(plan) = id.checked_sub(1).and_then(|index| self.plans.get(index)) {
                 let name = &catalog.projects[&plan.key].name;

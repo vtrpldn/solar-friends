@@ -85,6 +85,7 @@ enum Action {
     Cooling,
     Water(WaterCommand),
     NextWasteTank,
+    NextPowerShortage,
     AutomaticUpkeep,
     UpkeepBudget { restock: bool, increase: bool },
 }
@@ -228,6 +229,15 @@ impl Action {
                     && !village.construction.menu
                     && !village.construction.is_placing()
                     && self.facility_switch(village).is_some()
+            }
+            Self::NextPowerShortage => {
+                village.utility_panel == Some(UtilityPanel::Power)
+                    && village
+                        .construction
+                        .utilities
+                        .power_shortages()
+                        .next()
+                        .is_some()
             }
             Self::Water(_) => village.utility_panel == Some(UtilityPanel::Water),
             Self::NextWasteTank => {
@@ -534,6 +544,7 @@ impl Action {
             Self::Cooling if self.facility_switch(village) == Some(true) => "Pause cooling".into(),
             Self::Cooling => "Resume cooling".into(),
             Self::NextWasteTank => "Next waste tank".into(),
+            Self::NextPowerShortage => "Next building without power".into(),
             Self::Water(command) => match command {
                 WaterCommand::Camp { source: true } => "Camp source".into(),
                 WaterCommand::Camp { source: false } => "Camp destination".into(),
@@ -789,6 +800,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                     spawn_button(menu, &assets, Action::PantryPolicy(reserve, budget, toggle));
                 }
                 spawn_button(menu, &assets, Action::Grid);
+                spawn_button(menu, &assets, Action::NextPowerShortage);
                 spawn_button(menu, &assets, Action::BuildingPower);
                 spawn_button(menu, &assets, Action::Cooling);
                 for command in [
@@ -1166,6 +1178,9 @@ fn handle_buttons(
                 Action::UpkeepBudget { restock, increase } if !picker.open => {
                     village.construction.adjust_upkeep_budget(restock, increase);
                 }
+                Action::NextPowerShortage if !picker.open => {
+                    village.focus_next_power_shortage(&setup, camera)
+                }
                 Action::NextWasteTank if !picker.open => {
                     village.focus_next_waste_tank(&setup, camera)
                 }
@@ -1314,6 +1329,7 @@ fn handle_buttons(
                 | Action::Cooling
                 | Action::Water(_)
                 | Action::NextWasteTank
+                | Action::NextPowerShortage
                 | Action::AutomaticUpkeep
                 | Action::UpkeepBudget { .. } => {}
             }
@@ -1512,6 +1528,7 @@ fn refresh(
             | Action::CookingTarget { .. } => show_pantry && action.available(&village),
             Action::Home(_) => show_residents,
             Action::Grid => show_power,
+            Action::NextPowerShortage => show_power && action.available(&village),
             Action::BuildingPower | Action::Cooling => {
                 show_facility_switches && action.available(&village)
             }

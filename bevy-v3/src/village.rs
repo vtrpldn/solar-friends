@@ -427,6 +427,13 @@ impl Village {
         }
     }
 
+    fn focus_next_power_shortage(&mut self, setup: &WorldSetup, camera: &mut VillageCamera) {
+        if let Some(point) = self.construction.select_power_shortage() {
+            let terrain = self.terrain(setup);
+            camera.target = Vec3::new(point.x, terrain.height_at(point.x, point.y), point.y);
+        }
+    }
+
     fn focus_next_waste_tank(&mut self, setup: &WorldSetup, camera: &mut VillageCamera) {
         let current = (self.water_panel.target, self.water_panel.channel);
         let mut tanks = self
@@ -1400,8 +1407,14 @@ fn village_input(
                 .input(&keyboard, pointer.clicked, &mut town.construction);
             return;
         }
-        if keyboard.just_pressed(KeyCode::KeyO) && town.utility_panel == Some(UtilityPanel::Power) {
-            town.construction.utilities.grid_off = !town.construction.utilities.grid_off;
+        if town.utility_panel == Some(UtilityPanel::Power) {
+            if keyboard.just_pressed(KeyCode::KeyO) {
+                town.construction.utilities.grid_off = !town.construction.utilities.grid_off;
+            }
+            if keyboard.just_pressed(KeyCode::PageDown) {
+                town.focus_next_power_shortage(&setup, camera);
+                return;
+            }
         }
         if keyboard.just_pressed(KeyCode::KeyJ)
             && let Some(index) = town.construction.production.selected
