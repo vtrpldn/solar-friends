@@ -333,67 +333,60 @@ impl Construction {
                     fallback(IVec2::new(col, z))
                 })
         };
-        match kind {
-            Need::Hydration => {
-                let favorites = &catalog.residents[index].favorites;
-                let mut sources: Vec<_> = self
-                    .utilities
-                    .water_sources()
-                    .filter(|&(id, _, _)| {
-                        id == 0
-                            || !self.residents.iter().enumerate().any(|(other, worker)| {
-                                other != index
-                                    && worker
-                                        .health
-                                        .task
-                                        .as_ref()
-                                        .is_some_and(|task| task.facility == Some(id))
-                            })
+        let available_service = |mut sources: Vec<(usize, IVec2, IVec2)>| {
+            let favorites = &catalog.residents[index].favorites;
+            sources.retain(|&(id, _, _)| {
+                id == 0
+                    || !self.residents.iter().enumerate().any(|(other, worker)| {
+                        other != index
+                            && worker
+                                .health
+                                .task
+                                .as_ref()
+                                .is_some_and(|task| task.facility == Some(id))
                     })
-                    .collect();
-                let score = |(id, location, _): (usize, IVec2, IVec2)| {
-                    let kind = if id == 0 {
-                        "camp"
-                    } else {
-                        self.plans
-                            .get(id - 1)
-                            .map_or("", |plan| catalog.projects[&plan.key].kind.as_str())
-                    };
-                    let preference = favorites
-                        .iter()
-                        .position(|key| key == kind)
-                        .unwrap_or(favorites.len());
-                    let target = if id == 0 {
-                        SUPPLY_SPOTS[index]
-                    } else {
-                        location
-                    };
-                    (
-                        preference,
-                        resident.position.distance_squared(target.as_vec2()),
-                    )
+            });
+            let score = |(id, location, _): (usize, IVec2, IVec2)| {
+                let kind = if id == 0 {
+                    "camp"
+                } else {
+                    self.plans
+                        .get(id - 1)
+                        .map_or("", |plan| catalog.projects[&plan.key].kind.as_str())
                 };
-                sources.sort_by(|&a, &b| {
-                    let (a_rank, a_distance) = score(a);
-                    let (b_rank, b_distance) = score(b);
-                    a_rank.cmp(&b_rank).then(a_distance.total_cmp(&b_distance))
-                });
-                sources
-                    .into_iter()
-                    .find_map(|(id, loc, size)| facility_path(id, loc, size))
-            }
+                let preference = favorites
+                    .iter()
+                    .position(|key| key == kind)
+                    .unwrap_or(favorites.len());
+                let target = if id == 0 {
+                    SUPPLY_SPOTS[index]
+                } else {
+                    location
+                };
+                (
+                    preference,
+                    resident.position.distance_squared(target.as_vec2()),
+                )
+            };
+            sources.sort_by(|&a, &b| {
+                let (a_rank, a_distance) = score(a);
+                let (b_rank, b_distance) = score(b);
+                a_rank.cmp(&b_rank).then(a_distance.total_cmp(&b_distance))
+            });
+            sources
+                .into_iter()
+                .find_map(|(id, loc, size)| facility_path(id, loc, size))
+        };
+        match kind {
+            Need::Hydration => available_service(self.utilities.water_sources().collect()),
             Need::Hunger | Need::FilterWater => fallback(SUPPLY_SPOTS[index]),
             Need::FetchWater => bank(),
-            Need::Hygiene => self
-                .utilities
-                .wash_sources()
-                .find_map(|(id, loc, size)| facility_path(id, loc, size))
-                .or_else(bank),
+            Need::Hygiene => {
+                available_service(self.utilities.wash_sources().collect()).or_else(bank)
+            }
             Need::Bladder | Need::Bowels => {
                 let waste = if kind == Need::Bowels { 1.5 } else { 0.5 };
-                self.utilities
-                    .toilets(waste)
-                    .find_map(|(id, loc, size)| facility_path(id, loc, size))
+                available_service(self.utilities.toilets(waste).collect())
                     .or_else(|| fallback(camp + IVec2::new(index as i32 - 3, 3)))
             }
             Need::Rest | Need::Sleep => self.rest_route(index, catalog, site, &path),
@@ -1483,6 +1476,42 @@ mod tests {
         assert_eq!(
             village.residents[1].health.task.as_ref().unwrap().facility,
             Some(0)
+        );
+    }
+
+    #[test]
+    fn residents_choose_the_closer_toilet_even_if_it_was_built_later() {
+        let catalog = Catalog::default();
+        let terrain = WorldSetup::default().terrain();
+        let land = Land::default();
+        let mut village = Construction::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp: IVec2::new(36, 36),
+        };
+        let toilets = [IVec2::new(55, 36), IVec2::new(44, 36)];
+        village
+            .utilities
+            .sync(toilets.into_iter().enumerate().map(|(index, location)| {
+                crate::utilities::Facility {
+                    id: index + 1,
+                    kind: "eco_toilet",
+                    location,
+                    size: IVec2::ONE,
+                    batteries: 0,
+                    panels: 0,
+                    working: false,
+                }
+            }));
+        village.residents[0].position = Vec2::new(42.0, 36.0);
+
+        assert_eq!(
+            village
+                .need_route(0, &catalog, site, Need::Bladder)
+                .unwrap()
+                .0,
+            Some(2)
         );
     }
 
