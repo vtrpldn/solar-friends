@@ -12,6 +12,27 @@ use super::*;
 
 pub(super) const NAMES: [&str; 5] = ["Iara", "Bento", "Luz", "Cauã", "Nina"];
 
+fn latrine_sites(terrain: &Terrain, camp: IVec2, index: usize) -> impl Iterator<Item = IVec2> + '_ {
+    (6..=8).flat_map(move |radius| {
+        (0..12).filter_map(move |direction| {
+            let angle = ((direction + index) % 12) as f64 * std::f64::consts::TAU / 12.0;
+            let (sin, cos) = angle.sin_cos();
+            let cell = camp
+                + IVec2::new(
+                    (cos * f64::from(radius)).round() as i32,
+                    (sin * f64::from(radius)).round() as i32,
+                );
+            let Vec2 { x, y: z } = world_position(cell.x as f32, cell.y as f32);
+            let (river_center, river_width) = terrain.river(f64::from(z));
+            (cell.cmpge(IVec2::splat(-30)).all()
+                && cell.cmple(IVec2::splat(93)).all()
+                && cell.distance_squared(STOCKPILE) >= 25
+                && (f64::from(x) - river_center).abs() > river_width + 6.9)
+                .then_some(cell)
+        })
+    })
+}
+
 impl Construction {
     fn resident_working(&self, index: usize) -> bool {
         self.residents[index]
@@ -387,7 +408,7 @@ impl Construction {
             Need::Bladder | Need::Bowels => {
                 let waste = if kind == Need::Bowels { 1.5 } else { 0.5 };
                 available_service(self.utilities.toilets(waste).collect())
-                    .or_else(|| fallback(camp + IVec2::new(index as i32 - 3, 3)))
+                    .or_else(|| latrine_sites(terrain, camp, index).find_map(fallback))
             }
             Need::Rest | Need::Sleep => self.rest_route(index, catalog, site, &path),
             Need::Fun | Need::Social => fallback(camp + IVec2::new(index as i32 - 2, 1)),
@@ -1477,6 +1498,30 @@ mod tests {
             village.residents[1].health.task.as_ref().unwrap().facility,
             Some(0)
         );
+    }
+
+    #[test]
+    fn temporary_latrine_stays_away_from_the_river_and_supplies() {
+        let catalog = Catalog::default();
+        let terrain = WorldSetup::default().terrain();
+        let land = Land::default();
+        let camp = IVec2::new(36, 36);
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let village = Construction::default();
+        let (facility, path) = village
+            .need_route(0, &catalog, site, Need::Bladder)
+            .unwrap();
+        let target = path.back().unwrap().as_ivec2();
+        let Vec2 { x, y: z } = world_position(target.x as f32, target.y as f32);
+        let (center, width) = terrain.river(f64::from(z));
+        assert!(facility.is_none());
+        assert!(target.distance_squared(camp) >= 25);
+        assert!(target.distance_squared(STOCKPILE) >= 25);
+        assert!((f64::from(x) - center).abs() > width + 6.9);
     }
 
     #[test]
