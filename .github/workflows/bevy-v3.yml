@@ -43,20 +43,31 @@ jobs:
           cd "$standalone"
           cat > scenario.json <<'JSON'
           {
-            "steps": 8000,
+            "steps": 20000,
             "orders": [
-              {"step": 0, "order": {"type": "build", "key": "gathering", "x": 40, "z": 36}}
+              {"step": 0, "order": {"type": "build", "key": "gathering", "x": 40, "z": 36}},
+              {"step": 8000, "order": {"type": "move", "site": 1, "x": 49, "z": 36}},
+              {"step": 12000, "order": {"type": "salvage", "site": 1}}
             ]
           }
           JSON
           ./solar-friends-v3 --lab scenario.json > report.json
           jq -e '
-            .end_step == 8000
-            and .orders == [{"step": 0, "error": null}]
+            .end_step == 20000
+            and .orders == [
+              {"step": 0, "error": null},
+              {"step": 8000, "error": null},
+              {"step": 12000, "error": null}
+            ]
             and (.village.construction.plans | length == 1)
             and (.village.construction.plans[0] |
               .key == "gathering" and .loads == 3 and .delivered == 3
-              and .staged == 0 and .work == 134 and .removed == false)
-            and .village.stock.materials.wood == 28
+              and .staged == 0 and .work == 134 and .position == [49, 36]
+              and .removed == true)
+            and (.village.construction.building_history | map(del(.clock))) == [{
+              "key": "gathering", "kind": "Salvage", "recovered": {"wood": 4},
+              "lost": {"hardware": 1, "wood": 4}
+            }]
+            and .village.stock.materials.wood == 32
           ' report.json
           ./solar-friends-v3 --lab-replay report.json
