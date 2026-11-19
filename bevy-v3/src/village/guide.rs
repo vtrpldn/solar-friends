@@ -26,7 +26,7 @@ const TOPICS: [(&str, &str); 7] = [
     ),
     (
         "Village management",
-        "N · Residents     P · Power     V · Water\n\
+        "N · Residents     P · Power     U / V · Water\n\
          M / H · Finances, trade and pantry (Tab switches pages)\n\
          F7 · Maintenance     F8 · Events     I / F10 · Stores in Story\n\
          F · Weather forecast     L · Advance time\n\

@@ -26,7 +26,7 @@ Select a completed field, garden, or greenhouse and press K to manage its beds. 
 
 A completed coop or goat pen can store feed and drinking water, then produce eggs or milk. Residents take fodder to the animals when supplies are available. Select a pen and press C to see its care and collection options.
 
-Story reserves cash for town pickup when a blueprint needs materials beyond current stock. Press U to toggle automatic ordering.
+Story reserves cash for town pickup when a blueprint needs materials beyond current stock. Press Shift+U to toggle automatic ordering. Press U in the village view to open Water management.
 
 Sandbox skips the arrival and pitches camp in the clearing when it is free. If the clearing is occupied, choose your campsite immediately. Materials are unlimited. Press I to toggle instant building.
 

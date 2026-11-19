@@ -1807,12 +1807,18 @@ fn village_input(
             town.construction.upkeep_input(&keyboard);
             return;
         }
-        if keyboard.just_pressed(KeyCode::KeyV) {
+        let water_shortcut = main_view
+            && keyboard.just_pressed(KeyCode::KeyU)
+            && !keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]);
+        if keyboard.just_pressed(KeyCode::KeyV) || water_shortcut {
             town.utility_panel = if town.utility_panel == Some(UtilityPanel::Water) {
                 None
             } else {
                 Some(UtilityPanel::Water)
             };
+            if water_shortcut {
+                return;
+            }
         }
         if town.utility_panel == Some(UtilityPanel::Water) {
             if keyboard.just_pressed(KeyCode::PageUp) {
@@ -1917,7 +1923,11 @@ fn village_input(
         if town.stock.sandbox && keyboard.just_pressed(KeyCode::KeyI) {
             town.construction.toggle_sandbox_construction();
         }
-        if !town.stock.sandbox && keyboard.just_pressed(KeyCode::KeyU) {
+        if !town.stock.sandbox
+            && keyboard.just_pressed(KeyCode::KeyU)
+            && (town.construction.menu
+                || keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]))
+        {
             town.construction.toggle_auto_buy();
         }
         if keyboard.get_just_pressed().len() > 0 {
@@ -2370,7 +2380,7 @@ fn show_hud(
         )
     } else {
         format!(
-            "R${savings:.2} ({}) · Food {food} portions ({}) · {} timber\nBattery {energy:.1} kWh ({}) · Water {water:.0} L ({}) · U {}",
+            "R${savings:.2} ({}) · Food {food} portions ({}) · {} timber\nBattery {energy:.1} kWh ({}) · Water {water:.0} L ({}) · Shift+U {}",
             rate(0, "R$"),
             rate(1, ""),
             village.stock.available("wood"),

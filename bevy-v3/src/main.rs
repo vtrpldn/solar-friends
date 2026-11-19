@@ -800,6 +800,7 @@ mod tests {
             (KeyCode::KeyM, "Shared savings"),
             (KeyCode::KeyJ, "Projects ·"),
             (KeyCode::KeyI, "Resources · Stores"),
+            (KeyCode::KeyU, "Water stored / capacity"),
         ] {
             app.world_mut()
                 .resource_mut::<ButtonInput<KeyCode>>()
