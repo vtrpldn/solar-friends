@@ -426,7 +426,32 @@ impl Construction {
                     .or_else(|| latrine_sites(terrain, camp, index).find_map(fallback))
             }
             Need::Rest | Need::Sleep => self.rest_route(index, catalog, site, &path),
-            Need::Fun | Need::Social => fallback(camp + IVec2::new(index as i32 - 2, 1)),
+            Need::Fun => {
+                let sites = self.plans.iter().enumerate().filter_map(|(id, plan)| {
+                    let definition = &catalog.projects[&plan.key];
+                    (!plan.removed
+                        && plan.work >= definition.work
+                        && !self.changes.contains_key(&id)
+                        && self.utilities.enabled(id)
+                        && matches!(
+                            definition.kind.as_str(),
+                            "square"
+                                | "reading-room"
+                                | "outdoor-classroom"
+                                | "exercise-garden"
+                                | "volleyball-court"
+                                | "community-hall"
+                                | "picnic-table"
+                                | "garden-bench"
+                                | "fire-circle"
+                                | "hammock"
+                        ))
+                    .then_some((id + 1, plan.position, plan.size))
+                });
+                available_service(sites.collect())
+                    .or_else(|| fallback(camp + IVec2::new(index as i32 - 2, 1)))
+            }
+            Need::Social => fallback(camp + IVec2::new(index as i32 - 2, 1)),
         }
     }
 
@@ -957,7 +982,16 @@ impl Construction {
                 Need::Hunger | Need::Hydration => Motion::Eat,
                 Need::Hygiene => Motion::Wash,
                 Need::Social => Motion::Chat,
-                Need::Fun => Motion::Stretch,
+                Need::Fun => match task
+                    .facility
+                    .and_then(|id| id.checked_sub(1))
+                    .and_then(|id| self.plans.get(id))
+                    .map(|plan| plan.key.as_str())
+                {
+                    Some("fire-circle") => Motion::FireSit,
+                    Some("reading-room" | "outdoor-classroom" | "community-hall") => Motion::Read,
+                    _ => Motion::Stretch,
+                },
                 Need::Sleep | Need::Rest => Motion::Rest,
                 Need::FilterWater | Need::FetchWater => Motion::Work,
                 _ => Motion::Idle,
@@ -1556,6 +1590,32 @@ mod tests {
             village.residents[1].health.task.as_ref().unwrap().facility,
             Some(0)
         );
+    }
+
+    #[test]
+    fn a_resident_needing_fun_visits_a_finished_reading_room() {
+        let setup = WorldSetup::default();
+        let catalog = Catalog::default();
+        let terrain = setup.terrain();
+        let land = Land::default();
+        let stock = Stock::for_start(&setup, &catalog);
+        let mut village = Construction::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp: IVec2::new(36, 36),
+        };
+        let mut reading_room = village.proposed_site(&catalog, "reading-room", IVec2::new(44, 36));
+        reading_room.work = catalog.projects["reading-room"].work;
+        village.plans.push(reading_room);
+        village.residents[0].health.levels[Need::Fun as usize] = 5.0;
+
+        village.choose_need(0, &catalog, &stock, site, 0.0);
+        let task = village.residents[0].health.task.as_ref().unwrap();
+        assert!(task.kind == Need::Fun);
+        assert_eq!(task.facility, Some(1));
+        village.residents[0].path.clear();
+        assert!(matches!(village.resident_motion(0), Motion::Read));
     }
 
     #[test]
