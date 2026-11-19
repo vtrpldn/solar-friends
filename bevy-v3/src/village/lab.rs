@@ -419,7 +419,7 @@ impl Runner {
                 cash_centavos: self.village.stock.balance(),
                 timber: self.village.stock.available("wood"),
                 meals: self.village.stock.available("meals"),
-                potable_liters: self.village.construction.potable_liters(),
+                potable_liters: self.village.construction.utilities.stored_drinking_water(),
                 minimum_hydration: self.village.construction.minimum_hydration(),
                 watershed: self.village.construction.utilities.watershed_sample(),
                 weather: lab_weather(&self.village, &self.setup),
@@ -1460,7 +1460,7 @@ fn update_lab_window(
         village.stock.balance() as f64 / 100.0,
         village.stock.available("wood"),
         village.stock.available("meals"),
-        village.construction.potable_liters(),
+        village.construction.utilities.stored_drinking_water(),
         weather.temperature_c,
         weather.rainfall_mm_per_hour,
         weather.cloud_cover * 100.0,
@@ -1992,6 +1992,28 @@ mod tests {
             playback.advance_frame(&mut runner, &catalog, 12, 0.1);
         }
         assert_eq!(runner.index, 3);
+    }
+
+    #[test]
+    fn water_stop_counts_drinking_water_in_a_switched_off_well() {
+        use crate::utilities::Facility;
+
+        let mut construction = Construction::default();
+        construction.utilities.sync(std::iter::once(Facility {
+            id: 1,
+            kind: "well",
+            location: IVec2::new(42, -13),
+            size: IVec2::ONE,
+            batteries: 0,
+            panels: 0,
+            working: false,
+        }));
+        construction.utilities.take_water(Some(0), 0, 40.0);
+        assert_eq!(construction.utilities.deliver_water(1, 0, 2.0), 2.0);
+        construction.utilities.toggle(0);
+        assert_eq!(construction.utilities.potable_at(1), 0.0);
+        assert_eq!(construction.utilities.stored_drinking_water(), 2.0);
+        assert!(construction.lab_stop_reason(LabStop::Water, 0.0).is_none());
     }
 
     #[test]

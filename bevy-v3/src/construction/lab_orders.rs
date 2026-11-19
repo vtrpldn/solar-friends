@@ -532,13 +532,6 @@ impl Construction {
 }
 
 impl Construction {
-    pub(crate) fn potable_liters(&self) -> f64 {
-        self.utilities
-            .water_ids()
-            .map(|id| self.utilities.potable_at(id))
-            .sum()
-    }
-
     pub(crate) fn minimum_hydration(&self) -> f64 {
         self.residents
             .iter()
@@ -600,7 +593,7 @@ impl Construction {
                 (self.minimum_hydration() < 20.0).then_some("A resident has urgent thirst.")
             }
             LabStop::Water => (self.utilities.camp_water().is_some()
-                && self.potable_liters() < 0.5)
+                && self.utilities.stored_drinking_water() < 0.5)
                 .then_some("Less than 0.5 L of drinking water remains."),
         }
     }
