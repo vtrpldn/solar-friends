@@ -617,18 +617,19 @@ impl Construction {
             })
     }
 
-    pub(super) fn sale_trip_for_return_purchase(&mut self) -> Option<&mut TownTrip> {
+    pub(super) fn sale_trip_for_return_purchase(&self) -> Option<usize> {
         let orders = &self.trade.orders;
-        [&mut self.trip, &mut self.second_trip]
+        [&self.trip, &self.second_trip]
             .into_iter()
-            .filter_map(Option::as_mut)
-            .find(|trip| {
-                trip.market_order
-                    && trip.return_purchase.is_none()
-                    && trip.elapsed < trip.duration * 0.5
-                    && orders
-                        .get(trip.project)
-                        .is_some_and(|order| !order.buying && !order.settled)
+            .position(|trip| {
+                trip.as_ref().is_some_and(|trip| {
+                    trip.market_order
+                        && trip.return_purchase.is_none()
+                        && trip.elapsed < trip.duration * 0.5
+                        && orders
+                            .get(trip.project)
+                            .is_some_and(|order| !order.buying && !order.settled)
+                })
             })
     }
 
@@ -952,6 +953,16 @@ mod tests {
         village.residents[outgoing.driver].path.clear();
         village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
         assert!(village.trip.unwrap().boarded);
+
+        let selected = Trade::tradable(&catalog)[village.trade.selected].0;
+        let price = (catalog.materials[selected].price * 100.0).round() as u64;
+        let freight = crate::market::freight_cents(clock.round_trip_km);
+        let quote = village.trade_status(&catalog, &stock, clock);
+        assert!(quote.contains(&format!(
+            "Pickup total R${:.2} (return trip, no extra fuel) · Freight total R${:.2}",
+            price as f64 / 100.0,
+            (price + freight) as f64 / 100.0,
+        )));
 
         let after_departure = stock.balance();
         assert!(

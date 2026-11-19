@@ -328,14 +328,15 @@ impl Construction {
         if u64::from(item.pack) + self.trade.inbound() > self.storage_space(catalog, stock) {
             return Err("There is not enough storage for another pack.");
         }
-        if !freight && self.sale_trip_for_return_purchase().is_some() {
+        if !freight && let Some(slot) = self.sale_trip_for_return_purchase() {
             let index = self.trade.orders.len();
             if self
                 .trade
                 .buy_on_return_trip(catalog, stock, &mut self.market, material, clock.seconds)
                 .is_ok()
             {
-                self.sale_trip_for_return_purchase()
+                [&mut self.trip, &mut self.second_trip][slot]
+                    .as_mut()
                     .expect("outbound sale trip")
                     .return_purchase = Some(index);
                 return Ok(true);
@@ -454,13 +455,30 @@ impl Construction {
         let supplier = self.market.supplier_available(catalog, id, day);
         let pack = item.quantity_text(u64::from(item.pack));
         let available = item.quantity_text(u64::from(supplier));
-        let price = (item.price * 100.0).round() / 100.0;
-        let pickup = fare_cents(clock.round_trip_km) as f64 / 100.0;
-        let freight = freight_cents(clock.round_trip_km) as f64 / 100.0;
+        let price = (item.price * 100.0).round() as u64;
+        let shared_pickup = self.sale_trip_for_return_purchase().is_some();
+        let pickup = if shared_pickup {
+            0
+        } else {
+            fare_cents(clock.round_trip_km)
+        };
+        let freight = freight_cents(clock.round_trip_km);
+        let pickup_note = if shared_pickup {
+            " (return trip, no extra fuel)"
+        } else {
+            ""
+        };
         display.push_str(&format!(
-            "{} · Pack {pack} at R${price:.2} · Supplier has {available} today\nPickup fuel R${pickup:.2} · Freight R${freight:.2}\n",
-            item.name
+            "{} · Pack {pack} at R${:.2} · Supplier has {available} today\nPickup total R${:.2}{pickup_note} · Freight total R${:.2}\n",
+            item.name,
+            price as f64 / 100.0,
+            (price + pickup) as f64 / 100.0,
+            (price + freight) as f64 / 100.0,
         ));
+        if supplier < item.pack {
+            display
+                .push_str("Supplier stock renews tomorrow. Paid orders keep their allocation.\n");
+        }
         if !town_is_open(clock.seconds) {
             display.push_str("Town closed · Opens at 07:00\n");
         }
