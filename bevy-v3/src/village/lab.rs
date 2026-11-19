@@ -493,6 +493,7 @@ enum LabView {
     AllItems,
     Jobs,
     Beds,
+    Orders,
 }
 
 impl LabView {
@@ -502,7 +503,8 @@ impl LabView {
             Self::Stocked => Self::AllItems,
             Self::AllItems => Self::Jobs,
             Self::Jobs => Self::Beds,
-            Self::Beds => Self::Overview,
+            Self::Beds => Self::Orders,
+            Self::Orders => Self::Overview,
         }
     }
 }
@@ -573,6 +575,81 @@ fn lab_job_page(jobs: &[String], page: &mut usize, focus: &str, waiting_only: bo
         text.push_str(job);
     }
     text
+}
+
+fn lab_order_page(runner: &Runner, page: &mut usize) -> String {
+    use std::fmt::Write as _;
+    const ROWS: usize = 9;
+    let count = runner.outcomes.len();
+    let pages = count.div_ceil(ROWS).max(1);
+    *page = (*page).min(pages - 1);
+    let mut text = format!(
+        "Order history · Page {} of {pages}\nTab Switch view · Page Up/Down Browse\n",
+        *page + 1
+    );
+    if count == 0 {
+        text.push_str("\nNo orders processed.");
+    }
+    for (index, (scheduled, outcome)) in runner
+        .scenario
+        .orders
+        .iter()
+        .zip(&runner.outcomes)
+        .enumerate()
+        .rev()
+        .skip(*page * ROWS)
+        .take(ROWS)
+    {
+        let action = order_label(&scheduled.order);
+        let result = outcome.error.as_deref().unwrap_or("Accepted");
+        let _ = write!(
+            text,
+            "\n#{} · Step {} · {action} · {result}",
+            index + 1,
+            outcome.step
+        );
+    }
+    text
+}
+
+fn order_label(order: &LabOrder) -> String {
+    use crate::farming::FarmAction;
+    match order {
+        LabOrder::Build { key, x, z, .. } => format!("Build {key} at ({x}, {z})"),
+        LabOrder::Produce { site, recipe } => format!("Produce {recipe} at project #{site}"),
+        LabOrder::Buy { material, freight } => {
+            let transport = if *freight { "freight" } else { "pickup" };
+            format!("Buy {material} by {transport}")
+        }
+        LabOrder::Sell { material } => format!("Sell {material}"),
+        LabOrder::Bed { site, bed, action } => {
+            let action = match action {
+                FarmAction::Prepare => "Prepare",
+                FarmAction::Plant => "Plant",
+                FarmAction::Harvest => "Harvest",
+                FarmAction::Clear => "Clear",
+                FarmAction::Amend => "Amend",
+                FarmAction::Collect => "Collect residues from",
+            };
+            format!("{action} project #{site}, bed {bed}")
+        }
+        LabOrder::ConfigureBed { site, bed, .. } => format!("Configure project #{site}, bed {bed}"),
+        LabOrder::Outside {
+            resident, enabled, ..
+        } => format!(
+            "{} town work for resident {resident}",
+            toggle_label(*enabled)
+        ),
+        LabOrder::FoodPolicy { enabled } => format!("{} food restocking", toggle_label(*enabled)),
+        LabOrder::Grid { enabled } => format!("{} grid power", toggle_label(*enabled)),
+        LabOrder::CollectWater { site } => format!("Collect river water for site #{site}"),
+        LabOrder::Purify { site } => format!("Purify water at site #{site}"),
+        LabOrder::ServiceWater { site } => format!("Service wastewater at site #{site}"),
+    }
+}
+
+fn toggle_label(enabled: bool) -> &'static str {
+    if enabled { "Enable" } else { "Disable" }
 }
 
 struct Playback {
@@ -956,6 +1033,8 @@ fn update_lab_window(
             )
         } else if playback.view == LabView::Beds {
             lab_bed_page(&mut runner, &catalog, &keys, playback)
+        } else if playback.view == LabView::Orders {
+            lab_order_page(&runner, &mut playback.inventory_page)
         } else {
             lab_inventory(
                 &catalog,
@@ -979,7 +1058,7 @@ fn update_lab_window(
         .copied()
         .fold(0, u64::saturating_add);
     let text = format!(
-        "Simulation lab · {status}\nStep {} / {} · {:.1} simulation seconds · {}×\nSpace Run/Pause · J Single step · 1–4 Speed\nO Enter order · F5 Export completed report · Tab Inventory, jobs and beds\n{}\n\nR${:.2} · {} timber · {} meals · {:.1} L drinking water · {spoiled} units spoiled\nWeather · {:.1} °C · {:.2} mm/h rain · {:.0}% cloud\n{}\n{last}\n\n{}",
+        "Simulation lab · {status}\nStep {} / {} · {:.1} simulation seconds · {}×\nSpace Run/Pause · J Single step · 1–4 Speed\nO Enter order · F5 Export completed report · Tab Browse lab views\n{}\n\nR${:.2} · {} timber · {} meals · {:.1} L drinking water · {spoiled} units spoiled\nWeather · {:.1} °C · {:.2} mm/h rain · {:.0}% cloud\n{}\n{last}\n\n{}",
         runner.index,
         runner.scenario.steps,
         village.clock,
@@ -1067,6 +1146,10 @@ mod tests {
         runner
             .submit(&catalog, LabOrder::Grid { enabled: true })
             .unwrap();
+        let history = lab_order_page(&runner, &mut 0);
+        assert!(history.contains("#2 · Step 1 · Enable grid power · Accepted"));
+        assert!(history.contains("#1 · Step 1 · Disable grid power · Accepted"));
+        assert!(history.find("#2").unwrap() < history.find("#1").unwrap());
         assert_eq!(runner.samples.len(), 2);
         while !runner.done() {
             runner.advance(&catalog);
