@@ -720,6 +720,14 @@ mod tests {
         );
         app.finish();
         app.cleanup();
+        let save_dir =
+            std::env::temp_dir().join(format!("solar-v3-ui-save-{}", std::process::id()));
+        std::fs::create_dir_all(&save_dir).unwrap();
+        let existing_autosave = save_dir.join("continue.json");
+        std::fs::write(&existing_autosave, b"existing autosave").unwrap();
+        app.world_mut()
+            .resource_mut::<save_library::SaveMenu>()
+            .test_directory = Some(save_dir.clone());
         app.update();
 
         press_button(&mut app, "Town   ·   Drive");
@@ -738,7 +746,7 @@ mod tests {
         assert!(!app.world().resource::<audio::SoundSettings>().open);
 
         press_button(&mut app, "Land seed   ·   42");
-        press_button(&mut app, "Enter village");
+        press_button(&mut app, "Start new village");
         assert!(app.world().resource::<WorldSetup>().open);
         for key in [KeyCode::Digit4, KeyCode::Digit2] {
             app.world_mut()
@@ -749,7 +757,15 @@ mod tests {
                 .resource_mut::<ButtonInput<KeyCode>>()
                 .reset(key);
         }
-        press_button(&mut app, "Enter village");
+        press_button(&mut app, "Start new village");
+        press_button(&mut app, "Keep current village");
+        assert_eq!(
+            std::fs::read(&existing_autosave).unwrap(),
+            b"existing autosave"
+        );
+        press_button(&mut app, "Start new village");
+        press_button(&mut app, "Confirm new village");
+        std::fs::remove_file(&existing_autosave).unwrap();
         assert_eq!(app.world().resource::<WorldSetup>().seed(), 42);
         app.update();
         assert!(app.world().resource::<village::Village>().camp.is_none());
@@ -1174,11 +1190,6 @@ mod tests {
         press_button(&mut app, "Chill first · Ingredients first");
         press_button(&mut app, "Close panel");
 
-        let save_dir =
-            std::env::temp_dir().join(format!("solar-v3-ui-save-{}", std::process::id()));
-        app.world_mut()
-            .resource_mut::<save_library::SaveMenu>()
-            .test_directory = Some(save_dir.clone());
         press_button(&mut app, "Advance days");
         press_button(&mut app, "+7 day(s)");
         press_button(&mut app, "Start advance");

@@ -323,6 +323,7 @@ impl WorldSetup {
             Action::Explore if self.confirming_new => "Confirm new village".into(),
             Action::Explore if has_village => "Start new village".into(),
             Action::Explore => "Enter village".into(),
+            Action::CancelNew => "Keep current village".into(),
             Action::Resume => "Resume current village".into(),
             Action::Continue => "Continue last autosave".into(),
             Action::Library => "Saved villages".into(),
@@ -345,6 +346,7 @@ pub(crate) enum Action {
     Seed,
     Reroll,
     Explore,
+    CancelNew,
     Resume,
     Continue,
     Library,
@@ -414,13 +416,17 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
                 Action::Library,
                 Action::Sound,
                 Action::Explore,
+                Action::CancelNew,
             ] {
                 panel
                     .spawn((
                         action,
                         Button,
                         Node {
-                            display: if matches!(action, Action::Resume | Action::Continue) {
+                            display: if matches!(
+                                action,
+                                Action::Resume | Action::Continue | Action::CancelNew
+                            ) {
                                 Display::None
                             } else {
                                 Display::Flex
@@ -549,7 +555,10 @@ fn setup_input(
                 if !setup.apply_seed_entry() {
                     continue;
                 }
-                if village.session_setup().is_some() && !setup.confirming_new {
+                let autosave_exists = saves
+                    .continue_path(setup.mode)
+                    .is_ok_and(|path| path.is_file());
+                if (village.session_setup().is_some() || autosave_exists) && !setup.confirming_new {
                     setup.confirming_new = true;
                 } else {
                     if let Err(error) =
@@ -565,6 +574,7 @@ fn setup_input(
                     setup.open = false;
                 }
             }
+            Action::CancelNew => setup.confirming_new = false,
             Action::Continue | Action::Library => {}
             Action::Sound => sound.open = true,
             Action::Resume => {
@@ -596,6 +606,9 @@ fn refresh_panel(
         Display::None
     };
     let has_village = village.session_setup().is_some();
+    let autosave_exists = saves
+        .continue_path(setup.mode)
+        .is_ok_and(|path| path.is_file());
     for (action, children, mut button) in &mut buttons {
         match action {
             Action::Resume => {
@@ -606,9 +619,15 @@ fn refresh_panel(
                 };
             }
             Action::Continue => {
-                let available = !has_village
-                    && crate::save::autosave_location(setup.mode).is_ok_and(|path| path.is_file());
+                let available = !has_village && autosave_exists;
                 button.display = if available {
+                    Display::Flex
+                } else {
+                    Display::None
+                };
+            }
+            Action::CancelNew => {
+                button.display = if setup.confirming_new {
                     Display::Flex
                 } else {
                     Display::None
@@ -619,7 +638,7 @@ fn refresh_panel(
         if let Some(child) = children.first()
             && let Ok(mut label) = labels.get_mut(*child)
         {
-            label.0 = setup.label(*action, has_village);
+            label.0 = setup.label(*action, has_village || autosave_exists);
         }
     }
 }
@@ -646,6 +665,15 @@ fn refresh_preview(
         return;
     }
     summary.0 = setup.plot_summary();
+    if setup.confirming_new {
+        summary.0.push_str(match setup.mode {
+            Mode::Story => "\nStarting over replaces the Story autosave.",
+            Mode::Sandbox => "\nStarting over replaces the Sandbox autosave.",
+        });
+        summary
+            .0
+            .push_str("\nNamed villages and the other mode are kept.");
+    }
     let mut preview = setup.clone();
     if let Some(seed) = setup
         .seed_entry
