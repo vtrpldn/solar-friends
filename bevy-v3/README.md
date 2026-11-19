@@ -166,7 +166,7 @@ Press **F5** to export the current workshop view as a PNG without the controls o
 
 ### Asset Garden
 
-Pass `--asset-garden` to open the native flat V2 gallery. For a separate layout, pass a V2 scene JSON path as the next argument. The controls overlay lists selection, placement, rotation, undo, and save shortcuts. Saving without a path writes `solar-friends-asset-garden.json` in the current directory.
+Pass `--asset-garden` to open the native flat V2 gallery. For a separate layout, pass a V2 scene JSON path as the next argument. The controls overlay lists selection, placement, rotation, undo, and save shortcuts. The default gallery autosaves in the app’s local data folder. Drop a V2 scene JSON file into the window to import it. Press **Ctrl/Cmd+S** to save a scene opened by path or export the default gallery as `solar-friends-v02-scene.json` in the current directory.
 
 Press **B** to switch between the flat gallery, Mata Atlântica, Cerrado, and Caatinga. Press **L** to load the selected biome’s V2 landscape. Undo restores the previous props, and the scene file records the selected biome.
 

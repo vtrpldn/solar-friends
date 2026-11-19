@@ -8,15 +8,18 @@ use bevy::{
     asset::{AssetEvent, AssetPath, embedded_asset, embedded_path},
     input::mouse::{AccumulatedMouseMotion, AccumulatedMouseScroll},
     prelude::*,
+    window::FileDragAndDrop,
 };
 use serde::{Deserialize, Serialize};
 use std::{
     collections::{HashMap, HashSet},
-    path::PathBuf,
+    io,
+    path::{Path, PathBuf},
 };
 
 pub(super) const CELLS: i32 = 96;
 pub(super) const WIDTH: f32 = CELLS as f32 * 2.0;
+const MAX_SCENE_BYTES: u64 = 1_000_000;
 const GALLERY: &str = include_str!("../../data/asset-garden.json");
 
 #[derive(Clone, Deserialize, Serialize)]
@@ -100,6 +103,9 @@ struct Garden {
     selected: Option<usize>,
     pending: Option<(Prop, bool)>,
     file: PathBuf,
+    autosave: Option<PathBuf>,
+    persistence: String,
+    save_dirty: bool,
     status: String,
     redraw: bool,
     terrain_dirty: bool,
@@ -135,6 +141,7 @@ impl Garden {
         self.future.clear();
         self.redraw = true;
         self.terrain_dirty = true;
+        self.save_dirty = true;
     }
 }
 
@@ -156,19 +163,54 @@ struct Streetlamp;
 #[derive(Component)]
 struct PlacementPreview(usize);
 
+fn read_layout(path: &Path, models: &WorkshopCatalog) -> io::Result<Layout> {
+    let bytes = crate::save::read_bytes(path, MAX_SCENE_BYTES)?;
+    let json = std::str::from_utf8(&bytes).map_err(io::Error::other)?;
+    Layout::decode(json, models).map_err(|error| io::Error::new(io::ErrorKind::InvalidData, error))
+}
+
+fn write_layout(path: &Path, layout: &Layout) -> io::Result<()> {
+    let bytes = serde_json::to_vec_pretty(layout).map_err(io::Error::other)?;
+    crate::save::atomic_write(path, &bytes, MAX_SCENE_BYTES)
+}
+
 pub fn run(path: Option<PathBuf>, night: bool) {
     let models = WorkshopCatalog::default();
     let gallery = Layout::decode(GALLERY, &models).expect("bundled V2 gallery");
-    let file = path.unwrap_or_else(|| PathBuf::from("solar-friends-asset-garden.json"));
-    let (layout, status) = match std::fs::read_to_string(&file) {
-        Ok(json) => match Layout::decode(&json, &models) {
-            Ok(layout) => (layout, format!("Opened {}", file.display())),
-            Err(error) => (gallery.clone(), error),
-        },
-        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
-            (gallery.clone(), String::new())
+    let mut persistence = String::new();
+    let mut autosave = if path.is_none() {
+        match crate::save::location(crate::setup::Mode::Sandbox) {
+            Ok(path) => Some(path.with_file_name("asset-garden.json")),
+            Err(error) => {
+                persistence = format!("Autosave unavailable: {error}");
+                None
+            }
         }
-        Err(error) => (gallery.clone(), error.to_string()),
+    } else {
+        persistence = "Opened as a separate scene. Ctrl/Cmd+S saves changes.".into();
+        None
+    };
+    let opened = path.as_deref().or(autosave.as_deref());
+    let loaded = opened
+        .map(|file| read_layout(file, &models))
+        .unwrap_or_else(|| Ok(gallery.clone()))
+        .or_else(|error| {
+            if error.kind() == io::ErrorKind::NotFound && path.is_none() {
+                read_layout(Path::new("solar-friends-asset-garden.json"), &models)
+            } else {
+                Err(error)
+            }
+        });
+    let file = path.unwrap_or_else(|| PathBuf::from("solar-friends-v02-scene.json"));
+    let (layout, status) = match loaded {
+        Ok(layout) => (layout, String::new()),
+        Err(error) if error.kind() == io::ErrorKind::NotFound => (gallery.clone(), String::new()),
+        Err(error) => {
+            if autosave.take().is_some() {
+                persistence = "Autosave disabled to preserve the unreadable scene.".into();
+            }
+            (gallery.clone(), format!("Could not open scene: {error}"))
+        }
     };
     let mut library: Vec<_> = models.0.keys().cloned().collect();
     library.sort_by_key(|id| (&models.0[id].name, id.clone()));
@@ -189,6 +231,9 @@ pub fn run(path: Option<PathBuf>, night: bool) {
         layout,
         gallery,
         file,
+        autosave,
+        persistence,
+        save_dirty: false,
         status,
         past: vec![],
         future: vec![],
@@ -211,6 +256,8 @@ pub fn run(path: Option<PathBuf>, night: bool) {
         Update,
         (
             edit,
+            import_scene,
+            persist_scene,
             rehearsal::tick,
             update_terrain,
             render,
@@ -403,17 +450,9 @@ fn edit(
             )
         });
     if modifier && pressed(KeyS) {
-        garden.status = match serde_json::to_vec_pretty(&garden.layout) {
-            Ok(json) => {
-                let temporary = garden.file.with_extension("garden-tmp");
-                match std::fs::write(&temporary, json)
-                    .and_then(|()| std::fs::rename(temporary, &garden.file))
-                {
-                    Ok(()) => format!("Saved {}", garden.file.display()),
-                    Err(error) => error.to_string(),
-                }
-            }
-            Err(error) => error.to_string(),
+        garden.persistence = match write_layout(&garden.file, &garden.layout) {
+            Ok(()) => format!("Saved scene to {}", garden.file.display()),
+            Err(error) => format!("Could not save scene: {error}"),
         };
     }
     if modifier && pressed(KeyZ) {
@@ -434,6 +473,7 @@ fn edit(
             garden.pending = None;
             garden.redraw = true;
             garden.terrain_dirty = true;
+            garden.save_dirty = true;
         }
     }
     if pressed(KeyB) && garden.pending.is_none() {
@@ -443,6 +483,7 @@ fn edit(
             .unwrap_or_default();
         garden.layout.biome = BIOMES[(current + 1) % BIOMES.len()].into();
         garden.terrain_dirty = true;
+        garden.save_dirty = true;
         garden.redraw = true;
         return;
     }
@@ -521,6 +562,52 @@ fn edit(
             garden.layout.props[index] = prop;
         }
     }
+}
+
+fn import_scene(
+    mut dropped: MessageReader<FileDragAndDrop>,
+    window: Single<Entity, With<bevy::window::PrimaryWindow>>,
+    models: Res<WorkshopCatalog>,
+    mut garden: ResMut<Garden>,
+) {
+    let Some(path) = dropped
+        .read()
+        .filter_map(|event| match event {
+            FileDragAndDrop::DroppedFile {
+                window: target,
+                path_buf,
+            } if target == &*window => Some(path_buf),
+            _ => None,
+        })
+        .last()
+    else {
+        return;
+    };
+    match read_layout(path, &models) {
+        Ok(layout) => {
+            garden.edit();
+            garden.layout = layout;
+            garden.selected = None;
+            garden.pending = None;
+            garden.search = None;
+            garden.status = format!("Imported {}", path.display());
+        }
+        Err(error) => garden.status = format!("Could not import scene: {error}"),
+    }
+}
+
+fn persist_scene(mut garden: ResMut<Garden>) {
+    if !garden.save_dirty {
+        return;
+    }
+    garden.save_dirty = false;
+    let Some(path) = &garden.autosave else {
+        return;
+    };
+    garden.persistence = match write_layout(path, &garden.layout) {
+        Ok(()) => "Scene autosaved.".into(),
+        Err(error) => format!("Autosave failed: {error}. Ctrl/Cmd+S exports the scene."),
+    };
 }
 
 fn update_terrain(
@@ -727,10 +814,11 @@ fn render(
         });
     let rehearsal_hint = rehearsal::hint(&rehearsal, &garden.layout.props, selection, &models);
     text.0 = format!(
-        "Asset Garden  ·  {} props  ·  {}\n{label}{connection}\nRight drag pan   Scroll or +/- zoom   Q/E turn   Home whole plot   G grid   N night   / catalog\nB terrain   L load biome landscape\nM move   R rotate   Ctrl/Cmd D copy   Delete remove   F5 restore gallery\nArrows adjust placement   Click/Enter confirm   Esc cancel   Ctrl/Cmd Z undo   Shift redo   Ctrl/Cmd S save{rehearsal_hint}\n{}",
+        "Asset Garden  ·  {} props  ·  {}\n{label}{connection}\nRight drag pan   Scroll or +/- zoom   Q/E turn   Home whole plot   G grid   N night   / catalog\nB terrain   L load biome landscape\nM move   R rotate   Ctrl/Cmd D copy   Delete remove   F5 restore gallery\nArrows adjust placement   Click/Enter confirm   Esc cancel   Ctrl/Cmd Z undo   Shift redo   Ctrl/Cmd S save   Drop scene JSON to import{rehearsal_hint}\n{}\n{}",
         garden.layout.props.len(),
         garden.layout.biome,
-        garden.status
+        garden.status,
+        garden.persistence
     );
 }
 
@@ -819,6 +907,31 @@ mod tests {
             Layout::decode(&exported, &models).unwrap().props.len(),
             assets.len()
         );
+    }
+
+    #[test]
+    fn scene_files_round_trip_and_reject_oversized_input() {
+        let models = WorkshopCatalog::default();
+        let mut gallery = Layout::decode(GALLERY, &models).unwrap();
+        gallery.biome = "caatinga".into();
+        let nonce = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let path = std::env::temp_dir().join(format!(
+            "solar-v3-garden-{}-{nonce}.json",
+            std::process::id()
+        ));
+        write_layout(&path, &gallery).unwrap();
+        let reopened = read_layout(&path, &models).unwrap();
+        assert_eq!(reopened.biome, "caatinga");
+        assert_eq!(reopened.props.len(), gallery.props.len());
+        std::fs::write(&path, vec![b' '; MAX_SCENE_BYTES as usize + 1]).unwrap();
+        let error = read_layout(&path, &models)
+            .err()
+            .expect("oversized import rejected");
+        std::fs::remove_file(path).unwrap();
+        assert_eq!(error.kind(), io::ErrorKind::InvalidData);
     }
 
     #[test]
