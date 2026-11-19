@@ -403,7 +403,7 @@ impl Construction {
         self.production.notice.clear();
     }
 
-    fn batch_inputs(
+    pub(super) fn batch_inputs(
         &self,
         catalog: &Catalog,
         stock: &Stock,

@@ -21,10 +21,11 @@ impl Construction {
 
     pub fn manage_kitchens(&mut self, catalog: &Catalog, stock: &mut Stock, clock: f64) {
         let policy = &mut self.production.kitchen_policy;
-        if stock.sandbox || !policy.automatic || clock < policy.next_check {
+        if stock.sandbox || clock < policy.next_check {
             return;
         }
-        policy.next_check = clock + 1.0;
+        let automatic = policy.automatic;
+        policy.next_check = clock + if automatic { 1.0 } else { 10.0 };
         let kitchens: Vec<_> = self
             .plans
             .iter()
@@ -40,6 +41,16 @@ impl Construction {
                 .then_some(index)
             })
             .collect();
+        if !automatic {
+            if !kitchens.is_empty() && self.trade.pantry_needs_food(stock, clock) {
+                for index in kitchens {
+                    if self.batch_inputs(catalog, stock, index, "meals").is_ok() {
+                        self.queue_batch(catalog, stock, index, "meals");
+                    }
+                }
+            }
+            return;
+        }
         for index in kitchens {
             if let Some(recipe) = self.choose_kitchen_recipe(catalog, stock, clock) {
                 self.queue_batch(catalog, stock, index, recipe);
@@ -181,6 +192,26 @@ fn ingredients_keep(stock: &Stock, input: &BTreeMap<String, u32>, until: f64) ->
 mod tests {
     use super::*;
     use crate::setup::WorldSetup;
+
+    #[test]
+    fn a_low_pantry_reserve_queues_one_basic_meal_batch_at_an_idle_kitchen() {
+        let setup = WorldSetup::default();
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut village = Construction::default();
+        let mut kitchen = village.proposed_site(&catalog, "kitchen", IVec2::new(44, 36));
+        kitchen.work = catalog.projects["kitchen"].work;
+        village.plans.push(kitchen);
+        village
+            .trade
+            .set_pantry_policy(false, Some(14), None)
+            .unwrap();
+
+        village.manage_kitchens(&catalog, &mut stock, 0.0);
+        village.manage_kitchens(&catalog, &mut stock, 20.0);
+        assert_eq!(village.production.jobs.len(), 1);
+        assert_eq!(village.production.jobs[0].recipe, "meals");
+    }
 
     #[test]
     fn a_kitchen_preserves_food_only_with_room_for_the_batch_and_a_day_of_food() {

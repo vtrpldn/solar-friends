@@ -302,12 +302,7 @@ impl Trade {
             return None;
         }
         self.next_pantry_check = clock + 10.0;
-        let forecast = self.pantry_forecast(stock, clock);
-        if forecast
-            .served
-            .saturating_add(self.incoming_servings(clock))
-            >= forecast.target
-        {
+        if !self.pantry_needs_food(stock, clock) {
             return None;
         }
         let free = space.saturating_sub(self.inbound());
@@ -381,6 +376,14 @@ impl Trade {
             .allowance_cents
             .saturating_add_signed(budget_change)
             .min(10_000_000);
+    }
+
+    pub(crate) fn pantry_needs_food(&self, stock: &Stock, clock: f64) -> bool {
+        let forecast = self.pantry_forecast(stock, clock);
+        forecast
+            .served
+            .saturating_add(self.incoming_servings(clock))
+            < forecast.target
     }
 
     fn incoming_servings(&self, clock: f64) -> u32 {
