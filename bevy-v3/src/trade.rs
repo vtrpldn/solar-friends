@@ -294,7 +294,11 @@ impl Trade {
         market: &mut Market,
         (clock, distance, space, freight): (f64, u32, u64, bool),
     ) {
-        if stock.sandbox || self.household_restock_off || clock < self.next_pantry_check {
+        if stock.sandbox
+            || self.household_restock_off
+            || clock < self.next_pantry_check
+            || !crate::market::town_is_open(clock)
+        {
             return;
         }
         self.next_pantry_check = clock + 10.0;
@@ -873,6 +877,33 @@ mod tests {
         trade.maintain_pantry(&catalog, &mut stock, &mut market, (0.0, 12, 500, false));
         assert_eq!(trade.orders.len(), 1);
         assert_eq!(trade.orders[0].material, "food");
+    }
+
+    #[test]
+    fn automatic_food_orders_wait_for_town_to_open() {
+        let catalog = Catalog::default();
+        for freight in [false, true] {
+            let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);
+            let mut market = Market::default();
+            let mut trade = Trade::default();
+            trade.set_pantry_policy(true, Some(14), None).unwrap();
+            let opening = 22.0 * crate::weather::HOUR;
+            trade.maintain_pantry(
+                &catalog,
+                &mut stock,
+                &mut market,
+                (opening - 1.0, 12, 500, freight),
+            );
+            assert!(trade.delivery.is_none() && trade.orders.is_empty());
+            trade.maintain_pantry(
+                &catalog,
+                &mut stock,
+                &mut market,
+                (opening + 1.0, 12, 500, freight),
+            );
+            assert_eq!(trade.delivery.is_some(), freight);
+            assert_eq!(trade.orders.len(), usize::from(!freight));
+        }
     }
 
     #[test]
