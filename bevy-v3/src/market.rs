@@ -273,6 +273,10 @@ fn cargo_trips(catalog: &Catalog, mut pending: BTreeMap<String, u32>) -> Result<
     Ok(trips)
 }
 
+pub fn town_is_open(clock: f64) -> bool {
+    (7.0..18.0).contains(&crate::weather::game_hour(clock))
+}
+
 pub fn freight_cents(distance: u32) -> u64 {
     3500 + u64::from(distance) * 80
 }
@@ -289,6 +293,15 @@ pub fn trip_seconds(round_trip_km: u32) -> f64 {
 mod tests {
     use super::*;
     use crate::setup::WorldSetup;
+
+    #[test]
+    fn supplier_hours_wrap_to_the_next_morning() {
+        let hour = crate::weather::HOUR;
+        assert!(town_is_open(9.0 * hour - 0.1));
+        assert!(!town_is_open(9.0 * hour));
+        assert!(!town_is_open(22.0 * hour - 0.1));
+        assert!(town_is_open(22.0 * hour));
+    }
 
     #[test]
     fn cistern_quote_matches_reference_and_charges_fuel_on_departure() {

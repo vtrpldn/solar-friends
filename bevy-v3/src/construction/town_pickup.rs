@@ -160,6 +160,9 @@ impl Construction {
         clock: TownClock,
         vehicle: usize,
     ) -> Option<TownTrip> {
+        if !crate::market::town_is_open(clock.seconds) {
+            return None;
+        }
         let booked = |project, bed| {
             self.active_trips()
                 .any(|trip| !trip.market_order && trip.project == project && trip.farm_bed == bed)

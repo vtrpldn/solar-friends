@@ -1,4 +1,4 @@
-use crate::market::{fare_cents, freight_cents};
+use crate::market::{fare_cents, freight_cents, town_is_open};
 
 use super::*;
 
@@ -134,6 +134,9 @@ impl Construction {
             return;
         };
         match order {
+            TradeOrder::Buy { .. } if !town_is_open(clock.seconds) => {
+                self.trade.notice = "Town is closed. Order between 07:00 and 18:00.".into();
+            }
             TradeOrder::Buy { freight } => {
                 let space = self.storage_space(catalog, stock);
                 self.trade.notice = if u64::from(definition.pack) + self.trade.inbound() > space {
@@ -209,6 +212,9 @@ impl Construction {
             "{} · Pack {pack} at R${price:.2} · Supplier has {available} today\nPickup fuel R${pickup:.2} · Freight R${freight:.2}\n",
             item.name
         ));
+        if !town_is_open(clock.seconds) {
+            display.push_str("Town closed · Opens at 07:00\n");
+        }
         let quote = match self.trade.quote(catalog, stock, id, day, 0) {
             Ok((qty, cents)) => format!(
                 "{} for R${:.2} · Fuel R${:.2}",
