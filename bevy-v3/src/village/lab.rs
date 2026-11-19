@@ -695,6 +695,9 @@ fn order_label(order: &LabOrder) -> String {
         LabOrder::Move { site, x, z, .. } => format!("Move project #{site} to ({x}, {z})"),
         LabOrder::Salvage { site } => format!("Salvage project #{site}"),
         LabOrder::Demolish { site } => format!("Demolish project #{site}"),
+        LabOrder::MoveCraft { site, destination } => {
+            format!("Move craft job from #{site} to #{destination}")
+        }
         LabOrder::Produce { site, recipe } => format!("Produce {recipe} at project #{site}"),
         LabOrder::Gather { resource } => format!("Gather at resource #{resource}"),
         LabOrder::Buy { material, freight } => {

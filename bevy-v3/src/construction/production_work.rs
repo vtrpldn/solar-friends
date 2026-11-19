@@ -134,11 +134,17 @@ impl Construction {
                     .min(destinations.len().saturating_sub(1)),
             )
         {
+            self.select_project(Some(destination));
+            self.production.open = true;
             self.move_craft_job(catalog, stock, job, destination);
         }
     }
 
-    fn craft_destinations(&self, catalog: &Catalog, source: usize) -> (Option<usize>, Vec<usize>) {
+    pub(super) fn craft_destinations(
+        &self,
+        catalog: &Catalog,
+        source: usize,
+    ) -> (Option<usize>, Vec<usize>) {
         let Some(job) = self.production.jobs.iter().position(|job| {
             job.site == source
                 && job.phase != Phase::Return
@@ -166,7 +172,7 @@ impl Construction {
         (Some(job), destinations)
     }
 
-    fn move_craft_job(
+    pub(super) fn move_craft_job(
         &mut self,
         catalog: &Catalog,
         stock: &mut Stock,
@@ -184,8 +190,6 @@ impl Construction {
         stock
             .equipment
             .release(|worker, task| self.active_tool_task(worker, task));
-        self.select_project(Some(destination));
-        self.production.open = true;
         self.production.notice = format!(
             "Job moved to {} #{}.",
             catalog.projects[&self.plans[destination].key].name,
@@ -1425,6 +1429,25 @@ mod upgrade_tests {
                 .unwrap()
                 .contains("Craft progress 3% · Waiting for a qualified resident")
         );
+        let land = Land::default();
+        let terrain = setup.terrain();
+        let ground = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp: IVec2::new(36, 36),
+        };
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
+        let order: LabOrder =
+            serde_json::from_str(r#"{"type":"move-craft","site":3,"destination":1}"#).unwrap();
+        village
+            .lab_order(&catalog, &mut stock, ground, clock, &order, 1.0)
+            .unwrap();
+        assert_eq!(village.production.jobs[0].site, 0);
+        assert_eq!(village.production.jobs[0].work, 7.0);
+        assert_eq!(village.production.selected, Some(2));
     }
 
     #[test]

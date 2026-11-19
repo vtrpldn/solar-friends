@@ -28,6 +28,10 @@ pub(crate) enum LabOrder {
     Demolish {
         site: usize,
     },
+    MoveCraft {
+        site: usize,
+        destination: usize,
+    },
     Produce {
         site: usize,
         recipe: String,
@@ -372,6 +376,16 @@ impl Construction {
                 if !self.changes.contains_key(&index) && !self.plans[index].removed {
                     return Err(self.status.clone());
                 }
+            }
+            LabOrder::MoveCraft { site, destination } => {
+                let source = self.lab_change_site(*site)?;
+                let destination = self.lab_change_site(*destination)?;
+                let (job, destinations) = self.craft_destinations(catalog, source);
+                let job = job.ok_or("Choose a project with unfinished craft work.")?;
+                if !destinations.contains(&destination) {
+                    return Err("Choose a free, enabled matching workspace.".into());
+                }
+                self.move_craft_job(catalog, stock, job, destination);
             }
             LabOrder::Produce { site, recipe } => {
                 let id = site
