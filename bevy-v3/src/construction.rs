@@ -2010,17 +2010,19 @@ impl Construction {
                 )
             };
             let depot = if hauling {
-                self.haul_depots(catalog, id).into_iter().find_map(|depot| {
-                    let storage = &self.plans[depot];
-                    let from = if available_staged > 0 {
-                        position
-                    } else {
-                        supply.as_vec2()
-                    };
-                    resident_work::project_access_points(storage, catalog, from)
-                        .into_iter()
-                        .find_map(|cell| path(from, cell).map(|route| (depot, cell, route)))
-                })
+                self.haul_depots(catalog, id, available_staged > 0)
+                    .into_iter()
+                    .find_map(|depot| {
+                        let storage = &self.plans[depot];
+                        let from = if available_staged > 0 {
+                            position
+                        } else {
+                            supply.as_vec2()
+                        };
+                        resident_work::project_access_points(storage, catalog, from)
+                            .into_iter()
+                            .find_map(|cell| path(from, cell).map(|route| (depot, cell, route)))
+                    })
             } else {
                 None
             };
@@ -2148,10 +2150,14 @@ impl Construction {
         }
     }
 
-    fn haul_depots(&self, catalog: &Catalog, index: usize) -> Vec<usize> {
+    fn haul_depots(&self, catalog: &Catalog, index: usize, collecting_staged: bool) -> Vec<usize> {
         let project = &self.plans[index];
         if let Some(depot) = project.depot {
-            return vec![depot];
+            return if collecting_staged || !self.changes.contains_key(&depot) {
+                vec![depot]
+            } else {
+                Vec::new()
+            };
         }
         let origin = STOCKPILE.as_vec2();
         let target = project.position.as_vec2();
@@ -2780,7 +2786,7 @@ mod tests {
         assert_eq!(construction.plans.len(), 2);
 
         let mut saw_staging = false;
-        let mut saw_depot_delivery = false;
+        let mut depot_delivery = None;
         for _ in 0..8_000 {
             construction.tick(&catalog, &mut stock, site, clock, 0.1);
             let target = &construction.plans[1];
@@ -2796,18 +2802,45 @@ mod tests {
                 assert!(construction.valid_save(&catalog, &stock));
                 saw_staging = true;
             }
-            saw_depot_delivery |= construction.residents.iter().any(|worker| {
-                worker.assignment.as_ref().is_some_and(|job| {
-                    job.activity == Activity::Carry && matches!(job.haul, Haul::FromDepot { .. })
+            if depot_delivery.is_none()
+                && construction.residents.iter().any(|worker| {
+                    worker.assignment.as_ref().is_some_and(|job| {
+                        job.activity == Activity::Carry
+                            && matches!(job.haul, Haul::FromDepot { .. })
+                    })
                 })
-            });
+            {
+                depot_delivery = Some(serde_json::to_string(&construction).unwrap());
+            }
             if construction.finished_models(&catalog).count() == 2 {
                 break;
             }
         }
-        assert!(saw_staging && saw_depot_delivery);
+        assert!(saw_staging);
         assert_eq!(construction.finished_models(&catalog).count(), 2);
         assert_eq!(construction.plans[1].staged, 0);
+        assert_eq!(stock.available("wood"), 28);
+
+        let mut interrupted: Construction =
+            serde_json::from_str(&depot_delivery.expect("resident carrying loads from the depot"))
+                .unwrap();
+        interrupted.production.selected = Some(0);
+        interrupted.apply_project_action(&catalog, &mut stock, ProjectAction::Demolish);
+        assert!(interrupted.changes.contains_key(&0));
+        assert!(interrupted.haul_depots(&catalog, 1, false).is_empty());
+        assert_eq!(interrupted.haul_depots(&catalog, 1, true), vec![0]);
+        interrupted.remove_project(0);
+        assert_eq!(interrupted.plans[1].depot, None);
+        assert_eq!(interrupted.plans[1].staged, 0);
+        assert!(interrupted.valid_save(&catalog, &stock));
+        for _ in 0..8_000 {
+            interrupted.tick(&catalog, &mut stock, site, clock, 0.1);
+            if interrupted.finished_models(&catalog).count() == 1 {
+                break;
+            }
+        }
+        assert_eq!(interrupted.finished_models(&catalog).count(), 1);
+        assert_eq!(interrupted.plans[1].delivered, interrupted.plans[1].loads);
         assert_eq!(stock.available("wood"), 28);
     }
 

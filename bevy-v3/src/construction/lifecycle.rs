@@ -384,7 +384,7 @@ impl Construction {
         }
     }
 
-    fn remove_project(&mut self, index: usize) {
+    pub(super) fn remove_project(&mut self, index: usize) {
         self.clear_haul_depot(index);
         self.plans[index].staged = 0;
         self.plans[index].depot = None;
