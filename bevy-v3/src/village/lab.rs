@@ -31,6 +31,8 @@ struct Sample {
     minimum_hydration: f64,
     watershed: Option<crate::utilities::WatershedSample>,
     weather: WeatherSample,
+    inventory: std::collections::BTreeMap<String, u32>,
+    spoiled: std::collections::BTreeMap<String, u64>,
     residents: String,
 }
 
@@ -99,7 +101,7 @@ pub(crate) fn replay_file(path: &Path) -> io::Result<()> {
 }
 
 fn verify_report(mut expected: serde_json::Value, catalog: &Catalog) -> io::Result<u64> {
-    let Some(version @ 1..=3) = expected.get("version").and_then(serde_json::Value::as_u64) else {
+    let Some(version @ 1..=4) = expected.get("version").and_then(serde_json::Value::as_u64) else {
         return Err(io::Error::new(
             io::ErrorKind::InvalidData,
             "Unsupported lab report version.",
@@ -126,12 +128,16 @@ fn verify_report(mut expected: serde_json::Value, catalog: &Catalog) -> io::Resu
         serde_json::from_slice(&serde_json::to_vec(&report.report())?)?;
     actual["initial"] = serde_json::Value::Null;
     actual["scenario"] = serde_json::Value::Null;
-    if version < 3 {
+    if version < 4 {
         actual["version"] = version.into();
         if let Some(samples) = actual["samples"].as_array_mut() {
             for sample in samples {
                 let fields = sample.as_object_mut().expect("sample object");
-                fields.remove("weather");
+                fields.remove("inventory");
+                fields.remove("spoiled");
+                if version < 3 {
+                    fields.remove("weather");
+                }
                 if version == 1 {
                     fields.remove("watershed");
                 }
@@ -316,6 +322,15 @@ impl Runner {
                 minimum_hydration: self.village.construction.minimum_hydration(),
                 watershed: self.village.construction.utilities.watershed_sample(),
                 weather: lab_weather(&self.village, &self.setup),
+                inventory: catalog
+                    .materials
+                    .keys()
+                    .filter_map(|id| {
+                        let amount = self.village.stock.available(id);
+                        (amount > 0).then(|| (id.clone(), amount))
+                    })
+                    .collect(),
+                spoiled: self.village.stock.pantry.spoiled.clone(),
                 residents: self.village.construction.resident_status(
                     catalog,
                     &self.village.stock,
@@ -349,7 +364,7 @@ impl Runner {
 
     fn report(&self) -> Report<'_> {
         Report {
-            version: 3,
+            version: 4,
             scenario: &self.scenario,
             initial: &self.initial,
             step_seconds: STEP,
@@ -549,8 +564,15 @@ fn update_lab_window(
         },
     );
     let weather = lab_weather(village, &runner.setup);
+    let spoiled = village
+        .stock
+        .pantry
+        .spoiled
+        .values()
+        .copied()
+        .fold(0, u64::saturating_add);
     let text = format!(
-        "Simulation lab · {status}\nStep {} / {} · {:.1} simulation seconds · {}×\nSpace Run/Pause · J Single step · 1–4 Speed\nO Enter order · F5 Export completed report\n{}\n\nR${:.2} · {} timber · {} meals · {:.1} L drinking water\nWeather · {:.1} °C · {:.2} mm/h rain · {:.0}% cloud\n{}\n{last}\n\n{}",
+        "Simulation lab · {status}\nStep {} / {} · {:.1} simulation seconds · {}×\nSpace Run/Pause · J Single step · 1–4 Speed\nO Enter order · F5 Export completed report\n{}\n\nR${:.2} · {} timber · {} meals · {:.1} L drinking water · {spoiled} units spoiled\nWeather · {:.1} °C · {:.2} mm/h rain · {:.0}% cloud\n{}\n{last}\n\n{}",
         runner.index,
         runner.scenario.steps,
         village.clock,
@@ -704,6 +726,13 @@ mod tests {
         assert!(report["samples"].as_array().unwrap().last().unwrap()["watershed"]
             ["river_flow_liters_per_day"].as_f64().unwrap() > 0.0);
         let mut legacy = report.clone();
+        legacy["version"] = 3.into();
+        for sample in legacy["samples"].as_array_mut().unwrap() {
+            let fields = sample.as_object_mut().unwrap();
+            fields.remove("inventory");
+            fields.remove("spoiled");
+        }
+        assert_eq!(verify_report(legacy.clone(), &catalog).unwrap(), 10);
         legacy["version"] = 2.into();
         for sample in legacy["samples"].as_array_mut().unwrap() {
             sample.as_object_mut().unwrap().remove("weather");
@@ -720,7 +749,11 @@ mod tests {
             .unwrap()
             .remove("account");
         assert_eq!(verify_report(legacy, &catalog).unwrap(), 10);
-        report["samples"][0]["weather"]["temperature_c"] = (-99).into();
+        assert_eq!(
+            report["samples"][0]["inventory"]["wood"],
+            report["samples"][0]["timber"]
+        );
+        report["samples"][0]["spoiled"]["food"] = 1.into();
         assert!(
             verify_report(report, &catalog)
                 .unwrap_err()
