@@ -1583,7 +1583,9 @@ fn show_hud(
     node.display = Display::Flex;
     node.top = px(20);
     node.bottom = Val::Auto;
-    if village.trade_open() {
+    if village.trade_open()
+        || (village.utility_panel.is_none() && village.construction.production.open)
+    {
         node.right = px(toolbar::PANEL_WIDTH + 40.0);
     }
     if let Some(page) = village.guide.text().or_else(|| village.lenses.text()) {
