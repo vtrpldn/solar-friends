@@ -78,7 +78,7 @@ enum Action {
     ListedHome(usize),
     Shift(bool),
     Ledger,
-    ExpansionReserve(bool),
+    ExpansionReserve,
     PantryBatches,
     PantryPriority,
     PantryTransport,
@@ -327,7 +327,7 @@ impl Action {
                 village.pantry_batch_page.is_some()
             }
             Self::Shift(_) | Self::Ledger => village.utility_panel == Some(UtilityPanel::Finances),
-            Self::ExpansionReserve(_) => {
+            Self::ExpansionReserve => {
                 village.utility_panel == Some(UtilityPanel::Finances)
                     && !village.finance_history_open
             }
@@ -546,8 +546,11 @@ impl Action {
             Self::Shift(true) => "Toggle weekday shifts".into(),
             Self::Ledger if village.finance_history_open => "Close ledger".into(),
             Self::Ledger => "Open ledger".into(),
-            Self::ExpansionReserve(true) => "Raise expansion reserve".into(),
-            Self::ExpansionReserve(false) => "Lower expansion reserve".into(),
+            Self::ExpansionReserve => budget_label(
+                village,
+                BudgetTarget::ExpansionReserve,
+                "Set construction cash reserve",
+            ),
             Self::PantryBatches if village.pantry_batch_page.is_some() => {
                 "Close food batches".into()
             }
@@ -867,8 +870,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 spawn_button(menu, &assets, Action::Shift(false));
                 spawn_button(menu, &assets, Action::Shift(true));
                 spawn_button(menu, &assets, Action::Ledger);
-                spawn_button(menu, &assets, Action::ExpansionReserve(false));
-                spawn_button(menu, &assets, Action::ExpansionReserve(true));
+                spawn_button(menu, &assets, Action::ExpansionReserve);
                 spawn_button(menu, &assets, Action::PantryBatches);
                 spawn_button(menu, &assets, Action::PantryPriority);
                 spawn_button(menu, &assets, Action::PantryTransport);
@@ -1266,10 +1268,8 @@ fn handle_buttons(
                         village.construction.toggle_shift(resident);
                     }
                 }
-                Action::ExpansionReserve(increase) if !picker.open => {
-                    village
-                        .construction
-                        .adjust_expansion_reserve(increase, false);
+                Action::ExpansionReserve if !picker.open => {
+                    village.budget_entry = Some((BudgetTarget::ExpansionReserve, String::new()));
                 }
                 Action::Ledger if !picker.open => {
                     village.finance_history_open = !village.finance_history_open;
@@ -1469,7 +1469,7 @@ fn handle_buttons(
                 | Action::ListedHome(_)
                 | Action::Shift(_)
                 | Action::Ledger
-                | Action::ExpansionReserve(_)
+                | Action::ExpansionReserve
                 | Action::PantryBatches
                 | Action::PantryPriority
                 | Action::PantryTransport
@@ -1690,7 +1690,7 @@ fn refresh(
             Action::Resident(_) => show_residents || show_finances,
             Action::WorkPriority(_) | Action::WorkerReservation(_) => show_residents,
             Action::Shift(_) | Action::Ledger => show_finances,
-            Action::ExpansionReserve(_) => show_finances && !village.finance_history_open,
+            Action::ExpansionReserve => show_finances && !village.finance_history_open,
             Action::PantryBatches
             | Action::PantryPriority
             | Action::PantryTransport

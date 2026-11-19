@@ -1070,6 +1070,10 @@ impl Construction {
         self.market.adjust_expansion_reserve(increase, large_step);
     }
 
+    pub fn set_expansion_reserve(&mut self, cents: u64) {
+        self.market.set_expansion_reserve(cents);
+    }
+
     pub fn expansion_reserve_label(&self) -> String {
         format!(
             "Expansion reserve R${:.2} · [ / ] R$100 · Shift [ / ] R$1000",

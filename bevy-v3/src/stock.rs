@@ -478,6 +478,18 @@ impl Stock {
                 *cents as f64 / 100.0
             ));
         }
+        let construction = -i128::from(
+            self.ledger
+                .get(&CashKind::Construction)
+                .copied()
+                .unwrap_or_default(),
+        );
+        let (_, expenses, _) = self.finance_totals();
+        display.push_str(&format!(
+            "\nConstruction investment R${:.2} · Other cash spending R${:.2}",
+            construction.max(0) as f64 / 100.0,
+            (expenses - construction).max(0) as f64 / 100.0,
+        ));
         if let Some((days, low, high, mean)) = self.cash_forecast(committed) {
             display.push_str(&format!("\n7-day cash scenarios · R${low:.2} to R${high:.2}\n{days} completed days · Mean R${mean:+.2}/day · Excludes new construction"));
         } else {
@@ -556,6 +568,11 @@ mod finance_tests {
         assert_eq!(high, available + 56.0);
         assert!((mean - 4.0 / 3.0).abs() < 1e-9);
         let (_, history) = stock.finance_history(0);
+        assert!(
+            stock
+                .finance_summary(committed)
+                .contains("Construction investment R$10.00 · Other cash spending R$4.00")
+        );
         assert_eq!(history.matches("Grid electricity, daily total").count(), 1);
         assert!(history.contains("Day 2 · 09:00 · Grid electricity, daily total · R$-4.00"));
         let save = serde_json::to_string(&stock).unwrap();

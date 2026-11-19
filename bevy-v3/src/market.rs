@@ -61,6 +61,10 @@ impl Market {
         self.expansion_reserve
     }
 
+    pub fn set_expansion_reserve(&mut self, cents: u64) {
+        self.expansion_reserve = cents.min(MAX_EXPANSION_RESERVE);
+    }
+
     pub fn adjust_expansion_reserve(&mut self, increase: bool, large_step: bool) {
         let step = if large_step { 100_000 } else { 10_000 };
         self.expansion_reserve = if increase {

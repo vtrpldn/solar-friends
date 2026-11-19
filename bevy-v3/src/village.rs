@@ -1264,6 +1264,7 @@ fn custom_camp_error(terrain: &crate::terrain::Terrain, cell: IVec2) -> Option<&
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum BudgetTarget {
     Food,
+    ExpansionReserve,
     MaintenanceParts,
     MaintenanceShopping,
 }
@@ -1362,6 +1363,7 @@ fn village_input(
         village.utility_panel
             != Some(match target {
                 BudgetTarget::Food => UtilityPanel::Pantry,
+                BudgetTarget::ExpansionReserve => UtilityPanel::Finances,
                 BudgetTarget::MaintenanceParts | BudgetTarget::MaintenanceShopping => {
                     UtilityPanel::Upkeep
                 }
@@ -1382,6 +1384,7 @@ fn village_input(
             if let Some(cents) = amount {
                 let construction = &mut village.construction;
                 match target {
+                    BudgetTarget::ExpansionReserve => construction.set_expansion_reserve(cents),
                     BudgetTarget::Food => {
                         let trade = &mut construction.trade;
                         let _ = trade.set_pantry_policy(
