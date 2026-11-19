@@ -71,6 +71,13 @@ pub(crate) enum LabOrder {
     FoodPolicy {
         enabled: bool,
     },
+    SalePolicy {
+        material: String,
+        enabled: bool,
+        reserve: u32,
+        trigger: u32,
+        limit: u32,
+    },
     WorkPriority {
         group: WorkGroup,
         level: u8,
@@ -535,6 +542,26 @@ impl Construction {
                 }
             }
             LabOrder::FoodPolicy { enabled } => self.trade.household_restock_off = !enabled,
+            LabOrder::SalePolicy {
+                material,
+                enabled,
+                reserve,
+                trigger,
+                limit,
+            } => {
+                if !catalog
+                    .materials
+                    .get(material)
+                    .is_some_and(|item| item.pack > 0 && item.price > 0.0)
+                {
+                    return Err("Choose a tradable material for the sale policy.".into());
+                }
+                let policy = self.trade.policies.entry(material.clone()).or_default();
+                policy.enabled = *enabled;
+                policy.reserve = *reserve;
+                policy.trigger = *trigger;
+                policy.limit = *limit;
+            }
             LabOrder::WorkPriority { group, level } => {
                 self.work_policy.set_priority(*group, *level)?
             }

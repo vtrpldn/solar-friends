@@ -810,6 +810,11 @@ fn order_label(order: &LabOrder) -> String {
             toggle_label(*enabled)
         ),
         LabOrder::FoodPolicy { enabled } => format!("{} food restocking", toggle_label(*enabled)),
+        LabOrder::SalePolicy {
+            material, enabled, ..
+        } => {
+            format!("{} automatic sales for {material}", toggle_label(*enabled))
+        }
         LabOrder::WorkPriority { group, level } => {
             format!("Set {} priority to {level}", group.label())
         }
@@ -1587,6 +1592,24 @@ fn update_lab_window(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn scripted_automatic_sales_respect_reserves_and_replay() {
+        let catalog = Catalog::default();
+        let scenario = serde_json::from_str(r#"{
+            "steps": 2500,
+            "orders": [
+                {"step": 0, "order": {"type": "sale-policy", "material": "wood", "enabled": true, "reserve": 24, "trigger": 24, "limit": 12}}
+            ]
+        }"#).unwrap();
+        let runner = run(scenario, None, &catalog).unwrap();
+        assert!(runner.outcomes[0].error.is_none());
+        assert_eq!(runner.village.stock.available("wood"), 24);
+        assert_eq!(runner.village.construction.trade.receipts, 1);
+        let report =
+            serde_json::from_slice(&serde_json::to_vec(&runner.report()).unwrap()).unwrap();
+        assert_eq!(verify_report(report, &catalog).unwrap(), 2500);
+    }
 
     #[test]
     fn a_scenario_can_set_its_own_world_and_replay_it() {
