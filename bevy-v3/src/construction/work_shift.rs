@@ -8,7 +8,17 @@ use super::*;
 
 const BUS_STOP: IVec2 = IVec2::new(29, -31);
 
+fn shift_morning(seconds: f64, last_day: Option<u64>) -> Option<u64> {
+    let day = (seconds / DAY + 9.0 / 24.0).floor() as u64;
+    ((8.0..11.0).contains(&game_hour(seconds)) && last_day != Some(day)).then_some(day)
+}
+
 impl Construction {
+    pub(super) fn booked_shift_due(&self, index: usize, seconds: f64) -> bool {
+        let work = &self.residents[index].town_work;
+        work.booked && shift_morning(seconds, work.last_day).is_some()
+    }
+
     pub fn toggle_shift(&mut self, index: usize) {
         let resident = &mut self.residents[index];
         if !resident.town_work.active() {
@@ -59,8 +69,6 @@ impl Construction {
         if stock.sandbox {
             return;
         }
-        let day = (clock.seconds / DAY + 9.0 / 24.0).floor() as u64;
-        let hour = game_hour(clock.seconds);
         for (index, &(job_name, wages)) in JOBS.iter().enumerate() {
             let unavailable = self.driver_booked(index)
                 || self.working_water(index)
@@ -112,9 +120,10 @@ impl Construction {
                 continue;
             }
 
-            if !(8.0..11.0).contains(&hour)
-                || worker.town_work.last_day == Some(day)
-                || !(worker.town_work.booked || worker.town_work.repeating && day % 7 < 5)
+            let Some(day) = shift_morning(clock.seconds, worker.town_work.last_day) else {
+                continue;
+            };
+            if !(worker.town_work.booked || worker.town_work.repeating && day % 7 < 5)
                 || worker.health.energy < 65.0
                 || worker.health.task.is_some()
                 || unavailable
@@ -147,6 +156,7 @@ impl Construction {
             let worker = &mut self.residents[index];
             worker.path = path;
             worker.assignment = None;
+            worker.leisure.visit = None;
             worker.town_work.booked = false;
             worker.town_work.last_day = Some(day);
             worker.town_work.shift = Some(Shift {

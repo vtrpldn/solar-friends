@@ -894,7 +894,9 @@ impl Construction {
         self.utilities.ensure_camp();
         let (driver, path, water) = (0..self.residents.len())
             .rev()
-            .filter(|&index| self.free_for_leisure(index))
+            .filter(|&index| {
+                self.free_for_leisure(index) && !self.booked_shift_due(index, clock.seconds)
+            })
             .find_map(|index| {
                 let path =
                     self.resident_route(catalog, site, self.residents[index].position, door)?;
@@ -939,6 +941,38 @@ impl Construction {
 mod tests {
     use super::*;
     use crate::setup::WorldSetup;
+
+    #[test]
+    fn town_pickup_leaves_booked_workers_free_during_the_shift_window() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let terrain = setup.terrain();
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp: IVec2::new(36, 36),
+        };
+        let mut clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut village = Construction::default();
+        for index in 0..village.residents.len() {
+            village.toggle_shift(index);
+        }
+        village
+            .buy_from_town(&catalog, &mut stock, clock, "wood", false)
+            .unwrap();
+
+        village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
+        assert!(village.active_trips().next().is_none());
+
+        clock.seconds = 3.0 * crate::weather::HOUR;
+        village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
+        assert!(village.active_trips().next().is_some());
+    }
 
     #[test]
     fn town_pickups_wait_for_water_and_save_the_drivers_bottle() {
