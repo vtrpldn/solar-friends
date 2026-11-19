@@ -369,7 +369,9 @@ impl Worker {
         };
         let offset = next - self.position;
         let distance = offset.length();
-        self.speed = (self.speed + dt * 1.8).min(if carrying { 0.72 } else { 0.95 });
+        let pace = if carrying { 0.72 } else { 0.95 };
+        let fatigue = if self.health.energy < 35.0 { 0.8 } else { 1.0 };
+        self.speed = (self.speed + dt * 1.8).min(pace * fatigue);
         let step = self.speed * dt;
         if distance > 0.001 {
             self.yaw = offset.x.atan2(offset.y);
@@ -2751,6 +2753,22 @@ mod tests {
         village.priority = Some(0);
         village.assign(0, &catalog, &terrain, &land, camp);
         assert_eq!(village.residents[0].assignment.take().unwrap().project, 0);
+    }
+
+    #[test]
+    fn tired_residents_walk_and_haul_more_slowly() {
+        for (carrying, pace) in [(false, 0.95), (true, 0.72)] {
+            let mut construction = Construction::default();
+            let worker = &mut construction.residents[0];
+            worker.position = Vec2::ZERO;
+            worker.path.push_back(Vec2::new(8.0, 0.0));
+            worker.health.energy = 34.0;
+            worker.move_along_path(1.0, carrying);
+            assert!((worker.position.x - pace * 0.8).abs() < 1e-6);
+            worker.health.energy = 35.0;
+            worker.move_along_path(1.0, carrying);
+            assert!((worker.position.x - pace * 1.8).abs() < 1e-6);
+        }
     }
 
     #[test]
