@@ -6,7 +6,7 @@ Run the desktop preview from the repository root.
 cargo run --locked --manifest-path bevy-v3/Cargo.toml
 ```
 
-Pass `-- --play` to open the default Story plot directly.
+Pass `-- --play` to open the default Story plot directly, or `-- --play --sandbox` to open the Sandbox plot.
 
 Choose Story or Sandbox, a biome, landscape, water availability, resource richness, land seed, starting savings, supplies, and distance to town, then select **Enter village**. Pan with WASD, the arrow keys, or left drag. Hold Shift to pan faster. Rotate with Q/E or right drag horizontally, and right drag vertically to tilt. Zoom with the wheel, middle drag, or +/−. Press Home to center on camp, Shift+Home to reset the camera, Shift+End to frame the whole plot, and Escape to return to setup.
 

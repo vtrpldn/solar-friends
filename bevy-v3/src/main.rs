@@ -127,8 +127,17 @@ fn main() {
         return;
     }
     let mut app = App::new();
-    if std::env::args().any(|argument| argument == "--play") {
-        app.insert_resource(WorldSetup::default().session());
+    if option.as_deref().is_some_and(|flag| flag == "--play") {
+        let mut setup = WorldSetup::default();
+        match args.next().as_deref() {
+            None => {}
+            Some(mode) if mode == "--sandbox" => setup.mode = setup::Mode::Sandbox,
+            Some(_) => {
+                eprintln!("Usage: solar-friends-v3 --play [--sandbox]");
+                std::process::exit(2);
+            }
+        }
+        app.insert_resource(setup.session());
     }
     app.insert_resource(WinitSettings {
         unfocused_mode: UpdateMode::reactive_low_power(std::time::Duration::from_secs_f64(
