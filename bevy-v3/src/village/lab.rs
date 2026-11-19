@@ -429,12 +429,77 @@ fn setup_lab_window(mut commands: Commands, assets: Res<AssetServer>) {
     ));
 }
 
+#[derive(Default, PartialEq, Eq)]
+enum LabView {
+    #[default]
+    Overview,
+    Stocked,
+    AllItems,
+}
+
+impl LabView {
+    fn next(&self) -> Self {
+        match self {
+            Self::Overview => Self::Stocked,
+            Self::Stocked => Self::AllItems,
+            Self::AllItems => Self::Overview,
+        }
+    }
+}
+
+const INVENTORY_ROWS: usize = 12;
+
+fn lab_inventory(catalog: &Catalog, stock: &Stock, view: &LabView, page: &mut usize) -> String {
+    let mut items: Vec<_> = catalog
+        .materials
+        .iter()
+        .filter_map(|(id, material)| {
+            let available = stock.available(id);
+            let spoiled = stock.pantry.spoiled.get(id).copied().unwrap_or_default();
+            (*view == LabView::AllItems || available > 0 || spoiled > 0).then_some((
+                &material.name,
+                available,
+                spoiled,
+            ))
+        })
+        .collect();
+    items.sort_unstable_by(|a, b| a.0.cmp(b.0));
+    let pages = items.len().div_ceil(INVENTORY_ROWS).max(1);
+    *page = (*page).min(pages - 1);
+    let filter = if *view == LabView::AllItems {
+        "All items"
+    } else {
+        "In stock or spoiled"
+    };
+    let mut text = format!(
+        "Inventory · {filter} · Page {} of {pages}\nTab Switch view · Page Up/Down Browse\n",
+        *page + 1,
+    );
+    if items.is_empty() {
+        text.push_str("\nNo supplies or spoilage recorded.");
+    }
+    for (name, available, spoiled) in items
+        .into_iter()
+        .skip(*page * INVENTORY_ROWS)
+        .take(INVENTORY_ROWS)
+    {
+        use std::fmt::Write as _;
+        let _ = write!(text, "\n{name} · {available} available");
+        if spoiled > 0 {
+            let _ = write!(text, " · {spoiled} spoiled");
+        }
+    }
+    text
+}
+
 struct Playback {
     running: bool,
     speed: usize,
     debt: f64,
     order: Option<String>,
     notice: String,
+    view: LabView,
+    inventory_page: usize,
 }
 
 impl Default for Playback {
@@ -445,6 +510,8 @@ impl Default for Playback {
             debt: 0.0,
             order: None,
             notice: String::new(),
+            view: LabView::default(),
+            inventory_page: 0,
         }
     }
 }
@@ -511,6 +578,15 @@ fn update_lab_window(
         )));
         return;
     }
+    if keys.just_pressed(KeyCode::Tab) {
+        playback.view = playback.view.next();
+        playback.inventory_page = 0;
+    }
+    if keys.just_pressed(KeyCode::PageDown) {
+        playback.inventory_page = playback.inventory_page.saturating_add(1);
+    } else if keys.just_pressed(KeyCode::PageUp) {
+        playback.inventory_page = playback.inventory_page.saturating_sub(1);
+    }
     let rates = [1, 8, 32, 128];
     for (index, key) in [
         KeyCode::Digit1,
@@ -563,6 +639,20 @@ fn update_lab_window(
             )
         },
     );
+    if playback.view != LabView::Overview {
+        let playback = &mut *playback;
+        let inventory = lab_inventory(
+            &catalog,
+            &village.stock,
+            &playback.view,
+            &mut playback.inventory_page,
+        );
+        panel.set_if_neq(Text::new(format!(
+            "Simulation lab · {status} · Step {} / {}\nSpace Run/Pause · J Single step · O Enter order · F5 Export\n{}\n\n{inventory}",
+            runner.index, runner.scenario.steps, playback.notice,
+        )));
+        return;
+    }
     let weather = lab_weather(village, &runner.setup);
     let spoiled = village
         .stock
@@ -572,7 +662,7 @@ fn update_lab_window(
         .copied()
         .fold(0, u64::saturating_add);
     let text = format!(
-        "Simulation lab · {status}\nStep {} / {} · {:.1} simulation seconds · {}×\nSpace Run/Pause · J Single step · 1–4 Speed\nO Enter order · F5 Export completed report\n{}\n\nR${:.2} · {} timber · {} meals · {:.1} L drinking water · {spoiled} units spoiled\nWeather · {:.1} °C · {:.2} mm/h rain · {:.0}% cloud\n{}\n{last}\n\n{}",
+        "Simulation lab · {status}\nStep {} / {} · {:.1} simulation seconds · {}×\nSpace Run/Pause · J Single step · 1–4 Speed\nO Enter order · F5 Export completed report · Tab Inventory\n{}\n\nR${:.2} · {} timber · {} meals · {:.1} L drinking water · {spoiled} units spoiled\nWeather · {:.1} °C · {:.2} mm/h rain · {:.0}% cloud\n{}\n{last}\n\n{}",
         runner.index,
         runner.scenario.steps,
         village.clock,
