@@ -14,6 +14,7 @@ enum Action {
     ProjectFilter,
     Resident(usize),
     Home(bool),
+    ListedHome(usize),
 }
 
 impl Action {
@@ -63,12 +64,17 @@ impl Action {
             Self::Project(_) | Self::ProjectFilter => {
                 village.utility_panel == Some(UtilityPanel::Projects)
             }
-            Self::Resident(_) | Self::Home(_) => {
+            Self::Resident(_) | Self::Home(_) | Self::ListedHome(_) => {
                 village.utility_panel == Some(UtilityPanel::Residents)
             }
             Self::Page(_) => matches!(
                 village.utility_panel,
-                Some(UtilityPanel::Projects | UtilityPanel::Inventory | UtilityPanel::Events)
+                Some(
+                    UtilityPanel::Projects
+                        | UtilityPanel::Inventory
+                        | UtilityPanel::Events
+                        | UtilityPanel::Residents
+                )
             ),
         }
     }
@@ -101,6 +107,7 @@ impl Action {
             Self::Resident(index) => NAMES[index].into(),
             Self::Home(true) => "Assign selected home".into(),
             Self::Home(false) => "Clear home assignment".into(),
+            Self::ListedHome(_) => String::new(),
         }
     }
 }
@@ -111,9 +118,13 @@ struct Toolbar;
 #[derive(Component)]
 struct PanelMenu;
 
+const HOME_ROWS: usize = 4;
+
 #[derive(Default, Resource)]
 struct PanelPicker {
     open: bool,
+    home_page: usize,
+    visible_homes: [Option<usize>; HOME_ROWS],
 }
 
 pub(super) fn install(app: &mut App) {
@@ -185,6 +196,9 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 }
                 spawn_button(menu, &assets, Action::Home(true));
                 spawn_button(menu, &assets, Action::Home(false));
+                for row in 0..HOME_ROWS {
+                    spawn_button(menu, &assets, Action::ListedHome(row));
+                }
                 spawn_button(menu, &assets, Action::ProjectFilter);
                 for row in 0..crate::construction::PAGE_KEYS.len() {
                     spawn_button(menu, &assets, Action::Project(row));
@@ -243,6 +257,7 @@ fn handle_buttons(
                         UtilityPanel::Projects => village.projects_page = 0,
                         UtilityPanel::Inventory => village.inventory_page = 0,
                         UtilityPanel::Events => village.event_page = 0,
+                        UtilityPanel::Residents => picker.home_page = 0,
                         _ => {}
                     }
                     picker.open = false;
@@ -250,6 +265,16 @@ fn handle_buttons(
                 Action::ClosePanel => {
                     village.utility_panel = None;
                     picker.open = false;
+                }
+                Action::Page(forward) if village.utility_panel == Some(UtilityPanel::Residents) => {
+                    let pages = village
+                        .construction
+                        .home_options(&catalog)
+                        .count()
+                        .div_ceil(HOME_ROWS)
+                        .max(1);
+                    let page = picker.home_page.min(pages - 1);
+                    picker.home_page = (page + if forward { 1 } else { pages - 1 }) % pages;
                 }
                 Action::Page(forward) => village.change_panel_page(&catalog, forward),
                 Action::Project(row) if !picker.open => {
@@ -261,11 +286,21 @@ fn handle_buttons(
                 }
                 Action::Resident(index) if !picker.open => village.select_resident(index),
                 Action::Home(assign) if !picker.open => village.set_resident_home(&catalog, assign),
+                Action::ListedHome(row) if !picker.open => {
+                    if let Some(home) = picker.visible_homes[row] {
+                        let resident = village.selected_resident;
+                        village.housing_notice = village
+                            .construction
+                            .assign_home(resident, &catalog, home)
+                            .unwrap_or_else(str::to_owned);
+                    }
+                }
                 Action::Panel(_)
                 | Action::Project(_)
                 | Action::ProjectFilter
                 | Action::Resident(_)
-                | Action::Home(_) => {}
+                | Action::Home(_)
+                | Action::ListedHome(_) => {}
             }
         }
     }
@@ -287,7 +322,7 @@ type ToolbarButtons<'w, 's> = Query<
 fn refresh(
     (setup, saves, sound): (Res<WorldSetup>, Res<SaveMenu>, Res<SoundSettings>),
     (village, catalog): (Res<Village>, Res<Catalog>),
-    picker: Res<PanelPicker>,
+    mut picker: ResMut<PanelPicker>,
     mut toolbar: Single<&mut Node, (With<Toolbar>, Without<PanelMenu>)>,
     mut menu: Single<&mut Node, (With<PanelMenu>, Without<Toolbar>)>,
     mut buttons: ToolbarButtons,
@@ -312,6 +347,15 @@ fn refresh(
     } else {
         Vec::new()
     };
+    let homes: Vec<_> = if show_residents {
+        village.construction.home_options(&catalog).collect()
+    } else {
+        Vec::new()
+    };
+    let home_pages = homes.len().div_ceil(HOME_ROWS).max(1);
+    picker.home_page = picker.home_page.min(home_pages - 1);
+    let homes = &homes[(picker.home_page * HOME_ROWS)..];
+    picker.visible_homes = std::array::from_fn(|row| homes.get(row).map(|option| option.0));
     menu.display =
         if show_projects || show_residents || (picker.open && Action::Manage.available(&village)) {
             Display::Flex
@@ -320,9 +364,13 @@ fn refresh(
         };
     for (&action, &interaction, children, mut background, mut node) in &mut buttons {
         let show = match action {
+            Action::Page(_) if village.utility_panel == Some(UtilityPanel::Residents) => {
+                show_residents && home_pages > 1
+            }
             Action::Page(_) | Action::ClosePanel => action.available(&village),
             Action::Project(row) => projects.get(row).is_some(),
             Action::ProjectFilter => show_projects,
+            Action::ListedHome(row) => homes.get(row).is_some(),
             Action::Resident(_) | Action::Home(_) => show_residents,
             Action::Panel(_) => picker.open,
             _ => true,
@@ -341,6 +389,10 @@ fn refresh(
         if let Ok(mut text) = labels.get_mut(children[0]) {
             let label = match action {
                 Action::Project(row) => projects[row].clone(),
+                Action::ListedHome(row) => {
+                    let (home, name, occupants, beds) = homes[row];
+                    format!("{name} #{} · {occupants}/{beds} beds", home + 1)
+                }
                 _ => action.label(&village, &picker),
             };
             if text.0 != label {

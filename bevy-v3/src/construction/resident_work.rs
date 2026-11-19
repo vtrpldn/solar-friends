@@ -299,6 +299,38 @@ impl Construction {
             .production
             .selected
             .ok_or("Select a completed home on the map.")?;
+        self.assign_home(index, catalog, home)
+    }
+
+    pub fn home_options<'a>(
+        &'a self,
+        catalog: &'a Catalog,
+    ) -> impl Iterator<Item = (usize, &'a str, usize, usize)> + 'a {
+        self.plans.iter().enumerate().filter_map(move |(home, _)| {
+            let definition = self.completed_shelter(catalog, home)?;
+            if definition.kind != "home" || self.changes.contains_key(&home) {
+                return None;
+            }
+            let occupants = self
+                .residents
+                .iter()
+                .filter(|resident| resident.home == Some(home))
+                .count();
+            Some((
+                home,
+                definition.name.as_str(),
+                occupants,
+                definition.beds.unwrap_or(2),
+            ))
+        })
+    }
+
+    pub fn assign_home(
+        &mut self,
+        index: usize,
+        catalog: &Catalog,
+        home: usize,
+    ) -> Result<String, &'static str> {
         let definition = self
             .completed_shelter(catalog, home)
             .filter(|definition| definition.kind == "home" && !self.changes.contains_key(&home))
