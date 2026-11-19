@@ -809,7 +809,9 @@ fn order_label(order: &LabOrder) -> String {
             "{} town work for resident {resident}",
             toggle_label(*enabled)
         ),
-        LabOrder::FoodPolicy { enabled } => format!("{} food restocking", toggle_label(*enabled)),
+        LabOrder::FoodPolicy { enabled, .. } => {
+            format!("{} food restocking", toggle_label(*enabled))
+        }
         LabOrder::SalePolicy {
             material, enabled, ..
         } => {
@@ -1592,6 +1594,31 @@ fn update_lab_window(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn scripted_pantry_budget_controls_restocks_and_replays() {
+        let catalog = Catalog::default();
+        let scenario = serde_json::from_str(r#"{
+            "steps": 120,
+            "orders": [
+                {"step": 0, "order": {"type": "food-policy", "enabled": true, "reserve_half_days": 14, "allowance_cents": 0}},
+                {"step": 100, "order": {"type": "food-policy", "enabled": true, "allowance_cents": 10000}}
+            ]
+        }"#).unwrap();
+        let mut runner = Runner::new(scenario, None, &catalog).unwrap();
+        while runner.index < 100 {
+            runner.advance(&catalog);
+        }
+        assert!(runner.village.construction.trade.orders.is_empty());
+        while !runner.done() {
+            runner.advance(&catalog);
+        }
+        assert!(runner.outcomes.iter().all(|order| order.error.is_none()));
+        assert_eq!(runner.village.construction.trade.orders.len(), 1);
+        let report =
+            serde_json::from_slice(&serde_json::to_vec(&runner.report()).unwrap()).unwrap();
+        assert_eq!(verify_report(report, &catalog).unwrap(), 120);
+    }
 
     #[test]
     fn scripted_automatic_sales_respect_reserves_and_replay() {

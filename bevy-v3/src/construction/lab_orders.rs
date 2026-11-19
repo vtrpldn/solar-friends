@@ -70,6 +70,10 @@ pub(crate) enum LabOrder {
     },
     FoodPolicy {
         enabled: bool,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        reserve_half_days: Option<u8>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        allowance_cents: Option<u64>,
     },
     SalePolicy {
         material: String,
@@ -541,7 +545,13 @@ impl Construction {
                     work.booked = *enabled;
                 }
             }
-            LabOrder::FoodPolicy { enabled } => self.trade.household_restock_off = !enabled,
+            LabOrder::FoodPolicy {
+                enabled,
+                reserve_half_days,
+                allowance_cents,
+            } => self
+                .trade
+                .set_pantry_policy(*enabled, *reserve_half_days, *allowance_cents)?,
             LabOrder::SalePolicy {
                 material,
                 enabled,

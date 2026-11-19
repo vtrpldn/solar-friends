@@ -335,6 +335,28 @@ impl Trade {
         }
     }
 
+    pub(crate) fn set_pantry_policy(
+        &mut self,
+        enabled: bool,
+        reserve_half_days: Option<u8>,
+        allowance_cents: Option<u64>,
+    ) -> Result<(), &'static str> {
+        if reserve_half_days.is_some_and(|reserve| reserve > 14)
+            || allowance_cents.is_some_and(|budget| budget > 10_000_000)
+        {
+            return Err("Pantry reserve or daily budget exceeds the supported limit.");
+        }
+        self.household_restock_off = !enabled;
+        let policy = &mut self.pantry_purchase;
+        if let Some(reserve) = reserve_half_days {
+            policy.reserve_half_days = reserve;
+        }
+        if let Some(budget) = allowance_cents {
+            policy.allowance_cents = budget;
+        }
+        Ok(())
+    }
+
     pub fn pantry_controls(&mut self, reserve_change: i8, budget_change: i64, toggle: bool) {
         if toggle {
             self.household_restock_off = !self.household_restock_off;
