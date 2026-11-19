@@ -173,6 +173,8 @@ pub struct Village {
     terrain_editor: TerrainEditor,
     #[serde(skip)]
     water_panel: WaterControls,
+    #[serde(skip)]
+    connect_road_strokes: bool,
     stock: Stock,
     construction: Construction,
 }
@@ -439,6 +441,15 @@ impl Village {
 
     pub fn planning_roads(&self) -> bool {
         self.construction.planning_roads()
+    }
+
+    fn finish_road_planning(&mut self) {
+        self.construction.finish_roads();
+        self.connect_road_strokes = false;
+    }
+
+    fn extend_road(&self, keys: &ButtonInput<KeyCode>) -> bool {
+        self.connect_road_strokes || keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight])
     }
 
     pub fn is_paused(&self) -> bool {
@@ -836,10 +847,11 @@ fn village_input(
         let terrain = village.terrain(&setup);
         let town = &mut *village;
         if keyboard.any_just_pressed([KeyCode::KeyB, KeyCode::Escape]) {
-            town.construction.finish_roads();
+            town.finish_road_planning();
         } else if keyboard.just_pressed(KeyCode::KeyZ) {
             town.construction.undo_roads(&mut town.stock);
         } else if let Some(hit) = pointer.clicked {
+            let extend = town.extend_road(&keyboard);
             town.construction.plan_roads(
                 &catalog,
                 &mut town.stock,
@@ -853,7 +865,7 @@ fn village_input(
                     seconds: town.clock,
                     round_trip_km: setup.round_trip_km(),
                 },
-                keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]),
+                extend,
             );
         }
         return;
@@ -1812,7 +1824,7 @@ fn draw_blueprints(
                     .terrain_editor
                     .draw_preview(&terrain, hit.world, &mut gizmos);
             } else if village.planning_roads() {
-                let extend = keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]);
+                let extend = village.extend_road(&keyboard);
                 village
                     .construction
                     .draw_road_route(&terrain, hit.cell, extend, &mut gizmos);

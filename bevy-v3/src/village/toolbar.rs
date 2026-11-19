@@ -6,6 +6,9 @@ enum Action {
     Build,
     RotatePlacement,
     CancelPlacement,
+    ConnectRoad,
+    UndoRoad,
+    FinishRoad,
     ResizeField(IVec2),
     Pause,
     Speed,
@@ -51,6 +54,9 @@ impl Action {
         if matches!(self, Self::Guide) {
             return !village.construction.editing_search;
         }
+        if matches!(self, Self::ConnectRoad | Self::UndoRoad | Self::FinishRoad) {
+            return village.planning_roads() && !village.map_input_blocked();
+        }
         if village.map_input_blocked()
             || village.advance_open()
             || village.planning_roads()
@@ -69,7 +75,7 @@ impl Action {
                     && !village.construction.farming.open
                     && village.utility_panel.is_none()
             }
-            Self::Guide => true,
+            Self::Guide | Self::ConnectRoad | Self::UndoRoad | Self::FinishRoad => true,
             Self::Manage => !village.construction.menu && !village.construction.is_placing(),
             Self::Panel(
                 UtilityPanel::Finances
@@ -126,6 +132,10 @@ impl Action {
             Self::Build => "Build".into(),
             Self::RotatePlacement => "Rotate".into(),
             Self::CancelPlacement => "Cancel placement".into(),
+            Self::ConnectRoad if village.connect_road_strokes => "Connected route".into(),
+            Self::ConnectRoad => "Single road tile".into(),
+            Self::UndoRoad => "Undo road stroke".into(),
+            Self::FinishRoad => "Finish roads".into(),
             Self::ResizeField(delta) => format!(
                 "{} {}",
                 if delta.x != 0 { "Width" } else { "Depth" },
@@ -261,6 +271,9 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 Action::Build,
                 Action::RotatePlacement,
                 Action::CancelPlacement,
+                Action::ConnectRoad,
+                Action::UndoRoad,
+                Action::FinishRoad,
                 Action::Manage,
                 Action::ClosePanel,
                 Action::Pause,
@@ -400,6 +413,12 @@ fn handle_buttons(
                 }
                 Action::RotatePlacement => village.construction.rotate_placement(),
                 Action::CancelPlacement => village.construction.cancel_placement(),
+                Action::ConnectRoad => village.connect_road_strokes = !village.connect_road_strokes,
+                Action::UndoRoad => {
+                    let town = &mut *village;
+                    town.construction.undo_roads(&mut town.stock);
+                }
+                Action::FinishRoad => village.finish_road_planning(),
                 Action::ResizeField(delta) => village.construction.resize_field_placement(delta),
                 Action::Pause => village.paused = !village.paused,
                 Action::Speed => village.speed = (village.speed + 1) % SPEEDS.len(),
@@ -620,6 +639,9 @@ fn refresh(
             | Action::ClosePanel
             | Action::RotatePlacement
             | Action::CancelPlacement
+            | Action::ConnectRoad
+            | Action::UndoRoad
+            | Action::FinishRoad
             | Action::ResizeField(_) => action.available(&village),
             Action::Project(row) => projects.get(row).is_some(),
             Action::TradeItem(row) => trade_items.get(row).is_some(),
