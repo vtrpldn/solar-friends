@@ -324,38 +324,46 @@ fn camera_controls(
     let Projection::Orthographic(ortho) = &mut **projection else {
         return;
     };
-    if keyboard.just_pressed(KeyCode::Home) {
-        let action = if keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]) {
+    let keyboard_navigation = !keyboard.any_pressed([
+        KeyCode::ControlLeft,
+        KeyCode::ControlRight,
+        KeyCode::SuperLeft,
+        KeyCode::SuperRight,
+        KeyCode::AltLeft,
+        KeyCode::AltRight,
+    ]);
+    let shift = keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]);
+    if keyboard_navigation && keyboard.just_pressed(KeyCode::Home) {
+        let action = if shift {
             CameraAction::Reset
         } else {
             CameraAction::Camp
         };
         apply_camera_action(action, &village, &setup, view, ortho);
     }
-    if keyboard.just_pressed(KeyCode::End) {
+    if keyboard_navigation && keyboard.just_pressed(KeyCode::End) {
         apply_camera_action(CameraAction::River, &village, &setup, view, ortho);
     }
-    let axis = |positive, negative| {
-        i32::from(keyboard.any_pressed(positive)) as f32
-            - i32::from(keyboard.any_pressed(negative)) as f32
+    let axis = |positive: &[KeyCode], negative: &[KeyCode]| {
+        if keyboard_navigation {
+            i32::from(keyboard.any_pressed(positive.iter().copied())) as f32
+                - i32::from(keyboard.any_pressed(negative.iter().copied())) as f32
+        } else {
+            0.0
+        }
     };
     let delta = time.delta_secs();
     let pan_x = axis(
-        [KeyCode::KeyD, KeyCode::ArrowRight],
-        [KeyCode::KeyA, KeyCode::ArrowLeft],
+        &[KeyCode::KeyD, KeyCode::ArrowRight],
+        &[KeyCode::KeyA, KeyCode::ArrowLeft],
     );
     let pan_z = axis(
-        [KeyCode::KeyS, KeyCode::ArrowDown],
-        [KeyCode::KeyW, KeyCode::ArrowUp],
+        &[KeyCode::KeyS, KeyCode::ArrowDown],
+        &[KeyCode::KeyW, KeyCode::ArrowUp],
     );
-    let turn =
-        i32::from(keyboard.pressed(KeyCode::KeyE)) - i32::from(keyboard.pressed(KeyCode::KeyQ));
+    let turn = axis(&[KeyCode::KeyE], &[KeyCode::KeyQ]);
     let pan = Vec3::new(pan_x, 0.0, pan_z).normalize_or_zero();
-    let dash = if keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]) {
-        2.2
-    } else {
-        1.0
-    };
+    let dash = if shift { 2.2 } else { 1.0 };
     let heading = view.heading + std::f32::consts::FRAC_PI_4;
     let orientation = Quat::from_rotation_y(heading);
     view.target += orientation * pan * (24.0 * dash * ortho.scale.sqrt() * delta);
@@ -376,7 +384,7 @@ fn camera_controls(
         let drag = Vec3::new(-motion.delta.x, 0.0, -motion.delta.y);
         view.target += orientation * drag * distance_per_pixel;
     }
-    view.heading += turn as f32 * delta * 1.2;
+    view.heading += turn * delta * 1.2;
     if *drag_button == Some(MouseButton::Right) {
         let orbit = motion.delta / window.height().max(1.0) * std::f32::consts::TAU;
         view.heading -= orbit.x;
@@ -388,8 +396,8 @@ fn camera_controls(
     view.target.z = view.target.z.clamp(-124.0, 124.0);
 
     let zoom = axis(
-        [KeyCode::Minus, KeyCode::NumpadSubtract],
-        [KeyCode::Equal, KeyCode::NumpadAdd],
+        &[KeyCode::Minus, KeyCode::NumpadSubtract],
+        &[KeyCode::Equal, KeyCode::NumpadAdd],
     );
     let wheel_factor = match scroll.unit {
         MouseScrollUnit::Line => 0.12,
@@ -648,6 +656,21 @@ mod tests {
         assert_eq!(saved.target, requested_target);
         assert_eq!(saved.heading, 0.75);
         assert_eq!(saved.zoom, 1.5);
+        let mut keys = world.resource_mut::<ButtonInput<KeyCode>>();
+        keys.press(KeyCode::SuperLeft);
+        keys.press(KeyCode::Home);
+        world.run_schedule(Update);
+        world.run_schedule(PostUpdate);
+        assert_eq!(
+            world
+                .resource::<village::Village>()
+                .camera_view
+                .unwrap()
+                .target,
+            requested_target
+        );
+        world.resource_mut::<ButtonInput<KeyCode>>().reset_all();
+
         let mut camera = world.query::<(&mut VillageCamera, &mut Projection)>();
         let (mut view, mut projection) = camera.single_mut(world).unwrap();
         view.target = previous_target;
