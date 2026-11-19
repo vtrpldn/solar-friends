@@ -79,6 +79,9 @@ impl Construction {
             } else {
                 record(&mut ledger, plan.materials(catalog), location);
             }
+            if let Some(goats) = self.installed_goats(catalog, index) {
+                record(&mut ledger, goats, Location::Installed);
+            }
             for (recipe, installed) in [
                 ("cold_storage", self.utilities.has_cold_storage(index)),
                 ("solar_upgrade", self.utilities.has_rooftop_solar(index)),

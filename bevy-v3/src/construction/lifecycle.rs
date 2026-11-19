@@ -464,6 +464,9 @@ impl Construction {
         kind: Change,
     ) -> (BTreeMap<String, u32>, BTreeMap<String, u32>) {
         let mut installed = self.plans[index].materials(catalog).clone();
+        if let Some(goats) = self.installed_goats(catalog, index) {
+            installed.extend(goats.clone());
+        }
         for (recipe, upgraded) in [
             ("cold_storage", self.utilities.has_cold_storage(index)),
             ("solar_upgrade", self.utilities.has_rooftop_solar(index)),

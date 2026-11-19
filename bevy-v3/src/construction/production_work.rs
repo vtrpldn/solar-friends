@@ -35,6 +35,20 @@ impl Construction {
         self.production.notice.clear();
     }
 
+    pub(super) fn empty_goat_pen(&self, index: usize) -> bool {
+        self.plans[index].key == "goat-pasture-empty"
+            && !self.livestock.animals.contains_key(&index)
+    }
+
+    pub(super) fn installed_goats<'a>(
+        &self,
+        catalog: &'a Catalog,
+        index: usize,
+    ) -> Option<&'a BTreeMap<String, u32>> {
+        (self.plans[index].key == "goat-pasture-empty" && !self.empty_goat_pen(index))
+            .then_some(&catalog.production["stock-goats"].input)
+    }
+
     pub(super) fn recipes<'a>(
         &self,
         catalog: &'a Catalog,
@@ -49,7 +63,9 @@ impl Construction {
         let mut recipes: Vec<_> = catalog
             .production
             .iter()
-            .filter(|(_, recipe)| recipe.kind == *kind)
+            .filter(|(id, recipe)| {
+                recipe.kind == *kind && (id.as_str() == "stock-goats") == self.empty_goat_pen(index)
+            })
             .collect();
         recipes.sort_by_key(|(_, recipe)| recipe.repair.is_some());
         recipes
@@ -411,6 +427,13 @@ impl Construction {
         id: &str,
     ) -> Result<Option<BTreeMap<String, u32>>, String> {
         let recipe = &catalog.production[id];
+        let empty_pen = self.empty_goat_pen(index);
+        if id == "stock-goats" && !empty_pen {
+            return Err("This pen already has goats.".into());
+        }
+        if empty_pen && id != "stock-goats" {
+            return Err("Stock the pen with two goats first.".into());
+        }
         if let Some(tool) = &recipe.repair {
             if self.repairing(catalog, tool) {
                 return Err("A repair is already queued for this equipment.".into());
@@ -430,6 +453,7 @@ impl Construction {
         }
         if let Some(ration) = catalog.animal_rations.get(&recipe.kind)
             && !stock.sandbox
+            && id != "stock-goats"
         {
             let pen = self
                 .livestock
@@ -814,6 +838,9 @@ impl Construction {
             let Some(ration) = catalog.animal_rations.get(&definition.kind) else {
                 continue;
             };
+            if self.empty_goat_pen(index) {
+                continue;
+            }
             let pen = self.livestock.animals.entry(index).or_default();
             if !stock.sandbox {
                 pen.tick(ration, clock, dt);
@@ -1179,6 +1206,13 @@ impl Construction {
                         continue;
                     }
                     if job.work < recipe.work {
+                        continue;
+                    }
+                    if job.recipe == "stock-goats" {
+                        self.livestock.animals.entry(job.site).or_default();
+                        self.production.jobs.remove(index);
+                        self.production.notice = "Two goats moved into the pen.".into();
+                        self.record_event(clock, self.production.notice.clone());
                         continue;
                     }
                     if job.recipe == "cold_storage" {
@@ -2197,6 +2231,58 @@ mod upgrade_tests {
             stock.available("compost"),
             before + recipe.output["compost"]
         );
+    }
+
+    #[test]
+    fn residents_stock_an_empty_goat_pen_once_and_save_the_herd() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let camp = IVec2::new(36, 36);
+        let terrain = setup.terrain().with_camp(camp);
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let mut village = Construction::default();
+        let key = "goat-pasture-empty";
+        let mut plan = village.proposed_site(&catalog, key, IVec2::new(44, 36));
+        plan.delivered = plan.loads;
+        plan.work = catalog.projects[key].work;
+        village.plans.push(plan);
+
+        village.tick_services(&catalog, &setup, &mut stock, 0.0, 0.1);
+        village.tick_animals(&catalog, &mut stock, &land, 0.0, 0.1);
+        assert!(village.empty_goat_pen(0));
+        assert!(village.production.jobs.is_empty());
+        assert_eq!(village.recipes(&catalog, 0)[0].0, "stock-goats");
+
+        let goats = &catalog.production["stock-goats"].input;
+        stock.receive(goats);
+        let before = stock.available("goats");
+        village.production.selected = Some(0);
+        village.queue_recipe_row(&catalog, &mut stock, 0);
+        assert_eq!(stock.available("goats"), before - 2);
+        assert!(village.empty_goat_pen(0));
+        for step in 0..4_000 {
+            village.tick_production(&catalog, &mut stock, site, f64::from(step) * 0.1, 0.1);
+            if village.production.jobs.is_empty() {
+                break;
+            }
+        }
+        assert!(village.production.jobs.is_empty());
+        assert_eq!(village.installed_goats(&catalog, 0), Some(goats));
+        assert!(
+            village
+                .batch_inputs(&catalog, &stock, 0, "stock-goats")
+                .is_err()
+        );
+        let serialized = serde_json::to_string(&village).unwrap();
+        let restored: Construction = serde_json::from_str(&serialized).unwrap();
+        assert!(restored.valid_save(&catalog, &stock));
+        assert_eq!(restored.installed_goats(&catalog, 0), Some(goats));
     }
 
     #[test]
