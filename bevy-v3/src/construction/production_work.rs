@@ -643,6 +643,26 @@ impl Construction {
         }
     }
 
+    pub(crate) fn lab_production_status(
+        &self,
+        catalog: &Catalog,
+        stock: &Stock,
+        index: usize,
+        clock: f64,
+    ) -> String {
+        use std::fmt::Write as _;
+        let mut text = String::new();
+        if let Some(pen) = self.livestock.animals.get(&index) {
+            let _ = write!(text, "\n{}", pen.care_summary());
+        }
+        if let Some(job) = self.production.jobs.iter().find(|job| job.site == index) {
+            let name = &catalog.production[&job.recipe].name;
+            let status = self.batch_status(job, catalog, stock, clock);
+            let _ = write!(text, "\n{name} · {status}");
+        }
+        text
+    }
+
     pub fn selected_production(
         &self,
         catalog: &Catalog,
@@ -754,13 +774,8 @@ impl Construction {
             }
         }
         if let Some(animals) = self.livestock.animals.get(&index) {
-            text.push_str(&format!(
-                "\nHealth {:.0}% · feed {:.2} kg · water {:.1} L · {} ready",
-                animals.health,
-                animals.feed,
-                animals.water,
-                animals.available()
-            ));
+            text.push('\n');
+            text.push_str(&animals.care_summary());
         }
         if let Some(ground) = self.production.growing_sites.get(&index)
             && recipes.iter().any(|(_, recipe)| {
@@ -1669,6 +1684,21 @@ fn needs_power(id: &str, recipe: &ProductionRecipe) -> bool {
 #[cfg(test)]
 mod upgrade_tests {
     use super::*;
+
+    #[test]
+    fn lab_site_status_reports_livestock_rations() {
+        let catalog = Catalog::default();
+        let mut village = Construction::default();
+        let mut pen = crate::livestock::Pen::default();
+        pen.health = 85.0;
+        pen.feed = 2.5;
+        pen.water = 7.0;
+        village.livestock.animals.insert(0, pen);
+        assert_eq!(
+            village.lab_production_status(&catalog, &Stock::default(), 0, 0.0),
+            "\nHealth 85% · feed 2.50 kg · water 7.0 L · 0 ready"
+        );
+    }
 
     #[test]
     fn fully_spoiled_kitchen_batches_release_the_site_without_a_route() {

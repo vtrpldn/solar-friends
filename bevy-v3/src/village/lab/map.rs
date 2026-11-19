@@ -176,17 +176,21 @@ impl MapState {
         }
         let construction = &runner.village.construction;
         if let Some(index) = self.selected {
+            let village = &runner.village;
+            let mut details =
+                construction.lab_production_status(catalog, &village.stock, index, village.clock);
             let recipes = construction.recipes(catalog, index);
-            let Some((_, recipe)) = recipes.get(self.recipe.min(recipes.len().saturating_sub(1)))
-            else {
-                return String::new();
-            };
-            let controls = if editable {
-                " · [ / ] Choose recipe · K Queue batch"
-            } else {
-                ""
-            };
-            format!("\nProduction · {}{controls}", recipe.name)
+            if let Some((_, recipe)) = recipes.get(self.recipe.min(recipes.len().saturating_sub(1)))
+            {
+                use std::fmt::Write as _;
+                let controls = if editable {
+                    " · [ / ] Choose recipe · K Queue batch"
+                } else {
+                    ""
+                };
+                let _ = write!(details, "\nProduction · {}{controls}", recipe.name);
+            }
+            details
         } else {
             let grid = if construction.utilities.grid_off {
                 "Disconnected"

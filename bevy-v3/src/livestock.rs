@@ -47,6 +47,16 @@ impl Default for Pen {
 }
 
 impl Pen {
+    pub fn care_summary(&self) -> String {
+        format!(
+            "Health {:.0}% · feed {:.2} kg · water {:.1} L · {} ready",
+            self.health,
+            self.feed,
+            self.water,
+            self.available()
+        )
+    }
+
     pub fn fed_days(&self, ration: &AnimalRation) -> f64 {
         ration.days * (self.feed / f64::from(ration.fodder)).min(self.water / ration.water)
     }
