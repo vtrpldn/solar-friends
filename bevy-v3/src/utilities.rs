@@ -706,8 +706,16 @@ impl Utilities {
         format!("Power · {power}\nWater · {water} · Sanitation · {sanitation}")
     }
 
+    pub fn stored_energy(&self) -> f64 {
+        self.nodes.values().map(|node| node.charge).sum()
+    }
+
+    pub fn stored_drinking_water(&self) -> f64 {
+        self.nodes.values().map(|node| node.water[0]).sum()
+    }
+
     pub fn power_summary(&self) -> String {
-        let stored: f64 = self.nodes.values().map(|node| node.charge).sum();
+        let stored = self.stored_energy();
         format!(
             "Power · {:.2} kW solar/hydro · {:.2} kW demand\n{stored:.2} kWh stored · {:.2} kW grid · R${:.2} used\nGrid {} · O Switch grid",
             self.generation_kw,

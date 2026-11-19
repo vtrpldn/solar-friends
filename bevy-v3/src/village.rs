@@ -14,6 +14,7 @@ use lens_picker::{LensPicker, MapLens};
 mod library_ui;
 mod livestock_motion;
 mod resource_lens;
+mod resource_trends;
 mod road_surface;
 mod toolbar;
 mod vehicle_motion;
@@ -1543,6 +1544,7 @@ fn show_hud(
     mut hud: Single<(&mut Text, &mut Node), With<VillageHud>>,
     (catalog, land, saves): (Res<Catalog>, Res<Land>, Res<SaveMenu>),
     (placement, sound): (Res<MapNotice>, Res<SoundSettings>),
+    mut resource_trends: Local<resource_trends::ResourceTrends>,
 ) {
     if !saves.is_changed()
         && !setup.is_changed()
@@ -1552,6 +1554,21 @@ fn show_hud(
     {
         return;
     }
+    let utilities = &village.construction.utilities;
+    let savings = village.stock.balance() as f64 / 100.0;
+    let food = village.stock.food_portions();
+    let energy = utilities.stored_energy();
+    let water = utilities.stored_drinking_water();
+    let rates = if !setup.open && village.camp.is_some() {
+        resource_trends.sample(
+            village.session_serial,
+            village.clock,
+            [savings, f64::from(food), energy, water],
+        )
+    } else {
+        None
+    };
+    let rate = |index, unit| resource_trends::hourly_rate(rates.map(|rates| rates[index]), unit);
     let (text, node) = &mut *hud;
     if sound.open {
         node.display = Display::Flex;
@@ -1615,14 +1632,20 @@ fn show_hud(
     };
     let speed = SPEEDS[village.speed].1;
     let stock = if village.stock.sandbox {
-        format!("Sandbox · I {}", village.construction.sandbox_status())
+        format!(
+            "Sandbox · I {}\nWater {water:.0} L ({})",
+            village.construction.sandbox_status(),
+            rate(3, ""),
+        )
     } else {
         format!(
-            "R${:.2} · {} timber · {} meals · {}",
-            village.stock.balance() as f64 / 100.0,
+            "R${savings:.2} ({}) · Food {food} portions ({}) · {} timber\nBattery {energy:.1} kWh ({}) · Water {water:.0} L ({}) · U {}",
+            rate(0, "R$"),
+            rate(1, ""),
             village.stock.available("wood"),
-            village.stock.available("meals"),
-            format_args!("U {}", village.construction.auto_buy_status()),
+            rate(2, ""),
+            rate(3, ""),
+            village.construction.auto_buy_status(),
         )
     };
     let mut label = format!(
