@@ -27,7 +27,7 @@ use bevy::{
     gltf::GltfAssetLabel,
     picking::prelude::{MeshRayCast, MeshRayCastSettings},
     prelude::*,
-    window::PrimaryWindow,
+    window::{PrimaryWindow, WindowCloseRequested},
 };
 use serde::{Deserialize, Serialize};
 
@@ -98,6 +98,7 @@ impl Plugin for VillagePlugin {
             .init_resource::<SaveMenu>()
             .insert_resource(Time::<Fixed>::from_hz(SIMULATION_HZ))
             .add_systems(Startup, spawn_hud)
+            .add_systems(PreUpdate, save_on_window_close)
             .add_systems(
                 Update,
                 (
@@ -731,6 +732,44 @@ fn write_continuation(
         (attached_mode == mode && serial == village.session_serial).then_some(id)
     });
     save::write_continuation(&menu.continue_path(mode)?, village, slot, catalog)
+}
+
+pub(crate) fn save_session(
+    menu: &SaveMenu,
+    village: &Village,
+    catalog: &Catalog,
+) -> std::io::Result<()> {
+    let Some(mode) = village.mode() else {
+        return Ok(());
+    };
+    match save_active_village(menu, village, catalog) {
+        Ok(()) => write_continuation(menu, mode, village, catalog),
+        Err(error) => {
+            save::write_continuation(&menu.continue_path(mode)?, village, None, catalog)?;
+            Err(error)
+        }
+    }
+}
+
+fn save_on_window_close(
+    mut requests: MessageReader<WindowCloseRequested>,
+    primary: Query<Entity, With<PrimaryWindow>>,
+    menu: Res<SaveMenu>,
+    catalog: Res<Catalog>,
+    mut village: ResMut<Village>,
+) {
+    if !requests
+        .read()
+        .any(|request| primary.contains(request.window))
+    {
+        return;
+    }
+    if village.advance.running.is_some() {
+        village.apply_advance_action(AdvanceAction::Toggle);
+    }
+    if let Err(error) = save_session(&menu, &village, &catalog) {
+        warn!("Could not save village on exit: {error}");
+    }
 }
 
 fn autosave_continue(
@@ -2439,6 +2478,42 @@ mod tests {
         );
         let exported = save_library::export(&directory, id, Mode::Story).unwrap();
         assert_eq!(save::read(&exported, &catalog).unwrap().clock, 0.0);
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+
+    #[test]
+    fn closing_the_primary_window_saves_the_active_named_village() {
+        let setup = WorldSetup::default().session();
+        let catalog = Catalog::default();
+        let mut village = Village {
+            setup: Some(setup.clone()),
+            stock: Stock::for_start(&setup, &catalog),
+            ..default()
+        };
+        let directory =
+            std::env::temp_dir().join(format!("solar-v3-close-save-test-{}", std::process::id()));
+        let id = save_library::create(&directory, Mode::Story, "River camp", &village).unwrap();
+        village.clock = 120.0;
+        let mut app = App::new();
+        app.insert_resource(village)
+            .insert_resource(catalog)
+            .insert_resource(SaveMenu {
+                test_directory: Some(directory.clone()),
+                attached: Some((Mode::Story, id, 0)),
+                ..default()
+            })
+            .add_message::<WindowCloseRequested>()
+            .add_systems(PreUpdate, save_on_window_close);
+        let window = app.world_mut().spawn(PrimaryWindow).id();
+        app.world_mut()
+            .write_message(WindowCloseRequested { window });
+        app.update();
+
+        let menu = app.world().resource::<SaveMenu>();
+        let catalog = app.world().resource::<Catalog>();
+        let (restored, slot) = restore_continuation(menu, Mode::Story, catalog).unwrap();
+        assert_eq!(slot, Some(id));
+        assert_eq!(restored.clock, 120.0);
         std::fs::remove_dir_all(directory).unwrap();
     }
 

@@ -949,6 +949,9 @@ fn handle_buttons(
                 | Action::Diagnostics => {}
                 Action::CampPreset(index) => pointer.preset = Some(CAMP_SITES[index].1),
                 Action::Setup => {
+                    if let Err(error) = save_session(&saves, &village, &catalog) {
+                        village.save_notice = format!("Could not save village: {error}");
+                    }
                     setup.open = true;
                     picker.open = false;
                 }

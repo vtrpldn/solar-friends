@@ -420,7 +420,13 @@ fn setup_input(
         return;
     }
     if !setup.open {
-        if keyboard.just_pressed(KeyCode::Escape) {
+        if keyboard.just_pressed(KeyCode::Escape)
+            && !village.advance_open()
+            && !village.planning_roads()
+        {
+            if let Err(error) = crate::village::save_session(&saves, &village, &catalog) {
+                village.save_notice = format!("Could not save village: {error}");
+            }
             setup.open = true;
         }
         return;
