@@ -75,7 +75,13 @@ pub(crate) enum LabStop {
 }
 
 impl Construction {
-    pub(crate) fn lab_jobs(&self, catalog: &Catalog, land: &Land, clock: f64) -> Vec<String> {
+    pub(crate) fn lab_jobs(
+        &self,
+        catalog: &Catalog,
+        land: &Land,
+        clock: f64,
+        focus: Option<usize>,
+    ) -> Vec<String> {
         let mut jobs = Vec::new();
         let site_name = |index: usize| {
             format!(
@@ -84,11 +90,11 @@ impl Construction {
                 index + 1
             )
         };
-        let worker_name = |index: Option<usize>| {
-            index.map_or("Unassigned", |index| resident_work::NAMES[index])
-        };
+        let worker_name =
+            |index: Option<usize>| index.map_or("Unassigned", |index| resident_work::NAMES[index]);
         for (index, plan) in self.plans.iter().enumerate() {
-            if !plan.removed
+            if focus.is_none_or(|site| site == index)
+                && !plan.removed
                 && (plan.work < catalog.projects[&plan.key].work
                     || self.changes.contains_key(&index))
             {
@@ -110,6 +116,9 @@ impl Construction {
             }
         }
         for batch in &self.production.jobs {
+            if focus.is_some_and(|site| site != batch.site) {
+                continue;
+            }
             let recipe = &catalog.production[&batch.recipe];
             jobs.push(format!(
                 "{} · {} · {} · {}",
@@ -120,6 +129,9 @@ impl Construction {
             ));
         }
         for job in &self.farming.jobs {
+            if focus.is_some_and(|site| site != job.site) {
+                continue;
+            }
             use crate::farming::FarmPhase;
             let status = match job.phase {
                 FarmPhase::Pickup if job.pickups > 0 => "Waiting for seed delivery".to_owned(),
@@ -136,7 +148,9 @@ impl Construction {
             ));
         }
         for (&index, job) in &self.gathering.orders {
-            if let Some(site) = land.site(index) {
+            if focus.is_none()
+                && let Some(site) = land.site(index)
+            {
                 let recipe = &catalog.gathering[site.recipe()];
                 let status = match job.phase {
                     GatherPhase::Approach => "Heading to the site".to_owned(),
@@ -151,6 +165,9 @@ impl Construction {
             }
         }
         for (&site, job) in &self.water_jobs {
+            if focus.is_some_and(|project| project + 1 != site) {
+                continue;
+            }
             let destination = site.checked_sub(1).map_or_else(|| "Camp".into(), site_name);
             let worker = (0..self.residents.len()).find(|&index| job.assigned_to(index));
             jobs.push(format!(
@@ -160,6 +177,22 @@ impl Construction {
             ));
         }
         jobs
+    }
+
+    pub(crate) fn lab_job_sites(&self) -> impl Iterator<Item = usize> + '_ {
+        self.plans
+            .iter()
+            .enumerate()
+            .filter_map(|(index, plan)| (!plan.removed).then_some(index))
+    }
+
+    pub(crate) fn lab_job_site_name<'a>(
+        &self,
+        catalog: &'a Catalog,
+        index: usize,
+    ) -> Option<&'a str> {
+        let plan = self.plans.get(index).filter(|plan| !plan.removed)?;
+        Some(catalog.projects[&plan.key].name.as_str())
     }
 
     pub(crate) fn lab_order(
