@@ -959,8 +959,7 @@ mod tests {
         press_button(&mut app, "Map lenses");
         press_button(&mut app, "Clear lens");
 
-        press_button(&mut app, "Manage");
-        press_button(&mut app, "Finances");
+        press_button(&mut app, "Savings");
         assert!(app.world().resource::<village::Village>().is_paused());
         let planning_water = river_vertex_colors(&mut app);
         simulate_river_frame(&mut app);
@@ -1006,8 +1005,7 @@ mod tests {
         assert!(!app.world().resource::<village::Village>().trade_open());
         assert!(!app.world().resource::<village::Village>().is_paused());
 
-        press_button(&mut app, "Manage");
-        press_button(&mut app, "Pantry");
+        press_button(&mut app, "Food portions");
         press_button(&mut app, "Purchases: resident pickup");
         press_button(&mut app, "Purchases: supplier freight");
         press_button(&mut app, "Automatic food purchases on");

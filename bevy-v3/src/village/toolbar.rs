@@ -46,6 +46,7 @@ enum Action {
     ClearLens,
     Manage,
     Panel(UtilityPanel),
+    ResourcePanel(UtilityPanel),
     ClosePanel,
     Page(bool),
     Project(usize),
@@ -240,6 +241,11 @@ impl Action {
             Self::LensSite(_) => village.lenses.network_view().is_some(),
             Self::Guide | Self::ConnectRoad | Self::UndoRoad | Self::FinishRoad => true,
             Self::Manage => !village.construction.menu && !village.construction.is_placing(),
+            Self::ResourcePanel(panel) => {
+                village.utility_panel.is_none()
+                    && Self::Manage.available(village)
+                    && Self::Panel(panel).available(village)
+            }
             Self::Panel(
                 UtilityPanel::Finances
                 | UtilityPanel::Trade
@@ -442,7 +448,10 @@ impl Action {
                 .into(),
             Self::Manage if picker.open => "Close menu".into(),
             Self::Manage => "Manage".into(),
-            Self::Panel(panel) => Self::PANELS
+            Self::ResourcePanel(UtilityPanel::Finances) => "Savings".into(),
+            Self::ResourcePanel(UtilityPanel::Pantry) => "Food portions".into(),
+            Self::ResourcePanel(UtilityPanel::Power) => "Battery".into(),
+            Self::Panel(panel) | Self::ResourcePanel(panel) => Self::PANELS
                 .iter()
                 .find_map(|(item, label)| (*item == panel).then_some(*label))
                 .unwrap_or_default()
@@ -698,6 +707,10 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 Action::Terrain,
                 Action::Advance(AdvanceAction::Toggle),
                 Action::Manage,
+                Action::ResourcePanel(UtilityPanel::Finances),
+                Action::ResourcePanel(UtilityPanel::Pantry),
+                Action::ResourcePanel(UtilityPanel::Power),
+                Action::ResourcePanel(UtilityPanel::Water),
                 Action::ClosePanel,
                 Action::InventoryView,
                 Action::InventorySearch,
@@ -1144,7 +1157,9 @@ fn handle_buttons(
                     picker.open = !picker.open;
                     picker.view_open = false;
                 }
-                Action::Panel(panel) if picker.open => {
+                Action::Panel(panel) | Action::ResourcePanel(panel)
+                    if picker.open || matches!(action, Action::ResourcePanel(_)) =>
+                {
                     village.utility_panel = Some(panel);
                     match panel {
                         UtilityPanel::Projects => village.projects_page = 0,
@@ -1388,6 +1403,7 @@ fn handle_buttons(
                     );
                 }
                 Action::Panel(_)
+                | Action::ResourcePanel(_)
                 | Action::Project(_)
                 | Action::Recipe(_)
                 | Action::RecipePage(_)
@@ -1650,6 +1666,7 @@ fn refresh(
             Action::NextWasteTank => show_water && action.available(&village),
             Action::AutomaticUpkeep | Action::UpkeepBudget { .. } => show_upkeep,
             Action::Panel(_) => picker.open,
+            Action::ResourcePanel(_) => !picker.open && !show_view && action.available(&village),
             _ => true,
         };
         let show = if matches!(
