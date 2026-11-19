@@ -178,6 +178,31 @@ impl Plugin for WeatherPlugin {
     }
 }
 
+#[derive(Default)]
+struct CloudCover {
+    scene: Option<(u32, usize, bool)>,
+    seconds: f64,
+    amount: f32,
+}
+
+impl CloudCover {
+    fn update(
+        &mut self,
+        scene: (u32, usize, bool),
+        seconds: f64,
+        weather: Weather,
+        dt: f32,
+    ) -> f32 {
+        if self.scene != Some(scene) || seconds < self.seconds {
+            self.scene = Some(scene);
+            self.amount = f32::from(weather.rain > 0.05);
+        }
+        self.seconds = seconds;
+        self.amount += (weather.cloud as f32 - self.amount) * (1. - (-dt / 3.).exp());
+        self.amount
+    }
+}
+
 fn sunlight(
     setup: Res<WorldSetup>,
     village: Res<Village>,
@@ -185,6 +210,7 @@ fn sunlight(
     mut ambient: ResMut<GlobalAmbientLight>,
     mut sky: ResMut<ClearColor>,
     mut fog: Single<&mut DistanceFog, With<VillageCamera>>,
+    (time, mut cover): (Res<Time<Real>>, Local<CloudCover>),
 ) {
     let seconds = if setup.open { 400.0 } else { village.seconds() };
     let weather = weather_at(seconds, setup.biome(), setup.seed());
@@ -192,7 +218,17 @@ fn sunlight(
     let angle = ((hour - 6.0) * std::f64::consts::PI / 12.0) as f32;
     let height = sun_height(seconds) as f32;
     let daylight = (height * 5.0).min(1.0);
-    let cloud = weather.cloud as f32;
+    let dt = if !setup.open && village.is_paused() {
+        0.
+    } else {
+        time.delta_secs().min(0.1)
+    };
+    let cloud = cover.update(
+        (setup.seed(), setup.biome(), setup.open),
+        seconds,
+        weather,
+        dt,
+    );
     let (light, transform) = &mut *sun;
     let direction = Vec3::new(angle.cos() * 85.0, (height * 75.0).max(4.0), 28.0);
     transform.rotation = Transform::from_translation(direction)
@@ -200,7 +236,14 @@ fn sunlight(
         .rotation;
     light.illuminance = 4_400.0 * daylight * (2.1 + height * 1.3) * (1.0 - cloud * 0.88);
     let warmth = (1.0 - (height * 2.0).min(1.0)) * (1.0 - cloud);
-    light.color = Color::srgb(1.0, 0.95 - warmth * 0.25, 0.86 - warmth * 0.45);
+    let daylight_color = Color::srgb_u8(255, 226, 168).to_linear();
+    let sunset_color = Color::srgb_u8(255, 173, 114).to_linear();
+    let overcast = Color::srgb_u8(214, 227, 239).to_linear();
+    light.color = Color::LinearRgba(
+        daylight_color
+            .mix(&sunset_color, warmth)
+            .mix(&overcast, cloud),
+    );
     ambient.color = Color::srgb(0.56 + 0.44 * daylight, 0.67 + 0.33 * daylight, 1.0);
     ambient.brightness = 45.0 + 430.0 * daylight * (0.8 + cloud * 0.35);
     sky.0 = Color::srgb(
@@ -279,6 +322,26 @@ fn rain(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn cloud_transitions_use_real_time_and_reset_for_a_new_scene() {
+        let mut cover = CloudCover::default();
+        let dry = Weather {
+            rain: 0.,
+            cloud: 0.,
+            temperature: 20.,
+        };
+        let wet = Weather {
+            rain: 1.,
+            cloud: 1.,
+            temperature: 20.,
+        };
+        assert_eq!(cover.update((42, 0, false), 0., dry, 0.), 0.);
+        assert_eq!(cover.update((42, 0, false), 1., wet, 0.), 0.);
+        let after = cover.update((42, 0, false), 1., wet, 3.);
+        assert!((after - (1. - (-1_f32).exp())).abs() < 0.000001);
+        assert_eq!(cover.update((43, 0, false), 0., wet, 0.), 1.);
+    }
 
     #[test]
     fn forecasts_match_the_source_climate_model() {
