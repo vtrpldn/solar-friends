@@ -1291,7 +1291,7 @@ fn village_input(
         if let Some(position) = pointer.clicked.map(|hit| hit.cell)
             && town.construction.is_placing()
         {
-            town.construction.plan(
+            town.construction.place_blueprint(
                 &catalog,
                 &mut town.stock,
                 ConstructionSite {
@@ -1304,6 +1304,7 @@ fn village_input(
                     seconds: town.clock,
                     round_trip_km: setup.round_trip_km(),
                 },
+                keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]),
             );
         } else if let Some(position) = pointer.clicked.map(|hit| hit.cell)
             && !town.construction.menu
@@ -1587,7 +1588,9 @@ fn show_hud(
     } else if village.paused && !village.construction.menu {
         "B Build · Space Resume".into()
     } else {
-        village.construction.instructions(&catalog)
+        village
+            .construction
+            .instructions(&catalog, village.stock.sandbox)
     };
     let speed = SPEEDS[village.speed].1;
     let stock = if village.stock.sandbox {

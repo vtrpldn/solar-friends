@@ -550,7 +550,7 @@ impl Construction {
         }
     }
 
-    pub fn instructions(&self, catalog: &Catalog) -> String {
+    pub fn instructions(&self, catalog: &Catalog, sandbox: bool) -> String {
         if self.moving.is_some() {
             return format!(
                 "Click destination · R Rotate {}° · B Cancel move\n{}",
@@ -569,7 +569,7 @@ impl Construction {
         }
         if self.selection.as_deref() == Some("field") {
             return format!(
-                "Cultivated field · {} × {} cells\n[ ] Width · Shift [ ] Depth · R Rotate {}°\nClick to designate · B Close\n{}",
+                "Cultivated field · {} × {} cells\n[ ] Width · Shift [ ] Depth · R Rotate {}°\nClick to designate · Shift-click Repeat · B Close\n{}",
                 self.field_size.x,
                 self.field_size.y,
                 u32::from(self.rotation) * 90,
@@ -617,8 +617,13 @@ impl Construction {
                 details.push_str("\nMaterials\n");
                 details.push_str(&bill);
             }
+            let repeat = if sandbox || definition.repeatable {
+                " · Shift-click Repeat"
+            } else {
+                ""
+            };
             return format!(
-                "{details}\nClick to plan · R Rotate ({degrees}°) · B Close\n{}",
+                "{details}\nClick to plan · R Rotate ({degrees}°){repeat} · B Close\n{}",
                 self.status
             );
         }
@@ -661,6 +666,31 @@ impl Construction {
             pages,
             self.status
         )
+    }
+
+    pub fn place_blueprint(
+        &mut self,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        site: ConstructionSite,
+        position: IVec2,
+        clock: TownClock,
+        repeat: bool,
+    ) {
+        let keep = self
+            .selection
+            .as_ref()
+            .filter(|key| {
+                repeat
+                    && self.moving.is_none()
+                    && !self.planning_roads()
+                    && (stock.sandbox || catalog.projects[*key].repeatable)
+            })
+            .cloned();
+        self.plan(catalog, stock, site, position, clock);
+        if let Some(key) = keep {
+            self.selection = Some(key);
+        }
     }
 
     pub fn plan(
@@ -1975,6 +2005,34 @@ mod tests {
         assert_eq!(construction.plans[0].pickups, 0);
         assert_eq!(stock.balance(), 872_824);
         assert!(construction.valid_save(&catalog, &stock));
+    }
+
+    #[test]
+    fn shift_placement_keeps_repeatable_blueprints_selected() {
+        let setup = WorldSetup::default();
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let terrain = setup.terrain();
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp: IVec2::new(36, 36),
+        };
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
+        let mut village = Construction {
+            selection: Some("field".into()),
+            ..default()
+        };
+        village.place_blueprint(&catalog, &mut stock, site, IVec2::new(40, 36), clock, true);
+        assert_eq!(village.plans.len(), 1);
+        assert_eq!(village.selection.as_deref(), Some("field"));
+        village.place_blueprint(&catalog, &mut stock, site, IVec2::new(45, 36), clock, false);
+        assert_eq!(village.plans.len(), 2);
+        assert!(village.selection.is_none());
     }
 
     #[test]
