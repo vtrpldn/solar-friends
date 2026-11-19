@@ -49,6 +49,29 @@ pub(super) struct LensPicker {
 }
 
 impl LensPicker {
+    pub(super) fn toggle(&mut self) {
+        self.open = !self.open;
+        self.next_page = false;
+    }
+
+    pub(super) fn choose(&mut self, lens: Option<MapLens>) {
+        self.active = lens;
+        self.network_site = None;
+        self.open = false;
+    }
+
+    pub(super) fn choices(&self) -> &'static [(KeyCode, MapLens, &'static str)] {
+        if self.next_page {
+            &SECOND_PAGE
+        } else {
+            &LENSES
+        }
+    }
+
+    pub(super) fn turn_page(&mut self) {
+        self.next_page = !self.next_page;
+    }
+
     pub(super) fn network_view(&self) -> Option<NetworkView> {
         match self.active {
             Some(MapLens::Power) => Some(NetworkView::Power),
@@ -61,33 +84,22 @@ impl LensPicker {
     pub(super) fn controls(&mut self, keys: &ButtonInput<KeyCode>, material_count: usize) -> bool {
         let shift = keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]);
         if shift && keys.just_pressed(KeyCode::KeyL) {
-            self.open = !self.open;
-            self.next_page = false;
+            self.toggle();
             return true;
         }
         if self.open {
             if keys.just_pressed(KeyCode::Escape) {
                 self.open = false;
             } else if keys.just_pressed(KeyCode::Digit0) {
-                self.active = None;
-                self.network_site = None;
-                self.open = false;
+                self.choose(None);
             } else if keys.any_just_pressed([KeyCode::PageUp, KeyCode::PageDown]) {
-                self.next_page = !self.next_page;
-            } else if self.next_page {
-                for (key, lens, _) in SECOND_PAGE {
-                    if keys.just_pressed(key) {
-                        self.active = Some(lens);
-                        self.network_site = None;
-                        self.open = false;
-                    }
-                }
-            } else if let Some(&(_, lens, _)) =
-                LENSES.iter().find(|(key, _, _)| keys.just_pressed(*key))
+                self.turn_page();
+            } else if let Some(&(_, lens, _)) = self
+                .choices()
+                .iter()
+                .find(|(key, _, _)| keys.just_pressed(*key))
             {
-                self.active = Some(lens);
-                self.network_site = None;
-                self.open = false;
+                self.choose(Some(lens));
             }
             return true;
         }

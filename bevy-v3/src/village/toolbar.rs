@@ -27,6 +27,10 @@ enum Action {
     Pause,
     Speed,
     Guide,
+    Lenses,
+    Lens(usize),
+    LensPage,
+    ClearLens,
     Manage,
     Panel(UtilityPanel),
     ClosePanel,
@@ -72,6 +76,14 @@ impl Action {
     ];
 
     fn available(self, village: &Village) -> bool {
+        if matches!(
+            self,
+            Self::Lenses | Self::Lens(_) | Self::LensPage | Self::ClearLens
+        ) {
+            return !village.guide.open()
+                && !village.construction.editing_search
+                && (matches!(self, Self::Lenses) || village.lenses.open);
+        }
         if matches!(self, Self::Guide) {
             return !village.construction.editing_search;
         }
@@ -146,6 +158,7 @@ impl Action {
                     && !village.construction.farming.open
                     && village.utility_panel.is_none()
             }
+            Self::Lenses | Self::Lens(_) | Self::LensPage | Self::ClearLens => false,
             Self::Guide | Self::ConnectRoad | Self::UndoRoad | Self::FinishRoad => true,
             Self::Manage => !village.construction.menu && !village.construction.is_placing(),
             Self::Panel(
@@ -243,6 +256,17 @@ impl Action {
             Self::Speed => format!("{}×", SPEEDS[village.speed].1),
             Self::Guide if village.guide.open() => "Close guide".into(),
             Self::Guide => "Guide".into(),
+            Self::Lenses if village.lenses.open => "Close lenses".into(),
+            Self::Lenses => "Map lenses".into(),
+            Self::LensPage => "Other lenses".into(),
+            Self::ClearLens => "Clear lens".into(),
+            Self::Lens(row) => village
+                .lenses
+                .choices()
+                .get(row)
+                .map(|(_, _, name)| *name)
+                .unwrap_or_default()
+                .into(),
             Self::Manage if picker.open => "Close menu".into(),
             Self::Manage => "Manage".into(),
             Self::Panel(panel) => Self::PANELS
@@ -412,6 +436,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 Action::Pause,
                 Action::Speed,
                 Action::Guide,
+                Action::Lenses,
             ] {
                 spawn_button(row, &assets, action);
             }
@@ -437,6 +462,11 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 BackgroundColor(Color::srgb_u8(31, 45, 35)),
             ))
             .with_children(|menu| {
+                for row in 0..9 {
+                    spawn_button(menu, &assets, Action::Lens(row));
+                }
+                spawn_button(menu, &assets, Action::LensPage);
+                spawn_button(menu, &assets, Action::ClearLens);
                 for action in [
                     AdvanceAction::Adjust(-7),
                     AdvanceAction::Adjust(-1),
@@ -673,6 +703,17 @@ fn handle_buttons(
                 Action::ResizeField(_) => {}
                 Action::Pause => village.paused = !village.paused,
                 Action::Speed => village.speed = (village.speed + 1) % SPEEDS.len(),
+                Action::Lenses => {
+                    village.lenses.toggle();
+                    picker.open = false;
+                }
+                Action::Lens(row) => {
+                    if let Some(&(_, lens, _)) = village.lenses.choices().get(row) {
+                        village.lenses.choose(Some(lens));
+                    }
+                }
+                Action::LensPage => village.lenses.turn_page(),
+                Action::ClearLens => village.lenses.choose(None),
                 Action::Guide => {
                     village.guide.toggle();
                     picker.open = false;
@@ -882,6 +923,7 @@ fn refresh(
     if toolbar.display == Display::None {
         return;
     }
+    let show_lenses = Action::LensPage.available(&village);
     let show_beds = !picker.open && Action::Farm(FarmControl::NextBed).available(&village);
     let show_recipes = !picker.open && Action::RecipePage(true).available(&village);
     let recipes = if show_recipes {
@@ -928,7 +970,8 @@ fn refresh(
     picker.home_page = picker.home_page.min(home_pages - 1);
     let homes = &homes[(picker.home_page * HOME_ROWS)..];
     picker.visible_homes = std::array::from_fn(|row| homes.get(row).map(|option| option.0));
-    menu.display = if show_beds
+    menu.display = if show_lenses
+        || show_beds
         || show_recipes
         || show_selected_project
         || show_advance
@@ -953,6 +996,8 @@ fn refresh(
     }
     for (&action, &interaction, children, mut background, mut node) in &mut buttons {
         let show = match action {
+            Action::Lens(row) => show_lenses && row < village.lenses.choices().len(),
+            Action::LensPage | Action::ClearLens => show_lenses,
             Action::Advance(AdvanceAction::Toggle) => true,
             Action::Volume { .. } => false,
             Action::Advance(_) => show_advance,
