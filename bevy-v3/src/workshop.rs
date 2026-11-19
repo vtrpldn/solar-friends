@@ -174,6 +174,7 @@ fn show_inspection_actions(
     for (action, mut node) in &mut buttons {
         let available = match action {
             InspectionAction::Model => workshop.show_proof,
+            InspectionAction::Light => true,
             InspectionAction::Proof => !workshop.show_proof && !workshop.together,
             InspectionAction::Sheet | InspectionAction::Placement | InspectionAction::Source => {
                 !workshop.together
@@ -640,7 +641,7 @@ fn show_model(
     }
     if workshop.show_proof {
         text.set_if_neq(Text::new(format!(
-            "{} · Sprite Proof · {mode}\n0° · 90° · 180° · 270°\nF6 Export sheet · F7 Return to model\n{}",
+            "{} · Sprite Proof · {mode}\n0° · 90° · 180° · 270°\nN Lighting · F6 Export sheet · F7 Return to model\n{}",
             project.name, workshop.export_notice
         )));
         return;

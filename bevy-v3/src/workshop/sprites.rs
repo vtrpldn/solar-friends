@@ -18,6 +18,7 @@ pub(super) struct SpriteCapture {
     frames: Vec<Frame>,
     destination: Destination,
     placement: serde_json::Value,
+    night: bool,
     warmup: Option<u8>,
     started: std::time::Instant,
     light: Entity,
@@ -153,7 +154,9 @@ pub(super) fn start(
     spawner: Res<SceneSpawner>,
 ) {
     let toggle_proof = input.keys.just_pressed(KeyCode::F7);
-    let proof = toggle_proof || input.clicked(InspectionAction::Proof);
+    let change_light = workshop.show_proof
+        && (input.keys.just_pressed(KeyCode::KeyN) || input.clicked(InspectionAction::Light));
+    let proof = toggle_proof || change_light || input.clicked(InspectionAction::Proof);
     let export = input.keys.just_pressed(KeyCode::F6) || input.clicked(InspectionAction::Sheet);
     let export_placement = input.clicked(InspectionAction::Placement);
     let show_model = input.clicked(InspectionAction::Model);
@@ -170,7 +173,8 @@ pub(super) fn start(
         return;
     }
     let id = &workshop.assets[workshop.selected];
-    let light = if workshop.night { "night" } else { "day" };
+    let night = workshop.night ^ change_light;
+    let light = if night { "night" } else { "day" };
     let destination = if proof {
         Destination::Proof
     } else {
@@ -185,11 +189,15 @@ pub(super) fn start(
     };
     if let Some(cached) = &workshop.proof
         && cached.asset == *id
-        && cached.night == workshop.night
+        && cached.night == night
         && let Some(image) = images.get(&cached.image)
     {
         match destination {
-            Destination::Proof => workshop.show_proof = true,
+            Destination::Proof => {
+                workshop.night = night;
+                workshop.show_proof = true;
+                workshop.export_notice.clear();
+            }
             Destination::Placement(path) => {
                 workshop.export_notice = placement_notice(&cached.placement, &path);
             }
@@ -298,7 +306,7 @@ pub(super) fn start(
             pending: None,
         });
     }
-    let (illuminance, color, _, _) = lighting(workshop.night);
+    let (illuminance, color, _, _) = lighting(night);
     let light_entity = commands
         .spawn((
             DirectionalLight {
@@ -314,6 +322,7 @@ pub(super) fn start(
         frames,
         destination,
         placement,
+        night,
         warmup: None,
         started: std::time::Instant::now(),
         light: light_entity,
@@ -397,6 +406,7 @@ pub(super) fn progress(
     let image = sheet_image(&capture);
     match &capture.destination {
         Destination::Proof => {
+            workshop.night = capture.night;
             workshop.show_proof = true;
             workshop.export_notice.clear();
         }
@@ -409,7 +419,7 @@ pub(super) fn progress(
     }
     workshop.proof = Some(SpriteProof {
         asset: workshop.assets[workshop.selected].clone(),
-        night: workshop.night,
+        night: capture.night,
         image: images.add(image),
         placement: capture.placement.clone(),
     });
