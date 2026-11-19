@@ -9,6 +9,7 @@ enum Action {
     Manage,
     Panel(UtilityPanel),
     ClosePanel,
+    Page(bool),
 }
 
 impl Action {
@@ -47,11 +48,18 @@ impl Action {
             }
             Self::Guide => true,
             Self::Manage => !village.construction.menu && !village.construction.is_placing(),
-            Self::Panel(UtilityPanel::Finances | UtilityPanel::Trade | UtilityPanel::Pantry) => {
-                !village.stock.sandbox
-            }
+            Self::Panel(
+                UtilityPanel::Finances
+                | UtilityPanel::Trade
+                | UtilityPanel::Pantry
+                | UtilityPanel::Upkeep,
+            ) => !village.stock.sandbox,
             Self::Panel(_) => true,
             Self::ClosePanel => village.utility_panel.is_some(),
+            Self::Page(_) => matches!(
+                village.utility_panel,
+                Some(UtilityPanel::Projects | UtilityPanel::Inventory | UtilityPanel::Events)
+            ),
         }
     }
 
@@ -72,6 +80,8 @@ impl Action {
                 .unwrap_or_default()
                 .into(),
             Self::ClosePanel => "Close panel".into(),
+            Self::Page(false) => "Previous page".into(),
+            Self::Page(true) => "Next page".into(),
         }
     }
 }
@@ -120,6 +130,8 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
         ))
         .with_children(|row| {
             for action in [
+                Action::Page(false),
+                Action::Page(true),
                 Action::Build,
                 Action::Manage,
                 Action::Pause,
@@ -169,6 +181,7 @@ fn spawn_button(parent: &mut ChildSpawnerCommands, assets: &AssetServer, action:
 
 fn handle_buttons(
     (setup, saves, sound): (Res<WorldSetup>, Res<SaveMenu>, Res<SoundSettings>),
+    catalog: Res<Catalog>,
     mut village: ResMut<Village>,
     mut picker: ResMut<PanelPicker>,
     keyboard: Res<ButtonInput<KeyCode>>,
@@ -197,17 +210,37 @@ fn handle_buttons(
                 Action::Manage => picker.open = !picker.open,
                 Action::Panel(panel) if picker.open => {
                     village.utility_panel = Some(panel);
+                    match panel {
+                        UtilityPanel::Projects => village.projects_page = 0,
+                        UtilityPanel::Inventory => village.inventory_page = 0,
+                        UtilityPanel::Events => village.event_page = 0,
+                        _ => {}
+                    }
                     picker.open = false;
                 }
                 Action::ClosePanel if picker.open => {
                     village.utility_panel = None;
                     picker.open = false;
                 }
+                Action::Page(forward) => village.change_panel_page(&catalog, forward),
                 Action::Panel(_) | Action::ClosePanel => {}
             }
         }
     }
 }
+
+type ToolbarButtons<'w, 's> = Query<
+    'w,
+    's,
+    (
+        &'static Action,
+        &'static Interaction,
+        &'static Children,
+        &'static mut BackgroundColor,
+        &'static mut Node,
+    ),
+    (Without<Toolbar>, Without<PanelMenu>),
+>;
 
 fn refresh(
     (setup, saves, sound): (Res<WorldSetup>, Res<SaveMenu>, Res<SoundSettings>),
@@ -215,7 +248,7 @@ fn refresh(
     picker: Res<PanelPicker>,
     mut toolbar: Single<&mut Node, (With<Toolbar>, Without<PanelMenu>)>,
     mut menu: Single<&mut Node, (With<PanelMenu>, Without<Toolbar>)>,
-    mut buttons: Query<(&Action, &Interaction, &Children, &mut BackgroundColor)>,
+    mut buttons: ToolbarButtons,
     mut labels: Query<&mut Text>,
 ) {
     toolbar.display = if visible(&village, &setup, &saves, &sound) {
@@ -231,7 +264,14 @@ fn refresh(
     } else {
         Display::None
     };
-    for (&action, &interaction, children, mut background) in &mut buttons {
+    for (&action, &interaction, children, mut background, mut node) in &mut buttons {
+        if matches!(action, Action::Page(_)) {
+            node.display = if action.available(&village) {
+                Display::Flex
+            } else {
+                Display::None
+            };
+        }
         background.0 = if !action.available(&village) {
             Color::srgb_u8(40, 53, 43)
         } else if interaction == Interaction::None {

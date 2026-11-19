@@ -315,6 +315,29 @@ impl Village {
         self.guide.open() || self.lenses.open || self.construction.editing_search
     }
 
+    fn change_panel_page(&mut self, catalog: &Catalog, forward: bool) {
+        let (pages, page) = match self.utility_panel {
+            Some(UtilityPanel::Projects) => (
+                self.construction
+                    .projects_panel(catalog, self.projects_page, self.open_projects_only)
+                    .0,
+                &mut self.projects_page,
+            ),
+            Some(UtilityPanel::Inventory) => (
+                self.construction
+                    .inventory_panel(catalog, &self.stock, self.inventory_page)
+                    .0,
+                &mut self.inventory_page,
+            ),
+            Some(UtilityPanel::Events) => (
+                self.construction.event_log(self.event_page).0,
+                &mut self.event_page,
+            ),
+            _ => return,
+        };
+        *page = (*page + if forward { 1 } else { pages - 1 }) % pages;
+    }
+
     pub fn trade_open(&self) -> bool {
         self.utility_panel == Some(UtilityPanel::Trade)
     }
@@ -913,15 +936,7 @@ fn village_input(
                 town.projects_page = 0;
             }
             if keyboard.any_just_pressed([KeyCode::PageUp, KeyCode::PageDown]) {
-                let pages = town
-                    .construction
-                    .projects_panel(&catalog, town.projects_page, town.open_projects_only)
-                    .0;
-                town.projects_page = if keyboard.just_pressed(KeyCode::PageDown) {
-                    (town.projects_page + 1) % pages
-                } else {
-                    (town.projects_page + pages - 1) % pages
-                };
+                town.change_panel_page(&catalog, keyboard.just_pressed(KeyCode::PageDown));
             }
             if let Some(point) = town.construction.focus_project(
                 &catalog,
@@ -944,15 +959,7 @@ fn village_input(
         }
         if town.utility_panel == Some(UtilityPanel::Inventory) {
             if keyboard.any_just_pressed([KeyCode::PageUp, KeyCode::PageDown]) {
-                let pages = town
-                    .construction
-                    .inventory_panel(&catalog, &town.stock, town.inventory_page)
-                    .0;
-                town.inventory_page = if keyboard.just_pressed(KeyCode::PageDown) {
-                    (town.inventory_page + 1) % pages
-                } else {
-                    (town.inventory_page + pages - 1) % pages
-                };
+                town.change_panel_page(&catalog, keyboard.just_pressed(KeyCode::PageDown));
             }
             return;
         }
@@ -965,11 +972,8 @@ fn village_input(
             town.event_page = 0;
         }
         if town.utility_panel == Some(UtilityPanel::Events) {
-            let pages = town.construction.event_log(town.event_page).0;
-            if keyboard.just_pressed(KeyCode::PageDown) {
-                town.event_page = (town.event_page + 1) % pages;
-            } else if keyboard.just_pressed(KeyCode::PageUp) {
-                town.event_page = (town.event_page + pages - 1) % pages;
+            if keyboard.any_just_pressed([KeyCode::PageUp, KeyCode::PageDown]) {
+                town.change_panel_page(&catalog, keyboard.just_pressed(KeyCode::PageDown));
             }
             return;
         }
