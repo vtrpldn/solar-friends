@@ -14,6 +14,8 @@ struct Collection {
     ids: Vec<String>,
     categories: Vec<String>,
     category: usize,
+    categories_open: bool,
+    category_cursor: usize,
     page: usize,
     turn: u8,
     detail: bool,
@@ -32,6 +34,10 @@ struct ThumbnailCamera(usize);
 struct ThumbnailModel(usize);
 #[derive(Component)]
 struct CollectionStatus;
+#[derive(Component)]
+struct CategoryMenu;
+#[derive(Component)]
+struct CategoryChoice(usize);
 
 #[derive(Component, Clone, Copy)]
 enum Control {
@@ -42,7 +48,7 @@ enum Control {
     Scale,
 }
 
-pub fn run() {
+pub fn run(requested_category: Option<&str>) {
     let catalog = WorkshopCatalog::default();
     let mut ids: Vec<_> = catalog.0.keys().cloned().collect();
     ids.sort_by(|a, b| catalog.0[a].name.cmp(&catalog.0[b].name).then(a.cmp(b)));
@@ -55,6 +61,13 @@ pub fn run() {
     categories.dedup();
     categories.insert(0, "All categories".into());
 
+    let category = requested_category
+        .and_then(|name| {
+            categories
+                .iter()
+                .position(|category| category.eq_ignore_ascii_case(name))
+        })
+        .unwrap_or_default();
     let mut app = App::new();
     app.add_plugins(DefaultPlugins.set(WindowPlugin {
         primary_window: Some(Window {
@@ -68,7 +81,9 @@ pub fn run() {
     .insert_resource(Collection {
         ids,
         categories,
-        category: 0,
+        category,
+        categories_open: false,
+        category_cursor: category,
         page: 0,
         turn: 0,
         detail: false,
@@ -77,7 +92,7 @@ pub fn run() {
         status: String::new(),
     })
     .add_systems(Startup, setup)
-    .add_systems(Update, (input, refresh).chain())
+    .add_systems(Update, (input, show_categories, refresh).chain())
     .add_observer(prepare_thumbnail);
     crate::village::register_building_models(&mut app);
     app.run();
@@ -85,6 +100,7 @@ pub fn run() {
 
 fn setup(
     mut commands: Commands,
+    collection: Res<Collection>,
     assets: Res<AssetServer>,
     mut images: ResMut<Assets<Image>>,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -159,7 +175,7 @@ fn setup(
             })
             .with_children(|tools| {
                 for (action, label) in [
-                    (Control::Category, "Next category"),
+                    (Control::Category, "Categories"),
                     (Control::Scale, "Toggle detail scale"),
                     (Control::Rotate, "Rotate 90°"),
                     (Control::Previous, "Previous page"),
@@ -232,6 +248,39 @@ fn setup(
                 });
             }
         });
+    commands
+        .spawn((
+            CategoryMenu,
+            GlobalZIndex(1),
+            Node {
+                display: Display::None,
+                position_type: PositionType::Absolute,
+                top: px(113),
+                left: px(20),
+                width: px(522),
+                padding: UiRect::all(px(10)),
+                flex_wrap: FlexWrap::Wrap,
+                row_gap: px(6),
+                column_gap: px(6),
+                ..default()
+            },
+            BackgroundColor(Color::srgb_u8(36, 58, 44)),
+        ))
+        .with_children(|menu| {
+            for (index, title) in collection.categories.iter().enumerate() {
+                menu.spawn((
+                    Button,
+                    CategoryChoice(index),
+                    Node {
+                        width: px(162),
+                        padding: UiRect::axes(px(12), px(7)),
+                        ..default()
+                    },
+                    BackgroundColor(Color::srgb_u8(62, 83, 65)),
+                ))
+                .with_child((Text::new(title.clone()), ui_font(&assets, 16.)));
+            }
+        });
 }
 
 fn prepare_thumbnail(
@@ -250,14 +299,44 @@ fn prepare_thumbnail(
     }
 }
 
+fn show_categories(
+    collection: Res<Collection>,
+    mut menu: Single<&mut Node, With<CategoryMenu>>,
+    mut choices: Query<(&CategoryChoice, &Interaction, &mut BackgroundColor)>,
+) {
+    let display = if collection.categories_open {
+        Display::Flex
+    } else {
+        Display::None
+    };
+    if menu.display != display {
+        menu.display = display;
+    }
+    if collection.categories_open {
+        for (CategoryChoice(index), interaction, mut color) in &mut choices {
+            let tint = if *index == collection.category_cursor || *interaction != Interaction::None
+            {
+                Color::srgb_u8(104, 128, 88)
+            } else {
+                Color::srgb_u8(62, 83, 65)
+            };
+            color.set_if_neq(BackgroundColor(tint));
+        }
+    }
+}
+
 fn input(
     mut collection: ResMut<Collection>,
     keys: Res<ButtonInput<KeyCode>>,
     controls: Query<(&Interaction, &Control), Changed<Interaction>>,
+    choices: Query<(&Interaction, &CategoryChoice), Changed<Interaction>>,
     mut cards: Query<(&Interaction, &Card, &mut BackgroundColor), Changed<Interaction>>,
     mut children: Local<Vec<Child>>,
 ) {
     children.retain_mut(|child| !matches!(child.try_wait(), Ok(Some(_))));
+    if keys.just_pressed(KeyCode::Escape) {
+        collection.categories_open = false;
+    }
     let keyboard = [
         (KeyCode::KeyC, Control::Category),
         (KeyCode::PageUp, Control::Previous),
@@ -276,8 +355,9 @@ fn input(
     for action in actions {
         match action {
             Control::Category => {
-                collection.category = (collection.category + 1) % collection.categories.len();
-                collection.page = 0;
+                collection.categories_open = !collection.categories_open;
+                collection.category_cursor = collection.category;
+                continue;
             }
             Control::Previous => collection.page = collection.page.saturating_sub(1),
             Control::Next => collection.page += 1,
@@ -285,6 +365,30 @@ fn input(
             Control::Scale => collection.detail = !collection.detail,
         }
         collection.dirty = true;
+    }
+    if collection.categories_open {
+        let next = keys.just_pressed(KeyCode::ArrowDown) || keys.just_pressed(KeyCode::ArrowRight);
+        let previous = keys.just_pressed(KeyCode::ArrowUp) || keys.just_pressed(KeyCode::ArrowLeft);
+        let count = collection.categories.len();
+        collection.category_cursor = (collection.category_cursor + usize::from(next) + count
+            - usize::from(previous))
+            % count;
+        let choice = choices
+            .iter()
+            .find_map(|(interaction, CategoryChoice(index))| {
+                (*interaction == Interaction::Pressed).then_some(*index)
+            })
+            .or_else(|| {
+                keys.any_just_pressed([KeyCode::Enter, KeyCode::NumpadEnter])
+                    .then_some(collection.category_cursor)
+            });
+        if let Some(index) = choice {
+            collection.category = index;
+            collection.categories_open = false;
+            collection.page = 0;
+            collection.dirty = true;
+        }
+        return;
     }
     for (interaction, Card(slot), mut background) in &mut cards {
         background.0 = if *interaction == Interaction::None {
