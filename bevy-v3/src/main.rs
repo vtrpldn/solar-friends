@@ -288,7 +288,7 @@ mod tests {
     use super::*;
     use bevy::{asset::AssetPlugin, gizmos::GizmoPlugin, transform::TransformPlugin};
 
-    fn press_setup_button(app: &mut App, label: &str) {
+    fn press_button(app: &mut App, label: &str) {
         let world = app.world_mut();
         let button = world
             .query_filtered::<(Entity, &Children), With<Button>>()
@@ -299,7 +299,17 @@ mod tests {
                     .any(|child| world.get::<Text>(child).is_some_and(|text| text.0 == label))
                     .then_some(entity)
             })
-            .expect("setup button");
+            .unwrap_or_else(|| panic!("missing button: {label}"));
+        let mut ancestor = Some(button);
+        while let Some(entity) = ancestor {
+            assert!(
+                world
+                    .get::<Node>(entity)
+                    .is_none_or(|node| node.display != Display::None),
+                "hidden button: {label}"
+            );
+            ancestor = world.get::<ChildOf>(entity).map(ChildOf::parent);
+        }
         *world
             .get_mut::<Interaction>(button)
             .expect("button interaction") = Interaction::Pressed;
@@ -378,11 +388,45 @@ mod tests {
         app.world_mut()
             .resource_mut::<ButtonInput<KeyCode>>()
             .reset_all();
+        press_button(&mut app, "Pause");
+        assert!(app.world().resource::<village::Village>().is_paused());
+        press_button(&mut app, "Resume");
+        assert!(!app.world().resource::<village::Village>().is_paused());
+
+        press_button(&mut app, "1×");
+        press_button(&mut app, "4×");
+        press_button(&mut app, "8×");
+        press_button(&mut app, "16×");
+        press_button(&mut app, "1×");
+
+        press_button(&mut app, "Guide");
+        assert!(
+            app.world()
+                .resource::<village::Village>()
+                .map_input_blocked()
+        );
+        press_button(&mut app, "Reference");
+        press_button(&mut app, "Growing autonomy");
+        press_button(&mut app, "Chapter index");
+        press_button(&mut app, "Close guide");
+        assert!(
+            !app.world()
+                .resource::<village::Village>()
+                .map_input_blocked()
+        );
+
+        press_button(&mut app, "Manage");
+        press_button(&mut app, "Trade");
+        assert!(app.world().resource::<village::Village>().trade_open());
+        press_button(&mut app, "Manage");
+        press_button(&mut app, "Close panel");
+        assert!(!app.world().resource::<village::Village>().trade_open());
+
         app.world_mut().resource_mut::<WorldSetup>().open = true;
         app.world_mut().run_schedule(Update);
-        press_setup_button(&mut app, "Start new village");
+        press_button(&mut app, "Start new village");
         assert!(app.world().resource::<WorldSetup>().open);
-        press_setup_button(&mut app, "Resume current village");
+        press_button(&mut app, "Resume current village");
         assert!(!app.world().resource::<WorldSetup>().open);
         assert_eq!(
             app.world().resource::<village::Village>().camp,
@@ -391,8 +435,8 @@ mod tests {
 
         app.world_mut().resource_mut::<WorldSetup>().open = true;
         app.world_mut().run_schedule(Update);
-        press_setup_button(&mut app, "Start new village");
-        press_setup_button(&mut app, "Confirm new village");
+        press_button(&mut app, "Start new village");
+        press_button(&mut app, "Confirm new village");
         app.world_mut().run_schedule(Update);
         assert!(!app.world().resource::<WorldSetup>().open);
         assert!(app.world().resource::<village::Village>().camp.is_none());
