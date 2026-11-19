@@ -257,11 +257,16 @@ impl Construction {
             self.trade.purchases,
         ));
         if let Some(order) = &self.trade.delivery {
-            let hours = (order.eta - clock.seconds).max(0.0) * 0.45 / 60.0;
-            display.push_str(&format!(
-                "\nFreight: {} · {:.1}h remaining",
-                catalog.materials[&order.material].name, hours
-            ));
+            let name = &catalog.materials[&order.material].name;
+            let arrival = order.eta - clock.seconds;
+            let status = if arrival > 0.0 {
+                format!("{:.1}h remaining", arrival / crate::weather::HOUR)
+            } else if u64::from(order.quantity) > maximum.saturating_sub(used) {
+                "Arrived · Waiting for storage space".into()
+            } else {
+                "Arrived · Ready to unload".into()
+            };
+            display.push_str(&format!("\nFreight · {name} · {status}"));
         }
         if let Some(freight) = self.construction_freight_status(clock.seconds) {
             display.push('\n');
@@ -278,5 +283,44 @@ impl Construction {
             display.push_str(&self.trade.notice);
         }
         display
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::setup::WorldSetup;
+
+    #[test]
+    fn trade_panel_distinguishes_freight_arrival_from_unloading() {
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);
+        let mut village = Construction::default();
+        let mut clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
+        village
+            .buy_from_town(&catalog, &mut stock, clock, "wood", true)
+            .unwrap();
+        assert!(
+            village
+                .trade_status(&catalog, &stock, clock)
+                .contains("h remaining")
+        );
+
+        clock.seconds = village.trade.delivery.as_ref().unwrap().eta;
+        assert!(
+            village
+                .trade_status(&catalog, &stock, clock)
+                .contains("Ready to unload")
+        );
+        let space = village.storage_space(&catalog, &stock) as u32;
+        stock.receive(&BTreeMap::from([("stone".into(), space)]));
+        assert!(
+            village
+                .trade_status(&catalog, &stock, clock)
+                .contains("Waiting for storage space")
+        );
     }
 }

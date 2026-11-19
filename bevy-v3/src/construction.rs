@@ -2003,7 +2003,6 @@ impl Construction {
         stock
             .equipment
             .release(|worker, task| self.active_tool_task(worker, task));
-        let space = self.storage_space(catalog, stock);
         let locked = self.booked_trade_orders();
         for index in
             self.trade
@@ -2011,7 +2010,20 @@ impl Construction {
         {
             self.removed_trade_order(index);
         }
-        self.trade.receive_goods(stock, space, clock.seconds);
+        let space = self.storage_space(catalog, stock);
+        if let Some(order) = self.trade.receive_goods(stock, space, clock.seconds) {
+            let item = &catalog.materials[&order.material];
+            let message = if order.quantity == 0 {
+                format!("Supplier freight arrived with no usable {}.", item.name)
+            } else {
+                format!(
+                    "Supplier delivered {} of {}.",
+                    item.quantity_text(u64::from(order.quantity)),
+                    item.name,
+                )
+            };
+            self.record_event(clock.seconds, message);
+        }
         let space = self.storage_space(catalog, stock);
         self.trade.maintain_pantry(
             catalog,

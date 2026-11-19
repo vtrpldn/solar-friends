@@ -358,18 +358,20 @@ impl Trade {
                 .map_or(0, |order| u64::from(order.quantity))
     }
 
-    pub fn receive_goods(&mut self, stock: &mut Stock, space: u64, clock: f64) {
-        let Some(order) = &self.delivery else { return };
-        if order.eta <= clock && u64::from(order.quantity) <= space {
-            let order = self.delivery.take().expect("arrived freight");
-            let goods = BTreeMap::from([(order.material, order.quantity)]);
-            if let Some(lots) = order.food {
-                stock.receive_with_lots(&goods, lots);
-            } else {
-                stock.receive(&goods);
-            }
-            self.purchases = self.purchases.saturating_add(1);
+    pub fn receive_goods(&mut self, stock: &mut Stock, space: u64, clock: f64) -> Option<Delivery> {
+        let order = self.delivery.as_ref()?;
+        if order.eta > clock || u64::from(order.quantity) > space {
+            return None;
         }
+        let mut order = self.delivery.take().expect("arrived freight");
+        let goods = BTreeMap::from([(order.material.clone(), order.quantity)]);
+        if let Some(lots) = order.food.take() {
+            stock.receive_with_lots(&goods, lots);
+        } else {
+            stock.receive(&goods);
+        }
+        self.purchases = self.purchases.saturating_add(1);
+        Some(order)
     }
 
     pub fn finish_trip(&mut self, index: usize, stock: &mut Stock, space: u64) -> bool {
@@ -670,11 +672,15 @@ mod tests {
             .unwrap();
         let eta = trade.delivery.as_ref().unwrap().eta;
         assert_eq!(stock.balance(), before - 43_200 - 4_460);
-        trade.receive_goods(&mut stock, 200, eta - 0.1);
-        trade.receive_goods(&mut stock, 10, eta);
+        assert!(trade.receive_goods(&mut stock, 200, eta - 0.1).is_none());
+        assert!(trade.receive_goods(&mut stock, 10, eta).is_none());
         assert_eq!(stock.available("wood"), wood);
         assert!(trade.delivery.is_some());
-        trade.receive_goods(&mut stock, 12, eta);
+        let delivered = trade.receive_goods(&mut stock, 12, eta).unwrap();
+        assert_eq!(delivered.material, "wood");
+        assert_eq!(delivered.quantity, 12);
+        assert!(trade.receive_goods(&mut stock, 12, eta + 1.0).is_none());
+        assert_eq!(trade.purchases, 1);
         assert_eq!(stock.available("wood"), wood + 12);
         assert!(trade.delivery.is_none());
     }
