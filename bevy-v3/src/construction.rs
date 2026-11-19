@@ -457,7 +457,9 @@ impl Construction {
                     || self.production.has_worker(index)
                     || self.working_change(index)
                     || self.working_upkeep(index)
-                    || self.working_water(index))
+                    || self.working_water(index)
+                    || self.gathering.workers_at_site(index)
+                    || self.residents[index].health.task.is_some())
             {
                 self.refresh_resident_route(index, catalog, site);
             } else {
@@ -2968,6 +2970,25 @@ mod tests {
         village.plans[0].removed = true;
         village.refresh_resident_crowding(&catalog, site);
         assert_eq!(village.lab_stop_reason(LabStop::Blocked, 0.0), None);
+        village.production.jobs[0].worker = None;
+        let worker = &mut village.residents[0];
+        worker.health.task = Some(crate::residents::NeedTask {
+            kind: Need::Hunger,
+            facility: None,
+            elapsed: 0.0,
+            duration: 12.0,
+            water: 0.0,
+            returning: false,
+            partner: None,
+            conversation: None,
+        });
+        village.plans[0].removed = false;
+        village.refresh_resident_crowding(&catalog, site);
+        assert_eq!(village.resident_action(&catalog, 0), "Waiting for access");
+        assert_eq!(village.lab_stop_reason(LabStop::Blocked, 0.0), None);
+        village.plans[0].removed = true;
+        village.refresh_resident_crowding(&catalog, site);
+        assert!(!village.residents[0].waiting_for_route());
     }
 
     #[test]
