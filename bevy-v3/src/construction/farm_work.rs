@@ -383,7 +383,10 @@ impl Construction {
         let jobs = &self.farming.jobs;
         let mut slots = self.residents.len().saturating_sub(
             jobs.iter()
-                .filter(|job| job.pickups == 0 && job.phase != FarmPhase::Return)
+                .filter(|job| {
+                    job.pickups == 0
+                        && !matches!(job.phase, FarmPhase::Return | FarmPhase::CollectOutput)
+                })
                 .count(),
         );
         if slots == 0 {
@@ -666,16 +669,55 @@ impl Construction {
                     self.residents[index].path = path;
                 }
                 FarmPhase::Return => {
-                    let units: u64 = job.output.values().map(|v| u64::from(*v)).sum();
+                    let load = super::production_work::production_load(catalog, &job.output);
+                    if load.is_empty() && job.output.values().any(|&units| units > 0) {
+                        continue;
+                    }
+                    let units = load.values().map(|&units| u64::from(units)).sum();
                     if self.storage_space(catalog, stock) < units {
                         continue;
                     }
-                    if let Some(lots) = &job.food_output {
-                        stock.receive_with_lots(&job.output, lots.clone());
+                    let job = &mut self.farming.jobs[job_index];
+                    if let Some(lots) = &mut job.food_output {
+                        stock.receive_with_lots(
+                            &load,
+                            super::production_work::take_load_lots(lots, &load),
+                        );
                     } else {
-                        stock.receive(&job.output);
+                        stock.receive(&load);
                     }
-                    self.farming.jobs.remove(job_index);
+                    for (id, units) in load {
+                        *job.output.get_mut(&id).expect("load is part of harvest") -= units;
+                    }
+                    job.output.retain(|_, units| *units > 0);
+                    if job.output.is_empty() {
+                        self.farming.jobs.remove(job_index);
+                    } else {
+                        job.phase = FarmPhase::CollectOutput;
+                    }
+                }
+                FarmPhase::CollectOutput => {
+                    if job.output.values().all(|&units| units == 0) {
+                        self.farming.jobs.remove(job_index);
+                        continue;
+                    }
+                    let at_bed = self
+                        .bed_aisles(job)
+                        .iter()
+                        .any(|aisle| aisle.work.distance(position) <= 0.01);
+                    let route = if at_bed {
+                        self.path_from_bed(catalog, site, job, position, SUPPLY_SPOTS[index])
+                    } else {
+                        self.path_to_bed(catalog, site, job, position)
+                    };
+                    if let Some(path) = route {
+                        self.residents[index].path = path;
+                        if at_bed {
+                            self.farming.jobs[job_index].phase = FarmPhase::Return;
+                        }
+                    } else {
+                        self.farming.jobs[job_index].retry = clock + 5.0;
+                    }
                 }
             }
         }
@@ -757,7 +799,7 @@ impl Construction {
         let path = &self.residents[worker].path;
         Some(match job.phase {
             // The final three points follow the authored bed aisle beyond the grid route.
-            FarmPhase::Walk => path.len().saturating_sub(3),
+            FarmPhase::Walk | FarmPhase::CollectOutput => path.len().saturating_sub(3),
             FarmPhase::Return if path.front().is_some_and(|point| point.round() != *point) => 0,
             _ => path.len(),
         })
@@ -912,6 +954,62 @@ mod resize_tests {
         assert!(
             !worker_cell.cmpge(corner).all() || !worker_cell.cmplt(corner + IVec2::splat(8)).all()
         );
+    }
+
+    #[test]
+    fn harvest_reloads_from_the_bed_after_a_partial_delivery_and_save() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let camp = IVec2::new(36, 36);
+        let terrain = setup.terrain().with_camp(camp);
+        let land = Land::default();
+        let ground = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut village = Construction {
+            selection: Some("field".into()),
+            ..default()
+        };
+        let corner = IVec2::new(44, 36);
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
+        village.plan(&catalog, &mut stock, ground, corner, clock);
+        village.select_facility(corner);
+        let mut input = ButtonInput::default();
+        input.press(KeyCode::KeyK);
+        input.press(KeyCode::Digit1);
+        village.farm_input(&catalog, &mut stock, &input, ground, clock);
+
+        let total = 100;
+        let initial = stock.available("greens");
+        let job = &mut village.farming.jobs[0];
+        job.phase = FarmPhase::Return;
+        job.worker = Some(0);
+        job.output = BTreeMap::from([("greens".into(), total)]);
+        job.food_output = Some(crate::food::fresh(&job.output, 0.0, &Default::default()));
+        village.residents[0].position = SUPPLY_SPOTS[0].as_vec2();
+        village.residents[0].path.clear();
+        village.tick_farm_jobs(&catalog, &mut stock, ground, 0.0, 0.1);
+        let first_load = stock.available("greens") - initial;
+        assert!((1..total).contains(&first_load));
+        let job = &village.farming.jobs[0];
+        assert!(job.phase == FarmPhase::CollectOutput);
+        assert_eq!(job.output["greens"], total - first_load);
+
+        village = serde_json::from_str(&serde_json::to_string(&village).unwrap()).unwrap();
+        for step in 1..6_000 {
+            village.tick_farm_jobs(&catalog, &mut stock, ground, f64::from(step) * 0.1, 0.1);
+            if village.farming.jobs.is_empty() {
+                break;
+            }
+        }
+        assert!(village.farming.jobs.is_empty());
+        assert_eq!(stock.available("greens"), initial + total);
     }
 
     #[test]

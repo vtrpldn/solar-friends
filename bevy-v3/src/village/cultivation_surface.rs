@@ -48,7 +48,7 @@ pub(super) fn show_beds(
     let jobs: HashMap<_, _> = farming
         .jobs
         .iter()
-        .filter(|job| job.phase != FarmPhase::Return)
+        .filter(|job| !matches!(job.phase, FarmPhase::Return | FarmPhase::CollectOutput))
         .map(|job| {
             (
                 (job.site, job.bed),

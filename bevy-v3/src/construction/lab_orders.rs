@@ -184,6 +184,7 @@ impl Construction {
                 FarmPhase::Walk => "Walking to the bed".to_owned(),
                 FarmPhase::Work => format!("{:.0}% worked", 100.0 * job.work / job.required),
                 FarmPhase::Return => "Returning to stores".to_owned(),
+                FarmPhase::CollectOutput => "Returning for the next harvest load".to_owned(),
             };
             jobs.push(format!(
                 "{} · Bed {} · {status} · {}",

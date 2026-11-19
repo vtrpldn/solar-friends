@@ -1737,6 +1737,10 @@ impl Construction {
             self.plans.get(index).is_some_and(|project| {
                 matches!(project.key.as_str(), "garden" | "greenhouse" | "field")
             })
+        }) && self.farming.jobs.iter().all(|job| {
+            job.output
+                .keys()
+                .all(|id| catalog.materials.contains_key(id))
         });
         let animals_valid = self.livestock.animals.iter().all(|(index, pen)| {
             self.plans

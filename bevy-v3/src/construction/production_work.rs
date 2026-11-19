@@ -1473,7 +1473,7 @@ pub(super) fn production_load(
     load
 }
 
-fn take_load_lots(
+pub(super) fn take_load_lots(
     lots: &mut crate::food::FoodLots,
     load: &BTreeMap<String, u32>,
 ) -> crate::food::FoodLots {

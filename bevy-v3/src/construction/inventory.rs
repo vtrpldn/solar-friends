@@ -23,6 +23,24 @@ fn add(ledger: &mut Ledger, id: &str, amount: u32, location: Location) {
     }
 }
 
+fn record_output(
+    ledger: &mut Ledger,
+    catalog: &Catalog,
+    output: &BTreeMap<String, u32>,
+    carrying: bool,
+) {
+    let load = if carrying {
+        super::production_work::production_load(catalog, output)
+    } else {
+        BTreeMap::new()
+    };
+    for (id, &amount) in output {
+        let carried = load.get(id).copied().unwrap_or(0);
+        add(ledger, id, carried, Location::Transit);
+        add(ledger, id, amount - carried, Location::Processing);
+    }
+}
+
 impl Construction {
     fn inventory<'a>(&self, catalog: &'a Catalog, stock: &Stock) -> Ledger<'a> {
         use crate::{farming::FarmPhase, production::Phase};
@@ -77,16 +95,12 @@ impl Construction {
             let recipe = &catalog.production[&job.recipe];
             if job.phase == Phase::Return {
                 let output = job.delivered_output.as_ref().unwrap_or(&recipe.output);
-                let load = if job.worker.is_some() && !job.returning_to_site {
-                    super::production_work::production_load(catalog, output)
-                } else {
-                    BTreeMap::new()
-                };
-                for (id, &amount) in output {
-                    let carried = load.get(id).copied().unwrap_or(0);
-                    add(&mut ledger, id, carried, Location::Transit);
-                    add(&mut ledger, id, amount - carried, Location::Processing);
-                }
+                record_output(
+                    &mut ledger,
+                    catalog,
+                    output,
+                    job.worker.is_some() && !job.returning_to_site,
+                );
             } else {
                 record(
                     &mut ledger,
@@ -96,8 +110,13 @@ impl Construction {
             }
         }
         for job in &self.farming.jobs {
-            if job.phase == FarmPhase::Return {
-                record(&mut ledger, &job.output, Location::Transit);
+            if matches!(job.phase, FarmPhase::Return | FarmPhase::CollectOutput) {
+                record_output(
+                    &mut ledger,
+                    catalog,
+                    &job.output,
+                    job.worker.is_some() && job.phase == FarmPhase::Return,
+                );
             } else {
                 let location = if job.pickups > 0 {
                     Location::Reserved

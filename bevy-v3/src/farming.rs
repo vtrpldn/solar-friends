@@ -125,6 +125,7 @@ pub enum FarmPhase {
     Walk,
     Work,
     Return,
+    CollectOutput,
 }
 
 #[derive(Deserialize, Serialize)]
