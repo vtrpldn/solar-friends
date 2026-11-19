@@ -541,6 +541,28 @@ impl Runner {
         Ok(())
     }
 
+    fn schedule(
+        &mut self,
+        catalog: &Catalog,
+        scheduled: ScheduledOrder,
+    ) -> Result<(), &'static str> {
+        if !(self.index..=self.scenario.steps).contains(&scheduled.step) {
+            return Err("Choose a step between the current step and the end of the scenario.");
+        }
+        if self.done() {
+            return Err("The scenario is complete.");
+        }
+        if scheduled.step == self.index {
+            return self.submit(catalog, scheduled.order);
+        }
+        let insertion = self
+            .scenario
+            .orders
+            .partition_point(|order| order.step <= scheduled.step);
+        self.scenario.orders.insert(insertion, scheduled);
+        Ok(())
+    }
+
     fn latest_bed_outcome(&self, site: usize, bed: usize) -> Option<&Outcome> {
         self.scenario
             .orders
@@ -780,33 +802,34 @@ fn lab_job_page(jobs: &[String], page: &mut usize, focus: &str, waiting_only: bo
 fn lab_order_page(runner: &Runner, page: &mut usize) -> String {
     use std::fmt::Write as _;
     const ROWS: usize = 9;
-    let count = runner.outcomes.len();
+    let count = runner.scenario.orders.len();
     let pages = count.div_ceil(ROWS).max(1);
     *page = (*page).min(pages - 1);
     let mut text = format!(
-        "Order history · Page {} of {pages}\nTab Switch view · Page Up/Down Browse\n",
+        "Scenario orders · Page {} of {pages}\nTab Switch view · Page Up/Down Browse\n",
         *page + 1
     );
     if count == 0 {
-        text.push_str("\nNo orders processed.");
+        text.push_str("\nNo scenario orders.");
     }
-    for (index, (scheduled, outcome)) in runner
+    for (index, scheduled) in runner
         .scenario
         .orders
         .iter()
-        .zip(&runner.outcomes)
         .enumerate()
         .rev()
         .skip(*page * ROWS)
         .take(ROWS)
     {
         let action = order_label(&scheduled.order);
-        let result = outcome.error.as_deref().unwrap_or("Accepted");
+        let result = runner.outcomes.get(index).map_or("Scheduled", |outcome| {
+            outcome.error.as_deref().unwrap_or("Accepted")
+        });
         let _ = write!(
             text,
             "\n#{} · Step {} · {action} · {result}",
             index + 1,
-            outcome.step
+            scheduled.step
         );
     }
     text
@@ -1370,11 +1393,29 @@ fn update_lab_window(
             events.clear();
         } else if keys.just_pressed(KeyCode::Enter) {
             events.clear();
-            let result = serde_json::from_str(&order)
+            #[derive(Deserialize)]
+            #[serde(untagged)]
+            enum OrderInput {
+                Scheduled(ScheduledOrder),
+                Now(LabOrder),
+            }
+            let result = serde_json::from_str::<OrderInput>(&order)
                 .map_err(|error| error.to_string())
-                .and_then(|order| runner.submit(&catalog, order).map_err(str::to_owned));
+                .and_then(|input| match input {
+                    OrderInput::Scheduled(scheduled) => {
+                        let step = scheduled.step;
+                        runner
+                            .schedule(&catalog, scheduled)
+                            .map_err(str::to_owned)?;
+                        Ok(format!("Order submitted for step {step}."))
+                    }
+                    OrderInput::Now(order) => {
+                        runner.submit(&catalog, order).map_err(str::to_owned)?;
+                        Ok(String::new())
+                    }
+                });
             match result {
-                Ok(()) => playback.notice.clear(),
+                Ok(notice) => playback.notice = notice,
                 Err(error) => {
                     playback.notice = error;
                     playback.order = Some(order);
@@ -1431,7 +1472,7 @@ fn update_lab_window(
     if let Some(order) = &playback.order {
         map.visible = false;
         panel.set_if_neq(Text::new(format!(
-            "Order at step {}\nEnter Submit · Esc Cancel\n\nExample {{\"type\":\"grid\",\"enabled\":false}}\n\n{order}▏\n{}",
+            "Order at step {}\nEnter Submit · Esc Cancel\n\nNow {{\"type\":\"grid\",\"enabled\":false}}\nLater {{\"step\":120,\"order\":{{\"type\":\"grid\",\"enabled\":false}}}}\n\n{order}▏\n{}",
             runner.index, playback.notice
         )));
         return;
@@ -2222,6 +2263,56 @@ mod tests {
         playback.set_speed(0);
         assert_eq!(playback.speed_label(), "Target 1×");
         assert_eq!(playback.debt, 0.0);
+    }
+
+    #[test]
+    fn live_scheduled_orders_take_effect_at_their_step_in_submission_order() {
+        let catalog = Catalog::default();
+        let scenario = serde_json::from_str(r#"{"steps":5}"#).unwrap();
+        let mut runner = Runner::new(scenario, None, &catalog).unwrap();
+        for (step, enabled) in [(4, true), (2, false), (4, false)] {
+            runner
+                .schedule(
+                    &catalog,
+                    ScheduledOrder {
+                        step,
+                        order: LabOrder::Grid { enabled },
+                    },
+                )
+                .unwrap();
+        }
+        assert!(
+            runner
+                .schedule(
+                    &catalog,
+                    ScheduledOrder {
+                        step: 6,
+                        order: LabOrder::Grid { enabled: true }
+                    }
+                )
+                .is_err()
+        );
+        runner.advance(&catalog);
+        assert!(!runner.village.construction.utilities.grid_off);
+        assert!(runner.outcomes.is_empty());
+        runner.advance(&catalog);
+        assert!(runner.village.construction.utilities.grid_off);
+        assert_eq!(runner.outcomes.len(), 1);
+        while !runner.done() {
+            runner.advance(&catalog);
+        }
+        assert!(runner.village.construction.utilities.grid_off);
+        assert_eq!(
+            runner
+                .outcomes
+                .iter()
+                .map(|outcome| outcome.step)
+                .collect::<Vec<_>>(),
+            [2, 4, 4]
+        );
+        let report =
+            serde_json::from_slice(&serde_json::to_vec(&runner.report()).unwrap()).unwrap();
+        assert_eq!(verify_report(report, &catalog).unwrap(), 5);
     }
 
     #[test]
