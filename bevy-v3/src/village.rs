@@ -153,6 +153,8 @@ pub struct Village {
     #[serde(skip)]
     inventory_page: usize,
     #[serde(skip)]
+    inventory_equipment: bool,
+    #[serde(skip)]
     projects_page: usize,
     #[serde(skip)]
     guide: guide::Guide,
@@ -412,6 +414,11 @@ impl Village {
         }
     }
 
+    fn toggle_inventory_view(&mut self) {
+        self.inventory_equipment = !self.inventory_equipment;
+        self.inventory_page = 0;
+    }
+
     fn change_panel_page(&mut self, catalog: &Catalog, forward: bool) {
         let (pages, page) = match self.utility_panel {
             Some(UtilityPanel::Pantry) => {
@@ -434,7 +441,12 @@ impl Village {
             ),
             Some(UtilityPanel::Inventory) => (
                 self.construction
-                    .inventory_panel(catalog, &self.stock, self.inventory_page)
+                    .inventory_panel(
+                        catalog,
+                        &self.stock,
+                        self.inventory_page,
+                        self.inventory_equipment,
+                    )
                     .0,
                 &mut self.inventory_page,
             ),
@@ -1102,6 +1114,9 @@ fn village_input(
             town.inventory_page = 0;
         }
         if town.utility_panel == Some(UtilityPanel::Inventory) {
+            if keyboard.just_pressed(KeyCode::Tab) {
+                town.toggle_inventory_view();
+            }
             if keyboard.any_just_pressed([KeyCode::PageUp, KeyCode::PageDown]) {
                 town.change_panel_page(&catalog, keyboard.just_pressed(KeyCode::PageDown));
             }
@@ -1620,7 +1635,12 @@ fn show_hud(
             label.push_str(
                 &village
                     .construction
-                    .inventory_panel(&catalog, &village.stock, village.inventory_page)
+                    .inventory_panel(
+                        &catalog,
+                        &village.stock,
+                        village.inventory_page,
+                        village.inventory_equipment,
+                    )
                     .1,
             );
             label.push('\n');

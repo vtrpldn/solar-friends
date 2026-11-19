@@ -7,6 +7,7 @@
       "price": 432,
       "supplier": 1536,
       "unit": "kg",
+      "equipment": false,
       "mass": 4,
       "volume": 0.012,
       "buyer": {
@@ -26,6 +27,7 @@
       "price": 30,
       "supplier": 256,
       "unit": "units",
+      "equipment": false,
       "mass": 2,
       "volume": 0.01,
       "buyer": {
@@ -45,6 +47,7 @@
       "price": 120,
       "supplier": 768,
       "unit": "units",
+      "equipment": false,
       "mass": 8,
       "volume": 0.035,
       "buyer": {
@@ -64,6 +67,7 @@
       "price": 50,
       "supplier": 128,
       "unit": "units",
+      "equipment": false,
       "mass": 2,
       "volume": 0.01,
       "buyer": {
@@ -83,6 +87,7 @@
       "price": 320,
       "supplier": 16,
       "unit": "units",
+      "equipment": false,
       "mass": 12,
       "volume": 0.35,
       "buyer": {
@@ -102,6 +107,7 @@
       "price": 40,
       "supplier": 16,
       "unit": "units",
+      "equipment": false,
       "mass": 2,
       "volume": 0.01,
       "buyer": {
@@ -121,6 +127,7 @@
       "price": 80,
       "supplier": 16,
       "unit": "units",
+      "equipment": false,
       "mass": 2,
       "volume": 0.01,
       "buyer": {
@@ -140,6 +147,7 @@
       "price": 30,
       "supplier": 160,
       "unit": "kg",
+      "equipment": false,
       "mass": 1,
       "volume": 0.004,
       "buyer": {
@@ -159,6 +167,7 @@
       "price": 10,
       "supplier": 40,
       "unit": "units",
+      "equipment": false,
       "mass": 0.02,
       "volume": 0.0001,
       "buyer": {
@@ -178,6 +187,7 @@
       "price": 30,
       "supplier": 160,
       "unit": "kg",
+      "equipment": false,
       "mass": 1,
       "volume": 0.002,
       "buyer": {
@@ -197,6 +207,7 @@
       "price": 10,
       "supplier": 40,
       "unit": "units",
+      "equipment": false,
       "mass": 0.1,
       "volume": 0.0002,
       "buyer": {
@@ -216,6 +227,7 @@
       "price": 30,
       "supplier": 160,
       "unit": "kg",
+      "equipment": false,
       "mass": 1,
       "volume": 0.003,
       "buyer": {
@@ -235,6 +247,7 @@
       "price": 10,
       "supplier": 40,
       "unit": "units",
+      "equipment": false,
       "mass": 0.1,
       "volume": 0.0002,
       "buyer": {
@@ -254,6 +267,7 @@
       "price": 30,
       "supplier": 128,
       "unit": "units",
+      "equipment": true,
       "mass": 1,
       "volume": 0.015,
       "buyer": {
@@ -273,6 +287,7 @@
       "price": 95,
       "supplier": 128,
       "unit": "units",
+      "equipment": true,
       "mass": 3,
       "volume": 0.025,
       "buyer": {
@@ -292,6 +307,7 @@
       "price": 120,
       "supplier": 128,
       "unit": "units",
+      "equipment": true,
       "mass": 4,
       "volume": 0.02,
       "buyer": {
@@ -311,6 +327,7 @@
       "price": 25,
       "supplier": 128,
       "unit": "units",
+      "equipment": true,
       "mass": 1,
       "volume": 0.04,
       "buyer": {
@@ -330,6 +347,7 @@
       "price": 55,
       "supplier": 128,
       "unit": "units",
+      "equipment": true,
       "mass": 2,
       "volume": 0.02,
       "buyer": {
@@ -349,6 +367,7 @@
       "price": 45,
       "supplier": 128,
       "unit": "units",
+      "equipment": true,
       "mass": 1,
       "volume": 0.015,
       "buyer": {
@@ -368,6 +387,7 @@
       "price": 180,
       "supplier": 128,
       "unit": "units",
+      "equipment": true,
       "mass": 15,
       "volume": 0.35,
       "buyer": {
@@ -387,6 +407,7 @@
       "price": 450,
       "supplier": 128,
       "unit": "units",
+      "equipment": true,
       "mass": 16,
       "volume": 0.5,
       "buyer": {
@@ -406,6 +427,7 @@
       "price": 25,
       "supplier": 128,
       "unit": "units",
+      "equipment": true,
       "mass": 2,
       "volume": 0.04,
       "buyer": {
@@ -425,6 +447,7 @@
       "price": 600,
       "supplier": 16,
       "unit": "units",
+      "equipment": false,
       "mass": 35,
       "volume": 0.35,
       "buyer": {
@@ -444,6 +467,7 @@
       "price": 65,
       "supplier": 128,
       "unit": "units",
+      "equipment": false,
       "mass": 2,
       "volume": 0.005,
       "buyer": {
@@ -463,6 +487,7 @@
       "price": 15,
       "supplier": 128,
       "unit": "units",
+      "equipment": false,
       "mass": 1,
       "volume": 0.003,
       "buyer": {
@@ -482,6 +507,7 @@
       "price": 8,
       "supplier": 128,
       "unit": "units",
+      "equipment": false,
       "mass": 1,
       "volume": 0.002,
       "buyer": {
@@ -501,6 +527,7 @@
       "price": 65,
       "supplier": 128,
       "unit": "units",
+      "equipment": false,
       "mass": 5,
       "volume": 0.04,
       "buyer": {
@@ -520,6 +547,7 @@
       "price": 96,
       "supplier": 1536,
       "unit": "kg",
+      "equipment": false,
       "mass": 6,
       "volume": 0.015,
       "buyer": {
@@ -539,6 +567,7 @@
       "price": 240,
       "supplier": 1536,
       "unit": "units",
+      "equipment": false,
       "mass": 1.5,
       "volume": 0.005,
       "buyer": {
@@ -558,6 +587,7 @@
       "price": 48,
       "supplier": 1536,
       "unit": "units",
+      "equipment": false,
       "mass": 3,
       "volume": 0.018,
       "buyer": {
@@ -577,6 +607,7 @@
       "price": 18,
       "supplier": 1536,
       "unit": "kg",
+      "equipment": false,
       "mass": 20,
       "volume": 0.015,
       "buyer": {
@@ -596,6 +627,7 @@
       "price": 42,
       "supplier": 1536,
       "unit": "kg",
+      "equipment": false,
       "mass": 20,
       "volume": 0.012,
       "buyer": {
@@ -615,6 +647,7 @@
       "price": 320,
       "supplier": 512,
       "unit": "units",
+      "equipment": false,
       "mass": 4,
       "volume": 0.04,
       "buyer": {
@@ -634,6 +667,7 @@
       "price": 80,
       "supplier": 1024,
       "unit": "kg",
+      "equipment": false,
       "mass": 18,
       "volume": 0.025,
       "buyer": {
@@ -653,6 +687,7 @@
       "price": 108,
       "supplier": 1536,
       "unit": "kg",
+      "equipment": false,
       "mass": 12,
       "volume": 0.012,
       "buyer": {
@@ -672,6 +707,7 @@
       "price": 144,
       "supplier": 64,
       "unit": "units",
+      "equipment": false,
       "mass": 2,
       "volume": 0.01,
       "buyer": {
@@ -691,6 +727,7 @@
       "price": 80,
       "supplier": 128,
       "unit": "units",
+      "equipment": false,
       "mass": 2,
       "volume": 0.01,
       "buyer": {
@@ -710,6 +747,7 @@
       "price": 1400,
       "supplier": 8,
       "unit": "units",
+      "equipment": false,
       "mass": 20,
       "volume": 0.12,
       "buyer": {
@@ -729,6 +767,7 @@
       "price": 6000,
       "supplier": 4,
       "unit": "units",
+      "equipment": false,
       "mass": 30,
       "volume": 0.05,
       "buyer": {
@@ -748,6 +787,7 @@
       "price": 160,
       "supplier": 16,
       "unit": "units",
+      "equipment": false,
       "mass": 2,
       "volume": 0.01,
       "buyer": {
@@ -767,6 +807,7 @@
       "price": 36,
       "supplier": 64,
       "unit": "units",
+      "equipment": true,
       "mass": 2,
       "volume": 0.01,
       "buyer": {
@@ -786,6 +827,7 @@
       "price": 48,
       "supplier": 192,
       "unit": "kg",
+      "equipment": false,
       "mass": 1,
       "volume": 0.002,
       "buyer": {
@@ -805,6 +847,7 @@
       "price": 96,
       "supplier": 192,
       "unit": "units",
+      "equipment": false,
       "mass": 1,
       "volume": 0.002,
       "buyer": {
@@ -824,6 +867,7 @@
       "price": 36,
       "supplier": 192,
       "unit": "units",
+      "equipment": false,
       "mass": 0.06,
       "volume": 0.0001,
       "buyer": {
@@ -843,6 +887,7 @@
       "price": 64,
       "supplier": 64,
       "unit": "kg",
+      "equipment": false,
       "mass": 1,
       "volume": 0.002,
       "buyer": {
@@ -862,6 +907,7 @@
       "price": 0,
       "supplier": 0,
       "unit": "kg",
+      "equipment": false,
       "mass": 1,
       "volume": 0.002,
       "buyer": {
@@ -881,6 +927,7 @@
       "price": 24,
       "supplier": 64,
       "unit": "units",
+      "equipment": false,
       "mass": 2,
       "volume": 0.01,
       "buyer": {
@@ -900,6 +947,7 @@
       "price": 40,
       "supplier": 32,
       "unit": "units",
+      "equipment": false,
       "mass": 2,
       "volume": 0.01,
       "buyer": {
@@ -919,6 +967,7 @@
       "price": 80,
       "supplier": 32,
       "unit": "units",
+      "equipment": false,
       "mass": 2,
       "volume": 0.01,
       "buyer": {
@@ -938,6 +987,7 @@
       "price": 24,
       "supplier": 96,
       "unit": "kg",
+      "equipment": false,
       "mass": 1,
       "volume": 0.002,
       "buyer": {
@@ -957,6 +1007,7 @@
       "price": 42,
       "supplier": 96,
       "unit": "L",
+      "equipment": false,
       "mass": 1,
       "volume": 0.002,
       "buyer": {
@@ -976,6 +1027,7 @@
       "price": 48,
       "supplier": 64,
       "unit": "kg",
+      "equipment": false,
       "mass": 1,
       "volume": 0.002,
       "buyer": {
@@ -995,6 +1047,7 @@
       "price": 1800,
       "supplier": 16,
       "unit": "units",
+      "equipment": false,
       "mass": 40,
       "volume": 0.4,
       "buyer": {
@@ -1014,6 +1067,7 @@
       "price": 400,
       "supplier": 8,
       "unit": "units",
+      "equipment": false,
       "mass": 15,
       "volume": 0.08,
       "buyer": {
@@ -1033,6 +1087,7 @@
       "price": 180,
       "supplier": 24,
       "unit": "units",
+      "equipment": false,
       "mass": 2,
       "volume": 0.025,
       "buyer": {

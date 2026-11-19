@@ -22,6 +22,7 @@ pub struct Material {
     pub price: f64,
     pub supplier: u32,
     unit: MaterialUnit,
+    pub equipment: bool,
     pub mass: f64,
     pub volume: f64,
     pub buyer: Buyer,

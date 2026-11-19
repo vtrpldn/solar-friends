@@ -133,23 +133,35 @@ impl Construction {
         catalog: &Catalog,
         stock: &Stock,
         page: usize,
+        equipment: bool,
     ) -> (usize, String) {
         use std::fmt::Write;
         const ROWS: usize = 9;
         let ledger = self.inventory(catalog, stock);
         let mut rows: Vec<_> = ledger
             .into_iter()
-            .filter(|(_, amounts)| amounts.iter().any(|&amount| amount > 0))
+            .filter(|(id, amounts)| {
+                catalog.materials[*id].equipment == equipment
+                    && amounts.iter().any(|&amount| amount > 0)
+            })
             .collect();
         rows.sort_by(|(a, _), (b, _)| catalog.materials[*a].name.cmp(&catalog.materials[*b].name));
         let pages = rows.len().div_ceil(ROWS).max(1);
         let page = page.min(pages - 1);
         let (used, capacity) = self.storage(catalog, stock);
+        let heading = if equipment {
+            "Items & equipment"
+        } else {
+            "Resources"
+        };
         let mut text = format!(
-            "Stores {used}/{capacity} units · {}/{} · Page Up/Down · F10 Close",
+            "{heading} · Stores {used}/{capacity} units · {}/{} · Tab Switch view · Page Up/Down · F10 Close",
             page + 1,
             pages
         );
+        if rows.is_empty() {
+            text.push_str("\nNothing in this view yet.");
+        }
         for (id, row) in rows.iter().skip(page * ROWS).take(ROWS) {
             let item = &catalog.materials[*id];
             let _ = write!(text, "\n{}", item.name);

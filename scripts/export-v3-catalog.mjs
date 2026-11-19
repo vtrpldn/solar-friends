@@ -7,6 +7,7 @@ import { materialMeasure, physicalUnit } from "../web/v02/weekend/material-measu
 import { PROFILES } from "../web/v02/weekend/resident-personality.js";
 import { ANIMAL_RATIONS } from "../web/v02/weekend/animal-care.js";
 import { BIOLOGY, CROP_CARE } from "../web/v02/weekend/biological-production.js";
+import { EQUIPMENT_IDS } from "../web/v02/weekend/resource-groups.js";
 import { supplierLimit } from "../web/v02/weekend/supplier-stock.js";
 
 const startingVillage = createWeekend();
@@ -19,6 +20,7 @@ const materials = Object.fromEntries(Object.entries(MATERIALS).map(([id, materia
     price: Number.isFinite(material.price) ? material.price : 0,
     supplier: material.quantity ? supplierLimit(id, material) : 0,
     unit: physicalUnit(id).unit,
+    equipment: EQUIPMENT_IDS.has(id),
     mass: materialMeasure(id).kg,
     volume: materialMeasure(id).m3,
     buyer: buyerFor(id),

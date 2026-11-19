@@ -55,6 +55,7 @@ enum Action {
     Trade(TradeOrder),
     TradePolicy(TradePolicy),
     ProjectFilter,
+    InventoryView,
     Resident(usize),
     Home(bool),
     ListedHome(usize),
@@ -202,6 +203,7 @@ impl Action {
             }
             Self::SelectedProject(_) => village.utility_panel.is_none(),
             Self::TradeItem(_) | Self::Trade(_) | Self::TradePolicy(_) => village.trade_open(),
+            Self::InventoryView => village.utility_panel == Some(UtilityPanel::Inventory),
             Self::Project(_) | Self::ProjectFilter => {
                 village.utility_panel == Some(UtilityPanel::Projects)
             }
@@ -339,6 +341,8 @@ impl Action {
             Self::ClosePanel => "Close panel".into(),
             Self::Page(false) => "Previous page".into(),
             Self::Page(true) => "Next page".into(),
+            Self::InventoryView if village.inventory_equipment => "Show resources".into(),
+            Self::InventoryView => "Show items and equipment".into(),
             Self::ProjectFilter if village.open_projects_only => "Show all projects".into(),
             Self::ProjectFilter => "Show underway".into(),
             Self::Project(_) | Self::TradeItem(_) | Self::Recipe(_) | Self::FacilityIrrigation => {
@@ -539,6 +543,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 Action::Advance(AdvanceAction::Toggle),
                 Action::Manage,
                 Action::ClosePanel,
+                Action::InventoryView,
                 Action::Pause,
                 Action::Speed,
                 Action::Guide,
@@ -948,6 +953,7 @@ fn handle_buttons(
                 Action::Project(row) if !picker.open => {
                     village.focus_project_row(&catalog, &setup, camera, row);
                 }
+                Action::InventoryView => village.toggle_inventory_view(),
                 Action::ProjectFilter if !picker.open => {
                     village.open_projects_only = !village.open_projects_only;
                     village.projects_page = 0;
@@ -1247,6 +1253,7 @@ fn refresh(
                 show_residents && home_pages > 1
             }
             Action::Page(_)
+            | Action::InventoryView
             | Action::ClosePanel
             | Action::RotatePlacement
             | Action::CancelPlacement
