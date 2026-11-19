@@ -1223,6 +1223,57 @@ mod tests {
     }
 
     #[test]
+    fn replay_window_stops_at_a_partial_report_and_rejects_live_input() {
+        let catalog = Catalog::default();
+        let scenario = Scenario {
+            steps: 5,
+            orders: vec![ScheduledOrder {
+                step: 2,
+                order: LabOrder::Grid { enabled: false },
+            }],
+            stop: LabStop::None,
+        };
+        let mut recorded = Runner::new(scenario, None, &catalog).unwrap();
+        recorded.advance(&catalog);
+        let report =
+            serde_json::from_slice(&serde_json::to_vec(&recorded.report()).unwrap()).unwrap();
+        let (runner, replay) = prepare_replay(report, &catalog).unwrap();
+
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins)
+            .insert_resource(catalog)
+            .insert_resource(runner)
+            .insert_resource(replay)
+            .init_resource::<ButtonInput<KeyCode>>()
+            .add_message::<bevy::input::keyboard::KeyboardInput>()
+            .add_systems(Update, update_lab_window);
+        let panel = app.world_mut().spawn(Text::default()).id();
+        let key = |app: &mut App, key| {
+            let mut keys = app.world_mut().resource_mut::<ButtonInput<KeyCode>>();
+            keys.reset_all();
+            keys.press(key);
+            app.update();
+        };
+        key(&mut app, KeyCode::KeyO);
+        let view = &app.world().get::<Text>(panel).unwrap().0;
+        assert!(view.contains("Replay paused"));
+        assert!(!view.contains("Enter order"));
+        key(&mut app, KeyCode::KeyJ);
+        assert!(
+            app.world()
+                .get::<Text>(panel)
+                .unwrap()
+                .0
+                .contains("Replay matched through step 1.")
+        );
+        key(&mut app, KeyCode::KeyJ);
+        let runner = app.world().resource::<Runner>();
+        assert_eq!(runner.index, 1);
+        assert!(runner.outcomes.is_empty());
+        assert!(!runner.village.construction.utilities.grid_off);
+    }
+
+    #[test]
     fn a_lab_checkpoint_restores_the_current_village_for_a_new_run() {
         let catalog = Catalog::default();
         let scenario = || Scenario {
