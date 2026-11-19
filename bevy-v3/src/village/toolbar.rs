@@ -415,6 +415,10 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 position_type: PositionType::Absolute,
                 bottom: px(20),
                 right: px(20),
+                max_width: Val::Vw(94.0),
+                flex_wrap: FlexWrap::Wrap,
+                justify_content: JustifyContent::FlexEnd,
+                row_gap: px(5),
                 column_gap: px(5),
                 padding: UiRect::all(px(6)),
                 ..default()
