@@ -641,15 +641,19 @@ impl Construction {
         }
     }
 
-    pub(super) fn cancel_boarding(&mut self, canceled: TownTrip) {
-        let slot = usize::from(
-            !self
-                .trip
-                .is_some_and(|trip| trip.vehicle == canceled.vehicle),
-        );
-        self.pickup_manifests[canceled.vehicle].clear();
-        self.set_trip(slot, None);
-        self.residents[canceled.driver].path.clear();
+    pub(super) fn cancel_boarding_pickup(&mut self, mut trip: TownTrip, project: usize) {
+        let slot = usize::from(!self.trip.is_some_and(|first| first.vehicle == trip.vehicle));
+        let manifest = &mut self.pickup_manifests[trip.vehicle];
+        manifest.remove(&project);
+        if let Some((&next, _)) = manifest.first_key_value() {
+            if trip.project == project {
+                trip.project = next;
+            }
+            self.set_trip(slot, Some(trip));
+        } else {
+            self.set_trip(slot, None);
+            self.residents[trip.driver].path.clear();
+        }
     }
 
     fn advance_trip(
@@ -1460,6 +1464,25 @@ mod tests {
         let trip = village.trip.unwrap();
         assert_eq!(village.pickup_manifests[trip.vehicle].len(), 2);
         assert!(village.valid_save(&catalog, &stock));
+        for canceled in 0..2 {
+            let remaining = 1 - canceled;
+            let mut canceled_village: Construction =
+                serde_json::from_slice(&serde_json::to_vec(&village).unwrap()).unwrap();
+            let mut canceled_stock = stock.clone();
+            canceled_village.request_project_action(
+                &catalog,
+                &mut canceled_stock,
+                canceled,
+                ProjectAction::Salvage,
+            );
+            let retained_trip = canceled_village.trip.unwrap();
+            assert_eq!(retained_trip.project, remaining);
+            assert_eq!(retained_trip.driver, trip.driver);
+            assert!(canceled_village.plans[canceled].removed);
+            assert_eq!(canceled_village.pickup_manifests[trip.vehicle].len(), 1);
+            assert_eq!(canceled_village.market.committed_fares(), fare);
+            assert!(canceled_village.valid_save(&catalog, &canceled_stock));
+        }
         village.residents[trip.driver].path.clear();
         village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
         assert!(village.construction_pickup_cargo(1).is_some());

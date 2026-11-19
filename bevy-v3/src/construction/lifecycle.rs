@@ -353,7 +353,7 @@ impl Construction {
                 (order.day, order.price, plan.fare * u64::from(plan.pickups)),
             );
             if let Some(active) = active {
-                self.cancel_boarding(active);
+                self.cancel_boarding_pickup(active, index);
             }
         }
         if !stock.sandbox {
