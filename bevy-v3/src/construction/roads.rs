@@ -14,6 +14,32 @@ struct RoadStroke {
 }
 
 impl Construction {
+    pub(crate) fn bridge_walk_height(
+        &self,
+        catalog: &Catalog,
+        terrain: &Terrain,
+        cell: Vec2,
+    ) -> Option<f32> {
+        let bridge = self.plans.iter().find(|plan| {
+            let start = plan.position.as_vec2() - Vec2::splat(0.5);
+            !plan.removed
+                && plan.key == "bridge"
+                && plan.work >= catalog.projects["bridge"].work
+                && cell.cmpge(start).all()
+                && cell.cmple(start + plan.size.as_vec2()).all()
+        })?;
+        let center = bridge.position.as_vec2() + (bridge.size.as_vec2() - Vec2::ONE) * 0.5;
+        let direction = if bridge.rotation.is_multiple_of(2) {
+            Vec2::X
+        } else {
+            Vec2::Y
+        };
+        let meters_from_center = (cell - center).dot(direction).abs() * 2.0;
+        let deck = 0.08 + 0.42 * ((8.0 - meters_from_center) / 2.0).clamp(0.0, 1.0);
+        let world = world_position(center.x, center.y);
+        Some(terrain.height_at(world.x, world.y) + deck)
+    }
+
     pub(super) fn finished_road_cells(
         &self,
         catalog: &Catalog,
@@ -223,6 +249,41 @@ impl Construction {
 mod tests {
     use super::*;
     use crate::setup::WorldSetup;
+
+    #[test]
+    fn completed_bridges_raise_residents_to_the_deck_and_ramps() {
+        let catalog = Catalog::default();
+        let terrain = WorldSetup::default().terrain();
+        let mut village = Construction::default();
+        let start = IVec2::new(44, 36);
+        for rotation in [0, 1] {
+            village.rotation = rotation;
+            village.plans = vec![village.proposed_site(&catalog, "bridge", start)];
+            let direction = if rotation == 0 { Vec2::X } else { Vec2::Y };
+            let center = start.as_vec2() + direction * 3.5;
+            assert!(
+                village
+                    .bridge_walk_height(&catalog, &terrain, center)
+                    .is_none()
+            );
+            village.plans[0].work = catalog.projects["bridge"].work;
+            let world = world_position(center.x, center.y);
+            let base = terrain.height_at(world.x, world.y);
+            let deck = village
+                .bridge_walk_height(&catalog, &terrain, center)
+                .unwrap();
+            let ramp = village
+                .bridge_walk_height(&catalog, &terrain, center - direction * 4.0)
+                .unwrap();
+            assert!((deck - base - 0.5).abs() < 0.001);
+            assert!((ramp - base - 0.08).abs() < 0.001);
+            assert!(
+                village
+                    .bridge_walk_height(&catalog, &terrain, center - direction * 4.1)
+                    .is_none()
+            );
+        }
+    }
 
     #[test]
     fn resident_routes_prefer_finished_road_tiles() {

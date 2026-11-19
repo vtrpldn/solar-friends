@@ -1444,6 +1444,7 @@ fn animate_arrival(
     time: Res<Time>,
     setup: Res<WorldSetup>,
     saves: Res<SaveMenu>,
+    catalog: Res<Catalog>,
     mut village: ResMut<Village>,
     mut actors: Query<(&ArrivalActor, &mut Transform, &mut Visibility)>,
     mut tents: Query<&mut Visibility, (With<VillageEntity>, Without<ArrivalActor>)>,
@@ -1478,7 +1479,17 @@ fn animate_arrival(
             ),
         };
         let Vec2 { x, y: z } = pose.position;
-        transform.translation = Vec3::new(x, terrain.height_at(x, z) + pose.step_height, z);
+        let deck = match *actor {
+            ArrivalActor::Resident(index) if village.camp.is_some() => {
+                let position = village.construction.worker(index).position;
+                village
+                    .construction
+                    .bridge_walk_height(&catalog, &terrain, position)
+            }
+            _ => None,
+        };
+        let height = deck.unwrap_or_else(|| terrain.height_at(x, z));
+        transform.translation = Vec3::new(x, height + pose.step_height, z);
         transform.rotation = if matches!(actor, ArrivalActor::Car(_)) {
             vehicle_motion::terrain_rotation(pose.position, pose.yaw, |point| {
                 terrain.height_at(point.x, point.y)
@@ -2288,6 +2299,7 @@ mod tests {
         app.insert_resource(WorldSetup::default().session())
             .init_resource::<Village>()
             .init_resource::<SaveMenu>()
+            .init_resource::<Catalog>()
             .init_resource::<Time>()
             .add_systems(Update, animate_arrival);
         app.world_mut()
