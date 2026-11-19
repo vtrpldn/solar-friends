@@ -79,12 +79,14 @@
   },
   {
     "title": "Field and greenhouse cultivation",
+    "facts": "crops",
     "description": "Manage a whole planting area or inspect one bed. Each bed keeps its own crop, care and harvest cycle.",
     "tip": "Residents prepare beds, plant the selected crop with stored seeds, and harvest ripe beds automatically. With Auto-buy on, residents order missing seed packets when shared savings can cover them and collection. Keep water, work access and storage available.",
     "boundary": "Harvest quantities resolve once. Delayed harvest can reduce yield; clearing returns residues only. Fields snap to 2 m map cells."
   },
   {
     "title": "Soil, water stress and residue cycles",
+    "facts": "compost",
     "description": "Water, fertility, cover and accumulated stress determine crop development.",
     "tip": "Leave cover or compost collected residues. Both return material with losses; neither guarantees soil balance.",
     "boundary": "Late watering cannot erase drought damage. Failed or expired crops must be cleared."
@@ -115,12 +117,14 @@
   },
   {
     "title": "Power generation, storage and loads",
+    "facts": "grid",
     "description": "Local generation and batteries serve connected loads; grid backup covers affordable shortages.",
     "tip": "Match generation and batteries to actual demand before disconnecting the grid. Replacement equipment remains imported.",
     "boundary": "Grid backup does not charge batteries."
   },
   {
     "title": "Food batches, cooking and spoilage",
+    "facts": "food",
     "description": "Food keeps its identity and age during storage, processing and transport.",
     "tip": "Use Pantry to inspect food lots, expiry and refrigeration. Set kitchen policies to manage cooking and preservation.",
     "boundary": "Refrigeration capacity is measured in liters. Uncooked greens, beans and corn do not count as ready portions."

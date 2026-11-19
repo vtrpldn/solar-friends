@@ -77,6 +77,8 @@ static CROPS: LazyLock<CropCatalog> = LazyLock::new(|| {
 });
 
 impl Crop {
+    pub(crate) const ALL: [Self; 3] = [Self::Greens, Self::Beans, Self::Corn];
+
     fn definition(self) -> &'static CropDefinition {
         match self {
             Self::Greens => &CROPS.greens,
@@ -93,11 +95,11 @@ impl Crop {
         ["greens_seed", "beans_seed", "corn_seed"][self as usize]
     }
 
-    fn material(self) -> &'static str {
+    pub(crate) fn material(self) -> &'static str {
         ["greens", "beans", "corn"][self as usize]
     }
 
-    fn days(self) -> f64 {
+    pub(crate) fn days(self) -> f64 {
         self.definition().days
     }
     fn window(self) -> f64 {
@@ -119,7 +121,7 @@ impl Crop {
         self.definition().height
     }
     pub fn next(self) -> Self {
-        [Self::Greens, Self::Beans, Self::Corn][(self as usize + 1) % 3]
+        Self::ALL[(self as usize + 1) % Self::ALL.len()]
     }
 }
 

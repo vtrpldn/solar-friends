@@ -70,6 +70,47 @@ struct Chapter {
     description: String,
     tip: String,
     boundary: String,
+    facts: Option<Facts>,
+}
+
+#[derive(serde::Deserialize)]
+#[serde(rename_all = "kebab-case")]
+enum Facts {
+    Crops,
+    Compost,
+    Grid,
+    Food,
+}
+
+impl Facts {
+    fn text(&self, catalog: &Catalog) -> Vec<String> {
+        use crate::{economy_reference, farming::Crop, food};
+        match self {
+            Self::Crops => Crop::ALL
+                .map(|crop| format!("{} · {} favorable growth days", crop.label(), crop.days()))
+                .into(),
+            Self::Food => Crop::ALL
+                .iter()
+                .filter_map(|crop| {
+                    food::shelf(crop.material()).map(|days| {
+                        format!("{} · {days} days before ordinary spoilage", crop.label())
+                    })
+                })
+                .collect(),
+            Self::Grid => vec![format!(
+                "Grid backup · Up to {} kW · R${:.2}/kWh",
+                economy_reference::GRID_CAPACITY,
+                economy_reference::GRID_TARIFF_CENTS / 100.0,
+            )],
+            Self::Compost => {
+                let recipe = &catalog.production["compost"];
+                vec![format!(
+                    "Composting · {} kg residues → {} kg mature compost",
+                    recipe.input["scraps"], recipe.output["compost"],
+                )]
+            }
+        }
+    }
 }
 
 fn chapters() -> &'static [Chapter] {
@@ -326,7 +367,7 @@ impl Guide {
         true
     }
 
-    pub(super) fn text(&self) -> Option<String> {
+    pub(super) fn text(&self, catalog: &Catalog) -> Option<String> {
         use std::fmt::Write;
         Some(match self.screen? {
             Screen::Quick(page) => {
@@ -378,6 +419,9 @@ impl Guide {
                         }
                     }
                 }
+                if let Some(facts) = &chapter.facts {
+                    let _ = write!(label, "\n\n{}", facts.text(catalog).join("\n"));
+                }
                 label
             }
         })
@@ -399,12 +443,17 @@ mod tests {
         }
         assert!(
             guide
-                .text()
+                .text(&Catalog::default())
                 .unwrap()
                 .starts_with("Inspecting village conditions")
         );
         keys.press(KeyCode::Backspace);
         assert!(guide.controls(&keys));
-        assert!(guide.text().unwrap().starts_with("Village reference · 3/3"));
+        assert!(
+            guide
+                .text(&Catalog::default())
+                .unwrap()
+                .starts_with("Village reference · 3/3")
+        );
     }
 }

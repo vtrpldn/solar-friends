@@ -440,7 +440,7 @@ fn merge(lots: &mut Vec<Lot>) {
     lots.truncate(write);
 }
 
-fn shelf(id: &str) -> Option<f64> {
+pub(crate) fn shelf(id: &str) -> Option<f64> {
     FOODS
         .iter()
         .find_map(|(kind, days)| (*kind == id).then_some(*days))
