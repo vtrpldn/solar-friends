@@ -187,3 +187,5 @@ The game menu opens the 3D inspector, Asset Garden, biome landscapes, and reside
 ### Collection
 
 Open **Collection** from the game menu or pass `--collection`. Browse all 370 V2 models, filter by category, rotate the previews, or enlarge small props. Click a model card to open it in the inspector.
+
+In the Asset Garden, **Home** focuses the house or first placed prop. **End** frames the entire plot.

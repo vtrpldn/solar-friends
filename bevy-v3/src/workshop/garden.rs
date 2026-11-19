@@ -6,7 +6,7 @@ use super::garden_terrain::{BIOMES, Terrain};
 use super::{WorkshopCatalog, building_model, ui_font};
 use bevy::{
     asset::{AssetEvent, AssetPath, embedded_asset, embedded_path},
-    input::mouse::{AccumulatedMouseMotion, AccumulatedMouseScroll},
+    input::mouse::{AccumulatedMouseMotion, AccumulatedMouseScroll, MouseScrollUnit},
     prelude::*,
     window::FileDragAndDrop,
 };
@@ -19,6 +19,8 @@ use std::{
 
 pub(super) const CELLS: i32 = 96;
 pub(super) const WIDTH: f32 = CELLS as f32 * 2.0;
+const CAMERA_HEIGHT: f32 = 170.;
+const HOME_BEARING: f32 = std::f32::consts::FRAC_PI_4;
 const MAX_SCENE_BYTES: u64 = 1_000_000;
 const GALLERY: &str = include_str!("../../data/asset-garden.json");
 
@@ -121,6 +123,22 @@ struct Garden {
 }
 
 impl Garden {
+    fn focus_first(&mut self, models: &WorkshopCatalog) {
+        self.target = self
+            .layout
+            .props
+            .iter()
+            .find(|prop| prop.asset == "house")
+            .or_else(|| self.layout.props.first())
+            .map_or(Vec3::ZERO, |prop| {
+                let mut center = prop.center(models);
+                center.y = self.terrain.height(center.x, center.z);
+                center
+            });
+        self.zoom = 25. / CAMERA_HEIGHT;
+        self.bearing = HOME_BEARING;
+    }
+
     fn begin_copy(&mut self, mut prop: Prop) {
         if self.layout.props.len() >= 1000 {
             self.status = "The plot already has 1,000 props.".into();
@@ -263,7 +281,7 @@ pub fn run(path: Option<PathBuf>, night: bool, study: bool) {
         library,
         search: None,
         target: Vec3::ZERO,
-        bearing: std::f32::consts::FRAC_PI_4,
+        bearing: HOME_BEARING,
         zoom: 1.0,
         grid: false,
         night,
@@ -299,11 +317,11 @@ fn setup(
         Camera3d::default(),
         Projection::Orthographic(OrthographicProjection {
             scaling_mode: bevy::camera::ScalingMode::FixedVertical {
-                viewport_height: 170.,
+                viewport_height: CAMERA_HEIGHT,
             },
             ..OrthographicProjection::default_3d()
         }),
-        camera_transform(Vec3::ZERO, std::f32::consts::FRAC_PI_4),
+        camera_transform(Vec3::ZERO, HOME_BEARING),
     ));
     commands.spawn((
         GardenSun,
@@ -432,7 +450,11 @@ fn edit(
         .any(|key| keys.pressed(*key));
     let zoom_in = pressed(Equal) || pressed(NumpadAdd);
     let zoom_out = pressed(Minus) || pressed(NumpadSubtract);
-    let zoom_steps = scroll.delta.y + f32::from(zoom_in) - f32::from(zoom_out);
+    let wheel = match scroll.unit {
+        MouseScrollUnit::Line => scroll.delta.y,
+        MouseScrollUnit::Pixel => scroll.delta.y * 0.035,
+    };
+    let zoom_steps = wheel + f32::from(zoom_in) - f32::from(zoom_out);
     garden.zoom = (garden.zoom * (-0.09 * zoom_steps).exp()).clamp(0.035, 3.);
     garden.bearing +=
         (i32::from(pressed(KeyE)) - i32::from(pressed(KeyQ))) as f32 * std::f32::consts::FRAC_PI_2;
@@ -440,11 +462,20 @@ fn edit(
         let zoom = garden.zoom;
         let right = transform.right().as_vec3();
         let forward = Vec3::Y.cross(right);
-        garden.target += (-right * motion.delta.x + forward * motion.delta.y) * zoom * 0.25;
+        garden.target +=
+            (-right * motion.delta.x + forward * motion.delta.y) * zoom * CAMERA_HEIGHT
+                / window.height().max(1.);
+        garden.target.x = garden.target.x.clamp(-WIDTH * 0.5, WIDTH * 0.5);
+        garden.target.z = garden.target.z.clamp(-WIDTH * 0.5, WIDTH * 0.5);
     }
     if pressed(Home) {
+        garden.focus_first(&models);
+    }
+    if pressed(End) {
+        let aspect = window.width() / window.height().max(1.);
         garden.target = Vec3::ZERO;
-        garden.zoom = 1.;
+        garden.zoom =
+            1_f32.max(WIDTH * std::f32::consts::SQRT_2 * 1.05 / (CAMERA_HEIGHT * aspect.max(0.1)));
     }
     **transform = camera_transform(garden.target, garden.bearing);
     if let Projection::Orthographic(orthographic) = &mut **projection {
@@ -629,11 +660,16 @@ fn update_terrain(
     models: Res<WorkshopCatalog>,
     ground: Single<&Mesh3d, With<GardenGround>>,
     mut meshes: ResMut<Assets<Mesh>>,
+    mut initialized: Local<bool>,
 ) {
     if garden.terrain_dirty {
         garden.terrain_dirty = false;
         garden.connections = connections(&garden.layout.props, &models);
         garden.terrain = Terrain::new(&garden.layout, &models);
+        if !*initialized {
+            garden.focus_first(&models);
+            *initialized = true;
+        }
         if let Some(mesh) = meshes.get_mut(&ground.0) {
             *mesh = garden.terrain.mesh(&garden.layout.biome);
         }
@@ -828,7 +864,7 @@ fn render(
         });
     let rehearsal_hint = rehearsal::hint(&rehearsal, &garden.layout.props, selection, &models);
     text.0 = format!(
-        "Asset Garden  ·  {} props  ·  {}\n{label}{connection}\nRight drag pan   Scroll or +/- zoom   Q/E turn   Home whole plot   G grid   N night   / catalog\nB terrain   L load biome landscape\nM move   R rotate   Ctrl/Cmd D copy   Delete remove   F5 restore gallery\nArrows adjust placement   Click/Enter confirm   Esc cancel   Ctrl/Cmd Z undo   Shift redo   Ctrl/Cmd S save   Drop scene JSON to import{rehearsal_hint}\n{}\n{}",
+        "Asset Garden  ·  {} props  ·  {}\n{label}{connection}\nRight drag pan   Scroll or +/- zoom   Q/E turn   Home first prop   End whole plot   G grid   N night   / catalog\nB terrain   L load biome landscape\nM move   R rotate   Ctrl/Cmd D copy   Delete remove   F5 restore gallery\nArrows adjust placement   Click/Enter confirm   Esc cancel   Ctrl/Cmd Z undo   Shift redo   Ctrl/Cmd S save   Drop scene JSON to import{rehearsal_hint}\n{}\n{}",
         garden.layout.props.len(),
         garden.layout.biome,
         garden.status,
