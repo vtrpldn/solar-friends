@@ -115,6 +115,7 @@ struct Garden {
     redraw: bool,
     terrain_dirty: bool,
     focus_on_load: bool,
+    overview: bool,
     terrain: Terrain,
     connections: HashMap<String, Connection>,
     library: Vec<String>,
@@ -130,6 +131,7 @@ struct Garden {
 
 impl Garden {
     fn focus_first(&mut self, models: &WorkshopCatalog) {
+        self.overview = false;
         self.target = self
             .layout
             .props
@@ -145,10 +147,9 @@ impl Garden {
         self.bearing = HOME_BEARING;
     }
 
-    fn frame_plot(&mut self, aspect: f32) {
+    fn frame_plot(&mut self) {
         self.target = Vec3::ZERO;
-        self.zoom =
-            1_f32.max(WIDTH * std::f32::consts::SQRT_2 * 1.05 / (CAMERA_HEIGHT * aspect.max(0.1)));
+        self.overview = true;
     }
 
     fn begin_copy(&mut self, mut prop: Prop) {
@@ -365,6 +366,7 @@ fn run_garden(path: Option<PathBuf>, night: bool, study: Option<&str>) {
         redraw: true,
         terrain_dirty: true,
         focus_on_load: study.is_none(),
+        overview: study.is_some(),
         terrain: Terrain::default(),
         connections: HashMap::new(),
         library,
@@ -389,6 +391,7 @@ fn run_garden(path: Option<PathBuf>, night: bool, study: Option<&str>) {
             persist_scene,
             rehearsal::tick,
             update_terrain,
+            sync_camera,
             render,
             preview,
             update_lighting,
@@ -599,6 +602,29 @@ fn display_asset_picker(
     }
 }
 
+fn plot_zoom(aspect: f32) -> f32 {
+    1_f32.max(WIDTH * std::f32::consts::SQRT_2 * 1.05 / (CAMERA_HEIGHT * aspect.max(0.1)))
+}
+
+fn sync_camera(
+    garden: Res<Garden>,
+    window: Single<&Window>,
+    mut camera: Single<(&mut Transform, &mut Projection), With<Camera3d>>,
+) {
+    let (transform, projection) = &mut *camera;
+    transform.set_if_neq(camera_transform(garden.target, garden.bearing));
+    if let Projection::Orthographic(orthographic) = &mut **projection {
+        let scale = if garden.overview {
+            plot_zoom(window.width() / window.height().max(1.))
+        } else {
+            garden.zoom
+        };
+        if orthographic.scale != scale {
+            orthographic.scale = scale;
+        }
+    }
+}
+
 fn camera_transform(target: Vec3, bearing: f32) -> Transform {
     Transform::from_translation(
         target + Vec3::new(bearing.cos() * 180., 130., bearing.sin() * 180.),
@@ -625,10 +651,10 @@ fn edit(
     selectable: Query<&SelectableProp>,
     roots: Query<&GardenProp>,
     window: Single<&Window>,
-    mut camera: Single<(&Camera, &GlobalTransform, &mut Transform, &mut Projection)>,
+    camera: Single<(&Camera, &GlobalTransform, &Transform)>,
 ) {
     use KeyCode::*;
-    let (camera, global, transform, projection) = &mut *camera;
+    let (camera, global, transform) = *camera;
     let pressed = |key| keys.just_pressed(key);
     let action = action_buttons.iter().find_map(|(&interaction, &action)| {
         (interaction == Interaction::Pressed).then_some(action)
@@ -753,6 +779,7 @@ fn edit(
                     center.z,
                 );
                 garden.zoom = 0.12;
+                garden.overview = false;
             } else {
                 let center = ((garden.target.xz() + Vec2::splat(WIDTH / 2.)) / 2.)
                     .floor()
@@ -795,12 +822,21 @@ fn edit(
         MouseScrollUnit::Pixel => scroll.delta.y * 0.035,
     };
     let zoom_steps = wheel + f32::from(zoom_in) - f32::from(zoom_out);
-    garden.zoom = (garden.zoom * (-0.09 * zoom_steps).exp()).clamp(0.035, 3.);
+    let overview_zoom = plot_zoom(window.width() / window.height().max(1.));
+    if garden.overview {
+        garden.zoom = overview_zoom;
+    }
+    if zoom_steps != 0. {
+        garden.overview = false;
+        garden.zoom =
+            (garden.zoom * (-0.09 * zoom_steps).exp()).clamp(0.035, 3_f32.max(overview_zoom));
+    }
     let turn_left = pressed(KeyQ) || clicked_action(GardenAction::TurnLeft);
     let turn_right = pressed(KeyE) || clicked_action(GardenAction::TurnRight);
     garden.bearing +=
         (i32::from(turn_right) - i32::from(turn_left)) as f32 * std::f32::consts::FRAC_PI_2;
-    if drag || mouse.pressed(MouseButton::Right) {
+    if (drag || mouse.pressed(MouseButton::Right)) && motion.delta != Vec2::ZERO {
+        garden.overview = false;
         let zoom = garden.zoom;
         let right = transform.right().as_vec3();
         let forward = Vec3::Y.cross(right);
@@ -814,11 +850,7 @@ fn edit(
         garden.focus_first(&models);
     }
     if pressed(End) || clicked_action(GardenAction::Overview) {
-        garden.frame_plot(window.width() / window.height().max(1.));
-    }
-    **transform = camera_transform(garden.target, garden.bearing);
-    if let Projection::Orthographic(orthographic) = &mut **projection {
-        orthographic.scale = garden.zoom;
+        garden.frame_plot();
     }
     if pressed(KeyN) || clicked_action(GardenAction::Night) {
         garden.night = !garden.night;
@@ -883,12 +915,11 @@ fn edit(
             pressed(KeyL).then_some(GardenAction::LoadLandscape)
         }
     });
-    let aspect = window.width() / window.height().max(1.);
     match terrain_action {
         Some(GardenAction::Choose(biome)) if garden.layout.biome != biome => {
             garden.layout.biome = biome.into();
             garden.pending = None;
-            garden.frame_plot(aspect);
+            garden.frame_plot();
             garden.terrain_dirty = true;
             garden.save_dirty = true;
             garden.redraw = true;
@@ -899,7 +930,7 @@ fn edit(
             garden.layout.props = biome_landscape(&garden.layout.biome);
             garden.selected = None;
             garden.pending = None;
-            garden.frame_plot(aspect);
+            garden.frame_plot();
             garden.status = "Biome landscape loaded. Undo restores the previous props.".into();
             return;
         }
@@ -1544,6 +1575,15 @@ fn update_lighting(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn whole_plot_scale_fits_the_diagonal_in_wide_and_narrow_windows() {
+        for aspect in [16. / 9., 4. / 3., 1., 0.5] {
+            let visible_width = CAMERA_HEIGHT * plot_zoom(aspect) * aspect;
+            assert!(visible_width >= WIDTH * std::f32::consts::SQRT_2);
+        }
+        assert!(plot_zoom(0.5) > 3.);
+    }
 
     #[test]
     fn mesh_picking_selects_the_front_prop_and_ignores_the_preview() {

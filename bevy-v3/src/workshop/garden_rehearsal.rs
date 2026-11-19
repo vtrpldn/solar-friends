@@ -456,6 +456,7 @@ mod tests {
                 redraw: false,
                 terrain_dirty: false,
                 focus_on_load: false,
+                overview: false,
                 terrain: Terrain::default(),
                 connections: HashMap::new(),
                 library: vec![],
