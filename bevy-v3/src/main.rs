@@ -1203,6 +1203,17 @@ mod tests {
         assert_eq!(sandbox.camp, Some(IVec2::new(36, 36)));
         assert!(matches!(sandbox.mode(), Some(setup::Mode::Sandbox)));
 
+        press_button(&mut app, "Food portions");
+        assert!(
+            app.world_mut()
+                .query::<&Text>()
+                .iter(app.world())
+                .any(|text| text.0.contains("Unlimited food · No spoilage"))
+        );
+        press_button(&mut app, "Chill first · Earliest expiry");
+        press_button(&mut app, "Food batches");
+        press_button(&mut app, "Close panel");
+
         press_button(&mut app, "Saved villages");
         press_button(&mut app, "Name current village");
         app.world_mut()

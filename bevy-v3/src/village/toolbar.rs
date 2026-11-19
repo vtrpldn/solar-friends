@@ -261,12 +261,9 @@ impl Action {
                     && !village.editing_inventory
                     && Self::Panel(UtilityPanel::Pantry).available(village)
             }
-            Self::Panel(
-                UtilityPanel::Finances
-                | UtilityPanel::Trade
-                | UtilityPanel::Pantry
-                | UtilityPanel::Upkeep,
-            ) => !village.stock.sandbox,
+            Self::Panel(UtilityPanel::Finances | UtilityPanel::Trade | UtilityPanel::Upkeep) => {
+                !village.stock.sandbox
+            }
             Self::Panel(_) => true,
             Self::ClosePanel => village.utility_panel.is_some(),
             Self::Grid => village.utility_panel == Some(UtilityPanel::Power),
@@ -328,6 +325,7 @@ impl Action {
                 Some(UtilityPanel::Residents | UtilityPanel::Finances)
             ),
             Self::PantryBatches => village.utility_panel == Some(UtilityPanel::Pantry),
+            Self::AutoCook | Self::CookingTarget { .. } if village.stock.sandbox => false,
             Self::PantryPriority
             | Self::PantryTransport
             | Self::PantryBudget

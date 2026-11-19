@@ -1536,7 +1536,7 @@ fn village_input(
             town.utility_panel = match town.utility_panel {
                 Some(UtilityPanel::Finances) => Some(UtilityPanel::Trade),
                 Some(UtilityPanel::Trade) => Some(UtilityPanel::Pantry),
-                Some(UtilityPanel::Pantry) => Some(UtilityPanel::Finances),
+                Some(UtilityPanel::Pantry) if !town.stock.sandbox => Some(UtilityPanel::Finances),
                 other => other,
             };
         }
@@ -1603,7 +1603,9 @@ fn village_input(
                 }
                 return;
             }
-            town.construction.kitchen_controls(&keyboard);
+            if !town.stock.sandbox {
+                town.construction.kitchen_controls(&keyboard);
+            }
             if keyboard.just_pressed(KeyCode::KeyD) {
                 town.construction.toggle_supplier_construction();
                 return;
@@ -2533,22 +2535,38 @@ fn show_hud(
         }
         Some(UtilityPanel::Pantry) if village.pantry_batch_page.is_some() => {
             label.push('\n');
-            label.push_str(
-                &village
-                    .stock
-                    .pantry
-                    .batches(&catalog, village.pantry_batch_page.unwrap_or_default())
-                    .1,
-            );
-            label.push_str("\nTab Finances");
+            if village.stock.sandbox {
+                label.push_str("Food batches · Unlimited food · No spoilage\nR Pantry");
+            } else {
+                label.push_str(
+                    &village
+                        .stock
+                        .pantry
+                        .batches(&catalog, village.pantry_batch_page.unwrap_or_default())
+                        .1,
+                );
+                label.push_str("\nTab Finances");
+            }
         }
         Some(UtilityPanel::Pantry) => {
             label.push('\n');
-            label.push_str(&village.stock.pantry.status(
-                &catalog,
-                village.construction.utilities.powered_cold_storage(),
-                village.construction.utilities.installed_cold_storage(),
-            ));
+            if village.stock.sandbox {
+                let utilities = &village.construction.utilities;
+                use std::fmt::Write;
+                let _ = write!(
+                    label,
+                    "Unlimited food · No spoilage\nKitchen automation is inactive\nRefrigeration · {:.0}/{:.0} L powered · Chill first: {}",
+                    utilities.powered_cold_storage(),
+                    utilities.installed_cold_storage(),
+                    village.stock.pantry.priority.label(),
+                );
+            } else {
+                label.push_str(&village.stock.pantry.status(
+                    &catalog,
+                    village.construction.utilities.powered_cold_storage(),
+                    village.construction.utilities.installed_cold_storage(),
+                ));
+            }
             label.push('\n');
             label.push_str(&village.construction.pantry_purchase_status(
                 &catalog,
@@ -2565,8 +2583,12 @@ fn show_hud(
                 label.push_str(&warning);
                 label.push('\n');
             }
-            label.push_str(&village.construction.production.kitchen_policy.status());
-            label.push_str("\nR Food batches · Tab Finances");
+            if village.stock.sandbox {
+                label.push_str("R Food batches");
+            } else {
+                label.push_str(&village.construction.production.kitchen_policy.status());
+                label.push_str("\nR Food batches · Tab Finances");
+            }
         }
         None => {}
     }

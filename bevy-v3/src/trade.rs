@@ -422,13 +422,20 @@ impl Trade {
     }
 
     pub fn pantry_purchase_status(&self, stock: &Stock, clock: f64) -> String {
-        let forecast = self.pantry_forecast(stock, clock);
         let policy = &self.pantry_purchase;
         let state = if self.household_restock_off {
             "off"
         } else {
             "on"
         };
+        if stock.sandbox {
+            return format!(
+                "U Automatic food purchases {state}\n[ ] Reserve {:.1} days · Shift [ ] Daily limit R${:.0}\nFood forecasts are inactive in Sandbox.",
+                f64::from(policy.reserve_half_days) / 2.0,
+                policy.allowance_cents as f64 / 100.0,
+            );
+        }
+        let forecast = self.pantry_forecast(stock, clock);
         let used = if policy.day == pantry_day(clock) {
             policy.reserved_cents
         } else {
