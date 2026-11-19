@@ -151,13 +151,14 @@ impl Construction {
             pages
         );
         for (id, row) in rows.iter().skip(page * ROWS).take(ROWS) {
-            let _ = write!(text, "\n{}", catalog.materials[*id].name);
+            let item = &catalog.materials[*id];
+            let _ = write!(text, "\n{}", item.name);
             for (&amount, label) in
                 row.iter()
                     .zip(["stored", "reserved", "in work", "in transit", "installed"])
             {
                 if amount > 0 {
-                    let _ = write!(text, " · {amount} {label}");
+                    let _ = write!(text, " · {} {label}", item.quantity_text(amount));
                 }
             }
             if crate::equipment::TOOLS.contains(id) {

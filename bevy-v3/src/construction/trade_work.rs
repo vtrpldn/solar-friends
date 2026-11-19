@@ -193,7 +193,7 @@ impl Construction {
                 "{} {} · {} in stock\n",
                 index + 1,
                 item.name,
-                stock.available(id)
+                item.quantity_text(u64::from(stock.available(id)))
             ));
         }
         let (id, item) = options[self.trade.selected];
@@ -201,7 +201,8 @@ impl Construction {
         let day = ((540.0 + clock.seconds * 0.45) / 1440.0).floor() as u64;
         let quote = match self.trade.quote(catalog, stock, id, day, 0) {
             Ok((qty, cents)) => format!(
-                "{qty} for R${:.2} · Fuel R${:.2}",
+                "{} for R${:.2} · Fuel R${:.2}",
+                item.quantity_text(u64::from(qty)),
                 cents as f64 / 100.0,
                 fare_cents(clock.round_trip_km) as f64 / 100.0
             ),
@@ -216,9 +217,9 @@ impl Construction {
         } else {
             "off"
         };
-        let reserve = policy.map_or(0, |policy| policy.reserve);
-        let trigger = policy.map_or(0, |policy| policy.trigger);
-        let limit = policy.map_or(0, |policy| policy.limit);
+        let reserve = item.quantity_text(u64::from(policy.map_or(0, |policy| policy.reserve)));
+        let trigger = item.quantity_text(u64::from(policy.map_or(0, |policy| policy.trigger)));
+        let limit = item.quantity_text(u64::from(policy.map_or(0, |policy| policy.limit)));
         display.push_str(&format!("T Auto-sale {on} · [ / ] Reserve {reserve}\nR Trigger {trigger} · Y Daily cap {limit} (0 unlimited)\n{} queued · {} delivered",
             self.trade.orders.len(), self.trade.receipts));
         let (used, maximum) = self.storage(catalog, stock);

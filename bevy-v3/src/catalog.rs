@@ -21,10 +21,31 @@ pub struct Material {
     pub pack: u32,
     pub price: f64,
     pub supplier: u32,
+    unit: MaterialUnit,
     pub mass: f64,
     pub volume: f64,
     pub buyer: Buyer,
     pub starting: u32,
+}
+
+#[derive(Deserialize)]
+enum MaterialUnit {
+    #[serde(rename = "kg")]
+    Kilograms,
+    #[serde(rename = "L")]
+    Liters,
+    #[serde(rename = "units")]
+    Count,
+}
+
+impl Material {
+    pub fn quantity_text(&self, stock_units: u64) -> String {
+        match self.unit {
+            MaterialUnit::Kilograms => format!("{} kg", stock_units as f64 * self.mass),
+            MaterialUnit::Liters => format!("{stock_units} L"),
+            MaterialUnit::Count => stock_units.to_string(),
+        }
+    }
 }
 
 #[derive(Deserialize)]
