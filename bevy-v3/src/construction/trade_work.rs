@@ -277,6 +277,19 @@ impl Construction {
         let limit = item.quantity_text(u64::from(policy.map_or(0, |policy| policy.limit)));
         display.push_str(&format!("T Auto-sale {on} · [ / ] Reserve {reserve}\nR Trigger {trigger} · Y Daily cap {limit} (0 unlimited)\n{} queued · {} delivered",
             self.trade.orders.len(), self.trade.receipts));
+        let (protected, automatic_offer) = self.trade.automatic_sale_offer(catalog, stock, id, day);
+        let protected = item.quantity_text(u64::from(protected));
+        let result = match automatic_offer {
+            Ok((quantity, cents)) => format!(
+                "{} eligible for R${:.2} before fuel",
+                item.quantity_text(u64::from(quantity)),
+                cents as f64 / 100.0,
+            ),
+            Err(reason) => reason.into(),
+        };
+        display.push_str(&format!(
+            "\nAutomatic sale · {protected} protected · {result}"
+        ));
         let (used, maximum) = self.storage(catalog, stock);
         display.push_str(&format!(
             "\nI Buy for pickup · D Order freight\nStorage {used}/{maximum} units · {} fulfilled purchases",

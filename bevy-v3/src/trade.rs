@@ -446,6 +446,40 @@ impl Trade {
         }
     }
 
+    pub fn automatic_sale_offer(
+        &self,
+        catalog: &Catalog,
+        stock: &Stock,
+        id: &str,
+        day: u64,
+    ) -> (u32, Result<(u32, u64), &'static str>) {
+        let policy = self.policies.get(id);
+        let owned = stock.available(id);
+        let mut reserve = policy.map_or(0, |policy| policy.reserve);
+        if let Some((_, units_per_portion)) = food::SERVINGS.iter().find(|(food, _)| *food == id) {
+            let target = (15 * u32::from(self.pantry_purchase.reserve_half_days)).div_ceil(2);
+            let other_portions = stock
+                .food_portions()
+                .saturating_sub(owned / units_per_portion);
+            reserve = reserve.max(target.saturating_sub(other_portions) * units_per_portion);
+        }
+        reserve = reserve.max(stock.equipment.protected(id, owned));
+        let pack = catalog.materials[id].pack;
+        let offer = if owned <= policy.map_or(0, |policy| policy.trigger) {
+            Err("Below the sale trigger")
+        } else if owned.saturating_sub(reserve) < pack {
+            Err("Reserve protected or less than one pack")
+        } else if policy.is_some_and(|policy| {
+            let sold = if policy.day == day { policy.sold } else { 0 };
+            policy.limit > 0 && sold + pack > policy.limit
+        }) {
+            Err("Daily sale limit reached")
+        } else {
+            self.quote(catalog, stock, id, day, reserve)
+        };
+        (reserve, offer)
+    }
+
     pub fn auto_sell(
         &mut self,
         catalog: &Catalog,
@@ -458,7 +492,7 @@ impl Trade {
             return;
         }
         self.next_scan = clock + 1.0;
-        let day = ((540.0 + clock * 0.45) / 1440.0).floor() as u64;
+        let day = pantry_day(clock);
         let keys: Vec<_> = self
             .policies
             .iter()
@@ -466,36 +500,17 @@ impl Trade {
             .map(|(id, _)| id.clone())
             .collect();
         for id in keys {
-            let policy = self.policies.get_mut(&id).expect("active sale policy");
-            if policy.day != day {
-                policy.day = day;
-                policy.sold = 0;
-            }
-            let pack = catalog.materials[&id].pack;
-            let portions = match id.as_str() {
-                "food" | "meals" => 1,
-                "eggs" => 4,
-                "milk" => 2,
-                _ => 0,
-            };
-            let protect =
-                stock
-                    .available(&id)
-                    .checked_div(portions)
-                    .map_or(policy.reserve, |servings| {
-                        let other_food = stock.food_portions().saturating_sub(servings);
-                        policy
-                            .reserve
-                            .max(30u32.saturating_sub(other_food) * portions)
-                    });
-            if stock.available(&id) <= policy.trigger
-                || stock.available(&id).saturating_sub(protect) < pack
-                || (policy.limit != 0 && policy.sold + pack > policy.limit)
+            let (reserve, offer) = self.automatic_sale_offer(catalog, stock, &id, day);
+            if offer.is_ok()
+                && let Ok(quantity) =
+                    self.reserve(catalog, stock, market, &id, (day, fare, reserve))
             {
-                continue;
-            }
-            if let Ok(quantity) = self.reserve(catalog, stock, market, &id, (day, fare, protect)) {
-                self.policies.get_mut(&id).expect("active sale policy").sold += quantity;
+                let policy = self.policies.get_mut(&id).expect("active sale policy");
+                if policy.day != day {
+                    policy.day = day;
+                    policy.sold = 0;
+                }
+                policy.sold += quantity;
             }
         }
     }
@@ -683,6 +698,29 @@ mod tests {
         assert_eq!(trade.purchases, 1);
         assert_eq!(stock.available("wood"), wood + 12);
         assert!(trade.delivery.is_none());
+    }
+
+    #[test]
+    fn changing_pantry_reserve_changes_both_the_offer_and_automatic_sale() {
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);
+        let mut market = Market::default();
+        let mut trade = Trade::default();
+        trade.policies.entry("meals".into()).or_default().enabled = true;
+        trade.pantry_controls(14, 0, false);
+        let (protected, offer) = trade.automatic_sale_offer(&catalog, &stock, "meals", 0);
+        assert!(protected >= stock.available("meals"));
+        assert!(offer.is_err());
+        trade.auto_sell(&catalog, &mut stock, &mut market, 0.0, 776);
+        assert!(trade.orders.is_empty());
+
+        trade.pantry_controls(-14, 0, false);
+        let (protected, offer) = trade.automatic_sale_offer(&catalog, &stock, "meals", 0);
+        assert_eq!(protected, 0);
+        let (offered, _) = offer.unwrap();
+        trade.auto_sell(&catalog, &mut stock, &mut market, 1.0, 776);
+        assert_eq!(trade.orders[0].quantity, offered);
+        assert_eq!(offered, catalog.materials["meals"].pack);
     }
 
     #[test]
