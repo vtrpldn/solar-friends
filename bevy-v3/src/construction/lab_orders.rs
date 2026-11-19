@@ -64,6 +64,11 @@ pub(crate) enum LabOrder {
     ServiceWater {
         site: usize,
     },
+    WaterPolicy {
+        site: usize,
+        fresh: bool,
+        enabled: bool,
+    },
 }
 
 #[derive(Clone, Copy, Default, Deserialize, Serialize)]
@@ -429,6 +434,15 @@ impl Construction {
             )?,
             LabOrder::Purify { site } => self.queue_water(*site, WaterAction::Purify)?,
             LabOrder::ServiceWater { site } => self.queue_water(*site, WaterAction::Sanitation)?,
+            LabOrder::WaterPolicy {
+                site,
+                fresh,
+                enabled,
+            } => {
+                if !self.utilities.set_water_policy(*site, *fresh, *enabled) {
+                    return Err("This facility does not support that water policy.".into());
+                }
+            }
         }
         Ok(())
     }

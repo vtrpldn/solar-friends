@@ -82,7 +82,11 @@ impl MapState {
         })
     }
 
-    pub fn service_order(&self, keys: &ButtonInput<KeyCode>) -> Option<(LabOrder, &'static str)> {
+    pub fn service_order(
+        &self,
+        runner: &Runner,
+        keys: &ButtonInput<KeyCode>,
+    ) -> Option<(LabOrder, &'static str)> {
         if self.blueprint.is_some() {
             return None;
         }
@@ -95,6 +99,24 @@ impl MapState {
             ));
         }
         let site = self.selected.map_or(0, |index| index + 1);
+        let fresh = keys.just_pressed(KeyCode::KeyT);
+        if (fresh || keys.just_pressed(KeyCode::KeyY))
+            && let Some(water) = runner.village.construction.utilities.water_site(site)
+        {
+            let enabled = if fresh {
+                !water.maintain_fresh
+            } else {
+                !water.maintain_sanitation
+            };
+            return Some((
+                LabOrder::WaterPolicy {
+                    site,
+                    fresh,
+                    enabled,
+                },
+                "Water policy updated.",
+            ));
+        }
         [
             (KeyCode::KeyC, LabOrder::CollectWater { site }),
             (KeyCode::KeyP, LabOrder::Purify { site }),
@@ -138,6 +160,30 @@ impl MapState {
             if site.capacity[2] > 0.0 || site.capacity[3] > 0.0 {
                 details.push_str(" · V Service waste");
             }
+        }
+        use std::fmt::Write as _;
+        let binding = |label: &str| {
+            if editable && site.enabled {
+                format!(" ({label})")
+            } else {
+                String::new()
+            }
+        };
+        if site.supports_water_policy(true) {
+            let state = if site.maintain_fresh { "on" } else { "off" };
+            let _ = write!(details, "\nDrinking reserve {state}{}", binding("T Toggle"));
+        }
+        if site.supports_water_policy(false) {
+            let state = if site.maintain_sanitation {
+                "on"
+            } else {
+                "off"
+            };
+            let _ = write!(
+                details,
+                "\nSanitation upkeep {state}{}",
+                binding("Y Toggle")
+            );
         }
         details
     }

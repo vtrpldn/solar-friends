@@ -160,6 +160,15 @@ pub struct WaterSite<'a> {
 }
 
 impl WaterSite<'_> {
+    pub fn supports_water_policy(&self, fresh: bool) -> bool {
+        if fresh {
+            self.capacity[0] > 0.0 && self.capacity[1] > 0.0
+        } else {
+            (self.capacity[2] > 0.0 || self.capacity[3] > 0.0)
+                && !matches!(self.kind, "wetland" | "biodigester" | "banana_treatment")
+        }
+    }
+
     pub fn space(&self, channel: usize) -> f64 {
         (self.capacity[channel] - self.levels[channel]).max(0.0)
     }
@@ -395,24 +404,31 @@ impl Utilities {
     }
 
     pub fn toggle_water_policy(&mut self, id: usize, fresh: bool) -> bool {
-        let Some(node) = self.nodes.get_mut(&id) else {
+        let Some(site) = self.water_site(id) else {
             return false;
         };
-        if fresh && node.capacity[0] > 0.0 && node.capacity[1] > 0.0 {
-            node.maintain_fresh = !node.maintain_fresh;
-            true
-        } else if !fresh
-            && (node.capacity[2] > 0.0 || node.capacity[3] > 0.0)
-            && !matches!(
-                node.kind.as_str(),
-                "wetland" | "biodigester" | "banana_treatment"
-            )
-        {
-            node.maintain_sanitation = !node.maintain_sanitation;
-            true
+        let enabled = if fresh {
+            !site.maintain_fresh
         } else {
-            false
+            !site.maintain_sanitation
+        };
+        self.set_water_policy(id, fresh, enabled)
+    }
+
+    pub fn set_water_policy(&mut self, id: usize, fresh: bool, enabled: bool) -> bool {
+        if !self
+            .water_site(id)
+            .is_some_and(|site| site.supports_water_policy(fresh))
+        {
+            return false;
         }
+        let node = self.nodes.get_mut(&id).expect("validated water site");
+        if fresh {
+            node.maintain_fresh = enabled;
+        } else {
+            node.maintain_sanitation = enabled;
+        }
+        true
     }
 
     pub fn take_water(&mut self, source: Option<usize>, channel: usize, liters: f64) -> f64 {

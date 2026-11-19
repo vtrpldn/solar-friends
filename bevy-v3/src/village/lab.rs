@@ -722,6 +722,18 @@ fn order_label(order: &LabOrder) -> String {
         LabOrder::CollectWater { site } => format!("Collect river water for site #{site}"),
         LabOrder::Purify { site } => format!("Purify water at site #{site}"),
         LabOrder::ServiceWater { site } => format!("Service wastewater at site #{site}"),
+        LabOrder::WaterPolicy {
+            site,
+            fresh,
+            enabled,
+        } => {
+            let policy = if *fresh {
+                "drinking reserve"
+            } else {
+                "sanitation upkeep"
+            };
+            format!("{} {policy} at site #{site}", toggle_label(*enabled))
+        }
     }
 }
 
@@ -1093,7 +1105,7 @@ fn update_lab_window(
     if playback.view == LabView::Map
         && !playback.replaying
         && !runner.done()
-        && let Some((order, success)) = map.service_order(&keys)
+        && let Some((order, success)) = map.service_order(&runner, &keys)
     {
         playback.notice = match runner.submit(&catalog, order) {
             Ok(()) => runner
