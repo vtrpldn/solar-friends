@@ -83,13 +83,7 @@ impl Construction {
                 crate::residents::daily_drinking_liters(temperature, self.resident_working(index))
             })
             .sum();
-        let sanitation = present
-            .filter(|(_, resident)| {
-                [Need::Bladder, Need::Bowels, Need::Hygiene]
-                    .into_iter()
-                    .any(|need| resident.health.levels[need as usize] < 30.0)
-            })
-            .count();
+        let sanitation = self.residents_needing_sanitation();
         let services =
             self.utilities
                 .service_overview(thirsty, sanitation, daily_water, stock.sandbox);
@@ -103,6 +97,20 @@ impl Construction {
             format!("{portions} portions · {days:.1} days estimated")
         };
         format!("{services}\nFood · {food}")
+    }
+
+    pub fn residents_needing_sanitation(&self) -> usize {
+        self.residents
+            .iter()
+            .enumerate()
+            .filter(|(index, resident)| {
+                !self.away_for_work(*index)
+                    && !self.driver_away(*index)
+                    && [Need::Bladder, Need::Bowels, Need::Hygiene]
+                        .into_iter()
+                        .any(|need| resident.health.levels[need as usize] < 30.0)
+            })
+            .count()
     }
 
     pub fn tick_health(

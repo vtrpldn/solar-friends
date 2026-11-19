@@ -824,13 +824,19 @@ impl Utilities {
         } else {
             format!("{fresh:.1} L potable")
         };
-        let sanitation = if self.sewage_blocks_toilets() {
+        let sanitation = self.sanitation_status(sanitation_waiting);
+        format!("Power · {power}\nWater · {water} · Sanitation · {sanitation}")
+    }
+
+    pub fn sanitation_status(&self, sanitation_waiting: usize) -> String {
+        let usable = self.toilets(1.5).count();
+        if self.sewage_blocks_toilets() {
             "Sewage tanks too full for toilets · Service tanks or add treatment".into()
         } else if sanitation_waiting > 0 {
             format!("{sanitation_waiting} residents need care")
-        } else if self.toilets(1.5).next().is_none() {
+        } else if usable == 0 {
             "Camp latrine fallback".into()
-        } else if enabled().any(|node| {
+        } else if self.nodes.values().filter(|node| node.enabled).any(|node| {
             (2..4).any(|channel| {
                 waste_tank_warning(node.water[channel], node.capacity[channel]).is_some()
             })
@@ -839,9 +845,8 @@ impl Utilities {
         } else if self.wash_sources().next().is_none() {
             "No stocked washing facility".into()
         } else {
-            "Toilet and washing capacity available".into()
-        };
-        format!("Power · {power}\nWater · {water} · Sanitation · {sanitation}")
+            format!("{usable} usable toilet sites · Washing stocked")
+        }
     }
 
     pub fn stored_energy(&self) -> f64 {
@@ -1123,15 +1128,24 @@ impl Utilities {
     }
 
     pub fn water_summary(&self) -> String {
-        let water = self.nodes.values().fold([0.0; 4], |mut total, node| {
-            for (channel, quantity) in node.water.iter().enumerate() {
-                total[channel] += quantity;
+        let mut water = [0.0; 4];
+        let mut capacity = [0.0; 4];
+        for node in self.nodes.values() {
+            for channel in 0..water.len() {
+                water[channel] += node.water[channel];
+                capacity[channel] += node.capacity[channel];
             }
-            total
-        });
+        }
         let mut text = format!(
-            "Water · {:.1} L drinking · {:.1} L untreated\n{:.1} L greywater · {:.1} L sewage",
-            water[0], water[1], water[2], water[3],
+            "Water stored / capacity\nDrinking {:.1}/{:.1} L · Irrigation {:.1}/{:.1} L\nGreywater {:.1}/{:.1} L · Sewage {:.1}/{:.1} L",
+            water[0],
+            capacity[0],
+            water[1],
+            capacity[1],
+            water[2],
+            capacity[2],
+            water[3],
+            capacity[3],
         );
         if self.latrine_waste_liters > 0.0 {
             text.push_str(&format!(

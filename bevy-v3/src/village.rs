@@ -2438,6 +2438,13 @@ fn show_hud(
         Some(UtilityPanel::Water) => {
             label.push('\n');
             label.push_str(&village.construction.utilities.water_summary());
+            label.push_str("\nSanitation · ");
+            label.push_str(
+                &village
+                    .construction
+                    .utilities
+                    .sanitation_status(village.construction.residents_needing_sanitation()),
+            );
             label.push_str(&village.construction.waste_tank_summary(&catalog));
             label.push_str(&village.construction.queued_installation_hint(false));
             label.push_str(&village.construction.connection_summary(
