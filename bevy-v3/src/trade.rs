@@ -436,13 +436,19 @@ impl Trade {
             );
         }
         let forecast = self.pantry_forecast(stock, clock);
+        let shortfall = forecast.target.saturating_sub(forecast.served);
+        let reserve_status = if shortfall > 0 {
+            format!("Reserve short by {shortfall} portions")
+        } else {
+            "Reserve covered".into()
+        };
         let used = if policy.day == pantry_day(clock) {
             policy.reserved_cents
         } else {
             0
         };
         format!(
-            "U Automatic food purchases {state}\n[ ] Reserve {:.1} days · Shift [ ] Daily limit R${:.0}\nR${:.2} reserved today including transport\nStored food covers {}/{} meals · {:.1} servings may spoil\n{} servings expected from incoming orders",
+            "U Automatic food purchases {state}\n[ ] Reserve {:.1} days · Shift [ ] Daily limit R${:.0}\nR${:.2} reserved today including transport\n{reserve_status} · {}/{} portions usable before expiry\n{:.1} servings may spoil · {} expected from incoming orders\nReserve estimate uses current stores and expiry dates.",
             f64::from(policy.reserve_half_days) / 2.0,
             policy.allowance_cents as f64 / 100.0,
             used as f64 / 100.0,
@@ -1032,6 +1038,11 @@ mod tests {
         let mut trade = Trade::default();
         trade.policies.entry("meals".into()).or_default().enabled = true;
         trade.pantry_controls(14, 0, false);
+        assert!(
+            trade
+                .pantry_purchase_status(&stock, 0.0)
+                .contains("Reserve short by")
+        );
         let (protected, offer) = trade.automatic_sale_offer(&catalog, &stock, "meals", 0);
         assert!(protected >= stock.available("meals"));
         assert!(offer.is_err());
@@ -1039,6 +1050,11 @@ mod tests {
         assert!(trade.orders.is_empty());
 
         trade.pantry_controls(-14, 0, false);
+        assert!(
+            trade
+                .pantry_purchase_status(&stock, 0.0)
+                .contains("Reserve covered")
+        );
         let (protected, offer) = trade.automatic_sale_offer(&catalog, &stock, "meals", 0);
         assert_eq!(protected, 0);
         let (offered, _) = offer.unwrap();
