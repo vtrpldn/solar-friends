@@ -1141,6 +1141,53 @@ impl Construction {
                 }
             }
         }
+        if !road && !bridge {
+            let water_targets = |proposed: bool, camp_spot: IVec2| {
+                self.utilities
+                    .water_sources()
+                    .flat_map(|(id, position, size)| {
+                        if id == 0 {
+                            return vec![camp_spot];
+                        }
+                        if proposed && ignore == Some(id - 1) {
+                            build_perimeter(start, blueprint.size)
+                        } else {
+                            build_perimeter(position, size)
+                        }
+                    })
+                    .collect::<Vec<_>>()
+            };
+            for (index, resident) in self.residents.iter().enumerate() {
+                if self.driver_away(index) || self.away_for_work(index) {
+                    continue;
+                }
+                let from = resident.position;
+                let stores = [SUPPLY_SPOTS[index]];
+                let loses_access = |before: &[IVec2], after: &[IVec2]| {
+                    crate::navigation::route_to_any(from, before, existing_blocked).is_some_and(
+                        |path| {
+                            (before != after
+                                || path.is_empty() && footprint(from.round().as_ivec2())
+                                || path.iter().any(|point| footprint(point.as_ivec2())))
+                                && crate::navigation::route_to_any(from, after, proposed_blocked)
+                                    .is_none()
+                        },
+                    )
+                };
+                if loses_access(&stores, &stores) {
+                    return Some("Leave residents a walking route to the food stores.");
+                }
+                let previous_water = water_targets(false, stores[0]);
+                let proposed_water = if ignore.is_some() {
+                    water_targets(true, stores[0])
+                } else {
+                    previous_water.clone()
+                };
+                if loses_access(&previous_water, &proposed_water) {
+                    return Some("Leave residents a walking route to drinking water.");
+                }
+            }
+        }
         if !road {
             let targets = if bridge {
                 let along = if blueprint.rotation.is_multiple_of(2) {
@@ -2313,6 +2360,39 @@ mod tests {
         village.rotation = 1;
         village.plan(&catalog, &mut stock, site, cell, clock);
         assert_eq!(village.plans.len(), 2);
+    }
+
+    #[test]
+    fn a_new_blueprint_cannot_trap_a_resident_away_from_food() {
+        let setup = WorldSetup::default();
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let terrain = setup.terrain();
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp: IVec2::new(36, 36),
+        };
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
+        let mut village = Construction::default();
+        let isolated = IVec2::new(47, 36);
+        village.residents[0].position = isolated.as_vec2();
+        for offset in [IVec2::X, IVec2::NEG_X, IVec2::Y] {
+            village
+                .plans
+                .push(village.proposed_site(&catalog, "fire-circle", isolated + offset));
+        }
+        village.selection = Some("fire-circle".into());
+        village.plan(&catalog, &mut stock, site, isolated - IVec2::Y, clock);
+        assert_eq!(village.plans.len(), 3);
+        assert_eq!(
+            village.status,
+            "Leave residents a walking route to the food stores."
+        );
     }
 
     #[test]
