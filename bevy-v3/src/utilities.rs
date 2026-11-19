@@ -22,7 +22,7 @@ pub enum NetworkView {
 
 const LIQUID_NAMES: [&str; 4] = ["Drinking water", "Irrigation", "Greywater", "Sewage"];
 
-fn waste_tank_warning(liters: f64, capacity: f64) -> Option<&'static str> {
+pub(crate) fn waste_tank_warning(liters: f64, capacity: f64) -> Option<&'static str> {
     if capacity <= 0.0 || liters < 0.9 * capacity {
         None
     } else if liters >= capacity - 0.1 {
@@ -787,6 +787,21 @@ impl Utilities {
             river_reserve_liters: ground.river,
             river_flow_liters_per_day: ground.flow,
             runoff_liters: ground.runoff,
+        })
+    }
+
+    pub fn waste_tanks_needing_attention(
+        &self,
+    ) -> impl Iterator<Item = (usize, &'static str, &'static str)> + '_ {
+        self.nodes.iter().flat_map(|(&id, node)| {
+            LIQUID_NAMES
+                .iter()
+                .enumerate()
+                .skip(2)
+                .filter_map(move |(channel, &name)| {
+                    let warning = waste_tank_warning(node.water[channel], node.capacity[channel])?;
+                    Some((id, name, warning))
+                })
         })
     }
 

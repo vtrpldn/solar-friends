@@ -1974,6 +1974,7 @@ fn show_hud(
         Some(UtilityPanel::Water) => {
             label.push('\n');
             label.push_str(&village.construction.utilities.water_summary());
+            label.push_str(&village.construction.waste_tank_summary(&catalog));
             label.push_str("\nBlue Drinking · Green Irrigation\nPurple Greywater · Amber Sewage");
             let panel = &village.water_panel;
             label.push('\n');

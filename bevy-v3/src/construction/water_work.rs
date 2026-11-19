@@ -188,6 +188,37 @@ impl Construction {
                 .is_some_and(|index| self.residents[index].waiting_for_route())
     }
 
+    pub fn waste_tank_summary(&self, catalog: &Catalog) -> String {
+        use std::fmt::Write;
+        const VISIBLE_WARNINGS: usize = 4;
+        let mut details = String::new();
+        let mut count = 0;
+        for (id, tank, warning) in self.utilities.waste_tanks_needing_attention() {
+            count += 1;
+            if count > VISIBLE_WARNINGS {
+                continue;
+            }
+            if let Some(plan) = id.checked_sub(1).and_then(|index| self.plans.get(index)) {
+                let name = &catalog.projects[&plan.key].name;
+                let _ = write!(details, "\n{name} #{id} · {tank} tank {warning}");
+            } else {
+                let _ = write!(details, "\nCamp · {tank} tank {warning}");
+            }
+        }
+        if count == 0 {
+            return details;
+        }
+        if count > VISIBLE_WARNINGS {
+            let _ = write!(details, "\n{} more tanks", count - VISIBLE_WARNINGS);
+        }
+        let subject = if count == 1 {
+            "tank needs"
+        } else {
+            "tanks need"
+        };
+        format!("\n{count} waste {subject} attention{details}")
+    }
+
     pub fn water_panel(
         &self,
         target: usize,
@@ -224,6 +255,14 @@ impl Construction {
                     "\n{label} {:.1}/{:.0} L",
                     site.levels[channel], site.capacity[channel]
                 );
+                if channel >= 2
+                    && let Some(warning) = crate::utilities::waste_tank_warning(
+                        site.levels[channel],
+                        site.capacity[channel],
+                    )
+                {
+                    let _ = write!(text, " · Tank {warning}");
+                }
             }
         }
         if let Some(job) = self.water_jobs.get(&target) {
