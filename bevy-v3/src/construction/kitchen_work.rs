@@ -67,22 +67,30 @@ impl Construction {
         stock: &Stock,
         clock: f64,
     ) -> Option<&'a str> {
-        let pending_units = self
+        let units = |goods: &BTreeMap<String, u32>| {
+            goods.values().map(|&units| u64::from(units)).sum::<u64>()
+        };
+        let production_units = self
             .production
             .jobs
             .iter()
             .map(|job| {
-                job.delivered_output
-                    .as_ref()
-                    .unwrap_or(&catalog.production[&job.recipe].output)
-                    .values()
-                    .map(|units| u64::from(*units))
-                    .sum::<u64>()
+                units(
+                    job.delivered_output
+                        .as_ref()
+                        .unwrap_or(&catalog.production[&job.recipe].output),
+                )
             })
+            .sum::<u64>();
+        let harvest_units = self
+            .farming
+            .jobs
+            .iter()
+            .map(|job| units(&job.output))
             .sum::<u64>();
         let available = self
             .storage_space(catalog, stock)
-            .saturating_sub(pending_units);
+            .saturating_sub(production_units.saturating_add(harvest_units));
         for preserved in [false, true] {
             let target = self.production.kitchen_policy.target(preserved);
             let stored = stock
@@ -133,6 +141,7 @@ impl Construction {
                             .sum::<u64>()
                             <= available
                         && stock.missing(&recipe.input).is_none()
+                        && self.craft_blocker(catalog, stock, recipe, None).is_none()
                         && enough_to_eat(stock, &recipe.input)
                         && ingredients_keep(stock, &recipe.input, clock + recipe.work)
                 })
@@ -263,6 +272,46 @@ mod tests {
         );
         stock.pantry.lots.get_mut("food").unwrap()[0].expires = 900.0;
         stock.reserve_available(&BTreeMap::from([("meals".to_owned(), 12)]));
+        assert!(
+            village
+                .choose_kitchen_recipe(&catalog, &stock, 0.0)
+                .is_none()
+        );
+    }
+
+    #[test]
+    fn automatic_cooking_leaves_storage_for_a_pending_harvest() {
+        use crate::farming::{FarmAction, FarmJob, FarmPhase};
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);
+        stock.age_food(&catalog, 0.0, 0.1, 0.0);
+        let mut village = Construction::default();
+        village.production.kitchen_policy.change(false, -2);
+        village.production.kitchen_policy.change(true, -3);
+        assert_eq!(
+            village.choose_kitchen_recipe(&catalog, &stock, 0.0),
+            Some("preserve_meals")
+        );
+        village.farming.jobs.push(FarmJob {
+            site: 0,
+            bed: 0,
+            action: FarmAction::Harvest,
+            worker: None,
+            phase: FarmPhase::CollectOutput,
+            work: 0.0,
+            required: 1.0,
+            inputs: BTreeMap::new(),
+            output: BTreeMap::from([(
+                "greens".into(),
+                village.storage_space(&catalog, &stock) as u32,
+            )]),
+            food_output: None,
+            retry: 0.0,
+            waiting_for_access: false,
+            pickups: 0,
+            fare: 0,
+            seed_freight_eta: None,
+        });
         assert!(
             village
                 .choose_kitchen_recipe(&catalog, &stock, 0.0)

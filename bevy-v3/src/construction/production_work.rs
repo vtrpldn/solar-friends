@@ -352,7 +352,7 @@ impl Construction {
         self.queue_batch(catalog, stock, index, id);
     }
 
-    fn craft_blocker(
+    pub(super) fn craft_blocker(
         &self,
         catalog: &Catalog,
         stock: &Stock,
