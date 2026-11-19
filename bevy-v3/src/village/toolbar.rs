@@ -51,6 +51,8 @@ enum Action {
     Farm(FarmControl),
     Recipe(usize),
     RecipePage(bool),
+    CraftWorkspace,
+    MoveCraft,
     FacilityIrrigation,
     SelectedProject(ProjectAction),
     TradeItem(usize),
@@ -154,7 +156,11 @@ impl Action {
                     && !village.construction.production.open
             }
             Self::Recipes => village.utility_panel.is_none() && !village.construction.menu,
-            Self::Recipe(_) | Self::RecipePage(_) | Self::FacilityIrrigation => {
+            Self::Recipe(_)
+            | Self::RecipePage(_)
+            | Self::FacilityIrrigation
+            | Self::CraftWorkspace
+            | Self::MoveCraft => {
                 village.utility_panel.is_none()
                     && village.construction.production.open
                     && !village.construction.menu
@@ -380,6 +386,8 @@ impl Action {
                 FarmControl::Work(FarmAction::Collect) => "Collect residues",
             }
             .into(),
+            Self::CraftWorkspace => "Next workspace".into(),
+            Self::MoveCraft => "Move unfinished job".into(),
             Self::RecipePage(false) => "Previous recipes".into(),
             Self::RecipePage(true) => "Next recipes".into(),
             Self::SelectedProject(action) => match action {
@@ -746,6 +754,8 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 spawn_button(menu, &assets, Action::FacilityIrrigation);
                 spawn_button(menu, &assets, Action::RecipePage(false));
                 spawn_button(menu, &assets, Action::RecipePage(true));
+                spawn_button(menu, &assets, Action::CraftWorkspace);
+                spawn_button(menu, &assets, Action::MoveCraft);
                 for row in 0..crate::construction::PAGE_KEYS.len() {
                     spawn_button(menu, &assets, Action::Project(row));
                     spawn_button(menu, &assets, Action::Recipe(row));
@@ -1091,6 +1101,14 @@ fn handle_buttons(
                 Action::RecipePage(forward) if !picker.open => {
                     village.construction.page_recipes(&catalog, forward)
                 }
+                Action::CraftWorkspace if !picker.open => {
+                    village.construction.cycle_craft_workspace(&catalog, true);
+                }
+                Action::MoveCraft if !picker.open => {
+                    let town = &mut *village;
+                    town.construction
+                        .move_selected_craft(&catalog, &mut town.stock);
+                }
                 Action::Recipe(row) if !picker.open => {
                     let town = &mut *village;
                     town.construction
@@ -1116,6 +1134,8 @@ fn handle_buttons(
                 | Action::Project(_)
                 | Action::Recipe(_)
                 | Action::RecipePage(_)
+                | Action::CraftWorkspace
+                | Action::MoveCraft
                 | Action::FacilityIrrigation
                 | Action::Farm(_)
                 | Action::SelectedProject(_)
@@ -1185,6 +1205,9 @@ fn refresh(
     let show_lenses = Action::LensPage.available(&village);
     let show_beds = !picker.open && Action::Farm(FarmControl::NextBed).available(&village);
     let show_recipes = !picker.open && Action::RecipePage(true).available(&village);
+    let craft_workspace = show_recipes
+        .then(|| village.construction.craft_workspace_label(&catalog))
+        .flatten();
     let irrigation = show_recipes
         .then(|| village.construction.facility_irrigation(&catalog))
         .flatten();
@@ -1290,6 +1313,10 @@ fn refresh(
                 action.available(&village) && village.construction.has_recipes(&catalog)
             }
             Action::RecipePage(_) => show_recipes,
+            Action::CraftWorkspace => craft_workspace
+                .as_ref()
+                .is_some_and(|(_, count)| *count > 1),
+            Action::MoveCraft => craft_workspace.is_some(),
             Action::FacilityIrrigation => irrigation.is_some(),
             Action::Beds | Action::Gather => action.available(&village),
             Action::Farm(_) => show_beds,
@@ -1375,6 +1402,11 @@ fn refresh(
                 Action::Library if saves.open => "Close saved villages".into(),
                 Action::Project(row) => projects[row].clone(),
                 Action::Recipe(row) => recipes[row].clone(),
+                Action::MoveCraft => craft_workspace
+                    .as_ref()
+                    .expect("visible craft destination")
+                    .0
+                    .clone(),
                 Action::FacilityIrrigation => irrigation.map_or_else(String::new, |policy| {
                     format!("Irrigation · {}", policy.label())
                 }),

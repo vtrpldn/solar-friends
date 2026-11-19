@@ -73,34 +73,68 @@ impl Construction {
         if !self.production.open || self.menu {
             return;
         }
-        if let Some(source) = self.production.selected {
-            let (job, destinations) = self.craft_destinations(catalog, source);
-            if let Some(job) = job
-                && !destinations.is_empty()
-            {
-                let mut cursor = self
-                    .production
-                    .craft_destination
-                    .min(destinations.len() - 1);
-                if keyboard.just_pressed(KeyCode::BracketRight) {
-                    cursor = (cursor + 1) % destinations.len();
-                } else if keyboard.just_pressed(KeyCode::BracketLeft) {
-                    cursor = (cursor + destinations.len() - 1) % destinations.len();
-                }
-                self.production.craft_destination = cursor;
-                if keyboard.just_pressed(KeyCode::KeyM)
-                    && !keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight])
-                {
-                    self.move_craft_job(catalog, stock, job, destinations[cursor]);
-                    return;
-                }
-            }
+        if keyboard.just_pressed(KeyCode::BracketRight) {
+            self.cycle_craft_workspace(catalog, true);
+        } else if keyboard.just_pressed(KeyCode::BracketLeft) {
+            self.cycle_craft_workspace(catalog, false);
+        }
+        if keyboard.just_pressed(KeyCode::KeyM)
+            && !keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight])
+        {
+            self.move_selected_craft(catalog, stock);
+            return;
         }
         if keyboard.any_just_pressed([KeyCode::PageDown, KeyCode::PageUp]) {
             self.page_recipes(catalog, keyboard.just_pressed(KeyCode::PageDown));
         }
         if let Some(row) = PAGE_KEYS.iter().position(|key| keyboard.just_pressed(*key)) {
             self.queue_recipe_row(catalog, stock, row);
+        }
+    }
+
+    pub fn craft_workspace_label(&self, catalog: &Catalog) -> Option<(String, usize)> {
+        let source = self.production.selected?;
+        let (_, destinations) = self.craft_destinations(catalog, source);
+        let &destination = destinations.get(
+            self.production
+                .craft_destination
+                .min(destinations.len().saturating_sub(1)),
+        )?;
+        let name = &catalog.projects[&self.plans[destination].key].name;
+        Some((
+            format!("Move to {name} #{}", destination + 1),
+            destinations.len(),
+        ))
+    }
+
+    pub fn cycle_craft_workspace(&mut self, catalog: &Catalog, forward: bool) {
+        let Some(source) = self.production.selected else {
+            return;
+        };
+        let count = self.craft_destinations(catalog, source).1.len();
+        if count > 0 {
+            let current = self.production.craft_destination.min(count - 1);
+            self.production.craft_destination = if forward {
+                (current + 1) % count
+            } else {
+                (current + count - 1) % count
+            };
+        }
+    }
+
+    pub fn move_selected_craft(&mut self, catalog: &Catalog, stock: &mut Stock) {
+        let Some(source) = self.production.selected else {
+            return;
+        };
+        let (job, destinations) = self.craft_destinations(catalog, source);
+        if let Some(job) = job
+            && let Some(&destination) = destinations.get(
+                self.production
+                    .craft_destination
+                    .min(destinations.len().saturating_sub(1)),
+            )
+        {
+            self.move_craft_job(catalog, stock, job, destination);
         }
     }
 
