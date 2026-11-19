@@ -1106,7 +1106,7 @@ struct CampPointer {
 }
 
 #[derive(Resource, Default, PartialEq)]
-struct MapNotice(Option<String>);
+struct MapNotice(Option<String>, Option<bool>);
 
 #[derive(Clone, Copy)]
 struct GroundHit {
@@ -2542,6 +2542,7 @@ fn draw_blueprints(
     ),
 ) {
     let mut notice = None;
+    let mut available = None;
     if !setup.open
         && let Some(camp) = village.camp
     {
@@ -2680,8 +2681,8 @@ fn draw_blueprints(
                 village
                     .construction
                     .draw_road_route(&terrain, hit.cell, extend, &mut gizmos);
-            } else if village.construction.placing_project() {
-                notice = village.construction.draw_project_site(
+            } else if village.construction.placing_project()
+                && let Some((label, valid)) = village.construction.draw_project_site(
                     ConstructionSite {
                         terrain: &terrain,
                         land: &land,
@@ -2695,7 +2696,10 @@ fn draw_blueprints(
                     },
                     hit.cell,
                     &mut gizmos,
-                );
+                )
+            {
+                notice = Some(label);
+                available = Some(valid);
             }
         }
     }
@@ -2719,7 +2723,7 @@ fn draw_blueprints(
         );
         notice = Some(issue.unwrap_or("Click to pitch camp here.").into());
     }
-    map_notice.set_if_neq(MapNotice(notice));
+    map_notice.set_if_neq(MapNotice(notice, available));
 }
 
 pub(crate) fn register_building_models(app: &mut App) {

@@ -1264,7 +1264,7 @@ impl Construction {
         clock: TownClock,
         position: IVec2,
         gizmos: &mut Gizmos,
-    ) -> Option<String> {
+    ) -> Option<(String, bool)> {
         let key = self
             .moving
             .map(|index| self.plans[index].key.as_str())
@@ -1317,11 +1317,13 @@ impl Construction {
                 );
             }
         }
-        Some(match status {
+        let available = status.is_ok();
+        let label = match status {
             Ok(detail) if show_access => format!("{detail} · Blue Work access · Gold Entrance"),
             Ok(detail) => detail,
             Err(reason) => format!("Blocked · {reason}"),
-        })
+        };
+        Some((label, available))
     }
 
     fn placement_error(
