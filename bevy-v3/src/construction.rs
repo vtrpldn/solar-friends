@@ -3179,6 +3179,26 @@ mod tests {
     }
 
     #[test]
+    fn copying_a_field_preserves_its_rotation_and_footprint() {
+        let setup = WorldSetup::default();
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let footprint = IVec2::new(3, 5);
+        let field = Construction::proposal(&catalog, "field", IVec2::new(40, 36), footprint, 1);
+        let mut village = Construction {
+            plans: vec![field],
+            ..default()
+        };
+        village.production.selected = Some(0);
+        village.apply_project_action(&catalog, &mut stock, lifecycle::ProjectAction::Copy);
+
+        assert_eq!(village.selection.as_deref(), Some("field"));
+        assert_eq!(village.rotation, 1);
+        assert_eq!(village.field_size, footprint);
+        assert_eq!(village.plans.len(), 1);
+    }
+
+    #[test]
     fn shift_placement_keeps_repeatable_blueprints_selected() {
         let setup = WorldSetup::default();
         let catalog = Catalog::default();

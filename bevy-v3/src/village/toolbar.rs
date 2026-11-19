@@ -422,6 +422,7 @@ impl Action {
             Self::SelectedProject(action) => match action {
                 ProjectAction::Prioritize => "Prioritize project",
                 ProjectAction::Move => "Move building",
+                ProjectAction::Copy => "Copy blueprint",
                 ProjectAction::Salvage => "Cancel or salvage",
                 ProjectAction::Demolish => "Demolish",
             }
@@ -685,6 +686,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 for action in [
                     ProjectAction::Prioritize,
                     ProjectAction::Move,
+                    ProjectAction::Copy,
                     ProjectAction::Salvage,
                     ProjectAction::Demolish,
                 ] {
@@ -1329,11 +1331,8 @@ fn refresh(
     } else {
         Vec::new()
     };
-    let show_selected_project = !picker.open
-        && Action::SelectedProject(ProjectAction::Salvage).available(&village)
-        && village
-            .construction
-            .project_action_available(&catalog, ProjectAction::Salvage);
+    let show_selected_project =
+        !picker.open && Action::SelectedProject(ProjectAction::Salvage).available(&village);
     let show_advance = Action::Advance(AdvanceAction::Method).available(&village);
     let show_terrain = Action::UndoTerrain.available(&village);
     let show_field_size = Action::ResizeField(IVec2::ZERO).available(&village);
@@ -1442,9 +1441,11 @@ fn refresh(
             Action::Recipe(row) => recipes.get(row).is_some(),
             Action::SelectedProject(action) => {
                 show_selected_project
-                    && village
-                        .construction
-                        .project_action_available(&catalog, action)
+                    && village.construction.project_action_available(
+                        &catalog,
+                        action,
+                        village.stock.sandbox,
+                    )
             }
             Action::TradeItem(row) => trade_items.get(row).is_some(),
             Action::TradeQueue => show_trade,

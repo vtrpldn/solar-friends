@@ -68,6 +68,7 @@ pub(super) struct Destination {
 pub(crate) enum ProjectAction {
     Prioritize,
     Move,
+    Copy,
     Salvage,
     Demolish,
 }
@@ -148,7 +149,7 @@ impl Construction {
         ] {
             if keys.just_pressed(key)
                 && (!matches!(action, ProjectAction::Move) || shift)
-                && self.project_action_available(catalog, action)
+                && self.project_action_available(catalog, action, stock.sandbox)
             {
                 self.apply_project_action(catalog, stock, action);
                 break;
@@ -156,12 +157,20 @@ impl Construction {
         }
     }
 
-    pub fn project_action_available(&self, catalog: &Catalog, action: ProjectAction) -> bool {
+    pub fn project_action_available(
+        &self,
+        catalog: &Catalog,
+        action: ProjectAction,
+        sandbox: bool,
+    ) -> bool {
         if self.menu || self.moving.is_some() || self.production.open || self.farming.open {
             return false;
         }
         self.production.selected.is_some_and(|index| {
             let project = &self.plans[index];
+            if matches!(action, ProjectAction::Copy) {
+                return !project.removed && (sandbox || catalog.projects[&project.key].repeatable);
+            }
             !project.removed
                 && !self.changes.contains_key(&index)
                 && (!matches!(action, ProjectAction::Prioritize)
@@ -175,7 +184,7 @@ impl Construction {
         stock: &mut Stock,
         action: ProjectAction,
     ) {
-        if !self.project_action_available(catalog, action) {
+        if !self.project_action_available(catalog, action, stock.sandbox) {
             return;
         }
         let Some(index) = self.production.selected else {
@@ -192,6 +201,19 @@ impl Construction {
         action: ProjectAction,
     ) {
         let project = &self.plans[index];
+        if matches!(action, ProjectAction::Copy) {
+            let key = project.key.clone();
+            let rotation = project.rotation;
+            let footprint = rotated_size(project.size, rotation);
+            self.choose_blueprint(&key);
+            self.rotation = rotation;
+            if key == "field" {
+                self.field_size = footprint;
+            }
+            self.production.selected = None;
+            self.menu = true;
+            return;
+        }
         if matches!(action, ProjectAction::Prioritize) {
             self.priority = Some(index);
             for worker in &mut self.residents {
