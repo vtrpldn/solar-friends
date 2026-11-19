@@ -1093,21 +1093,14 @@ fn update_lab_window(
     if playback.view == LabView::Map
         && !playback.replaying
         && !runner.done()
-        && map.blueprint.is_none()
-        && keys.just_pressed(KeyCode::KeyG)
-        && let Some(index) = map.resource
+        && let Some((order, success)) = map.service_order(&keys)
     {
-        playback.notice = match runner.submit(
-            &catalog,
-            LabOrder::Gather {
-                resource: index + 1,
-            },
-        ) {
+        playback.notice = match runner.submit(&catalog, order) {
             Ok(()) => runner
                 .outcomes
                 .last()
                 .and_then(|outcome| outcome.error.clone())
-                .unwrap_or_else(|| "Gathering queued.".into()),
+                .unwrap_or_else(|| success.into()),
             Err(error) => error.into(),
         };
     }
@@ -1246,8 +1239,9 @@ fn update_lab_window(
             } else {
                 String::new()
             };
+            let water = map.water_details(&runner, !playback.replaying && !runner.done());
             format!(
-                "Village map · {selection}\nTab Switch view · Enter Inspect selected jobs{gather}{build}\nBlue Camp · Cream Residents · Green Completed · Gold Construction · Purple Resources"
+                "Village map · {selection}\nTab Switch view · Enter Inspect selected jobs{gather}{build}\nBlue Camp · Cream Residents · Green Completed · Gold Construction · Purple Resources{water}"
             )
         } else {
             lab_inventory(

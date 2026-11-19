@@ -82,6 +82,66 @@ impl MapState {
         })
     }
 
+    pub fn service_order(&self, keys: &ButtonInput<KeyCode>) -> Option<(LabOrder, &'static str)> {
+        if self.blueprint.is_some() {
+            return None;
+        }
+        if let Some(index) = self.resource {
+            return keys.just_pressed(KeyCode::KeyG).then_some((
+                LabOrder::Gather {
+                    resource: index + 1,
+                },
+                "Gathering queued.",
+            ));
+        }
+        let site = self.selected.map_or(0, |index| index + 1);
+        [
+            (KeyCode::KeyC, LabOrder::CollectWater { site }),
+            (KeyCode::KeyP, LabOrder::Purify { site }),
+            (KeyCode::KeyV, LabOrder::ServiceWater { site }),
+        ]
+        .into_iter()
+        .find(|(key, _)| keys.just_pressed(*key))
+        .map(|(_, order)| (order, "Water service queued."))
+    }
+
+    pub fn water_details(&self, runner: &Runner, editable: bool) -> String {
+        if self.resource.is_some() || self.blueprint.is_some() {
+            return String::new();
+        }
+        let id = self.selected.map_or(0, |index| index + 1);
+        let Some(site) = runner
+            .village
+            .construction
+            .utilities
+            .water_site(id)
+            .filter(|site| site.capacity.iter().any(|&capacity| capacity > 0.0))
+        else {
+            return String::new();
+        };
+        let [drinking, raw, grey, waste] = site.levels;
+        let target = if id == 0 {
+            "Camp water"
+        } else {
+            "Water storage"
+        };
+        let mut details = format!(
+            "\n{target} · {drinking:.1} L drinking · {raw:.1} L untreated · {grey:.1} L greywater · {waste:.1} L sewage"
+        );
+        if editable && site.enabled {
+            if site.capacity[1] > 0.0 {
+                details.push_str(" · C Collect river water");
+                if site.capacity[0] > 0.0 {
+                    details.push_str(" · P Purify");
+                }
+            }
+            if site.capacity[2] > 0.0 || site.capacity[3] > 0.0 {
+                details.push_str(" · V Service waste");
+            }
+        }
+        details
+    }
+
     pub fn cancel_build(&mut self) {
         self.blueprint = None;
         self.placement = None;
