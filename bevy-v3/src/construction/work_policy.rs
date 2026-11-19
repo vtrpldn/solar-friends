@@ -1,6 +1,7 @@
 use super::*;
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
+#[serde(rename_all = "kebab-case")]
 pub(crate) enum WorkGroup {
     Essentials,
     Maintenance,
@@ -61,6 +62,27 @@ fn one_worker() -> u8 {
 }
 
 impl WorkPolicy {
+    pub(super) fn set_priority(&mut self, group: WorkGroup, level: u8) -> Result<(), &'static str> {
+        if level > 3 {
+            return Err("Work priority must be between 0 and 3.");
+        }
+        self.priorities[group as usize] = level;
+        Ok(())
+    }
+
+    pub(super) fn set_reservations(
+        &mut self,
+        essentials: u8,
+        production: u8,
+    ) -> Result<(), &'static str> {
+        if u16::from(essentials) + u16::from(production) > 5 {
+            return Err("Worker reservations cannot exceed five residents.");
+        }
+        self.essential_workers = essentials;
+        self.production_workers = production;
+        Ok(())
+    }
+
     pub(super) fn valid(&self) -> bool {
         self.priorities.iter().all(|&priority| priority <= 3)
             && u16::from(self.essential_workers) + u16::from(self.production_workers) <= 5
@@ -183,8 +205,22 @@ mod tests {
         assert!(village.production.jobs[0].worker.is_none());
 
         let mut reserved: Construction = serde_json::from_slice(&before).unwrap();
-        reserved.cycle_work_priority(WorkGroup::Construction);
-        reserved.cycle_worker_reservation(false);
+        for input in [
+            r#"{"type":"work-priority","group":"construction","level":3}"#,
+            r#"{"type":"worker-reservations","essentials":0,"production":1}"#,
+        ] {
+            let order = serde_json::from_str(input).unwrap();
+            reserved
+                .lab_order(
+                    &catalog,
+                    &mut stock,
+                    ground,
+                    clock,
+                    &order,
+                    setup.richness(),
+                )
+                .unwrap();
+        }
         assert_eq!(reserved.work_policy.production_workers, 1);
         let saved = serde_json::to_vec(&reserved).unwrap();
         reserved = serde_json::from_slice(&saved).unwrap();

@@ -114,6 +114,8 @@ Set `"stop"` in the scenario to `"harvest"`, `"crop-failed"`, `"hydration"`, `"w
 
 `{"type":"carry-water","source":1,"site":0,"channel":"irrigation"}` queues a resident to carry water from project 1 to the camp reservoir. Channels are `drinking`, `irrigation`, `greywater`, and `sewage`.
 
+`{"type":"work-priority","group":"construction","level":3}` sets a priority from 0 (low) to 3 (highest). Groups are `essentials`, `maintenance`, `production`, and `construction`. Use `{"type":"worker-reservations","essentials":1,"production":2}` to reserve workers, up to five in total.
+
 Verify a lab report with `cargo run --locked --manifest-path bevy-v3/Cargo.toml -- --lab-replay report.json`. The verifier replays the bundled starting village and orders and exits with an error if the results diverge. Use `--lab-replay-ui report.json` to step through the same report in the desktop lab and see the verification result at the end.
 
 Use `--lab-ui scenario.json [village.json]` to open the native lab window. Press **Space** to run or pause, **J** for one simulation step, or **1–9** to choose a speed from 1× through 1024×. The lab reports achieved speed and indicates when CPU time limits playback. Press **F2** to choose an interval, **F3** to run it, or **Shift+J** to advance one game hour. Intervals stop at the scenario limit or its configured stop condition. Press **F4** to choose an additional pause condition while playing a scenario.

@@ -810,6 +810,15 @@ fn order_label(order: &LabOrder) -> String {
             toggle_label(*enabled)
         ),
         LabOrder::FoodPolicy { enabled } => format!("{} food restocking", toggle_label(*enabled)),
+        LabOrder::WorkPriority { group, level } => {
+            format!("Set {} priority to {level}", group.label())
+        }
+        LabOrder::WorkerReservations {
+            essentials,
+            production,
+        } => {
+            format!("Reserve {essentials} for essentials and {production} for production")
+        }
         LabOrder::Grid { enabled } => format!("{} grid power", toggle_label(*enabled)),
         LabOrder::CollectWater { site } => format!("Collect river water for site #{site}"),
         LabOrder::CarryWater {

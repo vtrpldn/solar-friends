@@ -71,6 +71,14 @@ pub(crate) enum LabOrder {
     FoodPolicy {
         enabled: bool,
     },
+    WorkPriority {
+        group: WorkGroup,
+        level: u8,
+    },
+    WorkerReservations {
+        essentials: u8,
+        production: u8,
+    },
     Grid {
         enabled: bool,
     },
@@ -527,6 +535,16 @@ impl Construction {
                 }
             }
             LabOrder::FoodPolicy { enabled } => self.trade.household_restock_off = !enabled,
+            LabOrder::WorkPriority { group, level } => {
+                self.work_policy.set_priority(*group, *level)?
+            }
+            LabOrder::WorkerReservations {
+                essentials,
+                production,
+            } => {
+                self.work_policy
+                    .set_reservations(*essentials, *production)?;
+            }
             LabOrder::Grid { enabled } => self.utilities.grid_off = !enabled,
             LabOrder::CollectWater { site } => self.queue_water(
                 *site,
