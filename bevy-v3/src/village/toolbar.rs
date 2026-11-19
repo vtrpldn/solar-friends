@@ -92,6 +92,7 @@ enum Action {
     ToggleUtilityLink,
     RemoveUtilityLink,
     CancelUtilityInstallation,
+    NextUtilityInstallation,
     AutomaticUpkeep,
     UpkeepBudget { restock: bool, increase: bool },
 }
@@ -238,6 +239,7 @@ impl Action {
             }
             Self::UtilityLinkPage(_) | Self::ToggleUtilityLink => village.utility_link_count() > 0,
             Self::RemoveUtilityLink => village.can_remove_selected_utility_link(),
+            Self::NextUtilityInstallation => village.has_queued_utility_installation(),
             Self::CancelUtilityInstallation => village.can_cancel_selected_installation(),
             Self::InstallPowerLink => village.utility_panel == Some(UtilityPanel::Power),
             Self::NextPowerShortage => {
@@ -564,6 +566,7 @@ impl Action {
             Self::ToggleUtilityLink => "Switch connection".into(),
             Self::RemoveUtilityLink => "Remove manual connection".into(),
             Self::CancelUtilityInstallation => "Cancel installation".into(),
+            Self::NextUtilityInstallation => "Next installation".into(),
             Self::Water(command) => match command {
                 WaterCommand::Camp { source: true } => "Camp source".into(),
                 WaterCommand::Camp { source: false } => "Camp destination".into(),
@@ -826,6 +829,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 spawn_button(menu, &assets, Action::ToggleUtilityLink);
                 spawn_button(menu, &assets, Action::RemoveUtilityLink);
                 spawn_button(menu, &assets, Action::CancelUtilityInstallation);
+                spawn_button(menu, &assets, Action::NextUtilityInstallation);
                 spawn_button(menu, &assets, Action::BuildingPower);
                 spawn_button(menu, &assets, Action::Cooling);
                 for command in [
@@ -1208,6 +1212,9 @@ fn handle_buttons(
                     village.move_utility_link(forward)
                 }
                 Action::ToggleUtilityLink if !picker.open => village.toggle_selected_utility_link(),
+                Action::NextUtilityInstallation if !picker.open => {
+                    village.focus_next_utility_installation(&setup, camera)
+                }
                 Action::CancelUtilityInstallation if !picker.open => {
                     village.cancel_selected_installation()
                 }
@@ -1376,6 +1383,7 @@ fn handle_buttons(
                 | Action::ToggleUtilityLink
                 | Action::RemoveUtilityLink
                 | Action::CancelUtilityInstallation
+                | Action::NextUtilityInstallation
                 | Action::AutomaticUpkeep
                 | Action::UpkeepBudget { .. } => {}
             }
@@ -1578,7 +1586,8 @@ fn refresh(
             Action::UtilityLinkPage(_)
             | Action::ToggleUtilityLink
             | Action::RemoveUtilityLink
-            | Action::CancelUtilityInstallation => {
+            | Action::CancelUtilityInstallation
+            | Action::NextUtilityInstallation => {
                 (show_power || show_water) && action.available(&village)
             }
             Action::BuildingPower | Action::Cooling => {

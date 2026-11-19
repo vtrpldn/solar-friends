@@ -496,6 +496,51 @@ impl Village {
         }
     }
 
+    fn has_queued_utility_installation(&self) -> bool {
+        match self.utility_panel {
+            Some(UtilityPanel::Power | UtilityPanel::Water) => self
+                .construction
+                .queued_utility_connections(self.utility_panel == Some(UtilityPanel::Power))
+                .next()
+                .is_some(),
+            _ => false,
+        }
+    }
+
+    fn focus_next_utility_installation(&mut self, setup: &WorldSetup, camera: &mut VillageCamera) {
+        let power = self.utility_panel == Some(UtilityPanel::Power);
+        let current = self
+            .selected_installation()
+            .and_then(|(from, to, channel)| self.construction.queued_connection(from, to, channel));
+        let next = {
+            let mut queue = self.construction.queued_utility_connections(power);
+            let Some(first) = queue.next() else { return };
+            current.map_or(first, |current| {
+                if first.0 > current {
+                    first
+                } else {
+                    queue.find(|&(from, _, _)| from > current).unwrap_or(first)
+                }
+            })
+        };
+        let (from, to, channel) = next;
+        if let Some(channel) = channel {
+            self.water_panel.source = Some(from);
+            self.water_panel.select_facility(to, false);
+            self.water_panel.channel = channel;
+        } else {
+            self.power_source = from;
+            self.power_target = to;
+            self.power_notice.clear();
+        }
+        if let Some(site) = self.construction.utilities.water_site(from) {
+            let center = site.location.as_vec2() + (site.size.as_vec2() - Vec2::ONE) * 0.5;
+            let point = world_position(center.x, center.y);
+            let terrain = self.terrain(setup);
+            camera.target = Vec3::new(point.x, terrain.height_at(point.x, point.y), point.y);
+        }
+    }
+
     fn can_cancel_selected_installation(&self) -> bool {
         self.selected_installation()
             .is_some_and(|(from, to, channel)| {
@@ -1534,6 +1579,10 @@ fn village_input(
             };
         }
         if town.utility_panel == Some(UtilityPanel::Water) {
+            if keyboard.just_pressed(KeyCode::PageUp) {
+                town.focus_next_utility_installation(&setup, camera);
+                return;
+            }
             if keyboard.just_pressed(KeyCode::KeyU) {
                 town.queue_selected_water_connection();
                 return;
@@ -1553,6 +1602,10 @@ fn village_input(
             return;
         }
         if town.utility_panel == Some(UtilityPanel::Power) {
+            if keyboard.just_pressed(KeyCode::PageUp) {
+                town.focus_next_utility_installation(&setup, camera);
+                return;
+            }
             let shift = keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]);
             let endpoint = if keyboard.just_pressed(KeyCode::KeyC) {
                 Some(0)
@@ -2145,6 +2198,7 @@ fn show_hud(
                 label.push_str(&village.power_notice);
             }
             label.push_str(&village.construction.power_shortage_summary(&catalog));
+            label.push_str(&village.construction.queued_installation_hint(true));
         }
         Some(UtilityPanel::Projects) => {
             label.push('\n');
@@ -2205,6 +2259,7 @@ fn show_hud(
             label.push('\n');
             label.push_str(&village.construction.utilities.water_summary());
             label.push_str(&village.construction.waste_tank_summary(&catalog));
+            label.push_str(&village.construction.queued_installation_hint(false));
             label.push_str(&village.construction.connection_summary(
                 &catalog,
                 village.water_link,

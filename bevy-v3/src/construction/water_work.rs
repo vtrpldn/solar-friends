@@ -406,6 +406,34 @@ impl Construction {
         }
     }
 
+    pub fn queued_utility_connections(
+        &self,
+        power: bool,
+    ) -> impl Iterator<Item = (usize, usize, Option<usize>)> + '_ {
+        self.water_jobs
+            .iter()
+            .filter_map(move |(&from, job)| match job.action {
+                WaterAction::InstallCable { to, .. } if power => Some((from, to, None)),
+                WaterAction::InstallPipe { to, channel, .. } if !power => {
+                    Some((from, to, Some(channel)))
+                }
+                _ => None,
+            })
+    }
+
+    pub fn queued_installation_hint(&self, power: bool) -> String {
+        let count = self.queued_utility_connections(power).count();
+        if count == 0 {
+            return String::new();
+        }
+        let noun = if count == 1 {
+            "installation"
+        } else {
+            "installations"
+        };
+        format!("\n{count} queued {noun} · Page Up Next installation")
+    }
+
     pub fn queued_connection(
         &self,
         from: usize,
@@ -570,11 +598,15 @@ impl Construction {
                 }
             }
         }
-        let displayed_job = self.water_jobs.get(&target).or_else(|| {
-            self.water_jobs.values().find(
-                |job| matches!(job.action, WaterAction::InstallPipe { to, .. } if to == target),
-            )
-        });
+        let displayed_job = source
+            .and_then(|from| self.queued_connection(from, target, Some(channel)))
+            .and_then(|from| self.water_jobs.get(&from))
+            .or_else(|| self.water_jobs.get(&target))
+            .or_else(|| {
+                self.water_jobs.values().find(
+                    |job| matches!(job.action, WaterAction::InstallPipe { to, .. } if to == target),
+                )
+            });
         if let Some(job) = displayed_job {
             let status = if self.water_route_blocked(job, clock) {
                 "Waiting for access"
