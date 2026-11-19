@@ -125,7 +125,10 @@ impl Action {
                 && !village.planning_roads()
                 && !village.terrain_editor.open
                 && (matches!(action, AdvanceAction::Toggle)
-                    || (village.advance.open && village.advance.running.is_none()));
+                    || (village.advance.open
+                        && village.advance.running.is_none()
+                        && (!matches!(action, AdvanceAction::Start)
+                            || village.advance.can_start())));
         }
         if matches!(self, Self::ConnectRoad | Self::UndoRoad | Self::FinishRoad) {
             return village.planning_roads() && !village.map_input_blocked();
@@ -345,6 +348,7 @@ impl Action {
                 AdvanceAction::Method if village.advance.fast => "Fast approximate".into(),
                 AdvanceAction::Method => "Exact replay".into(),
                 AdvanceAction::Start => "Start advance".into(),
+                AdvanceAction::Digit(_) | AdvanceAction::Backspace => String::new(),
             },
             Self::ResizeField(delta) => format!(
                 "{} {}",
@@ -1327,7 +1331,7 @@ fn refresh(
         && village
             .construction
             .project_action_available(&catalog, ProjectAction::Salvage);
-    let show_advance = Action::Advance(AdvanceAction::Start).available(&village);
+    let show_advance = Action::Advance(AdvanceAction::Method).available(&village);
     let show_terrain = Action::UndoTerrain.available(&village);
     let show_field_size = Action::ResizeField(IVec2::ZERO).available(&village);
     let show_projects = !picker.open && Action::ProjectFilter.available(&village);
