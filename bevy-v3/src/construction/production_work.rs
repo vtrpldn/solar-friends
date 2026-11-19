@@ -1559,6 +1559,7 @@ mod upgrade_tests {
             camp,
         };
         let mut stock = Stock::for_start(&setup, &catalog);
+        let initial_logs = stock.available("logs");
         let mut village = Construction::default();
         let mut trees = village.proposed_site(&catalog, "supply-0", IVec2::new(44, 36));
         trees.work = catalog.projects["supply-0"].work;
@@ -1574,7 +1575,7 @@ mod upgrade_tests {
             village.plans.push(obstacle);
         }
         village.tick_production(&catalog, &mut stock, site, 0.0, 0.1);
-        assert_eq!(stock.available("logs"), 5);
+        assert_eq!(stock.available("logs") - initial_logs, 5);
         assert!(village.production.jobs[0].returning_to_site);
         assert!(village.production.jobs[0].waiting_for_access);
         assert!(village.residents[0].path.is_empty());
@@ -1589,7 +1590,7 @@ mod upgrade_tests {
             }
         }
         assert!(village.production.jobs.is_empty());
-        assert_eq!(stock.available("logs"), 48);
+        assert_eq!(stock.available("logs") - initial_logs, 48);
         assert_eq!(
             production_load(
                 &catalog,

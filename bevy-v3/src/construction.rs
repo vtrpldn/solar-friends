@@ -2653,7 +2653,8 @@ mod tests {
             land: &land,
             camp: IVec2::new(36, 36),
         };
-        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);
+        stock.sandbox = true;
         let mut construction = Construction {
             selection: Some("supply-5".into()),
             ..default()
@@ -3025,6 +3026,7 @@ mod tests {
         setup.mode = crate::setup::Mode::Sandbox;
         let catalog = Catalog::default();
         let mut stock = Stock::for_start(&setup, &catalog);
+        let initial_wood = stock.available("wood");
         let terrain = setup.terrain();
         let camp = IVec2::new(36, 36);
         let mut construction = Construction {
@@ -3047,7 +3049,7 @@ mod tests {
             },
         );
         assert_eq!(construction.finished_models(&catalog).count(), 1);
-        assert_eq!(stock.available("wood"), 36);
+        assert_eq!(stock.available("wood"), initial_wood);
     }
 
     #[test]

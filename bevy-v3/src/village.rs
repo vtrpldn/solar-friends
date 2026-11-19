@@ -1565,6 +1565,7 @@ fn step(
     dt: f64,
 ) {
     town.clock += dt;
+    town.stock.replenish_sandbox(catalog);
     town.construction.refresh_resident_crowding(catalog, site);
     town.stock.update_finance_clock(town.clock);
     town.construction

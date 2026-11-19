@@ -9,6 +9,9 @@ use crate::{
     setup::{Mode, WorldSetup},
 };
 
+const SANDBOX_UNITS: u32 = 9_999;
+const SANDBOX_BALANCE_CENTS: u64 = 99_999_900;
+
 fn tracked_recipe(id: &str) -> bool {
     matches!(
         id,
@@ -110,7 +113,7 @@ impl Stock {
                 (id.clone(), count)
             })
             .collect();
-        Self {
+        let mut stock = Self {
             cash: settings.starting_cash(),
             centavos: 0,
             ledger: BTreeMap::new(),
@@ -120,6 +123,22 @@ impl Stock {
             processing: BTreeMap::new(),
             materials,
             equipment: Equipment::default(),
+        };
+        stock.replenish_sandbox(catalog);
+        stock
+    }
+
+    pub(crate) fn replenish_sandbox(&mut self, catalog: &Catalog) {
+        if !self.sandbox {
+            return;
+        }
+        self.set_balance(SANDBOX_BALANCE_CENTS);
+        for id in catalog.materials.keys() {
+            if let Some(count) = self.materials.get_mut(id) {
+                *count = SANDBOX_UNITS;
+            } else {
+                self.materials.insert(id.clone(), SANDBOX_UNITS);
+            }
         }
     }
 
@@ -489,6 +508,24 @@ impl Stock {
 mod finance_tests {
     use super::*;
     use crate::weather::DAY;
+
+    #[test]
+    fn sandbox_replenishes_tools_consumables_and_cash() {
+        let catalog = Catalog::default();
+        let mut setup = WorldSetup::default();
+        setup.mode = Mode::Sandbox;
+        let mut stock = Stock::for_start(&setup, &catalog);
+        assert_eq!(stock.available("cleaning-kit"), SANDBOX_UNITS);
+        assert_eq!(stock.balance(), SANDBOX_BALANCE_CENTS);
+        stock.reserve_available(&BTreeMap::from([("soap".into(), 1)]));
+        stock.debit(100, CashKind::Materials);
+        stock.materials.remove("cleaning-kit");
+
+        stock.replenish_sandbox(&catalog);
+        assert_eq!(stock.available("soap"), SANDBOX_UNITS);
+        assert_eq!(stock.available("cleaning-kit"), SANDBOX_UNITS);
+        assert_eq!(stock.balance(), SANDBOX_BALANCE_CENTS);
+    }
 
     #[test]
     fn cash_scenarios_use_completed_operating_days_and_skip_construction() {
