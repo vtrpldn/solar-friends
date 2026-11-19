@@ -183,10 +183,20 @@ struct GardenProp {
 #[derive(Component)]
 struct GardenText;
 
-#[derive(Component, Clone, Copy)]
-enum TerrainAction {
+#[derive(Component, Clone, Copy, PartialEq, Eq)]
+enum GardenAction {
     Choose(&'static str),
     LoadLandscape,
+    Move,
+    Rotate,
+    Duplicate,
+    Delete,
+    PlaceAnother,
+    Clear,
+    Position,
+    Cancel,
+    Undo,
+    Redo,
 }
 #[derive(Component)]
 struct SelectableProp(Entity);
@@ -351,7 +361,7 @@ fn run_garden(path: Option<PathBuf>, night: bool, study: Option<&str>) {
             render,
             preview,
             update_lighting,
-            update_terrain_buttons,
+            update_garden_buttons,
         )
             .chain(),
     );
@@ -429,11 +439,21 @@ fn setup(
         })
         .with_children(|row| {
             for (label, action) in [
-                ("Flat", TerrainAction::Choose("flat")),
-                ("Mata Atlântica", TerrainAction::Choose("mata-atlantica")),
-                ("Cerrado", TerrainAction::Choose("cerrado")),
-                ("Caatinga", TerrainAction::Choose("caatinga")),
-                ("Load biome landscape", TerrainAction::LoadLandscape),
+                ("Flat", GardenAction::Choose("flat")),
+                ("Mata Atlântica", GardenAction::Choose("mata-atlantica")),
+                ("Cerrado", GardenAction::Choose("cerrado")),
+                ("Caatinga", GardenAction::Choose("caatinga")),
+                ("Load biome landscape", GardenAction::LoadLandscape),
+                ("Move", GardenAction::Move),
+                ("Rotate", GardenAction::Rotate),
+                ("Duplicate", GardenAction::Duplicate),
+                ("Delete", GardenAction::Delete),
+                ("Place another", GardenAction::PlaceAnother),
+                ("Deselect", GardenAction::Clear),
+                ("Exact position", GardenAction::Position),
+                ("Cancel placement", GardenAction::Cancel),
+                ("Undo", GardenAction::Undo),
+                ("Redo", GardenAction::Redo),
             ] {
                 row.spawn((
                     Button,
@@ -449,27 +469,38 @@ fn setup(
         });
 }
 
-fn update_terrain_buttons(
+fn update_garden_buttons(
     garden: Res<Garden>,
-    mut buttons: Query<(&TerrainAction, &mut BackgroundColor, &mut Node)>,
+    mut buttons: Query<(&GardenAction, &mut BackgroundColor, &mut Node)>,
 ) {
     if !garden.is_changed() {
         return;
     }
     for (action, mut background, mut node) in &mut buttons {
         let selected =
-            matches!(action, TerrainAction::Choose(biome) if *biome == garden.layout.biome);
+            matches!(action, GardenAction::Choose(biome) if *biome == garden.layout.biome);
         background.0 = if selected {
             Color::srgb_u8(103, 123, 85)
         } else {
             Color::srgb_u8(62, 83, 65)
         };
-        node.display =
-            if matches!(action, TerrainAction::LoadLandscape) && garden.layout.biome == "flat" {
-                Display::None
-            } else {
-                Display::Flex
+        let editing_text = garden.search.is_some() || garden.coordinates.is_some();
+        let selected_prop = garden.selected.is_some() && garden.pending.is_none();
+        let visible = !editing_text
+            && match action {
+                GardenAction::Choose(_) => true,
+                GardenAction::LoadLandscape => garden.layout.biome != "flat",
+                GardenAction::Rotate => selected_prop || garden.pending.is_some(),
+                GardenAction::Cancel => garden.pending.is_some(),
+                GardenAction::Undo => !garden.past.is_empty(),
+                GardenAction::Redo => !garden.future.is_empty(),
+                _ => selected_prop,
             };
+        node.display = if visible {
+            Display::Flex
+        } else {
+            Display::None
+        };
     }
 }
 
@@ -480,7 +511,7 @@ fn camera_transform(target: Vec3, bearing: f32) -> Transform {
     .looking_at(target, Vec3::Y)
 }
 
-type GardenButton = Or<(With<super::navigation::ArtTool>, With<TerrainAction>)>;
+type GardenButton = Or<(With<super::navigation::ArtTool>, With<GardenAction>)>;
 
 #[allow(clippy::too_many_arguments)]
 fn edit(
@@ -493,7 +524,7 @@ fn edit(
     mut typing: MessageReader<bevy::input::keyboard::KeyboardInput>,
     mut pointer: Local<Option<(Vec2, bool)>>,
     buttons: Query<&Interaction, GardenButton>,
-    terrain_buttons: Query<(&Interaction, &TerrainAction), Changed<Interaction>>,
+    action_buttons: Query<(&Interaction, &GardenAction), Changed<Interaction>>,
     mut raycast: MeshRayCast,
     selectable: Query<&SelectableProp>,
     roots: Query<&GardenProp>,
@@ -503,16 +534,18 @@ fn edit(
     use KeyCode::*;
     let (camera, global, transform, projection) = &mut *camera;
     let pressed = |key| keys.just_pressed(key);
+    let action = action_buttons.iter().find_map(|(&interaction, &action)| {
+        (interaction == Interaction::Pressed).then_some(action)
+    });
+    let clicked_action = |candidate| action == Some(candidate);
     let cursor = window.cursor_position();
+    let over_toolbar = buttons
+        .iter()
+        .any(|interaction| *interaction != Interaction::None);
     if mouse.just_pressed(MouseButton::Left) {
-        *pointer = if buttons
-            .iter()
-            .any(|interaction| *interaction != Interaction::None)
-        {
-            None
-        } else {
-            cursor.map(|origin| (origin, false))
-        };
+        *pointer = cursor
+            .filter(|_| !over_toolbar)
+            .map(|origin| (origin, false));
     }
     if let (Some((origin, moved)), Some(cursor)) = (&mut *pointer, cursor) {
         *moved |= origin.distance_squared(cursor) > 36.;
@@ -522,7 +555,8 @@ fn edit(
         && garden.pending.is_none();
     let clicked = mouse.just_released(MouseButton::Left)
         && pointer.take().is_some_and(|(_, moved)| !moved)
-        && cursor.is_some();
+        && cursor.is_some()
+        && !over_toolbar;
     if let Some(mut input) = garden.coordinates.take() {
         if pressed(Escape) {
             typing.clear();
@@ -552,7 +586,7 @@ fn edit(
         garden.coordinates = Some(input);
         return;
     }
-    if pressed(F2)
+    if (pressed(F2) || clicked_action(GardenAction::Position))
         && garden.selected.is_some()
         && garden.search.is_none()
         && garden.pending.is_none()
@@ -676,8 +710,12 @@ fn edit(
             Err(error) => format!("Could not save scene: {error}"),
         };
     }
-    if modifier && pressed(KeyZ) {
-        let redo = keys.pressed(ShiftLeft) || keys.pressed(ShiftRight);
+    if modifier && pressed(KeyZ)
+        || clicked_action(GardenAction::Undo)
+        || clicked_action(GardenAction::Redo)
+    {
+        let redo = clicked_action(GardenAction::Redo)
+            || modifier && pressed(KeyZ) && (keys.pressed(ShiftLeft) || keys.pressed(ShiftRight));
         let snapshot = if redo {
             garden.future.pop()
         } else {
@@ -697,23 +735,20 @@ fn edit(
             garden.save_dirty = true;
         }
     }
-    let terrain_action = terrain_buttons
-        .iter()
-        .find_map(|(&interaction, &action)| (interaction == Interaction::Pressed).then_some(action))
-        .or_else(|| {
-            if pressed(KeyB) {
-                let current = BIOMES
-                    .iter()
-                    .position(|&biome| biome == garden.layout.biome)
-                    .unwrap_or_default();
-                Some(TerrainAction::Choose(BIOMES[(current + 1) % BIOMES.len()]))
-            } else {
-                pressed(KeyL).then_some(TerrainAction::LoadLandscape)
-            }
-        });
+    let terrain_action = action.or_else(|| {
+        if pressed(KeyB) {
+            let current = BIOMES
+                .iter()
+                .position(|&biome| biome == garden.layout.biome)
+                .unwrap_or_default();
+            Some(GardenAction::Choose(BIOMES[(current + 1) % BIOMES.len()]))
+        } else {
+            pressed(KeyL).then_some(GardenAction::LoadLandscape)
+        }
+    });
     let aspect = window.width() / window.height().max(1.);
     match terrain_action {
-        Some(TerrainAction::Choose(biome)) if garden.layout.biome != biome => {
+        Some(GardenAction::Choose(biome)) if garden.layout.biome != biome => {
             garden.layout.biome = biome.into();
             garden.pending = None;
             garden.frame_plot(aspect);
@@ -722,7 +757,7 @@ fn edit(
             garden.redraw = true;
             return;
         }
-        Some(TerrainAction::LoadLandscape) if garden.layout.biome != "flat" => {
+        Some(GardenAction::LoadLandscape) if garden.layout.biome != "flat" => {
             garden.edit();
             garden.layout.props = biome_landscape(&garden.layout.biome);
             garden.selected = None;
@@ -733,14 +768,18 @@ fn edit(
         }
         _ => {}
     }
-    if pressed(Escape) {
+    if pressed(Escape)
+        || clicked_action(GardenAction::Cancel)
+        || clicked_action(GardenAction::Clear)
+    {
         if garden.pending.take().is_none() {
             garden.selected = None;
         }
         return;
     }
     if let Some((mut prop, copy)) = garden.pending.take() {
-        if (motion.delta != Vec2::ZERO || clicked)
+        if !over_toolbar
+            && (motion.delta != Vec2::ZERO || clicked)
             && !mouse.pressed(MouseButton::Right)
             && let Some((column, row)) = cell
         {
@@ -749,7 +788,7 @@ fn edit(
         }
         prop.column += i32::from(pressed(ArrowRight)) - i32::from(pressed(ArrowLeft));
         prop.row += i32::from(pressed(ArrowDown)) - i32::from(pressed(ArrowUp));
-        if pressed(KeyR) {
+        if pressed(KeyR) || clicked_action(GardenAction::Rotate) {
             prop.rotation = (prop.rotation + 90) % 360;
         }
         if ((clicked && cell.is_some()) || pressed(Enter) || pressed(NumpadEnter))
@@ -789,21 +828,21 @@ fn edit(
         return;
     };
     let mut prop = garden.layout.props[index].clone();
-    if pressed(Delete) || pressed(Backspace) {
+    if pressed(Delete) || pressed(Backspace) || clicked_action(GardenAction::Delete) {
         garden.edit();
         garden.layout.props.remove(index);
         garden.selected = None;
-    } else if pressed(KeyM) {
+    } else if pressed(KeyM) || clicked_action(GardenAction::Move) {
         garden.pending = Some((prop, false));
-    } else if modifier && pressed(KeyD) {
+    } else if modifier && pressed(KeyD) || clicked_action(GardenAction::Duplicate) {
         garden.begin_copy(prop);
-    } else if pressed(Insert) {
+    } else if pressed(Insert) || clicked_action(GardenAction::PlaceAnother) {
         prop.rotation = 0;
         let [width, depth] = prop.size(&models);
         prop.column = prop.column.min(CELLS - width);
         prop.row = prop.row.min(CELLS - depth);
         garden.begin_copy(prop);
-    } else if pressed(KeyR) {
+    } else if pressed(KeyR) || clicked_action(GardenAction::Rotate) {
         prop.rotation = (prop.rotation + 90) % 360;
         if prop.fits(&models) {
             garden.edit();
