@@ -1827,6 +1827,7 @@ fn show_hud(
                 panel.target,
                 panel.source,
                 panel.channel,
+                village.clock,
             ));
             if !panel.message.is_empty() {
                 label.push('\n');

@@ -31,6 +31,8 @@ pub(super) struct WaterJob {
     carried: f64,
     work: f64,
     retry: f64,
+    #[serde(default)]
+    waiting_for_access: bool,
 }
 
 impl WaterJob {
@@ -115,6 +117,7 @@ impl Construction {
                 carried: 0.0,
                 work: 0.0,
                 retry: 0.0,
+                waiting_for_access: false,
             },
         );
         Ok(())
@@ -178,7 +181,20 @@ impl Construction {
             .map(WaterJob::label)
     }
 
-    pub fn water_panel(&self, target: usize, source: Option<usize>, channel: usize) -> String {
+    pub(super) fn water_route_blocked(&self, job: &WaterJob, clock: f64) -> bool {
+        (job.waiting_for_access && job.retry > clock)
+            || job
+                .worker
+                .is_some_and(|index| self.residents[index].waiting_for_route())
+    }
+
+    pub fn water_panel(
+        &self,
+        target: usize,
+        source: Option<usize>,
+        channel: usize,
+        clock: f64,
+    ) -> String {
         let utilities = &self.utilities;
         let name = |id| {
             utilities
@@ -211,7 +227,12 @@ impl Construction {
             }
         }
         if let Some(job) = self.water_jobs.get(&target) {
-            let _ = write!(text, "\n{} · {:.1} L carried", job.label(), job.carried);
+            let status = if self.water_route_blocked(job, clock) {
+                "Waiting for access"
+            } else {
+                job.label()
+            };
+            let _ = write!(text, "\n{status} · {:.1} L carried", job.carried);
         }
         text
     }
@@ -456,6 +477,7 @@ impl Construction {
             }
             if self.reservation_pass.is_none() {
                 job.retry = clock + 3.0;
+                job.waiting_for_access = false;
             }
             if let (WaterAction::Carry { channel, .. }, WaterPhase::Staged(_)) =
                 (job.action, job.phase)
@@ -466,11 +488,13 @@ impl Construction {
             {
                 return false;
             }
+            let mut attempted_route = false;
             let picked = (0..self.residents.len())
                 .filter(|&index| {
                     self.work_candidate(index) && self.residents[index].health.energy >= 25.0
                 })
                 .find_map(|index| {
+                    attempted_route = true;
                     let path = match (job.action, job.phase) {
                         (_, WaterPhase::Staged(point)) => self.resident_route(
                             catalog,
@@ -493,8 +517,12 @@ impl Construction {
                     Some((index, path))
                 });
             let Some((index, path)) = picked else {
+                if self.reservation_pass.is_none() {
+                    job.waiting_for_access = attempted_route;
+                }
                 return false;
             };
+            job.waiting_for_access = false;
             self.residents[index].path = path;
             self.residents[index].leisure.visit = None;
             job.worker = Some(index);
@@ -533,6 +561,8 @@ impl Construction {
             }
             let Some(path) = self.water_route(worker, catalog, site, id) else {
                 job.worker = None;
+                job.waiting_for_access = true;
+                job.retry = clock + 3.0;
                 return false;
             };
             if matches!(job.phase, WaterPhase::Approach) {
@@ -652,13 +682,32 @@ mod tests {
             },
         )
         .unwrap();
+        for cell in approach_points(IVec2::new(42, -13), IVec2::ONE, town.residents[0].position) {
+            let obstacle = town.proposed_site(&catalog, "supply-5", cell);
+            town.plans.push(obstacle);
+        }
         town.tick_water_work(&catalog, &mut stock, site, 0.0, 0.1);
+        assert_eq!(amount(&town, 1), 20.0);
+        assert!(
+            town.lab_stop_reason(super::super::LabStop::Blocked, 0.0)
+                .is_some()
+        );
+        assert!(
+            town.water_panel(0, Some(1), 1, 0.0)
+                .contains("Waiting for access")
+        );
+        town.plans.clear();
+        town.tick_water_work(&catalog, &mut stock, site, 3.0, 0.1);
+        assert!(
+            town.lab_stop_reason(super::super::LabStop::Blocked, 3.0)
+                .is_none()
+        );
         assert_eq!(amount(&town, 0), 0.0);
         assert_eq!(amount(&town, 1), 8.0);
         assert_eq!(town.water_jobs[&0].carried, 12.0);
         town.utilities.deliver_water(0, 1, 58.0);
 
-        for step in 1..400 {
+        for step in 31..400 {
             town.tick_water_work(&catalog, &mut stock, site, f64::from(step) * 0.1, 0.1);
             if matches!(town.water_jobs[&0].phase, WaterPhase::Staged(_)) {
                 break;
