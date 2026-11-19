@@ -25,7 +25,6 @@ impl Construction {
             return;
         }
         let automatic = policy.automatic;
-        policy.next_check = clock + if automatic { 1.0 } else { 10.0 };
         let kitchens: Vec<_> = self
             .plans
             .iter()
@@ -41,8 +40,12 @@ impl Construction {
                 .then_some(index)
             })
             .collect();
+        if kitchens.is_empty() {
+            return;
+        }
+        self.production.kitchen_policy.next_check = clock + if automatic { 1.0 } else { 10.0 };
         if !automatic {
-            if !kitchens.is_empty() && self.trade.pantry_needs_food(stock, clock) {
+            if self.trade.pantry_needs_food(stock, clock) {
                 for index in kitchens {
                     if self.batch_inputs(catalog, stock, index, "meals").is_ok() {
                         self.queue_batch(catalog, stock, index, "meals");
@@ -211,6 +214,29 @@ mod tests {
         village.manage_kitchens(&catalog, &mut stock, 20.0);
         assert_eq!(village.production.jobs.len(), 1);
         assert_eq!(village.production.jobs[0].recipe, "meals");
+    }
+
+    #[test]
+    fn pantry_cooking_keeps_its_next_check_after_loading() {
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);
+        let mut village = Construction::default();
+        let mut kitchen = village.proposed_site(&catalog, "kitchen", IVec2::new(44, 36));
+        kitchen.work = catalog.projects["kitchen"].work;
+        village.plans.push(kitchen);
+
+        village.manage_kitchens(&catalog, &mut stock, 0.0);
+        assert!(village.production.jobs.is_empty());
+        let mut restored: Construction =
+            serde_json::from_slice(&serde_json::to_vec(&village).unwrap()).unwrap();
+        restored
+            .trade
+            .set_pantry_policy(false, Some(14), None)
+            .unwrap();
+        restored.manage_kitchens(&catalog, &mut stock, 5.0);
+        assert!(restored.production.jobs.is_empty());
+        restored.manage_kitchens(&catalog, &mut stock, 10.0);
+        assert_eq!(restored.production.jobs.len(), 1);
     }
 
     #[test]

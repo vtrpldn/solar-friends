@@ -5,7 +5,7 @@ pub struct KitchenPolicy {
     pub automatic: bool,
     fresh_half_days: u8,
     provision_half_days: u8,
-    #[serde(skip)]
+    #[serde(default, skip_serializing_if = "zero")]
     pub next_check: f64,
 }
 
@@ -58,6 +58,13 @@ impl KitchenPolicy {
     }
 
     pub fn valid(&self) -> bool {
-        self.fresh_half_days <= 14 && self.provision_half_days <= 14
+        self.fresh_half_days <= 14
+            && self.provision_half_days <= 14
+            && self.next_check.is_finite()
+            && self.next_check >= 0.0
     }
+}
+
+fn zero(value: &f64) -> bool {
+    *value == 0.0
 }
