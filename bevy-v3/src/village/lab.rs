@@ -10,6 +10,8 @@ use crate::construction::{LabOrder, LabStop};
 #[derive(Deserialize, Serialize)]
 struct Scenario {
     steps: u64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    setup: Option<WorldSetup>,
     #[serde(default)]
     orders: Vec<ScheduledOrder>,
     #[serde(default)]
@@ -89,7 +91,13 @@ fn load_inputs(
     catalog: &Catalog,
 ) -> io::Result<(Scenario, Option<Village>)> {
     let input = crate::save::read_bytes(scenario, 1024 * 1024)?;
-    let scenario = serde_json::from_slice(&input)?;
+    let scenario: Scenario = serde_json::from_slice(&input)?;
+    if scenario.setup.is_some() && save.is_some() {
+        return Err(io::Error::new(
+            io::ErrorKind::InvalidInput,
+            "Choose either a scenario setup or a village checkpoint.",
+        ));
+    }
     let village = save
         .map(|path| crate::save::read(path, catalog))
         .transpose()?;
@@ -302,8 +310,18 @@ impl Runner {
                 "Orders must be sorted and within the run.",
             ));
         }
+        if scenario
+            .setup
+            .as_ref()
+            .is_some_and(|setup| setup.seed() == 0 || !setup.valid_save())
+        {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "Scenario setup contains an invalid seed or world setting.",
+            ));
+        }
         let village = village.unwrap_or_else(|| {
-            let setup = WorldSetup::default().session();
+            let setup = scenario.setup.clone().unwrap_or_default().session();
             Village {
                 setup: Some(setup.clone()),
                 camp: Some(CAMP_SITES[2].1),
@@ -320,6 +338,16 @@ impl Runner {
             .as_ref()
             .ok_or_else(|| io::Error::other("Village setup is missing."))?
             .clone();
+        if scenario
+            .setup
+            .as_ref()
+            .is_some_and(|requested| requested.session() != setup.session())
+        {
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                "Scenario setup does not match the starting village.",
+            ));
+        }
         let stride = scenario.steps.div_ceil((SAMPLE_LIMIT - 1) as u64).max(1);
         let mut runner = Self {
             scenario,
@@ -1477,11 +1505,43 @@ mod tests {
     use super::*;
 
     #[test]
+    fn a_scenario_can_set_its_own_world_and_replay_it() {
+        let catalog = Catalog::default();
+        let mut input = serde_json::json!({
+            "steps": 2,
+            "setup": {
+                "seed": 215,
+                "biome": 2,
+                "landscape": 2,
+                "water": 0,
+                "resources": 0,
+                "savings": 0,
+                "supplies": 0,
+                "town": 2
+            }
+        });
+        let scenario = serde_json::from_value(input.clone()).unwrap();
+        let runner = run(scenario, None, &catalog).unwrap();
+        assert_eq!(runner.setup.seed(), 215);
+        assert_eq!(runner.setup.biome(), 2);
+        assert_eq!(runner.setup.round_trip_km(), 36);
+        assert_eq!(runner.initial["stock"]["cash"], 3000);
+        let report =
+            serde_json::from_slice(&serde_json::to_vec(&runner.report()).unwrap()).unwrap();
+        assert_eq!(verify_report(report, &catalog).unwrap(), 2);
+
+        input["setup"]["biome"] = serde_json::json!(3);
+        let invalid = serde_json::from_value(input).unwrap();
+        assert!(run(invalid, None, &catalog).is_err());
+    }
+
+    #[test]
     fn interval_stops_at_its_target_and_leaves_a_replayable_partial_report() {
         let catalog = Catalog::default();
         let mut runner = Runner::new(
             Scenario {
                 steps: 12,
+                setup: None,
                 orders: vec![ScheduledOrder {
                     step: 4,
                     order: LabOrder::Grid { enabled: false },
@@ -1550,6 +1610,7 @@ mod tests {
         let catalog = Catalog::default();
         let scenario = Scenario {
             steps: 5_000,
+            setup: None,
             orders: vec![ScheduledOrder {
                 step: 2,
                 order: LabOrder::Grid { enabled: false },
@@ -1572,6 +1633,7 @@ mod tests {
         let catalog = Catalog::default();
         let scenario = Scenario {
             steps: 5,
+            setup: None,
             orders: vec![ScheduledOrder {
                 step: 2,
                 order: LabOrder::Grid { enabled: false },
@@ -1624,6 +1686,7 @@ mod tests {
         let catalog = Catalog::default();
         let scenario = || Scenario {
             steps: 3,
+            setup: None,
             orders: vec![],
             stop: LabStop::None,
         };
@@ -1652,6 +1715,7 @@ mod tests {
         let mut village = run(
             Scenario {
                 steps: 1,
+                setup: None,
                 orders: Vec::new(),
                 stop: LabStop::None,
             },
@@ -1665,6 +1729,7 @@ mod tests {
         let report = run(
             Scenario {
                 steps: 1,
+                setup: None,
                 orders: vec![ScheduledOrder {
                     step: 0,
                     order: LabOrder::Buy {
@@ -1695,6 +1760,7 @@ mod tests {
         let mut runner = Runner::new(
             Scenario {
                 steps: 3,
+                setup: None,
                 orders: Vec::new(),
                 stop: LabStop::None,
             },
@@ -1893,6 +1959,7 @@ mod tests {
         let catalog = Catalog::default();
         let scenario = Scenario {
             steps: 10,
+            setup: None,
             orders: vec![ScheduledOrder {
                 step: 2,
                 order: LabOrder::Grid { enabled: false },
@@ -1948,6 +2015,7 @@ mod tests {
         let mut first = Runner::new(
             Scenario {
                 steps: 1,
+                setup: None,
                 orders: Vec::new(),
                 stop: LabStop::None,
             },
@@ -1964,6 +2032,7 @@ mod tests {
         let mut runner = Runner::new(
             Scenario {
                 steps: 12,
+                setup: None,
                 orders: Vec::new(),
                 stop: LabStop::None,
             },
@@ -2022,6 +2091,7 @@ mod tests {
         let first = run(
             Scenario {
                 steps: 1,
+                setup: None,
                 orders: Vec::new(),
                 stop: LabStop::None,
             },
@@ -2034,6 +2104,7 @@ mod tests {
         let report = run(
             Scenario {
                 steps: 100,
+                setup: None,
                 orders: vec![ScheduledOrder {
                     step: 1,
                     order: LabOrder::Grid { enabled: false },

@@ -83,6 +83,20 @@ cargo run --locked --manifest-path bevy-v3/Cargo.toml -- --lab scenario.json > r
 
 Pass a V3 save path after the scenario path to start from that village. With no save path, the lab starts from the default Story camp. The JSON report includes sampled resident activity and supplies, each order's result, and the final village state.
 
+To start from another plot, include a `setup` object in the scenario and omit the save path. Use a nonzero 32-bit `seed` and the following indices:
+
+| Setting | 0 | 1 | 2 |
+| --- | --- | --- | --- |
+| `biome` | Mata Atlântica | Cerrado | Caatinga |
+| `landscape` | Gentle | Rolling | Rugged |
+| `water` | Dry | Seasonal | Abundant |
+| `resources` | Sparse | Balanced | Rich |
+| `savings` | Tight | Modest | Comfortable |
+| `supplies` | Essentials | Camp | Prepared |
+| `town` | Nearby | Drive | Remote |
+
+`mode` defaults to `"Story"` and also accepts `"Sandbox"`. `resources` and `town` default to 1.
+
 An example scenario with one construction order:
 
 ```json
