@@ -7,14 +7,31 @@ use crate::{
     stock::{CashKind, Stock},
 };
 
-const RESERVE: u64 = 10_000;
+const MAX_EXPANSION_RESERVE: u64 = 10_000_000;
+
+const fn default_expansion_reserve() -> u64 {
+    10_000
+}
 pub(crate) const PICKUP_CAPACITY: (f64, f64) = (350.0, 1.2);
 
-#[derive(Clone, Default, Deserialize, Serialize)]
+#[derive(Clone, Deserialize, Serialize)]
 pub struct Market {
     suppliers: BTreeMap<String, Allocation>,
     pub auto_buy_off: bool,
     committed_fares: u64,
+    #[serde(default = "default_expansion_reserve")]
+    expansion_reserve: u64,
+}
+
+impl Default for Market {
+    fn default() -> Self {
+        Self {
+            suppliers: BTreeMap::new(),
+            auto_buy_off: false,
+            committed_fares: 0,
+            expansion_reserve: default_expansion_reserve(),
+        }
+    }
 }
 
 #[derive(Clone, Deserialize, Serialize)]
@@ -34,6 +51,19 @@ pub struct Quote {
 impl Market {
     pub fn committed_fares(&self) -> u64 {
         self.committed_fares
+    }
+
+    pub fn expansion_reserve(&self) -> u64 {
+        self.expansion_reserve
+    }
+
+    pub fn adjust_expansion_reserve(&mut self, increase: bool, large_step: bool) {
+        let step = if large_step { 100_000 } else { 10_000 };
+        self.expansion_reserve = if increase {
+            (self.expansion_reserve + step).min(MAX_EXPANSION_RESERVE)
+        } else {
+            self.expansion_reserve.saturating_sub(step)
+        };
     }
 
     pub fn quote(
@@ -80,12 +110,13 @@ impl Market {
         let fare = fare_cents(round_trip_km);
         let price = (total * 100.0).ceil() as u64;
         if !units.is_empty()
-            && price + fare * u64::from(trips) + RESERVE + self.committed_fares > stock.balance()
+            && price + fare * u64::from(trips) + self.expansion_reserve + self.committed_fares
+                > stock.balance()
         {
-            return Err(
-                "Shared savings cannot cover materials and pickup while keeping R$100 in reserve."
-                    .into(),
-            );
+            return Err(format!(
+                "Shared savings cannot cover materials and pickup while keeping R${:.2} in reserve.",
+                self.expansion_reserve as f64 / 100.0,
+            ));
         }
         Ok(Quote {
             units,
@@ -237,7 +268,8 @@ impl Market {
     }
 
     pub fn valid_save(&self, catalog: &Catalog, stock: &Stock, fares: u64) -> bool {
-        fares == self.committed_fares
+        self.expansion_reserve <= MAX_EXPANSION_RESERVE
+            && fares == self.committed_fares
             && fares <= stock.balance()
             && self.suppliers.iter().all(|(id, allocation)| {
                 catalog
@@ -335,6 +367,31 @@ mod tests {
         assert!(!town_is_open(9.0 * hour));
         assert!(!town_is_open(22.0 * hour - 0.1));
         assert!(town_is_open(22.0 * hour));
+    }
+
+    #[test]
+    fn expansion_reserve_changes_affordability_and_defaults_in_older_saves() {
+        let catalog = Catalog::default();
+        let bill = &catalog.projects["well"].materials;
+        let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);
+        let mut market: Market =
+            serde_json::from_str(r#"{"suppliers":{},"auto_buy_off":false,"committed_fares":0}"#)
+                .unwrap();
+        let quote = market.quote(&catalog, bill, &stock, 0.0, 12).unwrap();
+        let exactly_affordable = quote.price + quote.fare * u64::from(quote.trips);
+        stock.debit(stock.balance() - exactly_affordable, CashKind::Construction);
+
+        assert_eq!(market.expansion_reserve(), 10_000);
+        let message = market.quote(&catalog, bill, &stock, 0.0, 12).err().unwrap();
+        assert!(message.contains("R$100.00"));
+        assert_eq!(stock.balance(), exactly_affordable);
+        assert_eq!(market.committed_fares(), 0);
+
+        market.adjust_expansion_reserve(false, false);
+        let saved = serde_json::to_vec(&market).unwrap();
+        let restored: Market = serde_json::from_slice(&saved).unwrap();
+        assert_eq!(restored.expansion_reserve(), 0);
+        assert!(restored.quote(&catalog, bill, &stock, 0.0, 12).is_ok());
     }
 
     #[test]

@@ -1046,6 +1046,15 @@ fn village_input(
             town.utility_panel = None;
         }
         if town.utility_panel == Some(UtilityPanel::Finances) {
+            if !town.finance_history_open
+                && keyboard.any_just_pressed([KeyCode::BracketLeft, KeyCode::BracketRight])
+            {
+                town.construction.adjust_expansion_reserve(
+                    keyboard.just_pressed(KeyCode::BracketRight),
+                    keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]),
+                );
+                return;
+            }
             if keyboard.just_pressed(KeyCode::KeyR) {
                 town.finance_history_open = !town.finance_history_open;
                 town.finance_history_page = 0;
@@ -1830,6 +1839,8 @@ fn show_hud(
                         .construction
                         .replacement_costs(&catalog, &village.stock),
                 );
+                label.push('\n');
+                label.push_str(&village.construction.expansion_reserve_label());
                 label.push_str("\nR Recent transactions");
             }
             label.push_str("\nTab Town trade");

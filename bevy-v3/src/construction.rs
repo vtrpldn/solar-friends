@@ -996,6 +996,17 @@ impl Construction {
         self.selection = None;
     }
 
+    pub fn adjust_expansion_reserve(&mut self, increase: bool, large_step: bool) {
+        self.market.adjust_expansion_reserve(increase, large_step);
+    }
+
+    pub fn expansion_reserve_label(&self) -> String {
+        format!(
+            "Expansion reserve R${:.2} · [ / ] R$100 · Shift [ / ] R$1000",
+            self.market.expansion_reserve() as f64 / 100.0,
+        )
+    }
+
     fn reserve_project(
         market: &mut Market,
         stock: &mut Stock,
