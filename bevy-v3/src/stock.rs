@@ -46,6 +46,8 @@ pub struct Stock {
     #[serde(default)]
     processing: BTreeMap<String, u64>,
     materials: BTreeMap<String, u32>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    movements: Option<MaterialLedger>,
     #[serde(default)]
     pub equipment: Equipment,
 }
@@ -68,6 +70,44 @@ struct Transaction {
     minute: u64,
     category: CashKind,
     cents: i64,
+}
+
+#[derive(Clone, Default, Deserialize, Serialize)]
+struct MaterialLedger {
+    opening: BTreeMap<String, u32>,
+    net: BTreeMap<String, i64>,
+    recent: VecDeque<MaterialMovement>,
+}
+
+#[derive(Clone, Deserialize, Serialize)]
+struct MaterialMovement {
+    minute: u64,
+    id: String,
+    quantity: i64,
+    reason: MaterialReason,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
+enum MaterialReason {
+    Arrival,
+    Transfer,
+    Meal,
+    Spoilage,
+    Residues,
+    Cleaning,
+}
+
+impl MaterialReason {
+    fn label(self) -> &'static str {
+        match self {
+            Self::Arrival => "Arrival or return",
+            Self::Transfer => "Reserved or used",
+            Self::Meal => "Meal",
+            Self::Spoilage => "Spoilage",
+            Self::Residues => "Organic residues",
+            Self::Cleaning => "Cleaning",
+        }
+    }
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Deserialize, Serialize)]
@@ -129,9 +169,11 @@ impl Stock {
             pantry: Pantry::default(),
             processing: BTreeMap::new(),
             materials,
+            movements: None,
             equipment: Equipment::default(),
         };
         stock.replenish_sandbox(catalog);
+        stock.begin_material_ledger();
         stock
     }
 
@@ -161,20 +203,27 @@ impl Stock {
         if owned == 0 {
             return 1.0;
         }
+        let soap_before = self.available("soap");
         let mut no_soap = 0;
         let soap = if item == "cleaning-kit" {
+            self.begin_material_ledger();
             self.materials.entry("soap".into()).or_default()
         } else {
             &mut no_soap
         };
-        self.equipment.use_tool(
+        let rate = self.equipment.use_tool(
             (worker, task),
             item,
             dt,
             owned,
             (self.sandbox, repairing),
             soap,
-        )
+        );
+        if item == "cleaning-kit" {
+            let used = soap_before - self.available("soap");
+            self.record_material("soap", -i64::from(used), MaterialReason::Cleaning);
+        }
+        rate
     }
 
     pub fn available(&self, id: &str) -> u32 {
@@ -193,7 +242,7 @@ impl Stock {
         let Some((id, portions)) = self.meal() else {
             return false;
         };
-        *self.materials.get_mut(id).expect("meal available") -= portions;
+        self.change_material(id, -i64::from(portions), MaterialReason::Meal);
         self.pantry.remove(id, portions);
         self.add_waste(if id == "eggs" {
             0.024
@@ -244,8 +293,7 @@ impl Stock {
             self.pantry.ensure(&self.materials);
         }
         for (id, units) in goods {
-            let count = self.materials.entry(id.clone()).or_default();
-            *count = count.saturating_add(*units);
+            self.change_material(id, i64::from(*units), MaterialReason::Arrival);
         }
         if !self.sandbox {
             self.pantry.insert(lots);
@@ -261,8 +309,7 @@ impl Stock {
         self.pantry.cool(catalog, cooling, dt, clock);
         let lost = food::discard_expired(&mut self.pantry.lots, clock);
         for (id, quantity) in &lost {
-            let count = self.materials.entry(id.clone()).or_default();
-            *count = count.saturating_sub(*quantity);
+            self.change_material(id, -i64::from(*quantity), MaterialReason::Spoilage);
         }
         self.record_spoilage(catalog, &lost);
     }
@@ -286,8 +333,7 @@ impl Stock {
         let whole = (total + 1e-9).floor() as u32;
         self.pantry.waste_remainder =
             ((total - f64::from(whole)) * 1_000_000.0).round().max(0.0) / 1_000_000.0;
-        let scraps = self.materials.entry("scraps".into()).or_default();
-        *scraps = scraps.saturating_add(whole);
+        self.change_material("scraps", i64::from(whole), MaterialReason::Residues);
     }
 
     pub fn balance(&self) -> u64 {
@@ -315,6 +361,7 @@ impl Stock {
     }
 
     pub fn update_finance_clock(&mut self, clock: f64) {
+        self.begin_material_ledger();
         let minute = (540.0 + clock * 0.45).floor() as u64;
         self.cash_flow.minute = minute;
         let day = minute / 1440;
@@ -519,15 +566,105 @@ impl Stock {
             .find_map(|(id, units)| (self.available(id) < *units).then_some(id.as_str()))
     }
 
+    fn begin_material_ledger(&mut self) {
+        if !self.sandbox && self.movements.is_none() {
+            self.movements = Some(MaterialLedger {
+                opening: self.materials.clone(),
+                ..Default::default()
+            });
+        }
+    }
+
+    fn change_material(&mut self, id: &str, quantity: i64, reason: MaterialReason) {
+        self.begin_material_ledger();
+        let count = self.materials.entry(id.into()).or_default();
+        let before = i64::from(*count);
+        let after = (before + quantity).clamp(0, i64::from(u32::MAX));
+        *count = after as u32;
+        self.record_material(id, after - before, reason);
+    }
+
+    fn record_material(&mut self, id: &str, quantity: i64, reason: MaterialReason) {
+        if self.sandbox || quantity == 0 {
+            return;
+        }
+        let Some(ledger) = &mut self.movements else {
+            return;
+        };
+        let minute = self.cash_flow.minute;
+        let total = ledger.net.entry(id.into()).or_default();
+        *total = total.saturating_add(quantity);
+        if let Some(last) = ledger.recent.front_mut()
+            && last.id == id
+            && last.reason == reason
+            && last.minute / 60 == minute / 60
+        {
+            last.quantity = last.quantity.saturating_add(quantity);
+        } else {
+            ledger.recent.push_front(MaterialMovement {
+                minute,
+                id: id.into(),
+                quantity,
+                reason,
+            });
+            ledger.recent.truncate(160);
+        }
+    }
+
+    pub fn valid_material_ledger(&self, catalog: &Catalog) -> bool {
+        self.movements.as_ref().is_none_or(|ledger| {
+            ledger.recent.len() <= 160
+                && ledger
+                    .opening
+                    .keys()
+                    .chain(ledger.net.keys())
+                    .all(|id| catalog.materials.contains_key(id))
+                && ledger.recent.iter().all(|row| {
+                    row.minute <= self.cash_flow.minute && catalog.materials.contains_key(&row.id)
+                })
+        })
+    }
+
+    pub fn material_history(&self, catalog: &Catalog) -> String {
+        use std::fmt::Write;
+        let Some(ledger) = &self.movements else {
+            return "Store movements · No records yet".into();
+        };
+        let reconciled = catalog.materials.keys().all(|id| {
+            let opening = i64::from(ledger.opening.get(id).copied().unwrap_or_default());
+            opening.saturating_add(ledger.net.get(id).copied().unwrap_or_default())
+                == i64::from(self.available(id))
+        });
+        let mut text = if reconciled {
+            "Store movements · Recorded changes match current stores".to_owned()
+        } else {
+            "Store movements · Some changes are unrecorded. Use current stores.".to_owned()
+        };
+        for row in ledger.recent.iter().take(8) {
+            let item = &catalog.materials[&row.id];
+            let sign = if row.quantity < 0 { '−' } else { '+' };
+            let _ = write!(
+                text,
+                "\nDay {} · {:02}:{:02} · {sign}{} {} · {}",
+                row.minute / 1440 + 1,
+                row.minute / 60 % 24,
+                row.minute % 60,
+                item.quantity_text(row.quantity.unsigned_abs()),
+                item.name,
+                row.reason.label(),
+            );
+        }
+        text
+    }
+
     pub fn reserve_available(&mut self, bill: &BTreeMap<String, u32>) -> FoodLots {
         if !self.sandbox {
             self.pantry.ensure(&self.materials);
         }
         let mut food = FoodLots::new();
         for (id, units) in bill {
-            let count = self.materials.entry(id.clone()).or_default();
-            let take = (*count).min(*units);
-            *count -= take;
+            let take = self.available(id).min(*units);
+            self.change_material(id, -i64::from(take), MaterialReason::Transfer);
             if !self.sandbox {
                 let taken = self.pantry.remove(id, take);
                 if !taken.is_empty() {
@@ -542,6 +679,27 @@ impl Stock {
 #[cfg(test)]
 mod finance_tests {
     use super::*;
+
+    #[test]
+    fn material_history_reconciles_arrivals_and_reservations_after_reload() {
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);
+        let wood = stock.available("wood");
+        let delivery = BTreeMap::from([("wood".to_owned(), 3)]);
+        stock.receive(&delivery);
+        stock.receive(&delivery);
+        stock.reserve_available(&BTreeMap::from([("wood".into(), 2)]));
+        assert_eq!(stock.available("wood"), wood + 4);
+        let saved = serde_json::to_string(&stock).unwrap();
+        let restored: Stock = serde_json::from_str(&saved).unwrap();
+        assert!(restored.valid_material_ledger(&catalog));
+        let history = restored.material_history(&catalog);
+        assert!(history.contains("Recorded changes match current stores"));
+        let movements = &restored.movements.as_ref().unwrap().recent;
+        assert_eq!(movements[0].quantity, -2);
+        assert_eq!(movements[1].quantity, 6);
+        assert_eq!(history.matches("Arrival or return").count(), 1);
+    }
     use crate::weather::DAY;
 
     #[test]

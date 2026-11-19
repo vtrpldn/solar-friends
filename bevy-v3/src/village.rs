@@ -875,6 +875,7 @@ impl Village {
             || !self.clock.is_finite()
             || !self.stock.valid_food()
             || !self.stock.valid_cash_flow()
+            || !self.stock.valid_material_ledger(catalog)
             || !self.stock.valid_processing(catalog)
             || !self.stock.equipment.valid(|id| self.stock.available(id))
             || !self.terrain_editor.valid()
@@ -2480,6 +2481,8 @@ fn show_hud(
                         .finance_history(village.finance_history_page)
                         .1,
                 );
+                label.push('\n');
+                label.push_str(&village.stock.material_history(&catalog));
             } else {
                 label.push_str(&village.construction.finance_summary(
                     &village.stock,
