@@ -80,6 +80,10 @@ pub(crate) enum LabOrder {
         irrigation: Option<bool>,
         collect_residues: Option<bool>,
     },
+    AssignHome {
+        resident: usize,
+        home: Option<usize>,
+    },
     Outside {
         resident: usize,
         enabled: bool,
@@ -633,6 +637,18 @@ impl Construction {
                 }
                 if let Some(collect) = collect_residues {
                     bed_data.collect_residues = *collect;
+                }
+            }
+            LabOrder::AssignHome { resident, home } => {
+                let resident = resident
+                    .checked_sub(1)
+                    .filter(|&index| index < self.residents.len())
+                    .ok_or("Choose a resident from 1 to 5.")?;
+                if let Some(home) = home {
+                    let index = home.checked_sub(1).ok_or("Project numbers start at 1.")?;
+                    self.assign_home(resident, catalog, index)?;
+                } else {
+                    self.clear_home(resident);
                 }
             }
             LabOrder::Outside {

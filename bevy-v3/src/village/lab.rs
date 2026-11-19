@@ -827,6 +827,10 @@ fn order_label(order: &LabOrder) -> String {
             format!("{action} project #{site}, bed {bed}")
         }
         LabOrder::ConfigureBed { site, bed, .. } => format!("Configure project #{site}, bed {bed}"),
+        LabOrder::AssignHome { resident, home } => match home {
+            Some(home) => format!("Assign resident #{resident} to home #{home}"),
+            None => format!("Clear resident #{resident}'s home assignment"),
+        },
         LabOrder::Outside {
             resident, enabled, ..
         } => format!(
@@ -1779,6 +1783,35 @@ mod tests {
         let recorded =
             serde_json::from_slice(&serde_json::to_vec(&runner.report()).unwrap()).unwrap();
         assert_eq!(verify_report(recorded, &catalog).unwrap(), 1);
+    }
+
+    #[test]
+    fn housing_orders_reserve_and_release_beds_in_replay() {
+        let catalog = Catalog::default();
+        let scenario = serde_json::from_str(r#"{
+            "setup":{"mode":"Sandbox","seed":42,"biome":0,"landscape":1,"water":1,"savings":1,"supplies":1},
+            "steps":1,
+            "orders":[
+                {"step":0,"order":{"type":"build","key":"home-cottage","x":44,"z":36}},
+                {"step":0,"order":{"type":"assign-home","resident":1,"home":1}},
+                {"step":0,"order":{"type":"assign-home","resident":2,"home":1}},
+                {"step":0,"order":{"type":"assign-home","resident":1}},
+                {"step":0,"order":{"type":"assign-home","resident":2,"home":1}}
+            ]
+        }"#).unwrap();
+        let runner = run(scenario, None, &catalog).unwrap();
+        let errors: Vec<_> = runner
+            .outcomes
+            .iter()
+            .map(|outcome| outcome.error.as_deref())
+            .collect();
+        assert_eq!(
+            errors,
+            [None, None, Some("This home has no free beds."), None, None]
+        );
+        let report =
+            serde_json::from_slice(&serde_json::to_vec(&runner.report()).unwrap()).unwrap();
+        assert_eq!(verify_report(report, &catalog).unwrap(), 1);
     }
 
     #[test]
