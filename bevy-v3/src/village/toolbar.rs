@@ -29,6 +29,7 @@ enum Action {
     Page(bool),
     Project(usize),
     Recipes,
+    Gather,
     Beds,
     Farm(FarmControl),
     Recipe(usize),
@@ -118,6 +119,12 @@ impl Action {
                 village.utility_panel.is_none()
                     && village.construction.production.open
                     && !village.construction.menu
+            }
+            Self::Gather => {
+                village.utility_panel.is_none()
+                    && !village.construction.menu
+                    && !village.construction.is_placing()
+                    && village.construction.gathering.has_selection()
             }
             Self::Build => village.utility_panel.is_none(),
             Self::RotatePlacement | Self::CancelPlacement => village.construction.placing_project(),
@@ -241,6 +248,7 @@ impl Action {
             Self::Project(_) | Self::TradeItem(_) | Self::Recipe(_) => String::new(),
             Self::Recipes if village.construction.production.open => "Close recipes".into(),
             Self::Recipes => "Recipes".into(),
+            Self::Gather => "Gather resource".into(),
             Self::Beds if village.construction.farming.open => "Close beds".into(),
             Self::Beds => "Beds".into(),
             Self::Farm(action) => match action {
@@ -377,6 +385,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 Action::Page(true),
                 Action::Build,
                 Action::Recipes,
+                Action::Gather,
                 Action::Beds,
                 Action::RotatePlacement,
                 Action::CancelPlacement,
@@ -725,6 +734,17 @@ fn handle_buttons(
                     town.construction
                         .apply_project_action(&catalog, &mut town.stock, action);
                 }
+                Action::Gather => {
+                    let seed = village.terrain(&setup).seed;
+                    let clock = village.clock;
+                    village.construction.gathering.queue(
+                        &catalog,
+                        &land,
+                        seed,
+                        setup.richness(),
+                        clock,
+                    );
+                }
                 Action::Recipes => {
                     village.construction.toggle_recipes(&catalog);
                     picker.open = false;
@@ -899,7 +919,7 @@ fn refresh(
                 action.available(&village) && village.construction.has_recipes(&catalog)
             }
             Action::RecipePage(_) => show_recipes,
-            Action::Beds => action.available(&village),
+            Action::Beds | Action::Gather => action.available(&village),
             Action::Farm(_) => show_beds,
             Action::Recipe(row) => recipes.get(row).is_some(),
             Action::SelectedProject(action) => {

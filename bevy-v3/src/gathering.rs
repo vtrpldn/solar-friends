@@ -70,6 +70,10 @@ impl Gathering {
         self.notice.clear();
     }
 
+    pub fn has_selection(&self) -> bool {
+        self.selected.is_some_and(|site| !self.felled(site))
+    }
+
     pub fn selected_status(&self, catalog: &Catalog, land: &Land, clock: f64) -> Option<String> {
         let index = self.selected?;
         let name = &catalog.gathering[land.site(index)?.recipe()].name;
