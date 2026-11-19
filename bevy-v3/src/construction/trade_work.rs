@@ -16,6 +16,9 @@ pub(crate) enum TradePolicy {
     Reserve(bool),
     Limit,
     Trigger,
+    MinimumLoad,
+    DispatchWait,
+    DispatchNow,
 }
 
 impl Construction {
@@ -89,6 +92,9 @@ impl Construction {
             (KeyCode::BracketRight, TradePolicy::Reserve(true)),
             (KeyCode::KeyY, TradePolicy::Limit),
             (KeyCode::KeyR, TradePolicy::Trigger),
+            (KeyCode::KeyG, TradePolicy::MinimumLoad),
+            (KeyCode::KeyJ, TradePolicy::DispatchWait),
+            (KeyCode::KeyU, TradePolicy::DispatchNow),
         ] {
             if keys.just_pressed(key) {
                 self.adjust_trade_policy(catalog, action);
@@ -97,6 +103,23 @@ impl Construction {
     }
 
     pub fn adjust_trade_policy(&mut self, catalog: &Catalog, action: TradePolicy) {
+        match action {
+            TradePolicy::MinimumLoad => {
+                let fill = &mut self.logistics_policy.minimum_fill;
+                *fill = (*fill + 10) % 110;
+                return;
+            }
+            TradePolicy::DispatchWait => {
+                let wait = &mut self.logistics_policy.wait_half_hours;
+                *wait = (*wait + 1) % 49;
+                return;
+            }
+            TradePolicy::DispatchNow => {
+                self.logistics_policy.urgent = true;
+                return;
+            }
+            _ => {}
+        }
         let options = Trade::tradable(catalog);
         let Some((id, definition)) = options.get(self.trade.selected).copied() else {
             return;
@@ -118,7 +141,10 @@ impl Construction {
             TradePolicy::Reserve(true) => policy.reserve = policy.reserve.saturating_add(pack),
             TradePolicy::Limit => policy.limit = cycle(policy.limit),
             TradePolicy::Trigger => policy.trigger = cycle(policy.trigger),
-            TradePolicy::HouseholdRestock => {}
+            TradePolicy::HouseholdRestock
+            | TradePolicy::MinimumLoad
+            | TradePolicy::DispatchWait
+            | TradePolicy::DispatchNow => {}
         }
     }
 
@@ -272,6 +298,17 @@ impl Construction {
             display.push('\n');
             display.push_str(&freight);
         }
+        let policy = &self.logistics_policy;
+        display.push_str(&format!(
+            "\nAuto dispatch · G Minimum load {}% · J Wait up to {:.1}h · U {}",
+            policy.minimum_fill,
+            f64::from(policy.wait_half_hours) * 0.5,
+            if policy.urgent {
+                "Marked urgent"
+            } else {
+                "Send now"
+            },
+        ));
         let restock = if self.trade.household_restock_off {
             "off"
         } else {

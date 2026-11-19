@@ -408,6 +408,9 @@ impl Action {
                 TradePolicy::Reserve(true) => "Keep one pack more",
                 TradePolicy::Limit => "Cycle sale limit",
                 TradePolicy::Trigger => "Cycle sale trigger",
+                TradePolicy::MinimumLoad => "Change minimum load",
+                TradePolicy::DispatchWait => "Change dispatch wait",
+                TradePolicy::DispatchNow => "Send waiting loads now",
             }
             .into(),
             Self::Resident(index) if index == village.selected_resident => {
@@ -748,6 +751,9 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                     TradePolicy::Reserve(true),
                     TradePolicy::Limit,
                     TradePolicy::Trigger,
+                    TradePolicy::MinimumLoad,
+                    TradePolicy::DispatchWait,
+                    TradePolicy::DispatchNow,
                 ] {
                     spawn_button(menu, &assets, Action::TradePolicy(policy));
                 }

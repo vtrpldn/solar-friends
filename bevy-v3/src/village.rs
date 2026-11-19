@@ -1115,6 +1115,9 @@ fn village_input(
                     round_trip_km: setup.round_trip_km(),
                 },
             );
+            if keyboard.any_just_pressed([KeyCode::KeyG, KeyCode::KeyJ, KeyCode::KeyU]) {
+                return;
+            }
         }
         if keyboard.just_pressed(KeyCode::KeyP) {
             town.utility_panel = if town.utility_panel == Some(UtilityPanel::Power) {

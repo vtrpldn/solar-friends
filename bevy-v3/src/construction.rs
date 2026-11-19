@@ -190,6 +190,8 @@ pub struct Construction {
     supplier_construction: bool,
     #[serde(default)]
     construction_delivery: Option<town_pickup::ConstructionDelivery>,
+    #[serde(default)]
+    logistics_policy: town_pickup::LogisticsPolicy,
     residents: [Worker; 5],
 }
 
@@ -340,6 +342,7 @@ impl Default for Construction {
             second_trip: None,
             supplier_construction: false,
             construction_delivery: None,
+            logistics_policy: town_pickup::LogisticsPolicy::default(),
             residents: std::array::from_fn(|index| {
                 let (x, z) = ARRIVAL_SPOTS[index];
                 Worker {
@@ -1762,6 +1765,7 @@ impl Construction {
                     })
             });
         if !self.valid_construction_delivery(catalog)
+            || !self.logistics_policy.valid()
             || !self.events.valid()
             || !self.production.kitchen_policy.valid()
             || !self.upkeep.valid(self.plans.len())

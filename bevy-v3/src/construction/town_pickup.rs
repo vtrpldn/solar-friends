@@ -5,6 +5,43 @@ use super::*;
 const FREIGHT_CAPACITY: (f64, f64) = (5000.0, 12.0);
 
 #[derive(Deserialize, Serialize)]
+pub(super) struct LogisticsPolicy {
+    pub minimum_fill: u8,
+    pub wait_half_hours: u8,
+    pub urgent: bool,
+    waiting_since: Option<f64>,
+}
+
+impl Default for LogisticsPolicy {
+    fn default() -> Self {
+        Self {
+            minimum_fill: 0,
+            wait_half_hours: 4,
+            urgent: false,
+            waiting_since: None,
+        }
+    }
+}
+
+impl LogisticsPolicy {
+    pub(super) fn valid(&self) -> bool {
+        self.minimum_fill <= 100
+            && self.wait_half_hours <= 48
+            && self
+                .waiting_since
+                .is_none_or(|time| time.is_finite() && time >= 0.0)
+    }
+
+    fn ready(&self, clock: f64, (mass, volume): (f64, f64), limits: (f64, f64)) -> bool {
+        self.urgent
+            || (mass / limits.0).max(volume / limits.1) * 100.0 >= f64::from(self.minimum_fill)
+            || self.waiting_since.is_some_and(|start| {
+                clock - start >= f64::from(self.wait_half_hours) * crate::weather::HOUR * 0.5
+            })
+    }
+}
+
+#[derive(Deserialize, Serialize)]
 pub(super) struct ConstructionDelivery {
     site: usize,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
@@ -21,6 +58,40 @@ impl ConstructionDelivery {
 }
 
 impl Construction {
+    fn pending_dispatch_cargo(&self, catalog: &Catalog) -> Option<(f64, f64)> {
+        let mut goods = BTreeMap::<String, u32>::new();
+        for (site, plan) in self.plans.iter().enumerate() {
+            if !plan.removed
+                && plan.pickups > 0
+                && !self.construction_delivery_at(site)
+                && !self.active_trips().any(|trip| {
+                    !trip.market_order && trip.farm_bed.is_none() && trip.project == site
+                })
+                && let Some(order) = &plan.purchase
+            {
+                for (id, &quantity) in &order.units {
+                    let amount = goods.entry(id.clone()).or_default();
+                    *amount = amount.saturating_add(quantity);
+                }
+            }
+        }
+        for (index, order) in self.trade.orders.iter().enumerate() {
+            if !order.buying
+                && !order.settled
+                && order.quantity > 0
+                && !self
+                    .active_trips()
+                    .any(|trip| trip.market_order && trip.project == index)
+            {
+                let amount = goods.entry(order.material.clone()).or_default();
+                *amount = amount.saturating_add(order.quantity);
+            }
+        }
+        (!goods.is_empty()).then(|| {
+            Self::construction_order_cargo(catalog, &goods).expect("pending goods exist in catalog")
+        })
+    }
+
     pub(super) fn tick_trip(
         &mut self,
         catalog: &Catalog,
@@ -40,6 +111,15 @@ impl Construction {
             }
         }
 
+        let cargo = self.pending_dispatch_cargo(catalog);
+        if cargo.is_some() {
+            self.logistics_policy
+                .waiting_since
+                .get_or_insert(clock.seconds);
+        } else {
+            self.logistics_policy.waiting_since = None;
+            self.logistics_policy.urgent = false;
+        }
         let freight_unaffordable = self.tick_construction_delivery(catalog, stock, clock);
         if !crate::market::town_is_open(clock.seconds) {
             return;
@@ -232,6 +312,11 @@ impl Construction {
         if !self.supplier_construction
             || self.trade.delivery.is_some()
             || !crate::market::town_is_open(clock.seconds)
+            || self.pending_dispatch_cargo(catalog).is_some_and(|cargo| {
+                !self
+                    .logistics_policy
+                    .ready(clock.seconds, cargo, FREIGHT_CAPACITY)
+            })
         {
             return false;
         }
@@ -427,6 +512,10 @@ impl Construction {
             self.active_trips()
                 .any(|trip| !trip.market_order && trip.project == project && trip.farm_bed == bed)
         };
+        let ready = self.pending_dispatch_cargo(catalog).is_none_or(|cargo| {
+            self.logistics_policy
+                .ready(clock.seconds, cargo, crate::market::PICKUP_CAPACITY)
+        });
         let construction = self
             .plans
             .iter()
@@ -434,6 +523,7 @@ impl Construction {
             .find(|&(index, plan)| {
                 !plan.removed
                     && plan.pickups > 0
+                    && (ready || plan.purchase.is_none())
                     && !booked(index, None)
                     && !self.construction_delivery_at(index)
                     && !(self.supplier_construction
@@ -448,11 +538,18 @@ impl Construction {
             .find(|job| job.pickups > 0 && !booked(job.site, Some(job.bed)))
             .map(|job| (job.site, Some(job.bed)));
         let pickup = construction.or(farming);
-        let order = (0..self.trade.orders.len()).find(|&index| {
-            !self
-                .active_trips()
-                .any(|trip| trip.market_order && trip.project == index)
-        });
+        let order = self
+            .trade
+            .orders
+            .iter()
+            .enumerate()
+            .find_map(|(index, order)| {
+                ((ready || order.buying)
+                    && !self
+                        .active_trips()
+                        .any(|trip| trip.market_order && trip.project == index))
+                .then_some(index)
+            });
         let market_order = pickup.is_none();
         let (project, farm_bed) = pickup.or_else(|| order.map(|index| (index, None)))?;
         let door = crate::arrival::car_door(vehicle);
@@ -594,6 +691,72 @@ mod tests {
             2 * crate::market::freight_cents(12)
         );
         assert!(village.valid_save(&catalog, &stock));
+    }
+
+    #[test]
+    fn automatic_freight_waits_for_fill_timeout_or_urgent_override() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let terrain = setup.terrain();
+        let land = Land::default();
+        let ground = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp: IVec2::new(36, 36),
+        };
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut village = Construction::default();
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
+        let mut plan = village.proposed_site(&catalog, "well", IVec2::new(44, 36));
+        Construction::reserve_project(&mut village.market, &mut stock, &catalog, &mut plan, clock)
+            .unwrap();
+        village.plans.push(plan);
+        village.toggle_supplier_construction();
+        village.logistics_policy.minimum_fill = 100;
+        village.tick_trip(&catalog, &mut stock, ground, clock, 0.1);
+        assert!(village.construction_delivery.is_none());
+
+        let saved = serde_json::to_vec(&village).unwrap();
+        let mut urgent: Construction = serde_json::from_slice(&saved).unwrap();
+        let mut urgent_stock = stock.clone();
+        urgent.logistics_policy.urgent = true;
+        urgent.tick_trip(&catalog, &mut urgent_stock, ground, clock, 0.1);
+        assert!(urgent.construction_delivery_at(0));
+
+        let mut full_enough: Construction = serde_json::from_slice(&saved).unwrap();
+        let mut filled_stock = stock.clone();
+        full_enough.logistics_policy.minimum_fill = 0;
+        full_enough.tick_trip(&catalog, &mut filled_stock, ground, clock, 0.1);
+        assert!(full_enough.construction_delivery_at(0));
+
+        let mut restored: Construction = serde_json::from_slice(&saved).unwrap();
+        let limit = 2.0 * crate::weather::HOUR;
+        restored.tick_trip(
+            &catalog,
+            &mut stock,
+            ground,
+            TownClock {
+                seconds: limit - 0.1,
+                ..clock
+            },
+            0.1,
+        );
+        assert!(restored.construction_delivery.is_none());
+        restored.tick_trip(
+            &catalog,
+            &mut stock,
+            ground,
+            TownClock {
+                seconds: limit,
+                ..clock
+            },
+            0.1,
+        );
+        assert!(restored.construction_delivery_at(0));
+        assert!(restored.valid_save(&catalog, &stock));
     }
 
     #[test]

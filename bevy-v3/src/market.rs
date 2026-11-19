@@ -8,8 +8,7 @@ use crate::{
 };
 
 const RESERVE: u64 = 10_000;
-const CARGO_MASS: f64 = 350.0;
-const CARGO_VOLUME: f64 = 1.2;
+pub(crate) const PICKUP_CAPACITY: (f64, f64) = (350.0, 1.2);
 
 #[derive(Clone, Default, Deserialize, Serialize)]
 pub struct Market {
@@ -272,7 +271,8 @@ pub(crate) fn pickup_cargo(
     catalog: &Catalog,
     pending: &BTreeMap<String, u32>,
 ) -> BTreeMap<String, u32> {
-    pack_cargo(catalog, pending, &mut (CARGO_MASS, CARGO_VOLUME))
+    let mut capacity = PICKUP_CAPACITY;
+    pack_cargo(catalog, pending, &mut capacity)
 }
 
 pub(crate) fn subtract_cargo(pending: &mut BTreeMap<String, u32>, cargo: &BTreeMap<String, u32>) {
@@ -286,7 +286,7 @@ pub(crate) fn cargo_trips(
     catalog: &Catalog,
     pending: BTreeMap<String, u32>,
 ) -> Result<u32, String> {
-    cargo_trips_with_capacity(catalog, pending, (CARGO_MASS, CARGO_VOLUME))
+    cargo_trips_with_capacity(catalog, pending, PICKUP_CAPACITY)
 }
 
 pub(crate) fn cargo_trips_with_capacity(
