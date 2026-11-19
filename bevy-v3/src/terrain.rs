@@ -184,6 +184,11 @@ impl TerrainEditor {
                 self.undo();
             }
         }
+        if keyboard.just_pressed(KeyCode::Backspace)
+            && keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight])
+        {
+            self.reset();
+        }
         if keyboard.just_pressed(KeyCode::BracketLeft) {
             self.cycle_radius(false);
         }
@@ -214,6 +219,26 @@ impl TerrainEditor {
         self.status = "Terrain edit redone.";
     }
 
+    fn record_edit(&mut self, previous: TerrainVertices) {
+        if self.history.len() == 20 {
+            self.history.pop_front();
+        }
+        self.history.push_back(previous);
+        self.redo.clear();
+        self.revision = self.revision.wrapping_add(1);
+    }
+
+    fn reset(&mut self) {
+        if self.vertices.is_empty() {
+            self.status = "No terrain edits to reset.";
+            return;
+        }
+        let previous = std::mem::take(&mut self.vertices);
+        self.record_edit(previous);
+        self.level = None;
+        self.status = "Terrain reset. Press Z to undo.";
+    }
+
     pub fn draw_preview(&self, terrain: &Terrain, point: Vec3, gizmos: &mut Gizmos) {
         let radius = Self::RADII[self.radius_index] as f32;
         let outline = (0..=48).map(|index| {
@@ -242,7 +267,7 @@ impl TerrainEditor {
         format!(
             "Terrain · {tool} · {} m radius{level}
 1 Raise · 2 Lower · 3 Flatten · 4 Smooth
-{instruction} · [ ] Radius · Z Undo · Shift+Z Redo · F4 Close
+{instruction} · [ ] Radius · Z Undo · Shift+Z Redo · Shift+Backspace Reset · F4 Close
 {}",
             Self::RADII[self.radius_index],
             self.status
@@ -273,12 +298,7 @@ impl TerrainEditor {
         }
         if changed {
             self.vertices = working.edits;
-            if self.history.len() == 20 {
-                self.history.pop_front();
-            }
-            self.history.push_back(previous);
-            self.redo.clear();
-            self.revision = self.revision.wrapping_add(1);
+            self.record_edit(previous);
             self.status = "";
         }
     }
@@ -778,6 +798,19 @@ mod tests {
         let revision = editor.revision;
         editor.redo();
         assert_eq!(editor.revision, revision);
+    }
+
+    #[test]
+    fn resetting_terrain_is_undoable() {
+        let base = || Terrain::new(0, 1.0, 1.0);
+        let mut editor = TerrainEditor::default();
+        editor.stroke(&base(), Vec3::new(40.0, 0.0, 24.0), |_| false);
+        editor.reset();
+        assert_eq!(editor.terrain(base()).elevation(40.0, 24.0), 0.0);
+        editor.undo();
+        assert_eq!(editor.terrain(base()).elevation(40.0, 24.0), 0.6);
+        editor.redo();
+        assert_eq!(editor.terrain(base()).elevation(40.0, 24.0), 0.0);
     }
 
     #[test]
