@@ -285,8 +285,10 @@ pub struct Worker {
     crowded: bool,
     #[serde(skip)]
     sidestep_cells: [Option<IVec2>; 9],
-    #[serde(skip)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     paused_waypoint: Option<Vec2>,
+    #[serde(default, skip_serializing_if = "zero_retry_ticks")]
+    route_retry_ticks: u8,
     path: VecDeque<Vec2>,
     assignment: Option<Assignment>,
     experience: f64,
@@ -348,6 +350,7 @@ impl Default for Construction {
                     crowded: false,
                     sidestep_cells: [None; 9],
                     paused_waypoint: None,
+                    route_retry_ticks: 0,
                     path: VecDeque::new(),
                     assignment: None,
                     experience: 0.0,
@@ -445,6 +448,10 @@ fn default_walking_pace() -> f32 {
     1.0
 }
 
+fn zero_retry_ticks(ticks: &u8) -> bool {
+    *ticks == 0
+}
+
 impl Construction {
     pub fn refresh_resident_crowding(&mut self, catalog: &Catalog, site: ConstructionSite) {
         let present: [Option<Vec2>; 5] = std::array::from_fn(|index| {
@@ -468,6 +475,7 @@ impl Construction {
                 self.refresh_resident_route(index, catalog, site);
             } else {
                 self.residents[index].paused_waypoint = None;
+                self.residents[index].route_retry_ticks = 0;
             }
             let crowded = present[index].is_some_and(|position| {
                 present.iter().enumerate().any(|(other, point)| {
@@ -505,6 +513,13 @@ impl Construction {
             cell != worker.position.round().as_ivec2()
                 && self.blocked(catalog, site.terrain, site.land, site.camp, cell)
         });
+        if blocked_waypoint.is_some()
+            && blocked_waypoint == worker.paused_waypoint
+            && worker.route_retry_ticks > 0
+        {
+            self.residents[index].route_retry_ticks -= 1;
+            return;
+        }
         let replacement = blocked_waypoint
             .and_then(|_| worker.path.get(grid_count - 1))
             .and_then(|&goal| {
@@ -520,8 +535,10 @@ impl Construction {
         if let Some(path) = replacement {
             worker.path = path;
             worker.paused_waypoint = None;
+            worker.route_retry_ticks = 0;
         } else {
             worker.paused_waypoint = blocked_waypoint;
+            worker.route_retry_ticks = if blocked_waypoint.is_some() { 9 } else { 0 };
         }
     }
 
@@ -1797,6 +1814,8 @@ impl Construction {
                     && in_bounds(worker.position)
                     && worker.path.len() <= 128 * 128
                     && worker.path.iter().copied().all(in_bounds)
+                    && worker.paused_waypoint.is_none_or(in_bounds)
+                    && worker.route_retry_ticks <= 9
                     && worker.assignment.as_ref().is_none_or(|job| {
                         job.project < self.plans.len()
                             && match job.haul {
@@ -2946,6 +2965,12 @@ mod tests {
             village.lab_stop_reason(LabStop::Blocked, 0.0),
             Some("A job is waiting for access.")
         );
+        let retry_ticks = village.residents[0].route_retry_ticks;
+        let encoded = serde_json::to_string(&village).unwrap();
+        village = serde_json::from_str(&encoded).unwrap();
+        assert_eq!(village.residents[0].route_retry_ticks, retry_ticks);
+        village.refresh_resident_route(0, &catalog, site);
+        assert_eq!(village.residents[0].route_retry_ticks, retry_ticks - 1);
         village.plans[0].removed = true;
         village.refresh_resident_route(0, &catalog, site);
         assert_eq!(village.lab_stop_reason(LabStop::Blocked, 0.0), None);
