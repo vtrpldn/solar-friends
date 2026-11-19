@@ -962,7 +962,55 @@ impl Construction {
             Color::srgb_u8(216, 122, 92)
         };
         draw_footprint(ground.terrain, position, proposal.size, tint, gizmos);
+        let show_access = status.is_ok() && !matches!(key, "road" | "bridge");
+        if show_access {
+            let center = position.as_vec2() + (proposal.size.as_vec2() - Vec2::ONE) * 0.5;
+            let heading =
+                [Vec2::Y, Vec2::X, Vec2::NEG_Y, Vec2::NEG_X][usize::from(proposal.rotation)];
+            let front =
+                center + heading * ((heading.abs().dot(proposal.size.as_vec2()) + 1.0) * 0.5);
+            let spots: Vec<_> = build_perimeter(position, proposal.size)
+                .into_iter()
+                .filter(|&cell| {
+                    !self.blocked(catalog, ground.terrain, ground.land, ground.camp, cell)
+                })
+                .collect();
+            let entrance = matches!(
+                definition.kind.as_str(),
+                "home" | "workshop" | "kitchen" | "wash-station" | "eco_toilet"
+            )
+            .then(|| {
+                spots
+                    .iter()
+                    .copied()
+                    .filter(|spot| (spot.as_vec2() - front).dot(heading).abs() < 0.1)
+                    .min_by(|a, b| {
+                        a.as_vec2()
+                            .distance_squared(front)
+                            .total_cmp(&b.as_vec2().distance_squared(front))
+                    })
+            })
+            .flatten();
+            for cell in spots {
+                let Vec2 { x, y: z } = world_position(cell.x as f32, cell.y as f32);
+                let y = ground.terrain.height_at(x, z) + 0.15;
+                let (radius, tint) = if entrance == Some(cell) {
+                    (0.38, Color::srgb_u8(243, 190, 85))
+                } else {
+                    (0.24, Color::srgb_u8(85, 185, 216))
+                };
+                gizmos.circle(
+                    Isometry3d::new(
+                        Vec3::new(x, y, z),
+                        Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2),
+                    ),
+                    radius,
+                    tint,
+                );
+            }
+        }
         Some(match status {
+            Ok(detail) if show_access => format!("{detail} · Blue Work access · Gold Entrance"),
             Ok(detail) => detail,
             Err(reason) => format!("Blocked · {reason}"),
         })
@@ -1762,14 +1810,7 @@ impl Construction {
             let hauling = project.delivered < project.loads;
             let supply = SUPPLY_SPOTS[index];
             let start = if hauling { supply.as_vec2() } else { position };
-            let mut spots = Vec::new();
-            for z in 0..project.size.y {
-                spots.extend([IVec2::new(-1, z), IVec2::new(project.size.x, z)]);
-            }
-            for x in 0..project.size.x {
-                spots.extend([IVec2::new(x, project.size.y), IVec2::new(x, -1)]);
-            }
-            spots.iter_mut().for_each(|spot| *spot += project.position);
+            let mut spots = build_perimeter(project.position, project.size);
             spots.sort_by(|a, b| {
                 a.as_vec2()
                     .distance_squared(start)
@@ -1842,6 +1883,18 @@ impl Construction {
                     && inside(plan.position, plan.position + plan.size)
             })
     }
+}
+
+fn build_perimeter(position: IVec2, size: IVec2) -> Vec<IVec2> {
+    let mut spots = Vec::new();
+    for z in 0..size.y {
+        spots.extend([IVec2::new(-1, z), IVec2::new(size.x, z)]);
+    }
+    for x in 0..size.x {
+        spots.extend([IVec2::new(x, size.y), IVec2::new(x, -1)]);
+    }
+    spots.iter_mut().for_each(|spot| *spot += position);
+    spots
 }
 
 fn access_road(cell: IVec2) -> bool {
