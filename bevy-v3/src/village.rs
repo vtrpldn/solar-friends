@@ -1545,7 +1545,13 @@ fn village_input(
             }
             return;
         }
-        if keyboard.just_pressed(KeyCode::KeyH) && !town.stock.sandbox {
+        let main_view = town.utility_panel.is_none()
+            && !town.construction.menu
+            && !town.construction.production.open
+            && !town.construction.farming.open;
+        let finances_shortcut = keyboard.just_pressed(KeyCode::KeyM)
+            && (main_view || town.utility_panel == Some(UtilityPanel::Finances));
+        if (keyboard.just_pressed(KeyCode::KeyH) || finances_shortcut) && !town.stock.sandbox {
             town.utility_panel = if matches!(
                 town.utility_panel,
                 Some(UtilityPanel::Finances | UtilityPanel::Trade | UtilityPanel::Pantry)
@@ -1680,13 +1686,19 @@ fn village_input(
                 Some(UtilityPanel::Residents)
             };
         }
-        if keyboard.just_pressed(KeyCode::F11) {
+        let projects_shortcut = keyboard.just_pressed(KeyCode::KeyJ)
+            && ((main_view && town.construction.production.selected.is_none())
+                || town.utility_panel == Some(UtilityPanel::Projects));
+        if keyboard.just_pressed(KeyCode::F11) || projects_shortcut {
             town.utility_panel = if town.utility_panel == Some(UtilityPanel::Projects) {
                 None
             } else {
                 Some(UtilityPanel::Projects)
             };
             town.projects_page = 0;
+            if town.utility_panel.is_none() {
+                return;
+            }
         }
         if town.utility_panel == Some(UtilityPanel::Projects) {
             if keyboard.just_pressed(KeyCode::Tab) {
@@ -1704,7 +1716,10 @@ fn village_input(
             }
             return;
         }
-        if keyboard.just_pressed(KeyCode::F10) {
+        let stores_shortcut = keyboard.just_pressed(KeyCode::KeyI)
+            && !town.stock.sandbox
+            && (main_view || town.utility_panel == Some(UtilityPanel::Inventory));
+        if keyboard.just_pressed(KeyCode::F10) || stores_shortcut {
             town.utility_panel = if town.utility_panel == Some(UtilityPanel::Inventory) {
                 None
             } else {

@@ -796,6 +796,26 @@ mod tests {
                 .any(|text| text.0.contains("Dry, roomy ground"))
         );
         press_button(&mut app, "Camp in clearing");
+        for (key, heading) in [
+            (KeyCode::KeyM, "Shared savings"),
+            (KeyCode::KeyJ, "Projects ·"),
+            (KeyCode::KeyI, "Resources · Stores"),
+        ] {
+            app.world_mut()
+                .resource_mut::<ButtonInput<KeyCode>>()
+                .press(key);
+            app.world_mut().run_schedule(Update);
+            app.world_mut()
+                .resource_mut::<ButtonInput<KeyCode>>()
+                .reset(key);
+            assert!(
+                app.world_mut()
+                    .query::<&Text>()
+                    .iter(app.world())
+                    .any(|text| text.0.contains(heading))
+            );
+            press_button(&mut app, "Close panel");
+        }
         assert_eq!(
             app.world().resource::<village::Village>().camp,
             Some(IVec2::new(36, 36))

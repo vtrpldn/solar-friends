@@ -20,14 +20,14 @@ const TOPICS: [(&str, &str); 7] = [
          Home · Camp     End · River bend     Shift+End · Whole plot     Shift+Home · Reset view\n\
          Space · Pause     1–4 · Speed     Esc · Cancel placement or close a panel\n\
          B · Build     / · Search     R · Rotate the current placement\n\
-         F4 · Terrain tools     F11 · Find a project     Shift+G · Grid\n\
+         F4 · Terrain tools     J / F11 · Projects     Shift+G · Grid\n\
          In road planning, Shift-click extends and Z undoes the last stroke.",
     ),
     (
         "Village management",
         "N · Residents     P · Power     V · Water\n\
-         H · Finances, trade and pantry (Tab switches pages)\n\
-         F7 · Maintenance     F8 · Events     F10 · Stores\n\
+         M / H · Finances, trade and pantry (Tab switches pages)\n\
+         F7 · Maintenance     F8 · Events     I / F10 · Stores in Story\n\
          F · Weather forecast     L · Advance time\n\
          Finances and maintenance are available in economy mode.",
     ),
