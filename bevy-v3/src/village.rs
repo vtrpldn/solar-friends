@@ -443,7 +443,7 @@ impl Village {
         self.inventory_page = 0;
     }
 
-    fn change_panel_page(&mut self, catalog: &Catalog, forward: bool) {
+    fn change_panel_page(&mut self, catalog: &Catalog, land: &Land, forward: bool) {
         let (pages, page) = match self.utility_panel {
             Some(UtilityPanel::Pantry) => {
                 let Some(page) = &mut self.pantry_batch_page else {
@@ -468,6 +468,7 @@ impl Village {
                     .inventory_panel(
                         catalog,
                         &self.stock,
+                        land,
                         self.inventory_page,
                         self.inventory_equipment,
                         &self.inventory_search,
@@ -1062,7 +1063,7 @@ fn village_input(
             if town.finance_history_open
                 && keyboard.any_just_pressed([KeyCode::PageUp, KeyCode::PageDown])
             {
-                town.change_panel_page(&catalog, keyboard.just_pressed(KeyCode::PageDown));
+                town.change_panel_page(&catalog, &land, keyboard.just_pressed(KeyCode::PageDown));
             }
             if let Some(index) = [
                 KeyCode::Digit1,
@@ -1091,7 +1092,11 @@ fn village_input(
             }
             if town.pantry_batch_page.is_some() {
                 if keyboard.any_just_pressed([KeyCode::PageUp, KeyCode::PageDown]) {
-                    town.change_panel_page(&catalog, keyboard.just_pressed(KeyCode::PageDown));
+                    town.change_panel_page(
+                        &catalog,
+                        &land,
+                        keyboard.just_pressed(KeyCode::PageDown),
+                    );
                 }
                 return;
             }
@@ -1157,7 +1162,7 @@ fn village_input(
                 town.projects_page = 0;
             }
             if keyboard.any_just_pressed([KeyCode::PageUp, KeyCode::PageDown]) {
-                town.change_panel_page(&catalog, keyboard.just_pressed(KeyCode::PageDown));
+                town.change_panel_page(&catalog, &land, keyboard.just_pressed(KeyCode::PageDown));
             }
             if let Some(row) = crate::construction::PAGE_KEYS
                 .iter()
@@ -1180,7 +1185,7 @@ fn village_input(
                 town.toggle_inventory_view();
             }
             if keyboard.any_just_pressed([KeyCode::PageUp, KeyCode::PageDown]) {
-                town.change_panel_page(&catalog, keyboard.just_pressed(KeyCode::PageDown));
+                town.change_panel_page(&catalog, &land, keyboard.just_pressed(KeyCode::PageDown));
             }
             return;
         }
@@ -1194,7 +1199,7 @@ fn village_input(
         }
         if town.utility_panel == Some(UtilityPanel::Events) {
             if keyboard.any_just_pressed([KeyCode::PageUp, KeyCode::PageDown]) {
-                town.change_panel_page(&catalog, keyboard.just_pressed(KeyCode::PageDown));
+                town.change_panel_page(&catalog, &land, keyboard.just_pressed(KeyCode::PageDown));
             }
             return;
         }
@@ -1767,6 +1772,7 @@ fn show_hud(
                     .inventory_panel(
                         &catalog,
                         &village.stock,
+                        &land,
                         village.inventory_page,
                         village.inventory_equipment,
                         &village.inventory_search,
@@ -1834,11 +1840,11 @@ fn show_hud(
                         .finance_summary(&village.stock, village.selected_resident),
                 );
                 label.push('\n');
-                label.push_str(
-                    &village
-                        .construction
-                        .replacement_costs(&catalog, &village.stock),
-                );
+                label.push_str(&village.construction.replacement_costs(
+                    &catalog,
+                    &village.stock,
+                    &land,
+                ));
                 label.push('\n');
                 label.push_str(&village.construction.expansion_reserve_label());
                 label.push_str("\nR Recent transactions");

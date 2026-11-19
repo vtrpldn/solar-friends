@@ -42,7 +42,7 @@ fn record_output(
 }
 
 impl Construction {
-    fn inventory<'a>(&self, catalog: &'a Catalog, stock: &Stock) -> Ledger<'a> {
+    fn inventory<'a>(&self, catalog: &'a Catalog, stock: &Stock, land: &Land) -> Ledger<'a> {
         use crate::{farming::FarmPhase, production::Phase};
         let mut ledger: Ledger<'a> = catalog
             .materials
@@ -124,6 +124,23 @@ impl Construction {
                 record(&mut ledger, &job.inputs, location);
             }
         }
+        for (&index, job) in &self.gathering.orders {
+            if !matches!(job.phase, GatherPhase::Return | GatherPhase::CollectOutput) {
+                continue;
+            }
+            if let Some(site) = land.site(index) {
+                let output = job
+                    .remaining
+                    .as_ref()
+                    .unwrap_or(&catalog.gathering[site.recipe()].output);
+                record_output(
+                    &mut ledger,
+                    catalog,
+                    output,
+                    job.worker.is_some() && job.phase == GatherPhase::Return,
+                );
+            }
+        }
         for inputs in self.service_materials(catalog) {
             record(&mut ledger, &inputs, Location::Processing);
         }
@@ -155,9 +172,9 @@ impl Construction {
         ledger
     }
 
-    pub fn replacement_costs(&self, catalog: &Catalog, stock: &Stock) -> String {
+    pub fn replacement_costs(&self, catalog: &Catalog, stock: &Stock, land: &Land) -> String {
         let mut totals = [0.0; 5];
-        for (id, amounts) in self.inventory(catalog, stock) {
+        for (id, amounts) in self.inventory(catalog, stock, land) {
             let item = &catalog.materials[id];
             let unit_price = item.price / f64::from(item.pack.max(1));
             for (total, amount) in totals.iter_mut().zip(amounts) {
@@ -174,6 +191,7 @@ impl Construction {
         &self,
         catalog: &Catalog,
         stock: &Stock,
+        land: &Land,
         page: usize,
         equipment: bool,
         search: &str,
@@ -181,7 +199,7 @@ impl Construction {
         use std::fmt::Write;
         const ROWS: usize = 9;
         let search = search.trim().to_lowercase();
-        let ledger = self.inventory(catalog, stock);
+        let ledger = self.inventory(catalog, stock, land);
         let mut rows: Vec<_> = ledger
             .into_iter()
             .filter(|(id, amounts)| {
@@ -281,7 +299,8 @@ mod tests {
             .insert("plumbing".into(), paid + 10);
         village.plans.push(serde_json::from_slice(&saved).unwrap());
         assert_eq!(
-            village.inventory(&catalog, &stock)["plumbing"][Location::Reserved as usize],
+            village.inventory(&catalog, &stock, &Land::default())["plumbing"]
+                [Location::Reserved as usize],
             u64::from(paid)
         );
     }
@@ -312,12 +331,12 @@ mod tests {
             fare: 776,
         });
         assert_eq!(
-            village.inventory(&catalog, &stock)[material],
+            village.inventory(&catalog, &stock, &Land::default())[material],
             [initial, 2, 0, 0, 0]
         );
         village.farming.jobs[0].pickups = 0;
         assert_eq!(
-            village.inventory(&catalog, &stock)[material],
+            village.inventory(&catalog, &stock, &Land::default())[material],
             [initial, 0, 2, 0, 0]
         );
     }
@@ -339,12 +358,12 @@ mod tests {
         let initial = u64::from(stock.available("logs"));
         village.production.jobs[0].phase = Phase::Return;
         assert_eq!(
-            village.inventory(&catalog, &stock)["logs"],
+            village.inventory(&catalog, &stock, &Land::default())["logs"],
             [initial, 0, 48, 0, 0]
         );
         village.production.jobs[0].worker = Some(0);
         assert_eq!(
-            village.inventory(&catalog, &stock)["logs"],
+            village.inventory(&catalog, &stock, &Land::default())["logs"],
             [initial, 0, 43, 5, 0]
         );
 
@@ -353,8 +372,68 @@ mod tests {
         job.delivered_output = Some(BTreeMap::from([("logs".into(), 43)]));
         job.returning_to_site = true;
         assert_eq!(
-            village.inventory(&catalog, &stock)["logs"],
+            village.inventory(&catalog, &stock, &Land::default())["logs"],
             [initial + 5, 0, 43, 0, 0]
+        );
+    }
+
+    #[test]
+    fn gathering_ledger_counts_only_one_load_in_transit() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let land = Land::generate(&setup);
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut village = Construction::default();
+        let deposit = land.site_at(IVec2::new(45, -26)).unwrap();
+        let initial = u64::from(stock.available("stone"));
+        let total = catalog.gathering["stone"].output["stone"];
+        village
+            .gathering
+            .queue_resource(
+                &catalog,
+                &land,
+                deposit,
+                (setup.terrain().seed, setup.richness(), 0.0),
+            )
+            .unwrap();
+        assert_eq!(
+            village.inventory(&catalog, &stock, &land)["stone"],
+            [initial, 0, 0, 0, 0]
+        );
+
+        let job = village.gathering.orders.get_mut(&deposit).unwrap();
+        job.worker = Some(0);
+        job.phase = GatherPhase::Return;
+        let load = super::super::production_work::production_load(
+            &catalog,
+            &catalog.gathering["stone"].output,
+        );
+        let carried = load["stone"];
+        assert!((1..total).contains(&carried));
+        assert_eq!(
+            village.inventory(&catalog, &stock, &land)["stone"],
+            [
+                initial,
+                0,
+                u64::from(total - carried),
+                u64::from(carried),
+                0
+            ],
+        );
+
+        stock.receive(&load);
+        let job = village.gathering.orders.get_mut(&deposit).unwrap();
+        job.phase = GatherPhase::CollectOutput;
+        job.remaining = Some(BTreeMap::from([("stone".into(), total - carried)]));
+        assert_eq!(
+            village.inventory(&catalog, &stock, &land)["stone"],
+            [
+                initial + u64::from(carried),
+                0,
+                u64::from(total - carried),
+                0,
+                0
+            ],
         );
     }
 
@@ -376,7 +455,7 @@ mod tests {
             )
             .unwrap();
         assert_eq!(
-            village.inventory(&catalog, &stock)["wood"],
+            village.inventory(&catalog, &stock, &Land::default())["wood"],
             [initial - u64::from(amount), u64::from(amount), 0, 0, 0]
         );
         village.trip = Some(TownTrip {
@@ -390,7 +469,7 @@ mod tests {
             boarded: true,
         });
         assert_eq!(
-            village.inventory(&catalog, &stock)["wood"],
+            village.inventory(&catalog, &stock, &Land::default())["wood"],
             [initial - u64::from(amount), 0, 0, u64::from(amount), 0]
         );
     }

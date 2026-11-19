@@ -1004,7 +1004,7 @@ fn handle_buttons(
                 Action::Page(forward) if village.trade_open() => {
                     village.construction.page_trade(&catalog, forward)
                 }
-                Action::Page(forward) => village.change_panel_page(&catalog, forward),
+                Action::Page(forward) => village.change_panel_page(&catalog, &land, forward),
                 Action::TradeItem(row) if !picker.open => {
                     village.construction.select_trade_row(&catalog, row)
                 }
