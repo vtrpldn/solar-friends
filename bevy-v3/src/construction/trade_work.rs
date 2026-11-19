@@ -613,7 +613,7 @@ impl Construction {
                 item.quantity_text(u64::from(order.quantity))
             ));
         }
-        if let Some(freight) = self.construction_freight_status(clock.seconds) {
+        if let Some(freight) = self.reserved_freight_status(clock.seconds) {
             display.push('\n');
             display.push_str(&freight);
         }

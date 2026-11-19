@@ -232,7 +232,20 @@ impl Construction {
             .is_some_and(|order| order.sites().any(|id| id == site))
     }
 
-    pub fn construction_freight_status(&self, clock: f64) -> Option<String> {
+    pub fn reserved_freight_status(&self, clock: f64) -> Option<String> {
+        if let Some(job) = self
+            .farming
+            .jobs
+            .iter()
+            .find(|job| job.seed_freight_eta.is_some())
+        {
+            return Some(format!(
+                "{} · Site {} · Bed {}",
+                super::farm_work::seed_delivery_status(job, clock),
+                job.site + 1,
+                job.bed + 1
+            ));
+        }
         let delivery = self.construction_delivery.as_ref()?;
         let hours = (delivery.eta - clock).max(0.0) / crate::weather::HOUR;
         let projects = delivery.sites().count();
@@ -1076,6 +1089,10 @@ mod tests {
         village.toggle_supplier_construction();
         assert!(!village.tick_seed_freight(&mut stock, clock));
         assert!(village.seed_freight_active());
+        assert_eq!(
+            village.reserved_freight_status(clock.seconds).as_deref(),
+            Some("Seed freight · 6.5h remaining · Site 1 · Bed 1")
+        );
         assert_eq!(village.market.committed_fares(), 0);
         assert_eq!(stock.balance(), balance - freight);
 
@@ -1085,7 +1102,7 @@ mod tests {
         clock.seconds = restored.farming.jobs[0].seed_freight_eta.unwrap();
         assert!(!restored.tick_seed_freight(&mut stock, clock));
         assert_eq!(restored.farming.jobs[0].pickups, 0);
-        assert!(!restored.seed_freight_active());
+        assert!(restored.reserved_freight_status(clock.seconds).is_none());
         assert_eq!(stock.balance(), balance - freight);
     }
 
@@ -1585,7 +1602,7 @@ mod tests {
         assert!(village.construction_delivery_at(1));
         assert!(
             village
-                .construction_freight_status(0.0)
+                .reserved_freight_status(0.0)
                 .unwrap()
                 .contains("2 project(s)")
         );

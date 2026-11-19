@@ -964,7 +964,7 @@ impl BedAccess {
     }
 }
 
-fn seed_delivery_status(job: &FarmJob, clock: f64) -> String {
+pub(super) fn seed_delivery_status(job: &FarmJob, clock: f64) -> String {
     job.seed_freight_eta.map_or_else(
         || "Waiting for seed delivery".into(),
         |eta| {
