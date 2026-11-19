@@ -104,6 +104,9 @@ impl Construction {
             } else {
                 self.second_trip
             } {
+                if !trip.boarded && !self.pickup_manifests[trip.vehicle].is_empty() {
+                    self.fill_construction_pickup(catalog, trip, false);
+                }
                 let finished = self.advance_trip(catalog, stock, clock, &mut trip, dt);
                 if finished {
                     self.pickup_manifests[trip.vehicle].clear();
@@ -138,8 +141,7 @@ impl Construction {
             };
             let slot = usize::from(self.trip.is_some());
             if !trip.market_order && trip.farm_bed.is_none() {
-                self.pickup_manifests[vehicle] =
-                    self.pack_construction_pickups(catalog, trip.project, freight_unaffordable);
+                self.fill_construction_pickup(catalog, trip, freight_unaffordable);
             }
             self.set_trip(slot, Some(trip));
             self.upkeep.dispatch_vehicle(vehicle);
@@ -408,20 +410,29 @@ impl Construction {
         }
     }
 
-    fn pack_construction_pickups(
-        &self,
+    fn fill_construction_pickup(
+        &mut self,
         catalog: &Catalog,
-        first: usize,
+        trip: TownTrip,
         freight_unaffordable: bool,
-    ) -> PickupManifest {
+    ) {
+        let first = trip.project;
         if Self::pending_construction_cargo(&self.plans[first]).is_none() {
-            return PickupManifest::new();
+            return;
         }
-        let mut manifest = PickupManifest::new();
+        let mut manifest = std::mem::take(&mut self.pickup_manifests[trip.vehicle]);
         let mut capacity = crate::market::PICKUP_CAPACITY;
+        for load in manifest.values() {
+            let (mass, volume) =
+                Self::construction_order_cargo(catalog, load).expect("known cargo");
+            capacity.0 -= mass;
+            capacity.1 -= volume;
+        }
         for index in std::iter::once(first).chain((0..self.plans.len()).filter(|&i| i != first)) {
             let plan = &self.plans[index];
-            if !self.can_collect_construction(catalog, index, plan, freight_unaffordable) {
+            if manifest.contains_key(&index)
+                || !self.can_collect_construction(catalog, index, plan, freight_unaffordable)
+            {
                 continue;
             }
             let Some(pending) = Self::pending_construction_cargo(plan) else {
@@ -434,10 +445,9 @@ impl Construction {
                 capacity = proposed;
             }
         }
-        if !manifest.contains_key(&first) {
-            manifest.clear();
+        if manifest.contains_key(&first) {
+            self.pickup_manifests[trip.vehicle] = manifest;
         }
-        manifest
     }
 
     pub(super) fn valid_pickup_manifests(&self, catalog: &Catalog) -> bool {
@@ -1409,19 +1419,19 @@ mod tests {
             seconds: 0.0,
             round_trip_km: 12,
         };
-        for x in [44, 53] {
+        let reserve = |village: &mut Construction, stock: &mut Stock, x| {
             let mut plan = village.proposed_site(&catalog, "well", IVec2::new(x, 36));
-            Construction::reserve_project(
-                &mut village.market,
-                &mut stock,
-                &catalog,
-                &mut plan,
-                clock,
-            )
-            .unwrap();
+            Construction::reserve_project(&mut village.market, stock, &catalog, &mut plan, clock)
+                .unwrap();
             assert_eq!(plan.pickups, 1);
             village.plans.push(plan);
-        }
+        };
+        reserve(&mut village, &mut stock, 44);
+        village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
+        let first_trip = village.trip.unwrap();
+        assert!(!first_trip.boarded);
+        assert_eq!(village.pickup_manifests[first_trip.vehicle].len(), 1);
+        reserve(&mut village, &mut stock, 53);
         let fare = crate::market::fare_cents(12);
         let balance = stock.balance();
         assert_eq!(village.market.committed_fares(), fare * 2);
