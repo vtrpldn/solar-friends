@@ -3,6 +3,38 @@ use crate::market::fare_cents;
 use super::*;
 
 impl Construction {
+    pub fn page_trade(&mut self, catalog: &Catalog, forward: bool) {
+        let pages = Trade::tradable(catalog)
+            .len()
+            .div_ceil(PAGE_KEYS.len())
+            .max(1);
+        self.trade.page = (self.trade.page + if forward { 1 } else { pages - 1 }) % pages;
+    }
+
+    pub fn trade_page_labels(&self, catalog: &Catalog) -> Vec<String> {
+        Trade::tradable(catalog)
+            .iter()
+            .enumerate()
+            .skip(self.trade.page * PAGE_KEYS.len())
+            .take(PAGE_KEYS.len())
+            .map(|(index, (_, item))| {
+                if index == self.trade.selected {
+                    format!("› {}", item.name)
+                } else {
+                    item.name.clone()
+                }
+            })
+            .collect()
+    }
+
+    pub fn select_trade_row(&mut self, catalog: &Catalog, row: usize) {
+        let index = self.trade.page * PAGE_KEYS.len() + row;
+        if index < Trade::tradable(catalog).len() {
+            self.trade.selected = index;
+            self.trade.notice.clear();
+        }
+    }
+
     pub fn trade_input(
         &mut self,
         catalog: &Catalog,
@@ -11,18 +43,11 @@ impl Construction {
         clock: TownClock,
     ) {
         let options = Trade::tradable(catalog);
-        let pages = options.len().div_ceil(PAGE_KEYS.len());
-        if keys.just_pressed(KeyCode::PageDown) {
-            self.trade.page = (self.trade.page + 1) % pages;
-        } else if keys.just_pressed(KeyCode::PageUp) {
-            self.trade.page = (self.trade.page + pages - 1) % pages;
+        if keys.any_just_pressed([KeyCode::PageUp, KeyCode::PageDown]) {
+            self.page_trade(catalog, keys.just_pressed(KeyCode::PageDown));
         }
-        if let Some(number) = PAGE_KEYS.iter().position(|key| keys.just_pressed(*key)) {
-            let index = self.trade.page * PAGE_KEYS.len() + number;
-            if index < options.len() {
-                self.trade.selected = index;
-                self.trade.notice.clear();
-            }
+        if let Some(row) = PAGE_KEYS.iter().position(|key| keys.just_pressed(*key)) {
+            self.select_trade_row(catalog, row);
         }
         let Some((id, definition)) = options.get(self.trade.selected).copied() else {
             return;

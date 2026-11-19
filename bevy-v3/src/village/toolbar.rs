@@ -11,6 +11,7 @@ enum Action {
     ClosePanel,
     Page(bool),
     Project(usize),
+    TradeItem(usize),
     ProjectFilter,
     Resident(usize),
     Home(bool),
@@ -75,6 +76,7 @@ impl Action {
             Self::AutomaticUpkeep | Self::UpkeepBudget { .. } => {
                 village.utility_panel == Some(UtilityPanel::Upkeep)
             }
+            Self::TradeItem(_) => village.trade_open(),
             Self::Project(_) | Self::ProjectFilter => {
                 village.utility_panel == Some(UtilityPanel::Projects)
             }
@@ -104,6 +106,7 @@ impl Action {
                         | UtilityPanel::Inventory
                         | UtilityPanel::Events
                         | UtilityPanel::Residents
+                        | UtilityPanel::Trade
                 )
             ),
         }
@@ -130,7 +133,7 @@ impl Action {
             Self::Page(true) => "Next page".into(),
             Self::ProjectFilter if village.open_projects_only => "Show all projects".into(),
             Self::ProjectFilter => "Show underway".into(),
-            Self::Project(_) => String::new(),
+            Self::Project(_) | Self::TradeItem(_) => String::new(),
             Self::Resident(index) if index == village.selected_resident => {
                 format!("› {}", NAMES[index])
             }
@@ -301,6 +304,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 spawn_button(menu, &assets, Action::ProjectFilter);
                 for row in 0..crate::construction::PAGE_KEYS.len() {
                     spawn_button(menu, &assets, Action::Project(row));
+                    spawn_button(menu, &assets, Action::TradeItem(row));
                 }
             });
         });
@@ -375,7 +379,13 @@ fn handle_buttons(
                     let page = picker.home_page.min(pages - 1);
                     picker.home_page = (page + if forward { 1 } else { pages - 1 }) % pages;
                 }
+                Action::Page(forward) if village.trade_open() => {
+                    village.construction.page_trade(&catalog, forward)
+                }
                 Action::Page(forward) => village.change_panel_page(&catalog, forward),
+                Action::TradeItem(row) if !picker.open => {
+                    village.construction.select_trade_row(&catalog, row)
+                }
                 Action::Project(row) if !picker.open => {
                     village.focus_project_row(&catalog, &setup, &mut camera, row);
                 }
@@ -434,6 +444,7 @@ fn handle_buttons(
                 }
                 Action::Panel(_)
                 | Action::Project(_)
+                | Action::TradeItem(_)
                 | Action::ProjectFilter
                 | Action::Resident(_)
                 | Action::Home(_)
@@ -483,6 +494,12 @@ fn refresh(
         return;
     }
     let show_projects = !picker.open && Action::ProjectFilter.available(&village);
+    let show_trade = !picker.open && Action::TradeItem(0).available(&village);
+    let trade_items = if show_trade {
+        village.construction.trade_page_labels(&catalog)
+    } else {
+        Vec::new()
+    };
     let show_pantry = !picker.open && Action::PantryBatches.available(&village);
     let show_finances = !picker.open && Action::Ledger.available(&village);
     let show_power = !picker.open && Action::Grid.available(&village);
@@ -511,6 +528,7 @@ fn refresh(
         || show_residents
         || show_finances
         || show_pantry
+        || show_trade
         || show_power
         || show_upkeep
         || show_water
@@ -527,6 +545,7 @@ fn refresh(
             }
             Action::Page(_) | Action::ClosePanel => action.available(&village),
             Action::Project(row) => projects.get(row).is_some(),
+            Action::TradeItem(row) => trade_items.get(row).is_some(),
             Action::ProjectFilter => show_projects,
             Action::ListedHome(row) => homes.get(row).is_some(),
             Action::Resident(_) => show_residents || show_finances,
@@ -555,6 +574,7 @@ fn refresh(
         if let Ok(mut text) = labels.get_mut(children[0]) {
             let label = match action {
                 Action::Project(row) => projects[row].clone(),
+                Action::TradeItem(row) => trade_items[row].clone(),
                 Action::ListedHome(row) => {
                     let (home, name, occupants, beds) = homes[row];
                     format!("{name} #{} · {occupants}/{beds} beds", home + 1)
