@@ -563,6 +563,25 @@ impl Runner {
         Ok(())
     }
 
+    fn reschedule(&mut self, index: usize, step: u64) -> Result<(), &'static str> {
+        if !(self.index.saturating_add(1)..=self.scenario.steps).contains(&step) {
+            return Err("Choose a future step within the scenario.");
+        }
+        if index < self.next_order || index >= self.scenario.orders.len() {
+            return Err("Only scheduled orders can be moved.");
+        }
+        if self.scenario.orders[index].step != step {
+            let mut order = self.scenario.orders.remove(index);
+            order.step = step;
+            let insertion = self
+                .scenario
+                .orders
+                .partition_point(|order| order.step <= step);
+            self.scenario.orders.insert(insertion, order);
+        }
+        Ok(())
+    }
+
     fn latest_bed_outcome(&self, site: usize, bed: usize) -> Option<&Outcome> {
         self.scenario
             .orders
@@ -811,7 +830,7 @@ fn lab_order_page(runner: &Runner, page: &mut usize, selected_row: Option<usize>
         *page + 1
     );
     if selected_row.is_some() {
-        text.push_str("↑/↓ Select · Delete Remove scheduled order\n");
+        text.push_str("↑/↓ Select · Enter Reschedule · Delete Remove\n");
     }
     if count == 0 {
         text.push_str("\nNo scenario orders.");
@@ -1022,6 +1041,7 @@ struct Playback {
     stop: usize,
     pause_at: Option<u64>,
     order: Option<String>,
+    rescheduling: Option<usize>,
     notice: String,
     view: LabView,
     inventory_page: usize,
@@ -1146,6 +1166,7 @@ impl Default for Playback {
             stop: 0,
             pause_at: None,
             order: None,
+            rescheduling: None,
             notice: String::new(),
             view: LabView::default(),
             inventory_page: 0,
@@ -1403,6 +1424,7 @@ fn update_lab_window(
     if let Some(mut order) = playback.order.take() {
         if keys.just_pressed(KeyCode::Escape) {
             events.clear();
+            playback.rescheduling = None;
         } else if keys.just_pressed(KeyCode::Enter) {
             events.clear();
             #[derive(Deserialize)]
@@ -1411,23 +1433,37 @@ fn update_lab_window(
                 Scheduled(ScheduledOrder),
                 Now(LabOrder),
             }
-            let result = serde_json::from_str::<OrderInput>(&order)
-                .map_err(|error| error.to_string())
-                .and_then(|input| match input {
-                    OrderInput::Scheduled(scheduled) => {
-                        let step = scheduled.step;
-                        runner
-                            .schedule(&catalog, scheduled)
-                            .map_err(str::to_owned)?;
-                        Ok(format!("Order submitted for step {step}."))
-                    }
-                    OrderInput::Now(order) => {
-                        runner.submit(&catalog, order).map_err(str::to_owned)?;
-                        Ok(String::new())
-                    }
-                });
+            let result = if let Some(index) = playback.rescheduling {
+                order
+                    .trim()
+                    .parse::<u64>()
+                    .map_err(|_| "Enter a step number.".to_owned())
+                    .and_then(|step| {
+                        runner.reschedule(index, step).map_err(str::to_owned)?;
+                        Ok(format!("Order moved to step {step}."))
+                    })
+            } else {
+                serde_json::from_str::<OrderInput>(&order)
+                    .map_err(|error| error.to_string())
+                    .and_then(|input| match input {
+                        OrderInput::Scheduled(scheduled) => {
+                            let step = scheduled.step;
+                            runner
+                                .schedule(&catalog, scheduled)
+                                .map_err(str::to_owned)?;
+                            Ok(format!("Order submitted for step {step}."))
+                        }
+                        OrderInput::Now(order) => {
+                            runner.submit(&catalog, order).map_err(str::to_owned)?;
+                            Ok(String::new())
+                        }
+                    })
+            };
             match result {
-                Ok(notice) => playback.notice = notice,
+                Ok(notice) => {
+                    playback.notice = notice;
+                    playback.rescheduling = None;
+                }
                 Err(error) => {
                     playback.notice = error;
                     playback.order = Some(order);
@@ -1483,6 +1519,15 @@ fn update_lab_window(
     }
     if let Some(order) = &playback.order {
         map.visible = false;
+        if let Some(index) = playback.rescheduling {
+            panel.set_if_neq(Text::new(format!(
+                "Move order #{} from step {}\nEnter Submit · Esc Cancel\n\nNew step · {order}▏\n{}",
+                index + 1,
+                runner.scenario.orders[index].step,
+                playback.notice
+            )));
+            return;
+        }
         panel.set_if_neq(Text::new(format!(
             "Order at step {}\nEnter Submit · Esc Cancel\n\nNow {{\"type\":\"grid\",\"enabled\":false}}\nLater {{\"step\":120,\"order\":{{\"type\":\"grid\",\"enabled\":false}}}}\n\n{order}▏\n{}",
             runner.index, playback.notice
@@ -1596,12 +1641,24 @@ fn update_lab_window(
             playback.order_row = playback.order_row.saturating_sub(1);
         }
         playback.order_row = playback.order_row.min(rows.saturating_sub(1));
-        if keys.just_pressed(KeyCode::Delete) && rows > 0 {
+        let remove = keys.just_pressed(KeyCode::Delete);
+        let move_order = keys.just_pressed(KeyCode::Enter);
+        if (remove || move_order) && rows > 0 {
             let index = count - 1 - offset - playback.order_row;
             if index < runner.next_order {
-                playback.notice = "Only scheduled orders can be removed.".into();
+                playback.notice = "Only scheduled orders can be edited.".into();
             } else if playback.running {
-                playback.notice = "Pause the scenario before removing an order.".into();
+                playback.notice = "Pause the scenario before editing an order.".into();
+            } else if move_order {
+                playback.notice.clear();
+                playback.rescheduling = Some(index);
+                playback.order = Some(String::new());
+                panel.set_if_neq(Text::new(format!(
+                    "Move order #{} from step {}\nEnter Submit · Esc Cancel\n\nNew step · ▏",
+                    index + 1,
+                    runner.scenario.orders[index].step
+                )));
+                return;
             } else {
                 runner.scenario.orders.remove(index);
                 playback.order_row = playback.order_row.min(rows.saturating_sub(2));
@@ -2355,6 +2412,38 @@ mod tests {
                 .collect::<Vec<_>>(),
             [2, 4, 4]
         );
+        let report =
+            serde_json::from_slice(&serde_json::to_vec(&runner.report()).unwrap()).unwrap();
+        assert_eq!(verify_report(report, &catalog).unwrap(), 5);
+    }
+
+    #[test]
+    fn moving_pending_orders_keeps_the_timeline_replayable() {
+        let catalog = Catalog::default();
+        let scenario = serde_json::from_str(
+            r#"{"steps":5,"orders":[
+            {"step":0,"order":{"type":"grid","enabled":false}},
+            {"step":2,"order":{"type":"grid","enabled":true}},
+            {"step":3,"order":{"type":"grid","enabled":false}}
+        ]}"#,
+        )
+        .unwrap();
+        let mut runner = Runner::new(scenario, None, &catalog).unwrap();
+        assert!(runner.reschedule(0, 4).is_err());
+        assert!(runner.reschedule(1, 0).is_err());
+        runner.reschedule(1, 4).unwrap();
+        while !runner.done() {
+            runner.advance(&catalog);
+        }
+        assert_eq!(
+            runner
+                .outcomes
+                .iter()
+                .map(|outcome| outcome.step)
+                .collect::<Vec<_>>(),
+            [0, 3, 4]
+        );
+        assert!(!runner.village.construction.utilities.grid_off);
         let report =
             serde_json::from_slice(&serde_json::to_vec(&runner.report()).unwrap()).unwrap();
         assert_eq!(verify_report(report, &catalog).unwrap(), 5);
