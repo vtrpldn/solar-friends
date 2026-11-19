@@ -1541,6 +1541,10 @@ fn village_input(
                 return;
             }
             town.construction.kitchen_controls(&keyboard);
+            if keyboard.just_pressed(KeyCode::KeyD) {
+                town.construction.toggle_supplier_construction();
+                return;
+            }
             if keyboard.just_pressed(KeyCode::KeyT) {
                 town.stock.pantry.priority = town.stock.pantry.priority.next();
             }
@@ -2463,12 +2467,14 @@ fn show_hud(
                 village.construction.utilities.installed_cold_storage(),
             ));
             label.push('\n');
-            label.push_str(
-                &village
-                    .construction
-                    .trade
-                    .pantry_purchase_status(&village.stock, village.clock),
-            );
+            label.push_str(&village.construction.pantry_purchase_status(
+                &catalog,
+                &village.stock,
+                TownClock {
+                    seconds: village.clock,
+                    round_trip_km: setup.round_trip_km(),
+                },
+            ));
             label.push('\n');
             if !village.stock.sandbox
                 && let Some(warning) = village.stock.pantry.use_soon(&catalog, village.clock)

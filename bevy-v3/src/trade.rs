@@ -263,7 +263,7 @@ impl Trade {
             &BTreeMap::new(),
         );
         if freight {
-            let eta = clock + 360.0 / 0.45 + crate::market::trip_seconds(distance);
+            let eta = clock + crate::market::freight_seconds(distance);
             self.delivery = Some(Delivery {
                 material: id.into(),
                 quantity,

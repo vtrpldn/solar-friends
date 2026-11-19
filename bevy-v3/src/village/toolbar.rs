@@ -80,6 +80,7 @@ enum Action {
     ExpansionReserve(bool),
     PantryBatches,
     PantryPriority,
+    PantryTransport,
     AutoCook,
     CookingTarget { preserved: bool, increase: bool },
     PantryPolicy(i8, i64, bool),
@@ -306,6 +307,7 @@ impl Action {
             ),
             Self::PantryBatches => village.utility_panel == Some(UtilityPanel::Pantry),
             Self::PantryPriority
+            | Self::PantryTransport
             | Self::PantryPolicy(..)
             | Self::AutoCook
             | Self::CookingTarget { .. } => {
@@ -536,6 +538,10 @@ impl Action {
             }
             Self::PantryBatches => "Food batches".into(),
             Self::PantryPriority => "Change food priority".into(),
+            Self::PantryTransport if village.construction.supplier_construction() => {
+                "Purchases: supplier freight".into()
+            }
+            Self::PantryTransport => "Purchases: resident pickup".into(),
             Self::AutoCook if village.construction.production.kitchen_policy.automatic => {
                 "Automatic cooking on".into()
             }
@@ -818,6 +824,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 spawn_button(menu, &assets, Action::ExpansionReserve(true));
                 spawn_button(menu, &assets, Action::PantryBatches);
                 spawn_button(menu, &assets, Action::PantryPriority);
+                spawn_button(menu, &assets, Action::PantryTransport);
                 spawn_button(menu, &assets, Action::AutoCook);
                 for preserved in [false, true] {
                     for increase in [false, true] {
@@ -1282,6 +1289,9 @@ fn handle_buttons(
                         .kitchen_policy
                         .change(preserved, if increase { 1 } else { -1 });
                 }
+                Action::PantryTransport if !picker.open => {
+                    village.construction.toggle_supplier_construction()
+                }
                 Action::PantryPolicy(reserve, budget, toggle) if !picker.open => {
                     village
                         .construction
@@ -1392,6 +1402,7 @@ fn handle_buttons(
                 | Action::ExpansionReserve(_)
                 | Action::PantryBatches
                 | Action::PantryPriority
+                | Action::PantryTransport
                 | Action::AutoCook
                 | Action::CookingTarget { .. }
                 | Action::PantryPolicy(..)
@@ -1603,6 +1614,7 @@ fn refresh(
             Action::ExpansionReserve(_) => show_finances && !village.finance_history_open,
             Action::PantryBatches
             | Action::PantryPriority
+            | Action::PantryTransport
             | Action::PantryPolicy(..)
             | Action::AutoCook
             | Action::CookingTarget { .. } => show_pantry && action.available(&village),

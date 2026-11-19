@@ -441,6 +441,60 @@ impl Construction {
         }
     }
 
+    fn supplier_delivery_status(
+        &self,
+        catalog: &Catalog,
+        space: u64,
+        clock: f64,
+    ) -> Option<String> {
+        let order = self.trade.delivery.as_ref()?;
+        let item = &catalog.materials[&order.material];
+        let arrival = order.eta - clock;
+        let status = if arrival > 0.0 {
+            format!("{:.1}h remaining", arrival / crate::weather::HOUR)
+        } else if u64::from(order.quantity) > space {
+            "Arrived · Waiting for storage space".into()
+        } else {
+            "Arrived · Ready to unload".into()
+        };
+        let loss = if order.quantity < item.pack {
+            " · Spoilage loss"
+        } else {
+            ""
+        };
+        Some(format!(
+            "Freight · {} · {} · {status}{loss}",
+            item.name,
+            item.quantity_text(u64::from(order.quantity))
+        ))
+    }
+
+    pub fn pantry_purchase_status(
+        &self,
+        catalog: &Catalog,
+        stock: &Stock,
+        clock: TownClock,
+    ) -> String {
+        let mut status = self.trade.pantry_purchase_status(stock, clock.seconds);
+        if self.supplier_construction {
+            let (kg, cubic_metres) = crate::economy_reference::FREIGHT_CAPACITY;
+            let fee = freight_cents(clock.round_trip_km) as f64 / 100.;
+            let hours = crate::market::freight_seconds(clock.round_trip_km) / crate::weather::HOUR;
+            status.push_str(&format!("\nD Automatic supplies · Supplier freight · R${fee:.2} · {kg:.0} kg / {cubic_metres:.0} m³ · {hours:.1}h · No driver needed"));
+        } else {
+            status.push_str("\nD Automatic supplies · Resident pickup");
+        }
+        if let Some(delivery) = self.supplier_delivery_status(
+            catalog,
+            self.storage_space(catalog, stock),
+            clock.seconds,
+        ) {
+            status.push('\n');
+            status.push_str(&delivery);
+        }
+        status
+    }
+
     pub fn trade_status(&self, catalog: &Catalog, stock: &Stock, clock: TownClock) -> String {
         if let Some(offset) = self.trade_queue_offset() {
             let mut display = format!(
@@ -596,26 +650,11 @@ impl Construction {
             "\nI Buy for pickup · D Order freight\nStorage {used}/{maximum} units · {} fulfilled purchases",
             self.trade.purchases,
         ));
-        if let Some(order) = &self.trade.delivery {
-            let item = &catalog.materials[&order.material];
-            let arrival = order.eta - clock.seconds;
-            let status = if arrival > 0.0 {
-                format!("{:.1}h remaining", arrival / crate::weather::HOUR)
-            } else if u64::from(order.quantity) > maximum.saturating_sub(used) {
-                "Arrived · Waiting for storage space".into()
-            } else {
-                "Arrived · Ready to unload".into()
-            };
-            let outcome = if order.quantity < item.pack {
-                " · Spoilage loss"
-            } else {
-                ""
-            };
-            display.push_str(&format!(
-                "\nFreight · {} · {} · {status}{outcome}",
-                item.name,
-                item.quantity_text(u64::from(order.quantity))
-            ));
+        if let Some(status) =
+            self.supplier_delivery_status(catalog, maximum.saturating_sub(used), clock.seconds)
+        {
+            display.push('\n');
+            display.push_str(&status);
         }
         if let Some(freight) = self.reserved_freight_status(clock.seconds) {
             display.push('\n');
@@ -786,6 +825,16 @@ mod tests {
                 .trade_status(&catalog, &stock, clock)
                 .contains("Freight unavailable · A freight order is already on the way.")
         );
+
+        assert!(
+            village
+                .pantry_purchase_status(&catalog, &stock, clock)
+                .contains("Resident pickup")
+        );
+        village.toggle_supplier_construction();
+        let pantry = village.pantry_purchase_status(&catalog, &stock, clock);
+        assert!(pantry.contains("Supplier freight · R$44.60"));
+        assert!(pantry.contains("h remaining"));
 
         clock.seconds = village.trade.delivery.as_ref().unwrap().eta;
         assert!(

@@ -375,6 +375,10 @@ pub fn freight_cents(distance: u32) -> u64 {
     3500 + u64::from(distance) * 80
 }
 
+pub fn freight_seconds(round_trip_km: u32) -> f64 {
+    360.0 / 0.45 + trip_seconds(round_trip_km)
+}
+
 pub fn fare_cents(round_trip_km: u32) -> u64 {
     ((f64::from(round_trip_km) / KM_PER_LITER) * GASOLINE_REAIS_PER_LITER * 100.0).round() as u64
 }
