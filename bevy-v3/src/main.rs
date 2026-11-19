@@ -491,6 +491,8 @@ mod tests {
         press_button(&mut app, "Zoom in");
         press_button(&mut app, "Show grid");
         press_button(&mut app, "Hide grid");
+        press_button(&mut app, "Show forecast");
+        press_button(&mut app, "Hide forecast");
         press_button(&mut app, "Reset camera");
         press_button(&mut app, "Close view");
 
