@@ -17,6 +17,7 @@ struct Workshop {
     zoom: f32,
     target: Vec3,
     scale_figure: bool,
+    clay: bool,
     night: bool,
     guides: bool,
     export_notice: String,
@@ -27,6 +28,12 @@ struct WorkshopModel;
 
 #[derive(Component)]
 struct ScaleFigure;
+
+#[derive(Resource)]
+struct ClayMaterial(Handle<StandardMaterial>);
+
+#[derive(Component)]
+struct OriginalMaterial(Handle<StandardMaterial>);
 
 const DEFAULT_ELEVATION: f32 = 37.72;
 
@@ -60,6 +67,7 @@ pub fn run() {
         zoom: 1.0,
         target: Vec3::Y,
         scale_figure: false,
+        clay: false,
         night: false,
         guides: false,
         export_notice: String::new(),
@@ -71,6 +79,7 @@ pub fn run() {
             controls,
             show_model,
             show_scale_figure,
+            apply_surface,
             capture_preview,
             draw_guides,
         )
@@ -87,6 +96,11 @@ fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
+    commands.insert_resource(ClayMaterial(materials.add(StandardMaterial {
+        base_color: Color::srgb_u8(213, 198, 164),
+        perceptual_roughness: 1.0,
+        ..default()
+    })));
     commands.spawn((
         Camera3d::default(),
         Projection::Orthographic(OrthographicProjection::default_3d()),
@@ -146,6 +160,9 @@ fn controls(
     }
     if keys.just_pressed(KeyCode::KeyG) {
         workshop.guides = !workshop.guides;
+    }
+    if keys.just_pressed(KeyCode::KeyM) {
+        workshop.clay = !workshop.clay;
     }
     if keys.just_pressed(KeyCode::KeyH) {
         workshop.scale_figure = !workshop.scale_figure;
@@ -255,8 +272,9 @@ fn show_model(
         ambient.brightness = 350.0;
         "Day"
     };
+    let surface = if workshop.clay { "Clay" } else { "Materials" };
     text.set_if_neq(Text::new(format!(
-        "{} · {}/{} · {mode}\n{} × {} m · {}\n←/→ Model · ↑/↓ Tilt · Q/E Orbit · +/− Zoom · R Rotate\nDrag Orbit · Right-drag Pan · Scroll Zoom\nN Lighting · G Guides · H Scale figure · Home Reset · F5 Export PNG\n{}",
+        "{} · {}/{} · {mode}\n{} × {} m · {}\n←/→ Model · ↑/↓ Tilt · Q/E Orbit · +/− Zoom · R Rotate\nDrag Orbit · Right-drag Pan · Scroll Zoom\nN Lighting · M Surface ({surface}) · G Guides · H Scale figure · Home Reset · F5 Export PNG\n{}",
         project.name, workshop.selected + 1, workshop.projects.len(),
         project.size[0] * 2, project.size[1] * 2, project.category, workshop.export_notice,
     )));
@@ -278,6 +296,39 @@ fn show_scale_figure(
     } else {
         Visibility::Hidden
     };
+}
+
+type SurfaceScene = Or<(With<WorkshopModel>, With<ScaleFigure>)>;
+
+fn apply_surface(
+    mut commands: Commands,
+    workshop: Res<Workshop>,
+    clay: Res<ClayMaterial>,
+    spawner: Res<SceneSpawner>,
+    scenes: Query<&SceneInstance, SurfaceScene>,
+    mut materials: Query<(
+        &mut MeshMaterial3d<StandardMaterial>,
+        Option<&OriginalMaterial>,
+    )>,
+) {
+    for instance in &scenes {
+        for entity in spawner.iter_instance_entities(**instance) {
+            let Ok((mut material, original)) = materials.get_mut(entity) else {
+                continue;
+            };
+            if workshop.clay && original.is_none() {
+                commands
+                    .entity(entity)
+                    .insert(OriginalMaterial(material.0.clone()));
+                material.0 = clay.0.clone();
+            } else if !workshop.clay
+                && let Some(original) = original
+            {
+                material.0 = original.0.clone();
+                commands.entity(entity).remove::<OriginalMaterial>();
+            }
+        }
+    }
 }
 
 fn capture_preview(
@@ -336,6 +387,7 @@ fn capture_preview(
         "model_rotation_degrees": u16::from(workshop.rotation) * 90,
         "metres_per_cell": 2,
         "scale_figure": workshop.scale_figure,
+        "surface": if workshop.clay { "clay" } else { "materials" },
         "light": if workshop.night { "night" } else { "day" },
         "camera": {
             "projection": "orthographic",
