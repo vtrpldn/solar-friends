@@ -300,8 +300,22 @@ impl Construction {
         let rows = self.visible_projects(catalog, underway);
         let page = page.min(rows.len().div_ceil(PAGE_KEYS.len()).saturating_sub(1));
         let &(project, plan) = rows.get(page * PAGE_KEYS.len() + row)?;
-        let center = plan.position.as_vec2() + (plan.size.as_vec2() - Vec2::ONE) * 0.5;
+        let center = project_center(plan);
         self.select_project(Some(project));
-        Some(world_position(center.x, center.y))
+        Some(center)
     }
+
+    pub fn selected_project_center(&self) -> Option<Vec2> {
+        let plan = self.plans.get(self.production.selected?)?;
+        (!plan.removed).then(|| project_center(plan))
+    }
+
+    pub fn clear_selected_project(&mut self) {
+        self.select_project(None);
+    }
+}
+
+fn project_center(plan: &Blueprint) -> Vec2 {
+    let center = plan.position.as_vec2() + (plan.size.as_vec2() - Vec2::ONE) * 0.5;
+    world_position(center.x, center.y)
 }

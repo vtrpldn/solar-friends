@@ -56,6 +56,8 @@ enum Action {
     MoveCraft,
     FacilityIrrigation,
     SelectedProject(ProjectAction),
+    FocusSelectedProject,
+    DeselectProject,
     TradeItem(usize),
     TradeQueue,
     TradeQueued(usize),
@@ -231,6 +233,14 @@ impl Action {
                 village.utility_panel == Some(UtilityPanel::Upkeep)
             }
             Self::SelectedProject(_) => village.utility_panel.is_none(),
+            Self::FocusSelectedProject | Self::DeselectProject => {
+                village.utility_panel.is_none()
+                    && !village.construction.menu
+                    && !village.construction.is_placing()
+                    && !village.construction.production.open
+                    && !village.construction.farming.open
+                    && village.construction.selected_project_center().is_some()
+            }
             Self::TradeItem(_)
             | Self::TradeQueue
             | Self::TradeQueued(_)
@@ -419,6 +429,8 @@ impl Action {
             Self::MoveCraft => "Move unfinished job".into(),
             Self::RecipePage(false) => "Previous recipes".into(),
             Self::RecipePage(true) => "Next recipes".into(),
+            Self::FocusSelectedProject => "Focus project".into(),
+            Self::DeselectProject => "Close project".into(),
             Self::SelectedProject(action) => match action {
                 ProjectAction::Prioritize => "Prioritize project",
                 ProjectAction::Move => "Move building",
@@ -683,6 +695,8 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 ] {
                     spawn_button(menu, &assets, Action::Advance(action));
                 }
+                spawn_button(menu, &assets, Action::FocusSelectedProject);
+                spawn_button(menu, &assets, Action::DeselectProject);
                 for action in [
                     ProjectAction::Prioritize,
                     ProjectAction::Move,
@@ -1184,6 +1198,16 @@ fn handle_buttons(
                 Action::TradePolicy(policy) if !picker.open => {
                     village.construction.adjust_trade_policy(&catalog, policy);
                 }
+                Action::FocusSelectedProject if !picker.open => {
+                    if let Some(point) = village.construction.selected_project_center() {
+                        let terrain = village.terrain(&setup);
+                        camera.target =
+                            Vec3::new(point.x, terrain.height_at(point.x, point.y), point.y);
+                    }
+                }
+                Action::DeselectProject if !picker.open => {
+                    village.construction.clear_selected_project()
+                }
                 Action::SelectedProject(action) if !picker.open => {
                     let town = &mut *village;
                     town.construction
@@ -1248,6 +1272,8 @@ fn handle_buttons(
                 | Action::FacilityIrrigation
                 | Action::Farm(_)
                 | Action::SelectedProject(_)
+                | Action::FocusSelectedProject
+                | Action::DeselectProject
                 | Action::TradeItem(_)
                 | Action::TradeQueue
                 | Action::TradeQueued(_)
@@ -1439,6 +1465,9 @@ fn refresh(
             Action::Beds | Action::Gather => action.available(&village),
             Action::Farm(_) => show_beds,
             Action::Recipe(row) => recipes.get(row).is_some(),
+            Action::FocusSelectedProject | Action::DeselectProject => {
+                show_selected_project && action.available(&village)
+            }
             Action::SelectedProject(action) => {
                 show_selected_project
                     && village.construction.project_action_available(
