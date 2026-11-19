@@ -2,6 +2,13 @@ use crate::market::fare_cents;
 
 use super::*;
 
+#[derive(Clone, Copy)]
+pub(crate) enum TradeOrder {
+    Buy { freight: bool },
+    Sell,
+    Cancel,
+}
+
 impl Construction {
     pub fn page_trade(&mut self, catalog: &Catalog, forward: bool) {
         let pages = Trade::tradable(catalog)
@@ -55,44 +62,21 @@ impl Construction {
         if keys.just_pressed(KeyCode::Digit0) {
             self.trade.household_restock_off = !self.trade.household_restock_off;
         }
-        if keys.just_pressed(KeyCode::KeyI) || keys.just_pressed(KeyCode::KeyD) {
-            let freight = keys.just_pressed(KeyCode::KeyD);
-            let space = self.storage_space(catalog, stock);
-            self.trade.notice = if u64::from(definition.pack) + self.trade.inbound() > space {
-                "There is not enough storage for another pack.".into()
-            } else {
-                match self.trade.buy(
-                    catalog,
-                    stock,
-                    &mut self.market,
-                    id,
-                    (clock.seconds, clock.round_trip_km, freight),
-                ) {
-                    Ok(()) if freight => {
-                        format!("{} ordered for freight delivery.", definition.name)
-                    }
-                    Ok(()) => format!("{} ordered for town pickup.", definition.name),
-                    Err(error) => error.into(),
-                }
-            };
+        if keys.any_just_pressed([KeyCode::KeyI, KeyCode::KeyD]) {
+            self.place_trade_order(
+                catalog,
+                stock,
+                clock,
+                TradeOrder::Buy {
+                    freight: keys.just_pressed(KeyCode::KeyD),
+                },
+            );
         }
         if keys.just_pressed(KeyCode::Enter) {
-            let day = ((540.0 + clock.seconds * 0.45) / 1440.0).floor() as u64;
-            let fare = fare_cents(clock.round_trip_km);
-            self.trade.notice =
-                match self
-                    .trade
-                    .reserve(catalog, stock, &mut self.market, id, (day, fare, 0))
-                {
-                    Ok(quantity) => format!("{quantity} {} reserved for town.", definition.name),
-                    Err(error) => error.into(),
-                };
+            self.place_trade_order(catalog, stock, clock, TradeOrder::Sell);
         }
         if keys.just_pressed(KeyCode::Backspace) {
-            let active = self.booked_trade_orders();
-            if let Some(index) = self.trade.cancel_last(stock, &mut self.market, &active) {
-                self.removed_trade_order(index);
-            }
+            self.place_trade_order(catalog, stock, clock, TradeOrder::Cancel);
         }
         let policy = self.trade.policies.entry(id.into()).or_default();
         if keys.just_pressed(KeyCode::KeyT) {
@@ -117,6 +101,61 @@ impl Construction {
                 set if set == definition.pack => definition.pack * 2,
                 _ => 0,
             };
+        }
+    }
+
+    pub fn place_trade_order(
+        &mut self,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        clock: TownClock,
+        order: TradeOrder,
+    ) {
+        let options = Trade::tradable(catalog);
+        let Some((id, definition)) = options.get(self.trade.selected).copied() else {
+            return;
+        };
+        match order {
+            TradeOrder::Buy { freight } => {
+                let space = self.storage_space(catalog, stock);
+                self.trade.notice = if u64::from(definition.pack) + self.trade.inbound() > space {
+                    "There is not enough storage for another pack.".into()
+                } else {
+                    match self.trade.buy(
+                        catalog,
+                        stock,
+                        &mut self.market,
+                        id,
+                        (clock.seconds, clock.round_trip_km, freight),
+                    ) {
+                        Ok(()) if freight => {
+                            format!("{} ordered for freight delivery.", definition.name)
+                        }
+                        Ok(()) => format!("{} ordered for town pickup.", definition.name),
+                        Err(error) => error.into(),
+                    }
+                };
+            }
+            TradeOrder::Sell => {
+                let day = ((540.0 + clock.seconds * 0.45) / 1440.0).floor() as u64;
+                let fare = fare_cents(clock.round_trip_km);
+                self.trade.notice =
+                    match self
+                        .trade
+                        .reserve(catalog, stock, &mut self.market, id, (day, fare, 0))
+                    {
+                        Ok(quantity) => {
+                            format!("{quantity} {} reserved for town.", definition.name)
+                        }
+                        Err(error) => error.into(),
+                    };
+            }
+            TradeOrder::Cancel => {
+                let active = self.booked_trade_orders();
+                if let Some(index) = self.trade.cancel_last(stock, &mut self.market, &active) {
+                    self.removed_trade_order(index);
+                }
+            }
         }
     }
 
