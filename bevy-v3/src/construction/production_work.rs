@@ -522,10 +522,13 @@ impl Construction {
             goods.values().map(|&count| u64::from(count)).sum::<u64>()
         };
         let expected = if job.phase == Phase::Return {
-            units(&production_load(
-                catalog,
-                job.delivered_output.as_ref().unwrap_or(&recipe.output),
-            ))
+            u64::from(
+                !production_load(
+                    catalog,
+                    job.delivered_output.as_ref().unwrap_or(&recipe.output),
+                )
+                .is_empty(),
+            )
         } else if let Some(output) = &job.delivered_output {
             units(output)
         } else if let Some((growth, biology)) = job.growth.as_ref().zip(recipe.biology.as_ref()) {
@@ -1311,7 +1314,11 @@ impl Construction {
                         continue;
                     }
                     let output = job.delivered_output.as_ref().unwrap_or(&recipe.output);
-                    let load = production_load(catalog, output);
+                    let load = production_load_with_limit(
+                        catalog,
+                        output,
+                        self.storage_space(catalog, stock),
+                    );
                     if load.is_empty() && output.values().any(|&units| units > 0) {
                         self.production.notice = "Output exceeds hand-carry capacity.".into();
                         continue;
@@ -1577,6 +1584,17 @@ pub(super) fn production_load(
     catalog: &Catalog,
     output: &BTreeMap<String, u32>,
 ) -> BTreeMap<String, u32> {
+    production_load_with_limit(catalog, output, u64::MAX)
+}
+
+fn production_load_with_limit(
+    catalog: &Catalog,
+    output: &BTreeMap<String, u32>,
+    mut spaces: u64,
+) -> BTreeMap<String, u32> {
+    if spaces == 0 {
+        return BTreeMap::new();
+    }
     if output.get("wheelbarrow").is_some_and(|&units| units > 0) {
         return BTreeMap::from([("wheelbarrow".into(), 1)]);
     }
@@ -1586,11 +1604,13 @@ pub(super) fn production_load(
         let material = &catalog.materials[id];
         let count = units
             .min(((mass + 1e-8) / material.mass).floor() as u32)
-            .min(((volume + 1e-8) / material.volume).floor() as u32);
+            .min(((volume + 1e-8) / material.volume).floor() as u32)
+            .min(spaces.min(u64::from(u32::MAX)) as u32);
         if count > 0 {
             load.insert(id.clone(), count);
             mass -= f64::from(count) * material.mass;
             volume -= f64::from(count) * material.volume;
+            spaces -= u64::from(count);
         }
     }
     load
@@ -1732,6 +1752,10 @@ mod upgrade_tests {
         }
         assert!(village.production.jobs.is_empty());
         assert_eq!(stock.available("logs") - initial_logs, 48);
+        assert_eq!(
+            production_load_with_limit(&catalog, &BTreeMap::from([("logs".into(), 48)]), 2),
+            BTreeMap::from([("logs".into(), 2)])
+        );
         assert_eq!(
             production_load(
                 &catalog,
