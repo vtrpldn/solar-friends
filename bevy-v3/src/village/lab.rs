@@ -251,6 +251,14 @@ const SPEEDS: [(KeyCode, u16); 9] = [
     (KeyCode::Digit9, 1024),
 ];
 const SAMPLE_LIMIT: usize = 2160;
+const PLAYBACK_STOPS: [(LabStop, &str); 6] = [
+    (LabStop::None, "Interval or scenario limit"),
+    (LabStop::Harvest, "Crop ready"),
+    (LabStop::CropFailed, "Crop failed or expired"),
+    (LabStop::Hydration, "Urgent thirst"),
+    (LabStop::Water, "Low drinking water"),
+    (LabStop::Blocked, "Blocked job access"),
+];
 const RUN_INTERVALS: [(f64, &str); 6] = [
     (0.1, "0.1 day"),
     (1.0, "1 day"),
@@ -801,6 +809,7 @@ struct Playback {
     debt: f64,
     speed_meter: SpeedMeter,
     interval: usize,
+    stop: usize,
     pause_at: Option<u64>,
     order: Option<String>,
     notice: String,
@@ -834,7 +843,33 @@ impl Playback {
         );
     }
 
+    fn cycle_stop(&mut self) {
+        self.stop = (self.stop + 1) % PLAYBACK_STOPS.len();
+    }
+
+    fn pause_on_condition(&mut self, runner: &Runner) -> bool {
+        if self.stop == 0 || self.replaying || runner.done() {
+            return false;
+        }
+        let condition = PLAYBACK_STOPS[self.stop].0;
+        let Some(reason) = runner
+            .village
+            .construction
+            .lab_stop_reason(condition, runner.village.clock)
+        else {
+            return false;
+        };
+        self.running = false;
+        self.pause_at = None;
+        self.reset_timing();
+        self.notice = format!("Paused at step {} · {reason}", runner.index);
+        true
+    }
+
     fn advance_frame(&mut self, runner: &mut Runner, catalog: &Catalog, limit: u64, elapsed: f64) {
+        if self.pause_on_condition(runner) {
+            return;
+        }
         let speed = f64::from(SPEEDS[self.speed].1);
         self.debt = (self.debt + elapsed.min(0.25) * speed).min(speed * 2.0);
         let before = runner.index;
@@ -847,6 +882,9 @@ impl Playback {
         {
             runner.advance(catalog);
             self.debt -= STEP;
+            if self.pause_on_condition(runner) {
+                return;
+            }
         }
         self.speed_meter.observe(elapsed, runner.index - before);
         if self.pause_at.is_some_and(|target| runner.index >= target) && !runner.done() {
@@ -862,8 +900,8 @@ impl Playback {
             return String::new();
         }
         format!(
-            "F2 Interval {} · F3 Run interval · Shift+J Advance 1h\n",
-            RUN_INTERVALS[self.interval].1
+            "F2 Interval {} · F3 Run interval · Shift+J Advance 1h\nF4 Extra stop · {}\n",
+            RUN_INTERVALS[self.interval].1, PLAYBACK_STOPS[self.stop].1
         )
     }
 
@@ -893,6 +931,7 @@ impl Default for Playback {
             debt: 0.0,
             speed_meter: SpeedMeter::default(),
             interval: 3,
+            stop: 0,
             pause_at: None,
             order: None,
             notice: String::new(),
@@ -1199,6 +1238,9 @@ fn update_lab_window(
     if keys.just_pressed(KeyCode::Space) && !reached_end(&runner) {
         playback.running = !playback.running;
         playback.reset_timing();
+    }
+    if !playback.replaying && keys.just_pressed(KeyCode::F4) {
+        playback.cycle_stop();
     }
     if !playback.replaying && keys.just_pressed(KeyCode::F2) {
         playback.interval = (playback.interval + 1) % RUN_INTERVALS.len();
@@ -1898,6 +1940,58 @@ mod tests {
                 .to_string()
                 .contains("diverged")
         );
+    }
+
+    #[test]
+    fn interactive_water_stop_pauses_without_changing_the_replay_scenario() {
+        let catalog = Catalog::default();
+        let mut first = Runner::new(
+            Scenario {
+                steps: 1,
+                orders: Vec::new(),
+                stop: LabStop::None,
+            },
+            None,
+            &catalog,
+        )
+        .unwrap();
+        first.advance(&catalog);
+        first
+            .village
+            .construction
+            .utilities
+            .take_water(Some(0), 0, 40.0);
+        let mut runner = Runner::new(
+            Scenario {
+                steps: 12,
+                orders: Vec::new(),
+                stop: LabStop::None,
+            },
+            Some(first.village),
+            &catalog,
+        )
+        .unwrap();
+        let mut playback = Playback::default();
+        for _ in 0..4 {
+            playback.cycle_stop();
+        }
+        playback.start_interval(0, 12, 0.3, "test interval");
+        playback.advance_frame(&mut runner, &catalog, 12, 0.1);
+        assert!(!playback.running);
+        assert_eq!(runner.index, 0);
+        assert!(playback.notice.contains("Less than 0.5 L"));
+        assert!(runner.reason.is_none());
+        let partial =
+            serde_json::from_slice(&serde_json::to_vec(&runner.report()).unwrap()).unwrap();
+        assert_eq!(verify_report(partial, &catalog).unwrap(), 0);
+
+        playback.cycle_stop();
+        playback.cycle_stop();
+        playback.start_interval(0, 12, 0.3, "test interval");
+        while playback.running {
+            playback.advance_frame(&mut runner, &catalog, 12, 0.1);
+        }
+        assert_eq!(runner.index, 3);
     }
 
     #[test]
