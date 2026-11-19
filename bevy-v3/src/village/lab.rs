@@ -777,6 +777,10 @@ fn lab_order_page(runner: &Runner, page: &mut usize) -> String {
 fn order_label(order: &LabOrder) -> String {
     use crate::farming::FarmAction;
     match order {
+        LabOrder::ResizeField {
+            site,
+            size: [width, depth],
+        } => format!("Resize field #{site} to {width} × {depth}"),
         LabOrder::Copy { site, x, z } => format!("Copy project #{site} to ({x}, {z})"),
         LabOrder::TerrainReset => "Reset terrain heights".into(),
         LabOrder::TerrainStroke { points, .. } => {
@@ -1750,12 +1754,13 @@ mod tests {
     }
 
     #[test]
-    fn blueprint_copy_replays_with_the_original_dimensions_and_rotation() {
+    fn resized_field_copies_replay_with_the_new_dimensions_and_rotation() {
         let catalog = Catalog::default();
         let scenario = serde_json::from_str(r#"{
             "steps": 1,
             "orders": [
                 {"step":0,"order":{"type":"build","key":"field","x":44,"z":36,"size":[3,2],"rotation":1}},
+                {"step":0,"order":{"type":"resize-field","site":1,"size":[4,3]}},
                 {"step":0,"order":{"type":"copy","site":1,"x":49,"z":36}}
             ]
         }"#).unwrap();
@@ -1768,6 +1773,7 @@ mod tests {
         );
         let report = serde_json::to_value(runner.report()).unwrap();
         let projects = &report["village"]["construction"]["plans"];
+        assert_eq!(projects[0]["size"], serde_json::json!([3, 4]));
         assert_eq!(projects[1]["rotation"], 1);
         assert_eq!(projects[1]["size"], projects[0]["size"]);
         let recorded =

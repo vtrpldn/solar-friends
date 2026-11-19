@@ -20,6 +20,10 @@ pub(crate) enum LabOrder {
         x: i32,
         z: i32,
     },
+    ResizeField {
+        site: usize,
+        size: [i32; 2],
+    },
     TerrainReset,
     TerrainStroke {
         brush: crate::terrain::Brush,
@@ -429,6 +433,25 @@ impl Construction {
                 if let Some(error) = error {
                     return Err(error);
                 }
+            }
+            LabOrder::ResizeField { site, size } => {
+                let index = site
+                    .checked_sub(1)
+                    .filter(|&index| {
+                        self.plans.get(index).is_some_and(|plan| {
+                            !plan.removed
+                                && plan.key == "field"
+                                && !self.changes.contains_key(&index)
+                        })
+                    })
+                    .ok_or("Choose a cultivated field without a pending change.")?;
+                self.resize_field(
+                    catalog,
+                    ground,
+                    index,
+                    IVec2::from_array(*size),
+                    stock.sandbox,
+                )?;
             }
             LabOrder::Copy { site, x, z } => {
                 let project = site

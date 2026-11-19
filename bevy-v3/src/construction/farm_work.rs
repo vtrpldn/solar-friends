@@ -495,7 +495,7 @@ impl Construction {
         }
     }
 
-    fn resize_field(
+    pub(super) fn resize_field(
         &mut self,
         catalog: &Catalog,
         ground: ConstructionSite,
