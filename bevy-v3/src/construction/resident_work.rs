@@ -449,16 +449,8 @@ impl Construction {
         });
         choices
             .into_iter()
-            .find_map(|(id, plan, _)| {
-                let start = plan.position;
-                let size = plan.size;
-                let front = start
-                    + match plan.rotation {
-                        0 => IVec2::new(size.x / 2, size.y),
-                        1 => IVec2::new(size.x, size.y / 2),
-                        2 => IVec2::new(size.x / 2, -1),
-                        _ => IVec2::new(-1, size.y / 2),
-                    };
+            .find_map(|(id, plan, definition)| {
+                let front = building_entrance(plan, definition)?;
                 path(front).map(|route| (Some(id + 1), route))
             })
             .or_else(|| {

@@ -1952,7 +1952,9 @@ fn building_entrance(plan: &Blueprint, definition: &Project) -> Option<IVec2> {
     }
     let start = plan.position;
     let end = start + plan.size;
-    let middle = start + (plan.size - IVec2::ONE) / 2;
+    // For an even frontage, use the same center cell residents already
+    // use when returning home.
+    let middle = start + plan.size / 2;
     Some(match plan.rotation {
         0 => IVec2::new(middle.x, end.y),
         1 => IVec2::new(end.x, middle.y),
@@ -2189,6 +2191,7 @@ mod tests {
         village.plan(&catalog, &mut stock, site, IVec2::new(44, 36), clock);
         let entrance =
             building_entrance(&village.plans[0], &catalog.projects["home-cottage"]).unwrap();
+        assert_eq!(entrance, IVec2::new(48, 38));
         village.selection = Some("fire-circle".into());
         village.plan(&catalog, &mut stock, site, entrance, clock);
         assert_eq!(village.plans.len(), 1);
