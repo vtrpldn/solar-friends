@@ -2284,7 +2284,9 @@ fn show_hud(
     }
     let weather = weather_at(village.clock, setup.biome(), setup.seed());
     label.push('\n');
-    label.push_str(&weather.summary());
+    label.push_str(&crate::weather::calendar_label(village.clock));
+    label.push_str(" · ");
+    label.push_str(&weather.summary(village.clock));
     label.push_str(if village.selected_project_focus().is_some() {
         " · F Find in village · Alt+F Forecast · F1 Guide · Shift+F1 Sound"
     } else {

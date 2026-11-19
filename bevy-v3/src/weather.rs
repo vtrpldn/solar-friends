@@ -5,6 +5,9 @@ use crate::{VillageCamera, setup::WorldSetup, terrain::land_random, village::Vil
 pub const DAY: f64 = 3200.0;
 pub const HOUR: f64 = DAY / 24.0;
 const MONTH_DAYS: [usize; 12] = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+const MONTHS: [&str; 12] = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+];
 
 // INMET 1991–2020 normals for the three V2 scenario biomes.
 // See docs/simulation-climate-sources.json for station provenance.
@@ -88,14 +91,26 @@ pub fn weather_at(seconds: f64, biome: usize, seed: u32) -> Weather {
     }
 }
 
-fn month_at(day: i64) -> usize {
+fn month_and_day(day: i64) -> (usize, usize) {
     let mut day_of_year = (day + 304).rem_euclid(365) as usize;
     let mut month = 0;
     while day_of_year >= MONTH_DAYS[month] {
         day_of_year -= MONTH_DAYS[month];
         month += 1;
     }
-    month
+    (month, day_of_year + 1)
+}
+
+fn month_at(day: i64) -> usize {
+    month_and_day(day).0
+}
+
+pub fn calendar_label(seconds: f64) -> String {
+    let elapsed = (game_minutes(seconds) / 1440) as i64;
+    let (month, day) = month_and_day(elapsed);
+    let year = (304 + elapsed) / 365 + 1;
+    let season = ["Summer", "Autumn", "Winter", "Spring"][season_at(seconds)];
+    format!("{day} {} · Year {year} · {season}", MONTHS[month])
 }
 
 pub fn recharge_season(seconds: f64, biome: usize) -> f64 {
@@ -104,14 +119,17 @@ pub fn recharge_season(seconds: f64, biome: usize) -> f64 {
     rain[month_at(day)] / rain.into_iter().fold(0.0, f64::max)
 }
 
-pub fn growing_season(seconds: f64, biome: usize) -> f64 {
+fn season_at(seconds: f64) -> usize {
     let day = (304.0 + (540.0 + seconds * 0.45) / 1440.0).rem_euclid(365.0);
-    let season = ((day + 31.0).rem_euclid(365.0) / 91.25).floor() as usize;
+    ((day + 31.0).rem_euclid(365.0) / 91.25).floor() as usize
+}
+
+pub fn growing_season(seconds: f64, biome: usize) -> f64 {
     [
         [1.0, 0.9, 0.7, 1.0],
         [1.0, 0.8, 0.45, 0.8],
         [1.0, 0.8, 0.3, 0.45],
-    ][biome][season]
+    ][biome][season_at(seconds)]
 }
 
 pub fn sun_height(seconds: f64) -> f64 {
@@ -125,13 +143,15 @@ fn sample(seed: u32, day: i64, salt: u32) -> f64 {
 }
 
 impl Weather {
-    pub fn summary(self) -> String {
+    pub fn summary(self, seconds: f64) -> String {
         let state = if self.rain > 0.05 {
             "Rain"
         } else if self.cloud > 0.5 {
             "Cloudy"
+        } else if (6.0..18.0).contains(&game_hour(seconds)) {
+            "Sunny"
         } else {
-            "Fair"
+            "Clear night"
         };
         format!("{state} · {:.0} °C", self.temperature.round())
     }
@@ -152,7 +172,7 @@ pub fn forecast(seconds: f64, biome: usize, seed: u32) -> String {
                 rain += value.rain;
             }
             let rain = if rain < 1.0 {
-                "Dry"
+                "Dry / trace rain"
             } else if rain < 10.0 {
                 "Light rain"
             } else {
@@ -345,6 +365,8 @@ mod tests {
 
     #[test]
     fn forecasts_match_the_source_climate_model() {
+        assert_eq!(calendar_label(0.0), "1 Nov · Year 1 · Spring");
+        assert_eq!(calendar_label(61.0 * DAY), "1 Jan · Year 2 · Summer");
         for (time, biome, seed, rain, cloud, temperature) in [
             (0.0, 0, 42, 1.391004679594048, 0.85, 19.39254175107926),
             (23000.0, 1, 10, 0.0, 0.2303803928894922, 23.58614738320908),
