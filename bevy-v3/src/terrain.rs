@@ -120,6 +120,8 @@ pub struct TerrainEditor {
     #[serde(skip)]
     history: VecDeque<TerrainVertices>,
     #[serde(skip)]
+    redo: Vec<TerrainVertices>,
+    #[serde(skip)]
     pub open: bool,
     #[serde(skip)]
     brush: Brush,
@@ -176,7 +178,11 @@ impl TerrainEditor {
             }
         }
         if keyboard.just_pressed(KeyCode::KeyZ) {
-            self.undo();
+            if keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]) {
+                self.redo();
+            } else {
+                self.undo();
+            }
         }
         if keyboard.just_pressed(KeyCode::BracketLeft) {
             self.cycle_radius(false);
@@ -191,9 +197,21 @@ impl TerrainEditor {
             self.status = "No terrain edits to undo.";
             return;
         };
-        self.vertices = previous;
+        self.redo
+            .push(std::mem::replace(&mut self.vertices, previous));
         self.revision = self.revision.wrapping_add(1);
         self.status = "Terrain edit undone.";
+    }
+
+    pub fn redo(&mut self) {
+        let Some(next) = self.redo.pop() else {
+            self.status = "No terrain edits to redo.";
+            return;
+        };
+        self.history
+            .push_back(std::mem::replace(&mut self.vertices, next));
+        self.revision = self.revision.wrapping_add(1);
+        self.status = "Terrain edit redone.";
     }
 
     pub fn draw_preview(&self, terrain: &Terrain, point: Vec3, gizmos: &mut Gizmos) {
@@ -224,7 +242,7 @@ impl TerrainEditor {
         format!(
             "Terrain · {tool} · {} m radius{level}
 1 Raise · 2 Lower · 3 Flatten · 4 Smooth
-{instruction} · [ ] Radius · Z Undo · F4 Close
+{instruction} · [ ] Radius · Z Undo · Shift+Z Redo · F4 Close
 {}",
             Self::RADII[self.radius_index],
             self.status
@@ -301,6 +319,7 @@ impl TerrainEditor {
                 self.history.pop_front();
             }
             self.history.push_back(previous);
+            self.redo.clear();
             self.revision = self.revision.wrapping_add(1);
         }
     }
@@ -718,6 +737,17 @@ mod tests {
         assert_eq!(smoothed.elevation(48.0, 24.0), 0.0);
         editor.undo();
         assert_eq!(editor.terrain(base()).elevation(40.0, 24.0), 0.6);
+        editor.redo();
+        assert_eq!(
+            editor.terrain(base()).elevation(40.0, 24.0),
+            smoothed.elevation(40.0, 24.0)
+        );
+        editor.undo();
+        editor.brush = Brush::Raise;
+        editor.stroke(&editor.terrain(base()), at, |_| false);
+        let revision = editor.revision;
+        editor.redo();
+        assert_eq!(editor.revision, revision);
     }
 
     #[test]
