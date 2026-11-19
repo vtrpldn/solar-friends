@@ -1,4 +1,4 @@
-use bevy::{prelude::*, window::PrimaryWindow};
+use bevy::{input::mouse::AccumulatedMouseScroll, prelude::*, window::PrimaryWindow};
 
 use super::{LabOrder, Runner};
 use crate::{
@@ -9,6 +9,10 @@ use crate::{
 #[derive(Resource, Default, PartialEq)]
 pub(super) struct MapState {
     pub visible: bool,
+    camera: Vec2,
+    zoom_steps: f32,
+    drag: Option<(Vec2, Vec2)>,
+    dragging: bool,
     pub selected: Option<usize>,
     pub resource: Option<usize>,
     pub blueprint: Option<(String, u8)>,
@@ -195,49 +199,128 @@ impl MapState {
     }
 }
 
+fn clip_line(a: Vec2, b: Vec2, min: Vec2, max: Vec2) -> Option<(Vec2, Vec2)> {
+    let delta = b - a;
+    let (mut start, mut end) = (0.0_f32, 1.0_f32);
+    for axis in 0..2 {
+        if delta[axis] == 0.0 {
+            if !(min[axis]..=max[axis]).contains(&a[axis]) {
+                return None;
+            }
+            continue;
+        }
+        let near = (min[axis] - a[axis]) / delta[axis];
+        let far = (max[axis] - a[axis]) / delta[axis];
+        start = start.max(near.min(far));
+        end = end.min(near.max(far));
+    }
+    (start <= end).then(|| (a + start * delta, a + end * delta))
+}
+
 pub(super) fn draw(
     mut map: ResMut<MapState>,
-    mouse: Res<ButtonInput<MouseButton>>,
+    (mouse, keys, scroll): (
+        Res<ButtonInput<MouseButton>>,
+        Res<ButtonInput<KeyCode>>,
+        Res<AccumulatedMouseScroll>,
+    ),
     runner: Res<Runner>,
     catalog: Res<Catalog>,
     window: Single<&Window, With<PrimaryWindow>>,
     mut gizmos: Gizmos,
 ) {
     if !map.visible {
+        if map.drag.is_some() {
+            map.drag = None;
+        }
         return;
     }
     let side = (window.height() - 230.0)
         .min(window.width() - 48.0)
         .max(1.0);
     let center = Vec2::new(0.0, -75.0);
-    let scale = side / 256.0;
-    let point = |p: Vec2| center + Vec2::new(p.x, -p.y) * scale;
+    let half = Vec2::splat(side * 0.5);
+    let contains =
+        |screen: Vec2, margin: Vec2| ((screen - center).abs() + margin).cmple(half).all();
+    let cursor = window.cursor_position().map(|cursor| {
+        Vec2::new(
+            cursor.x - window.width() * 0.5,
+            window.height() * 0.5 - cursor.y,
+        )
+    });
+    let inside = cursor.filter(|&screen| contains(screen, Vec2::ZERO));
+    let camp = world_position(runner.camp.x as f32, runner.camp.y as f32);
+    if keys.just_pressed(KeyCode::Home) {
+        map.camera = Vec2::new(camp.x, -camp.y);
+        map.selected = None;
+        map.resource = None;
+        map.cancel_build();
+        map.drag = None;
+    }
+    if inside.is_some() && scroll.delta.y != 0.0 {
+        map.zoom_steps = (map.zoom_steps + scroll.delta.y.signum()).clamp(0.0, 12.0);
+    }
+    let scale = side / 256.0 * 1.15_f32.powf(map.zoom_steps);
+    if mouse.just_pressed(MouseButton::Left) {
+        map.drag = inside.map(|position| (position, map.camera));
+        map.dragging = false;
+    }
+    if let Some((origin, camera)) = map.drag
+        && let Some(screen) = cursor
+        && (map.dragging || screen.distance_squared(origin) > 16.0)
+    {
+        map.dragging = true;
+        map.camera =
+            (camera - (screen - origin) / scale).clamp(Vec2::splat(-128.0), Vec2::splat(128.0));
+    }
+    let clicked = mouse.just_released(MouseButton::Left) && map.drag.is_some() && !map.dragging;
+    if !mouse.pressed(MouseButton::Left) {
+        map.drag = None;
+    }
+    let camera = map.camera;
+    let point = |p: Vec2| center + (Vec2::new(p.x, -p.y) - camera) * scale;
     gizmos.rect_2d(
         Isometry2d::from_translation(center),
         Vec2::splat(side),
         Color::srgb_u8(109, 138, 103),
     );
 
-    let river = Color::srgb_u8(76, 160, 186);
+    let mut path = |points: Vec<Vec2>, tint| {
+        for pair in points.windows(2) {
+            if let Some((a, b)) = clip_line(pair[0], pair[1], center - half, center + half) {
+                gizmos.line_2d(a, b, tint);
+            }
+        }
+    };
     for edge in [-1.0, 1.0] {
-        gizmos.linestrip_2d(
-            (-128..=128).step_by(2).map(|z| {
-                let (x, width) = runner.terrain.river(f64::from(z));
-                point(Vec2::new((x + edge * width) as f32, z as f32))
-            }),
-            river,
+        path(
+            (-128..=128)
+                .step_by(2)
+                .map(|z| {
+                    let (x, width) = runner.terrain.river(f64::from(z));
+                    point(Vec2::new((x + edge * width) as f32, z as f32))
+                })
+                .collect(),
+            Color::srgb_u8(76, 160, 186),
         );
-    }
-
-    for edge in [-1.0, 1.0] {
-        gizmos.linestrip_2d(
-            (MAP_START as i32..=ROAD_END as i32).step_by(2).map(|z| {
-                let z = z as f32;
-                point(Vec2::new(road_center(z) + edge * road_width(z), z))
-            }),
+        path(
+            (MAP_START as i32..=ROAD_END as i32)
+                .step_by(2)
+                .map(|z| {
+                    let z = z as f32;
+                    point(Vec2::new(road_center(z) + edge as f32 * road_width(z), z))
+                })
+                .collect(),
             Color::srgb_u8(184, 150, 110),
         );
     }
+    let clipped_marker = |position: Vec2, size: Vec2| {
+        let min = (position - size * 0.5).max(center - half);
+        let max = (position + size * 0.5).min(center + half);
+        min.cmplt(max)
+            .all()
+            .then_some(((min + max) * 0.5, max - min))
+    };
     let resources = || {
         runner.land.sites().filter_map(|(index, site)| {
             if runner.village.tree_felled(index) {
@@ -261,24 +344,10 @@ pub(super) fn draw(
     {
         map.selected = None;
     }
-    let cursor = window
-        .cursor_position()
-        .map(|cursor| {
-            Vec2::new(
-                cursor.x - window.width() * 0.5,
-                window.height() * 0.5 - cursor.y,
-            )
-        })
-        .filter(|screen| {
-            (*screen - center)
-                .abs()
-                .cmple(Vec2::splat(side * 0.5))
-                .all()
-        });
     map.preview_error = None;
-    if let Some(screen) = cursor {
+    if let Some(screen) = inside {
         if let Some((key, rotation)) = &map.blueprint {
-            let offset = (screen - center) / scale;
+            let offset = (screen - center) / scale + camera;
             let cell = (Vec2::new(offset.x, -offset.y) * 0.5 + Vec2::splat(32.0))
                 .round()
                 .as_ivec2();
@@ -299,16 +368,16 @@ pub(super) fn draw(
             } else {
                 Color::WHITE
             };
-            gizmos.rect_2d(
-                Isometry2d::from_translation(point(world_position(position.x, position.y))),
-                (size.as_vec2() * 2.0 * scale).max(Vec2::splat(4.0)),
-                tint,
-            );
+            let marker = point(world_position(position.x, position.y));
+            let size = (size.as_vec2() * 2.0 * scale).max(Vec2::splat(4.0));
+            if let Some((marker, size)) = clipped_marker(marker, size) {
+                gizmos.rect_2d(Isometry2d::from_translation(marker), size, tint);
+            }
             map.preview_error = error;
-            if mouse.just_pressed(MouseButton::Left) {
+            if clicked {
                 map.placement = Some(cell);
             }
-        } else if mouse.just_pressed(MouseButton::Left) {
+        } else if clicked {
             map.selected = projects()
                 .filter_map(|(index, position, size, _)| {
                     let delta = (screen - point(position)).abs();
@@ -331,7 +400,7 @@ pub(super) fn draw(
             };
         }
     }
-    for (index, position) in resources() {
+    for (index, position) in resources().filter(|&(_, p)| contains(p, Vec2::splat(2.0))) {
         let tint = if map.resource == Some(index) {
             Color::WHITE
         } else {
@@ -347,18 +416,19 @@ pub(super) fn draw(
         } else {
             Color::srgb_u8(247, 197, 106)
         };
-        gizmos.rect_2d(
-            Isometry2d::from_translation(point(position)),
-            (size * scale).max(Vec2::splat(6.0)),
-            tint,
+        let position = point(position);
+        let size = (size * scale).max(Vec2::splat(6.0));
+        if let Some((position, size)) = clipped_marker(position, size) {
+            gizmos.rect_2d(Isometry2d::from_translation(position), size, tint);
+        }
+    }
+    if contains(point(camp), Vec2::splat(6.0)) {
+        gizmos.circle_2d(
+            Isometry2d::from_translation(point(camp)),
+            6.0,
+            Color::srgb_u8(151, 208, 243),
         );
     }
-    let camp = world_position(runner.camp.x as f32, runner.camp.y as f32);
-    gizmos.circle_2d(
-        Isometry2d::from_translation(point(camp)),
-        6.0,
-        Color::srgb_u8(151, 208, 243),
-    );
     for (index, _) in crate::village::NAMES.iter().enumerate() {
         if construction.driver_away(index)
             || construction.away_for_work(index)
@@ -367,11 +437,14 @@ pub(super) fn draw(
             continue;
         }
         let position = construction.worker(index).position;
-        gizmos.circle_2d(
-            Isometry2d::from_translation(point(world_position(position.x, position.y))),
-            3.0,
-            Color::srgb_u8(255, 242, 209),
-        );
+        let position = point(world_position(position.x, position.y));
+        if contains(position, Vec2::splat(3.0)) {
+            gizmos.circle_2d(
+                Isometry2d::from_translation(position),
+                3.0,
+                Color::srgb_u8(255, 242, 209),
+            );
+        }
     }
 }
 
@@ -394,6 +467,20 @@ pub(super) fn resource_status(runner: &Runner, catalog: &Catalog, index: usize) 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn map_paths_clip_crossing_lines_and_hide_offscreen_lines() {
+        let min = Vec2::splat(-1.0);
+        let max = Vec2::splat(1.0);
+        assert_eq!(
+            clip_line(Vec2::new(-2.0, 0.0), Vec2::new(2.0, 0.0), min, max),
+            Some((Vec2::NEG_X, Vec2::X))
+        );
+        assert_eq!(
+            clip_line(Vec2::splat(2.0), Vec2::new(2.0, 0.0), min, max),
+            None
+        );
+    }
 
     #[test]
     fn field_placement_records_the_selected_dimensions_before_rotation() {

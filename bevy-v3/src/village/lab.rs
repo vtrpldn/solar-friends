@@ -1756,7 +1756,7 @@ fn update_lab_window(
             };
             let water = map.water_details(&runner, !playback.replaying && !runner.done());
             format!(
-                "Village map · {selection}\nTab Switch view · Enter Inspect selected jobs{gather}{build}\nBlue Camp · Cream Residents · Green Completed · Gold Construction · Purple Resources{water}"
+                "Village map · {selection}\nTab Switch view · Drag Pan · Scroll Zoom · Home Camp · Enter Inspect jobs{gather}{build}\nBlue Camp · Cream Residents · Green Completed · Gold Construction · Purple Resources{water}"
             )
         } else {
             lab_inventory(
