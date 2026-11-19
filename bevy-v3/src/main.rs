@@ -39,6 +39,11 @@ use setup::{WorldSetup, WorldSetupPlugin};
 
 const CAMERA_HOME: Vec3 = Vec3::new(-26.0, 3.0, -12.0);
 const CAMERA_HEIGHT: f32 = 40.0;
+const CAMERA_POLAR_LIMITS: std::ops::RangeInclusive<f32> = 0.25..=std::f32::consts::PI * 0.46;
+
+fn default_camera_polar() -> f32 {
+    (32.0_f32.hypot(32.0) / 35.0).atan()
+}
 
 fn main() {
     let mut args = std::env::args_os().skip(1);
@@ -111,10 +116,14 @@ fn main() {
 struct VillageCamera {
     target: Vec3,
     heading: f32,
+    polar: f32,
 }
 
-fn camera_transform(target: Vec3, heading: f32) -> Transform {
-    let offset = Quat::from_rotation_y(heading) * Vec3::new(32.0, 35.0, 32.0);
+fn camera_transform(target: Vec3, heading: f32, polar: f32) -> Transform {
+    let radius = Vec3::new(32.0, 35.0, 32.0).length();
+    let horizontal = radius * polar.sin() * std::f32::consts::FRAC_1_SQRT_2;
+    let offset =
+        Quat::from_rotation_y(heading) * Vec3::new(horizontal, radius * polar.cos(), horizontal);
     Transform::from_translation(target + offset).looking_at(target, Vec3::Y)
 }
 
@@ -130,8 +139,9 @@ fn setup_scene(mut commands: Commands) {
         VillageCamera {
             target: CAMERA_HOME,
             heading: 0.0,
+            polar: default_camera_polar(),
         },
-        camera_transform(CAMERA_HOME, 0.0),
+        camera_transform(CAMERA_HOME, 0.0, default_camera_polar()),
     ));
     commands.spawn((
         DirectionalLight {
@@ -332,7 +342,10 @@ fn camera_controls(
     }
     view.heading += turn as f32 * delta * 1.2;
     if !over_ui && mouse.pressed(MouseButton::Right) {
-        view.heading -= motion.delta.x / window.height().max(1.0) * std::f32::consts::TAU;
+        let orbit = motion.delta / window.height().max(1.0) * std::f32::consts::TAU;
+        view.heading -= orbit.x;
+        view.polar =
+            (view.polar - orbit.y).clamp(*CAMERA_POLAR_LIMITS.start(), *CAMERA_POLAR_LIMITS.end());
     }
     view.heading = view.heading.rem_euclid(std::f32::consts::TAU);
     view.target.x = view.target.x.clamp(-124.0, 124.0);
@@ -351,7 +364,12 @@ fn camera_controls(
     } else {
         scroll.delta.y * wheel_factor
     };
-    let change = zoom * delta * 1.3 - wheel;
+    let dolly = if !over_ui && mouse.pressed(MouseButton::Middle) {
+        motion.delta.y / window.height().max(1.0) * 4.0
+    } else {
+        0.0
+    };
+    let change = zoom * delta * 1.3 - wheel + dolly;
     ortho.scale = (ortho.scale * change.exp()).clamp(1.0 / 6.0, 1.0 / 0.18);
 }
 
@@ -367,10 +385,11 @@ fn sync_camera_view(
     let Projection::Orthographic(ortho) = projection else {
         return;
     };
-    transform.set_if_neq(camera_transform(view.target, view.heading));
+    transform.set_if_neq(camera_transform(view.target, view.heading, view.polar));
     let saved = village::CameraView {
         target: view.target,
         heading: view.heading,
+        polar: view.polar,
         zoom: ortho.scale,
     };
     if village.camera_view != Some(saved) {
@@ -401,6 +420,7 @@ fn apply_camera_action(
         CameraAction::Camp | CameraAction::Reset => {
             camera.target = CAMERA_HOME;
             camera.heading = 0.0;
+            camera.polar = default_camera_polar();
             projection.scale = 1.0;
         }
         CameraAction::River => {
@@ -562,7 +582,7 @@ mod tests {
         let mut camera = world.query_filtered::<&Transform, With<VillageCamera>>();
         assert_eq!(
             *camera.single(world).unwrap(),
-            camera_transform(requested_target, 0.75)
+            camera_transform(requested_target, 0.75, default_camera_polar())
         );
         let saved = world.resource::<village::Village>().camera_view.unwrap();
         assert_eq!(saved.target, requested_target);
@@ -644,12 +664,50 @@ mod tests {
             .single(app.world())
             .unwrap();
         assert_eq!(camera.heading, std::f32::consts::FRAC_PI_2);
+        let world = app.world_mut();
+        world
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .press(MouseButton::Right);
+        world.resource_mut::<AccumulatedMouseMotion>().delta = Vec2::new(0.0, 30.0);
+        world.run_schedule(Update);
+        world.run_schedule(PostUpdate);
+        let tilted = world.resource::<village::Village>().camera_view.unwrap();
+        assert!(tilted.polar < default_camera_polar());
+        assert!(CAMERA_POLAR_LIMITS.contains(&tilted.polar));
+        world.resource_mut::<ButtonInput<MouseButton>>().reset_all();
+        world
+            .resource_mut::<ButtonInput<MouseButton>>()
+            .press(MouseButton::Middle);
+        world.resource_mut::<AccumulatedMouseMotion>().delta = Vec2::new(0.0, -40.0);
+        world.run_schedule(Update);
+        world.run_schedule(PostUpdate);
+        let zoomed = world.resource::<village::Village>().camera_view.unwrap();
+        assert!(zoomed.zoom < tilted.zoom);
+        assert_eq!(zoomed.polar, tilted.polar);
+        let restored: village::CameraView =
+            serde_json::from_slice(&serde_json::to_vec(&zoomed).unwrap()).unwrap();
+        assert_eq!(restored.polar, zoomed.polar);
+        let older: village::CameraView =
+            serde_json::from_str(r#"{"target":[0,0,0],"heading":1.0,"zoom":1.0}"#).unwrap();
+        assert_eq!(older.polar, default_camera_polar());
+
+        world.resource_mut::<ButtonInput<MouseButton>>().reset_all();
+        world.resource_mut::<AccumulatedMouseMotion>().delta = Vec2::ZERO;
         press_button(&mut app, "Zoom in");
         press_button(&mut app, "Show grid");
         press_button(&mut app, "Hide grid");
         press_button(&mut app, "Show forecast");
         press_button(&mut app, "Hide forecast");
         press_button(&mut app, "Reset camera");
+        app.world_mut().run_schedule(PostUpdate);
+        assert_eq!(
+            app.world()
+                .resource::<village::Village>()
+                .camera_view
+                .unwrap()
+                .polar,
+            default_camera_polar()
+        );
         press_button(&mut app, "Close view");
 
         press_button(&mut app, "Map lenses");

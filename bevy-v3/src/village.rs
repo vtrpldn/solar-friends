@@ -126,6 +126,8 @@ impl Plugin for VillagePlugin {
 pub(super) struct CameraView {
     pub target: Vec3,
     pub heading: f32,
+    #[serde(default = "crate::default_camera_polar")]
+    pub polar: f32,
     pub zoom: f32,
 }
 
@@ -136,6 +138,7 @@ impl CameraView {
             && self.target.z.abs() <= 124.0
             && self.target.y.abs() <= 128.0
             && self.heading.is_finite()
+            && crate::CAMERA_POLAR_LIMITS.contains(&self.polar)
             && (1.0 / 6.0..=1.0 / 0.18).contains(&self.zoom)
     }
 }
@@ -892,12 +895,14 @@ fn village_input(
             camera.target = spawn_tents(&mut commands, &assets, &setup, cell);
         }
         camera.heading = 0.0;
+        camera.polar = crate::default_camera_polar();
         if let Projection::Orthographic(ortho) = &mut **projection {
             ortho.scale = village.camera_view.map_or(1.0, |view| view.zoom);
         }
         if let Some(view) = village.camera_view {
             camera.target = view.target;
             camera.heading = view.heading;
+            camera.polar = view.polar;
         }
         for (index, name) in NAMES.into_iter().enumerate() {
             commands.spawn((
