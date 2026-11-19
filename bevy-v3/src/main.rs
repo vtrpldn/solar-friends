@@ -425,10 +425,7 @@ mod tests {
                 .advance_by(std::time::Duration::from_millis(100));
             app.world_mut().run_schedule(Update);
         }
-        app.world_mut()
-            .resource_mut::<ButtonInput<KeyCode>>()
-            .press(KeyCode::Digit3);
-        app.world_mut().run_schedule(Update);
+        press_button(&mut app, "Camp in clearing");
         assert_eq!(
             app.world().resource::<village::Village>().camp,
             Some(IVec2::new(36, 36))

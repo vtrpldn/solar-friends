@@ -661,6 +661,7 @@ fn spawn_hud(mut commands: Commands, assets: Res<AssetServer>) {
 
 #[derive(Resource, Default)]
 struct CampPointer {
+    preset: Option<IVec2>,
     clicked: Option<GroundHit>,
     hovered: Option<GroundHit>,
 }
@@ -686,6 +687,7 @@ fn read_camp_pointer(
     mut raycast: MeshRayCast,
     (mut input, mut pointer): (Local<Option<Vec2>>, ResMut<CampPointer>),
 ) {
+    pointer.preset = None;
     pointer.clicked = None;
     pointer.hovered = None;
     if !window.focused
@@ -1244,9 +1246,11 @@ fn village_input(
     if village.arrival_time < ARRIVAL_DURATION {
         return;
     }
-    let preset = CAMP_SITES
-        .into_iter()
-        .find_map(|(key, cell)| keyboard.just_pressed(key).then_some(cell));
+    let preset = pointer.preset.or_else(|| {
+        CAMP_SITES
+            .into_iter()
+            .find_map(|(key, cell)| keyboard.just_pressed(key).then_some(cell))
+    });
     let Some(cell) = preset.or(pointer.clicked.map(|hit| hit.cell)) else {
         return;
     };

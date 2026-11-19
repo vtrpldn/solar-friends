@@ -9,6 +9,7 @@ use crate::{
 #[derive(Component, Clone, Copy)]
 enum Action {
     Build,
+    CampPreset(usize),
     Setup,
     View,
     Camera(crate::CameraAction),
@@ -150,6 +151,9 @@ impl Action {
             Self::View | Self::Camera(_) | Self::GridOverlay => !village.trade_open(),
             Self::Setup | Self::Library | Self::Sound => true,
             Self::Volume { .. } => false,
+            Self::CampPreset(_) => {
+                village.camp.is_none() && village.arrival_time >= ARRIVAL_DURATION
+            }
             Self::Build => village.utility_panel.is_none(),
             Self::RotatePlacement | Self::CancelPlacement => village.construction.placing_project(),
             Self::ResizeField(_) => {
@@ -223,6 +227,9 @@ impl Action {
         match self {
             Self::Build if village.construction.menu => "Close build".into(),
             Self::Build => "Build".into(),
+            Self::CampPreset(index) => {
+                ["Camp in shade", "Camp near entrance", "Camp in clearing"][index].into()
+            }
             Self::Setup => "Setup".into(),
             Self::View if picker.view_open => "Close view".into(),
             Self::View => "View".into(),
@@ -422,7 +429,9 @@ pub(super) fn install(app: &mut App) {
 }
 
 fn visible(village: &Village, setup: &WorldSetup, saves: &SaveMenu, sound: &SoundSettings) -> bool {
-    sound.open || saves.open || (!setup.open && village.camp.is_some())
+    sound.open
+        || saves.open
+        || (!setup.open && (village.camp.is_some() || village.arrival_time >= ARRIVAL_DURATION))
 }
 
 fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
@@ -477,6 +486,9 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 Action::LensSite(true),
             ] {
                 spawn_button(row, &assets, action);
+            }
+            for index in 0..CAMP_SITES.len() {
+                spawn_button(row, &assets, Action::CampPreset(index));
             }
             for effects in [false, true] {
                 for delta in [-5, 5] {
@@ -665,7 +677,7 @@ fn handle_buttons(
         ResMut<SoundSettings>,
     ),
     (catalog, land): (Res<Catalog>, Res<Land>),
-    mut village: ResMut<Village>,
+    (mut village, mut pointer): (ResMut<Village>, ResMut<CampPointer>),
     mut picker: ResMut<PanelPicker>,
     keyboard: Res<ButtonInput<KeyCode>>,
     mut camera: Single<(&mut VillageCamera, &mut Projection)>,
@@ -701,7 +713,10 @@ fn handle_buttons(
             }
             continue;
         }
-        if !setup.open && action.available(&village) {
+        if !setup.open
+            && (village.camp.is_some() || matches!(action, Action::CampPreset(_)))
+            && action.available(&village)
+        {
             match action {
                 Action::Sound => {
                     sound.open = true;
@@ -719,6 +734,7 @@ fn handle_buttons(
                 }
                 Action::GridOverlay if picker.view_open => village.show_grid = !village.show_grid,
                 Action::Camera(_) | Action::GridOverlay => {}
+                Action::CampPreset(index) => pointer.preset = Some(CAMP_SITES[index].1),
                 Action::Setup => {
                     setup.open = true;
                     picker.open = false;
@@ -1142,6 +1158,10 @@ fn refresh(
             matches!(action, Action::Sound | Action::Volume { .. })
         } else if saves.open {
             matches!(action, Action::Library)
+        } else if village.camp.is_none() {
+            matches!(action, Action::CampPreset(_)) && action.available(&village)
+        } else if matches!(action, Action::CampPreset(_)) {
+            false
         } else {
             show
         };
