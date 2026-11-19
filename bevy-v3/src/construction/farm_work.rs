@@ -577,7 +577,7 @@ impl Construction {
             if load.is_empty() && job.output.values().any(|&units| units > 0) {
                 return "Waiting for transport · Harvest exceeds hand-carry capacity".into();
             }
-            if !self.farm_load_fits(catalog, stock, &load) {
+            if !load.is_empty() && self.storage_space(catalog, stock) == 0 {
                 return "Waiting for storage space".into();
             }
         }
@@ -588,16 +588,6 @@ impl Construction {
             FarmPhase::Return => "Returning to stores".into(),
             FarmPhase::CollectOutput => "Returning for the next harvest load".into(),
         }
-    }
-
-    fn farm_load_fits(
-        &self,
-        catalog: &Catalog,
-        stock: &Stock,
-        load: &BTreeMap<String, u32>,
-    ) -> bool {
-        let units: u64 = load.values().map(|&units| u64::from(units)).sum();
-        self.storage_space(catalog, stock) >= units
     }
 
     pub fn farm_status(&self, catalog: &Catalog, stock: &Stock, clock: f64) -> Option<String> {
@@ -807,11 +797,12 @@ impl Construction {
                     self.residents[index].path = path;
                 }
                 FarmPhase::Return => {
-                    let load = super::production_work::production_load(catalog, &job.output);
+                    let load = super::production_work::production_load_with_limit(
+                        catalog,
+                        &job.output,
+                        self.storage_space(catalog, stock),
+                    );
                     if load.is_empty() && job.output.values().any(|&units| units > 0) {
-                        continue;
-                    }
-                    if !self.farm_load_fits(catalog, stock, &load) {
                         continue;
                     }
                     let job = &mut self.farming.jobs[job_index];
@@ -1286,15 +1277,18 @@ mod resize_tests {
         assert!(blocked.farming.jobs.is_empty());
         assert_eq!(full_stock.available("greens"), initial);
 
+        let filler = BTreeMap::from([("stone".into(), free_space - 2)]);
+        stock.receive(&filler);
         village.tick_farm_jobs(&catalog, &mut stock, ground, 0.0, 0.1);
         let first_load = stock.available("greens") - initial;
-        assert!((1..total).contains(&first_load));
+        assert_eq!(first_load, 2);
+        stock.reserve_available(&filler);
         let job = &village.farming.jobs[0];
         assert!(job.phase == FarmPhase::CollectOutput);
         assert_eq!(job.output["greens"], total - first_load);
 
         village = serde_json::from_str(&serde_json::to_string(&village).unwrap()).unwrap();
-        for step in 1..6_000 {
+        for step in 1..12_000 {
             village.tick_farm_jobs(&catalog, &mut stock, ground, f64::from(step) * 0.1, 0.1);
             if village.farming.jobs.is_empty() {
                 break;

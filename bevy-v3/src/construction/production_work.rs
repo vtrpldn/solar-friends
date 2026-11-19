@@ -1587,7 +1587,7 @@ pub(super) fn production_load(
     production_load_with_limit(catalog, output, u64::MAX)
 }
 
-fn production_load_with_limit(
+pub(super) fn production_load_with_limit(
     catalog: &Catalog,
     output: &BTreeMap<String, u32>,
     mut spaces: u64,
