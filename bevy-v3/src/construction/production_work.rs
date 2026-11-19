@@ -2256,6 +2256,10 @@ mod upgrade_tests {
         village.tick_services(&catalog, &setup, &mut stock, 0.0, 0.1);
         village.tick_animals(&catalog, &mut stock, &land, 0.0, 0.1);
         assert!(village.empty_goat_pen(0));
+        assert_eq!(
+            village.finished_model(&catalog, 0),
+            catalog.projects[key].model
+        );
         assert!(village.production.jobs.is_empty());
         assert_eq!(village.recipes(&catalog, 0)[0].0, "stock-goats");
 
@@ -2283,6 +2287,10 @@ mod upgrade_tests {
         let restored: Construction = serde_json::from_str(&serialized).unwrap();
         assert!(restored.valid_save(&catalog, &stock));
         assert_eq!(restored.installed_goats(&catalog, 0), Some(goats));
+        assert_eq!(
+            restored.finished_model(&catalog, 0),
+            catalog.projects["goat_pasture"].model
+        );
     }
 
     #[test]

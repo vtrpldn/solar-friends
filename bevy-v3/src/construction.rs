@@ -1153,7 +1153,9 @@ impl Construction {
             terrain.height_at(x, z)
         };
         Some((
-            definition.model,
+            self.moving.map_or(definition.model, |index| {
+                self.finished_model(catalog, index)
+            }),
             Transform::from_xyz(x, height, z).with_rotation(Quat::from_rotation_y(
                 f32::from(self.rotation) * std::f32::consts::FRAC_PI_2,
             )),
@@ -2022,6 +2024,16 @@ impl Construction {
             })
     }
 
+    fn finished_model(&self, catalog: &Catalog, index: usize) -> usize {
+        let plan = &self.plans[index];
+        let key = if plan.key == "goat-pasture-empty" && !self.empty_goat_pen(index) {
+            "goat_pasture"
+        } else {
+            &plan.key
+        };
+        catalog.projects[key].model
+    }
+
     pub fn finished_models<'a>(
         &'a self,
         catalog: &'a Catalog,
@@ -2033,7 +2045,7 @@ impl Construction {
                 if project.removed || project.work < catalog.projects[&project.key].work {
                     return None;
                 }
-                let model = catalog.projects[&project.key].model;
+                let model = self.finished_model(catalog, index);
                 let base = project.position.as_vec2() + (project.size.as_vec2() - Vec2::ONE) * 0.5;
                 Some((
                     index,

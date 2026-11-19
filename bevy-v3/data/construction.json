@@ -1812,7 +1812,7 @@
     "goat-pasture-empty": {
       "name": "Empty goat pen",
       "description": "Build the pen first. Stock it later with two goats from village supplies.",
-      "model": 18,
+      "model": 171,
       "constructionModels": [
         94,
         95

@@ -1032,6 +1032,7 @@ struct VillageHud;
 #[derive(Component)]
 struct BuiltProject {
     index: usize,
+    model: usize,
     rooftop_solar: bool,
 }
 
@@ -2664,7 +2665,7 @@ fn show_construction(
     for (entity, shown, _) in &displayed {
         if !models_to_show
             .iter()
-            .any(|(index, _, _, _)| *index == shown.index)
+            .any(|(index, model, _, _)| *index == shown.index && *model == shown.model)
         {
             commands.entity(entity).despawn();
         }
@@ -2676,7 +2677,7 @@ fn show_construction(
         let rooftop_solar = village.construction.utilities.has_rooftop_solar(project);
         let (entity, add_panel) = if let Some((entity, mut shown, mut placed)) = displayed
             .iter_mut()
-            .find(|(_, view, _)| view.index == project)
+            .find(|(_, view, _)| view.index == project && view.model == asset)
         {
             if *placed != place {
                 *placed = place;
@@ -2691,6 +2692,7 @@ fn show_construction(
                 VillageEntity,
                 BuiltProject {
                     index: project,
+                    model: asset,
                     rooftop_solar,
                 },
                 Visibility::Inherited,
