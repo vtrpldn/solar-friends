@@ -281,6 +281,8 @@ pub struct Worker {
     speed: f32,
     #[serde(skip)]
     crowded: bool,
+    #[serde(skip)]
+    sidestep_cells: [Option<IVec2>; 9],
     path: VecDeque<Vec2>,
     assignment: Option<Assignment>,
     experience: f64,
@@ -339,6 +341,7 @@ impl Default for Construction {
                     yaw: 0.0,
                     speed: 0.0,
                     crowded: false,
+                    sidestep_cells: [None; 9],
                     path: VecDeque::new(),
                     assignment: None,
                     experience: 0.0,
@@ -388,19 +391,39 @@ impl Worker {
             self.position = next;
             self.path.pop_front();
         } else {
-            self.position += offset / distance * step;
+            let direction = offset / distance;
+            let straight = self.position + direction * step;
+            let side = straight + Vec2::new(direction.y, -direction.x) * (dt * 0.18);
+            self.position = if self.crowded && distance > 0.1 && self.sidestep_is_clear(side, next)
+            {
+                side
+            } else {
+                straight
+            };
         }
+    }
+
+    fn sidestep_is_clear(&self, side: Vec2, next: Vec2) -> bool {
+        let cell = |point: Vec2| (point + Vec2::splat(0.5)).floor().as_ivec2();
+        let [start, side, end] = [self.position, side, next].map(cell);
+        let minimum = start.min(side).min(end);
+        let maximum = start.max(side).max(end);
+        (maximum - minimum).cmple(IVec2::ONE).all()
+            && (minimum.x..=maximum.x).all(|x| {
+                (minimum.y..=maximum.y)
+                    .all(|y| self.sidestep_cells.contains(&Some(IVec2::new(x, y))))
+            })
     }
 }
 
 impl Construction {
-    pub fn refresh_resident_crowding(&mut self) {
+    pub fn refresh_resident_crowding(&mut self, catalog: &Catalog, site: ConstructionSite) {
         let present: [Option<Vec2>; 5] = std::array::from_fn(|index| {
             (!self.driver_away(index) && !self.away_for_work(index))
                 .then_some(self.residents[index].position)
         });
-        for (index, resident) in self.residents.iter_mut().enumerate() {
-            resident.crowded = present[index].is_some_and(|position| {
+        for index in 0..self.residents.len() {
+            let crowded = present[index].is_some_and(|position| {
                 present.iter().enumerate().any(|(other, point)| {
                     index != other
                         && point.is_some_and(|point| {
@@ -408,6 +431,22 @@ impl Construction {
                         })
                 })
             });
+            let cells = if crowded {
+                let origin = (self.residents[index].position + Vec2::splat(0.5))
+                    .floor()
+                    .as_ivec2();
+                std::array::from_fn(|offset| {
+                    let cell = origin + IVec2::new(offset as i32 % 3 - 1, offset as i32 / 3 - 1);
+                    (cell.cmpge(IVec2::splat(-31)).all()
+                        && cell.cmple(IVec2::splat(94)).all()
+                        && !self.blocked(catalog, site.terrain, site.land, site.camp, cell))
+                    .then_some(cell)
+                })
+            } else {
+                [None; 9]
+            };
+            self.residents[index].crowded = crowded;
+            self.residents[index].sidestep_cells = cells;
         }
     }
 
@@ -2782,19 +2821,51 @@ mod tests {
 
     #[test]
     fn residents_slow_down_when_another_resident_is_close() {
+        let catalog = Catalog::default();
+        let terrain = WorldSetup::default().terrain();
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp: IVec2::new(36, 36),
+        };
         let mut village = Construction::default();
         village.residents[0].position = Vec2::ZERO;
         village.residents[1].position = Vec2::Y * 0.5;
-        village.refresh_resident_crowding();
+        village.refresh_resident_crowding(&catalog, site);
         let worker = &mut village.residents[0];
         worker.path.push_back(Vec2::X * 5.0);
         worker.move_along_path(1.0, false);
         assert!((worker.position.x - 0.95 * 0.65).abs() < 1e-6);
         village.residents[1].position = Vec2::Y * 3.0;
-        village.refresh_resident_crowding();
+        village.refresh_resident_crowding(&catalog, site);
         let worker = &mut village.residents[0];
         worker.move_along_path(1.0, false);
         assert!((worker.position.x - 0.95 * 1.65).abs() < 1e-6);
+    }
+
+    #[test]
+    fn crowded_residents_sidestep_only_when_the_corridor_is_clear() {
+        let mut village = Construction::default();
+        let worker = &mut village.residents[0];
+        worker.crowded = true;
+        worker.position = Vec2::new(0.0, -0.499);
+        worker.path = VecDeque::from([Vec2::X]);
+        worker.sidestep_cells = [None; 9];
+        worker.sidestep_cells[..4].copy_from_slice(&[
+            Some(IVec2::ZERO),
+            Some(IVec2::X),
+            Some(IVec2::NEG_Y),
+            Some(IVec2::new(1, -1)),
+        ]);
+        worker.move_along_path(0.1, false);
+        let sidestepped = worker.position;
+        worker.position = Vec2::new(0.0, -0.499);
+        worker.speed = 0.0;
+        worker.sidestep_cells[2] = None;
+        worker.move_along_path(0.1, false);
+        assert!(sidestepped.y < -0.5);
+        assert!(worker.position.y > -0.5);
     }
 
     #[test]
