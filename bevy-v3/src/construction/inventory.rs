@@ -78,8 +78,13 @@ impl Construction {
         for job in &self.farming.jobs {
             if job.phase == FarmPhase::Return {
                 record(&mut ledger, &job.output, Location::Transit);
-            } else if job.pickups == 0 {
-                record(&mut ledger, &job.inputs, Location::Processing);
+            } else {
+                let location = if job.pickups > 0 {
+                    Location::Reserved
+                } else {
+                    Location::Processing
+                };
+                record(&mut ledger, &job.inputs, location);
             }
         }
         for inputs in self.service_materials(catalog) {
@@ -208,6 +213,41 @@ impl Construction {
 mod tests {
     use super::*;
     use crate::setup::WorldSetup;
+
+    #[test]
+    fn paid_seed_inputs_remain_in_the_ledger_until_they_reach_the_bed() {
+        use crate::farming::{FarmAction, FarmJob, FarmPhase};
+
+        let catalog = Catalog::default();
+        let stock = Stock::for_start(&WorldSetup::default(), &catalog);
+        let mut village = Construction::default();
+        let material = "greens_seed";
+        let initial = u64::from(stock.available(material));
+        village.farming.jobs.push(FarmJob {
+            site: 0,
+            bed: 0,
+            action: FarmAction::Plant,
+            worker: None,
+            phase: FarmPhase::Pickup,
+            work: 0.0,
+            required: 10.0,
+            inputs: BTreeMap::from([(material.into(), 2)]),
+            output: Default::default(),
+            food_output: None,
+            retry: 0.0,
+            pickups: 1,
+            fare: 776,
+        });
+        assert_eq!(
+            village.inventory(&catalog, &stock)[material],
+            [initial, 2, 0, 0, 0]
+        );
+        village.farming.jobs[0].pickups = 0;
+        assert_eq!(
+            village.inventory(&catalog, &stock)[material],
+            [initial, 0, 2, 0, 0]
+        );
+    }
 
     #[test]
     fn a_trade_pack_is_counted_once_as_it_moves_from_stores_to_transit() {
