@@ -1450,7 +1450,10 @@ impl Construction {
     }
 }
 
-fn production_load(catalog: &Catalog, output: &BTreeMap<String, u32>) -> BTreeMap<String, u32> {
+pub(super) fn production_load(
+    catalog: &Catalog,
+    output: &BTreeMap<String, u32>,
+) -> BTreeMap<String, u32> {
     if output.get("wheelbarrow").is_some_and(|&units| units > 0) {
         return BTreeMap::from([("wheelbarrow".into(), 1)]);
     }

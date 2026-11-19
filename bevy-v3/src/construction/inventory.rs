@@ -76,11 +76,17 @@ impl Construction {
         for job in &self.production.jobs {
             let recipe = &catalog.production[&job.recipe];
             if job.phase == Phase::Return {
-                record(
-                    &mut ledger,
-                    job.delivered_output.as_ref().unwrap_or(&recipe.output),
-                    Location::Transit,
-                );
+                let output = job.delivered_output.as_ref().unwrap_or(&recipe.output);
+                let load = if job.worker.is_some() && !job.returning_to_site {
+                    super::production_work::production_load(catalog, output)
+                } else {
+                    BTreeMap::new()
+                };
+                for (id, &amount) in output {
+                    let carried = load.get(id).copied().unwrap_or(0);
+                    add(&mut ledger, id, carried, Location::Transit);
+                    add(&mut ledger, id, amount - carried, Location::Processing);
+                }
             } else {
                 record(
                     &mut ledger,
@@ -295,6 +301,42 @@ mod tests {
         assert_eq!(
             village.inventory(&catalog, &stock)[material],
             [initial, 0, 2, 0, 0]
+        );
+    }
+
+    #[test]
+    fn only_the_current_production_load_is_in_transit() {
+        use crate::production::Phase;
+
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);
+        let mut village = Construction::default();
+        let mut site = village.proposed_site(&catalog, "supply-0", IVec2::ZERO);
+        site.work = catalog.projects["supply-0"].work;
+        site.delivered = site.loads;
+        village.plans.push(site);
+        stock.sandbox = true;
+        village.queue_batch(&catalog, &mut stock, 0, "wood");
+        stock.sandbox = false;
+        let initial = u64::from(stock.available("logs"));
+        village.production.jobs[0].phase = Phase::Return;
+        assert_eq!(
+            village.inventory(&catalog, &stock)["logs"],
+            [initial, 0, 48, 0, 0]
+        );
+        village.production.jobs[0].worker = Some(0);
+        assert_eq!(
+            village.inventory(&catalog, &stock)["logs"],
+            [initial, 0, 43, 5, 0]
+        );
+
+        stock.receive(&BTreeMap::from([("logs".into(), 5)]));
+        let job = &mut village.production.jobs[0];
+        job.delivered_output = Some(BTreeMap::from([("logs".into(), 43)]));
+        job.returning_to_site = true;
+        assert_eq!(
+            village.inventory(&catalog, &stock)["logs"],
+            [initial + 5, 0, 43, 0, 0]
         );
     }
 
