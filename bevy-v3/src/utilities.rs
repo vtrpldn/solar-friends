@@ -55,6 +55,8 @@ pub struct Utilities {
     power_circuits: BTreeMap<usize, usize>,
     #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
     disabled_power_links: BTreeSet<(usize, usize)>,
+    #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
+    disabled_water_links: BTreeSet<(usize, usize, usize)>,
     #[serde(skip)]
     topology_valid: bool,
     pub grid_off: bool,
@@ -271,15 +273,26 @@ impl Utilities {
         if let Some(node) = self.nodes.remove(&id) {
             self.disabled_power_links
                 .retain(|&(a, b)| a != id && b != id);
+            self.disabled_water_links
+                .retain(|&(from, to, _)| from != id && to != id);
             self.curtailed_kwh += node.charge;
             self.topology_valid = false;
         }
     }
 
     pub fn valid_save(&self, valid_building: impl Fn(usize, &str) -> bool) -> bool {
-        self.disabled_power_links
+        self.disabled_water_links
             .iter()
-            .all(|&(a, b)| a < b && self.nodes.contains_key(&a) && self.nodes.contains_key(&b))
+            .all(|&(from, to, channel)| {
+                from != to
+                    && channel < LIQUID_NAMES.len()
+                    && self.nodes.contains_key(&from)
+                    && self.nodes.contains_key(&to)
+            })
+            && self
+                .disabled_power_links
+                .iter()
+                .all(|&(a, b)| a < b && self.nodes.contains_key(&a) && self.nodes.contains_key(&b))
             && self.nodes.iter().all(|(id, node)| {
                 (*id == 0 && node.kind == "camp" || *id > 0 && valid_building(*id - 1, &node.kind))
                     && node.capacity
@@ -774,6 +787,35 @@ impl Utilities {
         self.nodes
             .values()
             .fold(0.0, |total, node| total + node.water[0])
+    }
+
+    pub fn water_link_count(&self) -> usize {
+        self.links.len()
+    }
+
+    pub fn water_link(&self, row: usize) -> Option<(usize, usize, &'static str, bool)> {
+        let pipe = self.links.get(row).or_else(|| self.links.last())?;
+        Some((
+            pipe.from,
+            pipe.to,
+            LIQUID_NAMES[pipe.channel],
+            self.water_link_enabled(*pipe),
+        ))
+    }
+
+    pub fn toggle_water_link(&mut self, row: usize) {
+        if let Some(pipe) = self.links.get(row).or_else(|| self.links.last()) {
+            let key = (pipe.from, pipe.to, pipe.channel);
+            if !self.disabled_water_links.remove(&key) {
+                self.disabled_water_links.insert(key);
+            }
+        }
+    }
+
+    fn water_link_enabled(&self, pipe: Pipe) -> bool {
+        !self
+            .disabled_water_links
+            .contains(&(pipe.from, pipe.to, pipe.channel))
     }
 
     pub fn power_link_count(&self) -> usize {
@@ -1313,7 +1355,11 @@ impl Utilities {
             let cell = node.location.as_vec2() + (node.size.as_vec2() - Vec2::ONE) * 0.5;
             world_position(cell.x, cell.y)
         };
-        let draw = |gizmos: &mut Gizmos, pair: (usize, usize), color: Color, channel: usize| {
+        let draw = |gizmos: &mut Gizmos,
+                    pair: (usize, usize),
+                    color: Color,
+                    channel: usize,
+                    enabled: bool| {
             let (Some(from), Some(to)) = (self.nodes.get(&pair.0), self.nodes.get(&pair.1)) else {
                 return;
             };
@@ -1323,8 +1369,7 @@ impl Utilities {
             } else {
                 0.18 + channel as f32 * 0.06
             };
-            let active =
-                !power || (self.power_link_open(pair.0, pair.1) && from.powered && to.powered);
+            let active = enabled && (!power || (from.powered && to.powered));
             let tint = if from.enabled && to.enabled && active {
                 color
             } else {
@@ -1341,7 +1386,13 @@ impl Utilities {
         };
         if power {
             for &pair in &self.power_links {
-                draw(gizmos, pair, Color::srgb_u8(255, 221, 114), 4);
+                draw(
+                    gizmos,
+                    pair,
+                    Color::srgb_u8(255, 221, 114),
+                    4,
+                    self.power_link_open(pair.0, pair.1),
+                );
             }
         } else {
             let colors = [
@@ -1359,6 +1410,7 @@ impl Utilities {
                     (pipe.from, pipe.to),
                     colors[pipe.channel],
                     pipe.channel,
+                    self.water_link_enabled(*pipe),
                 );
             }
         }
@@ -1488,6 +1540,9 @@ impl Utilities {
     fn transfer(&mut self, hours: f64) {
         let mut counts = BTreeMap::<(usize, usize), usize>::new();
         for pipe in &self.links {
+            if !self.water_link_enabled(*pipe) {
+                continue;
+            }
             let recipient = &self.nodes[&pipe.to];
             if recipient.enabled
                 && recipient.capacity[pipe.channel] - recipient.water[pipe.channel] > 0.0001
@@ -1504,7 +1559,11 @@ impl Utilities {
                 )
             })
             .collect();
-        for &Pipe { from, to, channel } in &self.links {
+        for &pipe in &self.links {
+            if !self.water_link_enabled(pipe) {
+                continue;
+            }
+            let Pipe { from, to, channel } = pipe;
             let source = &self.nodes[&from];
             let target = &self.nodes[&to];
             if !source.enabled || !target.enabled {
@@ -1796,6 +1855,26 @@ mod tests {
                 .iter()
                 .any(|p| (p.from, p.to, p.channel) == (3, 4, 1))
         );
+        let water_link = utilities
+            .links
+            .iter()
+            .position(|pipe| (pipe.from, pipe.to, pipe.channel) == (3, 4, 1))
+            .unwrap();
+        utilities.deliver_water(3, 1, 10.0);
+        utilities.toggle_water_link(water_link);
+        utilities.transfer(1.0);
+        assert_eq!(utilities.nodes[&4].water[1], 0.0);
+        let mut reopened: Utilities =
+            serde_json::from_str(&serde_json::to_string(&utilities).unwrap()).unwrap();
+        reopened.sync(std::iter::empty());
+        assert_eq!(
+            reopened.water_link(water_link),
+            Some((3, 4, "Irrigation", false))
+        );
+        reopened.toggle_water_link(water_link);
+        reopened.transfer(1.0);
+        assert!(reopened.nodes[&4].water[1] > 0.0);
+
         utilities.tick(&setup, &mut stock, 0, 1.0, 0.1);
         assert!(utilities.generation_kw > 0.45);
         assert!(!utilities.powered(0));

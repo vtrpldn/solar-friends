@@ -188,9 +188,25 @@ impl Construction {
                 .is_some_and(|index| self.residents[index].waiting_for_route())
     }
 
-    pub fn power_connection_summary(&self, catalog: &Catalog, selected: usize) -> String {
-        let count = self.utilities.power_link_count();
-        let Some((from, to, enabled)) = self.utilities.power_link(selected) else {
+    pub fn connection_summary(&self, catalog: &Catalog, selected: usize, power: bool) -> String {
+        let (connection, count, shortcut, arrow) = if power {
+            (
+                self.utilities
+                    .power_link(selected)
+                    .map(|(from, to, enabled)| (from, to, "Power", enabled)),
+                self.utilities.power_link_count(),
+                "T",
+                "↔",
+            )
+        } else {
+            (
+                self.utilities.water_link(selected),
+                self.utilities.water_link_count(),
+                "G",
+                "→",
+            )
+        };
+        let Some((from, to, kind, enabled)) = connection else {
             return String::new();
         };
         let name = |id: usize| match id.checked_sub(1).and_then(|index| self.plans.get(index)) {
@@ -199,7 +215,7 @@ impl Construction {
         };
         let status = if enabled { "on" } else { "off" };
         format!(
-            "\nConnection {}/{count} · {} ↔ {} · {status}\n[ / ] Select connection · T Switch connection",
+            "\nConnection {}/{count} · {kind} · {} {arrow} {} · {status}\n[ / ] Select connection · {shortcut} Switch connection",
             selected + 1,
             name(from),
             name(to),

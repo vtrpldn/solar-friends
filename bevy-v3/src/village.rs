@@ -210,6 +210,8 @@ pub struct Village {
     #[serde(skip)]
     power_link: usize,
     #[serde(skip)]
+    water_link: usize,
+    #[serde(skip)]
     connect_road_strokes: bool,
     #[serde(skip)]
     advance_checkpoint: bool,
@@ -429,18 +431,39 @@ impl Village {
         }
     }
 
-    fn move_power_link(&mut self, forward: bool) {
-        let count = self.construction.utilities.power_link_count();
-        if count > 0 {
-            let current = self.power_link.min(count - 1);
-            self.power_link = (current + if forward { 1 } else { count - 1 }) % count;
+    fn utility_link_count(&self) -> usize {
+        match self.utility_panel {
+            Some(UtilityPanel::Water) => self.construction.utilities.water_link_count(),
+            Some(UtilityPanel::Power) => self.construction.utilities.power_link_count(),
+            _ => 0,
         }
     }
 
-    fn toggle_selected_power_link(&mut self) {
-        self.construction
-            .utilities
-            .toggle_power_link(self.power_link);
+    fn move_utility_link(&mut self, forward: bool) {
+        let count = self.utility_link_count();
+        if count > 0 {
+            let selected = if self.utility_panel == Some(UtilityPanel::Water) {
+                &mut self.water_link
+            } else {
+                &mut self.power_link
+            };
+            let current = (*selected).min(count - 1);
+            *selected = (current + if forward { 1 } else { count - 1 }) % count;
+        }
+    }
+
+    fn toggle_selected_utility_link(&mut self) {
+        match self.utility_panel {
+            Some(UtilityPanel::Water) => self
+                .construction
+                .utilities
+                .toggle_water_link(self.water_link),
+            Some(UtilityPanel::Power) => self
+                .construction
+                .utilities
+                .toggle_power_link(self.power_link),
+            _ => {}
+        }
     }
 
     fn focus_next_power_shortage(&mut self, setup: &WorldSetup, camera: &mut VillageCamera) {
@@ -1415,6 +1438,12 @@ fn village_input(
             };
         }
         if town.utility_panel == Some(UtilityPanel::Water) {
+            if keyboard.any_just_pressed([KeyCode::BracketLeft, KeyCode::BracketRight]) {
+                town.move_utility_link(keyboard.just_pressed(KeyCode::BracketRight));
+            }
+            if keyboard.just_pressed(KeyCode::KeyG) {
+                town.toggle_selected_utility_link();
+            }
             if keyboard.just_pressed(KeyCode::PageDown) {
                 town.focus_next_waste_tank(&setup, camera);
                 return;
@@ -1425,10 +1454,10 @@ fn village_input(
         }
         if town.utility_panel == Some(UtilityPanel::Power) {
             if keyboard.any_just_pressed([KeyCode::BracketLeft, KeyCode::BracketRight]) {
-                town.move_power_link(keyboard.just_pressed(KeyCode::BracketRight));
+                town.move_utility_link(keyboard.just_pressed(KeyCode::BracketRight));
             }
             if keyboard.just_pressed(KeyCode::KeyT) {
-                town.toggle_selected_power_link();
+                town.toggle_selected_utility_link();
             }
             if keyboard.just_pressed(KeyCode::KeyO) {
                 town.construction.utilities.grid_off = !town.construction.utilities.grid_off;
@@ -1978,11 +2007,11 @@ fn show_hud(
         Some(UtilityPanel::Power) => {
             label.push('\n');
             label.push_str(&village.construction.utilities.power_summary());
-            label.push_str(
-                &village
-                    .construction
-                    .power_connection_summary(&catalog, village.power_link),
-            );
+            label.push_str(&village.construction.connection_summary(
+                &catalog,
+                village.power_link,
+                true,
+            ));
             label.push_str(&village.construction.power_shortage_summary(&catalog));
         }
         Some(UtilityPanel::Projects) => {
@@ -2044,6 +2073,11 @@ fn show_hud(
             label.push('\n');
             label.push_str(&village.construction.utilities.water_summary());
             label.push_str(&village.construction.waste_tank_summary(&catalog));
+            label.push_str(&village.construction.connection_summary(
+                &catalog,
+                village.water_link,
+                false,
+            ));
             label.push_str("\nBlue Drinking · Green Irrigation\nPurple Greywater · Amber Sewage");
             let panel = &village.water_panel;
             label.push('\n');
