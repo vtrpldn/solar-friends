@@ -71,10 +71,11 @@ fn main() {
             (Some(path), None, None, Some("--lab-replay")) => village::lab::replay_file(&path),
             (Some(path), None, None, Some("--lab-replay-ui")) => village::lab::replay_ui(&path),
             (Some(path), save, None, Some("--lab-ui")) => {
-                village::lab::run_ui(&path, save.as_deref())
+                village::lab::run_ui(Some(&path), save.as_deref())
             }
+            (None, None, None, Some("--lab-ui")) => village::lab::run_ui(None, None),
             _ => Err(std::io::Error::other(
-                "Usage: solar-friends-v3 --lab or --lab-ui scenario.json [village.json], or --lab-replay or --lab-replay-ui report.json",
+                "Usage: solar-friends-v3 --lab scenario.json [village.json], --lab-ui [scenario.json [village.json]], or --lab-replay or --lab-replay-ui report.json",
             )),
         };
         if let Err(error) = result {
