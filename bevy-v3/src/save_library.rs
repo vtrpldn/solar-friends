@@ -53,8 +53,8 @@ struct Slot {
 impl SaveMenu {
     pub fn continue_path(&self, mode: Mode) -> io::Result<PathBuf> {
         #[cfg(test)]
-        if let Some(path) = &self.test_directory {
-            return Ok(path.join("continue.json"));
+        if self.test_directory.is_some() {
+            return Ok(self.directory(mode)?.join("continue.json"));
         }
         save::autosave_location(mode)
     }
@@ -209,14 +209,24 @@ pub fn load(directory: &Path, id: u64, mode: Mode, catalog: &Catalog) -> io::Res
     decode(&slot.current, mode, catalog)
 }
 
-pub fn recover(directory: &Path, id: u64, mode: Mode, catalog: &Catalog) -> io::Result<Village> {
+pub fn recover(
+    directory: &Path,
+    id: u64,
+    mode: Mode,
+    catalog: &Catalog,
+    live: Option<&Village>,
+) -> io::Result<Village> {
     let mut slot = read_slot(directory, id, mode)?;
     let previous = slot
         .previous
         .take()
         .ok_or_else(|| io::Error::other("no recovery copy"))?;
     let restored = decode(&previous, mode, catalog)?;
-    slot.previous = Some(std::mem::replace(&mut slot.current, previous));
+    let current = std::mem::replace(&mut slot.current, previous);
+    slot.previous = Some(match live {
+        Some(village) => serde_json::to_value(village)?,
+        None => current,
+    });
     slot.updated = timestamp();
     write_slot(directory, &slot)?;
     Ok(restored)

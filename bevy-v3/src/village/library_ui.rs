@@ -314,7 +314,8 @@ pub(super) fn library_controls(
                     "enter a village before creating a named save",
                 ))
             } else {
-                save_library::create(&path, mode, &entry.text, &village)
+                save_active_village(&menu, &village, &catalog)
+                    .and_then(|()| save_library::create(&path, mode, &entry.text, &village))
             };
             match result {
                 Ok(id) => {
@@ -376,10 +377,24 @@ pub(super) fn library_controls(
             rename: Some(slot),
         });
     } else if matches!(action, Some(Load | Recover)) {
-        let restored = if matches!(action, Some(Load)) {
-            save_library::load(&path, slot, mode, &catalog)
+        let recovering = matches!(action, Some(Recover));
+        let active_recovery = recovering
+            && menu.attached == Some((mode, slot, village.session_serial))
+            && village.mode() == Some(mode);
+        if !active_recovery && let Err(error) = save_active_village(&menu, &village, &catalog) {
+            menu.status = format!("Could not preserve the current village: {error}");
+            return;
+        }
+        let restored = if recovering {
+            save_library::recover(
+                &path,
+                slot,
+                mode,
+                &catalog,
+                active_recovery.then_some(&*village),
+            )
         } else {
-            save_library::recover(&path, slot, mode, &catalog)
+            save_library::load(&path, slot, mode, &catalog)
         };
         match restored {
             Ok(mut loaded) => {

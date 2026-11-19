@@ -2471,13 +2471,26 @@ mod tests {
             120.0
         );
         assert_eq!(
-            save_library::recover(&directory, id, Mode::Story, &catalog)
+            save_library::recover(&directory, id, Mode::Story, &catalog, None)
                 .unwrap()
                 .clock,
             0.0
         );
         let exported = save_library::export(&directory, id, Mode::Story).unwrap();
         assert_eq!(save::read(&exported, &catalog).unwrap().clock, 0.0);
+        village.clock = 180.0;
+        assert_eq!(
+            save_library::recover(&directory, id, Mode::Story, &catalog, Some(&village))
+                .unwrap()
+                .clock,
+            120.0
+        );
+        assert_eq!(
+            save_library::recover(&directory, id, Mode::Story, &catalog, None)
+                .unwrap()
+                .clock,
+            180.0
+        );
         std::fs::remove_dir_all(directory).unwrap();
     }
 
