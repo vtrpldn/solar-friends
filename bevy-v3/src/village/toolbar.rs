@@ -86,6 +86,8 @@ enum Action {
     Water(WaterCommand),
     NextWasteTank,
     NextPowerShortage,
+    PowerLinkPage(bool),
+    TogglePowerLink,
     AutomaticUpkeep,
     UpkeepBudget { restock: bool, increase: bool },
 }
@@ -229,6 +231,10 @@ impl Action {
                     && !village.construction.menu
                     && !village.construction.is_placing()
                     && self.facility_switch(village).is_some()
+            }
+            Self::PowerLinkPage(_) | Self::TogglePowerLink => {
+                village.utility_panel == Some(UtilityPanel::Power)
+                    && village.construction.utilities.power_link_count() > 0
             }
             Self::NextPowerShortage => {
                 village.utility_panel == Some(UtilityPanel::Power)
@@ -545,6 +551,9 @@ impl Action {
             Self::Cooling => "Resume cooling".into(),
             Self::NextWasteTank => "Next waste tank".into(),
             Self::NextPowerShortage => "Next building without power".into(),
+            Self::PowerLinkPage(false) => "Previous connection".into(),
+            Self::PowerLinkPage(true) => "Next connection".into(),
+            Self::TogglePowerLink => "Switch connection".into(),
             Self::Water(command) => match command {
                 WaterCommand::Camp { source: true } => "Camp source".into(),
                 WaterCommand::Camp { source: false } => "Camp destination".into(),
@@ -801,6 +810,9 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 }
                 spawn_button(menu, &assets, Action::Grid);
                 spawn_button(menu, &assets, Action::NextPowerShortage);
+                spawn_button(menu, &assets, Action::PowerLinkPage(false));
+                spawn_button(menu, &assets, Action::PowerLinkPage(true));
+                spawn_button(menu, &assets, Action::TogglePowerLink);
                 spawn_button(menu, &assets, Action::BuildingPower);
                 spawn_button(menu, &assets, Action::Cooling);
                 for command in [
@@ -1178,6 +1190,8 @@ fn handle_buttons(
                 Action::UpkeepBudget { restock, increase } if !picker.open => {
                     village.construction.adjust_upkeep_budget(restock, increase);
                 }
+                Action::PowerLinkPage(forward) if !picker.open => village.move_power_link(forward),
+                Action::TogglePowerLink if !picker.open => village.toggle_selected_power_link(),
                 Action::NextPowerShortage if !picker.open => {
                     village.focus_next_power_shortage(&setup, camera)
                 }
@@ -1330,6 +1344,8 @@ fn handle_buttons(
                 | Action::Water(_)
                 | Action::NextWasteTank
                 | Action::NextPowerShortage
+                | Action::PowerLinkPage(_)
+                | Action::TogglePowerLink
                 | Action::AutomaticUpkeep
                 | Action::UpkeepBudget { .. } => {}
             }
@@ -1528,7 +1544,9 @@ fn refresh(
             | Action::CookingTarget { .. } => show_pantry && action.available(&village),
             Action::Home(_) => show_residents,
             Action::Grid => show_power,
-            Action::NextPowerShortage => show_power && action.available(&village),
+            Action::NextPowerShortage | Action::PowerLinkPage(_) | Action::TogglePowerLink => {
+                show_power && action.available(&village)
+            }
             Action::BuildingPower | Action::Cooling => {
                 show_facility_switches && action.available(&village)
             }

@@ -208,6 +208,8 @@ pub struct Village {
     #[serde(skip)]
     water_panel: WaterControls,
     #[serde(skip)]
+    power_link: usize,
+    #[serde(skip)]
     connect_road_strokes: bool,
     #[serde(skip)]
     advance_checkpoint: bool,
@@ -425,6 +427,20 @@ impl Village {
             self.lenses.network_site = Some(id);
             camera.target = Vec3::new(point.x, terrain.height_at(point.x, point.y), point.y);
         }
+    }
+
+    fn move_power_link(&mut self, forward: bool) {
+        let count = self.construction.utilities.power_link_count();
+        if count > 0 {
+            let current = self.power_link.min(count - 1);
+            self.power_link = (current + if forward { 1 } else { count - 1 }) % count;
+        }
+    }
+
+    fn toggle_selected_power_link(&mut self) {
+        self.construction
+            .utilities
+            .toggle_power_link(self.power_link);
     }
 
     fn focus_next_power_shortage(&mut self, setup: &WorldSetup, camera: &mut VillageCamera) {
@@ -1408,6 +1424,12 @@ fn village_input(
             return;
         }
         if town.utility_panel == Some(UtilityPanel::Power) {
+            if keyboard.any_just_pressed([KeyCode::BracketLeft, KeyCode::BracketRight]) {
+                town.move_power_link(keyboard.just_pressed(KeyCode::BracketRight));
+            }
+            if keyboard.just_pressed(KeyCode::KeyT) {
+                town.toggle_selected_power_link();
+            }
             if keyboard.just_pressed(KeyCode::KeyO) {
                 town.construction.utilities.grid_off = !town.construction.utilities.grid_off;
             }
@@ -1956,6 +1978,11 @@ fn show_hud(
         Some(UtilityPanel::Power) => {
             label.push('\n');
             label.push_str(&village.construction.utilities.power_summary());
+            label.push_str(
+                &village
+                    .construction
+                    .power_connection_summary(&catalog, village.power_link),
+            );
             label.push_str(&village.construction.power_shortage_summary(&catalog));
         }
         Some(UtilityPanel::Projects) => {

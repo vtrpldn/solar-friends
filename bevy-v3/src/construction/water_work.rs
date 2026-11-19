@@ -188,6 +188,24 @@ impl Construction {
                 .is_some_and(|index| self.residents[index].waiting_for_route())
     }
 
+    pub fn power_connection_summary(&self, catalog: &Catalog, selected: usize) -> String {
+        let count = self.utilities.power_link_count();
+        let Some((from, to, enabled)) = self.utilities.power_link(selected) else {
+            return String::new();
+        };
+        let name = |id: usize| match id.checked_sub(1).and_then(|index| self.plans.get(index)) {
+            Some(plan) => format!("{} #{id}", catalog.projects[&plan.key].name),
+            None => "Camp".into(),
+        };
+        let status = if enabled { "on" } else { "off" };
+        format!(
+            "\nConnection {}/{count} · {} ↔ {} · {status}\n[ / ] Select connection · T Switch connection",
+            selected + 1,
+            name(from),
+            name(to),
+        )
+    }
+
     pub fn power_shortage_summary(&self, catalog: &Catalog) -> String {
         use std::fmt::Write;
         const VISIBLE_SHORTAGES: usize = 4;

@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, HashSet};
+use std::collections::{BTreeMap, BTreeSet, HashSet};
 
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -52,7 +52,9 @@ pub struct Utilities {
     #[serde(skip)]
     power_links: Vec<(usize, usize)>,
     #[serde(skip)]
-    power_members: HashSet<usize>,
+    power_circuits: BTreeMap<usize, usize>,
+    #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
+    disabled_power_links: BTreeSet<(usize, usize)>,
     #[serde(skip)]
     topology_valid: bool,
     pub grid_off: bool,
@@ -259,46 +261,54 @@ impl Utilities {
         if changed {
             self.links = self.connections();
             self.power_links = self.power_tree();
-            self.power_members = self.power_links.iter().flat_map(|&(a, b)| [a, b]).collect();
+            self.rebuild_power_circuits();
             self.topology_valid = true;
         }
     }
 
     pub fn remove_facility(&mut self, building: usize) {
-        if let Some(node) = self.nodes.remove(&(building + 1)) {
+        let id = building + 1;
+        if let Some(node) = self.nodes.remove(&id) {
+            self.disabled_power_links
+                .retain(|&(a, b)| a != id && b != id);
             self.curtailed_kwh += node.charge;
             self.topology_valid = false;
         }
     }
 
     pub fn valid_save(&self, valid_building: impl Fn(usize, &str) -> bool) -> bool {
-        self.nodes.iter().all(|(id, node)| {
-            (*id == 0 && node.kind == "camp" || *id > 0 && valid_building(*id - 1, &node.kind))
-                && node.capacity
-                    == if *id == 0 {
-                        [40.0, 60.0, 120.0, 80.0]
-                    } else {
-                        capacity(&node.kind)
-                    }
-                && node
-                    .water
-                    .iter()
-                    .zip(node.capacity)
-                    .all(|(amount, cap)| (0.0..=cap + 1e-8).contains(amount))
-                && (0.0..=1.0).contains(&node.service_factor)
-                && (!node.solar_upgrade
-                    || node.kind == "home"
-                        && node.solar_kw == 0.6
-                        && (3.2..=4.0).contains(&node.battery))
-                && (0.0..=node.battery + 1e-8).contains(&node.charge)
-        }) && self.ground.as_ref().is_none_or(|ground| {
-            ground.capacity > 0.0
-                && (0.0..=ground.capacity).contains(&ground.groundwater)
-                && ground.river >= 0.0
-                && ground.runoff >= 0.0
-                && ground.flow >= 0.0
-                && ground.account.as_ref().is_none_or(WaterAccount::valid)
-        }) && (0.0..1.0).contains(&self.grid_debt_cents)
+        self.disabled_power_links
+            .iter()
+            .all(|&(a, b)| a < b && self.nodes.contains_key(&a) && self.nodes.contains_key(&b))
+            && self.nodes.iter().all(|(id, node)| {
+                (*id == 0 && node.kind == "camp" || *id > 0 && valid_building(*id - 1, &node.kind))
+                    && node.capacity
+                        == if *id == 0 {
+                            [40.0, 60.0, 120.0, 80.0]
+                        } else {
+                            capacity(&node.kind)
+                        }
+                    && node
+                        .water
+                        .iter()
+                        .zip(node.capacity)
+                        .all(|(amount, cap)| (0.0..=cap + 1e-8).contains(amount))
+                    && (0.0..=1.0).contains(&node.service_factor)
+                    && (!node.solar_upgrade
+                        || node.kind == "home"
+                            && node.solar_kw == 0.6
+                            && (3.2..=4.0).contains(&node.battery))
+                    && (0.0..=node.battery + 1e-8).contains(&node.charge)
+            })
+            && self.ground.as_ref().is_none_or(|ground| {
+                ground.capacity > 0.0
+                    && (0.0..=ground.capacity).contains(&ground.groundwater)
+                    && ground.river >= 0.0
+                    && ground.runoff >= 0.0
+                    && ground.flow >= 0.0
+                    && ground.account.as_ref().is_none_or(WaterAccount::valid)
+            })
+            && (0.0..1.0).contains(&self.grid_debt_cents)
             && self.biogas.is_finite()
             && self.biogas >= 0.0
             && self.latrine_waste_liters.is_finite()
@@ -766,6 +776,45 @@ impl Utilities {
             .fold(0.0, |total, node| total + node.water[0])
     }
 
+    pub fn power_link_count(&self) -> usize {
+        self.power_links.len()
+    }
+
+    pub fn power_link(&self, row: usize) -> Option<(usize, usize, bool)> {
+        let &(a, b) = self
+            .power_links
+            .get(row)
+            .or_else(|| self.power_links.last())?;
+        Some((a, b, self.power_link_open(a, b)))
+    }
+
+    pub fn toggle_power_link(&mut self, row: usize) {
+        if let Some((a, b, _)) = self.power_link(row) {
+            let pair = (a.min(b), a.max(b));
+            if !self.disabled_power_links.remove(&pair) {
+                self.disabled_power_links.insert(pair);
+            }
+            self.rebuild_power_circuits();
+        }
+    }
+
+    fn power_link_open(&self, a: usize, b: usize) -> bool {
+        !self.disabled_power_links.contains(&(a.min(b), a.max(b)))
+    }
+
+    fn rebuild_power_circuits(&mut self) {
+        self.power_circuits.clear();
+        for &(from, to) in &self.power_links {
+            // The tree visits the parent before each child.
+            let circuit = if self.power_link_open(from, to) {
+                self.power_circuits.get(&from).copied().unwrap_or(from)
+            } else {
+                to
+            };
+            self.power_circuits.insert(to, circuit);
+        }
+    }
+
     pub fn power_shortages(&self) -> impl Iterator<Item = usize> + '_ {
         self.nodes
             .iter()
@@ -887,13 +936,8 @@ impl Utilities {
             available: f64,
         }
 
-        let circuit_of = |id| {
-            if self.power_members.contains(&id) {
-                0
-            } else {
-                id
-            }
-        };
+        let circuit_of = |id| self.power_circuits.get(&id).copied().unwrap_or(id);
+
         let mut circuits = BTreeMap::<usize, Circuit>::new();
         let wells: Vec<_> = self
             .nodes
@@ -1279,7 +1323,9 @@ impl Utilities {
             } else {
                 0.18 + channel as f32 * 0.06
             };
-            let tint = if from.enabled && to.enabled && (!power || from.powered && to.powered) {
+            let active =
+                !power || (self.power_link_open(pair.0, pair.1) && from.powered && to.powered);
+            let tint = if from.enabled && to.enabled && active {
                 color
             } else {
                 Color::srgb_u8(120, 125, 128)
@@ -1760,6 +1806,18 @@ mod tests {
         assert!(utilities.powered(0));
         assert_eq!(utilities.grid_import_kw, 0.0);
         assert!(utilities.nodes[&6].charge > 0.0);
+
+        let link = utilities.power_link_count() - 1;
+        utilities.toggle_power_link(link);
+        utilities.tick(&setup, &mut stock, 0, 3.0, 0.1);
+        assert!(!utilities.powered(0));
+        let mut restored: Utilities =
+            serde_json::from_str(&serde_json::to_string(&utilities).unwrap()).unwrap();
+        restored.sync(std::iter::empty());
+        assert_eq!(restored.power_link(link), Some((1, 6, false)));
+        restored.toggle_power_link(link);
+        restored.tick(&setup, &mut stock, 0, 4.0, 0.1);
+        assert!(restored.powered(0));
     }
 
     #[test]
