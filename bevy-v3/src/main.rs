@@ -1107,6 +1107,10 @@ mod tests {
         press_button(&mut app, "Done searching");
         press_button(&mut app, "Show items and equipment");
         press_button(&mut app, "Show resources");
+        press_button(&mut app, "Manage food");
+        press_button(&mut app, "Chill first · Earliest expiry");
+        press_button(&mut app, "Chill first · Meals first");
+        press_button(&mut app, "Chill first · Ingredients first");
         press_button(&mut app, "Close panel");
 
         let save_dir =

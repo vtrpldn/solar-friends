@@ -49,6 +49,7 @@ enum Action {
     ResourcePanel(UtilityPanel),
     GridFromFinances,
     StoresFromUpkeep,
+    PantryFromStores,
     ClosePanel,
     Page(bool),
     Project(usize),
@@ -254,6 +255,12 @@ impl Action {
                     && !village.finance_history_open
             }
             Self::StoresFromUpkeep => village.utility_panel == Some(UtilityPanel::Upkeep),
+            Self::PantryFromStores => {
+                village.utility_panel == Some(UtilityPanel::Inventory)
+                    && !village.inventory_equipment
+                    && !village.editing_inventory
+                    && Self::Panel(UtilityPanel::Pantry).available(village)
+            }
             Self::Panel(
                 UtilityPanel::Finances
                 | UtilityPanel::Trade
@@ -464,6 +471,7 @@ impl Action {
             Self::ResourcePanel(UtilityPanel::Power) => "Battery".into(),
             Self::GridFromFinances => "Manage grid power".into(),
             Self::StoresFromUpkeep => "Manage service supplies".into(),
+            Self::PantryFromStores => "Manage food".into(),
             Self::Panel(panel) | Self::ResourcePanel(panel) => Self::PANELS
                 .iter()
                 .find_map(|(item, label)| (*item == panel).then_some(*label))
@@ -564,7 +572,9 @@ impl Action {
                 "Close food batches".into()
             }
             Self::PantryBatches => "Food batches".into(),
-            Self::PantryPriority => "Change food priority".into(),
+            Self::PantryPriority => {
+                format!("Chill first · {}", village.stock.pantry.priority.label())
+            }
             Self::PantryTransport if village.construction.supplier_construction() => {
                 "Purchases: supplier freight".into()
             }
@@ -751,6 +761,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 Action::ClosePanel,
                 Action::InventoryView,
                 Action::InventorySearch,
+                Action::PantryFromStores,
                 Action::Pause,
                 Action::Speed,
                 Action::Guide,
@@ -1218,6 +1229,10 @@ fn handle_buttons(
                 Action::StoresFromUpkeep => {
                     village.utility_panel = Some(UtilityPanel::Inventory);
                     village.inventory_page = 0;
+                }
+                Action::PantryFromStores => {
+                    village.utility_panel = Some(UtilityPanel::Pantry);
+                    village.pantry_batch_page = None;
                 }
                 Action::Page(forward) if village.utility_panel == Some(UtilityPanel::Residents) => {
                     let pages = village
@@ -1737,6 +1752,7 @@ fn refresh(
             Action::UpkeepJob(row) => upkeep_jobs.get(row).is_some(),
             Action::Panel(_) => picker.open,
             Action::ResourcePanel(_) => !picker.open && !show_view && action.available(&village),
+            Action::PantryFromStores => !picker.open && !show_view && action.available(&village),
             _ => true,
         };
         let show = if matches!(
