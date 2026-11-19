@@ -933,6 +933,8 @@ impl Construction {
             "In town"
         } else if let Some(task) = &worker.health.task {
             task.kind.label()
+        } else if worker.waiting_for_route() {
+            "Waiting for access"
         } else if let Some(job) = &worker.assignment {
             match job.activity {
                 Activity::Collect => "Collecting materials",

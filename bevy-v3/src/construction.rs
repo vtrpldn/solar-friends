@@ -453,7 +453,11 @@ impl Construction {
         });
         for index in 0..self.residents.len() {
             if present[index].is_some()
-                && (self.residents[index].assignment.is_some() || self.production.has_worker(index))
+                && (self.residents[index].assignment.is_some()
+                    || self.production.has_worker(index)
+                    || self.working_change(index)
+                    || self.working_upkeep(index)
+                    || self.working_water(index))
             {
                 self.refresh_resident_route(index, catalog, site);
             } else {
@@ -496,8 +500,13 @@ impl Construction {
         });
         let replacement = blocked_waypoint
             .and_then(|_| worker.path.back())
-            .and_then(|goal| {
-                self.resident_route(catalog, site, worker.position, goal.round().as_ivec2())
+            .and_then(|&goal| {
+                let mut path =
+                    self.resident_route(catalog, site, worker.position, goal.round().as_ivec2())?;
+                if path.back().copied().unwrap_or(worker.position) != goal {
+                    path.push_back(goal);
+                }
+                Some(path)
             });
         let worker = &mut self.residents[index];
         if let Some(path) = replacement {
@@ -2896,7 +2905,7 @@ mod tests {
         };
         let mut village = Construction::default();
         let obstacle = IVec2::new(45, 36);
-        let goal = IVec2::new(47, 36);
+        let goal = Vec2::new(47.0, 36.125);
         village
             .plans
             .push(village.proposed_site(&catalog, "supply-5", obstacle));
@@ -2904,10 +2913,10 @@ mod tests {
             .plans
             .push(village.proposed_site(&catalog, "gathering", IVec2::new(45, 37)));
         village.residents[0].position = IVec2::new(44, 36).as_vec2();
-        village.residents[0].path = VecDeque::from([obstacle.as_vec2(), goal.as_vec2()]);
+        village.residents[0].path = VecDeque::from([obstacle.as_vec2(), goal]);
         village.refresh_resident_route(0, &catalog, site);
         let path = &village.residents[0].path;
-        assert_eq!(path.back(), Some(&goal.as_vec2()));
+        assert_eq!(path.back(), Some(&goal));
         assert!(!path.contains(&obstacle.as_vec2()));
         village.residents[0].path = VecDeque::from([obstacle.as_vec2()]);
         village.refresh_resident_route(0, &catalog, site);

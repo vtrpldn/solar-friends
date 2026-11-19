@@ -83,7 +83,7 @@ An example scenario with one construction order:
 
 Order types include `build`, `move`, `salvage`, `demolish`, `produce`, `move-craft`, `buy`, `sell`, `bed`, `configure-bed`, `outside`, `food-policy`, `grid`, `collect-water`, `purify`, and `service-water`. Project, bed, and resident numbers start at 1. Use site 0 for the camp water facility. For `move-craft`, supply the source project as `site` and the target project as `destination`. Build and move coordinates use map cells, rotation takes 0–3 quarter turns, and fields accept a `size` pair in cells.
 
-Set `"stop"` in the scenario to `"harvest"`, `"crop-failed"`, `"hydration"`, `"water"`, or `"blocked"` to stop at that condition. The blocked condition detects production jobs and construction crews waiting for a navigable route. The report includes the actual end step and a final sample.
+Set `"stop"` in the scenario to `"harvest"`, `"crop-failed"`, `"hydration"`, `"water"`, or `"blocked"` to stop at that condition. The blocked condition detects resident jobs waiting for a navigable route. The report includes the actual end step and a final sample.
 
 Verify a lab report with `cargo run --locked --manifest-path bevy-v3/Cargo.toml -- --lab-replay report.json`. The verifier replays the bundled starting village and orders and exits with an error if the results diverge. Use `--lab-replay-ui report.json` to step through the same report in the desktop lab and see the verification result at the end.
 
