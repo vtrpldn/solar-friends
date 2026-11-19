@@ -549,15 +549,19 @@ impl Construction {
                     .get_mut(&site)
                     .and_then(|plot| plot.beds.get_mut(bed))
                     .ok_or("Choose a completed planting bed.")?;
+                if self
+                    .farming
+                    .jobs
+                    .iter()
+                    .any(|job| job.site == site && job.bed == bed)
+                {
+                    return Err("Wait for this bed’s current job to finish.".into());
+                }
                 if crop.is_some() || density.is_some() {
-                    if !bed_data.editable()
-                        || self
-                            .farming
-                            .jobs
-                            .iter()
-                            .any(|job| job.site == site && job.bed == bed)
-                    {
-                        return Err("Choose a bed without standing crops or queued work.".into());
+                    if !bed_data.editable() {
+                        return Err(
+                            "Clear the standing crop before changing planting settings.".into()
+                        );
                     }
                     if density.is_some_and(|density| ![0.5, 1.0, 1.5].contains(&density)) {
                         return Err("Density must be 0.5, 1.0, or 1.5.".into());

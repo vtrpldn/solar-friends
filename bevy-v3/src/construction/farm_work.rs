@@ -346,6 +346,10 @@ impl Construction {
             .jobs
             .iter()
             .any(|job| job.site == site && job.bed == index);
+        if busy && !matches!(action, FarmControl::NextBed) {
+            self.farming.notice = "Wait for this bed’s current job to finish.".into();
+            return;
+        }
         match action {
             FarmControl::NextBed => {
                 self.farming.bed = (self.farming.bed + 1) % plot.beds.len();
@@ -353,11 +357,11 @@ impl Construction {
             }
             FarmControl::Irrigation => bed.irrigation = !bed.irrigation,
             FarmControl::Residues => bed.collect_residues = !bed.collect_residues,
-            FarmControl::Crop if !busy && bed.editable() => bed.crop = bed.crop.next(),
-            FarmControl::Density if !busy && bed.editable() => {
+            FarmControl::Crop if bed.editable() => bed.crop = bed.crop.next(),
+            FarmControl::Density if bed.editable() => {
                 bed.density = bed.next_density();
             }
-            FarmControl::Work(action) if !busy => {
+            FarmControl::Work(action) => {
                 match self.queue_bed_job(catalog, stock, (site, index, action), clock) {
                     Ok(()) => self.farming.notice.clear(),
                     Err(error) => self.farming.notice = error,
@@ -1023,6 +1027,39 @@ pub(super) fn seed_delivery_status(job: &FarmJob, clock: f64) -> String {
 mod resize_tests {
     use super::*;
     use crate::farming::{Crop, Stage};
+
+    #[test]
+    fn queued_bed_work_locks_watering_and_residue_settings() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut village = Construction::default();
+        let mut garden = village.proposed_site(&catalog, "garden", IVec2::new(44, 36));
+        garden.work = catalog.projects["garden"].work;
+        village.plans.push(garden);
+        village.tick_crops(&catalog, &setup, 0.0, 0.0);
+        village.production.selected = Some(0);
+        village.farming.open = true;
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
+        village
+            .queue_bed_job(&catalog, &mut stock, (0, 0, FarmAction::Prepare), clock)
+            .unwrap();
+        let bed = &village.farming.plots[&0].beds[0];
+        let original = (bed.irrigation, bed.collect_residues);
+
+        for action in [FarmControl::Irrigation, FarmControl::Residues] {
+            village.apply_farm_control(&catalog, &mut stock, action, clock);
+        }
+        let bed = &village.farming.plots[&0].beds[0];
+        assert_eq!((bed.irrigation, bed.collect_residues), original);
+        assert!(village.farming.notice.contains("current job"));
+
+        village.apply_farm_control(&catalog, &mut stock, FarmControl::NextBed, clock);
+        assert_eq!(village.farming.bed, 1);
+    }
 
     #[test]
     fn beds_can_request_irrigation_midway_through_a_long_step() {
