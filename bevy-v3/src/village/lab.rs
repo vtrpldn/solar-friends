@@ -341,15 +341,23 @@ impl Runner {
     }
 
     fn submit(&mut self, catalog: &Catalog, order: LabOrder) -> Result<(), &'static str> {
+        self.submit_orders(catalog, [order])
+    }
+
+    fn submit_orders(
+        &mut self,
+        catalog: &Catalog,
+        orders: impl IntoIterator<Item = LabOrder>,
+    ) -> Result<(), &'static str> {
         if self.done() {
             return Err("The scenario is complete.");
         }
-        self.scenario.orders.insert(
-            self.next_order,
-            ScheduledOrder {
+        self.scenario.orders.splice(
+            self.next_order..self.next_order,
+            orders.into_iter().map(|order| ScheduledOrder {
                 step: self.index,
                 order,
-            },
+            }),
         );
         if self
             .samples
@@ -591,14 +599,19 @@ fn lab_bed_page(
         .inventory_page
         .min(plots[&site].beds.len().saturating_sub(1));
     playback.inventory_page = index;
-    let mut order = None;
+    let all_beds = keys.any_pressed([KeyCode::ControlLeft, KeyCode::ControlRight]);
+    let mut orders = Vec::new();
     if !runner.done()
         && let Some(bed) = plots[&site].beds.get(index)
     {
+        let beds = if all_beds {
+            1..=plots[&site].beds.len()
+        } else {
+            index + 1..=index + 1
+        };
         let site = site + 1;
-        let index = index + 1;
         if keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]) {
-            order = [
+            if let Some((_, action)) = [
                 (KeyCode::Digit1, FarmAction::Prepare),
                 (KeyCode::Digit2, FarmAction::Plant),
                 (KeyCode::Digit3, FarmAction::Harvest),
@@ -608,11 +621,9 @@ fn lab_bed_page(
             ]
             .into_iter()
             .find(|(key, _)| keys.just_pressed(*key))
-            .map(|(_, action)| LabOrder::Bed {
-                site,
-                bed: index,
-                action,
-            });
+            {
+                orders.extend(beds.map(|bed| LabOrder::Bed { site, bed, action }));
+            }
         } else {
             let crop = keys.just_pressed(KeyCode::KeyX).then(|| bed.crop.next());
             let density = keys.just_pressed(KeyCode::KeyY).then(|| bed.next_density());
@@ -625,24 +636,39 @@ fn lab_bed_page(
                 || irrigation.is_some()
                 || collect_residues.is_some()
             {
-                order = Some(LabOrder::ConfigureBed {
+                orders.extend(beds.map(|bed| LabOrder::ConfigureBed {
                     site,
-                    bed: index,
+                    bed,
                     crop,
                     density,
                     irrigation,
                     collect_residues,
-                });
+                }));
             }
         }
     }
-    if let Some(order) = order {
-        playback.notice = match runner.submit(catalog, order) {
-            Ok(()) => runner
-                .outcomes
-                .last()
-                .and_then(|outcome| outcome.error.clone())
-                .unwrap_or_else(|| "Bed order accepted.".into()),
+    if !orders.is_empty() {
+        let count = orders.len();
+        let start = runner.outcomes.len();
+        playback.notice = match runner.submit_orders(catalog, orders) {
+            Ok(()) => {
+                let outcomes = &runner.outcomes[start..];
+                let first_error = outcomes.iter().find_map(|outcome| outcome.error.as_deref());
+                if count == 1 {
+                    first_error.unwrap_or("Bed order accepted.").into()
+                } else {
+                    let accepted = outcomes
+                        .iter()
+                        .filter(|outcome| outcome.error.is_none())
+                        .count();
+                    let mut notice = format!("{accepted} of {count} bed orders accepted.");
+                    if let Some(error) = first_error {
+                        notice.push(' ');
+                        notice.push_str(error);
+                    }
+                    notice
+                }
+            }
             Err(error) => error.into(),
         };
     }
@@ -656,7 +682,7 @@ fn lab_bed_page(
     let controls = if runner.done() {
         ""
     } else {
-        "\nShift+1 Prepare · +2 Plant · +3 Harvest · +4 Clear · +5 Amend · +6 Collect\nX Crop · Y Density · T Irrigation · Z Residues"
+        "\nShift+1 Prepare · +2 Plant · +3 Harvest · +4 Clear · +5 Amend · +6 Collect\nX Crop · Y Density · T Irrigation · Z Residues\nHold Ctrl to apply an order to every bed in the plot"
     };
     format!(
         "Cultivation · {name} #{}\nTab Switch view · [ / ] Plot · Page Up/Down Bed{controls}\n\n{details}",
@@ -1002,6 +1028,50 @@ mod tests {
                 ..
             }
         ));
+        while !runner.done() {
+            runner.advance(&catalog);
+        }
+        let data = serde_json::to_vec(&runner.report()).unwrap();
+        assert_eq!(
+            verify_report(serde_json::from_slice(&data).unwrap(), &catalog).unwrap(),
+            2
+        );
+    }
+
+    #[test]
+    fn bulk_lab_orders_keep_per_bed_results_and_replay() {
+        let catalog = Catalog::default();
+        let scenario = serde_json::from_str(
+            r#"{
+            "steps": 2,
+            "orders": [
+                {"step":0,"order":{"type":"build","key":"field","x":40,"z":36,"size":[2,2]}},
+                {"step":0,"order":{"type":"bed","site":1,"bed":1,"action":"Prepare"}}
+            ]
+        }"#,
+        )
+        .unwrap();
+        let mut runner = Runner::new(scenario, None, &catalog).unwrap();
+        let mut playback = Playback::default();
+        let mut keys = ButtonInput::default();
+        keys.press(KeyCode::ControlLeft);
+        keys.press(KeyCode::ShiftLeft);
+        keys.press(KeyCode::Digit1);
+        lab_bed_page(&mut runner, &catalog, &keys, &mut playback);
+        let count = runner.village.construction.farming.plots[&0].beds.len();
+        assert!(count > 1);
+        assert_eq!(runner.outcomes.len(), 2 + count);
+        assert!(runner.outcomes[2].error.is_some());
+        assert!(
+            runner.outcomes[3..]
+                .iter()
+                .all(|outcome| outcome.error.is_none())
+        );
+        assert!(
+            playback
+                .notice
+                .contains(&format!("{} of {count}", count - 1))
+        );
         while !runner.done() {
             runner.advance(&catalog);
         }
