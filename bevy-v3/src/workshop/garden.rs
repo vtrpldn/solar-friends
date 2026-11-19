@@ -391,12 +391,26 @@ fn edit(
     motion: Res<AccumulatedMouseMotion>,
     scroll: Res<AccumulatedMouseScroll>,
     mut typing: MessageReader<bevy::input::keyboard::KeyboardInput>,
+    mut pointer: Local<Option<(Vec2, bool)>>,
     window: Single<&Window>,
     mut camera: Single<(&Camera, &GlobalTransform, &mut Transform, &mut Projection)>,
 ) {
     use KeyCode::*;
     let (camera, global, transform, projection) = &mut *camera;
     let pressed = |key| keys.just_pressed(key);
+    let cursor = window.cursor_position();
+    if mouse.just_pressed(MouseButton::Left) {
+        *pointer = cursor.map(|origin| (origin, false));
+    }
+    if let (Some((origin, moved)), Some(cursor)) = (&mut *pointer, cursor) {
+        *moved |= origin.distance_squared(cursor) > 36.;
+    }
+    let drag = mouse.pressed(MouseButton::Left)
+        && pointer.is_some_and(|(_, moved)| moved)
+        && garden.pending.is_none();
+    let clicked = mouse.just_released(MouseButton::Left)
+        && pointer.take().is_some_and(|(_, moved)| !moved)
+        && cursor.is_some();
     if let Some(mut input) = garden.coordinates.take() {
         if pressed(Escape) {
             typing.clear();
@@ -509,7 +523,7 @@ fn edit(
     garden.zoom = (garden.zoom * (-0.09 * zoom_steps).exp()).clamp(0.035, 3.);
     garden.bearing +=
         (i32::from(pressed(KeyE)) - i32::from(pressed(KeyQ))) as f32 * std::f32::consts::FRAC_PI_2;
-    if mouse.pressed(MouseButton::Right) {
+    if drag || mouse.pressed(MouseButton::Right) {
         let zoom = garden.zoom;
         let right = transform.right().as_vec3();
         let forward = Vec3::Y.cross(right);
@@ -535,8 +549,7 @@ fn edit(
     if pressed(KeyG) {
         garden.grid = !garden.grid;
     }
-    let cell = window
-        .cursor_position()
+    let cell = cursor
         .and_then(|pixel| camera.viewport_to_world(global, pixel).ok())
         .and_then(|ray| garden.terrain.surface(ray))
         .map(|point| {
@@ -597,7 +610,8 @@ fn edit(
         return;
     }
     if let Some((mut prop, copy)) = garden.pending.take() {
-        if (motion.delta != Vec2::ZERO || mouse.just_pressed(MouseButton::Left))
+        if (motion.delta != Vec2::ZERO || clicked)
+            && !mouse.pressed(MouseButton::Right)
             && let Some((column, row)) = cell
         {
             prop.column = column;
@@ -608,9 +622,7 @@ fn edit(
         if pressed(KeyR) {
             prop.rotation = (prop.rotation + 90) % 360;
         }
-        if ((mouse.just_pressed(MouseButton::Left) && cell.is_some())
-            || pressed(Enter)
-            || pressed(NumpadEnter))
+        if ((clicked && cell.is_some()) || pressed(Enter) || pressed(NumpadEnter))
             && prop.fits(&models)
         {
             garden.edit();
@@ -625,13 +637,13 @@ fn edit(
         }
         return;
     }
-    if mouse.just_pressed(MouseButton::Left)
-        && let Some((column, row)) = cell
-    {
-        garden.selected = garden.layout.props.iter().rposition(|prop| {
-            let [width, depth] = prop.size(&models);
-            (prop.column..prop.column + width).contains(&column)
-                && (prop.row..prop.row + depth).contains(&row)
+    if clicked {
+        garden.selected = cell.and_then(|(column, row)| {
+            garden.layout.props.iter().rposition(|prop| {
+                let [width, depth] = prop.size(&models);
+                (prop.column..prop.column + width).contains(&column)
+                    && (prop.row..prop.row + depth).contains(&row)
+            })
         });
     }
     if pressed(F5) {
@@ -1008,7 +1020,7 @@ Enter place   Esc cancel
         });
     let rehearsal_hint = rehearsal::hint(&rehearsal, &garden.layout.props, selection, &models);
     text.0 = format!(
-        "Asset Garden  ·  {} props  ·  {}\n{label}{connection}\nRight drag pan   Scroll or +/- zoom   Q/E turn   Home first prop   End whole plot   G grid   N night   / catalog\nB terrain   L load biome landscape\nM move   F2 exact position   R rotate   Ctrl/Cmd D duplicate   Insert place another   Delete remove   F5 restore gallery\nArrows adjust placement   Click/Enter confirm   Esc cancel   Ctrl/Cmd Z undo   Shift redo   Ctrl/Cmd S save   Drop scene JSON to import{rehearsal_hint}\n{}\n{}",
+        "Asset Garden  ·  {} props  ·  {}\n{label}{connection}\nDrag to pan   Scroll or +/- zoom   Q/E turn   Home first prop   End whole plot   G grid   N night   / catalog\nB terrain   L load biome landscape\nM move   F2 exact position   R rotate   Ctrl/Cmd D duplicate   Insert place another   Delete remove   F5 restore gallery\nArrows adjust placement   Click/Enter confirm   Esc cancel   Ctrl/Cmd Z undo   Shift redo   Ctrl/Cmd S save   Drop scene JSON to import{rehearsal_hint}\n{}\n{}",
         garden.layout.props.len(),
         garden.layout.biome,
         garden.status,
