@@ -467,6 +467,7 @@ impl Trade {
 
     pub fn cancel_order(
         &mut self,
+        catalog: &Catalog,
         stock: &mut Stock,
         market: &mut Market,
         index: usize,
@@ -477,7 +478,7 @@ impl Trade {
                 stock,
                 &order.material,
                 order.day,
-                order.quantity,
+                catalog.materials[&order.material].pack,
                 order.cents,
                 order.fare,
             );
@@ -783,6 +784,35 @@ mod tests {
             assert!(trade.orders.is_empty() && trade.delivery.is_none());
             assert_eq!(market.committed_fares(), 0);
         }
+    }
+
+    #[test]
+    fn canceling_a_spoiled_purchase_releases_the_original_pack() {
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);
+        let mut market = Market::default();
+        let mut trade = Trade::default();
+        let available = market.supplier_available(&catalog, "milk", 0);
+        let balance = stock.balance();
+        trade
+            .buy(&catalog, &mut stock, &mut market, "milk", (0.0, 12, false))
+            .unwrap();
+
+        trade.age_shipments(
+            &catalog,
+            &mut stock,
+            &mut market,
+            crate::weather::DAY * 2.0,
+            &[],
+        );
+        assert_eq!(trade.orders[0].quantity, 0);
+        assert_eq!(
+            trade.cancel_order(&catalog, &mut stock, &mut market, 0),
+            Some(0)
+        );
+        assert_eq!(market.supplier_available(&catalog, "milk", 0), available);
+        assert_eq!(market.committed_fares(), 0);
+        assert_eq!(stock.balance(), balance);
     }
 
     #[test]

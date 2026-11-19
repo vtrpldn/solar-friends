@@ -1064,7 +1064,7 @@ fn handle_buttons(
                 Action::TradeQueued(row) if !picker.open => {
                     let town = &mut *village;
                     town.construction
-                        .cancel_trade_queue_row(&mut town.stock, row);
+                        .cancel_trade_queue_row(&catalog, &mut town.stock, row);
                 }
                 Action::TradeItem(row) if !picker.open => {
                     village.construction.select_trade_row(&catalog, row)

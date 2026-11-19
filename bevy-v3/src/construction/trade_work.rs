@@ -114,12 +114,12 @@ impl Construction {
             .collect()
     }
 
-    pub fn cancel_trade_queue_row(&mut self, stock: &mut Stock, row: usize) {
+    pub fn cancel_trade_queue_row(&mut self, catalog: &Catalog, stock: &mut Stock, row: usize) {
         let Some(offset) = self.trade_queue_offset() else {
             return;
         };
         if row < ORDER_ROWS {
-            self.cancel_queued_trade(stock, offset + row);
+            self.cancel_queued_trade(catalog, stock, offset + row);
         }
     }
 
@@ -181,12 +181,15 @@ impl Construction {
         Ok(quantity)
     }
 
-    fn cancel_queued_trade(&mut self, stock: &mut Stock, index: usize) {
+    fn cancel_queued_trade(&mut self, catalog: &Catalog, stock: &mut Stock, index: usize) {
         if self.booked_trade_orders().contains(&index) {
             self.trade.notice = "This order is already booked.".into();
             return;
         }
-        if let Some(index) = self.trade.cancel_order(stock, &mut self.market, index) {
+        if let Some(index) = self
+            .trade
+            .cancel_order(catalog, stock, &mut self.market, index)
+        {
             self.removed_trade_order(index);
         }
     }
@@ -234,7 +237,7 @@ impl Construction {
                 if keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]) {
                     self.toggle_trade_queue_hold(stock, row, clock.round_trip_km);
                 } else {
-                    self.cancel_trade_queue_row(stock, row);
+                    self.cancel_trade_queue_row(catalog, stock, row);
                 }
             }
             return;
@@ -428,7 +431,7 @@ impl Construction {
                     .rev()
                     .find(|index| !active.contains(index))
                 {
-                    self.cancel_queued_trade(stock, index);
+                    self.cancel_queued_trade(catalog, stock, index);
                 }
             }
         }
@@ -680,11 +683,11 @@ mod tests {
         let rows = village.trade_queue_labels(&catalog);
         assert!(rows[0].can_cancel && rows[0].label.contains("Queued"));
         assert!(!rows[1].can_cancel && rows[1].label.contains("Booked"));
-        village.cancel_trade_queue_row(&mut stock, 1);
+        village.cancel_trade_queue_row(&catalog, &mut stock, 1);
         assert_eq!(village.trade.orders.len(), 2);
         assert_eq!(stock.available("wood"), before - sold);
 
-        village.cancel_trade_queue_row(&mut stock, 0);
+        village.cancel_trade_queue_row(&catalog, &mut stock, 0);
         assert_eq!(stock.available("wood"), before);
         assert_eq!(village.trade.orders.len(), 1);
         assert!(village.trade.orders[0].buying);
