@@ -196,6 +196,9 @@ impl Construction {
                     GatherPhase::Approach => "Heading to the site".to_owned(),
                     GatherPhase::Work => format!("{:.0}% worked", 100.0 * job.work / recipe.work),
                     GatherPhase::Return => "Carrying supplies back".to_owned(),
+                    GatherPhase::CollectOutput => {
+                        "Returning for the next gathering load".to_owned()
+                    }
                 };
                 jobs.push(format!(
                     "{} · {status} · {}",

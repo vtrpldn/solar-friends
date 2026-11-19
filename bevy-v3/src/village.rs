@@ -584,7 +584,7 @@ impl Village {
             && self
                 .construction
                 .gathering
-                .valid_save(&Land::generate(setup))
+                .valid_save(&Land::generate(setup), catalog)
     }
 }
 

@@ -22,6 +22,8 @@ pub struct GatherJob {
     #[serde(default)]
     pub retry_at: f64,
     pub phase: GatherPhase,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub remaining: Option<BTreeMap<String, u32>>,
 }
 
 #[derive(PartialEq, Eq, Deserialize, Serialize)]
@@ -29,6 +31,7 @@ pub enum GatherPhase {
     Approach,
     Work,
     Return,
+    CollectOutput,
 }
 
 #[derive(Default, Deserialize, Serialize)]
@@ -94,6 +97,7 @@ impl Gathering {
                     job.work / catalog.gathering[land.site(index)?.recipe()].work * 100.0
                 ),
                 GatherPhase::Return => "Carrying output back to stores".into(),
+                GatherPhase::CollectOutput => "Returning for the next load".into(),
             }
         } else if let Some(state) = self.markers.get(&index).filter(|state| clock < state.ready) {
             format!(
@@ -238,6 +242,7 @@ impl Gathering {
                 work: 0.0,
                 retry_at: 0.0,
                 phase: GatherPhase::Approach,
+                remaining: None,
             },
         );
     }
@@ -253,14 +258,29 @@ impl Gathering {
         marker.ready = available_again;
     }
 
-    pub fn valid_save(&self, land: &Land) -> bool {
+    pub fn valid_save(&self, land: &Land, catalog: &Catalog) -> bool {
         self.markers
             .iter()
             .all(|(&index, state)| land.site(index).is_some() && state.ready >= 0.0)
             && self.orders.iter().all(|(&index, job)| {
-                land.site(index).is_some()
-                    && job.work >= 0.0
+                let Some(site) = land.site(index) else {
+                    return false;
+                };
+                let recipe = &catalog.gathering[site.recipe()];
+                (0.0..=recipe.work).contains(&job.work)
                     && job.worker.is_none_or(|worker| worker < 5)
+                    && (job.phase != GatherPhase::CollectOutput || job.remaining.is_some())
+                    && job.remaining.as_ref().is_none_or(|remaining| {
+                        matches!(job.phase, GatherPhase::Return | GatherPhase::CollectOutput)
+                            && !remaining.is_empty()
+                            && remaining.iter().all(|(id, &quantity)| {
+                                quantity > 0
+                                    && recipe
+                                        .output
+                                        .get(id)
+                                        .is_some_and(|&total| quantity <= total)
+                            })
+                    })
             })
     }
 }

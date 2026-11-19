@@ -2691,19 +2691,33 @@ mod tests {
             .queue(&catalog, &land, terrain.seed, setup.richness(), 0.0);
         let output = catalog.gathering["stone"].output["stone"];
         let mut returning = false;
-        for step in 0..2_000 {
+        let mut saved_between_loads = false;
+        for step in 0..16_000 {
             let clock = TownClock {
                 seconds: f64::from(step) / 10.0,
                 round_trip_km: 12,
             };
             construction.tick(&catalog, &mut stock, site, clock, 0.1, false);
-            if construction.gathering.orders.is_empty() {
+            let Some(job) = construction.gathering.orders.get(&deposit) else {
                 break;
+            };
+            if !returning {
+                assert_eq!(stock.available("stone"), 0);
             }
-            returning |= construction.gathering.orders[&deposit].phase == GatherPhase::Return;
-            assert_eq!(stock.available("stone"), 0);
+            returning |= job.phase == GatherPhase::Return;
+            if !saved_between_loads && job.phase == GatherPhase::CollectOutput {
+                let delivered = stock.available("stone");
+                assert!((1..output).contains(&delivered));
+                assert_eq!(job.remaining.as_ref().unwrap()["stone"], output - delivered);
+                construction =
+                    serde_json::from_slice(&serde_json::to_vec(&construction).unwrap()).unwrap();
+                assert!(construction.gathering.valid_save(&land, &catalog));
+                saved_between_loads = true;
+            }
         }
         assert!(returning);
+        assert!(saved_between_loads);
+        assert!(construction.gathering.orders.is_empty());
         assert_eq!(stock.available("stone"), output);
     }
 
