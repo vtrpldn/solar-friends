@@ -13,10 +13,16 @@ pub(super) struct MapState {
     pub resource: Option<usize>,
     pub blueprint: Option<(String, u8)>,
     placement: Option<IVec2>,
+    field_size: Option<IVec2>,
     pub preview_error: Option<&'static str>,
 }
 
 impl MapState {
+    pub fn field_size(&self) -> IVec2 {
+        self.field_size
+            .unwrap_or_else(crate::construction::default_field_size)
+    }
+
     pub fn build_order(
         &mut self,
         catalog: &Catalog,
@@ -52,13 +58,27 @@ impl MapState {
         {
             key.clone_from(previous);
         }
+        let field_size = if key == "field" {
+            let dx = i32::from(keys.just_pressed(KeyCode::ArrowRight))
+                - i32::from(keys.just_pressed(KeyCode::ArrowLeft));
+            let dz = i32::from(keys.just_pressed(KeyCode::ArrowUp))
+                - i32::from(keys.just_pressed(KeyCode::ArrowDown));
+            let before = self
+                .field_size
+                .unwrap_or_else(crate::construction::default_field_size);
+            let size = (before + IVec2::new(dx, dz)).clamp(IVec2::splat(2), IVec2::splat(32));
+            self.field_size = Some(size);
+            Some(size.to_array())
+        } else {
+            None
+        };
         let cell = self.placement.take()?;
         Some(LabOrder::Build {
             key: key.clone(),
             x: cell.x,
             z: cell.y,
             rotation: *rotation,
-            size: None,
+            size: field_size,
         })
     }
 
@@ -165,7 +185,7 @@ pub(super) fn draw(
                 &catalog,
                 ground,
                 runner.village.stock.sandbox,
-                (key, cell, *rotation),
+                (key, cell, *rotation, map.field_size()),
             );
             let position = cell.as_vec2() + (size.as_vec2() - Vec2::ONE) * 0.5;
             let tint = if error.is_some() {
@@ -263,4 +283,33 @@ pub(super) fn resource_status(runner: &Runner, catalog: &Catalog, index: usize) 
         ),
     );
     Some(format!("{name} · {status}"))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn field_placement_records_the_selected_dimensions_before_rotation() {
+        let catalog = Catalog::default();
+        let mut map = MapState {
+            blueprint: Some(("field".into(), 0)),
+            placement: Some(IVec2::new(40, 36)),
+            ..default()
+        };
+        let mut keys = ButtonInput::default();
+        keys.press(KeyCode::ArrowRight);
+        keys.press(KeyCode::KeyR);
+        assert!(matches!(
+            map.build_order(&catalog, &keys),
+            Some(LabOrder::Build {
+                x: 40,
+                z: 36,
+                rotation: 1,
+                size: Some([3, 2]),
+                ..
+            })
+        ));
+        assert_eq!(map.field_size(), IVec2::new(3, 2));
+    }
 }

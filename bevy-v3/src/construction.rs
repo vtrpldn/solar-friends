@@ -1831,7 +1831,7 @@ fn rotated_size(size: IVec2, rotation: u8) -> IVec2 {
     }
 }
 
-fn default_field_size() -> IVec2 {
+pub(crate) fn default_field_size() -> IVec2 {
     IVec2::splat(2)
 }
 

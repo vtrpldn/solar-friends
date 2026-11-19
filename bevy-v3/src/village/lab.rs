@@ -1225,8 +1225,17 @@ fn update_lab_window(
                 ""
             };
             let build = if let Some((key, rotation)) = &map.blueprint {
+                let field = if key == "field" {
+                    let size = map.field_size();
+                    format!(
+                        "\n{} × {} cells before rotation · Arrow keys Resize",
+                        size.x, size.y
+                    )
+                } else {
+                    String::new()
+                };
                 format!(
-                    "\nPlace {} · {}° · [ / ] Blueprint · R Rotate · Esc Cancel{}",
+                    "\nPlace {} · {}° · [ / ] Blueprint · R Rotate · Esc Cancel{field}{}",
                     catalog.projects[key].name,
                     u16::from(*rotation) * 90,
                     map.preview_error

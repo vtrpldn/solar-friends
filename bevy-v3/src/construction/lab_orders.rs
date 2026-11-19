@@ -210,9 +210,9 @@ impl Construction {
         catalog: &Catalog,
         ground: ConstructionSite,
         sandbox: bool,
-        (key, cell, rotation): (&str, IVec2, u8),
+        (key, cell, rotation, field_size): (&str, IVec2, u8, IVec2),
     ) -> (IVec2, Option<&'static str>) {
-        let proposal = Self::proposal(catalog, key, cell, default_field_size(), rotation);
+        let proposal = Self::proposal(catalog, key, cell, field_size, rotation);
         let error = self.placement_error(
             ground.terrain,
             ground.land,
