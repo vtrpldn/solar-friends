@@ -142,6 +142,12 @@ impl Garden {
         self.bearing = HOME_BEARING;
     }
 
+    fn frame_plot(&mut self, aspect: f32) {
+        self.target = Vec3::ZERO;
+        self.zoom =
+            1_f32.max(WIDTH * std::f32::consts::SQRT_2 * 1.05 / (CAMERA_HEIGHT * aspect.max(0.1)));
+    }
+
     fn begin_copy(&mut self, mut prop: Prop) {
         if self.layout.props.len() >= 1000 {
             self.status = "The plot already has 1,000 props.".into();
@@ -291,6 +297,7 @@ pub fn run(path: Option<PathBuf>, night: bool, study: bool) {
         night,
     })
     .add_observer(light_new_props)
+    .add_observer(style_placement_preview)
     .add_systems(Startup, setup)
     .add_systems(
         Update,
@@ -516,10 +523,7 @@ fn edit(
         garden.focus_first(&models);
     }
     if pressed(End) {
-        let aspect = window.width() / window.height().max(1.);
-        garden.target = Vec3::ZERO;
-        garden.zoom =
-            1_f32.max(WIDTH * std::f32::consts::SQRT_2 * 1.05 / (CAMERA_HEIGHT * aspect.max(0.1)));
+        garden.frame_plot(window.width() / window.height().max(1.));
     }
     **transform = camera_transform(garden.target, garden.bearing);
     if let Projection::Orthographic(orthographic) = &mut **projection {
@@ -583,10 +587,13 @@ fn edit(
         garden.edit();
         garden.layout.props = biome_landscape(&garden.layout.biome);
         garden.selected = None;
+        garden.frame_plot(window.width() / window.height().max(1.));
         return;
     }
     if pressed(Escape) {
-        garden.pending = None;
+        if garden.pending.take().is_none() {
+            garden.selected = None;
+        }
         return;
     }
     if let Some((mut prop, copy)) = garden.pending.take() {
@@ -631,6 +638,7 @@ fn edit(
         garden.edit();
         garden.layout.props = garden.gallery.props.clone();
         garden.selected = None;
+        garden.focus_first(&models);
     }
     let Some(index) = garden.selected else {
         return;
@@ -643,6 +651,12 @@ fn edit(
     } else if pressed(KeyM) {
         garden.pending = Some((prop, false));
     } else if modifier && pressed(KeyD) {
+        garden.begin_copy(prop);
+    } else if pressed(Insert) {
+        prop.rotation = 0;
+        let [width, depth] = prop.size(&models);
+        prop.column = prop.column.min(CELLS - width);
+        prop.row = prop.row.min(CELLS - depth);
         garden.begin_copy(prop);
     } else if pressed(KeyR) {
         prop.rotation = (prop.rotation + 90) % 360;
@@ -748,13 +762,60 @@ fn update_terrain(
     }
 }
 
+fn style_placement_preview(
+    event: On<SceneInstanceReady>,
+    mut commands: Commands,
+    garden: Res<Garden>,
+    previews: Query<(), With<PlacementPreview>>,
+    children: Query<&Children>,
+    surfaces: Query<&MeshMaterial3d<StandardMaterial>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    if !previews.contains(event.entity) {
+        return;
+    }
+    let mut handles = HashMap::new();
+    for entity in children.iter_descendants(event.entity) {
+        let Ok(original) = surfaces.get(entity) else {
+            continue;
+        };
+        let Some(mut material) = materials.get(original.id()).cloned() else {
+            continue;
+        };
+        let handle = handles.entry(original.id()).or_insert_with(|| {
+            if let Some(strength) = glow_strength(material.base_color) {
+                set_glow(&mut material, strength, garden.night);
+            }
+            material.alpha_mode = AlphaMode::Blend;
+            material.base_color = material.base_color.with_alpha(0.55);
+            materials.add(material)
+        });
+        commands
+            .entity(entity)
+            .insert((MeshMaterial3d(handle.clone()), bevy::light::NotShadowCaster));
+    }
+}
+
 fn preview(
     mut commands: Commands,
     garden: Res<Garden>,
     models: Res<WorkshopCatalog>,
     assets: Res<AssetServer>,
     mut existing: Query<(Entity, &PlacementPreview, &mut Transform)>,
+    mut props: Query<(&GardenProp, &mut Visibility)>,
 ) {
+    let moving = garden
+        .pending
+        .as_ref()
+        .filter(|(_, copy)| !copy)
+        .map(|(prop, _)| prop.id.as_str());
+    for (prop, mut visibility) in &mut props {
+        visibility.set_if_neq(if moving == Some(prop.id.as_str()) {
+            Visibility::Hidden
+        } else {
+            Visibility::Inherited
+        });
+    }
     let pending = garden.pending.as_ref().map(|(prop, _)| {
         let model = models.0[&prop.asset].model;
         let mut center = prop.center(&models);
@@ -947,7 +1008,7 @@ Enter place   Esc cancel
         });
     let rehearsal_hint = rehearsal::hint(&rehearsal, &garden.layout.props, selection, &models);
     text.0 = format!(
-        "Asset Garden  ·  {} props  ·  {}\n{label}{connection}\nRight drag pan   Scroll or +/- zoom   Q/E turn   Home first prop   End whole plot   G grid   N night   / catalog\nB terrain   L load biome landscape\nM move   F2 exact position   R rotate   Ctrl/Cmd D copy   Delete remove   F5 restore gallery\nArrows adjust placement   Click/Enter confirm   Esc cancel   Ctrl/Cmd Z undo   Shift redo   Ctrl/Cmd S save   Drop scene JSON to import{rehearsal_hint}\n{}\n{}",
+        "Asset Garden  ·  {} props  ·  {}\n{label}{connection}\nRight drag pan   Scroll or +/- zoom   Q/E turn   Home first prop   End whole plot   G grid   N night   / catalog\nB terrain   L load biome landscape\nM move   F2 exact position   R rotate   Ctrl/Cmd D duplicate   Insert place another   Delete remove   F5 restore gallery\nArrows adjust placement   Click/Enter confirm   Esc cancel   Ctrl/Cmd Z undo   Shift redo   Ctrl/Cmd S save   Drop scene JSON to import{rehearsal_hint}\n{}\n{}",
         garden.layout.props.len(),
         garden.layout.biome,
         garden.status,
