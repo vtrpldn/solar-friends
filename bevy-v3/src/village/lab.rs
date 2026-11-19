@@ -1389,6 +1389,8 @@ struct Playback {
     debt: f64,
     speed_meter: SpeedMeter,
     interval: usize,
+    custom_interval: Option<f64>,
+    interval_entry: Option<String>,
     stop: usize,
     pause_at: Option<u64>,
     order: Option<String>,
@@ -1480,13 +1482,35 @@ impl Playback {
         }
     }
 
+    fn set_custom_interval(&mut self, entry: &str) -> Result<(), &'static str> {
+        let days = entry
+            .trim()
+            .parse::<f64>()
+            .ok()
+            .filter(|&days| days > 0.0 && days <= 365.0)
+            .ok_or("Choose a duration greater than zero and at most 365 days.")?;
+        self.custom_interval = Some(days);
+        Ok(())
+    }
+
+    fn interval(&self) -> (f64, String) {
+        self.custom_interval.map_or_else(
+            || {
+                let (days, label) = RUN_INTERVALS[self.interval];
+                (days, label.into())
+            },
+            |days| (days, format!("{days} days")),
+        )
+    }
+
     fn interval_controls(&self) -> String {
         if self.replaying {
             return String::new();
         }
         format!(
-            "F2 Interval {} · F3 Run interval · Shift+J Advance 1h\nF4 Extra stop · {}\n",
-            RUN_INTERVALS[self.interval].1, PLAYBACK_STOPS[self.stop].1
+            "F2 Interval {} · Shift+F2 Custom · F3 Run interval · Shift+J Advance 1h\nF4 Extra stop · {}\n",
+            self.interval().1,
+            PLAYBACK_STOPS[self.stop].1
         )
     }
 
@@ -1516,6 +1540,8 @@ impl Default for Playback {
             debt: 0.0,
             speed_meter: SpeedMeter::default(),
             interval: 3,
+            custom_interval: None,
+            interval_entry: None,
             stop: 0,
             pause_at: None,
             order: None,
@@ -1732,6 +1758,48 @@ fn update_lab_window(
             _ => None,
         })
         .last();
+    let shift = keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]);
+    if !playback.replaying
+        && playback.order.is_none()
+        && playback.build_search.is_none()
+        && playback.story_settings.is_none()
+        && playback.replacement.is_none()
+        && shift
+        && keys.just_pressed(KeyCode::F2)
+    {
+        playback.running = false;
+        playback.pause_at = None;
+        playback.reset_timing();
+        playback.notice.clear();
+        playback.interval_entry = Some(String::new());
+        events.clear();
+    }
+    if let Some(mut entry) = playback.interval_entry.take() {
+        map.visible = false;
+        if keys.just_pressed(KeyCode::Escape) {
+            events.clear();
+            return;
+        }
+        if keys.any_just_pressed([KeyCode::Enter, KeyCode::NumpadEnter]) {
+            events.clear();
+            match playback.set_custom_interval(&entry) {
+                Ok(()) => {
+                    playback.notice = format!("Interval set to {}.", playback.interval().1);
+                    panel.set_if_neq(Text::new(playback.notice.clone()));
+                    return;
+                }
+                Err(error) => playback.notice = error.into(),
+            }
+        } else {
+            crate::construction::read_search_text(&mut entry, &mut events);
+        }
+        panel.set_if_neq(Text::new(format!(
+            "Custom run interval\nDays · {entry}▏\nEnter Set duration · Esc Cancel\n{}",
+            playback.notice
+        )));
+        playback.interval_entry = Some(entry);
+        return;
+    }
     if let Some(LabSource::Story(setup)) = source.as_deref()
         && playback.order.is_none()
         && playback.build_search.is_none()
@@ -2014,13 +2082,16 @@ fn update_lab_window(
     if !playback.replaying && keys.just_pressed(KeyCode::F4) {
         playback.cycle_stop();
     }
-    if !playback.replaying && keys.just_pressed(KeyCode::F2) {
+    if !playback.replaying
+        && keys.just_pressed(KeyCode::F2)
+        && playback.custom_interval.take().is_none()
+    {
         playback.interval = (playback.interval + 1) % RUN_INTERVALS.len();
     }
     if !playback.replaying && !reached_end(&runner) {
         if keys.just_pressed(KeyCode::F3) {
-            let (days, label) = RUN_INTERVALS[playback.interval];
-            playback.start_interval(runner.index, limit, days * crate::weather::DAY, label);
+            let (days, label) = playback.interval();
+            playback.start_interval(runner.index, limit, days * crate::weather::DAY, &label);
         } else if keys.just_pressed(KeyCode::KeyJ)
             && keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight])
         {
@@ -2850,6 +2921,23 @@ mod tests {
         input["setup"]["biome"] = serde_json::json!(3);
         let invalid = serde_json::from_value(input).unwrap();
         assert!(run(invalid, None, &catalog).is_err());
+    }
+
+    #[test]
+    fn custom_intervals_accept_fractional_days_and_respect_the_run_limit() {
+        let mut playback = Playback::default();
+        for invalid in ["", "0", "-1", "NaN", "inf", "365.01"] {
+            assert!(playback.set_custom_interval(invalid).is_err());
+        }
+        playback.set_custom_interval("0.25").unwrap();
+        assert!(playback.set_custom_interval("0").is_err());
+        let (days, label) = playback.interval();
+        assert_eq!(days, 0.25);
+        let seconds = days * crate::weather::DAY;
+        playback.start_interval(10, 100_000, seconds, &label);
+        assert_eq!(playback.pause_at, Some(10 + (seconds / STEP).ceil() as u64));
+        playback.start_interval(10, 12, seconds, &label);
+        assert_eq!(playback.pause_at, Some(12));
     }
 
     #[test]
