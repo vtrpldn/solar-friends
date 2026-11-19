@@ -114,14 +114,18 @@ impl Guide {
         self.screen.is_some()
     }
 
+    pub(super) fn toggle(&mut self) {
+        self.screen = if self.open() {
+            None
+        } else {
+            Some(Screen::Quick(0))
+        };
+    }
+
     /// Consume the whole frame when opening, reading or closing the guide.
     pub(super) fn controls(&mut self, keys: &ButtonInput<KeyCode>) -> bool {
         if keys.just_pressed(KeyCode::F1) {
-            self.screen = if self.open() {
-                None
-            } else {
-                Some(Screen::Quick(0))
-            };
+            self.toggle();
             return true;
         }
         let Some(screen) = self.screen else {

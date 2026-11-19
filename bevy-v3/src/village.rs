@@ -11,6 +11,7 @@ use lens_picker::{LensPicker, MapLens};
 mod library_ui;
 mod resource_lens;
 mod road_surface;
+mod toolbar;
 
 use library_ui::{autosave_named, library_controls};
 
@@ -65,6 +66,7 @@ impl Plugin for VillagePlugin {
         road_surface::install(app);
         building_preview::install(app);
         build_menu::install(app);
+        toolbar::install(app);
         app.add_systems(PostUpdate, cultivation_surface::show_beds);
         app.init_resource::<Village>()
             .init_resource::<CampPointer>()
