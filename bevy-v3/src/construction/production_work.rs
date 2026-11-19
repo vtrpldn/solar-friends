@@ -1425,17 +1425,21 @@ impl Construction {
                 self.production.jobs.remove(index);
                 continue;
             };
-            let from = self.residents[worker].position;
-            let path = self.resident_route(catalog, site, from, SUPPLY_SPOTS[worker]);
+            let resident = &self.residents[worker];
+            let path = if resident.health.task.is_none() && !resident.town_work.active() {
+                self.resident_route(catalog, site, resident.position, SUPPLY_SPOTS[worker])
+            } else {
+                None
+            };
             let job = &mut self.production.jobs[index];
             job.delivered_output = Some(good);
             job.food_output = Some(surviving);
             job.food_input = None;
             job.phase = Phase::Return;
+            self.residents[worker].clear_work_route();
             if let Some(path) = path {
                 self.residents[worker].path = path;
             } else {
-                self.residents[worker].path.clear();
                 job.worker = None;
             }
             self.production.notice =
@@ -1701,6 +1705,60 @@ mod upgrade_tests {
             village.expire_batch_food(&catalog, &mut stock, site, after_expiry);
             assert!(village.production.jobs.is_empty());
         }
+    }
+
+    #[test]
+    fn surviving_ingredients_wait_for_a_hauler_without_interrupting_resident_care() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let terrain = setup.terrain();
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp: IVec2::new(36, 36),
+        };
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut village = Construction::default();
+        let mut kitchen = village.proposed_site(&catalog, "kitchen", IVec2::new(44, 36));
+        kitchen.work = catalog.projects["kitchen"].work;
+        village.plans.push(kitchen);
+        stock.receive(&catalog.production["cook_greens"].input);
+        village.queue_batch(&catalog, &mut stock, 0, "cook_greens");
+        let job = &mut village.production.jobs[0];
+        job.worker = Some(0);
+        let lot = |expires| crate::food::Lot {
+            units: 2,
+            expires,
+            preserved: false,
+            chilled: false,
+        };
+        job.food_input = Some(BTreeMap::from([(
+            "greens".into(),
+            vec![lot(1.0), lot(10.0)],
+        )]));
+        let waypoint = SUPPLY_SPOTS[1].as_vec2();
+        village.residents[0].path = VecDeque::from([waypoint]);
+        village.residents[0].health.task = Some(crate::residents::NeedTask {
+            kind: Need::Sleep,
+            facility: None,
+            elapsed: 0.0,
+            started_at: None,
+            duration: 100.0,
+            water: 0.0,
+            returning: false,
+            partner: None,
+            conversation: None,
+        });
+
+        village.expire_batch_food(&catalog, &mut stock, site, 5.0);
+
+        let job = &village.production.jobs[0];
+        assert!(job.phase == Phase::Return);
+        assert_eq!(job.worker, None);
+        assert_eq!(job.delivered_output.as_ref().unwrap()["greens"], 2);
+        assert_eq!(job.food_output.as_ref().unwrap()["greens"][0].expires, 10.0);
+        assert_eq!(village.residents[0].path.front(), Some(&waypoint));
     }
 
     #[test]
