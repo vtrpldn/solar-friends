@@ -2408,10 +2408,18 @@ impl Construction {
                         + f64::from(dt) * work_multiplier * tools * efficiency * hunger * rain)
                         .min(catalog.projects[&project.key].work);
                     if project.work >= catalog.projects[&project.key].work {
-                        self.events.record(
-                            clock,
-                            format!("{} completed.", catalog.projects[&project.key].name),
-                        );
+                        let definition = &catalog.projects[&project.key];
+                        let detail = match project.key.as_str() {
+                            "gathering" => "Somewhere to sit together at last.",
+                            "shelter" => "A roof for our first night.",
+                            "water" => "Water close at hand.",
+                            _ if definition.kind == "eco_toilet" => {
+                                "A little privacy goes a long way."
+                            }
+                            _ => "Ready for the community to use.",
+                        };
+                        self.events
+                            .record(clock, format!("{} is ready. {detail}", definition.name));
                     }
                     worker.experience += f64::from(dt);
                     worker.health.energy = (worker.health.energy - f64::from(dt) * 0.16).max(0.0);
@@ -3735,6 +3743,11 @@ mod tests {
         assert!(saw_transit && saw_assembly && saw_named_crew);
         assert_eq!(construction.finished_models(&catalog).count(), 1);
         assert_eq!(construction.plans[0].delivered, loads);
+        assert!(
+            construction
+                .latest_event()
+                .is_some_and(|event| { event.contains("Somewhere to sit together at last.") })
+        );
         assert_eq!(stock.available("wood"), 28);
     }
 
