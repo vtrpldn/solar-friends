@@ -808,6 +808,22 @@ mod tests {
         press_button(&mut app, "16×");
         press_button(&mut app, "1×");
 
+        press_button(&mut app, "View");
+        press_button(&mut app, "Keyboard & camera");
+        assert!(
+            app.world()
+                .resource::<village::Village>()
+                .map_input_blocked()
+        );
+        let world = app.world_mut();
+        assert!(
+            world
+                .query::<&Text>()
+                .iter(world)
+                .any(|text| text.0.contains("Village guide · Keyboard & camera"))
+        );
+        press_button(&mut app, "Close guide");
+
         press_button(&mut app, "Guide");
         let reading_time = app.world().resource::<village::Village>().seconds();
         assert!(app.world().resource::<village::Village>().is_paused());

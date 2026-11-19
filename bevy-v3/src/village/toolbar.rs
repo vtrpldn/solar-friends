@@ -14,6 +14,7 @@ enum Action {
     CampPreset(usize),
     Setup,
     View,
+    CameraControls,
     Camera(crate::CameraAction),
     GridOverlay,
     Forecast,
@@ -203,6 +204,7 @@ impl Action {
                     && village.construction.gathering.has_selection()
             }
             Self::View
+            | Self::CameraControls
             | Self::Camera(_)
             | Self::GridOverlay
             | Self::Forecast
@@ -352,6 +354,7 @@ impl Action {
             Self::Setup => "Setup".into(),
             Self::View if picker.view_open => "Close view".into(),
             Self::View => "View".into(),
+            Self::CameraControls => "Keyboard & camera".into(),
             Self::GridOverlay if village.show_grid => "Hide grid".into(),
             Self::GridOverlay => "Show grid".into(),
             Self::Forecast if village.show_forecast => "Hide forecast".into(),
@@ -729,6 +732,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 ] {
                     spawn_button(menu, &assets, Action::Camera(action));
                 }
+                spawn_button(menu, &assets, Action::CameraControls);
                 spawn_button(menu, &assets, Action::GridOverlay);
                 spawn_button(menu, &assets, Action::Forecast);
                 spawn_button(menu, &assets, Action::Diagnostics);
@@ -1013,6 +1017,10 @@ fn handle_buttons(
                     picker.view_open = !picker.view_open;
                     picker.open = false;
                 }
+                Action::CameraControls if picker.view_open => {
+                    village.guide.open_camera_controls();
+                    picker.view_open = false;
+                }
                 Action::Camera(action) if picker.view_open => {
                     if let Projection::Orthographic(projection) = &mut **projection {
                         crate::apply_camera_action(action, &village, &setup, camera, projection);
@@ -1026,6 +1034,7 @@ fn handle_buttons(
                     village.save_notice = diagnostics::copy_notice(&village, &catalog, &window);
                 }
                 Action::Camera(_)
+                | Action::CameraControls
                 | Action::GridOverlay
                 | Action::Forecast
                 | Action::Diagnostics => {}
@@ -1613,7 +1622,11 @@ fn refresh(
         };
         let show = if matches!(
             action,
-            Action::Camera(_) | Action::GridOverlay | Action::Forecast | Action::Diagnostics
+            Action::Camera(_)
+                | Action::CameraControls
+                | Action::GridOverlay
+                | Action::Forecast
+                | Action::Diagnostics
         ) {
             show_view
         } else {

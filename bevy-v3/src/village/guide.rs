@@ -14,11 +14,12 @@ const TOPICS: [(&str, &str); 7] = [
          Shift+F5 exports a local bug report with the current village state.",
     ),
     (
-        "Camera and building",
+        "Keyboard & camera",
         "WASD / Arrow keys · Pan     Shift · Pan faster\n\
-         Q / E or right drag · Rotate     Scroll · Zoom\n\
+         Q / E or right drag · Rotate     Scroll or + / − · Zoom\n\
          Home · Camp     End · River bend     Shift+End · Whole plot     Shift+Home · Reset view\n\
-         B · Build     R · Rotate the current placement\n\
+         Space · Pause     1–4 · Speed     Esc · Cancel placement or close a panel\n\
+         B · Build     / · Search     R · Rotate the current placement\n\
          F4 · Terrain tools     F11 · Find a project     Shift+G · Grid\n\
          In road planning, Shift-click extends and Z undoes the last stroke.",
     ),
@@ -390,6 +391,10 @@ fn show_navigation(
 impl Guide {
     pub(super) fn open(&self) -> bool {
         self.screen.is_some()
+    }
+
+    pub(super) fn open_camera_controls(&mut self) {
+        self.screen = Some(Screen::Quick(1));
     }
 
     pub(super) fn toggle(&mut self) {
