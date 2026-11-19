@@ -18,6 +18,7 @@ enum Action {
     Shift(bool),
     Ledger,
     Grid,
+    Water(WaterCommand),
     AutomaticUpkeep,
     UpkeepBudget { restock: bool, increase: bool },
 }
@@ -67,6 +68,7 @@ impl Action {
             Self::Panel(_) => true,
             Self::ClosePanel => village.utility_panel.is_some(),
             Self::Grid => village.utility_panel == Some(UtilityPanel::Power),
+            Self::Water(_) => village.utility_panel == Some(UtilityPanel::Water),
             Self::AutomaticUpkeep | Self::UpkeepBudget { .. } => {
                 village.utility_panel == Some(UtilityPanel::Upkeep)
             }
@@ -131,6 +133,15 @@ impl Action {
             Self::Ledger => "Open ledger".into(),
             Self::Grid if village.construction.utilities.grid_off => "Connect grid".into(),
             Self::Grid => "Disconnect grid".into(),
+            Self::Water(command) => match command {
+                WaterCommand::Policy(true) => "Auto drinking reserve",
+                WaterCommand::Policy(false) => "Auto sanitation",
+                WaterCommand::River => "Collect river water",
+                WaterCommand::Carry => "Carry from source",
+                WaterCommand::Purify => "Purify water",
+                WaterCommand::Sanitation => "Service waste",
+            }
+            .into(),
             Self::AutomaticUpkeep => "Toggle auto maintenance".into(),
             Self::UpkeepBudget { restock, increase } => format!(
                 "{} {} R$25",
@@ -227,6 +238,16 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 spawn_button(menu, &assets, Action::Shift(true));
                 spawn_button(menu, &assets, Action::Ledger);
                 spawn_button(menu, &assets, Action::Grid);
+                for command in [
+                    WaterCommand::River,
+                    WaterCommand::Carry,
+                    WaterCommand::Purify,
+                    WaterCommand::Sanitation,
+                    WaterCommand::Policy(true),
+                    WaterCommand::Policy(false),
+                ] {
+                    spawn_button(menu, &assets, Action::Water(command));
+                }
                 spawn_button(menu, &assets, Action::AutomaticUpkeep);
                 for restock in [false, true] {
                     for increase in [false, true] {
@@ -356,6 +377,10 @@ fn handle_buttons(
                 Action::UpkeepBudget { restock, increase } if !picker.open => {
                     village.construction.adjust_upkeep_budget(restock, increase);
                 }
+                Action::Water(command) if !picker.open => {
+                    let town = &mut *village;
+                    town.water_panel.apply(command, &mut town.construction);
+                }
                 Action::Panel(_)
                 | Action::Project(_)
                 | Action::ProjectFilter
@@ -365,6 +390,7 @@ fn handle_buttons(
                 | Action::Shift(_)
                 | Action::Ledger
                 | Action::Grid
+                | Action::Water(_)
                 | Action::AutomaticUpkeep
                 | Action::UpkeepBudget { .. } => {}
             }
@@ -405,6 +431,7 @@ fn refresh(
     let show_projects = !picker.open && Action::ProjectFilter.available(&village);
     let show_finances = !picker.open && Action::Ledger.available(&village);
     let show_power = !picker.open && Action::Grid.available(&village);
+    let show_water = !picker.open && Action::Water(WaterCommand::River).available(&village);
     let show_upkeep = !picker.open && Action::AutomaticUpkeep.available(&village);
     let show_residents = !picker.open && Action::Home(true).available(&village);
     let projects = if show_projects {
@@ -430,6 +457,7 @@ fn refresh(
         || show_finances
         || show_power
         || show_upkeep
+        || show_water
         || (picker.open && Action::Manage.available(&village))
     {
         Display::Flex
@@ -449,6 +477,7 @@ fn refresh(
             Action::Shift(_) | Action::Ledger => show_finances,
             Action::Home(_) => show_residents,
             Action::Grid => show_power,
+            Action::Water(_) => show_water,
             Action::AutomaticUpkeep | Action::UpkeepBudget { .. } => show_upkeep,
             Action::Panel(_) => picker.open,
             _ => true,

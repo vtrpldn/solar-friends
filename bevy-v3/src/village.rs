@@ -185,6 +185,15 @@ struct WaterControls {
     message: String,
 }
 
+#[derive(Clone, Copy)]
+enum WaterCommand {
+    River,
+    Carry,
+    Purify,
+    Sanitation,
+    Policy(bool),
+}
+
 impl WaterControls {
     fn input(
         &mut self,
@@ -220,38 +229,52 @@ impl WaterControls {
         {
             self.channel = channel;
         }
-        if keyboard.any_just_pressed([KeyCode::KeyM, KeyCode::KeyL]) {
-            self.message = if construction
-                .utilities
-                .toggle_water_policy(self.target, keyboard.just_pressed(KeyCode::KeyM))
-            {
-                "Water policy updated."
-            } else {
-                "This facility does not support that water policy."
-            }
-            .into();
-            return;
+        let commands = [
+            (KeyCode::KeyM, WaterCommand::Policy(true)),
+            (KeyCode::KeyL, WaterCommand::Policy(false)),
+            (KeyCode::KeyR, WaterCommand::River),
+            (KeyCode::KeyT, WaterCommand::Carry),
+            (KeyCode::KeyY, WaterCommand::Purify),
+            (KeyCode::KeyK, WaterCommand::Sanitation),
+        ];
+        if let Some((_, command)) = commands
+            .into_iter()
+            .find(|(key, _)| keyboard.just_pressed(*key))
+        {
+            self.apply(command, construction);
         }
-        let action = if keyboard.just_pressed(KeyCode::KeyR) {
-            WaterAction::Carry {
+    }
+
+    fn apply(&mut self, command: WaterCommand, construction: &mut Construction) {
+        let action = match command {
+            WaterCommand::Policy(drinking) => {
+                self.message = if construction
+                    .utilities
+                    .toggle_water_policy(self.target, drinking)
+                {
+                    "Water policy updated."
+                } else {
+                    "This facility does not support that water policy."
+                }
+                .into();
+                return;
+            }
+            WaterCommand::River => WaterAction::Carry {
                 source: None,
                 channel: 1,
+            },
+            WaterCommand::Carry => {
+                let Some(source) = self.source else {
+                    self.message = "Shift-click a water source first.".into();
+                    return;
+                };
+                WaterAction::Carry {
+                    source: Some(source),
+                    channel: self.channel,
+                }
             }
-        } else if keyboard.just_pressed(KeyCode::KeyT) {
-            let Some(source) = self.source else {
-                self.message = "Shift-click a water source first.".into();
-                return;
-            };
-            WaterAction::Carry {
-                source: Some(source),
-                channel: self.channel,
-            }
-        } else if keyboard.just_pressed(KeyCode::KeyY) {
-            WaterAction::Purify
-        } else if keyboard.just_pressed(KeyCode::KeyK) {
-            WaterAction::Sanitation
-        } else {
-            return;
+            WaterCommand::Purify => WaterAction::Purify,
+            WaterCommand::Sanitation => WaterAction::Sanitation,
         };
         self.message = match construction.queue_water(self.target, action) {
             Ok(()) => "Water job queued.".into(),
