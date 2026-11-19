@@ -47,6 +47,8 @@ enum Action {
     Manage,
     Panel(UtilityPanel),
     ResourcePanel(UtilityPanel),
+    GridFromFinances,
+    StoresFromUpkeep,
     ClosePanel,
     Page(bool),
     Project(usize),
@@ -247,6 +249,11 @@ impl Action {
                     && Self::Manage.available(village)
                     && Self::Panel(panel).available(village)
             }
+            Self::GridFromFinances => {
+                village.utility_panel == Some(UtilityPanel::Finances)
+                    && !village.finance_history_open
+            }
+            Self::StoresFromUpkeep => village.utility_panel == Some(UtilityPanel::Upkeep),
             Self::Panel(
                 UtilityPanel::Finances
                 | UtilityPanel::Trade
@@ -455,6 +462,8 @@ impl Action {
             Self::ResourcePanel(UtilityPanel::Finances) => "Savings".into(),
             Self::ResourcePanel(UtilityPanel::Pantry) => "Food portions".into(),
             Self::ResourcePanel(UtilityPanel::Power) => "Battery".into(),
+            Self::GridFromFinances => "Manage grid power".into(),
+            Self::StoresFromUpkeep => "Manage service supplies".into(),
             Self::Panel(panel) | Self::ResourcePanel(panel) => Self::PANELS
                 .iter()
                 .find_map(|(item, label)| (*item == panel).then_some(*label))
@@ -871,6 +880,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 spawn_button(menu, &assets, Action::Shift(true));
                 spawn_button(menu, &assets, Action::Ledger);
                 spawn_button(menu, &assets, Action::ExpansionReserve);
+                spawn_button(menu, &assets, Action::GridFromFinances);
                 spawn_button(menu, &assets, Action::PantryBatches);
                 spawn_button(menu, &assets, Action::PantryPriority);
                 spawn_button(menu, &assets, Action::PantryTransport);
@@ -924,6 +934,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 spawn_button(menu, &assets, Action::NextWasteTank);
                 spawn_button(menu, &assets, Action::InstallWaterLink);
                 spawn_button(menu, &assets, Action::AutomaticUpkeep);
+                spawn_button(menu, &assets, Action::StoresFromUpkeep);
                 for row in 0..Construction::UPKEEP_ROWS {
                     spawn_button(menu, &assets, Action::UpkeepJob(row));
                 }
@@ -1202,6 +1213,11 @@ fn handle_buttons(
                 Action::ClosePanel => {
                     village.utility_panel = None;
                     picker.open = false;
+                }
+                Action::GridFromFinances => village.utility_panel = Some(UtilityPanel::Power),
+                Action::StoresFromUpkeep => {
+                    village.utility_panel = Some(UtilityPanel::Inventory);
+                    village.inventory_page = 0;
                 }
                 Action::Page(forward) if village.utility_panel == Some(UtilityPanel::Residents) => {
                     let pages = village
@@ -1690,7 +1706,9 @@ fn refresh(
             Action::Resident(_) => show_residents || show_finances,
             Action::WorkPriority(_) | Action::WorkerReservation(_) => show_residents,
             Action::Shift(_) | Action::Ledger => show_finances,
-            Action::ExpansionReserve => show_finances && !village.finance_history_open,
+            Action::ExpansionReserve | Action::GridFromFinances => {
+                show_finances && !village.finance_history_open
+            }
             Action::PantryBatches
             | Action::PantryPriority
             | Action::PantryTransport
@@ -1713,7 +1731,9 @@ fn refresh(
             }
             Action::Water(_) | Action::InstallWaterLink => show_water,
             Action::NextWasteTank => show_water && action.available(&village),
-            Action::AutomaticUpkeep | Action::UpkeepBudget { .. } => show_upkeep,
+            Action::AutomaticUpkeep | Action::UpkeepBudget { .. } | Action::StoresFromUpkeep => {
+                show_upkeep
+            }
             Action::UpkeepJob(row) => upkeep_jobs.get(row).is_some(),
             Action::Panel(_) => picker.open,
             Action::ResourcePanel(_) => !picker.open && !show_view && action.available(&village),

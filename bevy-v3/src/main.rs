@@ -977,6 +977,9 @@ mod tests {
         press_button(&mut app, "Open ledger");
         press_button(&mut app, "Next page");
         press_button(&mut app, "Close ledger");
+        press_button(&mut app, "Manage grid power");
+        press_button(&mut app, "Disconnect grid");
+        press_button(&mut app, "Connect grid");
         press_button(&mut app, "Manage");
         press_button(&mut app, "Trade");
         assert!(app.world().resource::<village::Village>().trade_open());
@@ -1072,7 +1075,8 @@ mod tests {
         press_button(&mut app, "Close panel");
 
         press_button(&mut app, "Manage");
-        press_button(&mut app, "Stores");
+        press_button(&mut app, "Maintenance");
+        press_button(&mut app, "Manage service supplies");
         press_button(&mut app, "Find material");
         for (key_code, letter) in [
             (KeyCode::KeyT, "T"),
