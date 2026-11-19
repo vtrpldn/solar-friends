@@ -1,3 +1,4 @@
+mod model_export;
 mod sprites;
 
 use std::collections::{HashMap, HashSet};
@@ -178,6 +179,7 @@ pub fn run() {
             sprites::start,
             sprites::progress,
             sprites::show_proof,
+            model_export::export_selected,
             draw_guides,
         )
             .chain(),
@@ -459,7 +461,7 @@ fn show_model(
     };
     let surface = workshop.surface.label();
     text.set_if_neq(Text::new(format!(
-        "{} · {}/{} · {mode}\n{} × {} m · {}\n←/→ Model · / Find asset · ↑/↓ Tilt · Q/E Orbit · +/− Zoom · R Rotate\nDrag Orbit · Right-drag Pan · Scroll Zoom\nN Lighting · M Surface ({surface}) · G Guides · H Scale figure{roof} · Home Reset · F5 Export PNG · F6 Sprite sheet · F7 Sprite Proof\n{}",
+        "{} · {}/{} · {mode}\n{} × {} m · {}\n←/→ Model · / Find asset · ↑/↓ Tilt · Q/E Orbit · +/− Zoom · R Rotate\nDrag Orbit · Right-drag Pan · Scroll Zoom\nN Lighting · M Surface ({surface}) · G Guides · H Scale figure{roof} · Home Reset · F5 Export PNG · F6 Sprite sheet · F7 Sprite Proof · F8 Export 3D source\n{}",
         project.name, workshop.selected + 1, workshop.projects.len(),
         project.size[0] * 2, project.size[1] * 2, project.category, workshop.export_notice,
     )));
