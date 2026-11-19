@@ -133,16 +133,7 @@ impl Construction {
                 }
             }
             LabOrder::Buy { material, freight } => {
-                if !catalog.materials.contains_key(material) {
-                    return Err("Unknown material.".into());
-                }
-                self.trade.buy(
-                    catalog,
-                    stock,
-                    &mut self.market,
-                    material,
-                    (clock.seconds, clock.round_trip_km, *freight),
-                )?;
+                self.buy_from_town(catalog, stock, clock, material, *freight)?;
             }
             LabOrder::Sell { material } => {
                 if !catalog.materials.contains_key(material) {

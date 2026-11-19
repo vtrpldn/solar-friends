@@ -122,6 +122,30 @@ impl Construction {
         }
     }
 
+    pub(super) fn buy_from_town(
+        &mut self,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        clock: TownClock,
+        material: &str,
+        freight: bool,
+    ) -> Result<(), &'static str> {
+        let item = catalog.materials.get(material).ok_or("Unknown material.")?;
+        if !town_is_open(clock.seconds) {
+            return Err("Town is closed. Order between 07:00 and 18:00.");
+        }
+        if u64::from(item.pack) + self.trade.inbound() > self.storage_space(catalog, stock) {
+            return Err("There is not enough storage for another pack.");
+        }
+        self.trade.buy(
+            catalog,
+            stock,
+            &mut self.market,
+            material,
+            (clock.seconds, clock.round_trip_km, freight),
+        )
+    }
+
     pub fn place_trade_order(
         &mut self,
         catalog: &Catalog,
@@ -134,27 +158,13 @@ impl Construction {
             return;
         };
         match order {
-            TradeOrder::Buy { .. } if !town_is_open(clock.seconds) => {
-                self.trade.notice = "Town is closed. Order between 07:00 and 18:00.".into();
-            }
             TradeOrder::Buy { freight } => {
-                let space = self.storage_space(catalog, stock);
-                self.trade.notice = if u64::from(definition.pack) + self.trade.inbound() > space {
-                    "There is not enough storage for another pack.".into()
-                } else {
-                    match self.trade.buy(
-                        catalog,
-                        stock,
-                        &mut self.market,
-                        id,
-                        (clock.seconds, clock.round_trip_km, freight),
-                    ) {
-                        Ok(()) if freight => {
-                            format!("{} ordered for freight delivery.", definition.name)
-                        }
-                        Ok(()) => format!("{} ordered for town pickup.", definition.name),
-                        Err(error) => error.into(),
+                self.trade.notice = match self.buy_from_town(catalog, stock, clock, id, freight) {
+                    Ok(()) if freight => {
+                        format!("{} ordered for freight delivery.", definition.name)
                     }
+                    Ok(()) => format!("{} ordered for town pickup.", definition.name),
+                    Err(error) => error.into(),
                 };
             }
             TradeOrder::Sell => {

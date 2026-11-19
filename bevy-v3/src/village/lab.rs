@@ -526,6 +526,49 @@ mod tests {
     use super::*;
 
     #[test]
+    fn a_lab_purchase_at_night_cannot_spend_cash_or_create_an_order() {
+        let catalog = Catalog::default();
+        let mut village = run(
+            Scenario {
+                steps: 1,
+                orders: Vec::new(),
+                stop: LabStop::None,
+            },
+            None,
+            &catalog,
+        )
+        .unwrap()
+        .village;
+        village.clock = 12.0 * crate::weather::HOUR;
+        let balance = village.stock.balance();
+        let report = run(
+            Scenario {
+                steps: 1,
+                orders: vec![ScheduledOrder {
+                    step: 0,
+                    order: LabOrder::Buy {
+                        material: "wood".into(),
+                        freight: true,
+                    },
+                }],
+                stop: LabStop::None,
+            },
+            Some(village),
+            &catalog,
+        )
+        .unwrap();
+        assert!(
+            report.outcomes[0]
+                .error
+                .as_deref()
+                .unwrap()
+                .contains("Town is closed")
+        );
+        assert_eq!(report.village.stock.balance(), balance);
+        assert!(report.village.construction.trade.delivery.is_none());
+    }
+
+    #[test]
     fn live_orders_are_replayed_in_sequence_without_duplicate_samples() {
         let catalog = Catalog::default();
         let mut runner = Runner::new(
