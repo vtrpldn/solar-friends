@@ -23,6 +23,17 @@ const models = buildingScenes.map((id) => {
   if (id === "greenhouse") return [id, bareGreenhouse()];
   const model = createAsset(id);
   model.getObjectByName("optional-rooftop-solar")?.removeFromParent();
-  return [id, compactModel(model)];
+  const compact = compactModel(model);
+  let index = 0;
+  compact.traverse(node => {
+    if (!node.animalRig) return;
+    const { kind, head, legs, tail } = node.animalRig;
+    const prefix = `livestock-${kind}-${index++}`;
+    node.name = `${prefix}-body`;
+    head.name = `${prefix}-head`;
+    tail.name = `${prefix}-tail`;
+    legs.forEach((leg, joint) => { leg.name = `${prefix}-leg-${joint}`; });
+  });
+  return [id, compact];
 });
 await exportModels(models, new URL("../bevy-v3/src/buildings.glb", import.meta.url));

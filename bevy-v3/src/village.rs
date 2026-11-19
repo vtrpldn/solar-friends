@@ -12,6 +12,7 @@ mod land_lens;
 mod lens_picker;
 use lens_picker::{LensPicker, MapLens};
 mod library_ui;
+mod livestock_motion;
 mod resource_lens;
 mod road_surface;
 mod toolbar;
@@ -75,6 +76,7 @@ impl Plugin for VillagePlugin {
         guide::install(app);
         library_ui::install(app);
         building_lighting::install(app);
+        livestock_motion::install(app);
         app.add_systems(PostUpdate, cultivation_surface::show_beds);
         app.init_resource::<Village>()
             .init_resource::<CampPointer>()
