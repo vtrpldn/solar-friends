@@ -5,11 +5,20 @@ import { createTent } from "../web/v02/library/camping.js";
 import { createJimny } from "../web/v02/library/vehicles.js";
 import { createResident, poseResident, RESIDENT_IDS } from "../web/v02/residents/rig.js";
 
+function openingCar(variant) {
+  const model = createJimny(variant);
+  let index = 0;
+  for (const part of model.children) {
+    if (part.userData.wheel) part.name = `vehicle-wheel-${index++}`;
+  }
+  return model;
+}
+
 const models = [
   ...RESIDENT_IDS.filter((id) => id !== "resident").map((id) => [id, createResident(id)]),
   ...[0, 1].flatMap((variant) => [
     [`tent-${variant}`, createTent(variant)],
-    [`car-${variant}`, createJimny(variant)],
+    [`car-${variant}`, openingCar(variant)],
   ]),
 ];
 const cycle = [

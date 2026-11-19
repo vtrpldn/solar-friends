@@ -16,6 +16,7 @@ mod livestock_motion;
 mod resource_lens;
 mod road_surface;
 mod toolbar;
+mod vehicle_motion;
 
 use library_ui::{autosave_named, library_controls};
 
@@ -77,6 +78,7 @@ impl Plugin for VillagePlugin {
         library_ui::install(app);
         building_lighting::install(app);
         livestock_motion::install(app);
+        vehicle_motion::install(app);
         app.add_systems(PostUpdate, cultivation_surface::show_beds);
         app.init_resource::<Village>()
             .init_resource::<CampPointer>()
@@ -1405,7 +1407,13 @@ fn animate_arrival(
         };
         let Vec2 { x, y: z } = pose.position;
         transform.translation = Vec3::new(x, terrain.height_at(x, z) + pose.step_height, z);
-        transform.rotation = Quat::from_rotation_y(pose.yaw);
+        transform.rotation = if matches!(actor, ArrivalActor::Car(_)) {
+            vehicle_motion::terrain_rotation(pose.position, pose.yaw, |point| {
+                terrain.height_at(point.x, point.y)
+            })
+        } else {
+            Quat::from_rotation_y(pose.yaw)
+        };
         *visibility = if pose.visible {
             Visibility::Inherited
         } else {
