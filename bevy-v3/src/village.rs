@@ -98,7 +98,9 @@ impl Plugin for VillagePlugin {
             )
             .add_systems(
                 Update,
-                (autosave_named, autosave_continue.after(village_input)),
+                (autosave_named, autosave_continue)
+                    .chain()
+                    .after(advance_days),
             )
             .add_systems(FixedUpdate, advance_clock);
     }
@@ -176,6 +178,8 @@ pub struct Village {
     water_panel: WaterControls,
     #[serde(skip)]
     connect_road_strokes: bool,
+    #[serde(skip)]
+    advance_checkpoint: bool,
     stock: Stock,
     construction: Construction,
 }
@@ -473,6 +477,11 @@ impl Village {
         self.connect_road_strokes || keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight])
     }
 
+    fn checkpoint_advance(&mut self) {
+        self.paused = true;
+        self.advance_checkpoint = true;
+    }
+
     pub fn is_paused(&self) -> bool {
         self.paused || self.advance.open || self.terrain_editor.open || self.planning_roads()
     }
@@ -591,12 +600,18 @@ fn autosave_continue(
     mut next: Local<f64>,
 ) {
     let now = time.elapsed_secs_f64();
-    if setup.open || saves.open || village.camp.is_none() || now < next.max(10.0) {
+    if setup.open || saves.open || village.camp.is_none() || village.advance.running.is_some() {
         return;
     }
+    if !village.advance_checkpoint && now < next.max(10.0) {
+        return;
+    }
+    village.advance_checkpoint = false;
     *next = now + 10.0;
     let Some(mode) = village.mode() else { return };
-    if let Err(error) = save::autosave_location(mode).and_then(|path| save::write(&path, &village))
+    if let Err(error) = saves
+        .continue_path(mode)
+        .and_then(|path| save::write(&path, &village))
     {
         village.save_notice = format!("Could not autosave village: {error}");
     }
@@ -897,7 +912,7 @@ fn village_input(
         && keyboard.get_just_pressed().len() > 0
         && village.advance.controls(&keyboard)
     {
-        village.paused = true;
+        village.checkpoint_advance();
         return;
     }
     if village.advance.open {
@@ -1371,7 +1386,7 @@ fn advance_days(
         step(&mut village, &catalog, &setup, site, run.dt);
         if run.record_step() {
             village.advance.done();
-            village.paused = true;
+            village.checkpoint_advance();
             return;
         }
         if started.elapsed() >= std::time::Duration::from_millis(12) {

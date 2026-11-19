@@ -695,7 +695,7 @@ fn handle_buttons(
                 Action::UndoTerrain => village.terrain_editor.undo(),
                 Action::Advance(action) => {
                     if village.advance.apply(action) {
-                        village.paused = true;
+                        village.checkpoint_advance();
                     }
                     picker.open = false;
                 }

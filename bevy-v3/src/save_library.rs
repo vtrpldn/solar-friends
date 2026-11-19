@@ -49,6 +49,14 @@ struct Slot {
 }
 
 impl SaveMenu {
+    pub fn continue_path(&self, mode: Mode) -> io::Result<PathBuf> {
+        #[cfg(test)]
+        if let Some(path) = &self.test_directory {
+            return Ok(path.join("continue.json"));
+        }
+        save::autosave_location(mode)
+    }
+
     pub fn directory(&self, mode: Mode) -> io::Result<PathBuf> {
         #[cfg(test)]
         if let Some(path) = &self.test_directory {

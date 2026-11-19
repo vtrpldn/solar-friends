@@ -491,19 +491,29 @@ mod tests {
         press_button(&mut app, "Show all projects");
         press_button(&mut app, "Close panel");
 
+        let save_dir =
+            std::env::temp_dir().join(format!("solar-v3-ui-save-{}", std::process::id()));
+        app.world_mut()
+            .resource_mut::<save_library::SaveMenu>()
+            .test_directory = Some(save_dir.clone());
         press_button(&mut app, "Advance days");
         press_button(&mut app, "+7 day(s)");
         press_button(&mut app, "Start advance");
         press_button(&mut app, "Stop advance");
         assert!(app.world().resource::<village::Village>().is_paused());
         assert!(!app.world().resource::<village::Village>().advance_open());
+        let checkpoint = save::read(
+            &save_dir.join("continue.json"),
+            app.world().resource::<catalog::Catalog>(),
+        )
+        .unwrap();
+        assert!(checkpoint.is_paused());
+        assert_eq!(
+            checkpoint.seconds(),
+            app.world().resource::<village::Village>().seconds()
+        );
         press_button(&mut app, "Resume");
 
-        let save_dir =
-            std::env::temp_dir().join(format!("solar-v3-ui-save-{}", std::process::id()));
-        app.world_mut()
-            .resource_mut::<save_library::SaveMenu>()
-            .test_directory = Some(save_dir.clone());
         press_button(&mut app, "Saved villages");
         press_button(&mut app, "Name current village");
         app.world_mut()

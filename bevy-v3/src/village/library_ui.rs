@@ -382,7 +382,11 @@ pub(super) fn autosave_named(
     mut village: ResMut<Village>,
     catalog: Res<Catalog>,
 ) {
-    if setup.open || menu.open || time.elapsed_secs_f64() < menu.next_autosave {
+    if setup.open
+        || menu.open
+        || village.advance.running.is_some()
+        || (!village.advance_checkpoint && time.elapsed_secs_f64() < menu.next_autosave)
+    {
         return;
     }
     let Some((mode, id, serial)) = menu.attached else {
