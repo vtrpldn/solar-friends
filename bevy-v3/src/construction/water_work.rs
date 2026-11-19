@@ -406,6 +406,49 @@ impl Construction {
         }
     }
 
+    pub fn queued_connection(
+        &self,
+        from: usize,
+        to: usize,
+        channel: Option<usize>,
+    ) -> Option<usize> {
+        self.water_jobs
+            .iter()
+            .find_map(|(&source, job)| match (job.action, channel) {
+                (WaterAction::InstallCable { to: target, .. }, None)
+                    if (source, target) == (from, to) || (source, target) == (to, from) =>
+                {
+                    Some(source)
+                }
+                (
+                    WaterAction::InstallPipe {
+                        to: target,
+                        channel,
+                        ..
+                    },
+                    Some(selected),
+                ) if (source, target, channel) == (from, to, selected) => Some(source),
+                _ => None,
+            })
+    }
+
+    pub fn cancel_connection_installation(
+        &mut self,
+        from: usize,
+        to: usize,
+        channel: Option<usize>,
+    ) -> bool {
+        let Some(source) = self.queued_connection(from, to, channel) else {
+            return false;
+        };
+        if let Some(job) = self.water_jobs.remove(&source)
+            && let Some(worker) = job.worker
+        {
+            self.residents[worker].path.clear();
+        }
+        true
+    }
+
     pub fn power_installation_summary(&self, catalog: &Catalog, from: usize, to: usize) -> String {
         use std::fmt::Write;
         let mut text = format!(
@@ -413,7 +456,8 @@ impl Construction {
             self.connection_site_name(catalog, from),
             self.connection_site_name(catalog, to),
         );
-        if let Some(job) = self.water_jobs.get(&from)
+        if let Some(source) = self.queued_connection(from, to, None)
+            && let Some(job) = self.water_jobs.get(&source)
             && let WaterAction::InstallCable { required, .. } = job.action
         {
             let _ = write!(
@@ -973,7 +1017,7 @@ mod tests {
         let mut stock = Stock::for_start(&setup, &catalog);
         stock.receive(&BTreeMap::from([
             ("plumbing".into(), 2),
-            ("pumps".into(), 1),
+            ("pumps".into(), 2),
         ]));
         let pumps = stock.available("pumps");
         for x in [42, 46] {
@@ -986,6 +1030,14 @@ mod tests {
         town.queue_water_connection(&mut stock, 1, 2, 1).unwrap();
         assert_eq!(stock.available("pumps"), pumps - 1);
         assert!(!town.utilities.water_link_exists(1, 2, 1));
+
+        town.tick_water_work(&catalog, &mut stock, site, 0.1, 0.1);
+        let worker = town.water_jobs[&1].worker.unwrap();
+        assert!(!town.cancel_connection_installation(2, 1, Some(1)));
+        assert!(town.cancel_connection_installation(1, 2, Some(1)));
+        assert!(town.residents[worker].path.is_empty());
+        assert_eq!(stock.available("pumps"), pumps - 1);
+        town.queue_water_connection(&mut stock, 1, 2, 1).unwrap();
 
         let mut town: Construction =
             serde_json::from_str(&serde_json::to_string(&town).unwrap()).unwrap();

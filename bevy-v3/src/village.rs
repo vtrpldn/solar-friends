@@ -484,6 +484,42 @@ impl Village {
         }
     }
 
+    fn selected_installation(&self) -> Option<(usize, usize, Option<usize>)> {
+        match self.utility_panel {
+            Some(UtilityPanel::Power) => Some((self.power_source, self.power_target, None)),
+            Some(UtilityPanel::Water) => Some((
+                self.water_panel.source?,
+                self.water_panel.target,
+                Some(self.water_panel.channel),
+            )),
+            _ => None,
+        }
+    }
+
+    fn can_cancel_selected_installation(&self) -> bool {
+        self.selected_installation()
+            .is_some_and(|(from, to, channel)| {
+                self.construction
+                    .queued_connection(from, to, channel)
+                    .is_some()
+            })
+    }
+
+    fn cancel_selected_installation(&mut self) {
+        if let Some((from, to, channel)) = self.selected_installation()
+            && self
+                .construction
+                .cancel_connection_installation(from, to, channel)
+        {
+            let notice = if channel.is_some() {
+                &mut self.water_panel.message
+            } else {
+                &mut self.power_notice
+            };
+            *notice = "Connection installation cancelled.".into();
+        }
+    }
+
     fn can_remove_selected_utility_link(&self) -> bool {
         match self.utility_panel {
             Some(UtilityPanel::Power) => self
