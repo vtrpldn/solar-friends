@@ -82,9 +82,42 @@ impl Construction {
         } else if plan.pickups > 0 {
             format!("{} town pickup(s) pending", plan.pickups)
         } else if plan.delivered < plan.loads {
-            format!("{}/{} loads delivered", plan.delivered, plan.loads)
+            let in_transit =
+                self.residents
+                    .iter()
+                    .filter(|worker| {
+                        worker.assignment.as_ref().is_some_and(|job| {
+                            job.project == index && job.activity == Activity::Carry
+                        })
+                    })
+                    .count();
+            format!(
+                "{}/{} loads delivered · {in_transit} in transit",
+                plan.delivered, plan.loads
+            )
         } else {
-            format!("{:.0}% built", 100.0 * plan.work / def.work)
+            let progress = 100.0 * plan.work / def.work;
+            let builders =
+                self.residents
+                    .iter()
+                    .filter(|worker| {
+                        worker.assignment.as_ref().is_some_and(|job| {
+                            job.project == index && job.activity == Activity::Build
+                        })
+                    })
+                    .count();
+            if builders == 0 {
+                format!("{progress:.0}% built · Waiting for builders")
+            } else {
+                let limit = construction_crew_limit(def, plan.size);
+                let hours = (def.work - plan.work)
+                    / (crate::weather::HOUR
+                        * builders as f64
+                        * construction_crew_efficiency(builders));
+                format!(
+                    "{progress:.0}% built · {builders}/{limit} builders · ~{hours:.1}h assembly left"
+                )
+            }
         }
     }
 

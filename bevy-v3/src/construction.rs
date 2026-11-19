@@ -52,6 +52,16 @@ use crate::{
     utilities::{Facility, Utilities},
 };
 
+fn construction_crew_limit(definition: &Project, size: IVec2) -> usize {
+    ((definition.work / 350.0).ceil() as usize)
+        .max((size.x as usize * size.y as usize).div_ceil(2))
+        .clamp(2, 3)
+}
+
+fn construction_crew_efficiency(builders: usize) -> f64 {
+    1.0 / (1.0 + 0.12 * builders.saturating_sub(1) as f64)
+}
+
 const CATEGORIES: [&str; 10] = [
     "Camp essentials",
     "Homes & shelter",
@@ -1594,18 +1604,14 @@ impl Construction {
     }
 
     pub fn latest_progress(&self, catalog: &Catalog) -> Option<String> {
-        let project = self.plans.iter().rev().find(|plan| !plan.removed)?;
-        let definition = &catalog.projects[&project.key];
-        let status = if project.work >= definition.work {
-            "Ready".into()
-        } else if project.pickups > 0 {
-            format!("{} town pickup(s) remaining", project.pickups)
-        } else if project.delivered < project.loads {
-            format!("{} of {} loads delivered", project.delivered, project.loads)
-        } else {
-            format!("{:.0}% built", project.work / definition.work * 100.0)
-        };
-        Some(format!("{}: {status}", definition.name))
+        let (index, project) = self
+            .plans
+            .iter()
+            .enumerate()
+            .rev()
+            .find(|(_, plan)| !plan.removed)?;
+        let name = &catalog.projects[&project.key].name;
+        Some(format!("{name}: {}", self.project_status(catalog, index)))
     }
 
     pub fn worker(&self, index: usize) -> &Worker {
@@ -1841,7 +1847,7 @@ impl Construction {
                     let skilled = catalog.residents[index].strengths.contains(&project.key);
                     let skill = if skilled { 1.25 } else { 1.0 };
                     let experience = 1.0 + (worker.experience / 10_000.0).min(0.15);
-                    let efficiency = 1.0 / (1.0 + 0.12 * crew as f64);
+                    let efficiency = construction_crew_efficiency(crew + 1);
                     let tools = stock.use_tool(
                         index,
                         "carpentry-tools",
@@ -1902,9 +1908,7 @@ impl Construction {
                 .iter()
                 .filter_map(|worker| worker.assignment.as_ref().filter(|job| job.project == id))
                 .collect();
-            let limit = ((definition.work / 350.0).ceil() as usize)
-                .max(((project.size.x * project.size.y) as usize).div_ceil(2))
-                .clamp(2, 3);
+            let limit = construction_crew_limit(definition, project.size);
             if crew.len() >= limit
                 || (project.delivered < project.loads
                     && project.delivered + crew.len() as u32 >= project.loads)
@@ -2495,6 +2499,8 @@ mod tests {
             },
         );
         let loads = catalog.loads(&catalog.projects["gathering"]);
+        let mut saw_transit = false;
+        let mut saw_assembly = false;
         for _ in 0..8_000 {
             construction.tick(
                 &catalog,
@@ -2510,6 +2516,11 @@ mod tests {
                 },
                 0.1,
             );
+            let status = construction.project_status(&catalog, 0);
+            saw_transit |= status.contains("loads delivered · 1 in transit")
+                || status.contains("loads delivered · 2 in transit")
+                || status.contains("loads delivered · 3 in transit");
+            saw_assembly |= status.contains("assembly left");
             let project = &construction.plans[0];
             assert!(project.delivered <= loads);
             if project.delivered < loads {
@@ -2519,6 +2530,7 @@ mod tests {
                 break;
             }
         }
+        assert!(saw_transit && saw_assembly);
         assert_eq!(construction.finished_models(&catalog).count(), 1);
         assert_eq!(construction.plans[0].delivered, loads);
         assert_eq!(stock.available("wood"), 28);
