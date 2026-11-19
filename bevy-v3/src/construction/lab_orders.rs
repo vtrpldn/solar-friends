@@ -205,6 +205,25 @@ impl Construction {
         jobs
     }
 
+    pub(crate) fn lab_map_preview(
+        &self,
+        catalog: &Catalog,
+        ground: ConstructionSite,
+        sandbox: bool,
+        (key, cell, rotation): (&str, IVec2, u8),
+    ) -> (IVec2, Option<&'static str>) {
+        let proposal = Self::proposal(catalog, key, cell, default_field_size(), rotation);
+        let error = self.placement_error(
+            ground.terrain,
+            ground.land,
+            ground.camp,
+            &proposal,
+            &catalog.projects[key],
+            (catalog, sandbox, None),
+        );
+        (proposal.size, error)
+    }
+
     pub(crate) fn lab_map_projects<'a>(
         &'a self,
         catalog: &'a Catalog,

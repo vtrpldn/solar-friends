@@ -1226,9 +1226,11 @@ fn update_lab_window(
             };
             let build = if let Some((key, rotation)) = &map.blueprint {
                 format!(
-                    "\nPlace {} · {}° · [ / ] Blueprint · R Rotate · Esc Cancel",
+                    "\nPlace {} · {}° · [ / ] Blueprint · R Rotate · Esc Cancel{}",
                     catalog.projects[key].name,
-                    u16::from(*rotation) * 90
+                    u16::from(*rotation) * 90,
+                    map.preview_error
+                        .map_or_else(String::new, |error| format!("\n{error}"))
                 )
             } else if !playback.replaying && !runner.done() {
                 " · B Build".into()

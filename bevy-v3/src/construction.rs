@@ -838,16 +838,26 @@ impl Construction {
     }
 
     fn proposed_site(&self, catalog: &Catalog, key: &str, position: IVec2) -> Blueprint {
+        Self::proposal(catalog, key, position, self.field_size, self.rotation)
+    }
+
+    fn proposal(
+        catalog: &Catalog,
+        key: &str,
+        position: IVec2,
+        field_size: IVec2,
+        rotation: u8,
+    ) -> Blueprint {
         let definition = &catalog.projects[key];
         Blueprint {
             key: key.to_owned(),
             position,
             size: if key == "field" {
-                rotated_size(self.field_size, self.rotation)
+                rotated_size(field_size, rotation)
             } else {
-                size(definition, self.rotation)
+                size(definition, rotation)
             },
-            rotation: self.rotation,
+            rotation,
             loads: catalog.loads(definition),
             delivered: 0,
             work: 0.0,

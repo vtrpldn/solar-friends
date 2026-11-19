@@ -13,6 +13,7 @@ pub(super) struct MapState {
     pub resource: Option<usize>,
     pub blueprint: Option<(String, u8)>,
     placement: Option<IVec2>,
+    pub preview_error: Option<&'static str>,
 }
 
 impl MapState {
@@ -64,6 +65,7 @@ impl MapState {
     pub fn cancel_build(&mut self) {
         self.blueprint = None;
         self.placement = None;
+        self.preview_error = None;
     }
 }
 
@@ -133,40 +135,74 @@ pub(super) fn draw(
     {
         map.selected = None;
     }
-    if mouse.just_pressed(MouseButton::Left)
-        && let Some(cursor) = window.cursor_position()
-    {
-        let screen = Vec2::new(
-            cursor.x - window.width() * 0.5,
-            window.height() * 0.5 - cursor.y,
-        );
-        if (screen - center).abs().cmple(Vec2::splat(side * 0.5)).all() {
-            if map.blueprint.is_some() {
-                let offset = (screen - center) / scale;
-                let cell = (Vec2::new(offset.x, -offset.y) * 0.5 + Vec2::splat(32.0)).round();
-                map.placement = Some(cell.as_ivec2());
+    let cursor = window
+        .cursor_position()
+        .map(|cursor| {
+            Vec2::new(
+                cursor.x - window.width() * 0.5,
+                window.height() * 0.5 - cursor.y,
+            )
+        })
+        .filter(|screen| {
+            (*screen - center)
+                .abs()
+                .cmple(Vec2::splat(side * 0.5))
+                .all()
+        });
+    map.preview_error = None;
+    if let Some(screen) = cursor {
+        if let Some((key, rotation)) = &map.blueprint {
+            let offset = (screen - center) / scale;
+            let cell = (Vec2::new(offset.x, -offset.y) * 0.5 + Vec2::splat(32.0))
+                .round()
+                .as_ivec2();
+            let ground = crate::construction::ConstructionSite {
+                terrain: &runner.terrain,
+                land: &runner.land,
+                camp: runner.camp,
+            };
+            let (size, error) = construction.lab_map_preview(
+                &catalog,
+                ground,
+                runner.village.stock.sandbox,
+                (key, cell, *rotation),
+            );
+            let position = cell.as_vec2() + (size.as_vec2() - Vec2::ONE) * 0.5;
+            let tint = if error.is_some() {
+                Color::srgb_u8(240, 111, 101)
             } else {
-                map.selected = projects()
-                    .filter_map(|(index, position, size, _)| {
-                        let delta = (screen - point(position)).abs();
-                        let marker = (size * scale * 0.5).max(Vec2::splat(4.0));
-                        delta
-                            .cmple(marker)
-                            .all()
-                            .then_some((index, delta.length_squared()))
-                    })
-                    .min_by(|a, b| a.1.total_cmp(&b.1))
-                    .map(|(index, _)| index);
-                map.resource = if map.selected.is_some() {
-                    None
-                } else {
-                    resources()
-                        .map(|(index, position)| (index, screen.distance_squared(position)))
-                        .filter(|(_, distance)| *distance <= 16.0)
-                        .min_by(|a, b| a.1.total_cmp(&b.1))
-                        .map(|(index, _)| index)
-                };
+                Color::WHITE
+            };
+            gizmos.rect_2d(
+                Isometry2d::from_translation(point(world_position(position.x, position.y))),
+                (size.as_vec2() * 2.0 * scale).max(Vec2::splat(4.0)),
+                tint,
+            );
+            map.preview_error = error;
+            if mouse.just_pressed(MouseButton::Left) {
+                map.placement = Some(cell);
             }
+        } else if mouse.just_pressed(MouseButton::Left) {
+            map.selected = projects()
+                .filter_map(|(index, position, size, _)| {
+                    let delta = (screen - point(position)).abs();
+                    let marker = (size * scale * 0.5).max(Vec2::splat(4.0));
+                    delta
+                        .cmple(marker)
+                        .all()
+                        .then_some((index, delta.length_squared()))
+                })
+                .min_by(|a, b| a.1.total_cmp(&b.1))
+                .map(|(index, _)| index);
+            map.resource = if map.selected.is_some() {
+                None
+            } else {
+                resources()
+                    .map(|(index, position)| (index, screen.distance_squared(position)))
+                    .filter(|(_, distance)| *distance <= 16.0)
+                    .min_by(|a, b| a.1.total_cmp(&b.1))
+                    .map(|(index, _)| index)
+            };
         }
     }
     for (index, position) in resources() {
