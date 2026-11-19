@@ -197,6 +197,14 @@ enum GardenAction {
     Cancel,
     Undo,
     Redo,
+    Gallery,
+    Overview,
+    TurnLeft,
+    TurnRight,
+    ZoomIn,
+    ZoomOut,
+    Grid,
+    Night,
 }
 #[derive(Component)]
 struct SelectableProp(Entity);
@@ -454,6 +462,14 @@ fn setup(
                 ("Cancel placement", GardenAction::Cancel),
                 ("Undo", GardenAction::Undo),
                 ("Redo", GardenAction::Redo),
+                ("Gallery", GardenAction::Gallery),
+                ("Whole plot", GardenAction::Overview),
+                ("Turn left", GardenAction::TurnLeft),
+                ("Turn right", GardenAction::TurnRight),
+                ("−", GardenAction::ZoomOut),
+                ("+", GardenAction::ZoomIn),
+                ("Grid", GardenAction::Grid),
+                ("Night", GardenAction::Night),
             ] {
                 row.spawn((
                     Button,
@@ -477,8 +493,12 @@ fn update_garden_buttons(
         return;
     }
     for (action, mut background, mut node) in &mut buttons {
-        let selected =
-            matches!(action, GardenAction::Choose(biome) if *biome == garden.layout.biome);
+        let selected = match action {
+            GardenAction::Choose(biome) => *biome == garden.layout.biome,
+            GardenAction::Grid => garden.grid,
+            GardenAction::Night => garden.night,
+            _ => false,
+        };
         background.0 = if selected {
             Color::srgb_u8(103, 123, 85)
         } else {
@@ -488,7 +508,15 @@ fn update_garden_buttons(
         let selected_prop = garden.selected.is_some() && garden.pending.is_none();
         let visible = !editing_text
             && match action {
-                GardenAction::Choose(_) => true,
+                GardenAction::Choose(_)
+                | GardenAction::Gallery
+                | GardenAction::Overview
+                | GardenAction::TurnLeft
+                | GardenAction::TurnRight
+                | GardenAction::ZoomIn
+                | GardenAction::ZoomOut
+                | GardenAction::Grid
+                | GardenAction::Night => true,
                 GardenAction::LoadLandscape => garden.layout.biome != "flat",
                 GardenAction::Rotate => selected_prop || garden.pending.is_some(),
                 GardenAction::Cancel => garden.pending.is_some(),
@@ -659,16 +687,19 @@ fn edit(
     let modifier = [ControlLeft, ControlRight, SuperLeft, SuperRight]
         .iter()
         .any(|key| keys.pressed(*key));
-    let zoom_in = pressed(Equal) || pressed(NumpadAdd);
-    let zoom_out = pressed(Minus) || pressed(NumpadSubtract);
+    let zoom_in = pressed(Equal) || pressed(NumpadAdd) || clicked_action(GardenAction::ZoomIn);
+    let zoom_out =
+        pressed(Minus) || pressed(NumpadSubtract) || clicked_action(GardenAction::ZoomOut);
     let wheel = match scroll.unit {
         MouseScrollUnit::Line => scroll.delta.y,
         MouseScrollUnit::Pixel => scroll.delta.y * 0.035,
     };
     let zoom_steps = wheel + f32::from(zoom_in) - f32::from(zoom_out);
     garden.zoom = (garden.zoom * (-0.09 * zoom_steps).exp()).clamp(0.035, 3.);
+    let turn_left = pressed(KeyQ) || clicked_action(GardenAction::TurnLeft);
+    let turn_right = pressed(KeyE) || clicked_action(GardenAction::TurnRight);
     garden.bearing +=
-        (i32::from(pressed(KeyE)) - i32::from(pressed(KeyQ))) as f32 * std::f32::consts::FRAC_PI_2;
+        (i32::from(turn_right) - i32::from(turn_left)) as f32 * std::f32::consts::FRAC_PI_2;
     if drag || mouse.pressed(MouseButton::Right) {
         let zoom = garden.zoom;
         let right = transform.right().as_vec3();
@@ -679,20 +710,20 @@ fn edit(
         garden.target.x = garden.target.x.clamp(-WIDTH * 0.5, WIDTH * 0.5);
         garden.target.z = garden.target.z.clamp(-WIDTH * 0.5, WIDTH * 0.5);
     }
-    if pressed(Home) {
+    if pressed(Home) || clicked_action(GardenAction::Gallery) {
         garden.focus_first(&models);
     }
-    if pressed(End) {
+    if pressed(End) || clicked_action(GardenAction::Overview) {
         garden.frame_plot(window.width() / window.height().max(1.));
     }
     **transform = camera_transform(garden.target, garden.bearing);
     if let Projection::Orthographic(orthographic) = &mut **projection {
         orthographic.scale = garden.zoom;
     }
-    if pressed(KeyN) {
+    if pressed(KeyN) || clicked_action(GardenAction::Night) {
         garden.night = !garden.night;
     }
-    if pressed(KeyG) {
+    if pressed(KeyG) || clicked_action(GardenAction::Grid) {
         garden.grid = !garden.grid;
     }
     let ray = cursor.and_then(|pixel| camera.viewport_to_world(global, pixel).ok());
@@ -1288,9 +1319,11 @@ Enter place   Esc cancel
                 group.count, group.area
             )
         });
+    let bearing = ((garden.bearing - HOME_BEARING) / std::f32::consts::FRAC_PI_2).round() as i32;
+    let direction = ["SE", "SW", "NW", "NE"][bearing.rem_euclid(4) as usize];
     let rehearsal_hint = rehearsal::hint(&rehearsal, &garden.layout.props, selection, &models);
     text.0 = format!(
-        "Asset Garden  ·  {} props  ·  {}\n{label}{connection}\nDrag to pan   Scroll or +/- zoom   Q/E turn   Home first prop   End whole plot   G grid   N night   / catalog\nB terrain   L load biome landscape\nM move   F2 exact position   R rotate   Ctrl/Cmd D duplicate   Insert place another   Delete remove   F5 restore gallery\nArrows adjust placement   Click/Enter confirm   Esc cancel   Ctrl/Cmd Z undo   Shift redo   Ctrl/Cmd S save   Drop scene JSON to import{rehearsal_hint}\n{}\n{}",
+        "Asset Garden  ·  {} props  ·  {}  ·  {direction}\n{label}{connection}\nDrag to pan   Scroll or +/- zoom   Q/E turn   Home first prop   End whole plot   G grid   N night   / catalog\nB terrain   L load biome landscape\nM move   F2 exact position   R rotate   Ctrl/Cmd D duplicate   Insert place another   Delete remove   F5 restore gallery\nArrows adjust placement   Click/Enter confirm   Esc cancel   Ctrl/Cmd Z undo   Shift redo   Ctrl/Cmd S save   Drop scene JSON to import{rehearsal_hint}\n{}\n{}",
         garden.layout.props.len(),
         garden.layout.biome,
         garden.status,
