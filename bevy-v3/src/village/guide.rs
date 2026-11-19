@@ -1,3 +1,5 @@
+use super::*;
+
 use bevy::prelude::*;
 
 const TOPICS: [(&str, &str); 7] = [
@@ -109,6 +111,177 @@ fn turn_page(page: usize, pages: usize, forward: bool) -> usize {
     (page + if forward { 1 } else { pages - 1 }) % pages
 }
 
+#[derive(Component, Clone, Copy)]
+enum GuideAction {
+    Previous,
+    Next,
+    SwitchView,
+    Index,
+    Chapter(usize),
+}
+
+impl GuideAction {
+    fn apply(self, screen: Screen) -> Screen {
+        match (self, screen) {
+            (Self::SwitchView, Screen::Quick(_)) => Screen::Index(0),
+            (Self::SwitchView, _) => Screen::Quick(0),
+            (Self::Index, Screen::Chapter(chapter)) => Screen::Index(chapter / CHAPTER_KEYS.len()),
+            (Self::Chapter(row), Screen::Index(page)) => {
+                let chapter = page * CHAPTER_KEYS.len() + row;
+                if chapter < chapters().len() {
+                    Screen::Chapter(chapter)
+                } else {
+                    screen
+                }
+            }
+            (Self::Previous | Self::Next, _) => {
+                let forward = matches!(self, Self::Next);
+                match screen {
+                    Screen::Quick(page) => Screen::Quick(turn_page(page, TOPICS.len(), forward)),
+                    Screen::Index(page) => Screen::Index(turn_page(page, index_pages(), forward)),
+                    Screen::Chapter(page) => {
+                        Screen::Chapter(turn_page(page, chapters().len(), forward))
+                    }
+                }
+            }
+            _ => screen,
+        }
+    }
+
+    fn label(self, screen: Screen) -> Option<&'static str> {
+        match (self, screen) {
+            (Self::Previous, _) => Some("Previous"),
+            (Self::Next, _) => Some("Next"),
+            (Self::SwitchView, Screen::Quick(_)) => Some("Reference"),
+            (Self::SwitchView, _) => Some("Quick guide"),
+            (Self::Index, Screen::Chapter(_)) => Some("Chapter index"),
+            (Self::Chapter(row), Screen::Index(page)) => chapters()
+                .get(page * CHAPTER_KEYS.len() + row)
+                .map(|chapter| chapter.title.as_str()),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Component)]
+struct GuideNavigation;
+
+pub(super) fn install(app: &mut App) {
+    app.add_systems(Startup, spawn_navigation)
+        .add_systems(
+            Update,
+            select_navigation
+                .after(read_camp_pointer)
+                .before(village_input),
+        )
+        .add_systems(Update, show_navigation.after(village_input));
+}
+
+fn spawn_navigation(mut commands: Commands, assets: Res<AssetServer>) {
+    commands
+        .spawn((
+            GuideNavigation,
+            Node {
+                display: Display::None,
+                position_type: PositionType::Absolute,
+                right: px(20),
+                top: px(20),
+                width: px(236),
+                padding: UiRect::all(px(8)),
+                row_gap: px(4),
+                flex_direction: FlexDirection::Column,
+                ..default()
+            },
+            BackgroundColor(Color::srgb_u8(31, 45, 35)),
+        ))
+        .with_children(|panel| {
+            for action in [
+                GuideAction::SwitchView,
+                GuideAction::Index,
+                GuideAction::Previous,
+                GuideAction::Next,
+            ]
+            .into_iter()
+            .chain((0..CHAPTER_KEYS.len()).map(GuideAction::Chapter))
+            {
+                panel
+                    .spawn((
+                        action,
+                        Button,
+                        Node {
+                            padding: UiRect::axes(px(10), px(5)),
+                            ..default()
+                        },
+                        BackgroundColor(Color::srgb_u8(58, 78, 61)),
+                    ))
+                    .with_child((Text::default(), ui_font(&assets, 16.0)));
+            }
+        });
+}
+
+fn active_screen(
+    village: &Village,
+    setup: &WorldSetup,
+    saves: &SaveMenu,
+    sound: &SoundSettings,
+) -> Option<Screen> {
+    if setup.open || saves.open || sound.open {
+        return None;
+    }
+    village.guide.screen
+}
+
+fn select_navigation(
+    (setup, saves, sound): (Res<WorldSetup>, Res<SaveMenu>, Res<SoundSettings>),
+    mut village: ResMut<Village>,
+    buttons: Query<(&GuideAction, &Interaction), Changed<Interaction>>,
+) {
+    if let Some(screen) = active_screen(&village, &setup, &saves, &sound)
+        && let Some((action, _)) = buttons.iter().find(|(action, interaction)| {
+            **interaction == Interaction::Pressed && action.label(screen).is_some()
+        })
+    {
+        village.guide.screen = Some(action.apply(screen));
+    }
+}
+
+fn show_navigation(
+    (setup, saves, sound): (Res<WorldSetup>, Res<SaveMenu>, Res<SoundSettings>),
+    village: Res<Village>,
+    mut panel: Single<&mut Node, (With<GuideNavigation>, Without<GuideAction>)>,
+    mut buttons: Query<(
+        &GuideAction,
+        &Children,
+        &Interaction,
+        &mut Node,
+        &mut BackgroundColor,
+    )>,
+    mut labels: Query<&mut Text>,
+) {
+    let Some(screen) = active_screen(&village, &setup, &saves, &sound) else {
+        panel.display = Display::None;
+        return;
+    };
+    panel.display = Display::Flex;
+    for (action, children, interaction, mut node, mut background) in &mut buttons {
+        let Some(label) = action.label(screen) else {
+            node.display = Display::None;
+            continue;
+        };
+        node.display = Display::Flex;
+        background.0 = if *interaction == Interaction::None {
+            Color::srgb_u8(58, 78, 61)
+        } else {
+            Color::srgb_u8(78, 105, 82)
+        };
+        if let Ok(mut text) = labels.get_mut(children[0])
+            && text.0 != label
+        {
+            text.0 = label.into();
+        }
+    }
+}
+
 impl Guide {
     pub(super) fn open(&self) -> bool {
         self.screen.is_some()
@@ -131,31 +304,22 @@ impl Guide {
         let Some(screen) = self.screen else {
             return false;
         };
-        if keys.just_pressed(KeyCode::Tab) {
-            self.screen = Some(match screen {
-                Screen::Quick(_) => Screen::Index(0),
-                Screen::Index(_) | Screen::Chapter(_) => Screen::Quick(0),
-            });
+        let action = if keys.just_pressed(KeyCode::Tab) {
+            Some(GuideAction::SwitchView)
         } else if keys.just_pressed(KeyCode::Backspace) {
-            if let Screen::Chapter(chapter) = screen {
-                self.screen = Some(Screen::Index(chapter / CHAPTER_KEYS.len()));
-            }
-        } else if keys.any_just_pressed([KeyCode::PageDown, KeyCode::PageUp]) {
-            let forward = keys.just_pressed(KeyCode::PageDown);
-            self.screen = Some(match screen {
-                Screen::Quick(page) => Screen::Quick(turn_page(page, TOPICS.len(), forward)),
-                Screen::Index(page) => Screen::Index(turn_page(page, index_pages(), forward)),
-                Screen::Chapter(page) => {
-                    Screen::Chapter(turn_page(page, chapters().len(), forward))
-                }
-            });
-        } else if let Screen::Index(page) = screen
-            && let Some(row) = CHAPTER_KEYS.iter().position(|key| keys.just_pressed(*key))
-        {
-            let chapter = page * CHAPTER_KEYS.len() + row;
-            if chapter < chapters().len() {
-                self.screen = Some(Screen::Chapter(chapter));
-            }
+            Some(GuideAction::Index)
+        } else if keys.just_pressed(KeyCode::PageDown) {
+            Some(GuideAction::Next)
+        } else if keys.just_pressed(KeyCode::PageUp) {
+            Some(GuideAction::Previous)
+        } else {
+            CHAPTER_KEYS
+                .iter()
+                .position(|key| keys.just_pressed(*key))
+                .map(GuideAction::Chapter)
+        };
+        if let Some(action) = action {
+            self.screen = Some(action.apply(screen));
         }
         true
     }

@@ -67,6 +67,7 @@ impl Plugin for VillagePlugin {
         building_preview::install(app);
         build_menu::install(app);
         toolbar::install(app);
+        guide::install(app);
         app.add_systems(PostUpdate, cultivation_surface::show_beds);
         app.init_resource::<Village>()
             .init_resource::<CampPointer>()
