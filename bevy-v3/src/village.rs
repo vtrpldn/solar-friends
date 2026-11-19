@@ -658,10 +658,7 @@ fn save_controls(
     } else if keyboard.just_pressed(KeyCode::F5) && !setup.open && village.setup.is_some() {
         let shift = keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]);
         village.save_notice = if shift {
-            match diagnostics::export(&village, &catalog, &window) {
-                Ok(path) => format!("Bug report saved locally\n{}", path.display()),
-                Err(error) => format!("Could not export bug report: {error}"),
-            }
+            diagnostics::export_notice(&village, &catalog, &window)
         } else {
             match save::location(setup.mode).and_then(|path| save::write(&path, &village)) {
                 Ok(()) => "Village saved.".into(),

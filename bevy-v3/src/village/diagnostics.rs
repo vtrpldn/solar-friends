@@ -26,7 +26,14 @@ struct Report<'a> {
     village: &'a Village,
 }
 
-pub(super) fn export(village: &Village, catalog: &Catalog, window: &Window) -> io::Result<PathBuf> {
+pub(super) fn export_notice(village: &Village, catalog: &Catalog, window: &Window) -> String {
+    match export(village, catalog, window) {
+        Ok(path) => format!("Bug report saved locally\n{}", path.display()),
+        Err(error) => format!("Could not export bug report: {error}"),
+    }
+}
+
+fn export(village: &Village, catalog: &Catalog, window: &Window) -> io::Result<PathBuf> {
     let captured = SystemTime::now()
         .duration_since(UNIX_EPOCH)
         .map_err(io::Error::other)?;

@@ -17,6 +17,7 @@ enum Action {
     Camera(crate::CameraAction),
     GridOverlay,
     Forecast,
+    Diagnostics,
     Library,
     Sound,
     Volume { effects: bool, delta: i16 },
@@ -177,9 +178,11 @@ impl Action {
                     && !village.construction.is_placing()
                     && village.construction.gathering.has_selection()
             }
-            Self::View | Self::Camera(_) | Self::GridOverlay | Self::Forecast => {
-                !village.trade_open()
-            }
+            Self::View
+            | Self::Camera(_)
+            | Self::GridOverlay
+            | Self::Forecast
+            | Self::Diagnostics => !village.trade_open(),
             Self::Setup | Self::Library | Self::Sound => true,
             Self::Volume { .. } => false,
             Self::CampPreset(_) => {
@@ -301,6 +304,7 @@ impl Action {
             Self::GridOverlay => "Show grid".into(),
             Self::Forecast if village.show_forecast => "Hide forecast".into(),
             Self::Forecast => "Show forecast".into(),
+            Self::Diagnostics => "Export bug report".into(),
             Self::Camera(action) => match action {
                 crate::CameraAction::Camp => "Focus camp",
                 crate::CameraAction::Reset => "Reset camera",
@@ -657,6 +661,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 }
                 spawn_button(menu, &assets, Action::GridOverlay);
                 spawn_button(menu, &assets, Action::Forecast);
+                spawn_button(menu, &assets, Action::Diagnostics);
                 for row in 0..9 {
                     spawn_button(menu, &assets, Action::Lens(row));
                 }
@@ -870,7 +875,10 @@ fn handle_buttons(
     (catalog, land): (Res<Catalog>, Res<Land>),
     (mut village, mut pointer): (ResMut<Village>, ResMut<CampPointer>),
     mut picker: ResMut<PanelPicker>,
-    keyboard: Res<ButtonInput<KeyCode>>,
+    (keyboard, window): (
+        Res<ButtonInput<KeyCode>>,
+        Single<&Window, With<PrimaryWindow>>,
+    ),
     mut camera: Single<(&mut VillageCamera, &mut Projection)>,
     buttons: Query<(&Action, &Interaction), Changed<Interaction>>,
 ) {
@@ -927,7 +935,13 @@ fn handle_buttons(
                 Action::Forecast if picker.view_open => {
                     village.show_forecast = !village.show_forecast
                 }
-                Action::Camera(_) | Action::GridOverlay | Action::Forecast => {}
+                Action::Diagnostics if picker.view_open => {
+                    village.save_notice = diagnostics::export_notice(&village, &catalog, &window);
+                }
+                Action::Camera(_)
+                | Action::GridOverlay
+                | Action::Forecast
+                | Action::Diagnostics => {}
                 Action::CampPreset(index) => pointer.preset = Some(CAMP_SITES[index].1),
                 Action::Setup => {
                     setup.open = true;
@@ -1456,7 +1470,7 @@ fn refresh(
         };
         let show = if matches!(
             action,
-            Action::Camera(_) | Action::GridOverlay | Action::Forecast
+            Action::Camera(_) | Action::GridOverlay | Action::Forecast | Action::Diagnostics
         ) {
             show_view
         } else {
