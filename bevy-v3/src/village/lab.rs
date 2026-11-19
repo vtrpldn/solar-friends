@@ -1039,9 +1039,14 @@ impl SpeedMeter {
     }
 }
 
+fn lab_save_path() -> io::Result<PathBuf> {
+    Ok(crate::save::location(Mode::Story)?.with_file_name("lab-save.json"))
+}
+
 enum LabReplacement {
     Reload,
     File(PathBuf),
+    SavedLab(PathBuf),
 }
 
 impl LabReplacement {
@@ -1056,12 +1061,14 @@ impl LabReplacement {
                 let source = source.ok_or_else(|| io::Error::other("No original scenario."))?;
                 Ok((source.load(catalog)?, None))
             }
-            Self::File(path) => {
-                let bytes = crate::save::read_bytes(path, 3 * crate::save::MAX_BYTES)?;
-                let value: serde_json::Value = serde_json::from_slice(&bytes)?;
-                if value.get("scenario").is_some() {
-                    let (runner, replay) = prepare_replay(value, catalog)?;
-                    return Ok((runner, Some(replay)));
+            Self::File(path) | Self::SavedLab(path) => {
+                if matches!(self, Self::File(_)) {
+                    let bytes = crate::save::read_bytes(path, 3 * crate::save::MAX_BYTES)?;
+                    let value: serde_json::Value = serde_json::from_slice(&bytes)?;
+                    if value.get("scenario").is_some() {
+                        let (runner, replay) = prepare_replay(value, catalog)?;
+                        return Ok((runner, Some(replay)));
+                    }
                 }
                 let village = crate::save::read(path, catalog)?;
                 let runner = Runner::new(
@@ -1086,6 +1093,7 @@ impl LabReplacement {
             }
             Self::Reload => "Reload scenario?",
             Self::File(_) => "Open lab checkpoint or replay report?",
+            Self::SavedLab(_) => "Load the saved lab village?",
         }
     }
 }
@@ -1525,6 +1533,18 @@ fn update_lab_window(
         } else if keys.just_pressed(KeyCode::Escape) {
             playback.replacement = None;
             None
+        } else if keys.just_pressed(KeyCode::F9) {
+            match lab_save_path() {
+                Ok(path) if path.is_file() => Some(LabReplacement::SavedLab(path)),
+                Ok(_) => {
+                    playback.notice = "No lab save yet.".into();
+                    None
+                }
+                Err(error) => {
+                    playback.notice = format!("Could not locate lab save · {error}");
+                    None
+                }
+            }
         } else if keys.just_pressed(KeyCode::F8) {
             if let Some(candidate) = playback.replacement.take() {
                 match candidate.load(source.as_deref(), runner.scenario.steps, &catalog) {
@@ -1540,6 +1560,7 @@ fn update_lab_window(
                             match candidate {
                                 LabReplacement::Reload => "Scenario reloaded at step 0.",
                                 LabReplacement::File(_) => "Checkpoint imported at step 0.",
+                                LabReplacement::SavedLab(_) => "Lab save loaded at step 0.",
                             }
                         }
                         .into();
@@ -1613,12 +1634,18 @@ fn update_lab_window(
             playback.order = Some(String::new());
         }
         if keys.just_pressed(KeyCode::F6) {
-            playback.notice = match runner.output_path("checkpoint").and_then(|path| {
+            let export = keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]);
+            let path = if export {
+                runner.output_path("checkpoint")
+            } else {
+                lab_save_path()
+            };
+            playback.notice = match path.and_then(|path| {
                 runner.checkpoint(&path)?;
                 Ok(path)
             }) {
-                Ok(path) => format!("Checkpoint saved to {}", path.display()),
-                Err(error) => format!("Could not save checkpoint · {error}"),
+                Ok(path) => format!("Lab village saved to {}", path.display()),
+                Err(error) => format!("Could not save lab village · {error}"),
             };
         }
         if keys.just_pressed(KeyCode::F5) {
@@ -1879,7 +1906,7 @@ fn update_lab_window(
             )
         };
         panel.set_if_neq(Text::new(format!(
-            "Simulation lab · {status} · Step {} / {} · {}\nSpace Run/Pause · J Single step · 1–9 Speed · {order_control}F5 Report · F6 Checkpoint\n{interval_controls}{}\n\n{details}",
+            "Simulation lab · {status} · Step {} / {} · {}\nSpace Run/Pause · J Single step · 1–9 Speed · {order_control}F5 Report · F6 Save lab · F9 Load lab\n{interval_controls}{}\n\n{details}",
             runner.index, limit, playback.speed_label(), playback.notice,
         )));
         return;
@@ -1900,7 +1927,7 @@ fn update_lab_window(
         .copied()
         .fold(0, u64::saturating_add);
     let text = format!(
-        "Simulation lab · {status}\nStep {} / {} · {:.1} simulation seconds · {}\nSpace Run/Pause · J Single step · 1–9 Speed\n{order_control}F5 Export report · F6 Checkpoint{reload_control} · Tab Browse lab views\nDrop checkpoint or replay report to open\n{interval_controls}{}\n\nR${:.2} · {} timber · {} meals · {:.1} L drinking water · {spoiled} units spoiled\nWeather · {:.1} °C · {:.2} mm/h rain · {:.0}% cloud\n{}\n{last}\n\n{}",
+        "Simulation lab · {status}\nStep {} / {} · {:.1} simulation seconds · {}\nSpace Run/Pause · J Single step · 1–9 Speed\n{order_control}F5 Report · F6 Save lab · F9 Load lab{reload_control} · Tab Browse lab views\nShift+F6 Export checkpoint · Drop checkpoint or replay report to open\n{interval_controls}{}\n\nR${:.2} · {} timber · {} meals · {:.1} L drinking water · {spoiled} units spoiled\nWeather · {:.1} °C · {:.2} mm/h rain · {:.0}% cloud\n{}\n{last}\n\n{}",
         runner.index,
         limit,
         village.clock,
@@ -2614,7 +2641,7 @@ mod tests {
         assert_eq!(app.world().resource::<Runner>().village.clock, 20.0);
         assert_eq!(app.world().resource::<Runner>().index, 0);
         let evidence = path.with_extension("evidence.json");
-        let mut recorded = LabReplacement::File(checkpoint.clone())
+        let mut recorded = LabReplacement::SavedLab(checkpoint.clone())
             .load(None, 8, app.world().resource::<Catalog>())
             .unwrap()
             .0;
