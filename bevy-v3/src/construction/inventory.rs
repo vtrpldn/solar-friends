@@ -134,14 +134,18 @@ impl Construction {
         stock: &Stock,
         page: usize,
         equipment: bool,
+        search: &str,
     ) -> (usize, String) {
         use std::fmt::Write;
         const ROWS: usize = 9;
+        let search = search.trim().to_lowercase();
         let ledger = self.inventory(catalog, stock);
         let mut rows: Vec<_> = ledger
             .into_iter()
             .filter(|(id, amounts)| {
                 catalog.materials[*id].equipment == equipment
+                    && (search.is_empty()
+                        || catalog.materials[*id].name.to_lowercase().contains(&search))
                     && amounts.iter().any(|&amount| amount > 0)
             })
             .collect();
@@ -160,7 +164,7 @@ impl Construction {
             pages
         );
         if rows.is_empty() {
-            text.push_str("\nNothing in this view yet.");
+            text.push_str("\nNo matching stock.");
         }
         for (id, row) in rows.iter().skip(page * ROWS).take(ROWS) {
             let item = &catalog.materials[*id];

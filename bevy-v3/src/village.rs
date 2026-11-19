@@ -155,6 +155,10 @@ pub struct Village {
     #[serde(skip)]
     inventory_equipment: bool,
     #[serde(skip)]
+    inventory_search: String,
+    #[serde(skip)]
+    editing_inventory: bool,
+    #[serde(skip)]
     projects_page: usize,
     #[serde(skip)]
     guide: guide::Guide,
@@ -357,7 +361,10 @@ impl Village {
     }
 
     pub fn map_input_blocked(&self) -> bool {
-        self.guide.open() || self.lenses.open || self.construction.editing_search
+        self.guide.open()
+            || self.lenses.open
+            || self.construction.editing_search
+            || self.editing_inventory
     }
 
     fn select_resident(&mut self, index: usize) {
@@ -446,6 +453,7 @@ impl Village {
                         &self.stock,
                         self.inventory_page,
                         self.inventory_equipment,
+                        &self.inventory_search,
                     )
                     .0,
                 &mut self.inventory_page,
@@ -872,6 +880,22 @@ fn village_input(
                 opening_model(&assets, NAMES.len() + index * 2 + 1),
             ));
         }
+    }
+
+    if village.utility_panel == Some(UtilityPanel::Inventory)
+        && (village.editing_inventory || keyboard.just_pressed(KeyCode::Slash))
+    {
+        if keyboard.just_pressed(KeyCode::Slash) && !village.editing_inventory {
+            village.editing_inventory = true;
+            build_text.clear();
+        } else if keyboard.any_just_pressed([KeyCode::Enter, KeyCode::NumpadEnter]) {
+            village.editing_inventory = false;
+            build_text.clear();
+        } else {
+            crate::construction::read_search_text(&mut village.inventory_search, &mut build_text);
+            village.inventory_page = 0;
+        }
+        return;
     }
 
     if (village.construction.editing_search || keyboard.just_pressed(KeyCode::Slash))
@@ -1631,6 +1655,17 @@ fn show_hud(
             );
         }
         Some(UtilityPanel::Inventory) => {
+            use std::fmt::Write;
+            let cursor = if village.editing_inventory {
+                "▏ · Enter Done"
+            } else {
+                " · / Search"
+            };
+            let _ = write!(
+                label,
+                "\nFind material · {}{cursor}",
+                village.inventory_search
+            );
             label.push('\n');
             label.push_str(
                 &village
@@ -1640,6 +1675,7 @@ fn show_hud(
                         &village.stock,
                         village.inventory_page,
                         village.inventory_equipment,
+                        &village.inventory_search,
                     )
                     .1,
             );

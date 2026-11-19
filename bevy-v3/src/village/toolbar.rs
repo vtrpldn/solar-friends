@@ -56,6 +56,7 @@ enum Action {
     TradePolicy(TradePolicy),
     ProjectFilter,
     InventoryView,
+    InventorySearch,
     Resident(usize),
     Home(bool),
     ListedHome(usize),
@@ -96,6 +97,13 @@ impl Action {
             return !village.guide.open()
                 && !village.construction.editing_search
                 && (matches!(self, Self::Lenses) || village.lenses.open);
+        }
+        if matches!(self, Self::InventorySearch) {
+            return village.utility_panel == Some(UtilityPanel::Inventory)
+                && !village.guide.open()
+                && !village.lenses.open
+                && !village.advance_open()
+                && !village.terrain_editor.open;
         }
         if matches!(self, Self::Guide) {
             return !village.construction.editing_search;
@@ -203,6 +211,7 @@ impl Action {
             }
             Self::SelectedProject(_) => village.utility_panel.is_none(),
             Self::TradeItem(_) | Self::Trade(_) | Self::TradePolicy(_) => village.trade_open(),
+            Self::InventorySearch => false,
             Self::InventoryView => village.utility_panel == Some(UtilityPanel::Inventory),
             Self::Project(_) | Self::ProjectFilter => {
                 village.utility_panel == Some(UtilityPanel::Projects)
@@ -341,6 +350,8 @@ impl Action {
             Self::ClosePanel => "Close panel".into(),
             Self::Page(false) => "Previous page".into(),
             Self::Page(true) => "Next page".into(),
+            Self::InventorySearch if village.editing_inventory => "Done searching".into(),
+            Self::InventorySearch => "Find material".into(),
             Self::InventoryView if village.inventory_equipment => "Show resources".into(),
             Self::InventoryView => "Show items and equipment".into(),
             Self::ProjectFilter if village.open_projects_only => "Show all projects".into(),
@@ -544,6 +555,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 Action::Manage,
                 Action::ClosePanel,
                 Action::InventoryView,
+                Action::InventorySearch,
                 Action::Pause,
                 Action::Speed,
                 Action::Guide,
@@ -953,6 +965,7 @@ fn handle_buttons(
                 Action::Project(row) if !picker.open => {
                     village.focus_project_row(&catalog, &setup, camera, row);
                 }
+                Action::InventorySearch => village.editing_inventory = !village.editing_inventory,
                 Action::InventoryView => village.toggle_inventory_view(),
                 Action::ProjectFilter if !picker.open => {
                     village.open_projects_only = !village.open_projects_only;
@@ -1253,6 +1266,7 @@ fn refresh(
                 show_residents && home_pages > 1
             }
             Action::Page(_)
+            | Action::InventorySearch
             | Action::InventoryView
             | Action::ClosePanel
             | Action::RotatePlacement

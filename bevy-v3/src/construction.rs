@@ -378,18 +378,7 @@ impl Construction {
             text.clear();
             return true;
         }
-        for event in text.read() {
-            if event.state != bevy::input::ButtonState::Pressed {
-                continue;
-            }
-            if event.key_code == KeyCode::Backspace {
-                self.build_query.pop();
-            } else if let Some(chars) = &event.text {
-                let room = 60usize.saturating_sub(self.build_query.chars().count());
-                self.build_query
-                    .extend(chars.chars().filter(|c| !c.is_control()).take(room));
-            }
-        }
+        read_search_text(&mut self.build_query, text);
         true
     }
 
@@ -1094,6 +1083,23 @@ fn draw_lens_marker(
     gizmos.line(base, tip, color);
     for axis in [Vec3::X, Vec3::Z] {
         gizmos.line(tip - axis * 0.7, tip + axis * 0.7, color);
+    }
+}
+
+pub(crate) fn read_search_text(
+    query: &mut String,
+    text: &mut MessageReader<bevy::input::keyboard::KeyboardInput>,
+) {
+    for event in text.read() {
+        if event.state != bevy::input::ButtonState::Pressed {
+            continue;
+        }
+        if event.key_code == KeyCode::Backspace {
+            query.pop();
+        } else if let Some(chars) = &event.text {
+            let room = 60usize.saturating_sub(query.chars().count());
+            query.extend(chars.chars().filter(|c| !c.is_control()).take(room));
+        }
     }
 }
 
