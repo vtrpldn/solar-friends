@@ -18,6 +18,7 @@ struct LaunchStatus;
 
 #[derive(Component, Clone, Copy, PartialEq, Eq)]
 enum ArtTool {
+    Collection,
     Workshop,
     Garden,
     Biomes,
@@ -25,10 +26,17 @@ enum ArtTool {
 }
 
 impl ArtTool {
-    const ALL: [Self; 4] = [Self::Workshop, Self::Garden, Self::Biomes, Self::Residents];
+    const ALL: [Self; 5] = [
+        Self::Collection,
+        Self::Workshop,
+        Self::Garden,
+        Self::Biomes,
+        Self::Residents,
+    ];
 
     fn label(self) -> &'static str {
         match self {
+            Self::Collection => "Collection",
             Self::Workshop => "3D inspector",
             Self::Garden => "Asset Garden",
             Self::Biomes => "Biome landscapes",
@@ -38,6 +46,7 @@ impl ArtTool {
 
     fn arguments(self) -> &'static [&'static str] {
         match self {
+            Self::Collection => &["--collection"],
             Self::Workshop => &["--workshop"],
             Self::Garden => &["--asset-garden"],
             Self::Biomes => &["--biome-landscapes"],

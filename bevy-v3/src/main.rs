@@ -74,8 +74,13 @@ fn main() {
         workshop::garden::run(path.map(std::path::PathBuf::from), night, false);
         return;
     }
+    if option.as_deref().is_some_and(|flag| flag == "--collection") {
+        workshop::collection::run();
+        return;
+    }
     if option.as_deref().is_some_and(|flag| flag == "--workshop") {
-        workshop::run();
+        let asset = args.next();
+        workshop::run(asset.as_deref().and_then(std::ffi::OsStr::to_str));
         return;
     }
     if let Some(flag) = option.as_deref()

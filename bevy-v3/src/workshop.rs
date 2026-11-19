@@ -1,3 +1,4 @@
+pub mod collection;
 pub mod garden;
 mod garden_connections;
 mod garden_terrain;
@@ -182,11 +183,14 @@ fn orbit_camera(heading: f32, elevation: f32, target: Vec3) -> Transform {
     Transform::from_translation(target + offset).looking_at(target, Vec3::Y)
 }
 
-pub fn run() {
+pub fn run(asset: Option<&str>) {
     let catalog = Catalog::default();
     let models = WorkshopCatalog::default();
     let mut assets: Vec<_> = models.0.keys().cloned().collect();
     assets.sort_by(|a, b| models.0[a].name.cmp(&models.0[b].name));
+    let selected = asset
+        .and_then(|asset| assets.iter().position(|id| id == asset))
+        .unwrap_or_default();
     let mut app = App::new();
     app.add_plugins(DefaultPlugins.set(WindowPlugin {
         primary_window: Some(Window {
@@ -200,7 +204,7 @@ pub fn run() {
     .insert_resource(models)
     .insert_resource(Workshop {
         assets,
-        selected: 0,
+        selected,
         heading: 0.0,
         elevation: DEFAULT_ELEVATION,
         rotation: 0,
