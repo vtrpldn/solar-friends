@@ -582,6 +582,21 @@ impl Runner {
         Ok(())
     }
 
+    fn replace_pending_action(
+        &mut self,
+        index: usize,
+        order: LabOrder,
+    ) -> Result<(), &'static str> {
+        let scheduled = self
+            .scenario
+            .orders
+            .get_mut(index)
+            .filter(|_| index >= self.next_order)
+            .ok_or("Only scheduled orders can be edited.")?;
+        scheduled.order = order;
+        Ok(())
+    }
+
     fn latest_bed_outcome(&self, site: usize, bed: usize) -> Option<&Outcome> {
         self.scenario
             .orders
@@ -830,7 +845,7 @@ fn lab_order_page(runner: &Runner, page: &mut usize, selected_row: Option<usize>
         *page + 1
     );
     if selected_row.is_some() {
-        text.push_str("↑/↓ Select · Enter Reschedule · Delete Remove\n");
+        text.push_str("↑/↓ Select · Enter Move · Shift+Enter Edit · Delete Remove\n");
     }
     if count == 0 {
         text.push_str("\nNo scenario orders.");
@@ -1031,6 +1046,30 @@ impl SpeedMeter {
     }
 }
 
+#[derive(Clone, Copy)]
+enum OrderEdit {
+    Timing,
+    Action,
+}
+
+impl OrderEdit {
+    fn prompt(self, index: usize, scheduled: &ScheduledOrder, draft: &str, notice: &str) -> String {
+        let details = match self {
+            Self::Timing => format!("New step · {draft}▏"),
+            Self::Action => {
+                let current = serde_json::to_string(&scheduled.order)
+                    .unwrap_or_else(|_| order_label(&scheduled.order));
+                format!("Current · {current}\nReplacement · {draft}▏")
+            }
+        };
+        format!(
+            "Edit order #{} at step {}\nEnter Submit · Esc Cancel\n\n{details}\n{notice}",
+            index + 1,
+            scheduled.step
+        )
+    }
+}
+
 struct Playback {
     running: bool,
     replaying: bool,
@@ -1041,7 +1080,7 @@ struct Playback {
     stop: usize,
     pause_at: Option<u64>,
     order: Option<String>,
-    rescheduling: Option<usize>,
+    order_edit: Option<(usize, OrderEdit)>,
     notice: String,
     view: LabView,
     inventory_page: usize,
@@ -1166,7 +1205,7 @@ impl Default for Playback {
             stop: 0,
             pause_at: None,
             order: None,
-            rescheduling: None,
+            order_edit: None,
             notice: String::new(),
             view: LabView::default(),
             inventory_page: 0,
@@ -1424,7 +1463,7 @@ fn update_lab_window(
     if let Some(mut order) = playback.order.take() {
         if keys.just_pressed(KeyCode::Escape) {
             events.clear();
-            playback.rescheduling = None;
+            playback.order_edit = None;
         } else if keys.just_pressed(KeyCode::Enter) {
             events.clear();
             #[derive(Deserialize)]
@@ -1433,7 +1472,7 @@ fn update_lab_window(
                 Scheduled(ScheduledOrder),
                 Now(LabOrder),
             }
-            let result = if let Some(index) = playback.rescheduling {
+            let result = if let Some((index, OrderEdit::Timing)) = playback.order_edit {
                 order
                     .trim()
                     .parse::<u64>()
@@ -1441,6 +1480,15 @@ fn update_lab_window(
                     .and_then(|step| {
                         runner.reschedule(index, step).map_err(str::to_owned)?;
                         Ok(format!("Order moved to step {step}."))
+                    })
+            } else if let Some((index, OrderEdit::Action)) = playback.order_edit {
+                serde_json::from_str::<LabOrder>(&order)
+                    .map_err(|error| error.to_string())
+                    .and_then(|replacement| {
+                        runner
+                            .replace_pending_action(index, replacement)
+                            .map_err(str::to_owned)?;
+                        Ok(format!("Updated order #{}.", index + 1))
                     })
             } else {
                 serde_json::from_str::<OrderInput>(&order)
@@ -1462,7 +1510,7 @@ fn update_lab_window(
             match result {
                 Ok(notice) => {
                     playback.notice = notice;
-                    playback.rescheduling = None;
+                    playback.order_edit = None;
                 }
                 Err(error) => {
                     playback.notice = error;
@@ -1519,12 +1567,12 @@ fn update_lab_window(
     }
     if let Some(order) = &playback.order {
         map.visible = false;
-        if let Some(index) = playback.rescheduling {
-            panel.set_if_neq(Text::new(format!(
-                "Move order #{} from step {}\nEnter Submit · Esc Cancel\n\nNew step · {order}▏\n{}",
-                index + 1,
-                runner.scenario.orders[index].step,
-                playback.notice
+        if let Some((index, mode)) = playback.order_edit {
+            panel.set_if_neq(Text::new(mode.prompt(
+                index,
+                &runner.scenario.orders[index],
+                order,
+                &playback.notice,
             )));
             return;
         }
@@ -1642,21 +1690,27 @@ fn update_lab_window(
         }
         playback.order_row = playback.order_row.min(rows.saturating_sub(1));
         let remove = keys.just_pressed(KeyCode::Delete);
-        let move_order = keys.just_pressed(KeyCode::Enter);
-        if (remove || move_order) && rows > 0 {
+        let edit = keys.just_pressed(KeyCode::Enter);
+        if (remove || edit) && rows > 0 {
             let index = count - 1 - offset - playback.order_row;
             if index < runner.next_order {
                 playback.notice = "Only scheduled orders can be edited.".into();
             } else if playback.running {
                 playback.notice = "Pause the scenario before editing an order.".into();
-            } else if move_order {
+            } else if edit {
+                let mode = if keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]) {
+                    OrderEdit::Action
+                } else {
+                    OrderEdit::Timing
+                };
                 playback.notice.clear();
-                playback.rescheduling = Some(index);
+                playback.order_edit = Some((index, mode));
                 playback.order = Some(String::new());
-                panel.set_if_neq(Text::new(format!(
-                    "Move order #{} from step {}\nEnter Submit · Esc Cancel\n\nNew step · ▏",
-                    index + 1,
-                    runner.scenario.orders[index].step
+                panel.set_if_neq(Text::new(mode.prompt(
+                    index,
+                    &runner.scenario.orders[index],
+                    "",
+                    "",
                 )));
                 return;
             } else {
@@ -2415,6 +2469,35 @@ mod tests {
         let report =
             serde_json::from_slice(&serde_json::to_vec(&runner.report()).unwrap()).unwrap();
         assert_eq!(verify_report(report, &catalog).unwrap(), 5);
+    }
+
+    #[test]
+    fn replacing_pending_action_preserves_step_and_replays() {
+        let catalog = Catalog::default();
+        let scenario = serde_json::from_str(
+            r#"{"steps":3,"orders":[
+            {"step":0,"order":{"type":"grid","enabled":false}},
+            {"step":2,"order":{"type":"grid","enabled":false}}
+        ]}"#,
+        )
+        .unwrap();
+        let mut runner = Runner::new(scenario, None, &catalog).unwrap();
+        assert!(
+            runner
+                .replace_pending_action(0, LabOrder::Grid { enabled: true })
+                .is_err()
+        );
+        runner
+            .replace_pending_action(1, LabOrder::Grid { enabled: true })
+            .unwrap();
+        runner.advance(&catalog);
+        assert!(runner.village.construction.utilities.grid_off);
+        runner.advance(&catalog);
+        assert!(!runner.village.construction.utilities.grid_off);
+        assert_eq!(runner.outcomes[1].step, 2);
+        let report =
+            serde_json::from_slice(&serde_json::to_vec(&runner.report()).unwrap()).unwrap();
+        assert_eq!(verify_report(report, &catalog).unwrap(), 2);
     }
 
     #[test]
