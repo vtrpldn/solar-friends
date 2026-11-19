@@ -120,6 +120,25 @@ struct Service {
     work: f64,
 }
 
+impl Service {
+    fn supplies_status(&self, definition: Option<&Project>, catalog: &Catalog) -> String {
+        let supplies = parts(self.kind, definition, catalog)
+            .iter()
+            .map(|(id, &count)| {
+                let item = &catalog.materials[id];
+                format!("{} {}", item.quantity_text(u64::from(count)), item.name)
+            })
+            .collect::<Vec<_>>()
+            .join(" · ");
+        let status = if self.parts_paid {
+            "Reserved"
+        } else {
+            "Required"
+        };
+        format!("{status} · {supplies}")
+    }
+}
+
 impl Upkeep {
     pub(super) fn valid(&self, count: usize) -> bool {
         self.next_vehicle < self.vehicles.len()
@@ -414,6 +433,10 @@ impl Construction {
                 car.condition,
                 car.kilometers
             ));
+            if let Some(job) = &car.service {
+                text.push('\n');
+                text.push_str(&job.supplies_status(None, catalog));
+            }
         }
         let page = page.min(self.upkeep_pages() - 1);
         if !u.jobs.is_empty() {
@@ -437,20 +460,8 @@ impl Construction {
                 index + 1,
                 job.kind.label()
             ));
-            let supplies = parts(job.kind, Some(definition), catalog)
-                .iter()
-                .map(|(id, &count)| {
-                    let item = &catalog.materials[id];
-                    format!("{} {}", item.quantity_text(u64::from(count)), item.name)
-                })
-                .collect::<Vec<_>>()
-                .join(" · ");
-            let supply_status = if job.parts_paid {
-                "Reserved"
-            } else {
-                "Required"
-            };
-            text.push_str(&format!("\n{supply_status} · {supplies}"));
+            text.push('\n');
+            text.push_str(&job.supplies_status(Some(definition), catalog));
         }
         if let Some(index) = self.production.selected
             && let Some(asset) = u.assets.get(&index)
@@ -923,12 +934,25 @@ mod tests {
 
         village.upkeep.budget = 20_000;
         village.age_assets(&catalog, 0.1, 0.1);
+        let queued = village.upkeep_status(&catalog, 0);
+        assert!(queued.contains("km · service queued\nRequired ·"));
+        let mut reserved_seen = false;
         for _ in 0..6_000 {
             village.tick_upkeep(&catalog, &mut stock, site, 0.1);
+            if !reserved_seen
+                && village.upkeep.vehicles[1]
+                    .service
+                    .as_ref()
+                    .is_some_and(|job| job.parts_paid)
+            {
+                assert!(village.upkeep_status(&catalog, 0).contains("\nReserved ·"));
+                reserved_seen = true;
+            }
             if village.upkeep.vehicles[1].service.is_none() {
                 break;
             }
         }
+        assert!(reserved_seen);
         assert_eq!(village.upkeep.vehicles[1].condition, 100.0);
         assert_eq!(village.upkeep.vehicles[1].kilometers, 5_012);
         village.upkeep.dispatch_vehicle(0);
