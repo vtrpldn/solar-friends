@@ -460,6 +460,7 @@ impl Construction {
                     || self.working_water(index)
                     || self.gathering.workers_at_site(index)
                     || self.farming.has_worker(index)
+                    || self.residents[index].leisure.visit.is_some()
                     || self.residents[index].health.task.is_some())
             {
                 self.refresh_resident_route(index, catalog, site);

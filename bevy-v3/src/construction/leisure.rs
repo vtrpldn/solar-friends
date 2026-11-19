@@ -148,7 +148,9 @@ impl Construction {
                 continue;
             }
             if let Some(mut visit) = self.residents[index].leisure.visit.take() {
-                if self.visit_valid(&visit, catalog, clock, wet) {
+                if !self.residents[index].waiting_for_route()
+                    && self.visit_valid(&visit, catalog, clock, wet)
+                {
                     let worker = &mut self.residents[index];
                     worker.move_along_path(dt, false);
                     if !worker.path.is_empty() {
@@ -193,6 +195,7 @@ impl Construction {
                     }
                 }
                 self.residents[index].path.clear();
+                self.residents[index].paused_waypoint = None;
             }
             self.choose_visit(index, catalog, site, clock, wet);
         }
@@ -566,7 +569,18 @@ mod tests {
             Some(0)
         );
         assert_eq!(village.residents[index].health.levels[fun], 60.0);
+        let path = &village.residents[index].path;
+        let blocked = *path.front().unwrap();
+        let destination = *path.back().unwrap();
+        assert_ne!(blocked, destination);
+        let obstacle = village.proposed_site(&catalog, "supply-5", blocked.as_ivec2());
+        village.plans.push(obstacle);
+        village.refresh_resident_crowding(&catalog, site);
+        let path = &village.residents[index].path;
+        assert!(!path.contains(&blocked));
+        assert_eq!(path.back(), Some(&destination));
         for tick in 1..200 {
+            village.refresh_resident_crowding(&catalog, site);
             village.tick_leisure(&catalog, &setup, &stock, site, f64::from(tick) / 10.0, 0.1);
         }
         let reader = &village.residents[index];
