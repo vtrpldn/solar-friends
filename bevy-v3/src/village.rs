@@ -2019,6 +2019,7 @@ fn show_hud(
     };
     let rate = |index, unit| resource_trends::hourly_rate(rates.map(|rates| rates[index]), unit);
     let (text, node) = &mut *hud;
+    node.max_width = Val::Auto;
     if sound.open {
         node.display = Display::Flex;
         node.left = Val::Auto;
@@ -2053,6 +2054,12 @@ fn show_hud(
     node.display = Display::Flex;
     node.top = px(20);
     node.bottom = Val::Auto;
+    if matches!(
+        village.utility_panel,
+        Some(UtilityPanel::Power | UtilityPanel::Water)
+    ) {
+        node.max_width = Val::Vw(40.0);
+    }
     if village.trade_open()
         || (village.utility_panel.is_none() && village.construction.production.open)
     {
