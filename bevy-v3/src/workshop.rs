@@ -68,7 +68,6 @@ impl Workshop {
     fn reset_camera(&mut self) {
         self.heading = 0.0;
         self.elevation = DEFAULT_ELEVATION;
-        self.rotation = 0;
         self.zoom = 1.0;
         self.target = Vec3::Y;
     }
