@@ -602,6 +602,16 @@ impl Construction {
             let recipe = &catalog.production[&job.recipe];
             let state = self.batch_status(job, catalog, stock, clock);
             text.push_str(&format!(" · {} · {state}", recipe.name));
+            if recipe.craft.is_some() {
+                use std::fmt::Write;
+                let resident = job
+                    .worker
+                    .map_or("Waiting for a qualified resident", |worker| {
+                        super::resident_work::NAMES[worker]
+                    });
+                let progress = (100.0 * job.work / recipe.work).floor();
+                let _ = write!(text, "\nCraft progress {progress:.0}% · {resident}");
+            }
         }
         if let Some(animals) = self.livestock.animals.get(&index) {
             text.push_str(&format!(
@@ -1390,6 +1400,12 @@ mod upgrade_tests {
         village.residents[0].path.push_back(Vec2::new(45.0, 36.0));
         village.select_project(Some(0));
         village.toggle_recipes(&catalog);
+        assert!(
+            village
+                .selected_production(&catalog, &stock, 0.0)
+                .unwrap()
+                .contains("Craft progress 3% · Iara")
+        );
         let mut keyboard = ButtonInput::default();
         keyboard.press(KeyCode::BracketRight);
         village.production_input(&catalog, &mut stock, &keyboard);
@@ -1403,6 +1419,12 @@ mod upgrade_tests {
         assert!(job.phase == Phase::Pickup);
         assert!(village.residents[0].path.is_empty());
         assert_eq!(village.production.selected, Some(2));
+        assert!(
+            village
+                .selected_production(&catalog, &stock, 0.0)
+                .unwrap()
+                .contains("Craft progress 3% · Waiting for a qualified resident")
+        );
     }
 
     #[test]
