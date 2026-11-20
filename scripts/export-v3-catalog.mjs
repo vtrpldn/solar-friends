@@ -66,7 +66,6 @@ const emptyGoatPen = PROJECTS["goat-pasture-empty"];
 projects["goat-pasture-empty"] = {
   ...projects.goat_pasture,
   name: emptyGoatPen.name,
-  retired: true,
   description: "Build the pen first. Stock it later with two goats from village supplies.",
   model: buildingScenes.indexOf(emptyGoatPen.asset),
   materials: emptyGoatPen.materials,
@@ -133,7 +132,7 @@ const landscapes = Object.fromEntries(
   Object.keys(BIOMES).filter(id => id !== "flat").map(id => [id, biomeLandscape(id)]),
 );
 const exports = {
-  "data/construction.json": json({ materials, resourceGroups: RESOURCE_GROUPS, foodResources: inventoryGroups("food")[0], projects, gathering, production, residents: Object.values(PROFILES), animalRations: ANIMAL_RATIONS, workshopComparison: buildingScenes.indexOf("workshop-comparison") }),
+  "data/construction.json": json({ materials, resourceGroups: RESOURCE_GROUPS, foodResources: inventoryGroups("food")[0], buildOrder: buildOptions.map(([id]) => id), projects, gathering, production, residents: Object.values(PROFILES), animalRations: ANIMAL_RATIONS, workshopComparison: buildingScenes.indexOf("workshop-comparison") }),
   "data/crops.json": json(CROPS),
   "data/workshop.json": json(workshopModels),
   "data/asset-garden.json": encode(gallery()) + "\n",

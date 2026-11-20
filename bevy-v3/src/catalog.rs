@@ -9,6 +9,7 @@ pub struct Catalog {
     pub materials: BTreeMap<String, Material>,
     pub resource_groups: Vec<ResourceGroup>,
     pub food_resources: ResourceGroup,
+    build_order: Vec<String>,
     pub projects: BTreeMap<String, Project>,
     pub gathering: BTreeMap<String, GatherRecipe>,
     pub production: BTreeMap<String, ProductionRecipe>,
@@ -103,8 +104,6 @@ pub struct Project {
     pub work: f64,
     pub camp_essential: bool,
     pub repeatable: bool,
-    #[serde(default)]
-    pub retired: bool,
     pub beds: Option<usize>,
 }
 
@@ -248,7 +247,7 @@ impl Default for Catalog {
 
 impl Catalog {
     pub fn build_options(&self) -> impl Iterator<Item = (&String, &Project)> {
-        self.projects.iter().filter(|(_, project)| !project.retired)
+        self.build_order.iter().map(|id| (id, &self.projects[id]))
     }
 
     pub(crate) fn resource_entries(&self) -> impl Iterator<Item = (&str, &str, &Material)> {

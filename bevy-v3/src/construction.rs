@@ -651,7 +651,7 @@ impl Construction {
         let category = CATEGORIES[self.category];
         let query = self.build_query.trim().to_lowercase();
         let matches = |text: &str| text.to_lowercase().contains(&query);
-        let mut projects: Vec<_> = catalog
+        catalog
             .build_options()
             .filter(|(id, project)| {
                 if query.is_empty() {
@@ -672,14 +672,7 @@ impl Construction {
                             && (matches(&recipe.name) || recipe.output.keys().any(material_matches))
                     })
             })
-            .collect();
-        if query.is_empty() && category == "Camp essentials" {
-            let rank = ["gathering", "well", "shelter", "toilet"];
-            projects.sort_by_key(|(id, _)| rank.iter().position(|key| *key == id.as_str()));
-        } else {
-            projects.sort_by(|(_, a), (_, b)| a.name.cmp(&b.name));
-        }
-        projects
+            .collect()
     }
 
     pub fn build_search_input(
