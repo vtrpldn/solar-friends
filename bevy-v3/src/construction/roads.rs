@@ -178,7 +178,10 @@ impl Construction {
             market: std::mem::replace(&mut self.market, draft_market),
         });
         self.road_planning.anchor = Some(end);
-        self.status = format!("{} road tile(s) planned.", added.len());
+        self.status = format!(
+            "{} planned.",
+            crate::words::counted(added.len() as u64, "road tile", "road tiles")
+        );
         self.plans.extend(added);
     }
 

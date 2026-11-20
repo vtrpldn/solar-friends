@@ -275,7 +275,8 @@ impl Construction {
         let minutes = crate::weather::remaining_game_minutes(delivery.eta - clock);
         let projects = delivery.sites().count();
         Some(format!(
-            "Construction freight · {projects} project(s) · {minutes} game minutes remaining"
+            "Construction freight · {} · {minutes} game minutes remaining",
+            crate::words::counted(projects as u64, "project", "projects")
         ))
     }
 
@@ -2127,7 +2128,7 @@ mod tests {
             village
                 .reserved_freight_status(clock.seconds)
                 .unwrap()
-                .contains("2 project(s) · 390 game minutes remaining")
+                .contains("2 projects · 390 game minutes remaining")
         );
         let (_, projects) = village.projects_panel(&catalog, &stock, 0, true, false, clock.seconds);
         for site in [1, 2] {

@@ -286,7 +286,10 @@ impl Construction {
                 "Switch to resident pickup to collect these materials".into()
             }
         } else if plan.pickups > 0 {
-            format!("{} town pickup(s) pending", plan.pickups)
+            format!(
+                "{} pending",
+                crate::words::counted(plan.pickups, "town pickup", "town pickups")
+            )
         } else if plan.delivered < plan.loads {
             let mut in_transit = 0;
             let mut staged = plan.staged;

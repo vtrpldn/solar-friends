@@ -1366,8 +1366,9 @@ impl Construction {
         let pickup_cost = quote.price + quote.fare * u64::from(quote.trips);
         let trips = quote.trips;
         let pickup = format!(
-            "R${:.2} including {trips} town pickup(s)",
-            pickup_cost as f64 / 100.0
+            "R${:.2} including {}",
+            pickup_cost as f64 / 100.0,
+            crate::words::counted(trips, "town pickup", "town pickups")
         );
         if self.supplier_construction {
             let (trips, reserved) = self
@@ -1381,13 +1382,15 @@ impl Construction {
                 freight_cost + self.market.expansion_reserve(),
             ) {
                 return Ok(format!(
-                    "R${:.2} including {trips} supplier load(s)",
-                    freight_cost as f64 / 100.0
+                    "R${:.2} including {}",
+                    freight_cost as f64 / 100.0,
+                    crate::words::counted(trips, "supplier load", "supplier loads")
                 ));
             }
             return Err(format!(
-                "Freight exceeds available expansion funds. Missing materials cost R${:.2}. The {trips} queued supplier load(s) cost R${:.2}, with R${:.2} kept for the expansion reserve.",
+                "Freight exceeds available expansion funds. Missing materials cost R${:.2}. The {} queued cost R${:.2}, with R${:.2} kept for the expansion reserve.",
                 quote.price as f64 / 100.0,
+                crate::words::counted(trips, "supplier load", "supplier loads"),
                 freight as f64 / 100.0,
                 self.market.expansion_reserve() as f64 / 100.0,
             ));

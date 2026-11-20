@@ -40,6 +40,7 @@ mod wall_clock;
 mod weather;
 mod web_loading;
 mod wildlife;
+mod words;
 mod workshop;
 use setup::{WorldSetup, WorldSetupPlugin};
 
