@@ -171,11 +171,12 @@ impl Advance {
             })
     }
 
-    /// Whether the panel is open, a run is under way, or the last run left a result.
-    pub fn has_status(&self) -> bool {
-        self.open || self.running.is_some() || !self.result.is_empty()
+    /// Notice left after an advance finishes or is stopped.
+    pub fn result(&self) -> &str {
+        &self.result
     }
 
+    #[cfg(test)]
     pub fn status(&self, contextual_shortcut: bool) -> String {
         if let Some(run) = &self.running {
             return format!(

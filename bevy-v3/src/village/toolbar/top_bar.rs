@@ -177,12 +177,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                                 ));
                                 top_button(row, &assets, Action::Pause, Some("Space"));
                                 top_button(row, &assets, Action::Speed, Some("1–4"));
-                                top_button(
-                                    row,
-                                    &assets,
-                                    Action::Advance(AdvanceAction::Toggle),
-                                    None,
-                                );
+                                top_button(row, &assets, Action::Advance, None);
                             });
                         clock
                             .spawn(Node {

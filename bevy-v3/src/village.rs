@@ -21,6 +21,7 @@ mod thumbnails;
 use lens_picker::{LensPicker, MapLens};
 mod library_ui;
 mod livestock_motion;
+mod projects_card;
 mod resident_meters;
 pub(crate) mod resident_motion;
 mod resource_lens;
@@ -30,6 +31,7 @@ mod terrain_card;
 mod toolbar;
 pub(crate) use toolbar::PanelPicker;
 mod vehicle_motion;
+mod view_options;
 
 use library_ui::{autosave_named, library_controls};
 
@@ -181,6 +183,8 @@ impl Plugin for VillagePlugin {
         terrain_card::install(app);
         lens_card::install(app);
         advance_modal::install(app);
+        view_options::install(app);
+        projects_card::install(app);
         building_lighting::install(app);
         selection_card::install(app);
         livestock_motion::install(app);
@@ -333,7 +337,7 @@ pub struct Village {
     #[serde(skip)]
     lenses: LensPicker,
     #[serde(skip)]
-    show_grid: bool,
+    pub(crate) show_grid: bool,
     #[serde(skip)]
     open_projects_only: bool,
     project_roads_expanded: bool,
@@ -905,6 +909,9 @@ impl Village {
 
     /// Opens a panel on its first page, as from the dock or the dialog sidebar.
     fn open_panel(&mut self, panel: UtilityPanel) {
+        if self.terrain_editor.open {
+            self.terrain_editor.toggle();
+        }
         self.utility_panel = Some(panel);
         if panel == UtilityPanel::Crafting {
             self.craft_view = crate::construction::CraftView::Make;
@@ -1862,24 +1869,6 @@ fn strip_key_hints(line: &str) -> String {
         })
         .collect::<Vec<_>>()
         .join(" · ")
-}
-
-/// Reads a Projects line the way V2's list does: "1 Solar farm #1 · Complete" becomes
-/// "✓ Solar farm #1", other rows drop their number, and the header names the list.
-fn project_row(line: &str) -> String {
-    if let Some(rest) = line.strip_prefix("Projects · ") {
-        return format!("Around the village · {rest}");
-    }
-    let Some((number, rest)) = line.split_once(' ') else {
-        return line.to_owned();
-    };
-    if number.is_empty() || !number.chars().all(|c| c.is_ascii_digit()) || !rest.contains(" · ") {
-        return line.to_owned();
-    }
-    match rest.strip_suffix(" · Complete") {
-        Some(name) => format!("✓ {name}"),
-        None => format!("· {rest}"),
-    }
 }
 
 /// Top of right-hand panels, below the clock card and its Guide and Lenses buttons.
@@ -3137,9 +3126,13 @@ fn show_hud(
         text.0.clone_from(&village.save_notice);
         return;
     }
-    // The catalog carries its own headings and hints.
-    if build_menu::visible(&setup, &village, &saves, &sound) {
+    // The catalog, projects card, lens picker, and advance modal carry their own UI.
+    if build_menu::visible(&setup, &village, &saves, &sound)
+        || projects_card::visible(&village, &setup, &saves, &sound)
+        || advance_modal::visible(&village, &setup, &saves, &sound)
+    {
         node.display = Display::None;
+        text.0.clear();
         return;
     }
     node.display = Display::Flex;
@@ -3149,16 +3142,12 @@ fn show_hud(
     node.bottom = Val::Auto;
     // An open panel becomes a wide almanac sheet beside its action column.
     let sheet = village.utility_panel.is_some() && !village.guide.open() && !village.lenses.open;
-    // Projects stays a compact card beside the village, as in V2.
-    let compact = village.utility_panel == Some(UtilityPanel::Projects);
-    node.right = if sheet && !compact {
+    node.right = if sheet {
         px(toolbar::PANEL_WIDTH + 60.0)
     } else {
         Val::Auto
     };
-    node.max_width = if compact {
-        px(420)
-    } else if sheet {
+    node.max_width = if sheet {
         Val::Auto
     } else if village.guide.open() || village.lenses.open || village.lenses.active.is_some() {
         Val::Vw(46.0)
@@ -3206,9 +3195,9 @@ fn show_hud(
         label.push('\n');
         label.push_str(&forecast(village.clock, setup.biome(), setup.seed()));
     }
-    if village.camp.is_some() && !village.advance.open && village.advance.has_status() {
+    if village.camp.is_some() && !village.advance.open && !village.advance.result().is_empty() {
         label.push('\n');
-        label.push_str(&village.advance.status(village.utility_owns_advance_key()));
+        label.push_str(village.advance.result());
     }
     if village.terrain_editor.open && !sheet && !village.guide.open() && !village.lenses.open {
         node.left = px(316);
@@ -3247,34 +3236,7 @@ fn show_hud(
         label.push_str(&natural);
     }
     match village.utility_panel {
-        Some(UtilityPanel::Projects) => {
-            label.push('\n');
-            label.push_str(
-                &village
-                    .construction
-                    .projects_panel(
-                        &catalog,
-                        &village.stock,
-                        village.projects_page,
-                        village.open_projects_only,
-                        village.project_roads_expanded,
-                        village.clock,
-                    )
-                    .1
-                    .lines()
-                    .map(project_row)
-                    .collect::<Vec<_>>()
-                    .join("\n"),
-            );
-            if let Some(freight) = village.construction.reserved_freight_status(village.clock) {
-                label.push('\n');
-                label.push_str(&freight);
-            }
-            if village.project_events_expanded {
-                label.push_str("\n\nRecent events · R Hide");
-                village.construction.append_recent_events(&mut label, 0, 8);
-            }
-        }
+        Some(UtilityPanel::Projects) => {}
         Some(UtilityPanel::Inventory) if village.inventory_view == InventoryView::Production => {
             label.push('\n');
             label.push_str(&village.construction.inventory_production_summary(
@@ -3753,20 +3715,6 @@ fn outdoor_animation_time(seconds: f64) -> f32 {
 mod tests {
     use super::*;
     use bevy::ecs::system::RunSystemOnce;
-
-    #[test]
-    fn project_rows_read_like_v2s_list() {
-        assert_eq!(project_row("1 Solar farm #1 · Complete"), "✓ Solar farm #1");
-        assert_eq!(
-            project_row("3 Workshop #3 · Building 40%"),
-            "· Workshop #3 · Building 40%"
-        );
-        assert_eq!(
-            project_row("Projects · All · 1/2"),
-            "Around the village · All · 1/2"
-        );
-        assert_eq!(project_row("100 m² basic shell"), "100 m² basic shell");
-    }
 
     #[test]
     fn cards_drop_keyboard_hints_their_buttons_already_offer() {

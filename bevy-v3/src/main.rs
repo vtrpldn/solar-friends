@@ -1134,7 +1134,7 @@ mod tests {
         press_button(&mut app, "1×");
 
         press_button(&mut app, "View & options");
-        press_button(&mut app, "Keyboard & camera");
+        press_button(&mut app, "?");
         assert!(
             app.world()
                 .resource::<village::Village>()
@@ -1212,14 +1212,14 @@ mod tests {
         );
 
         press_button(&mut app, "View & options");
-        press_button(&mut app, "Focus river");
+        press_button(&mut app, "River bend");
         let camera = app
             .world_mut()
             .query::<&VillageCamera>()
             .single(app.world())
             .unwrap();
         assert_eq!(camera.target.z, 0.0);
-        press_button(&mut app, "Rotate right");
+        press_button(&mut app, "E");
         let camera = app
             .world_mut()
             .query::<&VillageCamera>()
@@ -1276,11 +1276,11 @@ mod tests {
 
         world.resource_mut::<ButtonInput<MouseButton>>().reset_all();
         world.resource_mut::<AccumulatedMouseMotion>().delta = Vec2::ZERO;
-        press_button(&mut app, "Zoom in");
-        press_button(&mut app, "Show grid");
-        press_button(&mut app, "Hide grid");
-        press_button(&mut app, "Show forecast");
-        press_button(&mut app, "Hide forecast");
+        press_button(&mut app, "+");
+        press_button(&mut app, "Grid");
+        assert!(app.world().resource::<village::Village>().show_grid);
+        press_button(&mut app, "Grid");
+        assert!(!app.world().resource::<village::Village>().show_grid);
         press_button(&mut app, "Reset camera");
         app.world_mut().run_schedule(PostUpdate);
         assert_eq!(
@@ -1319,23 +1319,20 @@ mod tests {
             }
         }
         assert!(!app.world().resource::<village::Village>().show_forecast);
-        for (button, legend, second_page) in [
-            ("Land & slope", "Land & slope · Green", false),
-            ("Resources", "Resources · Green", false),
-            ("Ecology", "Ecology · Green", false),
-            ("Access & hauling", "Access & hauling · White", false),
-            ("Construction", "Construction · Gold", false),
-            ("Water", "Water · Drinking water", false),
-            ("Sanitation", "Sanitation · Purple", false),
-            ("Work", "Work · Green assigned", false),
-            ("Food", "Food · Blue shared supplies", true),
-            ("Residents", "Residents · Green residents", true),
-            ("Comfort", "Comfort · Green open facility", true),
+        for (button, legend) in [
+            ("Land & slope", "Land & slope · Green"),
+            ("Resources", "Resources · Green"),
+            ("Ecology", "Ecology · Green"),
+            ("Access & hauling", "Access & hauling · White"),
+            ("Construction", "Construction · Gold"),
+            ("Water", "Water · Drinking water"),
+            ("Sanitation", "Sanitation · Purple"),
+            ("Work", "Work · Green assigned"),
+            ("Food", "Food · Blue shared supplies"),
+            ("Residents", "Residents · Green residents"),
+            ("Comfort", "Comfort · Green open facility"),
         ] {
             press_button(&mut app, "Map lenses");
-            if second_page {
-                press_button(&mut app, "Other lenses");
-            }
             press_button(&mut app, button);
             assert!(
                 ui_texts(&mut app)
@@ -1345,7 +1342,6 @@ mod tests {
             );
         }
         press_button(&mut app, "Map lenses");
-        press_button(&mut app, "Other lenses");
         press_button(&mut app, "Production chains");
         press_button(&mut app, "Next filter");
         press_button(&mut app, "Previous filter");
@@ -1524,10 +1520,13 @@ mod tests {
         assert_eq!(press_stepper(&mut app, "SOURCE", false), "Choose a source");
         press_button(&mut app, "Close panel");
         press_button(&mut app, "Projects");
-        press_button(&mut app, "Show underway");
-        press_button(&mut app, "Next page");
-        press_button(&mut app, "Previous page");
-        press_button(&mut app, "Show all projects");
+        assert!(
+            ui_texts(&mut app)
+                .iter()
+                .any(|text| text.0.contains("Around the village ·"))
+        );
+        press_button(&mut app, "Recent events");
+        press_button(&mut app, "Recent events");
         press_button(&mut app, "Close panel");
         press_button(&mut app, "Maintenance");
         press_button(&mut app, "Manage service supplies");
@@ -1634,8 +1633,8 @@ mod tests {
         press_button(&mut app, "Close panel");
 
         press_button(&mut app, "Advance days");
-        press_button(&mut app, "+7 day(s)");
-        press_button(&mut app, "Start advance");
+        press_button(&mut app, "+7");
+        press_button(&mut app, "Advance time");
         press_button(&mut app, "Stop advance");
         assert!(app.world().resource::<village::Village>().is_paused());
         assert!(!app.world().resource::<village::Village>().advance_open());
@@ -1674,7 +1673,7 @@ mod tests {
             .text = "Renamed test village".into();
         press_button(&mut app, "Confirm name");
         press_button(&mut app, "Close saved villages");
-        press_button(&mut app, "Setup");
+        press_button(&mut app, "Main menu");
         app.world_mut().run_schedule(Update);
         assert!(app.world().resource::<WorldSetup>().open);
         press_button(&mut app, "Saved villages");
@@ -1697,7 +1696,7 @@ mod tests {
         press_button(&mut app, "Close saved villages");
         std::fs::remove_dir_all(&save_dir).unwrap();
 
-        press_button(&mut app, "Setup");
+        press_button(&mut app, "Main menu");
         app.world_mut().run_schedule(Update);
         assert!(app.world().resource::<WorldSetup>().open);
         press_button(&mut app, "New game");
@@ -1787,7 +1786,7 @@ mod tests {
             .text = "Sandbox test village".into();
         press_button(&mut app, "Confirm name");
         press_button(&mut app, "Close saved villages");
-        press_button(&mut app, "Setup");
+        press_button(&mut app, "Main menu");
         app.world_mut().resource_mut::<WorldSetup>().mode = setup::Mode::Story;
         app.update();
         press_button(&mut app, "Saved villages");

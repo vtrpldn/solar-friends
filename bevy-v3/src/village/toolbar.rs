@@ -2,7 +2,6 @@ use super::*;
 use crate::{
     construction::{FarmControl, ProjectAction, WorkGroup},
     farming::{Crop, FarmAction},
-    terrain::Brush,
     time_advance::AdvanceAction,
 };
 use bevy::asset::{embedded_asset, load_embedded_asset};
@@ -15,13 +14,8 @@ mod top_bar;
 enum Action {
     Build,
     CampPreset(usize),
-    Setup,
     View,
-    CameraControls,
-    Camera(crate::CameraAction),
-    GridOverlay,
     Forecast,
-    Diagnostics,
     Library,
     Sound,
     Volume { effects: bool, delta: i16 },
@@ -31,23 +25,15 @@ enum Action {
     UndoRoad,
     FinishRoad,
     Terrain,
-    TerrainBrush(Brush),
-    TerrainRadius(bool),
-    PickFlattenHeight,
-    UndoTerrain,
-    RedoTerrain,
-    Advance(AdvanceAction),
+    Advance,
     ResizeField(IVec2),
     FieldDimensions,
     Pause,
     Speed,
     Guide,
     Lenses,
-    Lens(usize),
-    LensPage,
     LensFilter(bool),
     LensSite(bool),
-    ClearLens,
     Manage,
     Panel(UtilityPanel),
     ResourcePanel(UtilityPanel),
@@ -55,7 +41,6 @@ enum Action {
     PantryFromStores,
     ClosePanel,
     Page(bool),
-    Project(usize),
     Recipes,
     Gather,
     Beds,
@@ -69,9 +54,6 @@ enum Action {
     SelectedProject(ProjectAction),
     FocusSelectedProject,
     DeselectProject,
-    ProjectFilter,
-    ProjectRoads,
-    ProjectEvents,
     InventoryView,
     InventoryItem(usize),
     InventorySearch,
@@ -118,13 +100,8 @@ impl Action {
     ];
 
     fn available(self, village: &Village) -> bool {
-        if matches!(
-            self,
-            Self::Lenses | Self::Lens(_) | Self::LensPage | Self::ClearLens
-        ) {
-            return !village.guide.open()
-                && !village.construction.editing_search
-                && (matches!(self, Self::Lenses) || village.lenses.open);
+        if matches!(self, Self::Lenses) {
+            return !village.guide.open() && !village.construction.editing_search;
         }
         if matches!(self, Self::InventorySearch | Self::InventoryItem(_)) {
             return (village.utility_panel == Some(UtilityPanel::Inventory)
@@ -137,16 +114,10 @@ impl Action {
         if matches!(self, Self::Guide) {
             return !village.construction.editing_search;
         }
-        if let Self::Advance(action) = self {
+        if matches!(self, Self::Advance) {
             return village.camp.is_some()
                 && !village.map_input_blocked()
-                && !village.planning_roads()
-                && !village.terrain_editor.open
-                && (matches!(action, AdvanceAction::Toggle)
-                    || (village.advance.open
-                        && village.advance.running.is_none()
-                        && (!matches!(action, AdvanceAction::Start)
-                            || village.advance.can_start())));
+                && !village.planning_roads();
         }
         if matches!(self, Self::ConnectRoad | Self::UndoRoad | Self::FinishRoad) {
             return village.planning_roads()
@@ -156,15 +127,12 @@ impl Action {
         if !village.map_input_blocked() && !village.advance_open() && !village.planning_roads() {
             match self {
                 Self::Terrain => return true,
-                Self::PickFlattenHeight => return village.terrain_editor.can_pick_flatten_height(),
-                Self::TerrainBrush(_) | Self::TerrainRadius(_) => {
-                    return village.terrain_editor.open;
-                }
-                Self::UndoTerrain => {
-                    return village.terrain_editor.open && village.terrain_editor.can_undo();
-                }
-                Self::RedoTerrain => {
-                    return village.terrain_editor.open && village.terrain_editor.can_redo();
+                Self::Build => return village.utility_panel.is_none(),
+                Self::View => return !village.trade_open(),
+                Self::ResourcePanel(panel) => {
+                    return !village.construction.menu
+                        && !village.construction.is_placing()
+                        && Self::Panel(panel).available(village);
                 }
                 _ => {}
             }
@@ -177,13 +145,7 @@ impl Action {
             return false;
         }
         match self {
-            Self::Terrain
-            | Self::TerrainBrush(_)
-            | Self::TerrainRadius(_)
-            | Self::PickFlattenHeight
-            | Self::UndoTerrain
-            | Self::RedoTerrain => false,
-            Self::Advance(_) => false,
+            Self::Terrain | Self::Advance => false,
             Self::Beds => {
                 village.utility_panel.is_none()
                     && !village.construction.menu
@@ -212,13 +174,8 @@ impl Action {
                     && !village.construction.is_placing()
                     && village.construction.gathering.has_selection()
             }
-            Self::View
-            | Self::CameraControls
-            | Self::Camera(_)
-            | Self::GridOverlay
-            | Self::Forecast
-            | Self::Diagnostics => !village.trade_open(),
-            Self::Setup | Self::Library | Self::Sound => true,
+            Self::View | Self::Forecast => !village.trade_open(),
+            Self::Library | Self::Sound => true,
             Self::Volume { .. } => false,
             Self::CampPreset(_) => {
                 village.camp.is_none() && village.arrival_time >= ARRIVAL_DURATION
@@ -240,7 +197,7 @@ impl Action {
                     && !village.construction.farming.open
                     && village.utility_panel.is_none()
             }
-            Self::Lenses | Self::Lens(_) | Self::LensPage | Self::ClearLens => false,
+            Self::Lenses => false,
             Self::LensFilter(_) => village.lenses.has_filter(),
             Self::LensSite(_) => village.lenses.network_view().is_some(),
             Self::Guide | Self::ConnectRoad | Self::UndoRoad | Self::FinishRoad => true,
@@ -266,7 +223,9 @@ impl Action {
                 !village.stock.sandbox
             }
             Self::Panel(_) => true,
-            Self::ClosePanel => village.utility_panel.is_some(),
+            Self::ClosePanel => village
+                .utility_panel
+                .is_some_and(|panel| panel != UtilityPanel::Projects),
             Self::BuildingPower | Self::Cooling => {
                 village.utility_panel.is_none()
                     && !village.construction.menu
@@ -291,9 +250,6 @@ impl Action {
             Self::StartCraft => {
                 village.utility_panel == Some(UtilityPanel::Crafting)
                     && village.craft_recipe.is_some()
-            }
-            Self::Project(_) | Self::ProjectFilter | Self::ProjectRoads | Self::ProjectEvents => {
-                village.utility_panel == Some(UtilityPanel::Projects)
             }
             Self::WorkPriority(_) | Self::WorkerReservation(_) => {
                 village.utility_panel == Some(UtilityPanel::Residents)
@@ -351,12 +307,7 @@ impl Action {
             }
             Self::Page(_) => matches!(
                 village.utility_panel,
-                Some(
-                    UtilityPanel::Projects
-                        | UtilityPanel::Inventory
-                        | UtilityPanel::Crafting
-                        | UtilityPanel::Residents
-                )
+                Some(UtilityPanel::Inventory | UtilityPanel::Crafting | UtilityPanel::Residents)
             ),
         }
     }
@@ -378,26 +329,10 @@ impl Action {
             Self::CampPreset(index) => {
                 ["Camp in shade", "Camp near entrance", "Camp in clearing"][index].into()
             }
-            Self::Setup => "Setup".into(),
             Self::View if picker.view_open => "Close options".into(),
             Self::View => "View & options".into(),
-            Self::CameraControls => "Keyboard & camera".into(),
-            Self::GridOverlay if village.show_grid => "Hide grid".into(),
-            Self::GridOverlay => "Show grid".into(),
             Self::Forecast if village.show_forecast => "Hide forecast".into(),
             Self::Forecast => "Show forecast".into(),
-            Self::Diagnostics => "Copy bug report".into(),
-            Self::Camera(action) => match action {
-                crate::CameraAction::Camp => "Focus camp",
-                crate::CameraAction::Reset => "Reset camera",
-                crate::CameraAction::River => "Focus river",
-                crate::CameraAction::Overview => "Whole plot",
-                crate::CameraAction::Turn(false) => "Rotate left",
-                crate::CameraAction::Turn(true) => "Rotate right",
-                crate::CameraAction::Zoom(false) => "Zoom out",
-                crate::CameraAction::Zoom(true) => "Zoom in",
-            }
-            .into(),
             Self::Library => "Saved villages".into(),
             Self::Sound => "Sound settings".into(),
             Self::Volume { .. } => String::new(),
@@ -407,30 +342,8 @@ impl Action {
             Self::ConnectRoad => "Single road tile".into(),
             Self::UndoRoad => "Undo road stroke".into(),
             Self::FinishRoad => "Finish roads".into(),
-            Self::Terrain if village.terrain_editor.open => "Finish terrain".into(),
-            Self::Terrain => "Terrain tools".into(),
-            Self::TerrainBrush(brush) => match brush {
-                Brush::Raise => "Raise",
-                Brush::Lower => "Lower",
-                Brush::Flatten => "Flatten",
-                Brush::Smooth => "Smooth",
-            }
-            .into(),
-            Self::TerrainRadius(true) => "Next radius".into(),
-            Self::TerrainRadius(false) => "Previous radius".into(),
-            Self::PickFlattenHeight => "Pick a new flatten height".into(),
-            Self::UndoTerrain => "Undo terrain edit".into(),
-            Self::RedoTerrain => "Redo terrain edit".into(),
-            Self::Advance(action) => match action {
-                AdvanceAction::Toggle if village.advance.running.is_some() => "Stop advance".into(),
-                AdvanceAction::Toggle if village.advance.open => "Close advance".into(),
-                AdvanceAction::Toggle => "Advance days".into(),
-                AdvanceAction::Adjust(days) => format!("{days:+} day(s)"),
-                AdvanceAction::Start => "Start advance".into(),
-                AdvanceAction::Fast if village.advance.fast => "Fast simulation: on".into(),
-                AdvanceAction::Fast => "Fast simulation: off".into(),
-                AdvanceAction::Digit(_) | AdvanceAction::Backspace => String::new(),
-            },
+            Self::Terrain => "Terrain".into(),
+            Self::Advance => "Advance days".into(),
             Self::FieldDimensions => numeric_label(
                 village,
                 NumericTarget::FieldDimensions,
@@ -450,19 +363,10 @@ impl Action {
             Self::Guide => "Guide".into(),
             Self::Lenses if village.lenses.open => "Close lenses".into(),
             Self::Lenses => "Map lenses".into(),
-            Self::LensPage => "Other lenses".into(),
             Self::LensSite(false) => "Previous facility".into(),
             Self::LensSite(true) => "Next facility".into(),
             Self::LensFilter(false) => "Previous filter".into(),
             Self::LensFilter(true) => "Next filter".into(),
-            Self::ClearLens => "Clear lens".into(),
-            Self::Lens(row) => village
-                .lenses
-                .choices()
-                .get(row)
-                .map(|(_, _, name)| *name)
-                .unwrap_or_default()
-                .into(),
             Self::Manage if picker.open => "Close menu".into(),
             Self::Manage => "Manage".into(),
             Self::GridFromFinances => "Manage grid power".into(),
@@ -495,16 +399,7 @@ impl Action {
                 InventoryView::Production => "Show production sites",
             }
             .into(),
-            Self::ProjectFilter if village.open_projects_only => "Show all projects".into(),
-            Self::ProjectFilter => "Show underway".into(),
-            Self::ProjectRoads if village.project_roads_expanded => "Hide road tiles".into(),
-            Self::ProjectRoads => "Show road tiles".into(),
-            Self::ProjectEvents if village.project_events_expanded => "Hide recent events".into(),
-            Self::ProjectEvents => "Show recent events".into(),
-            Self::Project(_)
-            | Self::InventoryItem(_)
-            | Self::Recipe(_)
-            | Self::FacilityIrrigation => String::new(),
+            Self::InventoryItem(_) | Self::Recipe(_) | Self::FacilityIrrigation => String::new(),
             Self::Recipes if village.construction.production.open => "Close recipes".into(),
             Self::Recipes => "Recipes".into(),
             Self::Gather => "Gather resource".into(),
@@ -673,6 +568,10 @@ fn numeric_label(village: &Village, target: NumericTarget, label: &str) -> Strin
 #[derive(Component)]
 pub(super) struct Toolbar;
 
+/// The dock's "View & options" button, used to anchor its popover above it.
+#[derive(Component)]
+pub(super) struct ViewOptionsButton;
+
 /// A rule between dock groups; hidden while the dock shows tool controls instead.
 #[derive(Component)]
 struct DockDivider;
@@ -692,7 +591,7 @@ const HOME_ROWS: usize = 4;
 pub(crate) struct PanelPicker {
     pub(super) open: bool,
     home_page: usize,
-    view_open: bool,
+    pub(super) view_open: bool,
     visible_homes: [Option<usize>; HOME_ROWS],
 }
 
@@ -785,6 +684,9 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                     ));
                 }
                 let button = spawn_button(row, &assets, action);
+                if matches!(action, Action::View) {
+                    row.commands_mut().entity(button).insert(ViewOptionsButton);
+                }
                 if let Some(key) = key {
                     row.commands_mut()
                         .entity(button)
@@ -792,8 +694,8 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 }
             }
             // Shown on their own only while their screen is open; otherwise they live in
-            // the View & options menu.
-            for action in [Action::Setup, Action::Library, Action::Sound] {
+            // the View & options popover.
+            for action in [Action::Library, Action::Sound] {
                 spawn_button(row, &assets, action);
             }
             // Placement, road and lens controls stay with the dock; screen controls now
@@ -842,41 +744,6 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 crate::theme::panel(),
             ))
             .with_children(|menu| {
-                use crate::CameraAction::*;
-                for action in [
-                    Camp,
-                    Reset,
-                    River,
-                    Overview,
-                    Turn(false),
-                    Turn(true),
-                    Zoom(false),
-                    Zoom(true),
-                ] {
-                    spawn_button(menu, &assets, Action::Camera(action));
-                }
-                spawn_button(menu, &assets, Action::CameraControls);
-                spawn_button(menu, &assets, Action::GridOverlay);
-                spawn_button(menu, &assets, Action::Forecast);
-                spawn_button(menu, &assets, Action::Diagnostics);
-                spawn_button(menu, &assets, Action::Setup);
-                spawn_button(menu, &assets, Action::Library);
-                spawn_button(menu, &assets, Action::Sound);
-                for row in 0..9 {
-                    spawn_button(menu, &assets, Action::Lens(row));
-                }
-                spawn_button(menu, &assets, Action::LensPage);
-                spawn_button(menu, &assets, Action::ClearLens);
-                for action in [
-                    AdvanceAction::Adjust(-7),
-                    AdvanceAction::Adjust(-1),
-                    AdvanceAction::Adjust(1),
-                    AdvanceAction::Adjust(7),
-                    AdvanceAction::Fast,
-                    AdvanceAction::Start,
-                ] {
-                    spawn_button(menu, &assets, Action::Advance(action));
-                }
                 menu.spawn((
                     super::thumbnails::ThumbnailImage(super::thumbnails::SELECTED_SLOT),
                     ImageNode::default(),
@@ -945,14 +812,6 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 ) {
                     spawn_button(menu, &assets, Action::Farm(action));
                 }
-                for brush in [Brush::Raise, Brush::Lower, Brush::Flatten, Brush::Smooth] {
-                    spawn_button(menu, &assets, Action::TerrainBrush(brush));
-                }
-                spawn_button(menu, &assets, Action::TerrainRadius(false));
-                spawn_button(menu, &assets, Action::TerrainRadius(true));
-                spawn_button(menu, &assets, Action::PickFlattenHeight);
-                spawn_button(menu, &assets, Action::UndoTerrain);
-                spawn_button(menu, &assets, Action::RedoTerrain);
                 spawn_button(menu, &assets, Action::FieldDimensions);
                 for delta in [IVec2::NEG_X, IVec2::X, IVec2::NEG_Y, IVec2::Y] {
                     spawn_button(menu, &assets, Action::ResizeField(delta));
@@ -1011,9 +870,6 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 for row in 0..HOME_ROWS {
                     spawn_button(menu, &assets, Action::ListedHome(row));
                 }
-                spawn_button(menu, &assets, Action::ProjectFilter);
-                spawn_button(menu, &assets, Action::ProjectRoads);
-                spawn_button(menu, &assets, Action::ProjectEvents);
                 spawn_button(menu, &assets, Action::FacilityIrrigation);
                 spawn_button(menu, &assets, Action::RecipePage(false));
                 spawn_button(menu, &assets, Action::RecipePage(true));
@@ -1023,7 +879,6 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                     spawn_button(menu, &assets, Action::InventoryItem(row));
                 }
                 for row in 0..crate::construction::PAGE_KEYS.len() {
-                    spawn_button(menu, &assets, Action::Project(row));
                     spawn_button(menu, &assets, Action::Recipe(row));
                 }
                 for action in [Action::Page(false), Action::Page(true), Action::ClosePanel] {
@@ -1169,16 +1024,11 @@ type ScrollablePanelMenu<'w, 's> = Single<
 >;
 
 fn handle_buttons(
-    (mut setup, mut saves, mut sound): (
-        ResMut<WorldSetup>,
-        ResMut<SaveMenu>,
-        ResMut<SoundSettings>,
-    ),
+    (setup, mut saves, mut sound): (Res<WorldSetup>, ResMut<SaveMenu>, ResMut<SoundSettings>),
     (catalog, land): (Res<Catalog>, Res<Land>),
     (mut village, mut pointer): (ResMut<Village>, ResMut<CampPointer>),
     mut picker: ResMut<PanelPicker>,
-    window: Single<&Window, With<PrimaryWindow>>,
-    mut camera: Single<(&mut VillageCamera, &mut Projection)>,
+    mut camera: Single<&mut VillageCamera>,
     buttons: Query<(&Action, &Interaction), Changed<Interaction>>,
 ) {
     if !visible(&village, &setup, &saves, &sound) {
@@ -1192,7 +1042,7 @@ fn handle_buttons(
     if !Action::View.available(&village) {
         picker.view_open = false;
     }
-    let (camera, projection) = &mut *camera;
+    let camera = &mut *camera;
     for (&action, &interaction) in &buttons {
         if interaction != Interaction::Pressed {
             continue;
@@ -1223,45 +1073,27 @@ fn handle_buttons(
                 }
                 Action::Volume { .. } => {}
                 Action::View => {
+                    if village.terrain_editor.open {
+                        village.terrain_editor.toggle();
+                    }
                     picker.view_open = !picker.view_open;
                     picker.open = false;
                 }
-                Action::CameraControls if picker.view_open => {
-                    village.guide.open_camera_controls();
-                    picker.view_open = false;
-                }
-                Action::Camera(action) if picker.view_open => {
-                    if let Projection::Orthographic(projection) = &mut **projection {
-                        crate::apply_camera_action(action, &village, &setup, camera, projection);
-                    }
-                }
-                Action::GridOverlay if picker.view_open => village.show_grid = !village.show_grid,
                 Action::Forecast => village.show_forecast = !village.show_forecast,
-                Action::Diagnostics if picker.view_open => {
-                    village.save_notice = diagnostics::copy_notice(&village, &catalog, &window);
-                }
-                Action::Camera(_)
-                | Action::CameraControls
-                | Action::GridOverlay
-                | Action::Diagnostics => {}
                 Action::CampPreset(index) => pointer.preset = Some(CAMP_SITES[index].1),
-                Action::Setup => {
-                    if let Err(error) = save_session(&saves, &village, &catalog) {
-                        village.save_notice = format!("Could not save village: {error}");
-                    }
-                    setup.open = true;
-                    picker.open = false;
-                    picker.view_open = false;
-                }
                 Action::Library => {
                     library_ui::toggle_library(&mut saves, setup.mode);
                     picker.open = false;
                     picker.view_open = false;
                 }
                 Action::Build => {
+                    if village.terrain_editor.open {
+                        village.terrain_editor.toggle();
+                    }
                     let sandbox = village.stock.sandbox;
                     village.construction.toggle_build_menu(sandbox);
                     picker.open = false;
+                    picker.view_open = false;
                 }
                 Action::RotatePlacement => village.construction.rotate_placement(false),
                 Action::CancelPlacement => village.construction.cancel_placement(),
@@ -1274,15 +1106,15 @@ fn handle_buttons(
                 Action::Terrain => {
                     village.terrain_editor.toggle();
                     picker.open = false;
+                    picker.view_open = false;
                 }
-                Action::TerrainBrush(brush) => village.terrain_editor.select_brush(brush),
-                Action::TerrainRadius(forward) => village.terrain_editor.cycle_radius(forward),
-                Action::PickFlattenHeight => village.terrain_editor.pick_flatten_height(),
-                Action::UndoTerrain => village.terrain_editor.undo(),
-                Action::RedoTerrain => village.terrain_editor.redo(),
-                Action::Advance(action) => {
-                    village.apply_advance_action(action);
+                Action::Advance => {
+                    if village.terrain_editor.open {
+                        village.terrain_editor.toggle();
+                    }
+                    village.apply_advance_action(AdvanceAction::Toggle);
                     picker.open = false;
+                    picker.view_open = false;
                 }
                 Action::FieldDimensions if !picker.open => {
                     village.numeric_entry = Some((NumericTarget::FieldDimensions, String::new()));
@@ -1312,23 +1144,18 @@ fn handle_buttons(
                 Action::Lenses => {
                     village.lenses.toggle();
                     picker.open = false;
+                    picker.view_open = false;
                 }
-                Action::Lens(row) => {
-                    if let Some(&(_, lens, _)) = village.lenses.choices().get(row) {
-                        village.lenses.choose(Some(lens));
-                    }
-                }
-                Action::LensPage => village.lenses.turn_page(),
                 Action::LensSite(forward) => village.focus_network_site(&setup, camera, forward),
                 Action::LensFilter(forward) => {
                     village
                         .lenses
                         .adjust_filter(catalog.materials.len(), forward);
                 }
-                Action::ClearLens => village.lenses.choose(None),
                 Action::Guide => {
                     village.guide.toggle();
                     picker.open = false;
+                    picker.view_open = false;
                 }
                 Action::Manage => {
                     picker.open = !picker.open;
@@ -1336,6 +1163,7 @@ fn handle_buttons(
                 }
                 Action::ResourcePanel(panel) if village.utility_panel == Some(panel) => {
                     village.utility_panel = None;
+                    picker.view_open = false;
                 }
                 Action::Panel(panel) | Action::ResourcePanel(panel)
                     if picker.open || matches!(action, Action::ResourcePanel(_)) =>
@@ -1345,6 +1173,7 @@ fn handle_buttons(
                         picker.home_page = 0;
                     }
                     picker.open = false;
+                    picker.view_open = false;
                 }
                 Action::ClosePanel => {
                     village.utility_panel = None;
@@ -1366,9 +1195,6 @@ fn handle_buttons(
                     picker.home_page = (page + if forward { 1 } else { pages - 1 }) % pages;
                 }
                 Action::Page(forward) => village.change_panel_page(&catalog, &land, forward),
-                Action::Project(row) if !picker.open => {
-                    village.focus_project_row(&catalog, &setup, camera, row);
-                }
                 Action::InventoryItem(row) if !picker.open && village.producer_view() => {
                     let (_, rows) = village.producer_rows(&catalog);
                     if let Some(&(producer, _)) = rows.get(row) {
@@ -1494,14 +1320,6 @@ fn handle_buttons(
                         town.craft_workspace = None;
                         town.inventory_page = 0;
                     }
-                }
-                Action::ProjectRoads if !picker.open => village.toggle_project_roads(),
-                Action::ProjectEvents if !picker.open => {
-                    village.project_events_expanded = !village.project_events_expanded;
-                }
-                Action::ProjectFilter if !picker.open => {
-                    village.open_projects_only = !village.open_projects_only;
-                    village.projects_page = 0;
                 }
                 Action::Resident(index) if !picker.open => village.select_resident(index),
                 Action::FocusResidentProject if !picker.open => {
@@ -1663,7 +1481,6 @@ fn handle_buttons(
                 }
                 Action::Panel(_)
                 | Action::ResourcePanel(_)
-                | Action::Project(_)
                 | Action::Recipe(_)
                 | Action::RecipePage(_)
                 | Action::CraftWorkspace
@@ -1675,9 +1492,6 @@ fn handle_buttons(
                 | Action::FocusSelectedProject
                 | Action::DeselectProject
                 | Action::InventoryItem(_)
-                | Action::ProjectFilter
-                | Action::ProjectRoads
-                | Action::ProjectEvents
                 | Action::Resident(_)
                 | Action::ResidentProfile(_)
                 | Action::FocusResident
@@ -1745,8 +1559,6 @@ fn refresh(
         return;
     }
     let (menu_id, menu) = &mut *menu;
-    let show_view = picker.view_open && Action::View.available(&village);
-    let show_lenses = Action::LensPage.available(&village);
     let show_beds = !picker.open && Action::Farm(FarmControl::NextBed).available(&village);
     let plot_actions = (show_beds && village.construction.farming.whole_plot)
         .then(|| village.construction.whole_plot_action_counts(village.clock));
@@ -1764,10 +1576,7 @@ fn refresh(
     };
     let show_selected_project =
         !picker.open && Action::SelectedProject(ProjectAction::Salvage).available(&village);
-    let show_advance = Action::Advance(AdvanceAction::Adjust(1)).available(&village);
-    let show_terrain = Action::TerrainBrush(Brush::Raise).available(&village);
     let show_field_size = Action::ResizeField(IVec2::ZERO).available(&village);
-    let show_projects = !picker.open && Action::ProjectFilter.available(&village);
     let inventory_items: Vec<_> = if !picker.open && Action::InventoryItem(0).available(&village) {
         if village.producer_view() {
             village
@@ -1798,16 +1607,6 @@ fn refresh(
         && (Action::BuildingPower.available(&village) || Action::Cooling.available(&village));
     let show_residents = !picker.open && village.utility_panel == Some(UtilityPanel::Residents);
     let show_homes = !picker.open && village.resident_overview_open();
-    let projects = if show_projects {
-        village.construction.project_page_labels(
-            &catalog,
-            village.projects_page,
-            village.open_projects_only,
-            village.project_roads_expanded,
-        )
-    } else {
-        Vec::new()
-    };
     let homes: Vec<_> = if show_homes {
         village
             .construction
@@ -1820,15 +1619,10 @@ fn refresh(
     picker.home_page = picker.home_page.min(home_pages - 1);
     let homes = &homes[(picker.home_page * HOME_ROWS)..];
     picker.visible_homes = std::array::from_fn(|row| homes.get(row).map(|option| option.id));
-    menu.display = if show_view
-        || show_lenses
-        || show_beds
+    menu.display = if show_beds
         || show_recipes
         || show_selected_project
-        || show_advance
-        || show_terrain
         || show_field_size
-        || show_projects
         || show_residents
         || show_finances
         || show_pantry
@@ -1849,12 +1643,10 @@ fn refresh(
     for (&action, &interaction, children, parent, paint, mut node, (top, custom)) in &mut buttons {
         let (mut background, mut border, mut shadow) = paint;
         let show = match action {
-            Action::Lens(row) => show_lenses && row < village.lenses.choices().len(),
-            Action::LensPage | Action::ClearLens => show_lenses,
-            Action::LensFilter(_) | Action::LensSite(_) => action.available(&village),
-            Action::Advance(AdvanceAction::Toggle) => action.available(&village),
+            Action::LensFilter(_) | Action::LensSite(_) | Action::Advance => {
+                action.available(&village)
+            }
             Action::Volume { .. } => false,
-            Action::Advance(_) => show_advance,
             Action::Page(_) if village.utility_panel == Some(UtilityPanel::Residents) => {
                 show_homes && home_pages > 1
             }
@@ -1886,12 +1678,6 @@ fn refresh(
             Action::UndoRoad => Action::FinishRoad.available(&village),
             Action::ResizeField(_) => !picker.open && show_field_size,
             Action::FieldDimensions => !picker.open && action.available(&village),
-            Action::PickFlattenHeight => action.available(&village),
-            Action::TerrainBrush(_)
-            | Action::TerrainRadius(_)
-            | Action::UndoTerrain
-            | Action::RedoTerrain => show_terrain,
-            Action::Project(row) => projects.get(row).is_some(),
             Action::Recipes => {
                 action.available(&village) && village.construction.has_recipes(&catalog)
             }
@@ -1925,10 +1711,6 @@ fn refresh(
                         .is_some())
             }
             Action::InventoryItem(row) => inventory_items.get(row).is_some_and(Option::is_some),
-            Action::ProjectFilter | Action::ProjectEvents => show_projects,
-            Action::ProjectRoads => {
-                show_projects && village.construction.road_project_counts(&catalog).0 > 0
-            }
             Action::ListedHome(row) => homes.get(row).is_some(),
             Action::Resident(_) => !picker.open && action.available(&village),
             Action::ResidentProfile(_) => show_residents,
@@ -1953,32 +1735,21 @@ fn refresh(
                 show_facility_switches && action.available(&village)
             }
             Action::Panel(_) => picker.open,
-            Action::ResourcePanel(_) => !picker.open && !show_view && action.available(&village),
-            Action::PantryFromStores => !picker.open && !show_view && action.available(&village),
+            Action::ResourcePanel(_) => !picker.open && action.available(&village),
+            Action::PantryFromStores => !picker.open && action.available(&village),
             _ => true,
         };
         let show = if matches!(action, Action::Forecast) {
-            if parent.parent() == *menu_id {
-                show_view
-            } else {
-                !show_view && !picker.open && action.available(&village)
-            }
-        } else if matches!(
-            action,
-            Action::Camera(_) | Action::CameraControls | Action::GridOverlay | Action::Diagnostics
-        ) {
-            show_view
-        } else if matches!(action, Action::Setup | Action::Library | Action::Sound) {
+            !picker.open && action.available(&village)
+        } else if matches!(action, Action::Library | Action::Sound) {
             // The dock copies only show while their own screen is open (handled below).
-            show_view && parent.parent() == *menu_id
+            false
         } else if let Action::ResourcePanel(panel) = action
             && parent.parent() != *menu_id
         {
-            Action::Panel(panel).available(&village)
-                && !village.construction.is_placing()
-                && !village.terrain_editor.open
+            Action::Panel(panel).available(&village) && !village.construction.is_placing()
         } else {
-            show && !(show_view && parent.parent() == *menu_id)
+            show
         };
         let show = if sound.open {
             matches!(action, Action::Sound | Action::Volume { .. })
@@ -2040,12 +1811,6 @@ fn refresh(
                 Action::UndoRoad if !village.construction.can_undo_roads() => {
                     Some("Place a road stroke before trying to undo it.".into())
                 }
-                Action::UndoTerrain if !village.terrain_editor.can_undo() => {
-                    Some("There are no terrain edits to undo in this session.".into())
-                }
-                Action::RedoTerrain if !village.terrain_editor.can_redo() => {
-                    Some("Undo a terrain edit before trying to redo it.".into())
-                }
                 Action::Recipe(row) => {
                     village
                         .construction
@@ -2075,7 +1840,7 @@ fn refresh(
             Action::ResidentProfile(profile) => profile == village.resident_profile,
             Action::Guide => top && village.guide.open(),
             Action::Lenses => top && (village.lenses.open || village.lenses.active.is_some()),
-            Action::Advance(_) => top && village.advance.open,
+            Action::Advance => top && village.advance.open,
             _ => false,
         };
         // The weather line is a plain link inside the clock card, not a raised button.
@@ -2110,7 +1875,6 @@ fn refresh(
                     NAMES[index],
                     village.construction.resident_roster_line(&catalog, index)
                 ),
-                Action::Project(row) => projects[row].clone(),
                 Action::Recipe(row) => recipes[row].clone(),
                 Action::MoveCraft => craft_workspace
                     .as_ref()

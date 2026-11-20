@@ -104,6 +104,20 @@ impl WorldSetup {
         }
     }
 
+    pub fn open_main_menu(&mut self) {
+        self.open = true;
+        self.choosing_land = false;
+        self.confirming_new = false;
+        self.seed_entry = None;
+    }
+
+    pub fn open_new_village(&mut self) {
+        self.reroll_seed();
+        self.open = true;
+        self.choosing_land = true;
+        self.confirming_new = false;
+    }
+
     pub fn valid_save(&self) -> bool {
         self.biome < BIOMES.len()
             && self.landscape < LANDSCAPES.len()

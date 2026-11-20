@@ -142,8 +142,9 @@ fn visible_panel(
     saves: &SaveMenu,
     sound: &SoundSettings,
 ) -> Option<UtilityPanel> {
-    village.utility_panel.filter(|_| {
-        !village.guide.open()
+    village.utility_panel.filter(|panel| {
+        *panel != UtilityPanel::Projects
+            && !village.guide.open()
             && !village.lenses.open
             && !setup.open
             && !saves.open
