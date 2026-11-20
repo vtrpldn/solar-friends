@@ -721,6 +721,7 @@ enum LabControl {
     ExportCheckpoint,
     ExportReport,
     View(LabView),
+    Inventory,
     Confirm,
     Cancel,
 }
@@ -774,6 +775,8 @@ fn setup_lab_window(mut commands: Commands, assets: Res<AssetServer>) {
             (LabControl::FocusCamp, "Focus camp"),
             (LabControl::FindBuilding, "Find building"),
             (LabControl::ExportCheckpoint, "Export checkpoint"),
+            (LabControl::Inventory, "Inventory"),
+            (LabControl::View(LabView::Trends), "Trends"),
         ],
         &[
             (LabControl::Confirm, "Confirm"),
@@ -2304,8 +2307,14 @@ fn update_lab_window(
     }
     let selected_view = controls
         .iter()
-        .find_map(|(interaction, control)| match control {
-            LabControl::View(view) if *interaction == Interaction::Pressed => Some(*view),
+        .filter(|(interaction, _)| **interaction == Interaction::Pressed)
+        .find_map(|(_, control)| match control {
+            LabControl::View(view) => Some(*view),
+            LabControl::Inventory => Some(if playback.view == LabView::Stocked {
+                LabView::AllItems
+            } else {
+                LabView::Stocked
+            }),
             _ => None,
         });
     if let Some(view) =
