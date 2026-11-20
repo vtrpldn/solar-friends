@@ -72,13 +72,23 @@ impl Construction {
     fn pending_dispatch_cargo(&self, catalog: &Catalog) -> Option<(f64, f64)> {
         let mut goods = BTreeMap::<String, u32>::new();
         for (site, plan) in self.plans.iter().enumerate() {
-            if !plan.removed
-                && plan.pickups > 0
-                && !self.construction_delivery_at(site)
-                && self.booked_construction_trip(site).is_none()
-                && let Some(order) = &plan.purchase
-            {
-                for (id, &quantity) in &order.units {
+            if plan.removed {
+                continue;
+            }
+            if let Some(pending) = Self::pending_construction_cargo(plan) {
+                let booked = self.booked_construction_trip(site);
+                let shipment = self.construction_freight_cargo(site).or_else(|| {
+                    booked.and_then(|trip| self.pickup_manifests[trip.vehicle].get(&site))
+                });
+                if booked.is_some() && shipment.is_none() {
+                    continue;
+                }
+                for (id, &quantity) in pending {
+                    let shipped = shipment.and_then(|load| load.get(id)).copied().unwrap_or(0);
+                    let quantity = quantity.saturating_sub(shipped);
+                    if quantity == 0 {
+                        continue;
+                    }
                     let amount = goods.entry(id.clone()).or_default();
                     *amount = amount.saturating_add(quantity);
                 }
@@ -1569,6 +1579,11 @@ mod tests {
         assert_eq!(
             village.construction_freight_cargo(0).unwrap()["stone"],
             limit
+        );
+        let stone = &catalog.materials["stone"];
+        assert_eq!(
+            village.pending_dispatch_cargo(&catalog),
+            Some((stone.mass, stone.volume))
         );
         assert_eq!(village.market.committed_fares(), village.plans[0].fare);
         assert!(village.valid_save(&catalog, &stock));
