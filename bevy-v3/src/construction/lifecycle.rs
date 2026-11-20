@@ -69,6 +69,7 @@ pub(crate) enum ProjectAction {
     Prioritize,
     Move,
     Copy,
+    Cancel,
     Salvage,
     Demolish,
 }
@@ -151,7 +152,13 @@ impl Construction {
             (KeyCode::KeyM, ProjectAction::Move),
             (
                 KeyCode::KeyX,
-                if shift {
+                if self
+                    .production
+                    .selected
+                    .is_some_and(|index| self.plans[index].work == 0.0)
+                {
+                    ProjectAction::Cancel
+                } else if shift {
                     ProjectAction::Demolish
                 } else {
                     ProjectAction::Salvage
@@ -184,6 +191,7 @@ impl Construction {
             }
             !project.removed
                 && !self.changes.contains_key(&index)
+                && (!matches!(action, ProjectAction::Cancel) || project.work == 0.0)
                 && (!matches!(action, ProjectAction::Prioritize)
                     || project.work < catalog.projects[&project.key].work)
         })
@@ -253,8 +261,12 @@ impl Construction {
             self.moving = Some(index);
             self.rotation = project.rotation;
             self.status.clear();
-        } else if project.work == 0.0 {
-            self.cancel_plan(catalog, stock, index);
+        } else if matches!(action, ProjectAction::Cancel) {
+            if project.work == 0.0 {
+                self.cancel_plan(catalog, stock, index);
+            } else {
+                self.status = "Construction has already started.".into();
+            }
         } else {
             if project.pickups > 0 {
                 self.status = "Wait for the purchased supplies to arrive.".into();
@@ -759,7 +771,7 @@ mod tests {
             },
         );
         assert!(stock.balance() < before);
-        construction.cancel_plan(&catalog, &mut stock, 0);
+        construction.request_project_action(&catalog, &mut stock, 0, ProjectAction::Cancel);
         assert_eq!(stock.balance(), before);
         assert_eq!(stock.available("tank"), 1);
         assert_eq!(construction.market.committed_fares(), 0);

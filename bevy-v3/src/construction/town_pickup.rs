@@ -1838,7 +1838,7 @@ mod tests {
                 &catalog,
                 &mut canceled_stock,
                 canceled,
-                ProjectAction::Salvage,
+                ProjectAction::Cancel,
             );
             let retained_trip = canceled_village.trip.unwrap();
             assert_eq!(retained_trip.project, remaining);
@@ -1859,7 +1859,7 @@ mod tests {
                 &catalog,
                 &mut canceled_stock,
                 remaining,
-                ProjectAction::Salvage,
+                ProjectAction::Cancel,
             );
             let sale_trip = canceled_village.trip.unwrap();
             assert!(sale_trip.market_order);

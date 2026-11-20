@@ -551,7 +551,9 @@ impl Construction {
             }
             LabOrder::Salvage { site } | LabOrder::Demolish { site } => {
                 let index = self.lab_change_site(*site)?;
-                let action = if matches!(order, LabOrder::Salvage { .. }) {
+                let action = if self.plans[index].work == 0.0 {
+                    ProjectAction::Cancel
+                } else if matches!(order, LabOrder::Salvage { .. }) {
                     ProjectAction::Salvage
                 } else {
                     ProjectAction::Demolish

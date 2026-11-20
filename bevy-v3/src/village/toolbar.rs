@@ -542,7 +542,8 @@ impl Action {
                 ProjectAction::Prioritize => "Prioritize project",
                 ProjectAction::Move => "Move building",
                 ProjectAction::Copy => "Copy blueprint",
-                ProjectAction::Salvage => "Cancel or salvage",
+                ProjectAction::Cancel => "Cancel plan",
+                ProjectAction::Salvage => "Salvage building",
                 ProjectAction::Demolish => "Demolish",
             }
             .into(),
@@ -886,6 +887,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                     ProjectAction::Prioritize,
                     ProjectAction::Move,
                     ProjectAction::Copy,
+                    ProjectAction::Cancel,
                     ProjectAction::Salvage,
                     ProjectAction::Demolish,
                 ] {
