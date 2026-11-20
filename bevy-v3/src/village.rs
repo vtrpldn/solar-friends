@@ -31,6 +31,8 @@ mod road_surface;
 mod terrain_card;
 mod toolbar;
 pub(crate) use toolbar::PanelPicker;
+#[cfg(test)]
+pub(crate) use {lens_card::LensCard, toolbar::DockButton};
 mod vehicle_motion;
 mod view_options;
 
@@ -1498,6 +1500,11 @@ fn fit_and_scroll_hud(
     let toolbar_height = toolbar.size().y * toolbar.inverse_scale_factor();
     // The dialog frame sizes the sheet while an almanac screen is open.
     let modal = !setup.open && village.modal_panel();
+    // Keep the last scrollable row clear of the dock over the dialog's lower edge.
+    let bottom_padding = px(18. + if modal { toolbar_height } else { 0. });
+    if node.padding.bottom != bottom_padding {
+        node.padding.bottom = bottom_padding;
+    }
     // While nothing is open, status reads as V2's short note centred above the dock
     // instead of a block over the village.
     let note = !setup.open && village.hud_note();

@@ -9,7 +9,7 @@ use crate::{
 const LENS_CARD_TOP: f32 = 142.0;
 
 #[derive(Component)]
-struct LensCard;
+pub(crate) struct LensCard;
 
 #[derive(Component)]
 struct ClearLabel;

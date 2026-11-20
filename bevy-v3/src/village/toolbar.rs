@@ -7,7 +7,10 @@ use crate::{
 use bevy::asset::{embedded_asset, load_embedded_asset};
 
 pub(super) const PANEL_WIDTH: f32 = 272.0;
+// The dock stays clickable over dimmed village screens, including Advance days.
+const DOCK_LAYER: i32 = 26;
 
+mod dock_icon;
 mod top_bar;
 
 #[derive(Component, Clone, Copy)]
@@ -98,6 +101,28 @@ impl Action {
         (UtilityPanel::Trade, "Trade"),
         (UtilityPanel::Pantry, "Pantry"),
     ];
+
+    fn supported(self, village: &Village) -> bool {
+        !matches!(
+            self,
+            Self::Panel(UtilityPanel::Finances | UtilityPanel::Trade | UtilityPanel::Upkeep)
+                | Self::ResourcePanel(UtilityPanel::Finances | UtilityPanel::Trade | UtilityPanel::Upkeep)
+                if village.stock.sandbox
+        )
+    }
+
+    fn dock_active(self, village: &Village, picker: &PanelPicker) -> bool {
+        if village.guide.open() || village.lenses.open || village.advance_open() {
+            return false;
+        }
+        match self {
+            Self::Build => village.construction.menu || village.construction.is_placing(),
+            Self::Terrain => village.terrain_editor.open,
+            Self::ResourcePanel(panel) => village.utility_panel == Some(panel),
+            Self::View => picker.view_open,
+            _ => false,
+        }
+    }
 
     fn available(self, village: &Village) -> bool {
         if matches!(self, Self::Lenses) {
@@ -219,10 +244,7 @@ impl Action {
                     && !village.editing_inventory
                     && Self::Panel(UtilityPanel::Pantry).available(village)
             }
-            Self::Panel(UtilityPanel::Finances | UtilityPanel::Trade | UtilityPanel::Upkeep) => {
-                !village.stock.sandbox
-            }
-            Self::Panel(_) => true,
+            Self::Panel(_) => self.supported(village),
             Self::ClosePanel => village
                 .utility_panel
                 .is_some_and(|panel| panel != UtilityPanel::Projects),
@@ -324,12 +346,10 @@ impl Action {
 
     fn label(self, village: &Village, picker: &PanelPicker) -> String {
         match self {
-            Self::Build if village.construction.menu => "Close build".into(),
             Self::Build => "Build".into(),
             Self::CampPreset(index) => {
                 ["Camp in shade", "Camp near entrance", "Camp in clearing"][index].into()
             }
-            Self::View if picker.view_open => "Close options".into(),
             Self::View => "View & options".into(),
             Self::Forecast if village.show_forecast => "Hide forecast".into(),
             Self::Forecast => "Show forecast".into(),
@@ -568,13 +588,18 @@ fn numeric_label(village: &Village, target: NumericTarget, label: &str) -> Strin
 #[derive(Component)]
 pub(super) struct Toolbar;
 
+#[derive(Component)]
+pub(crate) struct DockButton;
+
+#[derive(Component)]
+enum ControlsRow {
+    Dock,
+    Context,
+}
+
 /// The dock's "View & options" button, used to anchor its popover above it.
 #[derive(Component)]
 pub(super) struct ViewOptionsButton;
-
-/// A rule between dock groups; hidden while the dock shows tool controls instead.
-#[derive(Component)]
-struct DockDivider;
 
 /// The action column, which the dialog frame lifts above its dimmed backdrop.
 #[derive(Component)]
@@ -610,6 +635,7 @@ pub(super) fn install(app: &mut App) {
     embedded_asset!(app, "resident_portraits/luz.png");
     embedded_asset!(app, "resident_portraits/caua.png");
     embedded_asset!(app, "resident_portraits/nina.png");
+    dock_icon::install(app);
     top_bar::install(app);
     app.init_resource::<PanelPicker>()
         .add_systems(Startup, spawn)
@@ -619,7 +645,7 @@ pub(super) fn install(app: &mut App) {
                 .after(read_camp_pointer)
                 .before(village_input),
         )
-        .add_systems(Update, (refresh, show_dividers).after(village_input))
+        .add_systems(Update, refresh.after(village_input))
         .add_systems(Update, fit_and_scroll_menu.after(refresh));
 }
 
@@ -633,94 +659,92 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
     commands
         .spawn((
             Toolbar,
-            Interaction::None,
-            bevy::ui::FocusPolicy::Block,
-            crate::theme::panel_node(Node {
+            Node {
                 display: Display::None,
                 position_type: PositionType::Absolute,
                 bottom: px(18),
                 left: px(22),
                 right: px(22),
-                flex_wrap: FlexWrap::Wrap,
-                justify_content: JustifyContent::Center,
-                row_gap: px(8),
-                column_gap: px(8),
-                padding: UiRect::all(px(12)),
+                flex_direction: FlexDirection::Column,
                 ..default()
-            }),
-            crate::theme::panel(),
+            },
         ))
         .with_children(|row| {
-            // V2's dock: building and land first, then the village's panels, then options.
-            for (action, key) in [
-                (Action::Build, Some("B")),
-                (Action::ResourcePanel(UtilityPanel::Projects), Some("F11")),
-                (Action::ResourcePanel(UtilityPanel::Residents), Some("N")),
-                (Action::Terrain, Some("F4")),
-                (Action::ResourcePanel(UtilityPanel::Inventory), Some("F10")),
-                (Action::ResourcePanel(UtilityPanel::Crafting), None),
-                (Action::ResourcePanel(UtilityPanel::Pantry), None),
-                (Action::ResourcePanel(UtilityPanel::Water), Some("V")),
-                (Action::ResourcePanel(UtilityPanel::Power), Some("P")),
-                (Action::ResourcePanel(UtilityPanel::Finances), Some("H")),
-                (Action::ResourcePanel(UtilityPanel::Upkeep), Some("F7")),
-                (Action::View, None),
-            ] {
-                // Thin rules split building, village panels and options, as in V2's dock.
-                if matches!(
-                    action,
-                    Action::ResourcePanel(UtilityPanel::Inventory) | Action::View
-                ) {
-                    row.spawn((
-                        DockDivider,
-                        Node {
-                            width: px(2),
-                            height: px(30),
-                            margin: UiRect::horizontal(px(4)),
-                            align_self: AlignSelf::Center,
-                            ..default()
-                        },
-                        BackgroundColor(crate::theme::EDGE),
-                    ));
-                }
-                let button = spawn_button(row, &assets, action);
-                if matches!(action, Action::View) {
-                    row.commands_mut().entity(button).insert(ViewOptionsButton);
-                }
-                if let Some(key) = key {
-                    row.commands_mut()
-                        .entity(button)
-                        .with_children(|button| top_bar::key_chip(button, &assets, key));
-                }
-            }
-            // Shown on their own only while their screen is open; otherwise they live in
-            // the View & options popover.
-            for action in [Action::Library, Action::Sound] {
-                spawn_button(row, &assets, action);
-            }
-            // Placement, road and lens controls stay with the dock; screen controls now
-            // live in the action column beside the dialog, as V2 keeps its dock fixed.
-            for action in [
-                Action::RotatePlacement,
-                Action::CancelPlacement,
-                Action::ConnectRoad,
-                Action::UndoRoad,
-                Action::FinishRoad,
-                Action::LensFilter(false),
-                Action::LensFilter(true),
-                Action::LensSite(false),
-                Action::LensSite(true),
-            ] {
-                spawn_button(row, &assets, action);
-            }
-            for index in 0..CAMP_SITES.len() {
-                spawn_button(row, &assets, Action::CampPreset(index));
-            }
-            for effects in [false, true] {
-                for delta in [-5, 5] {
-                    spawn_button(row, &assets, Action::Volume { effects, delta });
-                }
-            }
+            row.spawn((ControlsRow::Dock, GlobalZIndex(DOCK_LAYER), dock_row()))
+                .with_children(|row| {
+                    // V2's dock: building and land first, then the village's panels, then options.
+                    for (action, key) in [
+                        (Action::Build, Some("B")),
+                        (Action::ResourcePanel(UtilityPanel::Projects), Some("F11")),
+                        (Action::ResourcePanel(UtilityPanel::Residents), Some("N")),
+                        (Action::Terrain, Some("F4")),
+                        (Action::ResourcePanel(UtilityPanel::Inventory), Some("F10")),
+                        (Action::ResourcePanel(UtilityPanel::Crafting), None),
+                        (Action::ResourcePanel(UtilityPanel::Pantry), None),
+                        (Action::ResourcePanel(UtilityPanel::Water), Some("V")),
+                        (Action::ResourcePanel(UtilityPanel::Power), Some("P")),
+                        (Action::ResourcePanel(UtilityPanel::Finances), Some("H")),
+                        (Action::ResourcePanel(UtilityPanel::Upkeep), Some("F7")),
+                        (Action::View, None),
+                    ] {
+                        // Thin rules split building, village panels and options, as in V2's dock.
+                        if matches!(
+                            action,
+                            Action::ResourcePanel(UtilityPanel::Inventory) | Action::View
+                        ) {
+                            row.spawn((
+                                Node {
+                                    width: px(2),
+                                    height: px(30),
+                                    margin: UiRect::horizontal(px(4)),
+                                    align_self: AlignSelf::Center,
+                                    ..default()
+                                },
+                                BackgroundColor(crate::theme::EDGE),
+                            ));
+                        }
+                        let button = spawn_button(row, &assets, action);
+                        row.commands_mut().entity(button).insert(DockButton);
+                        if matches!(action, Action::View) {
+                            row.commands_mut().entity(button).insert(ViewOptionsButton);
+                        }
+                        if let Some(key) = key {
+                            row.commands_mut()
+                                .entity(button)
+                                .with_children(|button| top_bar::key_chip(button, &assets, key));
+                        }
+                    }
+                });
+            row.spawn((ControlsRow::Context, GlobalZIndex(DOCK_LAYER), dock_row()))
+                .with_children(|row| {
+                    // Shown on their own only while their screen is open; otherwise they live in
+                    // the View & options popover.
+                    for action in [Action::Library, Action::Sound] {
+                        spawn_button(row, &assets, action);
+                    }
+                    // Tool controls get their own row above the dock.
+                    for action in [
+                        Action::RotatePlacement,
+                        Action::CancelPlacement,
+                        Action::ConnectRoad,
+                        Action::UndoRoad,
+                        Action::FinishRoad,
+                        Action::LensFilter(false),
+                        Action::LensFilter(true),
+                        Action::LensSite(false),
+                        Action::LensSite(true),
+                    ] {
+                        spawn_button(row, &assets, action);
+                    }
+                    for index in 0..CAMP_SITES.len() {
+                        spawn_button(row, &assets, Action::CampPreset(index));
+                    }
+                    for effects in [false, true] {
+                        for delta in [-5, 5] {
+                            spawn_button(row, &assets, Action::Volume { effects, delta });
+                        }
+                    }
+                });
             row.spawn((
                 PanelMenu,
                 GlobalZIndex(0),
@@ -890,6 +914,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 Text::default(),
                 ui_font(&assets, 15.0),
                 Visibility::Hidden,
+                GlobalZIndex(DOCK_LAYER + 1),
                 crate::theme::panel(),
                 crate::theme::panel_node(Node {
                     position_type: PositionType::Absolute,
@@ -901,6 +926,22 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 }),
             ));
         });
+}
+
+fn dock_row() -> impl Bundle {
+    (
+        Interaction::None,
+        bevy::ui::FocusPolicy::Block,
+        crate::theme::panel_node(Node {
+            flex_wrap: FlexWrap::Wrap,
+            justify_content: JustifyContent::Center,
+            row_gap: px(8),
+            column_gap: px(8),
+            padding: UiRect::all(px(12)),
+            ..default()
+        }),
+        crate::theme::panel(),
+    )
 }
 
 fn spawn_button(parent: &mut ChildSpawnerCommands, assets: &AssetServer, action: Action) -> Entity {
@@ -940,6 +981,7 @@ fn spawn_button(parent: &mut ChildSpawnerCommands, assets: &AssetServer, action:
     } else {
         font_size
     };
+    dock_icon::spawn(&mut button, assets, action);
     button.with_child((
         Text::default(),
         crate::ui_font::ui_font_weight(assets, font_size, 600),
@@ -972,19 +1014,6 @@ fn spawn_button(parent: &mut ChildSpawnerCommands, assets: &AssetServer, action:
         ));
     }
     button.id()
-}
-
-fn show_dividers(village: Res<Village>, mut dividers: Query<&mut Node, With<DockDivider>>) {
-    let display = if village.hud_note() {
-        Display::Flex
-    } else {
-        Display::None
-    };
-    for mut node in &mut dividers {
-        if node.display != display {
-            node.display = display;
-        }
-    }
 }
 
 fn fit_and_scroll_menu(
@@ -1023,13 +1052,44 @@ type ScrollablePanelMenu<'w, 's> = Single<
     (With<PanelMenu>, Without<Toolbar>),
 >;
 
+fn close_village_modes(village: &mut Village, picker: &mut PanelPicker) {
+    picker.dismiss();
+    if village.guide.open() {
+        village.guide.toggle();
+    }
+    village.lenses.open = false;
+    if village.advance_open() {
+        village.apply_advance_action(AdvanceAction::Toggle);
+    }
+    if village.terrain_editor.open {
+        village.terrain_editor.toggle();
+    }
+    if village.planning_roads() {
+        village.finish_road_planning();
+    }
+    if village.construction.is_placing() {
+        village.construction.cancel_placement();
+    }
+    if village.construction.menu {
+        village
+            .construction
+            .toggle_build_menu(village.stock.sandbox);
+    }
+    village.construction.production.open = false;
+    village.construction.farming.close();
+    village.utility_panel = None;
+    village.editing_inventory = false;
+    village.numeric_entry = None;
+    village.show_forecast = false;
+}
+
 fn handle_buttons(
     (setup, mut saves, mut sound): (Res<WorldSetup>, ResMut<SaveMenu>, ResMut<SoundSettings>),
     (catalog, land): (Res<Catalog>, Res<Land>),
     (mut village, mut pointer): (ResMut<Village>, ResMut<CampPointer>),
     mut picker: ResMut<PanelPicker>,
     mut camera: Single<&mut VillageCamera>,
-    buttons: Query<(&Action, &Interaction), Changed<Interaction>>,
+    buttons: Query<(&Action, &Interaction, Has<DockButton>), Changed<Interaction>>,
 ) {
     if !visible(&village, &setup, &saves, &sound) {
         picker.view_open = false;
@@ -1039,31 +1099,50 @@ fn handle_buttons(
     if !Action::Manage.available(&village) {
         picker.open = false;
     }
-    if !Action::View.available(&village) {
+    if !Action::View.available(&village)
+        || village.construction.menu
+        || village.construction.is_placing()
+        || village.terrain_editor.open
+        || village.utility_panel.is_some()
+    {
         picker.view_open = false;
     }
     let camera = &mut *camera;
-    for (&action, &interaction) in &buttons {
+    for (&action, &interaction, dock) in &buttons {
         if interaction != Interaction::Pressed {
             continue;
         }
-        if sound.open {
+        if dock {
+            if setup.open || village.camp.is_none() || !action.supported(&village) {
+                continue;
+            }
+            let active = !sound.open && !saves.open && action.dock_active(&village, &picker);
+            sound.open = false;
+            if saves.open {
+                library_ui::toggle_library(&mut saves, setup.mode);
+            }
+            close_village_modes(&mut village, &mut picker);
+            village.lenses.choose(None);
+            if active {
+                continue;
+            }
+        } else if sound.open {
             match action {
                 Action::Sound => sound.open = false,
                 Action::Volume { effects, delta } => sound.adjust_volume(effects, delta),
                 _ => {}
             }
             continue;
-        }
-        if saves.open {
+        } else if saves.open {
             if matches!(action, Action::Library) {
                 library_ui::toggle_library(&mut saves, setup.mode);
             }
             continue;
         }
-        if !setup.open
-            && (village.camp.is_some() || matches!(action, Action::CampPreset(_)))
-            && action.available(&village)
+        if dock
+            || (!setup.open
+                && (village.camp.is_some() || matches!(action, Action::CampPreset(_)))
+                && action.available(&village))
         {
             match action {
                 Action::Sound => {
@@ -1072,13 +1151,7 @@ fn handle_buttons(
                     picker.view_open = false;
                 }
                 Action::Volume { .. } => {}
-                Action::View => {
-                    if village.terrain_editor.open {
-                        village.terrain_editor.toggle();
-                    }
-                    picker.view_open = !picker.view_open;
-                    picker.open = false;
-                }
+                Action::View => picker.view_open = true,
                 Action::Forecast => village.show_forecast = !village.show_forecast,
                 Action::CampPreset(index) => pointer.preset = Some(CAMP_SITES[index].1),
                 Action::Library => {
@@ -1087,13 +1160,8 @@ fn handle_buttons(
                     picker.view_open = false;
                 }
                 Action::Build => {
-                    if village.terrain_editor.open {
-                        village.terrain_editor.toggle();
-                    }
                     let sandbox = village.stock.sandbox;
                     village.construction.toggle_build_menu(sandbox);
-                    picker.open = false;
-                    picker.view_open = false;
                 }
                 Action::RotatePlacement => village.construction.rotate_placement(false),
                 Action::CancelPlacement => village.construction.cancel_placement(),
@@ -1103,18 +1171,13 @@ fn handle_buttons(
                     town.construction.undo_roads(&mut town.stock);
                 }
                 Action::FinishRoad => village.finish_road_planning(),
-                Action::Terrain => {
-                    village.terrain_editor.toggle();
-                    picker.open = false;
-                    picker.view_open = false;
-                }
+                Action::Terrain => village.terrain_editor.toggle(),
                 Action::Advance => {
-                    if village.terrain_editor.open {
-                        village.terrain_editor.toggle();
+                    let was_open = village.advance_open();
+                    close_village_modes(&mut village, &mut picker);
+                    if !was_open {
+                        village.apply_advance_action(AdvanceAction::Toggle);
                     }
-                    village.apply_advance_action(AdvanceAction::Toggle);
-                    picker.open = false;
-                    picker.view_open = false;
                 }
                 Action::FieldDimensions if !picker.open => {
                     village.numeric_entry = Some((NumericTarget::FieldDimensions, String::new()));
@@ -1142,9 +1205,11 @@ fn handle_buttons(
                 Action::Pause => village.paused = !village.paused,
                 Action::Speed => village.speed = (village.speed + 1) % SPEEDS.len(),
                 Action::Lenses => {
-                    village.lenses.toggle();
-                    picker.open = false;
-                    picker.view_open = false;
+                    let was_open = village.lenses.open;
+                    close_village_modes(&mut village, &mut picker);
+                    if !was_open {
+                        village.lenses.toggle();
+                    }
                 }
                 Action::LensSite(forward) => village.focus_network_site(&setup, camera, forward),
                 Action::LensFilter(forward) => {
@@ -1153,9 +1218,11 @@ fn handle_buttons(
                         .adjust_filter(catalog.materials.len(), forward);
                 }
                 Action::Guide => {
-                    village.guide.toggle();
-                    picker.open = false;
-                    picker.view_open = false;
+                    let was_open = village.guide.open();
+                    close_village_modes(&mut village, &mut picker);
+                    if !was_open {
+                        village.guide.toggle();
+                    }
                 }
                 Action::Manage => {
                     picker.open = !picker.open;
@@ -1531,13 +1598,24 @@ type ToolbarButtons<'w, 's> = Query<
             &'static mut BoxShadow,
         ),
         &'static mut Node,
-        (Has<top_bar::TopBarItem>, Has<top_bar::CustomLabel>),
+        (
+            Has<top_bar::TopBarItem>,
+            Has<top_bar::CustomLabel>,
+            Has<DockButton>,
+        ),
     ),
     (Without<Toolbar>, Without<PanelMenu>),
 >;
 
 type PanelNode<'w, 's> =
     Single<'w, 's, (Entity, &'static mut Node), (With<PanelMenu>, Without<Toolbar>)>;
+
+type ControlsRows<'w, 's> = Query<
+    'w,
+    's,
+    (&'static ControlsRow, &'static mut Node),
+    (Without<Action>, Without<Toolbar>, Without<PanelMenu>),
+>;
 
 type ActionTooltip<'w, 's> = Single<'w, 's, (Entity, &'static mut Visibility), With<ActionDetails>>;
 
@@ -1546,7 +1624,7 @@ fn refresh(
     (village, catalog): (Res<Village>, Res<Catalog>),
     mut picker: ResMut<PanelPicker>,
     mut toolbar: Single<&mut Node, (With<Toolbar>, Without<PanelMenu>)>,
-    mut menu: PanelNode,
+    (mut menu, mut rows): (PanelNode, ControlsRows),
     mut buttons: ToolbarButtons,
     (mut labels, mut details): (Query<&mut Text>, ActionTooltip),
 ) {
@@ -1558,6 +1636,7 @@ fn refresh(
     if toolbar.display == Display::None {
         return;
     }
+    let dock_visible = !setup.open && village.camp.is_some();
     let (menu_id, menu) = &mut *menu;
     let show_beds = !picker.open && Action::Farm(FarmControl::NextBed).available(&village);
     let plot_actions = (show_beds && village.construction.farming.whole_plot)
@@ -1640,7 +1719,10 @@ fn refresh(
     let mut action_details = String::new();
     let top_bar_visible = top_bar::visible(&village, &setup, &saves, &sound);
     let mut menu_has_items = false;
-    for (&action, &interaction, children, parent, paint, mut node, (top, custom)) in &mut buttons {
+    let mut context_has_items = false;
+    for (&action, &interaction, children, parent, paint, mut node, (top, custom, dock)) in
+        &mut buttons
+    {
         let (mut background, mut border, mut shadow) = paint;
         let show = match action {
             Action::LensFilter(_) | Action::LensSite(_) | Action::Advance => {
@@ -1735,7 +1817,6 @@ fn refresh(
                 show_facility_switches && action.available(&village)
             }
             Action::Panel(_) => picker.open,
-            Action::ResourcePanel(_) => !picker.open && action.available(&village),
             Action::PantryFromStores => !picker.open && action.available(&village),
             _ => true,
         };
@@ -1744,10 +1825,6 @@ fn refresh(
         } else if matches!(action, Action::Library | Action::Sound) {
             // The dock copies only show while their own screen is open (handled below).
             false
-        } else if let Action::ResourcePanel(panel) = action
-            && parent.parent() != *menu_id
-        {
-            Action::Panel(panel).available(&village) && !village.construction.is_placing()
         } else {
             show
         };
@@ -1762,11 +1839,17 @@ fn refresh(
         } else {
             show
         };
-        // Top-bar controls stay put while panels and menus come and go, as in V2.
-        let show = if top { top_bar_visible } else { show };
+        let show = if dock {
+            dock_visible
+        } else if top {
+            top_bar_visible
+        } else {
+            show
+        };
         // Screens rebuilt as V2 dialogs hold their own controls.
         let show = show && !(village.widget_screen() && parent.parent() == *menu_id);
         menu_has_items |= show && parent.parent() == *menu_id;
+        context_has_items |= show && !dock && !top && parent.parent() != *menu_id;
         node.display = if show { Display::Flex } else { Display::None };
         if !show {
             continue;
@@ -1788,6 +1871,7 @@ fn refresh(
                 {
                     Some("This home has no free beds.")
                 }
+                _ if dock && !action.supported(&village) => Some("Available in Story villages."),
                 _ => None,
             };
         if interaction != Interaction::None {
@@ -1797,9 +1881,7 @@ fn refresh(
                         .unwrap_or("Remove this unstarted plan and return reserved supplies.")
                         .into(),
                 ),
-                Action::ListedHome(_) | Action::SelectedProject(_) => {
-                    action_issue.map(str::to_owned)
-                }
+                _ if action_issue.is_some() => action_issue.map(str::to_owned),
                 Action::CampPreset(index) => Some(
                     [
                         "Cool afternoons, but a longer walk from the unloading point.",
@@ -1824,17 +1906,15 @@ fn refresh(
         }
         let enabled = action_issue.is_none()
             && (top
-                || matches!(action, Action::ResourcePanel(_))
+                || dock
                 || action.available(&village)
                 || matches!(
                     action,
                     Action::Volume { .. } | Action::Library | Action::Sound
                 ));
         let active = match action {
+            _ if dock => !saves.open && !sound.open && action.dock_active(&village, &picker),
             Action::ResourcePanel(panel) => village.utility_panel == Some(panel),
-            Action::Build => village.construction.menu,
-            Action::Terrain => village.terrain_editor.open,
-            Action::View => picker.view_open,
             Action::Pause => top && village.paused,
             Action::Resident(index) => index == village.selected_resident,
             Action::ResidentProfile(profile) => profile == village.resident_profile,
@@ -1854,7 +1934,8 @@ fn refresh(
                 &mut shadow,
             );
         }
-        if !custom && let Ok(mut text) = labels.get_mut(children[0]) {
+        let mut button_labels = labels.iter_many_mut(children.iter());
+        if !custom && let Some(mut text) = button_labels.fetch_next() {
             let label = match action {
                 Action::Farm(FarmControl::Work(work)) if let Some(counts) = plot_actions => {
                     let count = counts[work as usize];
@@ -1912,6 +1993,34 @@ fn refresh(
                 text.0 = label;
             }
         }
+    }
+    for (row, mut node) in &mut rows {
+        let visible = match row {
+            ControlsRow::Dock => dock_visible,
+            ControlsRow::Context => {
+                // Before camp the campsite choices occupy this space. After camp, the dock
+                // keeps its height and the contextual controls sit just above it.
+                if dock_visible {
+                    node.position_type = PositionType::Absolute;
+                    node.bottom = percent(100);
+                    node.left = px(0);
+                    node.right = px(0);
+                    node.margin.bottom = px(8);
+                } else {
+                    node.position_type = PositionType::Relative;
+                    node.bottom = Val::Auto;
+                    node.left = Val::Auto;
+                    node.right = Val::Auto;
+                    node.margin.bottom = px(0);
+                }
+                context_has_items
+            }
+        };
+        node.display = if visible {
+            Display::Flex
+        } else {
+            Display::None
+        };
     }
     // The column shows exactly when one of its buttons does.
     menu.display = if menu_has_items && !saves.open && !sound.open {

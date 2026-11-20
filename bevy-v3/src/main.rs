@@ -644,6 +644,10 @@ mod tests {
     }
 
     fn visible_button(app: &mut App, label: &str) -> Option<Entity> {
+        visible_button_in(app, label, None)
+    }
+
+    fn visible_button_in(app: &mut App, label: &str, container: Option<Entity>) -> Option<Entity> {
         let world = app.world_mut();
         world
             .query_filtered::<(Entity, &Children), With<Button>>()
@@ -665,7 +669,9 @@ mod tests {
                     return None;
                 }
                 let mut ancestor = Some(entity);
+                let mut inside = container.is_none();
                 while let Some(current) = ancestor {
+                    inside |= Some(current) == container;
                     if world
                         .get::<Node>(current)
                         .is_some_and(|node| node.display == Display::None)
@@ -674,8 +680,42 @@ mod tests {
                     }
                     ancestor = world.get::<ChildOf>(current).map(ChildOf::parent);
                 }
-                Some(entity)
+                inside.then_some(entity)
             })
+    }
+
+    fn press_lens_button(app: &mut App, label: &str) {
+        let world = app.world_mut();
+        let card = world
+            .query_filtered::<Entity, With<village::LensCard>>()
+            .single(world)
+            .unwrap();
+        let button = visible_button_in(app, label, Some(card))
+            .unwrap_or_else(|| panic!("missing map lens button: {label}"));
+        run_button_interaction(app, button, Interaction::Pressed);
+    }
+
+    fn assert_dock_mode(app: &mut App, active: Option<&str>) {
+        let world = app.world_mut();
+        let mut dock = world.query_filtered::<(&Node, &ChildOf, &Children, &BorderColor), With<village::DockButton>>();
+        let buttons: Vec<_> = dock.iter(world).collect();
+        assert_eq!(buttons.len(), 12);
+        let mut highlighted = Vec::new();
+        for (node, parent, children, edge) in buttons {
+            assert_eq!(node.display, Display::Flex);
+            assert_eq!(
+                world.get::<Node>(parent.parent()).unwrap().display,
+                Display::Flex
+            );
+            if edge.top == crate::theme::ACTIVE_EDGE {
+                let label = children
+                    .iter()
+                    .find_map(|child| world.get::<Text>(child))
+                    .unwrap();
+                highlighted.push(label.0.as_str());
+            }
+        }
+        assert_eq!(highlighted, active.into_iter().collect::<Vec<_>>());
     }
 
     /// Presses the ‹ or › of the stepper captioned `caption` on a dialog screen.
@@ -759,6 +799,10 @@ mod tests {
             }
             panic!("missing visible button: {label}; shown: {labels:?}");
         };
+        run_button_interaction(app, button, input);
+    }
+
+    fn run_button_interaction(app: &mut App, button: Entity, input: Interaction) {
         let world = app.world_mut();
         *world
             .get_mut::<Interaction>(button)
@@ -1084,7 +1128,34 @@ mod tests {
         app.world_mut()
             .resource_mut::<ButtonInput<KeyCode>>()
             .reset_all();
+        assert_dock_mode(&mut app, None);
+        press_button(&mut app, "Terrain");
+        assert!(app.world().resource::<village::Village>().editing_terrain());
+        assert_dock_mode(&mut app, Some("Terrain"));
+        press_button(&mut app, "Map lenses");
+        assert!(!app.world().resource::<village::Village>().editing_terrain());
+        assert_dock_mode(&mut app, None);
+        press_button(&mut app, "Projects");
+        assert!(visible_button(&mut app, "Land & slope").is_none());
+        assert_dock_mode(&mut app, Some("Projects"));
+        press_button(&mut app, "Advance days");
+        assert!(app.world().resource::<village::Village>().advance_open());
+        assert_dock_mode(&mut app, None);
+        press_button(&mut app, "View & options");
+        assert!(!app.world().resource::<village::Village>().advance_open());
+        assert!(visible_button(&mut app, "Reset camera").is_some());
+        assert_dock_mode(&mut app, Some("View & options"));
+        press_button(&mut app, "Residents");
+        assert!(visible_button(&mut app, "Overview").is_some());
+        assert_dock_mode(&mut app, Some("Residents"));
+        press_button(&mut app, "Terrain");
+        assert!(visible_button(&mut app, "Overview").is_none());
+        assert_dock_mode(&mut app, Some("Terrain"));
+        press_button(&mut app, "Terrain");
+        assert_dock_mode(&mut app, None);
+
         press_button(&mut app, "Build");
+        assert_dock_mode(&mut app, Some("Build"));
         press_button(&mut app, "Auto-buy on");
         press_button(&mut app, "Auto-buy off");
         press_button(&mut app, "Find something to build…");
@@ -1329,7 +1400,7 @@ mod tests {
             ("Comfort", "Comfort · Green open facility"),
         ] {
             press_button(&mut app, "Map lenses");
-            press_button(&mut app, button);
+            press_lens_button(&mut app, button);
             assert!(
                 ui_texts(&mut app)
                     .iter()
@@ -1342,7 +1413,7 @@ mod tests {
         press_button(&mut app, "Next filter");
         press_button(&mut app, "Previous filter");
         press_button(&mut app, "Map lenses");
-        press_button(&mut app, "Power");
+        press_lens_button(&mut app, "Power");
         press_button(&mut app, "Next facility");
         press_button(&mut app, "Previous facility");
         press_button(&mut app, "Map lenses");
