@@ -128,16 +128,19 @@ impl<A: Clone + Send + Sync + 'static> Widget<A> {
         match self {
             Self::Text(value, tone) => {
                 let (size, weight, color) = match tone {
-                    Tone::Title => (18., 750, theme::INK),
-                    Tone::Caption => (11., 750, theme::CAPTION),
-                    Tone::Body => (14., 400, theme::INK),
-                    Tone::Note => (12., 400, theme::MUTED),
+                    // Sized for reading at a desk under the 0.82 UI scale; notes stay
+                    // quieter by colour, not by shrinking out of legibility.
+                    Tone::Title => (19., 750, theme::INK),
+                    Tone::Caption => (11.5, 750, theme::CAPTION),
+                    Tone::Body => (15.5, 450, theme::INK),
+                    Tone::Note => (14., 450, theme::MUTED),
                 };
                 rendered.texts.push(
                     parent
                         .spawn((
                             Text::new(value),
                             ui_font_styled(assets, size, weight, color),
+                            bevy::text::LineHeight::RelativeToFont(1.4),
                         ))
                         .id(),
                 );
@@ -223,14 +226,23 @@ impl<A: Clone + Send + Sync + 'static> Widget<A> {
                     column_gap: px(8),
                     row_gap: px(8),
                     padding: if card {
-                        UiRect::all(px(12))
+                        UiRect::all(px(14))
                     } else {
                         UiRect::ZERO
                     },
                     ..default()
                 };
+                // Cards are quiet insets on the dialog's paper, not floating panels.
                 let mut container = if card {
-                    parent.spawn((theme::panel_node(node), theme::panel()))
+                    parent.spawn((
+                        Node {
+                            border: UiRect::all(px(1)),
+                            border_radius: BorderRadius::all(px(14)),
+                            ..node
+                        },
+                        BackgroundColor(theme::CARD),
+                        BorderColor::all(theme::SUBTLE_BORDER),
+                    ))
                 } else {
                     parent.spawn(node)
                 };
@@ -292,8 +304,14 @@ impl Rendered {
             Button,
             FocusPolicy::Pass,
             theme::button_node(Node {
-                padding: UiRect::axes(px(9), px(5)),
+                padding: UiRect::axes(px(12), px(6)),
                 flex_shrink: 0.,
+                // Buttons keep their own width, like V2's; fields span their card.
+                align_self: if field {
+                    AlignSelf::Stretch
+                } else {
+                    AlignSelf::FlexStart
+                },
                 ..default()
             }),
             theme::button(),
