@@ -361,14 +361,11 @@ impl Runner {
             ));
         }
         let village = village.unwrap_or_else(|| {
-            let setup = scenario.setup.clone().unwrap_or_default().session();
-            Village {
-                setup: Some(setup.clone()),
-                camp: Some(CAMP_SITES[2].1),
-                arrival_time: ARRIVAL_DURATION,
-                stock: Stock::for_start(&setup, catalog),
-                ..default()
-            }
+            Self::starting_village(
+                &scenario.setup.clone().unwrap_or_default(),
+                CLEARING_CAMP,
+                catalog,
+            )
         });
         let camp = village
             .camp
@@ -408,6 +405,16 @@ impl Runner {
         };
         runner.observe(catalog);
         Ok(runner)
+    }
+
+    fn starting_village(setup: &WorldSetup, camp: IVec2, catalog: &Catalog) -> Village {
+        Village {
+            setup: Some(setup.session()),
+            camp: Some(camp),
+            arrival_time: ARRIVAL_DURATION,
+            stock: Stock::for_start(setup, catalog),
+            ..default()
+        }
     }
 
     fn done(&self) -> bool {
@@ -654,7 +661,7 @@ impl LabSource {
                     orders: Vec::new(),
                     stop: LabStop::None,
                 },
-                None,
+                Some(Runner::starting_village(setup, CAMP_SITES[1].1, catalog)),
                 catalog,
             ),
             Self::File {
@@ -2650,7 +2657,7 @@ mod tests {
         let runner = LabSource::Story(setup).load(&catalog).unwrap();
         assert_eq!(runner.setup.seed(), 215);
         assert!(runner.setup.mode == Mode::Story);
-        assert_eq!(runner.village.camp, Some(CAMP_SITES[2].1));
+        assert_eq!(runner.village.camp, Some(CAMP_SITES[1].1));
         assert_eq!(runner.index, 0);
         assert!(runner.scenario.orders.is_empty());
         assert!(runner.scenario.steps as f64 * STEP >= 365.0 * crate::weather::DAY);
