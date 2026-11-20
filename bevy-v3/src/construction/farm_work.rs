@@ -1020,10 +1020,8 @@ pub(super) fn seed_delivery_status(job: &FarmJob, clock: f64) -> String {
     job.seed_freight_eta.map_or_else(
         || "Waiting for seed delivery".into(),
         |eta| {
-            format!(
-                "Seed freight · {:.1}h remaining",
-                ((eta - clock) / HOUR).max(0.0)
-            )
+            let minutes = crate::market::freight_minutes_remaining(eta - clock);
+            format!("Seed freight · {minutes} game minutes remaining")
         },
     )
 }

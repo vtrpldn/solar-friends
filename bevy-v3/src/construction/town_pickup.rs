@@ -209,7 +209,7 @@ impl Construction {
         self.market.release_fare(job.fare);
         stock.debit(freight, crate::stock::CashKind::Freight);
         job.seed_freight_eta =
-            Some(clock.seconds + 6.0 * crate::weather::HOUR + trip_seconds(clock.round_trip_km));
+            Some(clock.seconds + crate::market::freight_seconds(clock.round_trip_km));
         self.record_event(
             clock.seconds,
             "Supplier dispatched seeds for planting.".into(),
@@ -246,10 +246,10 @@ impl Construction {
             ));
         }
         let delivery = self.construction_delivery.as_ref()?;
-        let hours = (delivery.eta - clock).max(0.0) / crate::weather::HOUR;
+        let minutes = crate::market::freight_minutes_remaining(delivery.eta - clock);
         let projects = delivery.sites().count();
         Some(format!(
-            "Construction freight · {projects} project(s) · {hours:.1}h remaining"
+            "Construction freight · {projects} project(s) · {minutes} game minutes remaining"
         ))
     }
 
@@ -451,7 +451,7 @@ impl Construction {
             site,
             additional_sites: additional_sites.to_vec(),
             cargo,
-            eta: clock.seconds + 6.0 * crate::weather::HOUR + trip_seconds(clock.round_trip_km),
+            eta: clock.seconds + crate::market::freight_seconds(clock.round_trip_km),
         });
         self.record_event(
             clock.seconds,
@@ -1088,12 +1088,12 @@ mod tests {
         assert!(village.seed_freight_active());
         assert_eq!(
             village.reserved_freight_status(clock.seconds).as_deref(),
-            Some("Seed freight · 6.5h remaining · Site 1 · Bed 1")
+            Some("Seed freight · 390 game minutes remaining · Site 1 · Bed 1")
         );
         assert!(
             village
                 .pantry_purchase_status(&catalog, &stock, clock)
-                .contains("Seed freight · 6.5h remaining · Site 1 · Bed 1")
+                .contains("Seed freight · 390 game minutes remaining · Site 1 · Bed 1")
         );
         assert_eq!(village.market.committed_fares(), 0);
         assert_eq!(stock.balance(), balance - freight);
@@ -1619,7 +1619,7 @@ mod tests {
             village
                 .reserved_freight_status(clock.seconds)
                 .unwrap()
-                .contains("2 project(s)")
+                .contains("2 project(s) · 390 game minutes remaining")
         );
         let (_, stores) =
             village.inventory_panel(&catalog, &stock, &Land::default(), 0, false, "pipe");

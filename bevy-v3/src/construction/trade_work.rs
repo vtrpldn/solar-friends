@@ -451,8 +451,8 @@ impl Construction {
         let item = &catalog.materials[&order.material];
         let arrival = order.eta - clock;
         let status = if arrival > 0.0 {
-            let minutes = (arrival * (60.0 / crate::weather::HOUR)).ceil();
-            format!("{minutes:.0} game minutes remaining")
+            let minutes = crate::market::freight_minutes_remaining(arrival);
+            format!("{minutes} game minutes remaining")
         } else if u64::from(order.quantity) > space {
             "Arrived · Waiting for storage space".into()
         } else {
