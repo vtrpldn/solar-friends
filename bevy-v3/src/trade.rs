@@ -1081,6 +1081,40 @@ mod tests {
     }
 
     #[test]
+    fn quote_and_reservation_agree_on_a_sale_spanning_buyer_price_tiers() {
+        let catalog = Catalog::default();
+        let item = &catalog.materials["wood"];
+        let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);
+        let mut market = Market::default();
+        let mut trade = Trade::default();
+        let premium_units = 1;
+        let previously_sold = item.buyer.full_price_batches * item.pack - premium_units;
+        trade.bought.insert(
+            "wood".into(),
+            Daily {
+                day: 0,
+                units: previously_sold,
+            },
+        );
+        let before = stock.available("wood");
+        let premium = (item.price * item.buyer.ratio).floor() as u64 * 100;
+        let bulk = (item.price * item.buyer.bulk_ratio).floor() as u64 * 100;
+        let expected =
+            (premium + bulk * u64::from(item.pack - premium_units)) / u64::from(item.pack);
+        assert_eq!(
+            trade.quote_sale_order(&catalog, &stock, "wood", 0, 0),
+            Ok((item.pack, expected))
+        );
+        assert_eq!(
+            trade.reserve(&catalog, &mut stock, &mut market, "wood", (0, 0, 0)),
+            Ok(item.pack)
+        );
+        assert_eq!(trade.orders[0].cents, expected);
+        assert_eq!(trade.buyer_reserved("wood", 0), previously_sold + item.pack);
+        assert_eq!(stock.available("wood"), before - item.pack);
+    }
+
+    #[test]
     fn freight_waits_for_storage_after_its_scheduled_arrival() {
         let catalog = Catalog::default();
         let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);
