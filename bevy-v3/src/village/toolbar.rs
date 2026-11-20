@@ -546,8 +546,12 @@ impl Action {
                 TradePolicy::Reserve(true) => "Keep one pack more",
                 TradePolicy::Limit => "Cycle sale limit",
                 TradePolicy::Trigger => "Cycle sale trigger",
-                TradePolicy::MinimumLoad => "Change minimum load",
-                TradePolicy::DispatchWait => "Change dispatch wait",
+                TradePolicy::MinimumLoad => {
+                    return numeric_label(village, NumericTarget::MinimumLoad, "Set minimum load");
+                }
+                TradePolicy::DispatchWait => {
+                    return numeric_label(village, NumericTarget::DispatchWait, "Set maximum wait");
+                }
                 TradePolicy::DispatchNow => "Send waiting loads now",
             }
             .into(),
@@ -566,9 +570,9 @@ impl Action {
             Self::Shift(true) => "Toggle weekday shifts".into(),
             Self::Ledger if village.finance_history_open => "Close ledger".into(),
             Self::Ledger => "Open ledger".into(),
-            Self::ExpansionReserve => budget_label(
+            Self::ExpansionReserve => numeric_label(
                 village,
-                BudgetTarget::ExpansionReserve,
+                NumericTarget::ExpansionReserve,
                 "Set construction cash reserve",
             ),
             Self::PantryBatches if village.pantry_batch_page.is_some() => {
@@ -583,7 +587,7 @@ impl Action {
             }
             Self::PantryTransport => "Purchases: resident pickup".into(),
             Self::PantryBudget => {
-                budget_label(village, BudgetTarget::Food, "Set daily food budget")
+                numeric_label(village, NumericTarget::Food, "Set daily food budget")
             }
             Self::AutoCook if village.construction.production.kitchen_policy.automatic => {
                 "Automatic cooking on".into()
@@ -656,24 +660,29 @@ impl Action {
                 }
             ),
             Self::UpkeepJob(_) => String::new(),
-            Self::UpkeepBudget { restock: false } => budget_label(
+            Self::UpkeepBudget { restock: false } => numeric_label(
                 village,
-                BudgetTarget::MaintenanceParts,
+                NumericTarget::MaintenanceParts,
                 "Set parts allowance",
             ),
-            Self::UpkeepBudget { restock: true } => budget_label(
+            Self::UpkeepBudget { restock: true } => numeric_label(
                 village,
-                BudgetTarget::MaintenanceShopping,
+                NumericTarget::MaintenanceShopping,
                 "Set feed and repair budget",
             ),
         }
     }
 }
 
-fn budget_label(village: &Village, target: BudgetTarget, label: &str) -> String {
-    match &village.budget_entry {
+fn numeric_label(village: &Village, target: NumericTarget, label: &str) -> String {
+    match &village.numeric_entry {
         Some((active, entry)) if *active == target => {
-            format!("R${entry} · Enter to set · Esc to cancel")
+            let value = match target {
+                NumericTarget::MinimumLoad => format!("{entry}% (0–100)"),
+                NumericTarget::DispatchWait => format!("{entry}h (0–24)"),
+                _ => format!("R${entry}"),
+            };
+            format!("{value} · Enter to set · Esc to cancel")
         }
         _ => label.into(),
     }
@@ -1323,7 +1332,7 @@ fn handle_buttons(
                     }
                 }
                 Action::ExpansionReserve if !picker.open => {
-                    village.budget_entry = Some((BudgetTarget::ExpansionReserve, String::new()));
+                    village.numeric_entry = Some((NumericTarget::ExpansionReserve, String::new()));
                 }
                 Action::Ledger if !picker.open => {
                     village.finance_history_open = !village.finance_history_open;
@@ -1357,11 +1366,11 @@ fn handle_buttons(
                 }
                 Action::UpkeepBudget { restock } if !picker.open => {
                     let target = if restock {
-                        BudgetTarget::MaintenanceShopping
+                        NumericTarget::MaintenanceShopping
                     } else {
-                        BudgetTarget::MaintenanceParts
+                        NumericTarget::MaintenanceParts
                     };
-                    village.budget_entry = Some((target, String::new()));
+                    village.numeric_entry = Some((target, String::new()));
                 }
                 Action::UtilityLinkPage(forward) if !picker.open => {
                     village.move_utility_link(forward)
@@ -1413,7 +1422,7 @@ fn handle_buttons(
                     village.construction.toggle_supplier_construction()
                 }
                 Action::PantryBudget if !picker.open => {
-                    village.budget_entry = Some((BudgetTarget::Food, String::new()));
+                    village.numeric_entry = Some((NumericTarget::Food, String::new()));
                 }
                 Action::PantryPolicy(reserve, budget, toggle) if !picker.open => {
                     village
@@ -1436,6 +1445,12 @@ fn handle_buttons(
                     let town = &mut *village;
                     town.construction
                         .place_trade_order(&catalog, &mut town.stock, clock, order);
+                }
+                Action::TradePolicy(TradePolicy::MinimumLoad) if !picker.open => {
+                    village.numeric_entry = Some((NumericTarget::MinimumLoad, String::new()));
+                }
+                Action::TradePolicy(TradePolicy::DispatchWait) if !picker.open => {
+                    village.numeric_entry = Some((NumericTarget::DispatchWait, String::new()));
                 }
                 Action::TradePolicy(policy) if !picker.open => {
                     village.construction.adjust_trade_policy(&catalog, policy);

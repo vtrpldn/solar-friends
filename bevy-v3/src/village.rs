@@ -184,7 +184,7 @@ pub struct Village {
     #[serde(skip)]
     inventory_search: String,
     #[serde(skip)]
-    budget_entry: Option<(BudgetTarget, String)>,
+    numeric_entry: Option<(NumericTarget, String)>,
     #[serde(skip)]
     editing_inventory: bool,
     #[serde(skip)]
@@ -426,7 +426,7 @@ impl Village {
             self.lenses.open = false;
             return true;
         }
-        if self.budget_entry.take().is_some() {
+        if self.numeric_entry.take().is_some() {
             return true;
         }
         if self.terrain_editor.open {
@@ -1360,11 +1360,47 @@ fn custom_camp_error(terrain: &crate::terrain::Terrain, cell: IVec2) -> Option<&
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
-enum BudgetTarget {
+enum NumericTarget {
     Food,
     ExpansionReserve,
     MaintenanceParts,
     MaintenanceShopping,
+    MinimumLoad,
+    DispatchWait,
+}
+
+fn apply_numeric_entry(target: NumericTarget, entry: &str, construction: &mut Construction) {
+    match target {
+        NumericTarget::MinimumLoad => {
+            if let Ok(percent) = entry.parse::<u32>() {
+                construction.set_minimum_dispatch_fill(percent.min(100) as u8);
+            }
+        }
+        NumericTarget::DispatchWait => {
+            if let Ok(hours) = entry.parse::<f64>() {
+                construction.set_dispatch_wait((hours.clamp(0., 24.) * 2.).round() as u8);
+            }
+        }
+        _ => {
+            let Ok(reais) = entry.parse::<u64>() else {
+                return;
+            };
+            let cents = reais.min(100_000) * 100;
+            match target {
+                NumericTarget::ExpansionReserve => construction.set_expansion_reserve(cents),
+                NumericTarget::Food => {
+                    let trade = &mut construction.trade;
+                    let _ =
+                        trade.set_pantry_policy(!trade.household_restock_off, None, Some(cents));
+                }
+                NumericTarget::MaintenanceParts | NumericTarget::MaintenanceShopping => {
+                    construction
+                        .set_upkeep_budget(target == NumericTarget::MaintenanceShopping, cents);
+                }
+                NumericTarget::MinimumLoad | NumericTarget::DispatchWait => unreachable!(),
+            }
+        }
+    }
 }
 
 fn village_input(
@@ -1457,47 +1493,27 @@ fn village_input(
         }
     }
 
-    if village.budget_entry.as_ref().is_some_and(|(target, _)| {
+    if village.numeric_entry.as_ref().is_some_and(|(target, _)| {
         village.utility_panel
             != Some(match target {
-                BudgetTarget::Food => UtilityPanel::Pantry,
-                BudgetTarget::ExpansionReserve => UtilityPanel::Finances,
-                BudgetTarget::MaintenanceParts | BudgetTarget::MaintenanceShopping => {
+                NumericTarget::Food => UtilityPanel::Pantry,
+                NumericTarget::ExpansionReserve => UtilityPanel::Finances,
+                NumericTarget::MinimumLoad | NumericTarget::DispatchWait => UtilityPanel::Trade,
+                NumericTarget::MaintenanceParts | NumericTarget::MaintenanceShopping => {
                     UtilityPanel::Upkeep
                 }
             })
     }) {
-        village.budget_entry = None;
+        village.numeric_entry = None;
     }
-    if let Some((target, entry)) = &mut village.budget_entry {
+    if let Some((target, entry)) = &mut village.numeric_entry {
         if keyboard.any_just_pressed([KeyCode::Enter, KeyCode::NumpadEnter]) {
-            let target = *target;
-            let amount = entry
-                .parse::<u64>()
-                .ok()
-                .map(|reais| reais.min(100_000) * 100);
-            village.budget_entry = None;
-            if let Some(cents) = amount {
-                let construction = &mut village.construction;
-                match target {
-                    BudgetTarget::ExpansionReserve => construction.set_expansion_reserve(cents),
-                    BudgetTarget::Food => {
-                        let trade = &mut construction.trade;
-                        let _ = trade.set_pantry_policy(
-                            !trade.household_restock_off,
-                            None,
-                            Some(cents),
-                        );
-                    }
-                    BudgetTarget::MaintenanceParts | BudgetTarget::MaintenanceShopping => {
-                        construction
-                            .set_upkeep_budget(target == BudgetTarget::MaintenanceShopping, cents);
-                    }
-                }
-            }
+            let (target, entry) = village.numeric_entry.take().expect("active numeric entry");
+            apply_numeric_entry(target, &entry, &mut village.construction);
         } else {
             crate::construction::read_search_text(entry, &mut build_text);
-            entry.retain(|character| character.is_ascii_digit());
+            let decimal = *target == NumericTarget::DispatchWait;
+            entry.retain(|character| character.is_ascii_digit() || decimal && character == '.');
             entry.truncate(6);
         }
         build_text.clear();
@@ -3144,6 +3160,31 @@ fn outdoor_animation_time(seconds: f64) -> f32 {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn dispatch_policy_accepts_exact_fill_and_half_hour_wait() {
+        let catalog = Catalog::default();
+        let stock = Stock::for_start(&WorldSetup::default(), &catalog);
+        let mut construction = Construction::default();
+        let clock = TownClock {
+            seconds: 0.,
+            round_trip_km: 12,
+        };
+        apply_numeric_entry(NumericTarget::MinimumLoad, "37", &mut construction);
+        apply_numeric_entry(NumericTarget::DispatchWait, "3.5", &mut construction);
+        assert!(
+            construction
+                .trade_status(&catalog, &stock, clock)
+                .contains("Minimum load 37% · J Wait up to 3.5h")
+        );
+        apply_numeric_entry(NumericTarget::MinimumLoad, "999", &mut construction);
+        apply_numeric_entry(NumericTarget::DispatchWait, "48", &mut construction);
+        assert!(
+            construction
+                .trade_status(&catalog, &stock, clock)
+                .contains("Minimum load 100% · J Wait up to 24.0h")
+        );
+    }
 
     #[test]
     fn opening_the_guide_pauses_story_arrival() {

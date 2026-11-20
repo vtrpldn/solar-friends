@@ -301,6 +301,14 @@ impl Construction {
         }
     }
 
+    pub(crate) fn set_minimum_dispatch_fill(&mut self, percent: u8) {
+        self.logistics_policy.minimum_fill = percent;
+    }
+
+    pub(crate) fn set_dispatch_wait(&mut self, half_hours: u8) {
+        self.logistics_policy.wait_half_hours = half_hours;
+    }
+
     pub fn adjust_trade_policy(&mut self, catalog: &Catalog, action: TradePolicy) {
         match action {
             TradePolicy::MinimumLoad => {
