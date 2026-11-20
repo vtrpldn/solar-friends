@@ -1140,6 +1140,12 @@ impl Utilities {
         })
     }
 
+    #[cfg(test)]
+    pub(crate) fn fill_waste_tank(&mut self, id: usize) {
+        let node = self.nodes.get_mut(&id).expect("utility node exists");
+        node.water[2] = node.capacity[2];
+    }
+
     pub fn waste_tanks_needing_attention(
         &self,
     ) -> impl Iterator<Item = (usize, usize, &'static str, &'static str)> + '_ {

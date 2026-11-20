@@ -1470,8 +1470,7 @@ fn read_camp_pointer(
         Single<&Window, With<PrimaryWindow>>,
     ),
     camera: Single<(&Camera, &GlobalTransform), With<VillageCamera>>,
-    ground: Query<(), With<GroundMesh>>,
-    actors: Query<(&ArrivalActor, &GlobalTransform, &InheritedVisibility)>,
+    (ground, actors): (Query<(), With<GroundMesh>>, Query<ResidentPick>),
     ui: Query<&Interaction>,
     mut raycast: MeshRayCast,
     (mut input, mut pointer): (Local<Option<Vec2>>, ResMut<CampPointer>),
@@ -1571,6 +1570,12 @@ fn read_camp_pointer(
     }
 }
 
+type ResidentPick = (
+    &'static ArrivalActor,
+    &'static GlobalTransform,
+    &'static InheritedVisibility,
+);
+
 /// Screen-space pick radius around a resident's torso, in logical pixels.
 const RESIDENT_PICK_RADIUS: f32 = 26.0;
 
@@ -1579,7 +1584,7 @@ fn resident_under_cursor(
     camera: &Camera,
     transform: &GlobalTransform,
     cursor: Vec2,
-    actors: &Query<(&ArrivalActor, &GlobalTransform, &InheritedVisibility)>,
+    actors: &Query<ResidentPick>,
 ) -> Option<usize> {
     nearest_resident(
         cursor,
@@ -1602,6 +1607,30 @@ fn nearest_resident(cursor: Vec2, residents: impl Iterator<Item = (usize, Vec2)>
         .filter(|(_, distance)| *distance <= RESIDENT_PICK_RADIUS)
         .min_by(|a, b| a.1.total_cmp(&b.1))
         .map(|(index, _)| index)
+}
+
+/// Utility problems that stay visible on the HUD until the matching panel is opened.
+fn utility_alerts(utilities: &crate::utilities::Utilities, panel: Option<UtilityPanel>) -> String {
+    let mut alerts = Vec::new();
+    let shortages = utilities.power_shortages().count();
+    if shortages > 0 && panel != Some(UtilityPanel::Power) {
+        let noun = if shortages == 1 {
+            "building"
+        } else {
+            "buildings"
+        };
+        alerts.push(format!("{shortages} {noun} short of power · P"));
+    }
+    let tanks = utilities.waste_tanks_needing_attention().count();
+    if tanks > 0 && panel != Some(UtilityPanel::Water) {
+        let noun = if tanks == 1 {
+            "waste tank needs"
+        } else {
+            "waste tanks need"
+        };
+        alerts.push(format!("{tanks} {noun} service · V"));
+    }
+    alerts.join(" · ")
 }
 
 const CAMP_OFFSET: IVec2 = IVec2::new(-1, -3);
@@ -2949,6 +2978,11 @@ fn show_hud(
         if !village.stock.sandbox {
             label.push_str(" · H Finances · F7 Maintenance");
         }
+        let alerts = utility_alerts(&village.construction.utilities, village.utility_panel);
+        if !alerts.is_empty() {
+            label.push_str("\nAttention: ");
+            label.push_str(&alerts);
+        }
     }
     if village.camp.is_some()
         && village.utility_panel.is_none()
@@ -3759,6 +3793,19 @@ fn outdoor_animation_time(seconds: f64) -> f32 {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn full_waste_tanks_stay_on_the_hud_until_water_opens() {
+        let mut utilities = crate::utilities::Utilities::default();
+        utilities.sync(std::iter::empty());
+        assert_eq!(utility_alerts(&utilities, None), "");
+        utilities.fill_waste_tank(0);
+        assert_eq!(
+            utility_alerts(&utilities, None),
+            "1 waste tank needs service · V"
+        );
+        assert_eq!(utility_alerts(&utilities, Some(UtilityPanel::Water)), "");
+    }
 
     #[test]
     fn clicking_picks_the_nearest_resident_within_reach() {

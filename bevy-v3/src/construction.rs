@@ -2952,9 +2952,11 @@ mod tests {
 
     #[test]
     fn shift_r_turns_the_placement_back_the_other_way() {
-        let mut construction = Construction::default();
-        construction.menu = true;
-        construction.selection = Some("tent".into());
+        let mut construction = Construction {
+            menu: true,
+            selection: Some("tent".into()),
+            ..Default::default()
+        };
         let mut keyboard = ButtonInput::<KeyCode>::default();
         keyboard.press(KeyCode::ShiftLeft);
         keyboard.press(KeyCode::KeyR);
