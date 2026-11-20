@@ -2,10 +2,18 @@ use bevy::prelude::*;
 
 use crate::{village::SIMULATION_STEP, weather::DAY};
 
+/// Fast advances use the largest step the live simulation is written for,
+/// matching V2's approximate time skip. Movement, needs and production
+/// still integrate, but resident decisions are taken ten times less often.
+pub(crate) const FAST_STEP: f64 = 1.0;
+
 pub struct Advance {
     pub open: bool,
     days: u16,
     day_entry: Option<u16>,
+    /// Kept between openings, like V2's checkbox, so a player who prefers
+    /// approximate advances does not have to re-select it every time.
+    pub fast: bool,
     pub running: Option<Run>,
     result: String,
 }
@@ -13,6 +21,7 @@ pub struct Advance {
 pub struct Run {
     total: u64,
     steps: u64,
+    step: f64,
 }
 
 impl Default for Advance {
@@ -21,6 +30,7 @@ impl Default for Advance {
             open: false,
             days: 1,
             day_entry: None,
+            fast: false,
             running: None,
             result: String::new(),
         }
@@ -33,6 +43,7 @@ pub(crate) enum AdvanceAction {
     Adjust(i16),
     Digit(u16),
     Backspace,
+    Fast,
     Start,
 }
 
@@ -70,6 +81,7 @@ impl Advance {
             (KeyCode::BracketLeft, AdvanceAction::Adjust(-increment)),
             (KeyCode::BracketRight, AdvanceAction::Adjust(increment)),
             (KeyCode::Backspace, AdvanceAction::Backspace),
+            (KeyCode::KeyX, AdvanceAction::Fast),
             (KeyCode::Enter, AdvanceAction::Start),
             (KeyCode::NumpadEnter, AdvanceAction::Start),
         ]
@@ -109,11 +121,12 @@ impl Advance {
             AdvanceAction::Backspace => {
                 self.day_entry = Some(self.selected_days() / 10);
             }
+            AdvanceAction::Fast => self.fast = !self.fast,
             AdvanceAction::Start if self.can_start() => {
                 self.days = self.selected_days();
                 self.day_entry = None;
                 self.result.clear();
-                self.running = Some(Run::new(self.days));
+                self.running = Some(Run::new(self.days, self.fast));
             }
             AdvanceAction::Toggle | AdvanceAction::Start => {}
         }
@@ -138,15 +151,20 @@ impl Advance {
         self.running
             .as_ref()
             .map_or(f64::from(self.selected_days()), |run| {
-                (run.total - run.steps) as f64 * SIMULATION_STEP / DAY
+                (run.total - run.steps) as f64 * run.step / DAY
             })
     }
 
     pub fn status(&self, contextual_shortcut: bool) -> String {
         if let Some(run) = &self.running {
             return format!(
-                "Advancing {} days · {:.0}%\nL Stop here",
+                "Advancing {} days{} · {:.0}%\nL Stop here",
                 self.days,
+                if run.step > SIMULATION_STEP {
+                    " (fast)"
+                } else {
+                    ""
+                },
                 100.0 * run.steps as f64 / run.total as f64
             );
         }
@@ -163,19 +181,31 @@ impl Advance {
         } else {
             "Choose 1–365 days"
         };
+        let fast = if self.fast {
+            "X Fast simulation: on · Larger time steps speed up the advance. Resident decisions and resource totals can differ from normal play."
+        } else {
+            "X Fast simulation: off · Every moment is simulated exactly as in live play."
+        };
         format!(
-            "Advance {} day(s)\nType days or use [ / ] · Shift ±7 · {entry_status} · L Close",
+            "Advance {} day(s)\nType days or use [ / ] · Shift ±7 · {entry_status} · L Close\n{fast}",
             self.selected_days(),
         )
     }
 }
 
 impl Run {
-    fn new(days: u16) -> Self {
+    fn new(days: u16, fast: bool) -> Self {
+        let step = if fast { FAST_STEP } else { SIMULATION_STEP };
         Self {
-            total: (f64::from(days) * DAY / SIMULATION_STEP).round() as u64,
+            total: (f64::from(days) * DAY / step).round() as u64,
             steps: 0,
+            step,
         }
+    }
+
+    /// Simulated seconds to pass to each village step of this run.
+    pub fn step_seconds(&self) -> f64 {
+        self.step
     }
 
     pub fn record_step(&mut self) -> bool {
@@ -204,5 +234,29 @@ mod tests {
         advance.apply(AdvanceAction::Start);
         let run = advance.running.as_ref().unwrap();
         assert_eq!(run.total as f64 * SIMULATION_STEP, 365.0 * DAY);
+        assert_eq!(run.step_seconds(), SIMULATION_STEP);
+    }
+
+    #[test]
+    fn fast_simulation_covers_the_same_days_in_fewer_larger_steps() {
+        let mut advance = Advance::default();
+        advance.apply(AdvanceAction::Toggle);
+        assert!(advance.status(false).contains("Fast simulation: off"));
+        advance.apply(AdvanceAction::Fast);
+        assert!(advance.status(false).contains("Fast simulation: on"));
+        advance.apply(AdvanceAction::Adjust(1));
+        advance.apply(AdvanceAction::Start);
+        let run = advance.running.as_ref().unwrap();
+        assert_eq!(run.step_seconds(), FAST_STEP);
+        assert_eq!(run.total as f64 * FAST_STEP, 2.0 * DAY);
+        assert_eq!(advance.remaining_days(), 2.0);
+        assert!(advance.status(false).contains("(fast)"));
+
+        // The choice can't change mid-run and persists for the next advance.
+        advance.apply(AdvanceAction::Fast);
+        assert!(advance.fast);
+        advance.done();
+        advance.apply(AdvanceAction::Toggle);
+        assert!(advance.status(false).contains("Fast simulation: on"));
     }
 }

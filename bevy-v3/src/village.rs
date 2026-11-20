@@ -2608,8 +2608,9 @@ fn advance_days(
         camp,
     };
     let started = std::time::Instant::now();
+    let dt = run.step_seconds();
     loop {
-        step(&mut village, &catalog, &setup, site, SIMULATION_STEP);
+        step(&mut village, &catalog, &setup, site, dt);
         if run.record_step() {
             village.advance.done();
             village.checkpoint_advance();
@@ -4199,6 +4200,73 @@ mod tests {
         assert!(advanced.advance_checkpoint);
         assert_eq!(advanced.clock, fixed.clock);
         assert!(serde_json::to_value(advanced).unwrap() == serde_json::to_value(fixed).unwrap());
+    }
+
+    #[test]
+    fn fast_advance_finishes_construction_and_produces_a_loadable_village() {
+        let setup = WorldSetup::default().session();
+        let catalog = Catalog::default();
+        let terrain = setup.terrain();
+        let land = Land::default();
+        let camp = IVec2::new(36, 36);
+        let start = 8.0 * crate::weather::HOUR;
+        let mut village = Village {
+            setup: Some(setup.clone()),
+            camp: Some(camp),
+            clock: start,
+            arrival_time: ARRIVAL_DURATION,
+            stock: Stock::for_start(&setup, &catalog),
+            ..default()
+        };
+        let mut keys = ButtonInput::default();
+        keys.press(KeyCode::KeyB);
+        keys.press(KeyCode::Digit1);
+        village
+            .construction
+            .input(&keys, &catalog, village.stock.sandbox);
+        village.construction.plan(
+            &catalog,
+            &mut village.stock,
+            ConstructionSite {
+                terrain: &terrain,
+                land: &land,
+                camp,
+            },
+            IVec2::new(44, 36),
+            TownClock {
+                seconds: start,
+                round_trip_km: setup.round_trip_km(),
+            },
+        );
+        assert_eq!(village.construction.finished_models(&catalog).count(), 0);
+        village.apply_advance_action(AdvanceAction::Toggle);
+        village.apply_advance_action(AdvanceAction::Fast);
+        village.apply_advance_action(AdvanceAction::Adjust(1));
+        village.apply_advance_action(AdvanceAction::Start);
+
+        let mut app = App::new();
+        app.insert_resource(setup)
+            .insert_resource(catalog)
+            .insert_resource(land)
+            .init_resource::<SaveMenu>()
+            .insert_resource(village)
+            .add_systems(Update, advance_days);
+        let mut updates = 0;
+        while app.world().resource::<Village>().advance.running.is_some() {
+            app.update();
+            updates += 1;
+            assert!(updates < 100_000, "fast advance did not finish");
+        }
+
+        let advanced = app.world().resource::<Village>();
+        let catalog = app.world().resource::<Catalog>();
+        assert!(advanced.advance_checkpoint && advanced.is_paused());
+        assert!((advanced.clock - (start + 2.0 * crate::weather::DAY)).abs() < 1e-6);
+        assert_eq!(advanced.construction.finished_models(catalog).count(), 1);
+        let restored: Village =
+            serde_json::from_slice(&serde_json::to_vec(advanced).unwrap()).unwrap();
+        assert!(restored.valid_save(catalog));
+        assert_eq!(restored.clock, advanced.clock);
     }
 
     #[test]

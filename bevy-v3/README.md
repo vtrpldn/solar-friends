@@ -42,7 +42,7 @@ In Story, press H for finances and paid town shifts. Book one day shift or turn 
 
 Press **F** or choose **Find in village** to center the camera on the selected project. **Alt+F** opens the forecast while a project is selected.
 
-Press L to advance between 1 and 365 days. Use Alt+L when L controls sanitation or cold storage. Time advance uses the same simulation steps as live play. Press L while advancing to stop at the time shown.
+Press L to advance between 1 and 365 days. Use Alt+L when L controls sanitation or cold storage. By default, time advance uses the same simulation steps as live play. Press X or choose **Fast simulation** for larger one-second steps that finish sooner; resident decisions and resource totals can then differ from normal play. Press L while advancing to stop at the time shown.
 
 With the Flatten terrain tool open, press **P** or choose **Pick a new flatten height**. The next click samples a grade for subsequent strokes.
 

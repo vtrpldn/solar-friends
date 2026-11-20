@@ -495,6 +495,8 @@ impl Action {
                 AdvanceAction::Toggle => "Advance days".into(),
                 AdvanceAction::Adjust(days) => format!("{days:+} day(s)"),
                 AdvanceAction::Start => "Start advance".into(),
+                AdvanceAction::Fast if village.advance.fast => "Fast simulation: on".into(),
+                AdvanceAction::Fast => "Fast simulation: off".into(),
                 AdvanceAction::Digit(_) | AdvanceAction::Backspace => String::new(),
             },
             Self::FieldDimensions => numeric_label(
@@ -1000,6 +1002,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                     AdvanceAction::Adjust(-1),
                     AdvanceAction::Adjust(1),
                     AdvanceAction::Adjust(7),
+                    AdvanceAction::Fast,
                     AdvanceAction::Start,
                 ] {
                     spawn_button(menu, &assets, Action::Advance(action));
