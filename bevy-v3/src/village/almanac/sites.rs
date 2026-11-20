@@ -148,13 +148,17 @@ fn spawn_site(
 ) {
     list.spawn((
         FocusPolicy::Pass,
-        theme::panel_node(Node {
+        // A flat inset on the dialog's paper, like the other almanac cards.
+        Node {
             flex_direction: FlexDirection::Column,
-            padding: UiRect::all(px(12)),
+            padding: UiRect::all(px(14)),
             row_gap: px(5),
+            border: UiRect::all(px(1)),
+            border_radius: BorderRadius::all(px(14)),
             ..default()
-        }),
-        theme::panel(),
+        },
+        BackgroundColor(theme::CARD),
+        BorderColor::all(theme::SUBTLE_BORDER),
     ))
     .with_children(|card| {
         card.spawn((
