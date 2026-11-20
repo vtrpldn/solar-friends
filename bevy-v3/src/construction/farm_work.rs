@@ -163,12 +163,14 @@ impl Construction {
             } else {
                 format!("About {remaining:.1} days")
             };
-            let outside = if remaining.is_finite() && remaining > days {
-                " · After advance"
+            let window = if !remaining.is_finite() {
+                "Production waiting"
+            } else if remaining > days {
+                "After this advance"
             } else {
-                ""
+                "During this advance"
             };
-            let _ = write!(label, "\n{when} · {event}{outside} · {detail}");
+            let _ = write!(label, "\n{when} · {event} · {window} · {detail}");
         }
         label
     }
