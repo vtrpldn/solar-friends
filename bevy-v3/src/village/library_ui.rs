@@ -59,6 +59,7 @@ struct LibraryPanel;
 
 pub(super) fn install(app: &mut App) {
     app.add_message::<FileDragAndDrop>()
+        .configure_sets(Update, crate::setup::SetupRefreshSet.after(village_input))
         .add_systems(Startup, spawn_library)
         .add_systems(
             Update,

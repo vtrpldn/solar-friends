@@ -8,7 +8,12 @@ use bevy::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{save_library::SaveMenu, terrain::Terrain, ui_font::ui_font};
+use crate::{
+    save_library::SaveMenu,
+    terrain::Terrain,
+    theme,
+    ui_font::{ui_font, ui_font_styled, ui_font_weight},
+};
 
 const BIOMES: [&str; 3] = ["Mata Atlântica", "Cerrado", "Caatinga"];
 const LANDSCAPES: [&str; 3] = ["Gentle", "Rolling", "Rugged"];
@@ -246,9 +251,13 @@ impl WorldSetup {
             .position(|preset| *preset == settings)
     }
 
-    fn cycle_preset(&mut self) {
+    fn cycle_preset(&mut self, forward: bool) {
         let presets = crate::economy_reference::WORLD_PRESETS;
-        let index = self.preset().map_or(0, |index| (index + 1) % presets.len());
+        let index = match self.preset() {
+            Some(index) => (index + if forward { 1 } else { presets.len() - 1 }) % presets.len(),
+            None if forward => 0,
+            None => presets.len() - 1,
+        };
         [
             self.landscape,
             self.water,
@@ -269,7 +278,22 @@ impl WorldSetup {
         Action::Town,
     ];
 
+    const PICKER_OPTIONS: [Action; 8] = [
+        Action::Preset,
+        Action::Biome,
+        Action::Landscape,
+        Action::Water,
+        Action::Resources,
+        Action::Savings,
+        Action::Supplies,
+        Action::Town,
+    ];
+
     pub(crate) fn cycle_world_option(&mut self, action: Action, forward: bool) {
+        if matches!(action, Action::Preset) {
+            self.cycle_preset(forward);
+            return;
+        }
         let (index, count) = match action {
             Action::Biome => (&mut self.biome, BIOMES.len()),
             Action::Landscape => (&mut self.landscape, LANDSCAPES.len()),
@@ -281,6 +305,47 @@ impl WorldSetup {
             _ => return,
         };
         *index = (*index + if forward { 1 } else { count - 1 }) % count;
+    }
+
+    fn picker_caption(action: Action) -> &'static str {
+        match action {
+            Action::Preset => "STARTING POINT",
+            Action::Biome => "BIOME",
+            Action::Landscape => "LANDSCAPE",
+            Action::Water => "WATER",
+            Action::Resources => "RESOURCES",
+            Action::Savings => "SAVINGS",
+            Action::Supplies => "SUPPLIES",
+            Action::Town => "TOWN",
+            Action::Seed => "LAND SEED",
+            _ => "",
+        }
+    }
+
+    fn button_value(&self, action: Action, has_village: bool) -> String {
+        match action {
+            Action::Preset => self
+                .preset()
+                .map_or("Custom", |index| PRESET_NAMES[index])
+                .into(),
+            Action::Biome => BIOMES[self.biome].into(),
+            Action::Landscape => LANDSCAPES[self.landscape].into(),
+            Action::Water => WATER[self.water].into(),
+            Action::Resources => RESOURCES[self.resources].into(),
+            Action::Savings if self.mode == Mode::Sandbox => "Unlimited".into(),
+            Action::Savings => SAVINGS[self.savings].into(),
+            Action::Supplies if self.mode == Mode::Sandbox => "Unlimited".into(),
+            Action::Supplies => SUPPLIES[self.supplies].into(),
+            Action::Town => TOWN[self.town].into(),
+            Action::Seed => match &self.seed_entry {
+                Some(entry) if entry.parse::<std::num::NonZeroU32>().is_err() => {
+                    format!("{entry}|\nUse 1–4294967295 · Esc cancel")
+                }
+                Some(entry) => format!("{entry}|\nEnter apply · Esc cancel"),
+                None => self.seed.to_string(),
+            },
+            _ => self.label(action, has_village),
+        }
     }
 
     pub(crate) fn label(&self, action: Action, has_village: bool) -> String {
@@ -355,7 +420,32 @@ impl Action {
             Self::New(_) | Self::Resume | Self::Continue(_) | Self::Library | Self::Sound
         )
     }
+
+    fn is_picker_value(self) -> bool {
+        matches!(
+            self,
+            Self::Preset
+                | Self::Biome
+                | Self::Landscape
+                | Self::Water
+                | Self::Resources
+                | Self::Savings
+                | Self::Supplies
+                | Self::Town
+                | Self::Seed
+        )
+    }
+
+    fn is_primary(self) -> bool {
+        matches!(self, Self::New(Mode::Story) | Self::Explore)
+    }
 }
+
+#[derive(Component, Clone, Copy)]
+struct PickerStep(Action, bool);
+
+#[derive(Component)]
+struct ActionValueLabel;
 
 #[derive(Component)]
 struct SetupPanel;
@@ -364,10 +454,22 @@ struct SetupPanel;
 struct TitleBackdrop;
 
 #[derive(Component)]
+struct SetupCaption;
+
+#[derive(Component)]
 struct SetupHeading;
 
 #[derive(Component)]
-struct PlotPreview;
+struct SetupSubtitle;
+
+#[derive(Component)]
+struct TitleActionsGroup;
+
+#[derive(Component)]
+struct LandSetupBody;
+
+#[derive(Component)]
+struct LandSetupFooter;
 
 #[derive(Component)]
 struct PlotPreviewImage;
@@ -382,6 +484,9 @@ type StoryResumeSnapshot = (std::path::PathBuf, std::time::SystemTime, u64);
 
 const PREVIEW_SIZE: u32 = 128;
 
+#[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
+pub(crate) struct SetupRefreshSet;
+
 pub struct WorldSetupPlugin;
 
 impl Plugin for WorldSetupPlugin {
@@ -389,19 +494,143 @@ impl Plugin for WorldSetupPlugin {
         embedded_asset!(app, "title-art.png");
         app.init_resource::<WorldSetup>()
             .add_systems(Startup, spawn_panel)
+            .add_systems(Update, setup_input)
             .add_systems(
                 Update,
                 (
-                    setup_input,
                     refresh_panel,
                     refresh_title,
+                    paint_setup_buttons,
                     scroll_setup_panel,
                     refresh_preview,
                     refresh_story_resume,
                 )
-                    .chain(),
+                    .chain()
+                    .in_set(SetupRefreshSet)
+                    .after(setup_input),
             );
     }
+}
+
+fn spawn_action_button(
+    parent: &mut ChildSpawnerCommands,
+    assets: &AssetServer,
+    setup: &WorldSetup,
+    action: Action,
+    visible: bool,
+) {
+    let primary = action.is_primary();
+    let mut button = parent.spawn((
+        action,
+        Button,
+        theme::button_node(Node {
+            display: if visible {
+                Display::Flex
+            } else {
+                Display::None
+            },
+            padding: UiRect::axes(px(16), px(9)),
+            flex_shrink: 0.,
+            flex_direction: FlexDirection::Column,
+            ..default()
+        }),
+        theme::button(),
+    ));
+    if primary {
+        button.insert((
+            BackgroundColor(theme::INK),
+            BorderColor::all(theme::INK),
+            BoxShadow::new(Color::srgb_u8(0x26, 0x3d, 0x30), px(0), px(3), px(0), px(0)),
+        ));
+    }
+    button.with_child((
+        ActionValueLabel,
+        Text::new(setup.button_value(action, false)),
+        ui_font_styled(
+            assets,
+            16.0,
+            600,
+            if primary { theme::PAPER } else { theme::INK },
+        ),
+    ));
+    if matches!(action, Action::Continue(Mode::Story)) {
+        button.with_child((StoryResumeSummary, Text::default(), ui_font(assets, 13.0)));
+    }
+}
+
+fn spawn_picker_row(
+    parent: &mut ChildSpawnerCommands,
+    assets: &AssetServer,
+    setup: &WorldSetup,
+    action: Action,
+) {
+    parent
+        .spawn((
+            Node {
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::SpaceBetween,
+                column_gap: px(10),
+                padding: UiRect::axes(px(12), px(7)),
+                border: UiRect::all(px(1)),
+                border_radius: BorderRadius::all(px(12)),
+                flex_shrink: 0.,
+                ..default()
+            },
+            BackgroundColor(theme::CARD),
+            BorderColor::all(theme::SUBTLE_BORDER),
+        ))
+        .with_children(|row| {
+            // Clicking the value cycles forward; ‹ and › step in either direction.
+            row.spawn((
+                action,
+                Button,
+                Node {
+                    flex_grow: 1.,
+                    min_width: px(0),
+                    flex_direction: FlexDirection::Column,
+                    row_gap: px(1),
+                    padding: UiRect::axes(px(4), px(2)),
+                    border_radius: BorderRadius::all(px(8)),
+                    ..default()
+                },
+                BackgroundColor(Color::NONE),
+            ))
+            .with_children(|value| {
+                value.spawn((
+                    Text::new(WorldSetup::picker_caption(action)),
+                    ui_font_styled(assets, 10.0, 750, theme::CAPTION),
+                ));
+                value.spawn((
+                    ActionValueLabel,
+                    Text::new(setup.button_value(action, false)),
+                    ui_font_weight(assets, 15.0, 600),
+                ));
+            });
+
+            row.spawn(Node {
+                column_gap: px(6),
+                flex_shrink: 0.,
+                ..default()
+            })
+            .with_children(|arrows| {
+                for (forward, symbol) in [(false, "‹"), (true, "›")] {
+                    arrows
+                        .spawn((
+                            PickerStep(action, forward),
+                            Button,
+                            theme::button_node(Node {
+                                width: px(32),
+                                height: px(32),
+                                justify_content: JustifyContent::Center,
+                                align_items: AlignItems::Center,
+                                ..default()
+                            }),
+                            theme::button(),
+                        ))
+                        .with_child((Text::new(symbol), ui_font_weight(assets, 18.0, 750)));
+                }
+            });
+        });
 }
 
 fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<AssetServer>) {
@@ -443,140 +672,259 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
                 ImageNode::new(load_embedded_asset!(&*assets, "title-art.png")),
             ));
         });
+
     commands
         .spawn((
             SetupPanel,
-            crate::theme::panel_node(Node {
+            UiTransform::default(),
+            theme::panel_node(Node {
                 position_type: PositionType::Absolute,
                 left: px(32),
                 top: px(32),
-                padding: UiRect::all(px(24)),
+                padding: UiRect::all(px(26)),
                 width: px(340),
-                max_height: vh(90),
+                max_width: vw(94),
+                max_height: vh(92),
                 flex_direction: FlexDirection::Column,
-                row_gap: px(6),
+                row_gap: px(10),
                 overflow: Overflow::scroll_y(),
                 ..default()
             }),
-            crate::theme::panel(),
+            theme::panel(),
             Interaction::default(),
             ScrollPosition::default(),
         ))
         .with_children(|panel| {
             panel.spawn((
-                SetupHeading,
-                Text::new("Solar Friends"),
-                crate::ui_font::ui_font_weight(&assets, 30.0, 750),
-            ));
-            for action in [
-                Action::Resume,
-                Action::Continue(Mode::Story),
-                Action::New(Mode::Story),
-                Action::New(Mode::Sandbox),
-                Action::Continue(Mode::Sandbox),
-                Action::Library,
-                Action::Sound,
-                Action::Preset,
-                Action::Biome,
-                Action::Landscape,
-                Action::Water,
-                Action::Resources,
-                Action::Savings,
-                Action::Supplies,
-                Action::Town,
-                Action::Seed,
-                Action::Reroll,
-                Action::Explore,
-                Action::CancelNew,
-                Action::Back,
-            ] {
-                let mut button = panel.spawn((
-                    action,
-                    Button,
-                    crate::theme::button_node(Node {
-                        display: if !action.is_title_action()
-                            || matches!(
-                                action,
-                                Action::Resume | Action::Continue(_) | Action::CancelNew
-                            ) {
-                            Display::None
-                        } else {
-                            Display::Flex
-                        },
-                        padding: UiRect::axes(px(14), px(6)),
-                        flex_shrink: 0.,
-                        flex_direction: FlexDirection::Column,
-                        ..default()
-                    }),
-                    crate::theme::button(),
-                ));
-                // V2's title leads with one filled button; the rest stay paper.
-                let primary = matches!(action, Action::New(Mode::Story));
-                if primary {
-                    button.insert((
-                        BackgroundColor(crate::theme::INK),
-                        BorderColor::all(crate::theme::INK),
-                    ));
-                }
-                button.with_child((
-                    Text::new(setup.label(action, false)),
-                    crate::ui_font::ui_font_styled(
-                        &assets,
-                        16.0,
-                        600,
-                        if primary {
-                            crate::theme::PAPER
-                        } else {
-                            crate::theme::INK
-                        },
-                    ),
-                ));
-                if matches!(action, Action::Continue(Mode::Story)) {
-                    button.with_child((
-                        StoryResumeSummary,
-                        Text::default(),
-                        ui_font(&assets, 13.0),
-                    ));
-                }
-            }
-        });
-    commands
-        .spawn((
-            PlotPreview,
-            crate::theme::panel_node(Node {
-                position_type: PositionType::Absolute,
-                right: px(32),
-                top: px(32),
-                padding: UiRect::all(px(16)),
-                flex_direction: FlexDirection::Column,
-                row_gap: px(8),
-                ..default()
-            }),
-            crate::theme::panel(),
-        ))
-        .with_children(|panel| {
-            panel.spawn((
-                Text::new("Plot preview"),
-                crate::ui_font::ui_font_weight(&assets, 20.0, 750),
-            ));
-            panel.spawn((
-                PlotPreviewImage,
-                ImageNode::default(),
+                SetupCaption,
+                Text::new("YOUR VILLAGE"),
+                ui_font_styled(&assets, 11.0, 750, theme::CAPTION),
                 Node {
-                    width: px(272),
-                    height: px(272),
+                    display: Display::None,
+                    flex_shrink: 0.,
                     ..default()
                 },
             ));
             panel.spawn((
-                Text::new("Blue river · Tan access road\nDarker ground is higher"),
-                ui_font(&assets, 15.0),
+                SetupHeading,
+                Text::new("Solar Friends"),
+                ui_font_weight(&assets, 30.0, 750),
+                Node {
+                    flex_shrink: 0.,
+                    ..default()
+                },
             ));
             panel.spawn((
-                PlotSummary,
-                Text::new(setup.plot_summary()),
-                ui_font(&assets, 15.0),
+                SetupSubtitle,
+                Text::new("Choose the land and the circumstances your friends arrive with."),
+                ui_font_styled(&assets, 14.0, 400, theme::MUTED),
+                Node {
+                    display: Display::None,
+                    flex_shrink: 0.,
+                    ..default()
+                },
             ));
+
+            // Title screen actions.
+            panel
+                .spawn((
+                    TitleActionsGroup,
+                    Node {
+                        flex_direction: FlexDirection::Column,
+                        row_gap: px(8),
+                        flex_shrink: 0.,
+                        margin: UiRect::top(px(8)),
+                        ..default()
+                    },
+                ))
+                .with_children(|title| {
+                    for action in [
+                        Action::Resume,
+                        Action::Continue(Mode::Story),
+                        Action::New(Mode::Story),
+                        Action::New(Mode::Sandbox),
+                        Action::Continue(Mode::Sandbox),
+                        Action::Library,
+                        Action::Sound,
+                    ] {
+                        let visible = !matches!(action, Action::Resume | Action::Continue(_));
+                        spawn_action_button(title, &assets, &setup, action, visible);
+                    }
+                });
+
+            // Unified two-column land setup sheet: pickers on the left, plot preview on the right.
+            panel
+                .spawn((
+                    LandSetupBody,
+                    Node {
+                        display: Display::None,
+                        column_gap: px(24),
+                        align_items: AlignItems::FlexStart,
+                        flex_shrink: 0.,
+                        margin: UiRect::top(px(6)),
+                        ..default()
+                    },
+                ))
+                .with_children(|body| {
+                    body.spawn(Node {
+                        flex_grow: 1.,
+                        min_width: px(0),
+                        flex_direction: FlexDirection::Column,
+                        row_gap: px(7),
+                        ..default()
+                    })
+                    .with_children(|pickers| {
+                        for action in WorldSetup::PICKER_OPTIONS {
+                            spawn_picker_row(pickers, &assets, &setup, action);
+                        }
+                    });
+
+                    body.spawn(Node {
+                        width: px(336),
+                        flex_shrink: 0.,
+                        flex_direction: FlexDirection::Column,
+                        row_gap: px(10),
+                        ..default()
+                    })
+                    .with_children(|preview_col| {
+                        preview_col
+                            .spawn((
+                                Node {
+                                    flex_direction: FlexDirection::Column,
+                                    align_items: AlignItems::Center,
+                                    row_gap: px(8),
+                                    padding: UiRect::all(px(14)),
+                                    border: UiRect::all(px(1)),
+                                    border_radius: BorderRadius::all(px(16)),
+                                    ..default()
+                                },
+                                BackgroundColor(theme::CARD),
+                                BorderColor::all(theme::SUBTLE_BORDER),
+                            ))
+                            .with_children(|card| {
+                                card.spawn((
+                                    Text::new("PLOT PREVIEW"),
+                                    ui_font_styled(&assets, 10.0, 750, theme::CAPTION),
+                                    Node {
+                                        align_self: AlignSelf::FlexStart,
+                                        ..default()
+                                    },
+                                ));
+                                card.spawn((
+                                    PlotPreviewImage,
+                                    ImageNode::default(),
+                                    Node {
+                                        width: px(280),
+                                        height: px(280),
+                                        ..default()
+                                    },
+                                ));
+                                card.spawn((
+                                    Text::new(
+                                        "Blue river · Tan access road\nDarker ground is higher",
+                                    ),
+                                    ui_font_styled(&assets, 12.0, 400, theme::MUTED),
+                                    Node {
+                                        align_self: AlignSelf::FlexStart,
+                                        ..default()
+                                    },
+                                ));
+                            });
+
+                        // Seed picker + reroll button.
+                        preview_col
+                            .spawn((
+                                Node {
+                                    align_items: AlignItems::Center,
+                                    justify_content: JustifyContent::SpaceBetween,
+                                    column_gap: px(10),
+                                    padding: UiRect::axes(px(12), px(8)),
+                                    border: UiRect::all(px(1)),
+                                    border_radius: BorderRadius::all(px(12)),
+                                    ..default()
+                                },
+                                BackgroundColor(theme::CARD),
+                                BorderColor::all(theme::SUBTLE_BORDER),
+                            ))
+                            .with_children(|row| {
+                                row.spawn((
+                                    Action::Seed,
+                                    Button,
+                                    Node {
+                                        flex_grow: 1.,
+                                        min_width: px(0),
+                                        flex_direction: FlexDirection::Column,
+                                        row_gap: px(1),
+                                        padding: UiRect::axes(px(4), px(2)),
+                                        border_radius: BorderRadius::all(px(8)),
+                                        ..default()
+                                    },
+                                    BackgroundColor(Color::NONE),
+                                ))
+                                .with_children(|seed| {
+                                    seed.spawn((
+                                        Text::new(WorldSetup::picker_caption(Action::Seed)),
+                                        ui_font_styled(&assets, 10.0, 750, theme::CAPTION),
+                                    ));
+                                    seed.spawn((
+                                        ActionValueLabel,
+                                        Text::new(setup.button_value(Action::Seed, false)),
+                                        ui_font_weight(&assets, 15.0, 600),
+                                    ));
+                                });
+                                spawn_action_button(row, &assets, &setup, Action::Reroll, true);
+                            });
+
+                        // Plot summary inset.
+                        preview_col
+                            .spawn((
+                                Node {
+                                    padding: UiRect::axes(px(12), px(10)),
+                                    border: UiRect::left(px(3)),
+                                    border_radius: BorderRadius::all(px(8)),
+                                    ..default()
+                                },
+                                BackgroundColor(theme::INSET),
+                                BorderColor::all(theme::LEAF),
+                            ))
+                            .with_child((
+                                PlotSummary,
+                                Text::new(setup.plot_summary()),
+                                ui_font_weight(&assets, 13.0, 500),
+                            ));
+                    });
+                });
+
+            // Footer action row on the land setup sheet.
+            panel
+                .spawn((
+                    LandSetupFooter,
+                    Node {
+                        display: Display::None,
+                        justify_content: JustifyContent::SpaceBetween,
+                        align_items: AlignItems::Center,
+                        column_gap: px(12),
+                        padding: UiRect::top(px(14)),
+                        margin: UiRect::top(px(6)),
+                        border: UiRect::top(px(1)),
+                        flex_shrink: 0.,
+                        ..default()
+                    },
+                    BorderColor::all(theme::SUBTLE_BORDER),
+                ))
+                .with_children(|footer| {
+                    spawn_action_button(footer, &assets, &setup, Action::Back, true);
+                    footer
+                        .spawn(Node {
+                            column_gap: px(10),
+                            align_items: AlignItems::Center,
+                            ..default()
+                        })
+                        .with_children(|right| {
+                            spawn_action_button(right, &assets, &setup, Action::CancelNew, false);
+                            spawn_action_button(right, &assets, &setup, Action::Explore, true);
+                        });
+                });
         });
 }
 
@@ -585,18 +933,114 @@ type SetupPanelStyle<'w, 's> = Single<
     's,
     (
         &'static mut Node,
+        &'static mut UiTransform,
         &'static mut BackgroundColor,
         &'static mut BorderColor,
         &'static mut BoxShadow,
     ),
-    (With<SetupPanel>, Without<TitleBackdrop>),
+    (
+        With<SetupPanel>,
+        Without<TitleBackdrop>,
+        Without<SetupCaption>,
+        Without<SetupSubtitle>,
+        Without<TitleActionsGroup>,
+        Without<LandSetupBody>,
+        Without<LandSetupFooter>,
+    ),
 >;
+
+type SetupSectionNodes<'w, 's> = (
+    Single<
+        'w,
+        's,
+        &'static mut Node,
+        (
+            With<TitleBackdrop>,
+            Without<SetupPanel>,
+            Without<SetupCaption>,
+            Without<SetupSubtitle>,
+            Without<TitleActionsGroup>,
+            Without<LandSetupBody>,
+            Without<LandSetupFooter>,
+        ),
+    >,
+    Single<
+        'w,
+        's,
+        &'static mut Node,
+        (
+            With<SetupCaption>,
+            Without<SetupPanel>,
+            Without<TitleBackdrop>,
+            Without<SetupSubtitle>,
+            Without<TitleActionsGroup>,
+            Without<LandSetupBody>,
+            Without<LandSetupFooter>,
+        ),
+    >,
+    Single<
+        'w,
+        's,
+        &'static mut Node,
+        (
+            With<SetupSubtitle>,
+            Without<SetupPanel>,
+            Without<TitleBackdrop>,
+            Without<SetupCaption>,
+            Without<TitleActionsGroup>,
+            Without<LandSetupBody>,
+            Without<LandSetupFooter>,
+        ),
+    >,
+    Single<
+        'w,
+        's,
+        &'static mut Node,
+        (
+            With<TitleActionsGroup>,
+            Without<SetupPanel>,
+            Without<TitleBackdrop>,
+            Without<SetupCaption>,
+            Without<SetupSubtitle>,
+            Without<LandSetupBody>,
+            Without<LandSetupFooter>,
+        ),
+    >,
+    Single<
+        'w,
+        's,
+        &'static mut Node,
+        (
+            With<LandSetupBody>,
+            Without<SetupPanel>,
+            Without<TitleBackdrop>,
+            Without<SetupCaption>,
+            Without<SetupSubtitle>,
+            Without<TitleActionsGroup>,
+            Without<LandSetupFooter>,
+        ),
+    >,
+    Single<
+        'w,
+        's,
+        &'static mut Node,
+        (
+            With<LandSetupFooter>,
+            Without<SetupPanel>,
+            Without<TitleBackdrop>,
+            Without<SetupCaption>,
+            Without<SetupSubtitle>,
+            Without<TitleActionsGroup>,
+            Without<LandSetupBody>,
+        ),
+    >,
+);
 
 fn refresh_title(
     setup: Res<WorldSetup>,
     saves: Res<SaveMenu>,
     sound: Res<crate::audio::SoundSettings>,
-    mut backdrop: Single<&mut Node, With<TitleBackdrop>>,
+    (mut backdrop, mut caption, mut subtitle, mut title_group, mut land_body, mut land_footer): SetupSectionNodes,
     mut panel: SetupPanelStyle,
     mut heading: Single<(&mut Text, &mut TextFont, &mut TextColor), With<SetupHeading>>,
 ) {
@@ -609,11 +1053,19 @@ fn refresh_title(
     } else {
         Display::None
     };
-    let (panel, background, border, shadow) = &mut *panel;
+    caption.display = if title { Display::None } else { Display::Flex };
+    subtitle.display = if title { Display::None } else { Display::Flex };
+    title_group.display = if title { Display::Flex } else { Display::None };
+    land_body.display = if title { Display::None } else { Display::Flex };
+    land_footer.display = if title { Display::None } else { Display::Flex };
+
+    let (panel, transform, background, border, shadow) = &mut *panel;
     let (text, font, color) = &mut *heading;
     if title {
         panel.left = vw(8);
         panel.top = vh(6);
+        panel.width = px(340);
+        transform.translation = Val2::ZERO;
         // On the title screen the menu sits on the backdrop like V2's, without a card.
         background.0 = Color::NONE;
         **border = BorderColor::all(Color::NONE);
@@ -622,14 +1074,16 @@ fn refresh_title(
         font.font_size = 66.;
         color.0 = Color::srgb_u8(54, 82, 63);
     } else {
-        panel.left = px(32);
-        panel.top = px(32);
-        background.0 = crate::theme::PAPER;
-        **border = BorderColor::all(crate::theme::EDGE);
-        **shadow = crate::theme::panel_shadow();
+        panel.left = percent(50);
+        panel.top = px(28);
+        panel.width = px(880);
+        transform.translation = Val2::new(percent(-50), px(0));
+        background.0 = theme::PAPER;
+        **border = BorderColor::all(theme::EDGE);
+        **shadow = theme::panel_shadow();
         text.0 = "Choose the land".into();
-        font.font_size = 30.;
-        color.0 = crate::theme::INK;
+        font.font_size = 28.;
+        color.0 = theme::INK;
     }
 }
 
@@ -650,10 +1104,15 @@ fn scroll_setup_panel(
     }
 }
 
+type SetupInputQueries<'w, 's> = (
+    Query<'w, 's, (&'static Interaction, &'static Action), Changed<Interaction>>,
+    Query<'w, 's, (&'static Interaction, &'static PickerStep), Changed<Interaction>>,
+);
+
 fn setup_input(
     mut setup: ResMut<WorldSetup>,
     keyboard: Res<ButtonInput<KeyCode>>,
-    buttons: Query<(&Interaction, &Action), Changed<Interaction>>,
+    (buttons, step_buttons): SetupInputQueries,
     window: Single<&Window, With<PrimaryWindow>>,
     mut picker: Option<ResMut<crate::village::PanelPicker>>,
     (mut saves, mut sound, mut village, catalog): (
@@ -693,6 +1152,12 @@ fn setup_input(
         }
         return;
     }
+    for (interaction, &PickerStep(action, forward)) in &step_buttons {
+        if *interaction == Interaction::Pressed && action.enabled(setup.mode) {
+            setup.confirming_new = false;
+            setup.cycle_world_option(action, forward);
+        }
+    }
     for (interaction, action) in &buttons {
         if *interaction != Interaction::Pressed || !action.enabled(setup.mode) {
             continue;
@@ -707,8 +1172,8 @@ fn setup_input(
                 setup.choosing_land = true;
             }
             Action::Back => setup.choosing_land = false,
-            Action::Preset => setup.cycle_preset(),
-            Action::Biome
+            Action::Preset
+            | Action::Biome
             | Action::Landscape
             | Action::Water
             | Action::Resources
@@ -768,20 +1233,27 @@ type SetupButtons<'w, 's> = Query<
         &'static mut BackgroundColor,
         Has<InteractionDisabled>,
     ),
-    Without<SetupPanel>,
+    (Without<SetupPanel>, Without<PickerStep>),
+>;
+
+type StepButtons<'w, 's> = Query<
+    'w,
+    's,
+    (Entity, &'static PickerStep, Has<InteractionDisabled>),
+    (Without<SetupPanel>, Without<Action>),
 >;
 
 fn refresh_panel(
     mut commands: Commands,
     setup: Res<WorldSetup>,
     mut panel: Single<&mut Node, With<SetupPanel>>,
-    mut buttons: SetupButtons,
+    (mut buttons, step_buttons): (SetupButtons, StepButtons),
     (village, saves, sound): (
         Res<crate::village::Village>,
         Res<SaveMenu>,
         Res<crate::audio::SoundSettings>,
     ),
-    mut labels: Query<&mut Text>,
+    mut labels: Query<(&mut Text, &mut TextColor), With<ActionValueLabel>>,
 ) {
     if !setup.is_changed() && !saves.is_changed() && !sound.is_changed() {
         return;
@@ -795,6 +1267,16 @@ fn refresh_panel(
     let autosave_exists = saves
         .continue_path(setup.mode)
         .is_ok_and(|path| path.is_file());
+    for (entity, &PickerStep(action, _), disabled) in &step_buttons {
+        let enabled = action.enabled(setup.mode);
+        if enabled == disabled {
+            if enabled {
+                commands.entity(entity).remove::<InteractionDisabled>();
+            } else {
+                commands.entity(entity).insert(InteractionDisabled);
+            }
+        }
+    }
     for (entity, action, children, mut button, mut background, disabled) in &mut buttons {
         let enabled = action.enabled(setup.mode);
         if enabled == disabled {
@@ -803,8 +1285,8 @@ fn refresh_panel(
             } else {
                 commands.entity(entity).insert(InteractionDisabled);
             }
-            if !matches!(action, Action::New(Mode::Story)) {
-                background.0 = crate::theme::button_fill(Interaction::None, enabled);
+            if !action.is_primary() && !action.is_picker_value() {
+                background.0 = theme::button_fill(Interaction::None, enabled);
             }
         }
         let visible = match action {
@@ -823,11 +1305,97 @@ fn refresh_panel(
         } else {
             Display::None
         };
-        if let Some(child) = children.first()
-            && let Ok(mut label) = labels.get_mut(*child)
-        {
-            label.0 = setup.label(*action, has_village || autosave_exists);
+        for child in children.iter() {
+            if let Ok((mut label, mut color)) = labels.get_mut(child) {
+                label.0 = setup.button_value(*action, has_village || autosave_exists);
+                if action.is_picker_value() {
+                    color.0 = if enabled { theme::INK } else { theme::MUTED };
+                }
+            }
         }
+    }
+}
+
+type PaintActionButtons<'w, 's> = Query<
+    'w,
+    's,
+    (
+        &'static Action,
+        &'static Interaction,
+        &'static mut BackgroundColor,
+        Option<&'static mut BorderColor>,
+        Option<&'static mut BoxShadow>,
+    ),
+    Without<PickerStep>,
+>;
+
+type PaintStepButtons<'w, 's> = Query<
+    'w,
+    's,
+    (
+        &'static PickerStep,
+        &'static Interaction,
+        &'static mut BackgroundColor,
+        &'static mut BorderColor,
+        &'static mut BoxShadow,
+    ),
+    Without<Action>,
+>;
+
+fn paint_setup_buttons(
+    setup: Res<WorldSetup>,
+    mut action_buttons: PaintActionButtons,
+    mut step_buttons: PaintStepButtons,
+) {
+    if !setup.open {
+        return;
+    }
+    for (action, interaction, mut background, border, shadow) in &mut action_buttons {
+        let enabled = action.enabled(setup.mode);
+        if action.is_picker_value() {
+            let fill = if matches!(action, Action::Seed) && setup.seed_entry.is_some() {
+                theme::ACTIVE
+            } else if enabled && *interaction == Interaction::Hovered {
+                theme::BUTTON_HOVER
+            } else if enabled && *interaction == Interaction::Pressed {
+                theme::BUTTON_PRESSED
+            } else {
+                Color::NONE
+            };
+            if background.0 != fill {
+                background.0 = fill;
+            }
+        } else if action.is_primary() {
+            let fill = match interaction {
+                Interaction::Hovered => Color::srgb_u8(0x4c, 0x62, 0x47),
+                Interaction::Pressed => Color::srgb_u8(0x32, 0x42, 0x30),
+                Interaction::None => theme::INK,
+            };
+            if background.0 != fill {
+                background.0 = fill;
+            }
+        } else if let (Some(mut border), Some(mut shadow)) = (border, shadow) {
+            theme::paint_button(
+                *interaction,
+                enabled,
+                false,
+                &mut background,
+                &mut border,
+                &mut shadow,
+            );
+        }
+    }
+    for (&PickerStep(action, _), interaction, mut background, mut border, mut shadow) in
+        &mut step_buttons
+    {
+        theme::paint_button(
+            *interaction,
+            action.enabled(setup.mode),
+            false,
+            &mut background,
+            &mut border,
+            &mut shadow,
+        );
     }
 }
 
@@ -865,7 +1433,6 @@ fn refresh_story_resume(
 fn refresh_preview(
     setup: Res<WorldSetup>,
     (saves, sound): (Res<SaveMenu>, Res<crate::audio::SoundSettings>),
-    mut panel: Single<&mut Node, With<PlotPreview>>,
     mut image: Single<&mut ImageNode, With<PlotPreviewImage>>,
     mut summary: Single<&mut Text, With<PlotSummary>>,
     mut images: ResMut<Assets<Image>>,
@@ -875,11 +1442,6 @@ fn refresh_preview(
         return;
     }
     let visible = setup.open && setup.choosing_land && !saves.open && !sound.open;
-    panel.display = if visible {
-        Display::Flex
-    } else {
-        Display::None
-    };
     if !visible {
         return;
     }
@@ -950,6 +1512,24 @@ fn refresh_preview(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn picker_steps_cycle_options_and_presets_in_both_directions() {
+        let mut setup = WorldSetup::default();
+        let initial_biome = setup.biome;
+        setup.cycle_world_option(Action::Biome, true);
+        assert_eq!(setup.biome, (initial_biome + 1) % BIOMES.len());
+        setup.cycle_world_option(Action::Biome, false);
+        assert_eq!(setup.biome, initial_biome);
+
+        setup.cycle_world_option(Action::Preset, true);
+        let first = setup.preset().unwrap();
+        setup.cycle_world_option(Action::Preset, false);
+        assert_eq!(
+            setup.preset().unwrap(),
+            (first + PRESET_NAMES.len() - 1) % PRESET_NAMES.len()
+        );
+    }
 
     #[test]
     fn land_setup_scrolls_under_the_pointer_and_resets_on_back() {
