@@ -112,6 +112,14 @@ jobs:
               and any(.events[]; .text == "Construction supplies delivered."))
           ' freight-report.json
           "$game" --lab-replay freight-report.json
+          jq '.steps = 100' freight.json > freight-start.json
+          "$game" --lab freight-start.json > freight-start-report.json
+          jq -e '.village.construction.construction_delivery != null' freight-start-report.json
+          jq '{version: 1, village}' freight-start-report.json > freight-checkpoint.json
+          jq '{steps: (.steps - 100)}' freight.json > freight-resume.json
+          "$game" --lab freight-resume.json freight-checkpoint.json > freight-resume-report.json
+          "$game" --lab-replay freight-resume-report.json
+          diff -u <(jq -S '.village' freight-report.json) <(jq -S '.village' freight-resume-report.json)
       - uses: actions/upload-artifact@v4
         with:
           name: solar-friends-v3-macos
