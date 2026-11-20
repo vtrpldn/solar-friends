@@ -195,7 +195,7 @@ impl Construction {
         let page = page.min(pages - 1);
         let filter = if underway { "Underway" } else { "All" };
         let mut text = format!(
-            "Projects · {filter} · {}/{}\n1–8 Focus · Page Up/Down · Tab Filter · F11 Close",
+            "Projects · {filter} · {}/{}\n1–8 Focus · Page Up/Down · F11 Close",
             page + 1,
             pages
         );

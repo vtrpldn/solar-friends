@@ -31,7 +31,7 @@ const TOPICS: [(&str, &str); 7] = [
     (
         "Village management",
         "N · Residents     P · Power     U / V · Water\n\
-         M / H · Finances, trade and pantry (Tab switches pages)\n\
+         M / H · Finances, trade and pantry (the sidebar switches pages)\n\
          F7 · Maintenance     F8 · Events     I / F10 · Stores in Story\n\
          F · Weather forecast     L · Advance time\n\
          Finances and maintenance are available in economy mode.",
@@ -65,7 +65,7 @@ const TOPICS: [(&str, &str); 7] = [
         "Use N and 1–5 to choose a resident. Click an available finished home.\n\
          T assigns the selected home, and Y clears the assignment.\n\
          In economy mode, H shows the village balance and upcoming commitments.\n\
-         Tab opens Trade, then Pantry. Check the quote before placing an order.\n\
+         The sidebar opens Town trade and Food. Check the quote before placing an order.\n\
          Check F7 for upcoming upkeep and F8 for recent village events.",
     ),
 ];
@@ -1037,7 +1037,7 @@ fn show_guide(
                     String::new(),
                     String::new(),
                     String::new(),
-                    "1–7 Topic · Page Up/Down · Tab Reference · / Search · F1 Close".to_owned(),
+                    "1–7 Topic · Page Up/Down · / Search · F1 Close".to_owned(),
                     String::new(),
                 )
             }
@@ -1049,7 +1049,7 @@ fn show_guide(
                 String::new(),
                 String::new(),
                 String::new(),
-                "1–9 Open chapter · / Find · Page Up/Down · Tab Quick guide · F1 Close".to_owned(),
+                "1–9 Open chapter · / Find · Page Up/Down · F1 Close".to_owned(),
                 String::new(),
             ),
             Screen::Chapter(index) => {
@@ -1111,7 +1111,7 @@ fn show_guide(
                     String::new(),
                     String::new(),
                     String::new(),
-                    "Type to search · 1–9 or Enter Open · Tab Index · Esc Close".to_owned(),
+                    "Type to search · 1–9 or Enter Open · Esc Close".to_owned(),
                     String::new(),
                 )
             }
@@ -1290,14 +1290,14 @@ impl Guide {
             Screen::Quick(page) => {
                 let (title, body) = TOPICS[page];
                 format!(
-                    "Village guide · {title} · {}/{}\nPage Up/Down · Tab Reference · F1 Close\n\n{body}",
+                    "Village guide · {title} · {}/{}\nPage Up/Down · F1 Close\n\n{body}",
                     page + 1,
                     TOPICS.len()
                 )
             }
             Screen::Index(page) => {
                 let mut label = format!(
-                    "Village reference · {}/{}\n1–9 Open chapter · / Find · Page Up/Down · Tab Quick guide · F1 Close\n",
+                    "Village reference · {}/{}\n1–9 Open chapter · / Find · Page Up/Down · F1 Close\n",
                     page + 1,
                     index_pages()
                 );
@@ -1332,7 +1332,7 @@ impl Guide {
             Screen::Search => {
                 let results = search_results(&self.query);
                 let mut label = format!(
-                    "Find a topic · {}|\nType to search · 1–9 or Enter Open · Tab Index · Esc Close\n",
+                    "Find a topic · {}|\nType to search · 1–9 or Enter Open · Esc Close\n",
                     self.query
                 );
                 if self.query.trim().is_empty() {

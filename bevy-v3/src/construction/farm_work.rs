@@ -946,7 +946,7 @@ impl Construction {
                 "Missing seeds are bought automatically with transport costs. Planting starts after they arrive."
             };
             return Some(format!(
-                "Whole {name} · {count} beds · {area:.1} m² · {} queued\n{summary}\n{seed_policy}\nCrop and spacing apply to {planting} available beds\nCare applies to {care} beds · Irrigation on {irrigated}/{care} · Collect residues {collect}/{care}\n1 Prepare · 2 Plant · 3 Harvest · 4 Clear · 5 Amend · 6 Collect\nX Crop · Y Density · T Irrigation · Z Residues · Tab Inspect bed\n{}",
+                "Whole {name} · {count} beds · {area:.1} m² · {} queued\n{summary}\n{seed_policy}\nCrop and spacing apply to {planting} available beds\nCare applies to {care} beds · Irrigation on {irrigated}/{care} · Collect residues {collect}/{care}\n1 Prepare · 2 Plant · 3 Harvest · 4 Clear · 5 Amend · 6 Collect\nX Crop · Y Density · T Irrigation · Z Residues\n{}",
                 jobs.len(),
                 self.farming.notice,
             ));

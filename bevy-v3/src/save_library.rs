@@ -109,7 +109,7 @@ impl SaveMenu {
             lines.push("Enter Confirm · Escape Cancel".into());
         } else if self.rows.is_empty() {
             lines.push("No named villages in this mode.".into());
-            lines.push("Tab Switch mode · F6 Close".into());
+            lines.push("F6 Close".into());
         } else {
             let start = self.selected / 8 * 8;
             let now = timestamp();
@@ -131,7 +131,7 @@ impl SaveMenu {
             } else {
                 lines.push("E Export · P Recover · Delete Remove".into());
             }
-            lines.push("Tab Switch mode · F6 Close".into());
+            lines.push("F6 Close".into());
         }
         if self.entry.is_none() && !cfg!(target_arch = "wasm32") {
             lines.push("Drop a V3 save file here to import a copy.".into());

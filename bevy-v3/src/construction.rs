@@ -1051,7 +1051,7 @@ impl Construction {
         } else {
             (
                 self.build_result_heading(options.len()),
-                "/ Search · Tab Category · Page Up/Down · B Close",
+                "/ Search · Page Up/Down · B Close",
             )
         };
         let list = if list.is_empty() {

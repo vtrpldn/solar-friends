@@ -56,7 +56,7 @@
   {
     "title": "Production and output hauling",
     "description": "Inputs travel to work sites. Finished output travels back to storage.",
-    "tip": "Queue work when inputs and storage are ready. In Story, open Finances with H and use Tab to reach Pantry and its kitchen policy.",
+    "tip": "Queue work when inputs and storage are ready. In Story, open Finances with H, then choose Food in the sidebar for its kitchen policy.",
     "boundary": "Planting beds, perennial crops and recipes have different waiting and harvest rules."
   },
   {

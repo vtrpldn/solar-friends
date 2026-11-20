@@ -12,7 +12,7 @@ Each new village starts land setup with a fresh seed. Keep it, use **New plot**,
 
 Select **New game** for Story or **New sandbox**. Choose a biome, landscape, water availability, resource richness, land seed, starting savings, supplies, and distance to town, then select **Enter village**. Pan with WASD, the arrow keys, or left drag. Hold Shift to pan faster. Rotate with Q/E or right drag horizontally, and right drag vertically to tilt. Zoom with the wheel, middle drag, or +/−. Press Home to center on camp, Shift+Home to reset the camera, Shift+End to frame the whole plot, and Escape to return to the main menu.
 
-After the cars arrive, click the ground to place camp or select a preset with 1 (shade), 2 (entrance), or 3 (clearing). Press Space to pause or resume the village clock. After placing camp, press B to open the build catalog. Use Tab for categories and Page Up/Down to browse. Select a blueprint with its number key, R to rotate it, and click the plot to reserve materials and mark the site. The placement outline follows the model and changes color when the site or supply plan is blocked. Residents carry each reserved load to the site before assembly. The project model appears when they finish. Press Ctrl+D or Command+D on a selected project to place another copy of its blueprint. Select a project to prioritize or cancel an unstarted plan, or to queue relocation, salvage, or demolition.
+After the cars arrive, click the ground to place camp or select a preset with 1 (shade), 2 (entrance), or 3 (clearing). Press Space to pause or resume the village clock. After placing camp, press B to open the build catalog. Choose a category from the list and use Page Up/Down to browse. Select a blueprint with its number key, R to rotate it, and click the plot to reserve materials and mark the site. The placement outline follows the model and changes color when the site or supply plan is blocked. Residents carry each reserved load to the site before assembly. The project model appears when they finish. Press Ctrl+D or Command+D on a selected project to place another copy of its blueprint. Select a project to prioritize or cancel an unstarted plan, or to queue relocation, salvage, or demolition.
 
 The desktop port includes Story and Sandbox villages, local saves, and the V2 collection, workshop, and Balance Lab. The V2 browser game remains available at `/v2/`.
 
@@ -28,7 +28,7 @@ Press F10 for Stores and cycle views to **Production sites**. Search by building
 
 Open **Manage → Crafting** to browse items to make, owned equipment to repair, and active crafting jobs. Select an item to review its requirements and choose a workspace. Select a job to find it in the village or move unfinished work to a free, compatible workspace.
 
-Select a completed field, garden, or greenhouse and press K to manage the whole plot. Choose **Inspect one bed** or press Tab to switch to individual beds. Prepare the soil, sow a crop, and return to harvest when it is ripe. Bed settings cover crop, density, irrigation, and residues.
+Select a completed field, garden, or greenhouse and press K to manage the whole plot. Choose **Inspect one bed** to switch to individual beds. Prepare the soil, sow a crop, and return to harvest when it is ripe. Bed settings cover crop, density, irrigation, and residues.
 
 A completed coop or goat pen can store feed and drinking water, then produce eggs or milk. Residents take fodder to the animals when supplies are available. Select a pen and press C to see its care and collection options.
 
@@ -36,7 +36,7 @@ Story reserves cash for transport when a blueprint needs materials beyond curren
 
 Sandbox skips the arrival and pitches camp in the clearing when it is free. If the clearing is occupied, choose your campsite immediately. Materials are unlimited. Press I to toggle instant building.
 
-In Story, press H for finances and paid town shifts. Book one day shift or turn on repeating weekday work for a selected resident. Wages reach village savings when the resident returns. Press Tab in Finances to open Trade. Press D or click **Purchases** to switch between resident pickup and supplier freight, then press I or click the Buy button for that transport. The same setting applies to automatic construction, seed, and pantry purchases. Trade also quotes sales and lets you set automatic sale policies. Press Tab again to inspect food expiry and cold-storage use. Dried provisions keep longer, and powered cold storage slows aging for the food that fits.
+In Story, press H for finances and paid town shifts. Book one day shift or turn on repeating weekday work for a selected resident. Wages reach village savings when the resident returns. Choose **Town trade** in the sidebar to open Trade. Press D or click **Purchases** to switch between resident pickup and supplier freight, then press I or click the Buy button for that transport. The same setting applies to automatic construction, seed, and pantry purchases. Trade also quotes sales and lets you set automatic sale policies. Choose **Food** to inspect food expiry and cold-storage use. Dried provisions keep longer, and powered cold storage slows aging for the food that fits.
 
 Press **F** or choose **Find in village** to center the camera on the selected project. **Alt+F** opens the forecast while a project is selected.
 
@@ -77,6 +77,15 @@ In the in-game reference, open a chapter and press **D** or select **Show diagra
 Regenerate native trees, deposits, and scenery with `node scripts/export-v3-land-models.mjs`.
 
 Regenerate the build catalog models with `node scripts/export-v3-building-models.mjs`.
+
+## Playing with the keyboard
+
+Every action can be done without a mouse.
+
+- **Tab** and **Shift+Tab** move a ring through the buttons on screen in reading order, including dialogs, cards and the title screens. Once a button has the ring, the **arrow keys** move it to the nearest button in that direction, **Enter** presses it, and **Escape** lets go. The focused button shows the same help a mouse hover shows, and scrolling panels follow it.
+- With no button focused, **WASD** or the **arrow keys** pan the camera and show a reticle at the centre of the screen. **Enter** acts as a click there: pitch camp, place a building or field, plan roads, or select a resident or building. In the terrain tools, hold **Enter** while panning to paint a stroke. Moving the mouse hands control back to it.
+- **Q** and **E** turn the camera, **,** and **.** tilt it, and **-** and **=** zoom. **Space** pauses, and **1–4** set the speed.
+- While typing a number, **Enter** sets it and **Escape** cancels it.
 
 ## macOS desktop bundle
 

@@ -418,7 +418,7 @@ impl Construction {
         let (pages, rows) = self.inventory_producers(catalog, page, search, stock.sandbox);
         let page = page.min(pages - 1) + 1;
         let mut text = format!(
-            "Production sites · {page}/{pages} · Tab Switch view · Page Up/Down · F10 Close"
+            "Production sites · {page}/{pages} · Page Up/Down · F10 Close"
         );
         if rows.is_empty() {
             text.push_str("\nNo completed production sites match. Search for a building, crop, recipe or product.");
@@ -673,7 +673,7 @@ impl Construction {
         let (used, capacity) = self.storage(catalog, stock);
         let heading = view.label();
         let mut text = format!(
-            "{heading} · Stores {used}/{capacity} units · {}/{} · Tab Switch view · Page Up/Down · F10 Close",
+            "{heading} · Stores {used}/{capacity} units · {}/{} · Page Up/Down · F10 Close",
             page + 1,
             pages
         );
