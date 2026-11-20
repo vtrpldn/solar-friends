@@ -104,7 +104,7 @@ pub(super) fn spawn(card: &mut ChildSpawnerCommands, assets: &AssetServer) {
 pub(super) fn heading(panel: UtilityPanel) -> (&'static str, &'static str) {
     match panel {
         UtilityPanel::Residents => ("OUR LITTLE CREW", "Our residents"),
-        UtilityPanel::Projects => ("VILLAGE ALMANAC", "Projects"),
+        UtilityPanel::Projects => ("VILLAGE WORK", "Your projects"),
         UtilityPanel::Inventory => ("VILLAGE ALMANAC", "Stores"),
         UtilityPanel::Crafting => ("VILLAGE ALMANAC", "Crafting"),
         UtilityPanel::Power => ("VILLAGE ALMANAC", "Power"),

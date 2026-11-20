@@ -2997,12 +2997,16 @@ fn show_hud(
     node.bottom = Val::Auto;
     // An open panel becomes a wide almanac sheet beside its action column.
     let sheet = village.utility_panel.is_some() && !village.guide.open() && !village.lenses.open;
-    node.right = if sheet {
+    // Projects stays a compact card beside the village, as in V2.
+    let compact = village.utility_panel == Some(UtilityPanel::Projects);
+    node.right = if sheet && !compact {
         px(toolbar::PANEL_WIDTH + 60.0)
     } else {
         Val::Auto
     };
-    node.max_width = if sheet {
+    node.max_width = if compact {
+        px(420)
+    } else if sheet {
         Val::Auto
     } else if village.guide.open() || village.lenses.open || village.lenses.active.is_some() {
         Val::Vw(46.0)
@@ -3557,7 +3561,11 @@ fn show_hud(
             .trim_start_matches('\n')
             .lines()
             .filter_map(|line| {
-                // Keep paragraph breaks; drop lines that held nothing but shortcuts.
+                // Keep paragraph breaks; drop lines that held nothing but shortcuts,
+                // including numbered-row hints such as "1–8 Focus · Page Up/Down".
+                if line.starts_with("1–") {
+                    return None;
+                }
                 let stripped = strip_key_hints(line);
                 (line.is_empty() || !stripped.is_empty()).then_some(stripped)
             })
