@@ -143,6 +143,22 @@ impl Advance {
         self.day_entry.unwrap_or(self.days)
     }
 
+    pub fn days_selected(&self) -> u16 {
+        self.selected_days()
+    }
+
+    pub fn target_days(&self) -> u16 {
+        self.days
+    }
+
+    /// Progress fraction (`0.0..=1.0`) and whether fast stepping is active while a run is underway.
+    pub fn progress(&self) -> Option<(f32, bool)> {
+        self.running.as_ref().map(|run| {
+            let fraction = (run.steps as f32 / run.total.max(1) as f32).clamp(0.0, 1.0);
+            (fraction, run.step > SIMULATION_STEP)
+        })
+    }
+
     pub fn can_start(&self) -> bool {
         (1..=365).contains(&self.selected_days())
     }

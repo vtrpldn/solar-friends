@@ -1,4 +1,5 @@
 use crate::{audio::SoundSettings, utilities::NetworkView};
+mod advance_modal;
 mod almanac;
 mod build_menu;
 mod building_lighting;
@@ -173,6 +174,7 @@ impl Plugin for VillagePlugin {
         resident_meters::install(app);
         terrain_card::install(app);
         lens_card::install(app);
+        advance_modal::install(app);
         building_lighting::install(app);
         livestock_motion::install(app);
         vehicle_motion::install(app);
@@ -3108,17 +3110,9 @@ fn show_hud(
         label.push('\n');
         label.push_str(&forecast(village.clock, setup.biome(), setup.seed()));
     }
-    if village.camp.is_some() && village.advance.has_status() {
+    if village.camp.is_some() && !village.advance.open && village.advance.has_status() {
         label.push('\n');
         label.push_str(&village.advance.status(village.utility_owns_advance_key()));
-        if village.advance.open {
-            label.push_str(&village.construction.advance_milestones(
-                &catalog,
-                &setup,
-                village.clock,
-                village.advance.remaining_days(),
-            ));
-        }
     }
     if village.terrain_editor.open && !sheet && !village.guide.open() && !village.lenses.open {
         node.left = px(316);
