@@ -222,7 +222,17 @@ fn refresh(
                         detail_node.display = Display::Flex;
                         detail_text.set_if_neq(Text::new(text));
                     }
-                    format!("{}  {}", index + 1, project.name)
+                    let [width, depth] = project.size;
+                    let supplies = if village.stock.sandbox {
+                        "Free".into()
+                    } else {
+                        let total = project.materials.values().sum::<u32>();
+                        let missing = project.materials.iter()
+                            .any(|(id, amount)| village.stock.available(id) < *amount);
+                        let notice = if missing { " · Short on stock" } else { "" };
+                        format!("{total} materials{notice}")
+                    };
+                    format!("{}  {}\n{supplies} · {width}×{depth} cells", index + 1, project.name)
                 })
             }
             BuildButton::ConstructionPolicy => Some(
