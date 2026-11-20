@@ -1679,11 +1679,10 @@ mod tests {
                 .contains("Bento · Getting to know each other · 0/100")
         }));
         press_button(&mut app, "Overview");
-        assert!(
-            ui_texts(&mut app)
-                .iter()
-                .any(|text| text.0.contains("Click home"))
-        );
+        assert!(ui_texts(&mut app).iter().any(|text| {
+            text.0
+                .contains("Complete a house to assign a permanent home.")
+        }));
         let before = app
             .world_mut()
             .query::<&VillageCamera>()

@@ -1,4 +1,5 @@
 use crate::{audio::SoundSettings, utilities::NetworkView};
+mod advance_modal;
 mod almanac;
 mod build_menu;
 mod building_lighting;
@@ -12,6 +13,7 @@ mod guide;
 mod guide_diagrams;
 pub(crate) mod lab;
 mod land_lens;
+mod lens_card;
 mod lens_picker;
 mod rich_text;
 mod thumbnails;
@@ -23,6 +25,7 @@ pub(crate) mod resident_motion;
 mod resource_lens;
 mod resource_trends;
 mod road_surface;
+mod terrain_card;
 mod toolbar;
 pub(crate) use toolbar::PanelPicker;
 mod vehicle_motion;
@@ -174,6 +177,9 @@ impl Plugin for VillagePlugin {
         guide::install(app);
         library_ui::install(app);
         resident_meters::install(app);
+        terrain_card::install(app);
+        lens_card::install(app);
+        advance_modal::install(app);
         building_lighting::install(app);
         livestock_motion::install(app);
         vehicle_motion::install(app);
@@ -3146,12 +3152,13 @@ fn show_hud(
     {
         node.right = px(toolbar::PANEL_WIDTH + 40.0);
     }
-    if let Some(page) = village
-        .guide
-        .text(&catalog)
-        .or_else(|| village.lenses.text())
-    {
+    if let Some(page) = village.guide.text(&catalog) {
         text.0 = page;
+        return;
+    }
+    if village.lenses.open {
+        node.display = Display::None;
+        text.0.clear();
         return;
     }
     let controls = if village.arrival_time < ARRIVAL_DURATION {
@@ -3183,21 +3190,12 @@ fn show_hud(
         label.push('\n');
         label.push_str(&forecast(village.clock, setup.biome(), setup.seed()));
     }
-    if village.camp.is_some() && village.advance.has_status() {
+    if village.camp.is_some() && !village.advance.open && village.advance.has_status() {
         label.push('\n');
         label.push_str(&village.advance.status(village.utility_owns_advance_key()));
-        if village.advance.open {
-            label.push_str(&village.construction.advance_milestones(
-                &catalog,
-                &setup,
-                village.clock,
-                village.advance.remaining_days(),
-            ));
-        }
     }
-    if village.terrain_editor.open {
-        label.push('\n');
-        label.push_str(&village.terrain_editor.label());
+    if village.terrain_editor.open && !sheet && !village.guide.open() && !village.lenses.open {
+        node.left = px(316);
     }
     if village.camp.is_some()
         && !sheet
@@ -3348,42 +3346,7 @@ fn show_hud(
                 label.push_str(&panel.message);
             }
         }
-        Some(UtilityPanel::Residents) => {
-            if !label.is_empty() {
-                label.push_str("\n\n");
-            }
-            let selected = village.selected_resident;
-            match village.resident_profile {
-                ResidentProfile::Overview => {
-                    if !village.stock.sandbox {
-                        label.push_str("Paid town work\n");
-                        label.push_str(
-                            &village
-                                .construction
-                                .resident_shift_summary(selected, village.clock),
-                        );
-                        label.push_str("\n\n");
-                    }
-                    label.push_str(&village.construction.resident_overview(
-                        &catalog,
-                        &village.stock,
-                        selected,
-                        false,
-                        &village.housing_notice,
-                    ));
-                }
-                ResidentProfile::Story => {
-                    label.push_str(&Construction::resident_story(&catalog, selected));
-                }
-                ResidentProfile::Skills => {
-                    label.push_str(&village.construction.resident_skills(&catalog, selected));
-                }
-                ResidentProfile::Relationships => {
-                    label.push_str(&village.construction.resident_relationships(selected));
-                }
-            }
-            label.push_str("\n\n1–5 Select resident · Tab Change profile view");
-        }
+        Some(UtilityPanel::Residents) => {}
         Some(UtilityPanel::Finances) => {}
         Some(UtilityPanel::Trade) => {
             label.push('\n');

@@ -10,6 +10,15 @@ use crate::{
 
 use super::*;
 
+pub(crate) struct ResidentNotes {
+    pub thought: String,
+    pub hope_heading: String,
+    pub hope_reason: String,
+    pub about_heading: String,
+    pub about_body: String,
+    pub memories: String,
+}
+
 pub(crate) struct HomeOption<'a> {
     pub id: usize,
     pub name: &'a str,
@@ -132,17 +141,175 @@ impl Construction {
         [food, power, water]
     }
 
-    /// One line for a roster card: what the resident is doing and their lowest need.
-    pub(crate) fn resident_roster_line(&self, catalog: &Catalog, index: usize) -> String {
+    /// Action text and lowest need for a resident roster card.
+    pub(crate) fn resident_roster_info(
+        &self,
+        catalog: &Catalog,
+        index: usize,
+    ) -> (String, &'static str, f64) {
         let health = &self.residents[index].health;
         let (need, value) = std::iter::once(("Energy", health.energy))
             .chain(NEED_METERS.map(|(label, need)| (label, health.levels[need as usize])))
             .min_by(|left, right| left.1.total_cmp(&right.1))
             .expect("energy is always tracked");
-        format!(
-            "{} · {need} {value:.0}%",
-            self.resident_action(catalog, index)
+        (
+            self.resident_action(catalog, index).into_owned(),
+            need,
+            value,
         )
+    }
+
+    /// One line for a roster card: what the resident is doing and their lowest need.
+    pub(crate) fn resident_roster_line(&self, catalog: &Catalog, index: usize) -> String {
+        let (action, need, value) = self.resident_roster_info(catalog, index);
+        format!("{action} · {need} {value:.0}%")
+    }
+
+    pub(crate) fn resident_project_label(
+        &self,
+        catalog: &Catalog,
+        resident: usize,
+    ) -> Option<String> {
+        let site = self.resident_project(resident)?;
+        let project = catalog.projects.get(&self.plans.get(site)?.key)?;
+        Some(format!("View project · {} #{}", project.name, site + 1))
+    }
+
+    pub(crate) fn resident_home_display(
+        &self,
+        catalog: &Catalog,
+        selected: usize,
+    ) -> (String, String, bool) {
+        let options: Vec<_> = self.home_options(catalog, selected).collect();
+        let has_choices = self.residents[selected].home.is_some()
+            || options
+                .iter()
+                .any(|home| home.open && home.occupants < home.beds);
+        let Some(home_id) = self.residents[selected].home else {
+            let note = if options.is_empty() {
+                "Complete a house to assign a permanent home."
+            } else {
+                "Use arrows to assign a home. Applies at the next rest."
+            };
+            return (
+                "Unassigned · available shelter".into(),
+                note.into(),
+                has_choices,
+            );
+        };
+        let value = options
+            .iter()
+            .find(|home| home.id == home_id)
+            .map(|home| {
+                format!(
+                    "{} #{} · {}/{} beds",
+                    home.name,
+                    home.id + 1,
+                    home.occupants,
+                    home.beds
+                )
+            })
+            .unwrap_or_else(|| {
+                let name = &catalog.projects[&self.plans[home_id].key].name;
+                format!("{name} #{}", home_id + 1)
+            });
+        let housemates = self
+            .residents
+            .iter()
+            .enumerate()
+            .filter(|(other, worker)| *other != selected && worker.home == Some(home_id))
+            .map(|(other, _)| NAMES[other])
+            .collect::<Vec<_>>();
+        let note = if housemates.is_empty() {
+            "Lives here alone.".to_owned()
+        } else {
+            format!("Lives with {}.", housemates.join(", "))
+        };
+        (value, note, has_choices)
+    }
+
+    pub(crate) fn resident_home_step(
+        &mut self,
+        catalog: &Catalog,
+        selected: usize,
+        forward: bool,
+    ) -> String {
+        let mut choices: Vec<Option<usize>> = vec![None];
+        choices.extend(
+            self.home_options(catalog, selected)
+                .filter(|home| home.assigned || (home.open && home.occupants < home.beds))
+                .map(|home| Some(home.id)),
+        );
+        if choices.len() <= 1 {
+            return String::new();
+        }
+        let current = choices
+            .iter()
+            .position(|&choice| choice == self.residents[selected].home)
+            .unwrap_or(0);
+        let next = if forward {
+            (current + 1) % choices.len()
+        } else {
+            (current + choices.len() - 1) % choices.len()
+        };
+        match choices[next] {
+            None => self.clear_home(selected),
+            Some(home) => self
+                .assign_home(selected, catalog, home)
+                .unwrap_or_else(str::to_owned),
+        }
+    }
+
+    pub(crate) fn resident_weekday_shift_repeating(&self, selected: usize) -> bool {
+        self.residents[selected].town_work.repeating
+    }
+
+    pub(crate) fn resident_work_priority(&self, group: WorkGroup) -> (u8, &'static str) {
+        let label = self.work_priority_label(group);
+        match label.rsplit(" · ").next() {
+            Some("Low") => (0, "Low"),
+            Some("Normal") => (1, "Normal"),
+            Some("High") => (2, "High"),
+            _ => (3, "Highest"),
+        }
+    }
+
+    pub(crate) fn resident_worker_reservation(&self, essential: bool) -> u8 {
+        self.worker_reservation_label(essential)
+            .split_whitespace()
+            .nth(1)
+            .and_then(|value| value.parse().ok())
+            .unwrap_or(0)
+    }
+
+    pub(crate) fn resident_experience_bonus(&self, selected: usize) -> f64 {
+        (100.0 * self.residents[selected].experience_bonus()).floor()
+    }
+
+    pub(crate) fn resident_craft_levels(&self, selected: usize) -> [(&'static str, usize); 3] {
+        use crate::production::crafting::Skill;
+        let worker = &self.residents[selected];
+        [Skill::Woodworking, Skill::Basketry, Skill::Repair]
+            .map(|skill| (skill.label(), worker.craft.level(selected, skill)))
+    }
+
+    pub(crate) fn resident_relationship_rows(
+        &self,
+        selected: usize,
+    ) -> [(usize, &'static str, &'static str, i16, Option<String>); 4] {
+        let health = &self.residents[selected].health;
+        let mut rows = Vec::with_capacity(4);
+        for (id, &name) in NAMES.iter().enumerate().filter(|(id, _)| *id != selected) {
+            let score = health.friendships[id];
+            let memory = health
+                .mind
+                .memories
+                .iter()
+                .find(|memory| memory.partner == Some(id))
+                .map(|memory| memory.text.clone());
+            rows.push((id, name, friendship_label(score), score, memory));
+        }
+        rows.try_into().expect("four other residents")
     }
 
     pub fn residents_needing_sanitation(&self) -> usize {
@@ -1591,83 +1758,89 @@ impl Construction {
         line
     }
 
-    pub(crate) fn resident_story(catalog: &Catalog, selected: usize) -> String {
-        use std::fmt::Write;
-
+    pub(crate) fn resident_story_sections(catalog: &Catalog, selected: usize) -> [&str; 7] {
         let profile = &catalog.residents[selected];
-        let mut story = String::new();
-        for (index, (label, text)) in [
-            ("Before the village", &profile.backstory),
-            ("What I want", &profile.desire),
-            ("What drives me", &profile.motivation),
-            ("What I fear", &profile.fear),
-            ("Where I struggle", &profile.flaw),
-            ("What I need from others", &profile.boundary),
-            ("Room to grow", &profile.growth),
+        [
+            profile.backstory.as_str(),
+            profile.desire.as_str(),
+            profile.motivation.as_str(),
+            profile.fear.as_str(),
+            profile.flaw.as_str(),
+            profile.boundary.as_str(),
+            profile.growth.as_str(),
         ]
-        .into_iter()
-        .enumerate()
-        {
-            if index > 0 {
-                story.push_str("\n\n");
-            }
-            let _ = write!(story, "{label}\n{text}");
-        }
-        story
     }
 
-    pub(crate) fn resident_skills(&self, catalog: &Catalog, selected: usize) -> String {
-        use crate::production::crafting::Skill;
-        use std::fmt::Write;
-
+    pub(crate) fn resident_notes(
+        &self,
+        catalog: &Catalog,
+        stock: &Stock,
+        selected: usize,
+    ) -> ResidentNotes {
         let worker = &self.residents[selected];
-        let specialties = catalog.residents[selected]
-            .strengths
+        let profile = &catalog.residents[selected];
+        let mind = &worker.health.mind;
+        let wish = &profile.aspiration;
+        let stage = if self.plans.iter().any(|plan| {
+            !plan.removed && plan.key == wish.key && plan.work >= catalog.projects[&plan.key].work
+        }) {
+            "Built"
+        } else if self
+            .plans
             .iter()
-            .filter_map(|key| {
-                catalog
-                    .projects
-                    .get(key)
-                    .map(|project| project.name.as_str())
-            })
-            .collect::<Vec<_>>()
-            .join(" · ");
-        let bonus = (100.0 * worker.experience_bonus()).floor();
-        let mut skills = format!(
-            "Specialties · 25% faster\n{specialties}\n\nLearning by doing\n+{bonus}% speed on all work\nHands-on work gradually improves efficiency, up to a 15% bonus.\n\nCraft skills",
-        );
-        for skill in [Skill::Woodworking, Skill::Basketry, Skill::Repair] {
-            let _ = write!(
-                skills,
-                "\n{} · Level {}",
-                skill.label(),
-                worker.craft.level(selected, skill)
-            );
-        }
-        skills
-    }
-
-    pub(crate) fn resident_relationships(&self, selected: usize) -> String {
-        use std::fmt::Write;
-
-        let health = &self.residents[selected].health;
-        let mut relationships = String::from(
-            "Growing together\nResidents make time for willing friends, shared interests, and listening. Sleep, urgent needs, and quiet time come first.",
-        );
-        for (id, &name) in NAMES.iter().enumerate().filter(|(id, _)| *id != selected) {
-            let score = health.friendships[id];
-            let label = friendship_label(score);
-            let _ = write!(relationships, "\n\n{name} · {label} · {score}/100");
-            if let Some(memory) = health
-                .mind
-                .memories
-                .iter()
-                .find(|memory| memory.partner == Some(id))
-            {
-                let _ = write!(relationships, "\n{}", memory.text);
+            .any(|plan| !plan.removed && plan.key == wish.key)
+        {
+            "Taking shape"
+        } else {
+            "Hoping for this"
+        };
+        let thought = match worker.health.task.as_ref().map(|task| task.kind) {
+            Some(Need::Social) => {
+                let topic = worker
+                    .health
+                    .task
+                    .as_ref()
+                    .and_then(|task| task.conversation.as_ref())
+                    .map_or("life in the village", Conversation::topic);
+                format!("Making time to talk about {topic}.")
             }
+            Some(Need::Fun) => profile.reflection.clone(),
+            Some(Need::Sleep | Need::Rest) => "Time to rest. The village can wait a little.".into(),
+            _ => self
+                .concern(selected, catalog, stock)
+                .map(str::to_owned)
+                .unwrap_or_else(|| {
+                    if mind.fulfilled {
+                        "Something I hoped for is here. I want to enjoy it too.".into()
+                    } else {
+                        wish.reason.clone()
+                    }
+                }),
+        };
+        let memories = if mind.memories.is_empty() {
+            "Memories will appear after conversations, personal time, and meaningful village milestones."
+                .into()
+        } else {
+            mind.memories
+                .iter()
+                .take(3)
+                .map(|memory| memory.text.as_str())
+                .collect::<Vec<_>>()
+                .join("\n")
+        };
+        ResidentNotes {
+            thought,
+            hope_heading: format!("{} · {stage}", wish.label),
+            hope_reason: wish.reason.clone(),
+            about_heading: format!("ABOUT {}", NAMES[selected].to_uppercase()),
+            about_body: format!(
+                "{}\n{}\nEnjoys {}.",
+                profile.bio,
+                profile.effect,
+                profile.hobby.to_lowercase(),
+            ),
+            memories,
         }
-        relationships
     }
 
     pub(crate) fn resident_activity_summary(&self, catalog: &Catalog, selected: usize) -> String {
