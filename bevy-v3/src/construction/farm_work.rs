@@ -893,6 +893,22 @@ impl Construction {
             irrigation,
             residues,
         );
+        if bed.stage == Stage::Failed {
+            label.push_str("\nClear the failed crop, then prepare the bed again.");
+        } else if bed.stage == Stage::Growing {
+            if bed.moisture < 0.4 {
+                label.push_str("\nDry soil is slowing growth.");
+            }
+            if bed.fertility < 0.5 {
+                label.push_str("\nLow fertility is limiting growth.");
+            }
+            if bed.density > 1.0 {
+                label.push_str("\nDense spacing increases competition.");
+            }
+            if bed.health() < 0.8 {
+                label.push_str("\nEarlier stress has reduced this crop’s yield.");
+            }
+        }
         use std::fmt::Write;
         if let Some((remaining, window)) = bed.harvest_timing(clock) {
             let _ = write!(

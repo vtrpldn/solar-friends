@@ -474,7 +474,7 @@ impl Bed {
         1.2 * f64::from(self.dimensions.y)
     }
 
-    fn health(&self) -> f64 {
+    pub(crate) fn health(&self) -> f64 {
         let conditioned = if self.progress_seconds > 0.0 {
             (1.0 - self.stress / self.progress_seconds).max(0.0)
         } else {
