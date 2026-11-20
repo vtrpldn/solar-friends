@@ -698,6 +698,8 @@ enum LabControl {
     CycleSpeed,
     SetInterval,
     AdvanceHour,
+    FocusCamp,
+    FindBuilding,
     Confirm,
     Cancel,
 }
@@ -741,6 +743,8 @@ fn setup_lab_window(mut commands: Commands, assets: Res<AssetServer>) {
             (SetInterval, "Set interval"),
             (Shortcut(KeyCode::F3), "Run interval"),
             (Shortcut(KeyCode::F4), "Cycle stop condition"),
+            (LabControl::FocusCamp, "Focus camp"),
+            (LabControl::FindBuilding, "Find building"),
         ],
         &[
             (LabControl::Confirm, "Confirm"),
@@ -2076,13 +2080,20 @@ fn update_lab_window(
         .as_ref()
         .map_or(runner.scenario.steps, |replay| replay.limit);
     let reached_end = |runner: &Runner| runner.index >= limit || runner.done();
-    if playback.view == LabView::Map
-        && playback.order.is_none()
+    if clicked(LabControl::FocusCamp) && playback.order.is_none() && playback.build_search.is_none()
+    {
+        playback.view = LabView::Map;
+        playback.clear_confirmation = None;
+        map.focus_camp(runner.camp);
+    }
+    if playback.order.is_none()
         && !playback.replaying
         && !reached_end(&runner)
-        && keys.just_pressed(KeyCode::Slash)
+        && (clicked(LabControl::FindBuilding)
+            || (playback.view == LabView::Map && keys.just_pressed(KeyCode::Slash)))
         && playback.build_search.is_none()
     {
+        playback.view = LabView::Map;
         playback.running = false;
         playback.reset_timing();
         playback.build_search = Some(LabBuildSearch::default());
@@ -3290,6 +3301,10 @@ mod tests {
             .spawn((Interaction::None, LabControl::Shortcut(KeyCode::KeyJ)))
             .with_child((Text::new("Single step"), LabControlLabel))
             .id();
+        let focus = app
+            .world_mut()
+            .spawn((Interaction::None, LabControl::FocusCamp))
+            .id();
         let faster = app
             .world_mut()
             .spawn((Interaction::None, LabControl::CycleSpeed))
@@ -3304,6 +3319,9 @@ mod tests {
         let view = &app.world().get::<Text>(panel).unwrap().0;
         assert!(view.contains("Replay paused"));
         assert!(!view.contains("Enter order"));
+        *app.world_mut().get_mut::<Interaction>(focus).unwrap() = Interaction::Pressed;
+        app.update();
+        assert!(app.world().resource::<map::MapState>().visible);
         *app.world_mut().get_mut::<Interaction>(faster).unwrap() = Interaction::Pressed;
         app.update();
         assert!(

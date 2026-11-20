@@ -23,6 +23,15 @@ pub(super) struct MapState {
 }
 
 impl MapState {
+    pub(super) fn focus_camp(&mut self, camp: IVec2) {
+        let position = world_position(camp.x as f32, camp.y as f32);
+        self.camera = Vec2::new(position.x, -position.y);
+        self.selected = None;
+        self.resource = None;
+        self.cancel_build();
+        self.drag = None;
+    }
+
     pub fn field_size(&self) -> IVec2 {
         self.field_size
             .unwrap_or_else(crate::construction::default_field_size)
@@ -353,11 +362,7 @@ pub(super) fn draw(
     let inside = cursor.filter(|&screen| contains(screen, Vec2::ZERO));
     let camp = world_position(runner.camp.x as f32, runner.camp.y as f32);
     if keys.just_pressed(KeyCode::Home) {
-        map.camera = Vec2::new(camp.x, -camp.y);
-        map.selected = None;
-        map.resource = None;
-        map.cancel_build();
-        map.drag = None;
+        map.focus_camp(runner.camp);
     }
     if inside.is_some() && scroll.delta.y != 0.0 {
         map.zoom_steps = (map.zoom_steps + scroll.delta.y.signum()).clamp(0.0, 12.0);
