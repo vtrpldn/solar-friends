@@ -1449,6 +1449,7 @@ struct CampPointer {
     preset: Option<IVec2>,
     clicked: Option<GroundHit>,
     hovered: Option<GroundHit>,
+    resident: Option<usize>,
     terrain_stroke: Vec<Vec3>,
     terrain_stroke_finished: bool,
 }
@@ -1470,6 +1471,7 @@ fn read_camp_pointer(
     ),
     camera: Single<(&Camera, &GlobalTransform), With<VillageCamera>>,
     ground: Query<(), With<GroundMesh>>,
+    actors: Query<(&ArrivalActor, &GlobalTransform, &InheritedVisibility)>,
     ui: Query<&Interaction>,
     mut raycast: MeshRayCast,
     (mut input, mut pointer): (Local<Option<Vec2>>, ResMut<CampPointer>),
@@ -1477,6 +1479,7 @@ fn read_camp_pointer(
     pointer.preset = None;
     pointer.clicked = None;
     pointer.hovered = None;
+    pointer.resident = None;
     if pointer.terrain_stroke_finished {
         pointer.terrain_stroke.clear();
         pointer.terrain_stroke_finished = false;
@@ -1516,6 +1519,17 @@ fn read_camp_pointer(
         return;
     }
     let (camera, transform) = *camera;
+    if clicked
+        && village.camp.is_some()
+        && !painting
+        && !village.planning_roads()
+        && !village.construction.placing_project()
+    {
+        pointer.resident = resident_under_cursor(camera, transform, cursor, &actors);
+        if pointer.resident.is_some() {
+            return;
+        }
+    }
     let Ok(ray) = camera.viewport_to_world(transform, cursor) else {
         return;
     };
@@ -1555,6 +1569,39 @@ fn read_camp_pointer(
     if painting && mouse.just_released(MouseButton::Left) {
         pointer.terrain_stroke_finished = true;
     }
+}
+
+/// Screen-space pick radius around a resident's torso, in logical pixels.
+const RESIDENT_PICK_RADIUS: f32 = 26.0;
+
+/// Picks the visible resident whose torso is nearest the cursor on screen.
+fn resident_under_cursor(
+    camera: &Camera,
+    transform: &GlobalTransform,
+    cursor: Vec2,
+    actors: &Query<(&ArrivalActor, &GlobalTransform, &InheritedVisibility)>,
+) -> Option<usize> {
+    nearest_resident(
+        cursor,
+        actors
+            .iter()
+            .filter(|(_, _, visible)| visible.get())
+            .filter_map(|(actor, place, _)| {
+                let ArrivalActor::Resident(index) = *actor else {
+                    return None;
+                };
+                let torso = place.translation() + Vec3::Y * 0.8;
+                Some((index, camera.world_to_viewport(transform, torso).ok()?))
+            }),
+    )
+}
+
+fn nearest_resident(cursor: Vec2, residents: impl Iterator<Item = (usize, Vec2)>) -> Option<usize> {
+    residents
+        .map(|(index, screen)| (index, screen.distance(cursor)))
+        .filter(|(_, distance)| *distance <= RESIDENT_PICK_RADIUS)
+        .min_by(|a, b| a.1.total_cmp(&b.1))
+        .map(|(index, _)| index)
 }
 
 const CAMP_OFFSET: IVec2 = IVec2::new(-1, -3);
@@ -2391,6 +2438,11 @@ fn village_input(
                 },
                 keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]),
             );
+        } else if let Some(index) = pointer.resident
+            && !town.construction.menu
+        {
+            town.select_resident(index);
+            town.utility_panel = Some(UtilityPanel::Residents);
         } else if let Some(position) = pointer.clicked.map(|hit| hit.cell)
             && !town.construction.menu
         {
@@ -3707,6 +3759,15 @@ fn outdoor_animation_time(seconds: f64) -> f32 {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn clicking_picks_the_nearest_resident_within_reach() {
+        let cursor = Vec2::new(100.0, 100.0);
+        let residents = [(0, Vec2::new(120.0, 100.0)), (3, Vec2::new(105.0, 98.0))];
+        assert_eq!(nearest_resident(cursor, residents.into_iter()), Some(3));
+        let far = [(1, Vec2::new(100.0, 100.0 + RESIDENT_PICK_RADIUS + 1.0))];
+        assert_eq!(nearest_resident(cursor, far.into_iter()), None);
+    }
 
     #[test]
     fn downtime_preview_starts_an_evening_village_without_save_access() {
