@@ -1501,7 +1501,9 @@ fn fit_and_scroll_hud(
             node.max_width = px(640);
         }
     }
-    let available_height = (window.height() - 48. - toolbar_height).max(0.);
+    // Sheets start below the top bar and stop above the dock.
+    let available_height =
+        (window.height() - TOP_BAR_CLEARANCE - 18. - toolbar_height - 14.).max(0.);
     let max_height = px(available_height);
     if node.max_height != max_height {
         node.max_height = max_height;
