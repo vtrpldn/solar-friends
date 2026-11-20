@@ -13,6 +13,7 @@ pub(crate) enum Preview {
     Needs(UtilitiesPreview),
     Rest,
     Wildlife,
+    Scale(ScalePreview),
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
@@ -47,6 +48,14 @@ impl Preview {
                 "--needs-preview" => Self::Needs(UtilitiesPreview::default()),
                 "--rest-preview" => Self::Rest,
                 "--wildlife-preview" => Self::Wildlife,
+                "--scale-preview" => Self::Scale(match value() {
+                    None | Some("" | "default") => ScalePreview::Default,
+                    Some("homes") => ScalePreview::Homes,
+                    Some("new-homes") => ScalePreview::NewHomes,
+                    Some(_) => {
+                        return Err("--scale-preview expects default, homes, or new-homes.".into());
+                    }
+                }),
                 "--interactions" | "--land-seed" | "--lighting-hour" | "--lighting-rain" => {
                     utilities_option = Some(flag);
                     match flag {
@@ -115,6 +124,7 @@ impl Preview {
             Self::Needs(_) => "Needs preview",
             Self::Rest => "Rest preview",
             Self::Wildlife => "Wildlife preview",
+            Self::Scale(_) => "Scale preview",
         }
     }
 
@@ -124,6 +134,7 @@ impl Preview {
             Self::Utilities(options) => (Mode::Story, Some(options.seed), options.clock()),
             Self::Needs(options) => (Mode::Story, Some(options.seed), 200.0),
             Self::Arrival | Self::Rest | Self::Wildlife => (Mode::Story, Some(0), 0.0),
+            Self::Scale(_) => (Mode::Sandbox, Some(42), 400.0),
         };
         let mut scene = PreviewVillage::new(self.title(), mode, seed, clock);
         match self {
@@ -147,6 +158,11 @@ impl Preview {
                 app.insert_resource(crate::wildlife::WildlifePreview(
                     scene.village.session_serial,
                 ));
+            }
+            Self::Scale(variant) => {
+                prepare_scale(&mut scene, variant)?;
+                scene.village.paused = true;
+                scene.village.preview_rain = Some(false);
             }
         }
         scene.village.stock.sandbox = mode == Mode::Sandbox;
@@ -428,6 +444,90 @@ fn prepare_wildlife(scene: &mut PreviewVillage) {
     scene.focus(crate::construction::STOCKPILE + IVec2::new(0, 2), 1.0);
 }
 
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub(crate) enum ScalePreview {
+    Default,
+    Homes,
+    NewHomes,
+}
+
+fn prepare_scale(scene: &mut PreviewVillage, variant: ScalePreview) -> Result<(), String> {
+    const VILLAGE: &[(&str, i32, i32)] = &[
+        ("house", 44, 44),
+        ("home-family", 54, 44),
+        ("home-shared", 66, 44),
+        ("kitchen", 44, 55),
+        ("workshop", 56, 55),
+        ("warehouse", 66, 55),
+        ("garden", 44, 65),
+        ("greenhouse", 52, 65),
+        ("goat_pasture", 60, 65),
+        ("solar_farm", 72, 65),
+        ("rain-barrel", 40, 44),
+        ("wayfinding-sign", 40, 47),
+        ("supply-5", 40, 50),
+        ("orchard", 44, 77),
+        ("grove", 54, 77),
+    ];
+    const HOMES: &[(&str, i32, i32)] = &[
+        ("home-cottage", 35, 44),
+        ("home-longhouse", 85, 44),
+        ("house", 44, 43),
+        ("home-gable", 54, 43),
+        ("adobe-gable", 64, 43),
+        ("home-family", 74, 43),
+        ("home-veranda", 44, 55),
+        ("adobe-veranda", 54, 55),
+        ("home-courtyard", 64, 55),
+        ("home-shared", 76, 55),
+    ];
+    const NEW_HOMES: &[(&str, i32, i32)] = &[
+        ("home-studio", 35, 43),
+        ("home-lane", 47, 43),
+        ("home-garden", 59, 43),
+        ("home-ochre", 71, 43),
+        ("home-deep-porch", 83, 43),
+        ("home-blue-gallery", 35, 57),
+        ("home-paired", 47, 57),
+        ("home-broad-veranda", 59, 57),
+        ("home-shaded-retreat", 71, 57),
+        ("home-ranch", 83, 57),
+    ];
+    let (sites, streets, focus) = match variant {
+        ScalePreview::Default => (VILLAGE, &[(42, 74, 51)][..], IVec2::new(56, 57)),
+        ScalePreview::Homes => (HOMES, &[(42, 83, 51), (42, 83, 63)][..], IVec2::new(63, 52)),
+        ScalePreview::NewHomes => (
+            NEW_HOMES,
+            &[(35, 93, 51), (35, 93, 65)][..],
+            IVec2::new(62, 53),
+        ),
+    };
+    for &(start, end, z) in streets {
+        scene.order(&LabOrder::Road {
+            start: [start, z],
+            end: [end, z],
+        })?;
+    }
+    for &(key, x, z) in sites {
+        scene.build_at(key, IVec2::new(x, z), 0, None)?;
+    }
+
+    // V3 uses its current footbridge model at both comparison crossings.
+    for cell in [IVec2::new(6, 48), IVec2::new(5, 39)] {
+        scene.build_at("bridge", cell, 0, None)?;
+    }
+    scene
+        .village
+        .construction
+        .prepare_scale_preview(&scene.catalog);
+    scene.focus(focus, 46.0 / crate::CAMERA_HEIGHT);
+    scene.village.construction.record_event(
+        scene.village.clock,
+        "Physical-scale review · 2 m per tile.".into(),
+    );
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -577,6 +677,33 @@ mod tests {
             assert_eq!(
                 village.construction.resident_need_meters(index)[0],
                 ("Energy", 10.0)
+            );
+        }
+    }
+
+    #[test]
+    fn scale_preview_variants_start_paused_with_their_own_camera_and_roads() {
+        let catalog = Catalog::default();
+        for (flag, focus, roads, projects) in [
+            ("--scale-preview", Vec2::new(48.0, 50.0), 33, 50),
+            ("--scale-preview=homes", Vec2::new(62.0, 40.0), 84, 96),
+            ("--scale-preview=new-homes", Vec2::new(60.0, 42.0), 118, 130),
+        ] {
+            let app = start(&[flag]);
+            let village = app.world().resource::<Village>();
+            assert!(village.is_paused());
+            assert!(village.mode() == Some(Mode::Sandbox));
+            assert_eq!(village.clock, 400.0);
+            let view = village.camera_view.unwrap();
+            assert_eq!(view.target.xz(), focus);
+            assert_eq!(view.zoom * crate::CAMERA_HEIGHT, 46.0);
+            assert_eq!(
+                village.construction.road_project_counts(&catalog),
+                (roads, roads)
+            );
+            assert_eq!(
+                village.construction.finished_models(&catalog).count(),
+                projects
             );
         }
     }

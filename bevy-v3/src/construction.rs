@@ -350,6 +350,17 @@ pub struct Worker {
 }
 
 impl Construction {
+    pub(crate) fn prepare_scale_preview(&mut self, catalog: &Catalog) {
+        let road_work = catalog.projects["road"].work;
+        for plan in self.plans.iter_mut().filter(|plan| plan.key == "road") {
+            plan.work = road_work;
+        }
+        for (index, worker) in self.residents.iter_mut().enumerate() {
+            worker.position = Vec2::new(46.0 + index as f32, 51.0);
+        }
+        self.status.clear();
+    }
+
     pub(crate) fn prepare_downtime_preview(&mut self) {
         for (index, worker) in self.residents.iter_mut().enumerate() {
             let [x, z] = [[32., 35.], [34., 35.], [33., 36.], [32., 36.], [34., 36.]][index];
