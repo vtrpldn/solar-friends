@@ -127,7 +127,7 @@ impl Construction {
             } {
                 if !trip.boarded {
                     if !self.pickup_manifests[trip.vehicle].is_empty() {
-                        self.fill_construction_pickup(catalog, trip, false);
+                        self.fill_construction_pickup(catalog, trip);
                     }
                     self.add_trip_exports(catalog, &mut trip);
                 }
@@ -149,7 +149,7 @@ impl Construction {
             self.logistics_policy.waiting_since = None;
             self.logistics_policy.urgent = false;
         }
-        let freight_unaffordable = self.tick_construction_delivery(catalog, stock, clock);
+        self.tick_construction_delivery(catalog, stock, clock);
         let seed_freight_unaffordable = self.tick_seed_freight(stock, clock);
         if !crate::market::town_is_open(clock.seconds) {
             return;
@@ -160,18 +160,14 @@ impl Construction {
             .filter(|&vehicle| !self.active_trips().any(|trip| trip.vehicle == vehicle))
             .collect();
         for vehicle in available {
-            let Some(trip) = self.dispatch_trip(
-                catalog,
-                site,
-                clock,
-                vehicle,
-                (freight_unaffordable, seed_freight_unaffordable),
-            ) else {
+            let Some(trip) =
+                self.dispatch_trip(catalog, site, clock, vehicle, seed_freight_unaffordable)
+            else {
                 continue;
             };
             let slot = usize::from(self.trip.is_some());
             if !trip.market_order && trip.farm_bed.is_none() {
-                self.fill_construction_pickup(catalog, trip, freight_unaffordable);
+                self.fill_construction_pickup(catalog, trip);
             }
             self.set_trip(slot, Some(trip));
             self.upkeep.dispatch_vehicle(vehicle);
@@ -406,7 +402,7 @@ impl Construction {
         catalog: &Catalog,
         stock: &mut Stock,
         clock: TownClock,
-    ) -> bool {
+    ) {
         if let Some(delivery) = &self.construction_delivery {
             if clock.seconds >= delivery.eta {
                 let delivery = self.construction_delivery.take().expect("arrived freight");
@@ -428,7 +424,7 @@ impl Construction {
                 }
                 self.record_event(clock.seconds, "Construction supplies delivered.".into());
             }
-            return false;
+            return;
         }
         if !self.supplier_construction
             || self.trade.delivery.is_some()
@@ -439,7 +435,7 @@ impl Construction {
                     .ready(clock.seconds, cargo, FREIGHT_CAPACITY)
             })
         {
-            return false;
+            return;
         }
         let mut sites = Vec::new();
         let mut reserved = 0;
@@ -464,14 +460,14 @@ impl Construction {
             }
         }
         let Some((&site, additional_sites)) = sites.split_first() else {
-            return false;
+            return;
         };
         let freight = crate::market::freight_cents(clock.round_trip_km);
         if !self
             .market
             .can_replace_fares_with_freight(stock, reserved, freight)
         {
-            return true;
+            return;
         }
         self.market.release_fare(reserved);
         stock.debit(freight, crate::stock::CashKind::Freight);
@@ -485,7 +481,6 @@ impl Construction {
             clock.seconds,
             "Supplier dispatched construction supplies.".into(),
         );
-        false
     }
 
     pub(super) fn booked_construction_trip(&self, site: usize) -> Option<&TownTrip> {
@@ -519,12 +514,7 @@ impl Construction {
         }
     }
 
-    fn fill_construction_pickup(
-        &mut self,
-        catalog: &Catalog,
-        trip: TownTrip,
-        freight_unaffordable: bool,
-    ) {
+    fn fill_construction_pickup(&mut self, catalog: &Catalog, trip: TownTrip) {
         let first = trip.project;
         if Self::pending_construction_cargo(&self.plans[first]).is_none() {
             return;
@@ -539,9 +529,7 @@ impl Construction {
         }
         for index in std::iter::once(first).chain((0..self.plans.len()).filter(|&i| i != first)) {
             let plan = &self.plans[index];
-            if manifest.contains_key(&index)
-                || !self.can_collect_construction(catalog, index, plan, freight_unaffordable)
-            {
+            if manifest.contains_key(&index) || !self.can_collect_construction(index, plan) {
                 continue;
             }
             let Some(pending) = Self::pending_construction_cargo(plan) else {
@@ -941,20 +929,12 @@ impl Construction {
         }
     }
 
-    fn can_collect_construction(
-        &self,
-        catalog: &Catalog,
-        index: usize,
-        plan: &Blueprint,
-        freight_unaffordable: bool,
-    ) -> bool {
+    fn can_collect_construction(&self, index: usize, plan: &Blueprint) -> bool {
         !plan.removed
             && plan.pickups > 0
             && self.booked_construction_trip(index).is_none()
             && !self.construction_delivery_at(index)
-            && !(self.supplier_construction
-                && !freight_unaffordable
-                && Self::fits_construction_freight(catalog, plan))
+            && !self.supplier_construction
     }
 
     fn dispatch_trip(
@@ -963,7 +943,7 @@ impl Construction {
         site: ConstructionSite,
         clock: TownClock,
         vehicle: usize,
-        (freight_unaffordable, seed_freight_unaffordable): (bool, bool),
+        seed_freight_unaffordable: bool,
     ) -> Option<TownTrip> {
         let booked = |project, bed| {
             self.active_trips()
@@ -978,8 +958,7 @@ impl Construction {
             .iter()
             .enumerate()
             .find(|&(index, plan)| {
-                (ready || plan.purchase.is_none())
-                    && self.can_collect_construction(catalog, index, plan, freight_unaffordable)
+                (ready || plan.purchase.is_none()) && self.can_collect_construction(index, plan)
             })
             .map(|(index, _)| (index, None));
         let farming = self
@@ -1516,7 +1495,7 @@ mod tests {
         village.toggle_supplier_construction();
 
         let balance = stock.balance();
-        assert!(!village.tick_construction_delivery(&catalog, &mut stock, clock));
+        village.tick_construction_delivery(&catalog, &mut stock, clock);
         assert_eq!(
             village.construction_freight_cargo(0).unwrap()["stone"],
             limit
@@ -1704,7 +1683,7 @@ mod tests {
     }
 
     #[test]
-    fn construction_uses_reserved_pickup_when_freight_is_unaffordable() {
+    fn construction_waits_for_freight_until_the_player_switches_to_pickup() {
         let catalog = Catalog::default();
         let setup = WorldSetup::default();
         let mut stock = Stock::for_start(&setup, &catalog);
@@ -1735,6 +1714,12 @@ mod tests {
         village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
 
         assert!(village.construction_delivery.is_none());
+        assert!(village.active_trips().next().is_none());
+        assert_eq!(stock.balance(), freight);
+        assert_eq!(village.market.committed_fares(), reserved);
+        village.toggle_supplier_construction();
+        village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
+
         let trip = village.trip.expect("reserved pickup should be booked");
         assert_eq!(trip.project, 0);
         assert!(!trip.market_order);

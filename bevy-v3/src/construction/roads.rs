@@ -189,6 +189,15 @@ impl Construction {
         clock: TownClock,
         tiles: &mut [Blueprint],
     ) -> Result<(Stock, Market), String> {
+        if self.supplier_construction {
+            let sections = tiles.len() as u32;
+            let materials = catalog.projects["road"]
+                .materials
+                .iter()
+                .map(|(id, amount)| (id.clone(), amount * sections))
+                .collect();
+            self.construction_supply_quote(catalog, stock, clock, &materials)?;
+        }
         let mut stock = stock.clone();
         let mut market = self.market.clone();
         for tile in tiles {

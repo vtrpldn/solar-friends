@@ -98,8 +98,12 @@ impl Construction {
             } else {
                 format!("Vehicle {} booked for materials", trip.vehicle + 1)
             }
-        } else if self.supplier_construction && Self::fits_construction_freight(catalog, plan) {
-            "Waiting for supplier freight".into()
+        } else if self.supplier_construction && plan.pickups > 0 {
+            if Self::fits_construction_freight(catalog, plan) {
+                "Waiting for supplier freight".into()
+            } else {
+                "Switch to resident pickup to collect these materials".into()
+            }
         } else if plan.pickups > 0 {
             format!("{} town pickup(s) pending", plan.pickups)
         } else if plan.delivered < plan.loads {

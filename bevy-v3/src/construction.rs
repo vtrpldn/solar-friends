@@ -1065,6 +1065,12 @@ impl Construction {
             self.status = error.into();
             return;
         }
+        if self.supplier_construction
+            && let Err(error) = self.blueprint_supply_quote(catalog, stock, clock, definition)
+        {
+            self.status = error;
+            return;
+        }
         if let Err(error) =
             Self::reserve_project(&mut self.market, stock, catalog, &mut blueprint, clock)
         {
@@ -1077,17 +1083,7 @@ impl Construction {
             format!("{} built.", definition.name)
         } else if stock.sandbox {
             format!("{} planned.", definition.name)
-        } else if let Some(order) = &blueprint.purchase
-            && self
-                .construction_freight_cost(catalog, order.units.clone(), clock.round_trip_km)
-                .is_some_and(|(_, freight)| {
-                    self.market.can_replace_fares_with_freight(
-                        stock,
-                        blueprint.fare * u64::from(blueprint.pickups),
-                        freight,
-                    )
-                })
-        {
+        } else if self.supplier_construction && blueprint.pickups > 0 {
             format!(
                 "{} planned. Missing materials queued for supplier freight.",
                 definition.name
@@ -1300,9 +1296,10 @@ impl Construction {
             "R${:.2} including {trips} town pickup(s)",
             pickup_cost as f64 / 100.0
         );
-        if let Some((trips, freight)) =
-            self.construction_freight_cost(catalog, quote.units, clock.round_trip_km)
-        {
+        if self.supplier_construction {
+            let trips = Self::construction_freight_trips(catalog, quote.units)
+                .ok_or("Missing materials exceed supplier freight capacity.")?;
+            let freight = crate::market::freight_cents(clock.round_trip_km) * u64::from(trips);
             let freight_cost = quote.price + freight;
             if self
                 .market
@@ -1313,27 +1310,9 @@ impl Construction {
                     freight_cost as f64 / 100.0
                 ));
             }
-            return Ok(format!(
-                "{pickup} · Freight exceeds available expansion funds"
-            ));
+            return Err("Freight exceeds available expansion funds".into());
         }
         Ok(pickup)
-    }
-
-    fn construction_freight_cost(
-        &self,
-        catalog: &Catalog,
-        units: BTreeMap<String, u32>,
-        distance: u32,
-    ) -> Option<(u32, u64)> {
-        if !self.supplier_construction {
-            return None;
-        }
-        let trips = Self::construction_freight_trips(catalog, units)?;
-        Some((
-            trips,
-            crate::market::freight_cents(distance) * u64::from(trips),
-        ))
     }
 
     pub fn draw_project_site(
@@ -4001,7 +3980,7 @@ mod tests {
     }
 
     #[test]
-    fn placement_reports_pickup_when_the_quote_cannot_cover_freight() {
+    fn freight_selection_rejects_unaffordable_plans() {
         let setup = WorldSetup::default();
         let catalog = Catalog::default();
         let camp = IVec2::splat(36);
@@ -4040,12 +4019,22 @@ mod tests {
         assert!(
             construction
                 .blueprint_supply_quote(&catalog, &stock, clock, definition)
-                .unwrap()
+                .unwrap_err()
                 .contains("Freight exceeds available expansion funds")
         );
 
+        let balance = stock.balance();
         construction.plan(&catalog, &mut stock, site, IVec2::new(44, 36), clock);
+        assert!(construction.plans.is_empty());
+        assert_eq!(stock.balance(), balance);
+        assert!(
+            construction
+                .status
+                .contains("Freight exceeds available expansion funds")
+        );
 
+        construction.toggle_supplier_construction();
+        construction.plan(&catalog, &mut stock, site, IVec2::new(44, 36), clock);
         assert_eq!(construction.plans.len(), 1);
         assert!(construction.status.contains("ordered for town pickup"));
     }
