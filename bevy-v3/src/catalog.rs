@@ -184,6 +184,7 @@ pub struct Profile {
     pub role: String,
     pub bio: String,
     pub backstory: String,
+    pub effect: String,
     pub desire: String,
     pub motivation: String,
     pub fear: String,

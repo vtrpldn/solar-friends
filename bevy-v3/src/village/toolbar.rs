@@ -343,7 +343,13 @@ impl Action {
             Self::Page(_) if village.utility_panel == Some(UtilityPanel::Pantry) => {
                 village.pantry_batch_page.is_some()
             }
-            Self::Shift(_) | Self::Ledger => village.utility_panel == Some(UtilityPanel::Finances),
+            Self::Shift(_) => {
+                village.utility_panel == Some(UtilityPanel::Finances)
+                    || (!village.stock.sandbox
+                        && village.utility_panel == Some(UtilityPanel::Residents)
+                        && village.resident_profile == ResidentProfile::Overview)
+            }
+            Self::Ledger => village.utility_panel == Some(UtilityPanel::Finances),
             Self::ExpansionReserve => {
                 village.utility_panel == Some(UtilityPanel::Finances)
                     && !village.finance_history_open
@@ -1811,7 +1817,8 @@ fn refresh(
             Action::Resident(_) => show_residents || show_finances,
             Action::ResidentProfile(_) => show_residents,
             Action::WorkPriority(_) | Action::WorkerReservation(_) => show_residents,
-            Action::Shift(_) | Action::Ledger => show_finances,
+            Action::Shift(_) => !picker.open && action.available(&village),
+            Action::Ledger => show_finances,
             Action::ExpansionReserve | Action::GridFromFinances => {
                 show_finances && !village.finance_history_open
             }

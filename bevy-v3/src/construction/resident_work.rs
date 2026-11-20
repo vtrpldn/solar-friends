@@ -1636,8 +1636,35 @@ impl Construction {
         };
         let _ = write!(
             rows,
-            "\n\n{}\n{stage} · {}\n{thought}",
-            profile.bio, wish.label
+            "\n\n{} · {}\n{}\n\nNeeds · Energy {:.0}%",
+            NAMES[selected],
+            profile.role,
+            profile.traits.join(" · "),
+            worker.health.energy,
+        );
+        for (label, need) in [
+            ("Food", Need::Hunger),
+            ("Water", Need::Hydration),
+            ("Bladder", Need::Bladder),
+            ("Bowels", Need::Bowels),
+            ("Hygiene", Need::Hygiene),
+            ("Social", Need::Social),
+            ("Fun", Need::Fun),
+        ] {
+            let _ = write!(
+                rows,
+                " · {label} {:.0}%",
+                worker.health.levels[need as usize]
+            );
+        }
+        let _ = write!(
+            rows,
+            "\n\nOn my mind\n{thought}\n\nA personal hope\n{} · {stage}\n{}\n\n{}\n{}\nEnjoys {}.",
+            wish.label,
+            wish.reason,
+            profile.bio,
+            profile.effect,
+            profile.hobby.to_lowercase(),
         );
         use crate::production::crafting::Skill;
         for skill in [Skill::Woodworking, Skill::Basketry, Skill::Repair] {
@@ -1661,6 +1688,10 @@ impl Construction {
             .collect::<Vec<_>>();
         if !ties.is_empty() {
             let _ = write!(rows, "\n{}", ties.join("  |  "));
+        }
+        rows.push_str("\n\nRecent memories");
+        if mind.memories.is_empty() {
+            rows.push_str("\nMemories will appear after conversations, personal time, and meaningful village milestones.");
         }
         for memory in mind.memories.iter().take(3) {
             let _ = write!(rows, "\n{}", memory.text);
