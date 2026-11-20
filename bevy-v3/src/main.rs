@@ -1262,7 +1262,18 @@ mod tests {
             .unwrap();
         assert!(hud.0.contains("timber pieces"));
         assert!(!hud.0.contains("fastener packs"));
-        press_button(&mut app, "Done searching");
+        press_button(&mut app, "Trade · timber pieces");
+        assert!(app.world().resource::<village::Village>().trade_open());
+        assert!(
+            app.world_mut()
+                .query::<&Text>()
+                .iter(app.world())
+                .any(|text| text.0.contains("timber pieces · Pack")
+                    && text.0.contains("Freight total"))
+        );
+        press_button(&mut app, "Close panel");
+        press_button(&mut app, "Manage");
+        press_button(&mut app, "Stores");
         press_button(&mut app, "Show items and equipment");
         press_button(&mut app, "Show food");
         assert!(

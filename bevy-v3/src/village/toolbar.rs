@@ -1682,6 +1682,7 @@ fn refresh(
         || show_finances
         || show_pantry
         || show_trade
+        || inventory_items.iter().any(Option::is_some)
         || show_power
         || show_facility_switches
         || show_upkeep
