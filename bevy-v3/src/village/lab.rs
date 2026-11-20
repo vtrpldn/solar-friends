@@ -2771,6 +2771,88 @@ mod tests {
     }
 
     #[test]
+    fn lab_toolbar_wraps_without_covering_the_readout() {
+        use bevy::{
+            asset::AssetPlugin,
+            camera::{RenderTargetInfo, Viewport},
+            text::TextPlugin,
+            ui::{UiGlobalTransform, UiPlugin},
+        };
+
+        let mut app = App::new();
+        app.add_plugins((
+            MinimalPlugins,
+            AssetPlugin::default(),
+            bevy::input::InputPlugin,
+            bevy::window::WindowPlugin {
+                primary_window: None,
+                exit_condition: bevy::window::ExitCondition::DontExit,
+                ..default()
+            },
+            bevy::picking::DefaultPickingPlugins,
+            TextPlugin,
+            UiPlugin,
+            crate::ui_font::UiFontPlugin,
+        ))
+        .init_asset::<Image>()
+        .init_asset::<TextureAtlasLayout>()
+        .add_systems(Startup, setup_lab_window);
+        app.finish();
+        app.cleanup();
+        app.update();
+        let world = app.world_mut();
+        let font = world
+            .resource_mut::<Assets<Font>>()
+            .add(Font::try_from_bytes(include_bytes!("../outfit.ttf").to_vec()).unwrap());
+        for mut style in world.query::<&mut TextFont>().iter_mut(world) {
+            style.font = font.clone();
+        }
+        world
+            .query_filtered::<&mut Text, Without<LabControlLabel>>()
+            .single_mut(world)
+            .unwrap()
+            .0 = "Balance Lab readout".into();
+
+        let mut previous_height = 0.0;
+        for width in [1280, 800] {
+            let world = app.world_mut();
+            let mut camera = world.query::<&mut Camera>().single_mut(world).unwrap();
+            let size = UVec2::new(width, 600);
+            camera.computed.target_info = Some(RenderTargetInfo {
+                physical_size: size,
+                scale_factor: 1.0,
+            });
+            camera.viewport = Some(Viewport {
+                physical_size: size,
+                ..default()
+            });
+            app.update();
+
+            let world = app.world_mut();
+            let (toolbar, transform) = world
+                .query::<(&LabToolbar, &ComputedNode, &UiGlobalTransform)>()
+                .iter(world)
+                .find_map(|(kind, node, transform)| {
+                    (*kind == LabToolbar::Main).then_some((node, transform))
+                })
+                .unwrap();
+            let height = toolbar.size().y;
+            let toolbar_bottom = transform.translation.y + height * 0.5;
+            let (readout, transform) = world
+                .query_filtered::<(&ComputedNode, &UiGlobalTransform), (With<Text>, Without<LabControlLabel>)>()
+                .single(world)
+                .unwrap();
+            let readout_top = transform.translation.y - readout.size().y * 0.5;
+            assert!(height > previous_height, "toolbar should wrap at {width}px");
+            assert!(
+                readout_top >= toolbar_bottom,
+                "readout must stay below the toolbar"
+            );
+            previous_height = height;
+        }
+    }
+
+    #[test]
     fn trends_show_retained_steps_and_resource_ranges() {
         let catalog = Catalog::default();
         let scenario = serde_json::from_str(r#"{"steps":2}"#).unwrap();
