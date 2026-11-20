@@ -536,7 +536,11 @@ impl Construction {
                 "solar_farm" => 25.0,
                 _ => 0.0,
             };
-            let battery = def.materials.get("batteries").copied().unwrap_or(0) as f64
+            let battery = plan
+                .materials(catalog)
+                .get("batteries")
+                .copied()
+                .unwrap_or(0) as f64
                 + if self.utilities.has_rooftop_solar(index) {
                     1.0
                 } else {

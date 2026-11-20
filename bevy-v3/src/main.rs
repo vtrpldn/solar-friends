@@ -156,15 +156,15 @@ fn main() {
         return;
     }
     let mut app = App::new();
-    let downtime_preview = option
-        .as_deref()
-        .is_some_and(|flag| flag == "--downtime-preview");
-    if downtime_preview {
-        if args.next().is_some() {
-            eprintln!("Usage: solar-friends-v3 --downtime-preview");
+    let preview = match village::previews::Preview::parse(option.iter().chain(args.as_slice())) {
+        Ok(preview) => preview,
+        Err(error) => {
+            eprintln!("{error}");
             std::process::exit(2);
         }
-        if let Err(error) = village::start_downtime_preview(&mut app) {
+    };
+    if let Some(preview) = preview {
+        if let Err(error) = preview.start(&mut app) {
             eprintln!("{error}");
             std::process::exit(1);
         }
@@ -186,24 +186,20 @@ fn main() {
         )),
         ..WinitSettings::game()
     })
-    .add_plugins(
-        DefaultPlugins.set(WindowPlugin {
-            primary_window: Some(Window {
-                title: if downtime_preview {
-                    "Solar Friends V3 · Downtime preview"
-                } else {
-                    "Solar Friends V3"
-                }
-                .into(),
-                resolution: WindowResolution::new(1280, 800),
-                // On the web, draw into the page's canvas and follow its size.
-                canvas: cfg!(target_arch = "wasm32").then(|| "#solar-friends".into()),
-                fit_canvas_to_parent: true,
-                ..default()
-            }),
+    .add_plugins(DefaultPlugins.set(WindowPlugin {
+        primary_window: Some(Window {
+            title: preview.map_or_else(
+                || "Solar Friends V3".into(),
+                |scene| format!("Solar Friends V3 · {}", scene.title()),
+            ),
+            resolution: WindowResolution::new(1280, 800),
+            // On the web, draw into the page's canvas and follow its size.
+            canvas: cfg!(target_arch = "wasm32").then(|| "#solar-friends".into()),
+            fit_canvas_to_parent: true,
             ..default()
         }),
-    )
+        ..default()
+    }))
     .insert_resource(UiScale(theme::UI_SCALE))
     .add_plugins((
         WorldSetupPlugin,

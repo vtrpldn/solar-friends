@@ -241,7 +241,11 @@ fn sunlight(
     (time, mut cover): (Res<Time<Real>>, Local<CloudCover>),
 ) {
     let seconds = if setup.open { 400.0 } else { village.seconds() };
-    let weather = weather_at(seconds, setup.biome(), setup.seed());
+    let weather = if setup.open {
+        weather_at(seconds, setup.biome(), setup.seed())
+    } else {
+        village.weather(&setup)
+    };
     let hour = game_hour(seconds);
     let angle = ((hour - 6.0) * std::f64::consts::PI / 12.0) as f32;
     let height = sun_height(seconds) as f32;
@@ -339,7 +343,7 @@ fn rain(
     if setup.open || village.camp.is_none() {
         return;
     }
-    let weather = weather_at(village.seconds(), setup.biome(), setup.seed());
+    let weather = village.weather(&setup);
     if weather.rain <= 0.05 {
         return;
     }

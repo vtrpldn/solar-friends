@@ -21,6 +21,7 @@ mod thumbnails;
 use lens_picker::{LensPicker, MapLens};
 mod library_ui;
 mod livestock_motion;
+pub(crate) mod previews;
 mod projects_card;
 mod resident_meters;
 pub(crate) mod resident_motion;
@@ -87,83 +88,6 @@ const CAMP_SITES: [(KeyCode, IVec2); 3] = [
 ];
 
 pub struct VillagePlugin;
-
-pub(crate) fn start_downtime_preview(app: &mut App) -> Result<(), String> {
-    let setup = WorldSetup::default().session();
-    let catalog = Catalog::default();
-    let land = Land::generate(&setup);
-    let camp = CLEARING_CAMP;
-    let mut village = Village {
-        setup: Some(setup.clone()),
-        camp: Some(camp),
-        arrival_time: ARRIVAL_DURATION,
-        clock: 1300.0,
-        stock: Stock::for_start(&setup, &catalog),
-        rebuild_scene: true,
-        save_notice: "Downtime preview · This village is not saved.".into(),
-        ..default()
-    };
-    village.stock.cash = 3000;
-    village.stock.sandbox = true;
-    let clock = TownClock {
-        seconds: village.clock,
-        round_trip_km: setup.round_trip_km(),
-    };
-    for (key, x, z) in [
-        ("solar_farm", 27, 39),
-        ("well", 33, 39),
-        ("workshop", 38, 39),
-        ("warehouse", 45, 39),
-        ("garden", 45, 31),
-        ("eco_toilet", 39, 30),
-        ("banana_treatment", 43, 25),
-        ("wetland", 34, 30),
-        ("house", 27, 30),
-        ("streetlight", 30, 37),
-        ("fire-circle", 33, 36),
-    ] {
-        let terrain = village.terrain(&setup);
-        let ground = ConstructionSite {
-            terrain: &terrain,
-            land: &land,
-            camp,
-        };
-        let mut offsets = (-16i32..=16)
-            .flat_map(|dz| (-16i32..=16).map(move |dx| (dx, dz)))
-            .collect::<Vec<_>>();
-        offsets.sort_by_key(|&(dx, dz)| (dx.abs().max(dz.abs()), dx * dx + dz * dz));
-        if !offsets.into_iter().any(|(dx, dz)| {
-            village
-                .construction
-                .lab_order(
-                    &catalog,
-                    &mut village.stock,
-                    ground,
-                    clock,
-                    &crate::construction::LabOrder::Build {
-                        key: key.into(),
-                        x: x + dx,
-                        z: z + dz,
-                        rotation: 0,
-                        size: None,
-                    },
-                    setup.richness(),
-                )
-                .is_ok()
-        }) {
-            return Err(format!("Could not place {key} in the downtime preview"));
-        }
-    }
-    village.stock.sandbox = false;
-    village.construction.prepare_downtime_preview();
-    app.insert_resource(setup)
-        .insert_resource(village)
-        .insert_resource(SaveMenu {
-            preview: true,
-            ..default()
-        });
-    Ok(())
-}
 
 impl Plugin for VillagePlugin {
     fn build(&self, app: &mut App) {
@@ -289,6 +213,8 @@ pub struct Village {
     clock: f64,
     arrival_time: f32,
     paused: bool,
+    #[serde(skip)]
+    preview_rain: Option<bool>,
     speed: usize,
     #[serde(default)]
     pub(super) camera_view: Option<CameraView>,
@@ -629,6 +555,15 @@ impl Village {
 
     pub fn seconds(&self) -> f64 {
         self.clock
+    }
+
+    pub(crate) fn weather(&self, setup: &WorldSetup) -> crate::weather::Weather {
+        let mut weather = weather_at(self.clock, setup.biome(), setup.seed());
+        if let Some(rain) = self.preview_rain {
+            weather.rain = if rain { 1.0 } else { 0.0 };
+            weather.cloud = if rain { 0.85 } else { 0.0 };
+        }
+        weather
     }
 
     pub fn editing_terrain(&self) -> bool {
@@ -3036,6 +2971,7 @@ fn step(
     site: ConstructionSite,
     dt: f64,
 ) {
+    town.preview_rain = None;
     town.clock += dt;
     town.stock.replenish_sandbox(catalog);
     town.construction.refresh_resident_crowding(catalog, site);
@@ -3067,7 +3003,7 @@ fn step(
         seconds: town.clock,
         round_trip_km: setup.round_trip_km(),
     };
-    let raining = weather_at(town.clock, setup.biome(), setup.seed()).rain > 0.05;
+    let raining = town.weather(setup).rain > 0.05;
     town.construction
         .tick(catalog, &mut town.stock, site, clock, dt as f32, raining);
     if !town.stock.sandbox {
@@ -3881,22 +3817,6 @@ mod tests {
         assert_eq!(nearest_resident(cursor, residents.into_iter()), Some(3));
         let far = [(1, Vec2::new(100.0, 100.0 + RESIDENT_PICK_RADIUS + 1.0))];
         assert_eq!(nearest_resident(cursor, far.into_iter()), None);
-    }
-
-    #[test]
-    fn downtime_preview_starts_an_evening_village_without_save_access() {
-        let mut app = App::new();
-        start_downtime_preview(&mut app).unwrap();
-        let world = app.world();
-        let village = world.resource::<Village>();
-        let menu = world.resource::<SaveMenu>();
-        assert_eq!(village.camp, Some(CLEARING_CAMP));
-        assert!(village.mode() == Some(Mode::Story));
-        assert_eq!(crate::weather::game_minutes(village.clock), 1125);
-        assert!(!village.stock.sandbox);
-        assert!(menu.continue_path(Mode::Story).is_err());
-        assert!(menu.directory(Mode::Story).is_err());
-        save_session(menu, village, &Catalog::default()).unwrap();
     }
 
     #[test]
