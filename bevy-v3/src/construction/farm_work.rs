@@ -1558,6 +1558,47 @@ mod resize_tests {
     }
 
     #[test]
+    fn queued_bed_work_claims_an_available_resident_before_construction() {
+        let catalog = Catalog::default();
+        let mut setup = WorldSetup::default();
+        setup.mode = crate::setup::Mode::Sandbox;
+        let camp = IVec2::new(36, 36);
+        let terrain = setup.terrain().with_camp(camp);
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut village = Construction::default();
+        let mut garden = village.proposed_site(&catalog, "garden", IVec2::new(44, 36));
+        garden.work = catalog.projects["garden"].work;
+        garden.delivered = garden.loads;
+        village.plans.push(garden);
+        let well = village.proposed_site(&catalog, "well", IVec2::new(53, 36));
+        village.plans.push(well);
+        village.tick_crops(&catalog, &setup, 0.0, 0.0);
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
+        village
+            .queue_bed_job(&catalog, &mut stock, (0, 0, FarmAction::Prepare), clock)
+            .unwrap();
+        for (index, resident) in village.residents.iter_mut().enumerate() {
+            resident.position = SUPPLY_SPOTS[index].as_vec2();
+            resident.health.energy = if index == 0 { 100.0 } else { 0.0 };
+        }
+        village.set_worker_reservation(true, 0);
+        village.set_worker_reservation(false, 0);
+        village.set_work_priority(WorkGroup::Construction, 3);
+        village.tick(&catalog, &mut stock, site, clock, 0.1, false);
+        assert_eq!(village.farming.jobs[0].worker, Some(0));
+        assert!(village.residents[0].assignment.is_none());
+    }
+
+    #[test]
     fn queued_bed_work_locks_watering_and_residue_settings() {
         let catalog = Catalog::default();
         let setup = WorldSetup::default();
