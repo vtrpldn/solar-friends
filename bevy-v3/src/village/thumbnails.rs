@@ -94,10 +94,12 @@ fn spawn(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
         RenderLayers::from_layers(&(FIRST_LAYER..FIRST_LAYER + SLOTS).collect::<Vec<_>>()),
     ));
     let images = std::array::from_fn(|slot| {
+        // Match the window's swapchain format so thumbnails reuse the village's compiled
+        // pipelines; a different format recompiled every material and stalled ~1 s.
         let image = images.add(Image::new_target_texture(
             160,
             120,
-            TextureFormat::Rgba8UnormSrgb,
+            TextureFormat::Bgra8UnormSrgb,
             None,
         ));
         commands.spawn((
