@@ -196,6 +196,8 @@ enum GardenAction {
     PlaceAnother,
     Clear,
     Position,
+    ApplyPosition,
+    CancelPosition,
     Cancel,
     Undo,
     Redo,
@@ -486,6 +488,8 @@ fn setup(
                 ("Place another", GardenAction::PlaceAnother),
                 ("Deselect", GardenAction::Clear),
                 ("Exact position", GardenAction::Position),
+                ("Apply position", GardenAction::ApplyPosition),
+                ("Cancel position", GardenAction::CancelPosition),
                 ("Cancel placement", GardenAction::Cancel),
                 ("Undo", GardenAction::Undo),
                 ("Redo", GardenAction::Redo),
@@ -546,34 +550,37 @@ fn update_garden_buttons(
         };
         let editing_text = garden.catalog_open || garden.coordinates.is_some();
         let selected_prop = garden.selected.is_some() && garden.pending.is_none();
-        let visible = !editing_text
-            && match action {
-                GardenAction::Choose(_)
-                | GardenAction::Gallery
-                | GardenAction::Overview
-                | GardenAction::TurnLeft
-                | GardenAction::TurnRight
-                | GardenAction::ZoomIn
-                | GardenAction::ZoomOut
-                | GardenAction::Grid
-                | GardenAction::Night
-                | GardenAction::RestoreGallery
-                | GardenAction::Export
-                | GardenAction::Import
-                | GardenAction::PlayPause => true,
-                GardenAction::Resident
-                | GardenAction::Interaction
-                | GardenAction::Send
-                | GardenAction::Nearby => can_rehearse,
-                GardenAction::Stop => rehearsal.has_task(),
-                GardenAction::Catalog => garden.pending.is_none(),
-                GardenAction::LoadLandscape => garden.layout.biome != "flat",
-                GardenAction::Rotate => selected_prop || garden.pending.is_some(),
-                GardenAction::Cancel => garden.pending.is_some(),
-                GardenAction::Undo => !garden.past.is_empty(),
-                GardenAction::Redo => !garden.future.is_empty(),
-                _ => selected_prop,
-            };
+        let visible = match action {
+            GardenAction::ApplyPosition | GardenAction::CancelPosition => {
+                garden.coordinates.is_some()
+            }
+            _ if editing_text => false,
+            GardenAction::Choose(_)
+            | GardenAction::Gallery
+            | GardenAction::Overview
+            | GardenAction::TurnLeft
+            | GardenAction::TurnRight
+            | GardenAction::ZoomIn
+            | GardenAction::ZoomOut
+            | GardenAction::Grid
+            | GardenAction::Night
+            | GardenAction::RestoreGallery
+            | GardenAction::Export
+            | GardenAction::Import
+            | GardenAction::PlayPause => true,
+            GardenAction::Resident
+            | GardenAction::Interaction
+            | GardenAction::Send
+            | GardenAction::Nearby => can_rehearse,
+            GardenAction::Stop => rehearsal.has_task(),
+            GardenAction::Catalog => garden.pending.is_none(),
+            GardenAction::LoadLandscape => garden.layout.biome != "flat",
+            GardenAction::Rotate => selected_prop || garden.pending.is_some(),
+            GardenAction::Cancel => garden.pending.is_some(),
+            GardenAction::Undo => !garden.past.is_empty(),
+            GardenAction::Redo => !garden.future.is_empty(),
+            _ => selected_prop,
+        };
         node.display = if visible {
             Display::Flex
         } else {
@@ -680,12 +687,12 @@ fn edit(
         && cursor.is_some()
         && !over_toolbar;
     if let Some(mut input) = garden.coordinates.take() {
-        if pressed(Escape) {
+        if pressed(Escape) || clicked_action(GardenAction::CancelPosition) {
             typing.clear();
             garden.status.clear();
             return;
         }
-        if pressed(Enter) || pressed(NumpadEnter) {
+        if pressed(Enter) || pressed(NumpadEnter) || clicked_action(GardenAction::ApplyPosition) {
             typing.clear();
             if let Some(index) = garden.selected {
                 match exact_position(&input, &garden.layout.props[index], &models) {
@@ -1414,8 +1421,8 @@ fn render(
         text.0 = format!(
             "Exact placement
 Enter one-based column and row, separated by a space.
-Column Row: {input}▏
-Enter place   Esc cancel
+Column Row: {input}
+Enter apply   Esc cancel
 {}",
             garden.status
         );
