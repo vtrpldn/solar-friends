@@ -1426,11 +1426,10 @@ fn handle_buttons(
                         seconds: village.clock,
                         round_trip_km: setup.round_trip_km(),
                     };
-                    if let TradeOrder::Buy { freight } = order
-                        && village
-                            .construction
-                            .selected_purchase_issue(&catalog, &village.stock, clock, freight)
-                            .is_some()
+                    if village
+                        .construction
+                        .selected_trade_issue(&catalog, &village.stock, clock, order)
+                        .is_some()
                     {
                         continue;
                     }
@@ -1701,18 +1700,9 @@ fn refresh(
     if saves.open || sound.open {
         menu.display = Display::None;
     }
-    let purchase_issues = if show_trade && !show_trade_queue {
-        let clock = TownClock {
-            seconds: village.clock,
-            round_trip_km: setup.round_trip_km(),
-        };
-        [false, true].map(|freight| {
-            village
-                .construction
-                .selected_purchase_issue(&catalog, &village.stock, clock, freight)
-        })
-    } else {
-        [None, None]
+    let trade_clock = TownClock {
+        seconds: village.clock,
+        round_trip_km: setup.round_trip_km(),
     };
     let mut action_details = String::new();
     for (&action, &interaction, children, parent, mut background, mut node) in &mut buttons {
@@ -1841,13 +1831,18 @@ fn refresh(
         if !show {
             continue;
         }
-        let purchase_issue = match action {
-            Action::Trade(TradeOrder::Buy { freight }) => purchase_issues[usize::from(freight)],
+        let trade_issue = match action {
+            Action::Trade(order) => village.construction.selected_trade_issue(
+                &catalog,
+                &village.stock,
+                trade_clock,
+                order,
+            ),
             _ => None,
         };
         if interaction != Interaction::None {
             let description = match action {
-                Action::Trade(TradeOrder::Buy { .. }) => purchase_issue.map(str::to_owned),
+                Action::Trade(_) => trade_issue.map(str::to_owned),
                 Action::CampPreset(index) => Some(
                     [
                         "Cool afternoons, but a longer walk from the unloading point.",
@@ -1876,7 +1871,7 @@ fn refresh(
                 action_details = description;
             }
         }
-        background.0 = if purchase_issue.is_some()
+        background.0 = if trade_issue.is_some()
             || !action.available(&village)
                 && !matches!(
                     action,

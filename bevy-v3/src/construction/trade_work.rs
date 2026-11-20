@@ -373,24 +373,44 @@ impl Construction {
         self.trade.purchase_slot(freight)
     }
 
-    pub(crate) fn selected_purchase_issue(
+    pub(crate) fn selected_trade_issue(
         &self,
         catalog: &Catalog,
         stock: &Stock,
         clock: TownClock,
-        freight: bool,
+        order: TradeOrder,
     ) -> Option<&'static str> {
         let options = Trade::tradable(catalog);
         let item = options.get(self.trade.selected)?;
-        let fare = if freight {
-            freight_cents(clock.round_trip_km)
-        } else if self.sale_trip_for_return_purchase().is_some() {
-            0
-        } else {
-            fare_cents(clock.round_trip_km)
-        };
-        self.purchase_quote(catalog, stock, clock, item.id, freight, fare)
-            .err()
+        match order {
+            TradeOrder::Buy { freight } => {
+                let fare = if freight {
+                    freight_cents(clock.round_trip_km)
+                } else if self.sale_trip_for_return_purchase().is_some() {
+                    0
+                } else {
+                    fare_cents(clock.round_trip_km)
+                };
+                self.purchase_quote(catalog, stock, clock, item.id, freight, fare)
+                    .err()
+            }
+            TradeOrder::Sell { hold_for_pickup } => self
+                .trade
+                .quote_sale_order(catalog, stock, item.id, clock.day(), 0)
+                .err()
+                .or_else(|| {
+                    (!hold_for_pickup
+                        && !self
+                            .market
+                            .can_hold_fare(stock, fare_cents(clock.round_trip_km)))
+                    .then_some("Shared savings cannot cover the trip fuel.")
+                }),
+            TradeOrder::Cancel => {
+                let booked = self.booked_trade_orders();
+                (!(0..self.trade.orders.len()).any(|index| !booked.contains(&index)))
+                    .then_some("No unbooked order to cancel.")
+            }
+        }
     }
 
     fn purchase_quote(
@@ -845,6 +865,28 @@ mod tests {
             seconds: 0.0,
             round_trip_km: 500,
         };
+        assert_eq!(
+            village.selected_trade_issue(
+                &catalog,
+                &stock,
+                clock,
+                TradeOrder::Sell {
+                    hold_for_pickup: false
+                }
+            ),
+            Some("Shared savings cannot cover the trip fuel.")
+        );
+        assert_eq!(
+            village.selected_trade_issue(
+                &catalog,
+                &stock,
+                clock,
+                TradeOrder::Sell {
+                    hold_for_pickup: true
+                }
+            ),
+            None
+        );
         let (_, gross) = village.trade.quote(&catalog, &stock, "wood", 0, 0).unwrap();
         let loss = fare_cents(clock.round_trip_km) - gross;
         assert!(
@@ -925,11 +967,21 @@ mod tests {
             .buy_from_town(&catalog, &mut stock, clock, "wood", true)
             .unwrap();
         assert_eq!(
-            village.selected_purchase_issue(&catalog, &stock, clock, true),
+            village.selected_trade_issue(
+                &catalog,
+                &stock,
+                clock,
+                TradeOrder::Buy { freight: true }
+            ),
             Some("A freight order is already on the way.")
         );
         assert_eq!(
-            village.selected_purchase_issue(&catalog, &stock, clock, false),
+            village.selected_trade_issue(
+                &catalog,
+                &stock,
+                clock,
+                TradeOrder::Buy { freight: false }
+            ),
             None
         );
         assert!(
