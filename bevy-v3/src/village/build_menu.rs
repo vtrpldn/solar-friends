@@ -53,17 +53,27 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 padding: UiRect::all(px(14)),
                 flex_direction: FlexDirection::Column,
                 row_gap: px(5),
+                overflow: Overflow::scroll_y(),
                 ..default()
             },
+            ScrollPosition::default(),
             BackgroundColor(Color::srgb_u8(31, 45, 35)),
         ))
         .with_children(|panel| {
-            panel.spawn((Text::new("Blueprints"), ui_font(&assets, 20.0)));
+            panel.spawn((
+                Text::new("Blueprints"),
+                ui_font(&assets, 20.0),
+                Node {
+                    flex_shrink: 0.,
+                    ..default()
+                },
+            ));
             button(panel, &assets, BuildButton::ConstructionPolicy, "");
             button(panel, &assets, BuildButton::SupplierConstruction, "");
             panel
                 .spawn(Node {
                     column_gap: px(5),
+                    flex_shrink: 0.,
                     ..default()
                 })
                 .with_children(|row| {
@@ -77,6 +87,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
             panel
                 .spawn(Node {
                     column_gap: px(5),
+                    flex_shrink: 0.,
                     ..default()
                 })
                 .with_children(|row| {
@@ -113,6 +124,7 @@ fn button(
             Button,
             Node {
                 padding: UiRect::axes(px(10), px(7)),
+                flex_shrink: 0.,
                 ..default()
             },
             BackgroundColor(Color::srgb_u8(58, 78, 61)),
@@ -171,7 +183,11 @@ fn refresh(
         Res<SoundSettings>,
     ),
     village: Res<Village>,
-    mut panel: Single<&mut Node, With<BuildPanel>>,
+    (window, scroll): (
+        Single<&Window, With<PrimaryWindow>>,
+        Res<bevy::input::mouse::AccumulatedMouseScroll>,
+    ),
+    mut panel: Single<(&mut Node, &mut ScrollPosition, &Interaction), With<BuildPanel>>,
     mut buttons: Query<
         (
             &BuildButton,
@@ -186,14 +202,22 @@ fn refresh(
     mut details: Single<(&mut Node, &mut Text), BlueprintDetailsFilter>,
 ) {
     let (detail_node, detail_text) = &mut *details;
+    let (panel, position, interaction) = &mut *panel;
+    let max_height = px((window.height() - 40.).max(0.));
+    if panel.max_height != max_height {
+        panel.max_height = max_height;
+    }
     detail_node.display = Display::None;
     if !visible(&setup, &village, &saves, &sound) {
         panel.display = Display::None;
+        position.y = 0.;
         return;
     }
     panel.display = Display::Flex;
     let projects = village.construction.build_rows(&catalog);
+    let mut hovered = **interaction != Interaction::None;
     for (button, children, interaction, mut node, mut color) in &mut buttons {
+        hovered |= *interaction != Interaction::None && node.display != Display::None;
         color.0 = match interaction {
             Interaction::None => Color::srgb_u8(58, 78, 61),
             Interaction::Hovered => Color::srgb_u8(83, 110, 76),
@@ -266,6 +290,13 @@ fn refresh(
         {
             text.set_if_neq(Text::new(label));
         }
+    }
+    if hovered && scroll.delta.y != 0. {
+        let step = match scroll.unit {
+            bevy::input::mouse::MouseScrollUnit::Line => 34.,
+            bevy::input::mouse::MouseScrollUnit::Pixel => 1.,
+        };
+        position.y = (position.y - scroll.delta.y * step).max(0.);
     }
 }
 
