@@ -527,6 +527,13 @@ impl Utilities {
             .filter_map(|(&id, node)| node.capacity.iter().any(|&n| n > 0.0).then_some(id))
     }
 
+    /// Buildings that generate, store or draw power, camp first.
+    pub fn power_ids(&self) -> impl Iterator<Item = usize> + '_ {
+        self.nodes.iter().filter_map(|(&id, node)| {
+            (id == 0 || node.matches_view(NetworkView::Power)).then_some(id)
+        })
+    }
+
     pub fn water_at(&self, cell: IVec2) -> Option<usize> {
         self.water_ids().find(|id| {
             let node = &self.nodes[id];

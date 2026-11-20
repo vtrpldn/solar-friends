@@ -724,6 +724,57 @@ impl Construction {
         text
     }
 
+    /// One line per power or water building, like V2's network cards.
+    pub fn utility_site_list(&self, catalog: &Catalog, power: bool) -> String {
+        use std::fmt::Write;
+        const VISIBLE_SITES: usize = 12;
+        let ids: Vec<usize> = if power {
+            self.utilities.power_ids().collect()
+        } else {
+            self.utilities.water_ids().collect()
+        };
+        if ids.is_empty() {
+            return String::new();
+        }
+        let mut text = format!("\nBuildings · {}", ids.len());
+        for &id in ids.iter().take(VISIBLE_SITES) {
+            let name = self.connection_site_name(catalog, id);
+            if power {
+                if let Some(status) = self.utilities.power_site_summary(id) {
+                    let _ = write!(text, "\n{name} · {status}");
+                }
+                continue;
+            }
+            let Some(site) = self.utilities.water_site(id) else {
+                continue;
+            };
+            let _ = write!(text, "\n{name}");
+            for (channel, label) in ["Drinking", "Irrigation", "Greywater", "Sewage"]
+                .into_iter()
+                .enumerate()
+            {
+                if site.capacity[channel] > 0.0 {
+                    let _ = write!(
+                        text,
+                        " · {label} {:.0}/{:.0} L",
+                        site.levels[channel], site.capacity[channel]
+                    );
+                }
+            }
+            if !site.enabled {
+                text.push_str(" · Switched off");
+            }
+        }
+        if ids.len() > VISIBLE_SITES {
+            let _ = write!(
+                text,
+                "\n{} more · Ctrl+Page Up/Down with a map lens to visit each",
+                ids.len() - VISIBLE_SITES
+            );
+        }
+        text
+    }
+
     pub fn power_shortage_summary(&self, catalog: &Catalog) -> String {
         use std::fmt::Write;
         const VISIBLE_SHORTAGES: usize = 4;
@@ -1392,6 +1443,21 @@ impl Construction {
 mod tests {
     use super::*;
     use crate::setup::WorldSetup;
+
+    #[test]
+    fn utility_panels_list_each_building_with_its_levels() {
+        let catalog = Catalog::default();
+        let mut construction = Construction::default();
+        construction.utilities.sync(std::iter::empty());
+        let water = construction.utility_site_list(&catalog, false);
+        assert!(
+            water.starts_with("\nBuildings · 1\nCamp · Drinking"),
+            "{water}"
+        );
+        assert!(water.contains(" L"));
+        let power = construction.utility_site_list(&catalog, true);
+        assert!(power.starts_with("\nBuildings · 1\nCamp · "), "{power}");
+    }
 
     #[test]
     fn waste_attention_shows_each_tanks_volume_and_capacity() {

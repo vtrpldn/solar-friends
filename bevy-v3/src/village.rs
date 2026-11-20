@@ -3097,6 +3097,7 @@ fn show_hud(
                 label.push_str(&village.power_notice);
             }
             label.push_str(&village.construction.power_shortage_summary(&catalog));
+            label.push_str(&village.construction.utility_site_list(&catalog, true));
             label.push_str(&village.construction.queued_installation_hint(true));
         }
         Some(UtilityPanel::Projects) => {
@@ -3268,6 +3269,7 @@ fn show_hud(
                     .sanitation_status(village.construction.residents_needing_sanitation()),
             );
             label.push_str(&village.construction.waste_tank_summary(&catalog));
+            label.push_str(&village.construction.utility_site_list(&catalog, false));
             label.push_str(&village.construction.queued_installation_hint(false));
             label.push_str(&village.construction.connection_summary(
                 &catalog,
