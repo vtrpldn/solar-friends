@@ -611,9 +611,7 @@ impl Runner {
     }
 
     fn output_path(&self, kind: &str) -> io::Result<std::path::PathBuf> {
-        let nonce = std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .map_err(io::Error::other)?;
+        let nonce = crate::wall_clock::since_epoch();
         Ok(crate::save::location(self.setup.mode)?
             .with_file_name(format!("lab-{kind}-{}.json", nonce.as_nanos())))
     }
@@ -839,7 +837,7 @@ fn setup_lab_window(mut commands: Commands, assets: Res<AssetServer>) {
                                             padding: UiRect::axes(px(12), px(8)),
                                             ..default()
                                         },
-                                        BackgroundColor(Color::srgb_u8(62, 83, 65)),
+                                        BackgroundColor(crate::theme::BUTTON),
                                     ))
                                     .with_child((
                                         Text::new(label),

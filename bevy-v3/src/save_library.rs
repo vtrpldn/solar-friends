@@ -1,7 +1,6 @@
 use std::{
     fs, io,
     path::{Path, PathBuf},
-    time::{SystemTime, UNIX_EPOCH},
 };
 
 use bevy::prelude::*;
@@ -365,8 +364,5 @@ fn saved_age(now: u64, updated: u64) -> String {
 }
 
 fn timestamp() -> u64 {
-    SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .unwrap_or_default()
-        .as_nanos() as u64
+    crate::wall_clock::since_epoch().as_nanos() as u64
 }

@@ -356,7 +356,7 @@ fn setup(
             padding: UiRect::all(px(16)),
             ..default()
         },
-        BackgroundColor(Color::srgb_u8(31, 45, 35)),
+        BackgroundColor(crate::theme::PAPER),
     ));
     commands
         .spawn((
@@ -400,7 +400,7 @@ fn setup(
                             padding: UiRect::axes(px(9), px(5)),
                             ..default()
                         },
-                        BackgroundColor(Color::srgb_u8(62, 83, 65)),
+                        BackgroundColor(crate::theme::BUTTON),
                     ))
                     .with_child((Text::new(label), ui_font(&assets, 15.)));
             }

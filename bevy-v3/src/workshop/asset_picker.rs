@@ -103,7 +103,7 @@ fn spawn_picker(mut commands: Commands, assets: &AssetServer, categories: &[Stri
                 ..default()
             },
             GlobalZIndex(1),
-            BackgroundColor(Color::srgb_u8(31, 45, 35)),
+            BackgroundColor(crate::theme::PAPER),
         ))
         .with_children(|panel| {
             panel.spawn((Heading, Text::default(), ui_font(assets, 16.)));
@@ -147,7 +147,7 @@ fn button(parent: &mut ChildSpawnerCommands, assets: &AssetServer, action: Actio
                 padding: UiRect::axes(px(8), px(4)),
                 ..default()
             },
-            BackgroundColor(Color::srgb_u8(62, 83, 65)),
+            BackgroundColor(crate::theme::BUTTON),
         ))
         .with_child((Text::new(label), ui_font(assets, 15.)));
 }
@@ -218,9 +218,9 @@ impl PickerView<'_, '_> {
                             )));
                         }
                         background.0 = if row == search.row {
-                            Color::srgb_u8(103, 123, 85)
+                            crate::theme::ACTIVE
                         } else {
-                            Color::srgb_u8(62, 83, 65)
+                            crate::theme::BUTTON
                         };
                         true
                     } else {

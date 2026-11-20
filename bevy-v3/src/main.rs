@@ -35,6 +35,7 @@ mod trade;
 mod ui_font;
 mod utilities;
 mod village;
+mod wall_clock;
 mod weather;
 mod wildlife;
 mod workshop;

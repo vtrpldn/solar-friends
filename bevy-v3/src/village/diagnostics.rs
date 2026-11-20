@@ -3,7 +3,6 @@ use std::{
     path::PathBuf,
     process::{Command, Stdio},
     time::Duration,
-    time::{SystemTime, UNIX_EPOCH},
 };
 
 use serde::Serialize;
@@ -51,9 +50,7 @@ pub(super) fn copy_notice(village: &Village, catalog: &Catalog, window: &Window)
 }
 
 fn capture_time() -> io::Result<Duration> {
-    SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .map_err(io::Error::other)
+    Ok(crate::wall_clock::since_epoch())
 }
 
 fn export(village: &Village, catalog: &Catalog, window: &Window) -> io::Result<PathBuf> {

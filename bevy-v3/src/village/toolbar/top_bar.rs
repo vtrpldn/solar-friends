@@ -57,7 +57,11 @@ pub(super) fn visible(
     saves: &SaveMenu,
     sound: &SoundSettings,
 ) -> bool {
-    !setup.open && !saves.open && !sound.open && village.setup.is_some()
+    !setup.open
+        && !saves.open
+        && !sound.open
+        && village.setup.is_some()
+        && (village.camp.is_some() || village.arrival_time >= ARRIVAL_DURATION)
 }
 
 pub(super) fn key_chip(parent: &mut ChildSpawnerCommands, assets: &AssetServer, key: &str) {

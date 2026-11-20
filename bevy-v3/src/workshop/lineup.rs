@@ -157,7 +157,6 @@ fn setup(
             Nameplate(position),
             Text::new(names[column]),
             TextLayout::new_with_justify(Justify::Center),
-            TextColor(Color::srgb_u8(25, 42, 33)),
             ui_font(&assets, 20.),
             BackgroundColor(Color::srgba(0.93, 0.94, 0.85, 0.88)),
             Node {
@@ -212,7 +211,7 @@ fn setup(
                             height: px(14),
                             ..default()
                         },
-                        BackgroundColor(Color::srgb_u8(62, 83, 65)),
+                        BackgroundColor(crate::theme::BUTTON),
                     ))
                     .with_child((
                         ScrubProgress,
@@ -260,7 +259,7 @@ fn preview_button(
                 padding: UiRect::axes(px(9), px(4)),
                 ..default()
             },
-            BackgroundColor(Color::srgb_u8(62, 83, 65)),
+            BackgroundColor(crate::theme::BUTTON),
         ))
         .with_child((Text::new(label), ui_font(assets, 15.)));
 }

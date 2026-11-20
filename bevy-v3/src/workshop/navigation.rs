@@ -44,15 +44,16 @@ fn spawn_navigation(mut commands: Commands, assets: Res<AssetServer>, current: A
         .with_children(|bar| {
             for tool in [ArtTool::Game].into_iter().chain(ArtTool::ALL) {
                 let mut item = bar.spawn((
-                    Node {
+                    crate::theme::button_node(Node {
                         padding: UiRect::axes(px(10), px(5)),
                         ..default()
-                    },
-                    BackgroundColor(if tool == current {
-                        Color::srgb_u8(103, 123, 85)
-                    } else {
-                        Color::srgb_u8(62, 83, 65)
                     }),
+                    BackgroundColor(if tool == current {
+                        crate::theme::ACTIVE
+                    } else {
+                        crate::theme::BUTTON
+                    }),
+                    BorderColor::all(crate::theme::EDGE),
                 ));
                 if tool != current {
                     item.insert((Button, tool));
@@ -126,33 +127,39 @@ fn spawn_tools(mut commands: Commands, assets: Res<AssetServer>) {
     commands
         .spawn((
             ArtTools,
-            Node {
+            crate::theme::panel_node(Node {
                 display: Display::None,
                 position_type: PositionType::Absolute,
                 right: px(32),
                 bottom: px(32),
-                width: px(304),
+                width: px(280),
                 flex_direction: FlexDirection::Column,
                 row_gap: px(6),
                 padding: UiRect::all(px(16)),
                 ..default()
-            },
-            BackgroundColor(Color::srgb_u8(31, 45, 35)),
+            }),
+            crate::theme::panel(),
         ))
         .with_children(|panel| {
-            panel.spawn((Text::new("Tools"), ui_font(&assets, 20.)));
+            panel.spawn((
+                Text::new("Art tools"),
+                crate::ui_font::ui_font_weight(&assets, 18., 750),
+            ));
             for tool in ArtTool::ALL.into_iter().chain([ArtTool::BalanceLab]) {
                 panel
                     .spawn((
                         tool,
                         Button,
-                        Node {
-                            padding: UiRect::axes(px(14), px(7)),
+                        crate::theme::button_node(Node {
+                            padding: UiRect::axes(px(12), px(6)),
                             ..default()
-                        },
-                        BackgroundColor(Color::srgb_u8(62, 83, 65)),
+                        }),
+                        crate::theme::button(),
                     ))
-                    .with_child((Text::new(tool.label()), ui_font(&assets, 17.)));
+                    .with_child((
+                        Text::new(tool.label()),
+                        crate::ui_font::ui_font_weight(&assets, 14., 600),
+                    ));
             }
             panel.spawn((LaunchStatus, Text::default(), ui_font(&assets, 14.)));
         });
@@ -164,7 +171,8 @@ fn show_tools(
     sound: Res<SoundSettings>,
     mut panel: Single<&mut Node, With<ArtTools>>,
 ) {
-    panel.display = if setup.open && !sound.open && !saves.open {
+    // The tools launch separate programs, which the web build cannot do.
+    panel.display = if setup.open && !sound.open && !saves.open && !cfg!(target_arch = "wasm32") {
         Display::Flex
     } else {
         Display::None
@@ -182,11 +190,7 @@ fn open_tool(
         return;
     }
     for (interaction, tool, mut background) in &mut buttons {
-        background.0 = match interaction {
-            Interaction::None => Color::srgb_u8(62, 83, 65),
-            Interaction::Hovered => Color::srgb_u8(82, 106, 82),
-            Interaction::Pressed => Color::srgb_u8(103, 123, 85),
-        };
+        background.0 = crate::theme::button_fill(*interaction, true);
         if *interaction != Interaction::Pressed {
             continue;
         }

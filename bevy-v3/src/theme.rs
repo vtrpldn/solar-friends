@@ -58,23 +58,28 @@ pub fn panel() -> impl Bundle {
     (
         BackgroundColor(PAPER),
         BorderColor::all(EDGE),
-        BoxShadow(vec![
-            ShadowStyle {
-                color: Color::srgba_u8(0x94, 0x7c, 0x50, 0x80),
-                x_offset: px(0),
-                y_offset: px(5),
-                spread_radius: px(0),
-                blur_radius: px(0),
-            },
-            ShadowStyle {
-                color: Color::srgba_u8(0x3c, 0x48, 0x23, 0x26),
-                x_offset: px(0),
-                y_offset: px(9),
-                spread_radius: px(0),
-                blur_radius: px(22),
-            },
-        ]),
+        panel_shadow(),
     )
+}
+
+/// The two-part drop shadow under paper panels.
+pub fn panel_shadow() -> BoxShadow {
+    BoxShadow(vec![
+        ShadowStyle {
+            color: Color::srgba_u8(0x94, 0x7c, 0x50, 0x80),
+            x_offset: px(0),
+            y_offset: px(5),
+            spread_radius: px(0),
+            blur_radius: px(0),
+        },
+        ShadowStyle {
+            color: Color::srgba_u8(0x3c, 0x48, 0x23, 0x26),
+            x_offset: px(0),
+            y_offset: px(9),
+            spread_radius: px(0),
+            blur_radius: px(22),
+        },
+    ])
 }
 
 /// Colours and shadow of a paper button at rest.

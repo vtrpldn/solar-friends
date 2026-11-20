@@ -519,7 +519,7 @@ fn setup(
                         padding: UiRect::axes(px(10), px(5)),
                         ..default()
                     },
-                    BackgroundColor(Color::srgb_u8(62, 83, 65)),
+                    BackgroundColor(crate::theme::BUTTON),
                 ))
                 .with_child((Text::new(label), ui_font(&assets, 15.)));
             }
@@ -544,9 +544,9 @@ fn update_garden_buttons(
             _ => false,
         };
         background.0 = if selected {
-            Color::srgb_u8(103, 123, 85)
+            crate::theme::ACTIVE
         } else {
-            Color::srgb_u8(62, 83, 65)
+            crate::theme::BUTTON
         };
         let editing_text = garden.catalog_open || garden.coordinates.is_some();
         let selected_prop = garden.selected.is_some() && garden.pending.is_none();

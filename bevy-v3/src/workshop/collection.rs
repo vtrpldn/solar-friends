@@ -204,11 +204,7 @@ fn setup(
                         .with_child((Text::new(tool.label()), ui_font(&assets, 15.)));
                 }
             });
-            root.spawn((
-                Text::new("The 3D collection"),
-                ui_font(&assets, 30.),
-                TextColor(Color::srgb_u8(35, 59, 44)),
-            ));
+            root.spawn((Text::new("The 3D collection"), ui_font(&assets, 30.)));
             root.spawn(Node {
                 column_gap: px(8),
                 ..default()
@@ -234,12 +230,7 @@ fn setup(
                         .with_child((Text::new(label), ui_font(&assets, 16.)));
                 }
             });
-            root.spawn((
-                CollectionStatus,
-                Text::default(),
-                ui_font(&assets, 16.),
-                TextColor(Color::srgb_u8(35, 59, 44)),
-            ));
+            root.spawn((CollectionStatus, Text::default(), ui_font(&assets, 16.)));
             for (row, entries) in targets.chunks(4).enumerate() {
                 root.spawn(Node {
                     flex_grow: 1.,
@@ -281,7 +272,6 @@ fn setup(
                                     Text::default(),
                                     TextLayout::new_with_justify(Justify::Center),
                                     ui_font(&assets, 15.),
-                                    TextColor(Color::srgb_u8(35, 59, 44)),
                                 ));
                             });
                     }
@@ -316,7 +306,7 @@ fn setup(
                         padding: UiRect::axes(px(12), px(7)),
                         ..default()
                     },
-                    BackgroundColor(Color::srgb_u8(62, 83, 65)),
+                    BackgroundColor(crate::theme::BUTTON),
                 ))
                 .with_child((Text::new(title.clone()), ui_font(&assets, 16.)));
             }
@@ -416,7 +406,7 @@ fn show_categories(
             {
                 Color::srgb_u8(104, 128, 88)
             } else {
-                Color::srgb_u8(62, 83, 65)
+                crate::theme::BUTTON
             };
             color.set_if_neq(BackgroundColor(tint));
         }

@@ -114,9 +114,7 @@ impl WorldSetup {
     }
 
     fn reroll_seed(&mut self) {
-        let time = std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .unwrap_or_default();
+        let time = crate::wall_clock::since_epoch();
         let entropy = time.subsec_nanos() ^ time.as_secs() as u32 ^ self.seed.rotate_left(13);
         let seed = (crate::terrain::land_random(entropy)() * f64::from(u32::MAX)) as u32;
         self.seed = if seed == 0 || seed == self.seed {
@@ -512,9 +510,26 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
                     }),
                     crate::theme::button(),
                 ));
+                // V2's title leads with one filled button; the rest stay paper.
+                let primary = matches!(action, Action::New(Mode::Story));
+                if primary {
+                    button.insert((
+                        BackgroundColor(crate::theme::INK),
+                        BorderColor::all(crate::theme::INK),
+                    ));
+                }
                 button.with_child((
                     Text::new(setup.label(action, false)),
-                    crate::ui_font::ui_font_weight(&assets, 16.0, 600),
+                    crate::ui_font::ui_font_styled(
+                        &assets,
+                        16.0,
+                        600,
+                        if primary {
+                            crate::theme::PAPER
+                        } else {
+                            crate::theme::INK
+                        },
+                    ),
                 ));
                 if matches!(action, Action::Continue(Mode::Story)) {
                     button.with_child((
@@ -568,7 +583,12 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
 type SetupPanelStyle<'w, 's> = Single<
     'w,
     's,
-    (&'static mut Node, &'static mut BackgroundColor),
+    (
+        &'static mut Node,
+        &'static mut BackgroundColor,
+        &'static mut BorderColor,
+        &'static mut BoxShadow,
+    ),
     (With<SetupPanel>, Without<TitleBackdrop>),
 >;
 
@@ -589,12 +609,15 @@ fn refresh_title(
     } else {
         Display::None
     };
-    let (panel, background) = &mut *panel;
+    let (panel, background, border, shadow) = &mut *panel;
     let (text, font, color) = &mut *heading;
     if title {
         panel.left = vw(8);
         panel.top = vh(6);
+        // On the title screen the menu sits on the backdrop like V2's, without a card.
         background.0 = Color::NONE;
+        **border = BorderColor::all(Color::NONE);
+        **shadow = BoxShadow::default();
         text.0 = "Solar\nFriends".into();
         font.font_size = 66.;
         color.0 = Color::srgb_u8(54, 82, 63);
@@ -602,6 +625,8 @@ fn refresh_title(
         panel.left = px(32);
         panel.top = px(32);
         background.0 = crate::theme::PAPER;
+        **border = BorderColor::all(crate::theme::EDGE);
+        **shadow = crate::theme::panel_shadow();
         text.0 = "Choose the land".into();
         font.font_size = 30.;
         color.0 = crate::theme::INK;
@@ -778,7 +803,9 @@ fn refresh_panel(
             } else {
                 commands.entity(entity).insert(InteractionDisabled);
             }
-            background.0 = crate::theme::button_fill(Interaction::None, enabled);
+            if !matches!(action, Action::New(Mode::Story)) {
+                background.0 = crate::theme::button_fill(Interaction::None, enabled);
+            }
         }
         let visible = match action {
             Action::Resume => !setup.choosing_land && has_village,

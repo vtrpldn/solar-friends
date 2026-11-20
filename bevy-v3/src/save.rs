@@ -2,7 +2,6 @@ use std::{
     fs::{self, File, OpenOptions},
     io::{self, Read, Write},
     path::{Path, PathBuf},
-    time::{SystemTime, UNIX_EPOCH},
 };
 
 use serde::{Deserialize, Serialize};
@@ -100,10 +99,7 @@ pub(crate) fn atomic_write(path: &Path, json: &[u8], max_bytes: u64) -> io::Resu
     if let Some(directory) = path.parent() {
         fs::create_dir_all(directory)?;
     }
-    let nonce = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .unwrap_or_default()
-        .as_nanos();
+    let nonce = crate::wall_clock::since_epoch().as_nanos();
     let pending = path.with_extension(format!("{}.{}.tmp", std::process::id(), nonce));
     let mut file = OpenOptions::new()
         .create_new(true)
