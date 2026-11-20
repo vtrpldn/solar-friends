@@ -1898,8 +1898,7 @@ impl Construction {
             .enumerate()
             .fold(0u64, |total, (index, project)| {
                 let trips = self
-                    .remaining_freight_pickups(catalog, index)
-                    .or_else(|| self.remaining_boarded_pickups(catalog, index))
+                    .remaining_paid_pickups(catalog, index)
                     .unwrap_or(project.pickups);
                 total.saturating_add(project.fare.saturating_mul(u64::from(trips)))
             });

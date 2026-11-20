@@ -124,9 +124,17 @@ impl Construction {
                 Location::Reserved
             };
             let pickup = self.construction_pickup_cargo(index);
-            if let Some(shipment) = self.construction_freight_cargo(index).or(pickup.as_ref()) {
+            let freight = self.construction_freight_cargo(index);
+            if pickup.is_some() || freight.is_some() {
                 for (id, &amount) in plan.materials(catalog) {
-                    let cargo = shipment.get(id).copied().unwrap_or(0).min(amount);
+                    let cargo = pickup
+                        .as_ref()
+                        .into_iter()
+                        .chain(freight)
+                        .filter_map(|shipment| shipment.get(id))
+                        .copied()
+                        .sum::<u32>()
+                        .min(amount);
                     add(&mut ledger, id, cargo, Location::Transit);
                     add(&mut ledger, id, amount - cargo, location);
                 }
