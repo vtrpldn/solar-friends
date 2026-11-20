@@ -690,6 +690,9 @@ impl Construction {
         if site.work < definition.work {
             use std::fmt::Write;
             let _ = write!(text, " · {}", self.project_status(catalog, index));
+            if let Some((phase, progress)) = self.selected_construction_progress(catalog) {
+                let _ = write!(text, "\n{phase} · {:.0}%", (progress * 100.0).floor());
+            }
             if let Some(minutes) = self.construction_delivery_minutes(index, clock) {
                 let _ = write!(text, " · {minutes} game minutes remaining");
             }
@@ -1817,9 +1820,24 @@ mod upgrade_tests {
         let catalog = Catalog::default();
         let mut village = Construction::default();
         let mut house = village.proposed_site(&catalog, "home-cottage", IVec2::new(44, 36));
-        house.delivered = house.loads;
-        village.plans.push(house);
+        house.pickups = 1;
+        house.delivered = house.loads / 2;
+        village.plans.push(house.clone());
         village.production.selected = Some(0);
+        assert_eq!(
+            village.selected_construction_progress(&catalog),
+            Some(("Collecting materials", 0.0))
+        );
+        village.plans[0].pickups = 0;
+        let fraction = f64::from(house.delivered) / f64::from(house.loads);
+        assert_eq!(
+            village.selected_construction_progress(&catalog),
+            Some(("Delivering supplies", fraction))
+        );
+        house.pickups = 0;
+        house.delivered = house.loads;
+        house.work = catalog.projects["home-cottage"].work / 2.0;
+        village.plans[0] = house;
         for resident in &mut village.residents {
             resident.health.energy = 20.0;
         }
@@ -1830,6 +1848,7 @@ mod upgrade_tests {
         assert!(text.contains("64 m² basic shell"));
         assert!(text.contains("Foundation and level floor · 96.0 h"));
         assert!(text.contains("Materials for this plan"));
+        assert!(text.contains("Building · 50%"));
     }
 
     #[test]

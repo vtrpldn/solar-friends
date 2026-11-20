@@ -1,6 +1,28 @@
 use super::*;
 
 impl Construction {
+    pub(crate) fn selected_construction_progress(
+        &self,
+        catalog: &Catalog,
+    ) -> Option<(&'static str, f64)> {
+        let index = self.production.selected?;
+        let plan = self.plans.get(index)?;
+        let required = catalog.projects[&plan.key].work;
+        if plan.removed || plan.work >= required || self.changes.contains_key(&index) {
+            return None;
+        }
+        if plan.pickups > 0 {
+            Some(("Collecting materials", 0.0))
+        } else if plan.delivered < plan.loads {
+            Some((
+                "Delivering supplies",
+                f64::from(plan.delivered) / f64::from(plan.loads),
+            ))
+        } else {
+            Some(("Building", plan.work / required))
+        }
+    }
+
     fn visible_projects<'a>(
         &'a self,
         catalog: &'a Catalog,

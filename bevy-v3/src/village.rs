@@ -1173,6 +1173,12 @@ struct VillageHud;
 struct VillageHudText;
 
 #[derive(Component)]
+struct ConstructionProgressTrack;
+
+#[derive(Component)]
+struct ConstructionProgressFill;
+
+#[derive(Component)]
 struct BuiltProject {
     index: usize,
     model: usize,
@@ -1206,20 +1212,43 @@ fn spawn_hud(mut commands: Commands, assets: Res<AssetServer>) {
                 top: px(20),
                 left: px(20),
                 padding: UiRect::all(px(14)),
+                flex_direction: FlexDirection::Column,
+                row_gap: px(6),
                 overflow: Overflow::scroll_y(),
                 ..default()
             },
             BackgroundColor(Color::srgb_u8(31, 45, 35)),
         ))
-        .with_child((
-            VillageHudText,
-            Text::default(),
-            ui_font(&assets, 17.0),
-            Node {
-                flex_shrink: 0.,
-                ..default()
-            },
-        ));
+        .with_children(|hud| {
+            hud.spawn((
+                ConstructionProgressTrack,
+                Node {
+                    display: Display::None,
+                    height: px(6),
+                    flex_shrink: 0.0,
+                    ..default()
+                },
+                BackgroundColor(Color::srgb_u8(57, 76, 60)),
+            ))
+            .with_child((
+                ConstructionProgressFill,
+                Node {
+                    width: percent(0),
+                    height: percent(100),
+                    ..default()
+                },
+                BackgroundColor(Color::srgb_u8(174, 212, 133)),
+            ));
+            hud.spawn((
+                VillageHudText,
+                Text::default(),
+                ui_font(&assets, 17.0),
+                Node {
+                    flex_shrink: 0.,
+                    ..default()
+                },
+            ));
+        });
 }
 
 #[derive(Default, PartialEq)]
@@ -2476,11 +2505,29 @@ fn step(
         .tick_leisure(catalog, setup, &town.stock, site, town.clock, dt as f32);
 }
 
+type ConstructionProgressNodes<'w, 's> = Query<
+    'w,
+    's,
+    (&'static mut Node, Has<ConstructionProgressTrack>),
+    (
+        Or<(
+            With<ConstructionProgressTrack>,
+            With<ConstructionProgressFill>,
+        )>,
+        Without<VillageHud>,
+    ),
+>;
+
+type VillageHudNodes<'w, 's> = (
+    Single<'w, 's, &'static mut Text, With<VillageHudText>>,
+    Single<'w, 's, &'static mut Node, With<VillageHud>>,
+);
+
 fn show_hud(
     setup: Res<WorldSetup>,
     village: Res<Village>,
-    mut text: Single<&mut Text, With<VillageHudText>>,
-    mut node: Single<&mut Node, With<VillageHud>>,
+    (mut text, mut node): VillageHudNodes,
+    mut progress_nodes: ConstructionProgressNodes,
     (catalog, land, saves): (Res<Catalog>, Res<Land>, Res<SaveMenu>),
     (placement, sound): (Res<MapNotice>, Res<SoundSettings>),
     mut resource_trends: Local<resource_trends::ResourceTrends>,
@@ -2494,6 +2541,11 @@ fn show_hud(
         return;
     }
     let utilities = &village.construction.utilities;
+    for (mut node, track) in &mut progress_nodes {
+        if track {
+            node.display = Display::None;
+        }
+    }
     let savings = village.stock.balance() as f64 / 100.0;
     let food = village.stock.food_portions();
     let energy = utilities.stored_energy();
@@ -2990,6 +3042,18 @@ fn show_hud(
     {
         label.push('\n');
         label.push_str(&production);
+        if let Some((_, fraction)) = village
+            .construction
+            .selected_construction_progress(&catalog)
+        {
+            for (mut node, track) in &mut progress_nodes {
+                if track {
+                    node.display = Display::Flex;
+                } else {
+                    node.width = percent((fraction * 100.0) as f32);
+                }
+            }
+        }
     }
     if let Some(status) = village
         .construction
