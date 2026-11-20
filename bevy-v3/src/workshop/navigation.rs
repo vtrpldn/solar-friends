@@ -77,6 +77,7 @@ pub(super) enum ArtTool {
     Garden,
     Biomes,
     Residents,
+    BalanceLab,
 }
 
 impl ArtTool {
@@ -96,6 +97,7 @@ impl ArtTool {
             Self::Garden => "Scene editor",
             Self::Biomes => "Biome landscapes",
             Self::Residents => "Resident animations",
+            Self::BalanceLab => "Balance Lab",
         }
     }
 
@@ -107,6 +109,7 @@ impl ArtTool {
             Self::Garden => &["--asset-garden"],
             Self::Biomes => &["--biome-landscapes"],
             Self::Residents => &["--residents"],
+            Self::BalanceLab => &["--lab-ui"],
         }
     }
 
@@ -137,8 +140,8 @@ fn spawn_tools(mut commands: Commands, assets: Res<AssetServer>) {
             BackgroundColor(Color::srgb_u8(31, 45, 35)),
         ))
         .with_children(|panel| {
-            panel.spawn((Text::new("Art previews"), ui_font(&assets, 20.)));
-            for tool in ArtTool::ALL {
+            panel.spawn((Text::new("Tools"), ui_font(&assets, 20.)));
+            for tool in ArtTool::ALL.into_iter().chain([ArtTool::BalanceLab]) {
                 panel
                     .spawn((
                         tool,
