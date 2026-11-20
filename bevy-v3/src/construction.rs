@@ -2332,6 +2332,10 @@ impl Construction {
                     && resident.health.levels[Need::Hydration as usize] < 30.0)
         });
         let order = self.work_policy.dispatch_order(urgent);
+        // V2 assigns animal care before new work from the priority groups.
+        self.reservation_pass = Some([true; 5]);
+        self.reserve_animal_care_workers(catalog, stock, site, clock.seconds);
+        self.reservation_pass = None;
         let (essential, production) = self.reserved_workers();
         // Reserve assignments first. The normal pass advances jobs and assigns any
         // residents whose reserved work was unavailable.

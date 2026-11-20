@@ -1515,6 +1515,18 @@ impl Construction {
         }
     }
 
+    pub(super) fn reserve_animal_care_workers(
+        &mut self,
+        catalog: &Catalog,
+        stock: &Stock,
+        site: ConstructionSite,
+        clock: f64,
+    ) {
+        self.assign_producers(catalog, stock, site, clock, |job| {
+            matches!(job.recipe.as_str(), "care-coop" | "care-goat_pasture")
+        });
+    }
+
     fn assign_producers(
         &mut self,
         catalog: &Catalog,

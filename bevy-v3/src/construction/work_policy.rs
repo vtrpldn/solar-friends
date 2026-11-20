@@ -187,6 +187,43 @@ mod tests {
     use crate::setup::{Mode, WorldSetup};
 
     #[test]
+    fn animal_care_claims_an_available_resident_before_new_construction() {
+        let catalog = Catalog::default();
+        let mut setup = WorldSetup::default();
+        setup.mode = Mode::Sandbox;
+        let camp = IVec2::new(36, 36);
+        let terrain = setup.terrain().with_camp(camp);
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut village = Construction::default();
+        let mut coop = village.proposed_site(&catalog, "coop", IVec2::new(44, 36));
+        coop.work = catalog.projects["coop"].work;
+        coop.delivered = coop.loads;
+        village.plans.push(coop);
+        let well = village.proposed_site(&catalog, "well", IVec2::new(53, 36));
+        village.plans.push(well);
+        village.queue_batch(&catalog, &mut stock, 0, "care-coop");
+        for (index, resident) in village.residents.iter_mut().enumerate() {
+            resident.position = SUPPLY_SPOTS[index].as_vec2();
+            resident.health.energy = if index == 0 { 100.0 } else { 0.0 };
+        }
+        village.work_policy.set_reservations(0, 0).unwrap();
+        village.set_work_priority(WorkGroup::Construction, 3);
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
+        village.tick(&catalog, &mut stock, site, clock, 0.1, false);
+        assert_eq!(village.production.jobs[0].worker, Some(0));
+        assert!(village.residents[0].assignment.is_none());
+    }
+
+    #[test]
     fn higher_priority_changes_the_job_a_free_resident_accepts() {
         let catalog = Catalog::default();
         let mut setup = WorldSetup::default();
