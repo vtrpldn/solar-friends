@@ -84,7 +84,7 @@ impl Construction {
         if roads > 0 {
             let _ = write!(
                 text,
-                "\nRoads · {roads} tiles · {ready} ready · D Show/hide tiles"
+                "\nRoads · {roads} tiles · {ready} ready · G Show/hide tiles"
             );
         }
         if rows.is_empty() && roads == 0 {

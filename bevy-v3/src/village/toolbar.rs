@@ -76,6 +76,7 @@ enum Action {
     TradePolicy(TradePolicy),
     ProjectFilter,
     ProjectRoads,
+    ProjectEvents,
     InventoryView,
     SaleQuantity(SaleSetting),
     InventoryItem(usize),
@@ -353,7 +354,7 @@ impl Action {
                 village.utility_panel == Some(UtilityPanel::Crafting)
                     && village.craft_recipe.is_some()
             }
-            Self::Project(_) | Self::ProjectFilter | Self::ProjectRoads => {
+            Self::Project(_) | Self::ProjectFilter | Self::ProjectRoads | Self::ProjectEvents => {
                 village.utility_panel == Some(UtilityPanel::Projects)
             }
             Self::WorkPriority(_) | Self::WorkerReservation(_) => {
@@ -568,6 +569,8 @@ impl Action {
             Self::ProjectFilter => "Show underway".into(),
             Self::ProjectRoads if village.project_roads_expanded => "Hide road tiles".into(),
             Self::ProjectRoads => "Show road tiles".into(),
+            Self::ProjectEvents if village.project_events_expanded => "Hide recent events".into(),
+            Self::ProjectEvents => "Show recent events".into(),
             Self::Project(_)
             | Self::TradeItem(_)
             | Self::InventoryItem(_)
@@ -1140,6 +1143,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 }
                 spawn_button(menu, &assets, Action::ProjectFilter);
                 spawn_button(menu, &assets, Action::ProjectRoads);
+                spawn_button(menu, &assets, Action::ProjectEvents);
                 spawn_button(menu, &assets, Action::TradeQueue);
                 for order in [
                     TradeOrder::Buy { freight: false },
@@ -1653,6 +1657,9 @@ fn handle_buttons(
                     }
                 }
                 Action::ProjectRoads if !picker.open => village.toggle_project_roads(),
+                Action::ProjectEvents if !picker.open => {
+                    village.project_events_expanded = !village.project_events_expanded;
+                }
                 Action::ProjectFilter if !picker.open => {
                     village.open_projects_only = !village.open_projects_only;
                     village.projects_page = 0;
@@ -1917,6 +1924,7 @@ fn handle_buttons(
                 | Action::SaleQuantity(_)
                 | Action::ProjectFilter
                 | Action::ProjectRoads
+                | Action::ProjectEvents
                 | Action::Resident(_)
                 | Action::ResidentProfile(_)
                 | Action::FocusResident
@@ -2213,7 +2221,7 @@ fn refresh(
             Action::Trade(_) | Action::TradePolicy(_) | Action::SaleQuantity(_) => {
                 show_trade && !show_trade_queue
             }
-            Action::ProjectFilter => show_projects,
+            Action::ProjectFilter | Action::ProjectEvents => show_projects,
             Action::ProjectRoads => {
                 show_projects && village.construction.road_project_counts(&catalog).0 > 0
             }

@@ -292,6 +292,7 @@ pub struct Village {
     #[serde(skip)]
     open_projects_only: bool,
     project_roads_expanded: bool,
+    project_events_expanded: bool,
     #[serde(skip)]
     housing_notice: String,
     #[serde(skip)]
@@ -2121,7 +2122,10 @@ fn village_input(
             }
         }
         if town.utility_panel == Some(UtilityPanel::Projects) {
-            if keyboard.just_pressed(KeyCode::KeyD)
+            if keyboard.just_pressed(KeyCode::KeyR) {
+                town.project_events_expanded = !town.project_events_expanded;
+            }
+            if keyboard.just_pressed(KeyCode::KeyG)
                 && town.construction.road_project_counts(&catalog).0 > 0
             {
                 town.toggle_project_roads();
@@ -2950,6 +2954,10 @@ fn show_hud(
             if let Some(freight) = village.construction.reserved_freight_status(village.clock) {
                 label.push('\n');
                 label.push_str(&freight);
+            }
+            if village.project_events_expanded {
+                label.push_str("\n\nRecent events · R Hide");
+                village.construction.append_recent_events(&mut label, 0, 8);
             }
         }
         Some(UtilityPanel::Inventory) => {

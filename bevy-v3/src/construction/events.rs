@@ -48,7 +48,6 @@ impl Construction {
     }
 
     pub fn event_log(&self, page: usize, controls: &str) -> (usize, String) {
-        use std::fmt::Write;
         const PAGE: usize = 8;
         let pages = self.events.0.len().div_ceil(PAGE).max(1);
         let page = page.min(pages - 1);
@@ -57,10 +56,16 @@ impl Construction {
             page + 1,
             pages
         );
+        self.append_recent_events(&mut text, page * PAGE, PAGE);
+        (pages, text)
+    }
+
+    pub(crate) fn append_recent_events(&self, text: &mut String, start: usize, limit: usize) {
+        use std::fmt::Write;
         if self.events.0.is_empty() {
             text.push_str("\nNo village events recorded.");
         }
-        for event in self.events.0.iter().skip(page * PAGE).take(PAGE) {
+        for event in self.events.0.iter().skip(start).take(limit) {
             let minute = (540.0 + event.clock * 0.45).floor() as u64;
             let _ = write!(
                 text,
@@ -74,7 +79,6 @@ impl Construction {
                 let _ = write!(text, " ×{}", event.count);
             }
         }
-        (pages, text)
     }
 }
 
