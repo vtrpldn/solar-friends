@@ -117,12 +117,12 @@ impl Market {
         let trips = cargo_trips(catalog, units.clone())?;
         let fare = fare_cents(round_trip_km);
         let price = (total * 100.0).ceil() as u64;
-        if !units.is_empty()
-            && price + fare * u64::from(trips) + self.expansion_reserve + self.committed_fares
-                > stock.balance()
-        {
+        let transport = fare * u64::from(trips) + self.committed_fares;
+        if !units.is_empty() && price + transport + self.expansion_reserve > stock.balance() {
             return Err(format!(
-                "Shared savings cannot cover materials and pickup while keeping R${:.2} in reserve.",
+                "Shared savings cannot cover R${:.2} for missing materials, R${:.2} for town pickups, and R${:.2} for the expansion reserve.",
+                price as f64 / 100.0,
+                transport as f64 / 100.0,
                 self.expansion_reserve as f64 / 100.0,
             ));
         }

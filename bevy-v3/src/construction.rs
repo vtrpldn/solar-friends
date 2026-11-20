@@ -1330,7 +1330,12 @@ impl Construction {
                     freight_cost as f64 / 100.0
                 ));
             }
-            return Err("Freight exceeds available expansion funds".into());
+            return Err(format!(
+                "Freight exceeds available expansion funds. Missing materials cost R${:.2}. The {trips} queued supplier load(s) cost R${:.2}, with R${:.2} kept for the expansion reserve.",
+                quote.price as f64 / 100.0,
+                freight as f64 / 100.0,
+                self.market.expansion_reserve() as f64 / 100.0,
+            ));
         }
         Ok(pickup)
     }
