@@ -690,6 +690,9 @@ impl Construction {
         if site.work < definition.work {
             use std::fmt::Write;
             let _ = write!(text, " · {}", self.project_status(catalog, index));
+            if let Some(minutes) = self.construction_delivery_minutes(index, clock) {
+                let _ = write!(text, " · {minutes} game minutes remaining");
+            }
             let _ = write!(
                 text,
                 "\n{} × {} m · Labor {:.0}/{:.0} person-minutes · Delivered {}/{} loads",
@@ -704,7 +707,9 @@ impl Construction {
                 text.push_str("\nMaterials for this plan");
                 for (row, (id, amount)) in site.materials(catalog).iter().enumerate() {
                     text.push_str(if row % 3 == 0 { "\n" } else { " · " });
-                    let _ = write!(text, "{amount} {}", catalog.materials[id].name);
+                    let material = &catalog.materials[id];
+                    let quantity = material.quantity_text(u64::from(*amount));
+                    let _ = write!(text, "{quantity} {}", material.name);
                 }
             }
             let crew: Vec<_> = self
