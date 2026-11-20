@@ -44,7 +44,8 @@ impl Construction {
             }
             let def = &catalog.projects[&plan.key];
             let plot = self.farming.plots.get(&index);
-            if plot.is_none()
+            let cultivation = matches!(plan.key.as_str(), "field" | "garden" | "greenhouse");
+            if !cultivation
                 && !catalog
                     .production
                     .values()
@@ -55,7 +56,7 @@ impl Construction {
             let ready = plot.map_or(0, |plot| {
                 plot.beds
                     .iter()
-                    .filter(|bed| bed.stage == Stage::Harvestable)
+                    .filter(|bed| bed.stage == Stage::Harvestable && !bed.harvest_expired(clock))
                     .count()
             });
             let growing = plot.map_or(0, |plot| {
@@ -64,10 +65,10 @@ impl Construction {
                     .filter(|bed| bed.stage == Stage::Growing)
                     .count()
             });
-            let batch = self.production.jobs.iter().find_map(|job| {
-                let recipe = &catalog.production[&job.recipe];
-                (job.site == index && makes_food(recipe)).then_some((job, recipe))
-            });
+            let batch = self.production.jobs.iter().find(|job| job.site == index);
+            let mut farm_jobs = self.farming.jobs.iter().filter(|job| job.site == index);
+            let farm_queued = farm_jobs.clone().count();
+            let farm_active = farm_jobs.any(|job| job.worker.is_some());
             let animal_output = self
                 .livestock
                 .animals
@@ -80,17 +81,19 @@ impl Construction {
             } else if switched_off {
                 gray
             } else if batch
-                .is_some_and(|(job, _)| self.batch_blocker(job, catalog, stock, clock).is_some())
+                .is_some_and(|job| self.batch_blocker(job, catalog, stock, clock).is_some())
             {
                 red
-            } else if ready > 0 || growing > 0 || animal_output > 0 {
+            } else if ready > 0 || growing > 0 || animal_output > 0 || farm_active {
                 green
-            } else if let Some((job, _)) = batch {
+            } else if let Some(job) = batch {
                 if job.worker.is_some() || matches!(job.phase, Phase::Growing | Phase::Harvest) {
                     green
                 } else {
                     gold
                 }
+            } else if farm_queued > 0 {
+                gold
             } else {
                 gray
             };
@@ -103,7 +106,8 @@ impl Construction {
                     let _ = write!(label, " · {}", self.project_status(catalog, index));
                 } else if switched_off {
                     label.push_str(" · Building switched off");
-                } else if let Some((job, recipe)) = batch {
+                } else if let Some(job) = batch {
+                    let recipe = &catalog.production[&job.recipe];
                     let _ = write!(
                         label,
                         " · {} · {}",
@@ -111,7 +115,10 @@ impl Construction {
                         self.batch_status(job, catalog, stock, clock)
                     );
                 } else if plot.is_some() {
-                    let _ = write!(label, " · {growing} growing · {ready} harvestable");
+                    let _ = write!(
+                        label,
+                        " · {growing} growing · {ready} harvestable · {farm_queued} bed jobs queued"
+                    );
                 } else if animal_output > 0 {
                     let _ = write!(label, " · {animal_output} ready to collect");
                 } else {
