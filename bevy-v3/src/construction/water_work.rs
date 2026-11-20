@@ -1092,25 +1092,58 @@ impl Construction {
         dt: f32,
         group: Option<WorkGroup>,
     ) {
+        self.tick_water_matching(catalog, stock, site, clock, dt, |_, _, job| {
+            let work = if matches!(
+                job.action,
+                WaterAction::Sanitation
+                    | WaterAction::InstallPipe { .. }
+                    | WaterAction::InstallCable { .. }
+            ) {
+                WorkGroup::Maintenance
+            } else {
+                WorkGroup::Essentials
+            };
+            group.is_none_or(|group| group == work)
+        });
+    }
+
+    pub(super) fn reserve_farm_water_workers(
+        &mut self,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        site: ConstructionSite,
+        clock: f64,
+    ) {
+        self.tick_water_matching(catalog, stock, site, clock, 0.0, |town, id, job| {
+            matches!(job.action, WaterAction::Carry { .. })
+                && id.checked_sub(1).is_some_and(|index| {
+                    town.farming.plots.contains_key(&index)
+                        || town.project_kind(catalog, index).is_some_and(|kind| {
+                            matches!(
+                                kind,
+                                "orchard" | "grove" | "apiary" | "coop" | "goat_pasture"
+                            )
+                        })
+                })
+        });
+    }
+
+    fn tick_water_matching(
+        &mut self,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        site: ConstructionSite,
+        clock: f64,
+        dt: f32,
+        matches_job: impl Fn(&Self, usize, &WaterJob) -> bool,
+    ) {
         if self.reservation_pass.is_none() && !self.pending_connections.is_empty() {
             self.promote_pending_connections();
         }
         let ids = self
             .water_jobs
             .iter()
-            .filter_map(|(&id, job)| {
-                let work = if matches!(
-                    job.action,
-                    WaterAction::Sanitation
-                        | WaterAction::InstallPipe { .. }
-                        | WaterAction::InstallCable { .. }
-                ) {
-                    WorkGroup::Maintenance
-                } else {
-                    WorkGroup::Essentials
-                };
-                group.is_none_or(|group| group == work).then_some(id)
-            })
+            .filter_map(|(&id, job)| matches_job(self, id, job).then_some(id))
             .collect::<Vec<_>>();
         for id in ids {
             // Keep the slot occupied while choosing a worker for another job.
@@ -1593,6 +1626,53 @@ mod tests {
                 channel: 1
             }
         ));
+    }
+
+    #[test]
+    fn farm_water_delivery_claims_a_resident_before_new_construction() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let camp = IVec2::new(36, 36);
+        let terrain = setup.terrain().with_camp(camp);
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut town = Construction::default();
+        let mut coop = town.proposed_site(&catalog, "coop", IVec2::new(44, 36));
+        coop.work = catalog.projects["coop"].work;
+        town.plans.push(coop);
+        let well = town.proposed_site(&catalog, "well", IVec2::new(53, 36));
+        town.plans.push(well);
+        town.tick_services(&catalog, &setup, &mut stock, 0.0, 0.1);
+        town.utilities.deliver_water(0, 0, 10.0);
+        town.utilities.take_water(Some(1), 0, 6.0);
+        town.queue_water(
+            1,
+            WaterAction::Carry {
+                source: Some(0),
+                channel: 0,
+            },
+        )
+        .unwrap();
+        for (index, resident) in town.residents.iter_mut().enumerate() {
+            resident.position = SUPPLY_SPOTS[index].as_vec2();
+            resident.health.energy = if index == 0 { 100.0 } else { 0.0 };
+        }
+        town.set_worker_reservation(true, 0);
+        town.set_worker_reservation(false, 0);
+        town.set_work_priority(WorkGroup::Construction, 3);
+        town.set_work_priority(WorkGroup::Essentials, 0);
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
+        town.tick(&catalog, &mut stock, site, clock, 0.1, false);
+        assert_eq!(town.water_jobs[&1].worker, Some(0));
+        assert!(town.residents[0].assignment.is_none());
     }
 
     #[test]
