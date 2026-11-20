@@ -370,7 +370,7 @@ pub(in crate::village) fn refresh<S: Screen>(
     (catalog, assets, land): (Res<Catalog>, Res<AssetServer>, Res<Land>),
     mut root: Single<(Entity, &mut Node, &mut Rendered), With<WidgetRoot<S>>>,
     mut fills: Query<&mut Node, Without<WidgetRoot<S>>>,
-    mut texts: Query<&mut Text>,
+    (mut texts, children, mut colors): (Query<&mut Text>, Query<&Children>, Query<&mut TextColor>),
     mut buttons: Buttons<S::Action>,
 ) {
     let (entity, node, rendered) = &mut *root;
@@ -445,6 +445,14 @@ pub(in crate::village) fn refresh<S: Screen>(
                     &mut edge,
                     &mut shadow,
                 );
+                let tone = if enabled { theme::INK } else { theme::MUTED };
+                for child in children.get(*id).into_iter().flatten() {
+                    if let Ok(mut color) = colors.get_mut(*child)
+                        && color.0 != tone
+                    {
+                        color.0 = tone;
+                    }
+                }
             }
         }
     }

@@ -113,12 +113,22 @@ pub fn paint_button(
     border: &mut BorderColor,
     shadow: &mut BoxShadow,
 ) {
-    let fill = if active && enabled {
+    // An unavailable button lies flat on the paper with a faint edge, so it reads as
+    // unavailable at a glance; its text is muted by its owner.
+    let fill = if !enabled {
+        Color::NONE
+    } else if active {
         ACTIVE
     } else {
         button_fill(interaction, enabled)
     };
-    let edge = if active { ACTIVE_EDGE } else { EDGE };
+    let edge = if !enabled {
+        SUBTLE_BORDER
+    } else if active {
+        ACTIVE_EDGE
+    } else {
+        EDGE
+    };
     let drop = if active { ACTIVE_SHADOW } else { BUTTON_SHADOW };
     let lift = match (enabled, interaction) {
         (false, _) => 0.0,
