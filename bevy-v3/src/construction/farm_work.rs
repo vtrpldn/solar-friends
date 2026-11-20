@@ -1770,6 +1770,64 @@ mod resize_tests {
     }
 
     #[test]
+    fn planting_hands_off_with_progress_and_reserved_seeds_intact() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let camp = IVec2::new(36, 36);
+        let terrain = setup.terrain().with_camp(camp);
+        let land = Land::default();
+        let ground = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let mut stock = Stock::for_start(&setup, &catalog);
+        stock.receive(&BTreeMap::from([("greens_seed".into(), 10)]));
+        let mut village = Construction::default();
+        let mut garden = village.proposed_site(&catalog, "garden", IVec2::new(44, 36));
+        garden.work = catalog.projects["garden"].work;
+        village.plans.push(garden);
+        village.tick_crops(&catalog, &setup, 0.0, 0.0);
+        village.farming.plots.get_mut(&0).unwrap().beds[0].stage = Stage::Prepared;
+        village
+            .queue_bed_job(
+                &catalog,
+                &mut stock,
+                (0, 0, FarmAction::Plant),
+                TownClock {
+                    seconds: 0.0,
+                    round_trip_km: 12,
+                },
+            )
+            .unwrap();
+        let job = &mut village.farming.jobs[0];
+        let reserved = job.inputs.clone();
+        let remaining_seeds = stock.available("greens_seed");
+        job.phase = FarmPhase::Work;
+        job.work = job.required / 2.0;
+        let work = job.work;
+        job.worker = Some(0);
+        village.residents[0].health.energy = 24.0;
+
+        village.tick_farm_jobs(&catalog, &mut stock, ground, 0.0, 0.1);
+        let job = &village.farming.jobs[0];
+        assert_eq!(job.worker, Some(1));
+        assert_eq!(job.work, work);
+        assert_eq!(job.inputs, reserved);
+        assert_eq!(stock.available("greens_seed"), remaining_seeds);
+
+        for step in 1..2_000 {
+            village.tick_farm_jobs(&catalog, &mut stock, ground, f64::from(step) * 0.1, 0.1);
+            if village.farming.jobs.is_empty() {
+                break;
+            }
+        }
+        assert!(village.farming.jobs.is_empty());
+        assert!(village.farming.plots[&0].beds[0].stage == Stage::Growing);
+        assert_eq!(stock.available("greens_seed"), remaining_seeds);
+    }
+
+    #[test]
     fn harvest_reloads_from_the_bed_after_a_partial_delivery_and_save() {
         let catalog = Catalog::default();
         let setup = WorldSetup::default();
