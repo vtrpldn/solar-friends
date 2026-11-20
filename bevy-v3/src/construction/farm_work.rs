@@ -870,12 +870,13 @@ impl Construction {
             bed.stage.label()
         };
         let mut label = format!(
-            "Bed {}/{} · {} · {} ({:.0}%)\nMoisture {:.0}% · Fertility {:.0}% · {:.1} kg harvest estimate\nDrought loss {:.0}% · Ground cover {:.0}%\nSoil · {:.1} kg residues · {:.1} kg compost · {:.1} kg organic matter\n{}\nWater totals · {:.1} L rain · {:.1} L irrigation · {:.1} L evaporated · {:.1} L drained\nDensity {:.1}× · {} · {} residues",
+            "Bed {}/{} · {} · {} ({:.0}%) · {:.1} m²\nMoisture {:.0}% · Fertility {:.0}% · {:.1} kg harvest estimate\nDrought loss {:.0}% · Ground cover {:.0}%\nSoil · {:.1} kg residues · {:.1} kg compost · {:.1} kg organic matter\n{}\nWater totals · {:.1} L rain · {:.1} L irrigation · {:.1} L evaporated · {:.1} L drained\nDensity {:.1}× · {} · {} residues",
             index + 1,
             plot.beds.len(),
             bed.crop.label(),
             stage,
             bed.growth * 100.0,
+            bed.area(),
             bed.moisture * 100.0,
             bed.fertility * 100.0,
             bed.yield_kg(clock),
@@ -893,6 +894,17 @@ impl Construction {
             irrigation,
             residues,
         );
+        if let Some((remaining, window)) = bed.harvest_timing(clock) {
+            use std::fmt::Write;
+            if remaining > 0.0 {
+                let _ = write!(
+                    label,
+                    "\nHarvest expires in {remaining:.1} days · Yield declines after {window} ripe days"
+                );
+            } else {
+                label.push_str("\nClear the expired crop before replanting.");
+            }
+        }
         if let Some(job) = self
             .farming
             .jobs

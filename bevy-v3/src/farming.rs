@@ -495,6 +495,14 @@ impl Bed {
         self.stage == Stage::Harvestable && self.harvest_factor(clock) == 0.0
     }
 
+    pub(crate) fn harvest_timing(&self, clock: f64) -> Option<(f64, f64)> {
+        (self.stage == Stage::Harvestable).then(|| {
+            let window = self.crop.window();
+            let remaining = (2.0 * window - (clock - self.ripe_at) / DAY).max(0.0);
+            (remaining, window)
+        })
+    }
+
     fn harvest_factor(&self, clock: f64) -> f64 {
         if self.stage != Stage::Harvestable {
             return 1.0;
@@ -884,6 +892,7 @@ mod tests {
         job.action = FarmAction::Plant;
         plot.finish(&catalog, &job, 46.0 * DAY, true);
         let expired = 60.0 * DAY;
+        assert_eq!(plot.beds[0].harvest_timing(expired).unwrap().0, 0.0);
         assert!(plot.beds[0].harvest_expired(expired));
         let remainder = plot.remainders[0];
         let previous_loss = plot.beds[0].mass.field_loss_kg;
