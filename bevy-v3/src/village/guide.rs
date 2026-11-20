@@ -480,11 +480,6 @@ impl Guide {
         let Some(screen) = self.screen else {
             return false;
         };
-        if keys.just_pressed(KeyCode::Escape) {
-            self.screen = None;
-            text.clear();
-            return true;
-        }
         if matches!(screen, Screen::Search) {
             self.search_controls(keys, text);
             return true;
@@ -670,10 +665,6 @@ mod tests {
         keys.press(KeyCode::Enter);
         guide_controls(&mut guide, &keys, &[]);
         assert!(matches!(guide.screen, Some(Screen::Chapter(chapter)) if chapter == results[0]));
-        keys.reset_all();
-        keys.press(KeyCode::Escape);
-        guide_controls(&mut guide, &keys, &[]);
-        assert!(!guide.open());
     }
 
     #[test]
