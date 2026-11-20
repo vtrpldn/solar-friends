@@ -605,11 +605,9 @@ impl Runner {
             .with_file_name(format!("lab-{kind}-{}.json", nonce.as_nanos())))
     }
 
-    fn export(&self) -> io::Result<std::path::PathBuf> {
-        let path = self.output_path("report")?;
+    fn export(&self, path: &Path) -> io::Result<()> {
         let bytes = serde_json::to_vec(&self.report())?;
-        crate::save::atomic_write(&path, &bytes, 3 * crate::save::MAX_BYTES)?;
-        Ok(path)
+        crate::save::atomic_write(path, &bytes, 3 * crate::save::MAX_BYTES)
     }
 }
 
@@ -709,6 +707,7 @@ enum LabControl {
     FindBuilding,
     OpenFile,
     ExportCheckpoint,
+    ExportReport,
     View(LabView),
     Confirm,
     Cancel,
@@ -747,7 +746,7 @@ fn setup_lab_window(mut commands: Commands, assets: Res<AssetServer>) {
             (Shortcut(KeyCode::F7), "New story run"),
             (Shortcut(KeyCode::F6), "Save lab"),
             (Shortcut(KeyCode::F9), "Load lab"),
-            (Shortcut(KeyCode::F5), "Export report"),
+            (LabControl::ExportReport, "Export report"),
             (LabControl::OpenFile, "Open lab file"),
             (LabControl::View(LabView::Trade), "Trade"),
             (LabControl::View(LabView::Residents), "Residents"),
@@ -1898,6 +1897,14 @@ type LabControlPresses<'w, 's> =
 
 type LabToolbarNodes<'w, 's> = Query<'w, 's, (&'static LabToolbar, &'static mut Node)>;
 
+fn choose_lab_export(file_name: &str) -> Option<PathBuf> {
+    rfd::FileDialog::new()
+        .set_title("Export Balance Lab file")
+        .set_file_name(file_name)
+        .add_filter("Lab JSON", &["json"])
+        .save_file()
+}
+
 fn update_lab_window(
     mut runner: ResMut<Runner>,
     catalog: Res<Catalog>,
@@ -2224,14 +2231,16 @@ fn update_lab_window(
             playback.clear_confirmation = None;
             playback.order = Some(String::new());
         }
-        let export =
-            clicked(LabControl::ExportCheckpoint) || (keys.just_pressed(KeyCode::F6) && shift);
-        if export || pressed(KeyCode::F6) {
-            let path = if export {
-                runner.output_path("checkpoint")
-            } else {
-                lab_save_path()
-            };
+        let save_checkpoint = if clicked(LabControl::ExportCheckpoint) {
+            choose_lab_export("solar-friends-lab-checkpoint.json").map(Ok)
+        } else if keys.just_pressed(KeyCode::F6) && shift {
+            Some(runner.output_path("checkpoint"))
+        } else if pressed(KeyCode::F6) {
+            Some(lab_save_path())
+        } else {
+            None
+        };
+        if let Some(path) = save_checkpoint {
             playback.notice = match path.and_then(|path| {
                 runner.checkpoint(&path)?;
                 Ok(path)
@@ -2240,8 +2249,18 @@ fn update_lab_window(
                 Err(error) => format!("Could not save lab village · {error}"),
             };
         }
-        if pressed(KeyCode::F5) {
-            playback.notice = match runner.export() {
+        let save_report = if clicked(LabControl::ExportReport) {
+            choose_lab_export("solar-friends-balance-evidence.json").map(Ok)
+        } else if keys.just_pressed(KeyCode::F5) {
+            Some(runner.output_path("report"))
+        } else {
+            None
+        };
+        if let Some(path) = save_report {
+            playback.notice = match path.and_then(|path| {
+                runner.export(&path)?;
+                Ok(path)
+            }) {
                 Ok(path) => format!("Report saved to {}", path.display()),
                 Err(error) => format!("Could not export report · {error}"),
             };
@@ -3485,7 +3504,7 @@ mod tests {
             .unwrap()
             .0;
         recorded.advance(app.world().resource::<Catalog>());
-        std::fs::write(&evidence, serde_json::to_vec(&recorded.report()).unwrap()).unwrap();
+        recorded.export(&evidence).unwrap();
         app.world_mut()
             .resource_mut::<ButtonInput<KeyCode>>()
             .reset_all();
