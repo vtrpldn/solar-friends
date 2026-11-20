@@ -1344,7 +1344,15 @@ mod tests {
                     && text.0.contains("Repeat 4h shifts on weekdays · on"))
         );
         press_button(&mut app, "Book one day shift");
-        press_button(&mut app, "Trade");
+        // Town trade sits behind Finances, reached with Tab.
+        press_button(&mut app, "Finances");
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::Tab);
+        app.world_mut().run_schedule(Update);
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .reset(KeyCode::Tab);
         assert!(app.world().resource::<village::Village>().trade_open());
         let trade_state = |app: &App| {
             app.world()

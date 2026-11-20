@@ -878,6 +878,21 @@ impl Village {
         self.water_panel.channel = channel;
     }
 
+    /// Whether the status card is just a short note: no panel, reference or tool open.
+    fn hud_note(&self) -> bool {
+        self.camp.is_some()
+            && self.utility_panel.is_none()
+            && !self.guide.open()
+            && !self.lenses.open
+            && self.lenses.active.is_none()
+            && !self.advance_open()
+            && !self.terrain_editor.open
+            && !self.trade_open()
+            && !self.construction.menu
+            && !self.construction.production.open
+            && !self.construction.farming.open
+    }
+
     fn selected_project_focus(&self) -> Option<Vec2> {
         if self.utility_panel.is_some()
             || self.advance_open()
@@ -1401,6 +1416,7 @@ fn spawn_hud(mut commands: Commands, assets: Res<AssetServer>) {
     commands
         .spawn((
             VillageHud,
+            UiTransform::default(),
             Interaction::None,
             bevy::ui::FocusPolicy::Block,
             crate::theme::panel_node(Node {
@@ -1437,16 +1453,49 @@ struct HudScrollContext {
     resident_view: Option<(ResidentProfile, usize)>,
 }
 
+type HudFrame<'w, 's> = Single<
+    'w,
+    's,
+    (
+        &'static mut Node,
+        &'static mut ScrollPosition,
+        &'static Interaction,
+        &'static mut UiTransform,
+    ),
+    With<VillageHud>,
+>;
+
 fn fit_and_scroll_hud(
     window: Single<&Window, With<PrimaryWindow>>,
     toolbar: Single<&ComputedNode, With<toolbar::Toolbar>>,
-    mut hud: Single<(&mut Node, &mut ScrollPosition, &Interaction), With<VillageHud>>,
-    village: Res<Village>,
+    mut hud: HudFrame,
+    (village, setup): (Res<Village>, Res<WorldSetup>),
     mut previous_panel: Local<HudScrollContext>,
     scroll: Res<bevy::input::mouse::AccumulatedMouseScroll>,
 ) {
-    let (node, position, interaction) = &mut *hud;
+    let (node, position, interaction, transform) = &mut *hud;
     let toolbar_height = toolbar.size().y * toolbar.inverse_scale_factor();
+    // While nothing is open, status reads as V2's short note centred above the dock
+    // instead of a block over the village.
+    let note = !setup.open && village.hud_note();
+    let shift = if note {
+        Val2::new(percent(-50), px(0))
+    } else {
+        Val2::ZERO
+    };
+    if transform.translation != shift {
+        transform.translation = shift;
+    }
+    if note {
+        let bottom = px(18. + toolbar_height + 14.);
+        if node.bottom != bottom || node.top != Val::Auto || node.left != percent(50) {
+            node.top = Val::Auto;
+            node.bottom = bottom;
+            node.left = percent(50);
+            node.right = Val::Auto;
+            node.max_width = px(640);
+        }
+    }
     let available_height = (window.height() - 48. - toolbar_height).max(0.);
     let max_height = px(available_height);
     if node.max_height != max_height {

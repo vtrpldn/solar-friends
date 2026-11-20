@@ -820,6 +820,10 @@ fn numeric_label(village: &Village, target: NumericTarget, label: &str) -> Strin
 #[derive(Component)]
 pub(super) struct Toolbar;
 
+/// A rule between dock groups; hidden while the dock shows tool controls instead.
+#[derive(Component)]
+struct DockDivider;
+
 #[derive(Component)]
 struct PanelMenu;
 
@@ -862,7 +866,7 @@ pub(super) fn install(app: &mut App) {
         )
         .add_systems(
             Update,
-            (refresh, refresh_selection_card).after(village_input),
+            (refresh, refresh_selection_card, show_dividers).after(village_input),
         )
         .add_systems(Update, fit_and_scroll_menu.after(refresh));
 }
@@ -908,10 +912,25 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 (Action::ResourcePanel(UtilityPanel::Power), Some("P")),
                 (Action::ResourcePanel(UtilityPanel::Finances), Some("H")),
                 (Action::ResourcePanel(UtilityPanel::Upkeep), Some("F7")),
-                (Action::ResourcePanel(UtilityPanel::Events), Some("F8")),
-                (Action::ResourcePanel(UtilityPanel::Trade), None),
                 (Action::View, None),
             ] {
+                // Thin rules split building, village panels and options, as in V2's dock.
+                if matches!(
+                    action,
+                    Action::ResourcePanel(UtilityPanel::Inventory) | Action::View
+                ) {
+                    row.spawn((
+                        DockDivider,
+                        Node {
+                            width: px(2),
+                            height: px(30),
+                            margin: UiRect::horizontal(px(4)),
+                            align_self: AlignSelf::Center,
+                            ..default()
+                        },
+                        BackgroundColor(crate::theme::EDGE),
+                    ));
+                }
                 let button = spawn_button(row, &assets, action);
                 if let Some(key) = key {
                     row.commands_mut()
@@ -1246,7 +1265,7 @@ fn spawn_button(parent: &mut ChildSpawnerCommands, assets: &AssetServer, action:
             | Action::Trade(_)
             | Action::TradePolicy(_)
     );
-    let (vertical_padding, font_size) = if trade_button { (4, 14.0) } else { (6, 15.0) };
+    let (vertical_padding, font_size) = if trade_button { (4, 13.0) } else { (6, 14.0) };
     let mut button = parent.spawn((
         action,
         Button,
@@ -1403,6 +1422,19 @@ fn refresh_selection_card(
         };
         if node.display != shown {
             node.display = shown;
+        }
+    }
+}
+
+fn show_dividers(village: Res<Village>, mut dividers: Query<&mut Node, With<DockDivider>>) {
+    let display = if village.hud_note() {
+        Display::Flex
+    } else {
+        Display::None
+    };
+    for mut node in &mut dividers {
+        if node.display != display {
+            node.display = display;
         }
     }
 }
