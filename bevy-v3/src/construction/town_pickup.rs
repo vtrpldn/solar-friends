@@ -99,7 +99,7 @@ impl Construction {
         })
     }
 
-    fn reset_sale_dispatch_if_booked(&mut self) {
+    pub(super) fn clear_sale_dispatch_if_empty(&mut self) {
         let has_queued_sale = self.trade.orders.iter().enumerate().any(|(index, order)| {
             !order.buying
                 && !order.settled
@@ -139,7 +139,7 @@ impl Construction {
             }
         }
 
-        self.reset_sale_dispatch_if_booked();
+        self.clear_sale_dispatch_if_empty();
         let cargo = self.pending_dispatch_cargo(catalog);
         if cargo.is_some() {
             self.logistics_policy
@@ -176,7 +176,7 @@ impl Construction {
             self.set_trip(slot, Some(trip));
             self.upkeep.dispatch_vehicle(vehicle);
         }
-        self.reset_sale_dispatch_if_booked();
+        self.clear_sale_dispatch_if_empty();
     }
 
     pub(super) fn seed_freight_active(&self) -> bool {

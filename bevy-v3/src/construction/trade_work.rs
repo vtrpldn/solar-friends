@@ -225,6 +225,7 @@ impl Construction {
             .cancel_order(catalog, stock, &mut self.market, index)
         {
             self.removed_trade_order(index);
+            self.clear_sale_dispatch_if_empty();
         }
     }
 
@@ -994,6 +995,32 @@ mod tests {
         let status = village.trade_status(&catalog, &stock, clock);
         assert!(status.contains("Automatic sales are disabled in Sandbox."));
         assert!(!status.contains("before fuel"));
+    }
+
+    #[test]
+    fn canceling_last_sale_gives_the_next_sale_a_fresh_dispatch_wait() {
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);
+        let mut village = Construction::default();
+        let first = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
+        village
+            .reserve_town_sale(&catalog, &mut stock, first, "wood", false)
+            .unwrap();
+        village.cancel_queued_trade(&catalog, &mut stock, 0);
+        let next = TownClock {
+            seconds: crate::weather::DAY,
+            ..first
+        };
+        village
+            .reserve_town_sale(&catalog, &mut stock, next, "wood", false)
+            .unwrap();
+        assert_eq!(
+            village.trade.sale_dispatch_wait(next.seconds),
+            Some(crate::economy_reference::SALE_DISPATCH_DELAY)
+        );
     }
 
     #[test]
