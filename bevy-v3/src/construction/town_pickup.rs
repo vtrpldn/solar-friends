@@ -127,7 +127,7 @@ impl Construction {
             } {
                 if !trip.boarded {
                     if !self.pickup_manifests[trip.vehicle].is_empty() {
-                        self.fill_construction_pickup(catalog, trip);
+                        self.fill_construction_pickup(catalog, &mut trip);
                     }
                     self.add_trip_exports(catalog, &mut trip);
                 }
@@ -160,12 +160,12 @@ impl Construction {
             .filter(|&vehicle| !self.active_trips().any(|trip| trip.vehicle == vehicle))
             .collect();
         for vehicle in available {
-            let Some(trip) = self.dispatch_trip(catalog, site, clock, vehicle) else {
+            let Some(mut trip) = self.dispatch_trip(catalog, site, clock, vehicle) else {
                 continue;
             };
             let slot = usize::from(self.trip.is_some());
             if !trip.market_order && trip.farm_bed.is_none() {
-                self.fill_construction_pickup(catalog, trip);
+                self.fill_construction_pickup(catalog, &mut trip);
             }
             self.set_trip(slot, Some(trip));
             self.upkeep.dispatch_vehicle(vehicle);
@@ -512,25 +512,24 @@ impl Construction {
         }
     }
 
-    fn fill_construction_pickup(&mut self, catalog: &Catalog, trip: TownTrip) {
-        let first = trip.project;
-        if Self::pending_construction_cargo(&self.plans[first]).is_none() {
+    fn fill_construction_pickup(&mut self, catalog: &Catalog, trip: &mut TownTrip) {
+        if self.supplier_construction
+            || Self::pending_construction_cargo(&self.plans[trip.project]).is_none()
+        {
             return;
         }
-        let mut manifest = std::mem::take(&mut self.pickup_manifests[trip.vehicle]);
+        let mut manifest = BTreeMap::new();
+        let mut first = None;
         let mut capacity = crate::market::PICKUP_CAPACITY;
-        for load in manifest.values() {
-            let (mass, volume) =
-                Self::construction_order_cargo(catalog, load).expect("known cargo");
-            capacity.0 -= mass;
-            capacity.1 -= volume;
-        }
-        for index in std::iter::once(first).chain(
-            self.construction_dispatch_order()
-                .filter(|&index| index != first),
-        ) {
+        for index in self.construction_dispatch_order() {
             let plan = &self.plans[index];
-            if manifest.contains_key(&index) || !self.can_collect_construction(index, plan) {
+            if plan.removed
+                || plan.pickups == 0
+                || self.construction_delivery_at(index)
+                || self
+                    .booked_construction_trip(index)
+                    .is_some_and(|booked| booked.vehicle != trip.vehicle)
+            {
                 continue;
             }
             let Some(pending) = Self::pending_construction_cargo(plan) else {
@@ -538,12 +537,17 @@ impl Construction {
             };
             let mut proposed = capacity;
             let load = crate::market::pack_cargo(catalog, pending, &mut proposed);
-            if !load.is_empty() && Self::pickups_after_load(catalog, plan, &load).is_some() {
+            if !load.is_empty()
+                && Self::pickups_after_load(catalog, plan, &load)
+                    .is_some_and(|remaining| first.is_some() || remaining < plan.pickups)
+            {
+                first.get_or_insert(index);
                 manifest.insert(index, load);
                 capacity = proposed;
             }
         }
-        if manifest.contains_key(&first) {
+        if let Some(first) = first {
+            trip.project = first;
             self.pickup_manifests[trip.vehicle] = manifest;
         }
     }
@@ -1858,12 +1862,16 @@ mod tests {
         assert!(!first_trip.boarded);
         assert_eq!(village.pickup_manifests[first_trip.vehicle].len(), 1);
         reserve(&mut village, &mut stock, 53);
+        village.request_project_action(&catalog, &mut stock, 1, ProjectAction::Prioritize);
         let fare = crate::market::fare_cents(12);
         let balance = stock.balance();
         assert_eq!(village.market.committed_fares(), fare * 2);
         village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
         assert_eq!(village.active_trips().count(), 1);
         let trip = village.trip.unwrap();
+        assert!(!trip.boarded);
+        assert_eq!(trip.project, 1);
+        assert_eq!(trip.driver, first_trip.driver);
         assert_eq!(village.pickup_manifests[trip.vehicle].len(), 2);
         assert!(village.valid_save(&catalog, &stock));
         for canceled in 0..2 {
