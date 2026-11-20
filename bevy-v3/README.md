@@ -82,7 +82,7 @@ Regenerate the build catalog models with `node scripts/export-v3-building-models
 
 ## macOS desktop bundle
 
-The desktop check on the pull request uploads the `solar-friends-v3-macos` artifact after running and replaying two village scenarios from the packaged executable. Download and unzip the artifact, then open **Solar Friends V3.app**.
+The desktop check on the pull request uploads the `solar-friends-v3-macos` artifact after running and replaying three village scenarios from the packaged executable. The checks cover construction and salvage, freight resumed from a checkpoint, and crafting moved between workspaces. Download and unzip the artifact, then open **Solar Friends V3.app**.
 
 To package a local build from the repository root:
 
