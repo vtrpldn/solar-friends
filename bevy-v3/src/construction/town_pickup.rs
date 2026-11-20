@@ -438,7 +438,8 @@ impl Construction {
         let mut reserved = 0;
         let mut capacity = FREIGHT_CAPACITY;
         let mut cargo = BTreeMap::new();
-        for (index, plan) in self.plans.iter().enumerate() {
+        for index in self.construction_dispatch_order() {
+            let plan = &self.plans[index];
             if plan.removed || plan.pickups == 0 || self.booked_construction_trip(index).is_some() {
                 continue;
             }
@@ -524,7 +525,10 @@ impl Construction {
             capacity.0 -= mass;
             capacity.1 -= volume;
         }
-        for index in std::iter::once(first).chain((0..self.plans.len()).filter(|&i| i != first)) {
+        for index in std::iter::once(first).chain(
+            self.construction_dispatch_order()
+                .filter(|&index| index != first),
+        ) {
             let plan = &self.plans[index];
             if manifest.contains_key(&index) || !self.can_collect_construction(index, plan) {
                 continue;
@@ -934,6 +938,13 @@ impl Construction {
             && !self.supplier_construction
     }
 
+    fn construction_dispatch_order(&self) -> impl Iterator<Item = usize> + '_ {
+        self.priority
+            .filter(|&index| index < self.plans.len())
+            .into_iter()
+            .chain((0..self.plans.len()).filter(|&index| self.priority != Some(index)))
+    }
+
     fn dispatch_trip(
         &mut self,
         catalog: &Catalog,
@@ -950,13 +961,12 @@ impl Construction {
                 .ready(clock.seconds, cargo, crate::market::PICKUP_CAPACITY)
         });
         let construction = self
-            .plans
-            .iter()
-            .enumerate()
-            .find(|&(index, plan)| {
+            .construction_dispatch_order()
+            .find(|&index| {
+                let plan = &self.plans[index];
                 (ready || plan.purchase.is_none()) && self.can_collect_construction(index, plan)
             })
-            .map(|(index, _)| (index, None));
+            .map(|index| (index, None));
         let farming = self
             .farming
             .jobs
@@ -1644,9 +1654,13 @@ mod tests {
         )
         .unwrap();
         village.plans.push(second);
+        village.request_project_action(&catalog, &mut stock, 1, ProjectAction::Prioritize);
         village.toggle_supplier_construction();
         let before = stock.balance();
         village.tick_construction_delivery(&catalog, &mut stock, clock);
+        let delivery = village.construction_delivery.as_ref().unwrap();
+        assert_eq!(delivery.site, 1);
+        assert_eq!(delivery.additional_sites, [0]);
         assert!(village.construction_delivery_at(0));
         assert!(village.construction_delivery_at(1));
         assert!(
@@ -1657,8 +1671,9 @@ mod tests {
         );
         let (_, projects) = village.projects_panel(&catalog, &stock, 0, true, clock.seconds);
         for site in [1, 2] {
+            let priority = if site == 2 { " · Priority" } else { "" };
             assert!(projects.contains(&format!(
-                " #{site} · Supplier delivery on its way · 390 game minutes remaining"
+                " #{site} · Supplier delivery on its way{priority} · 390 game minutes remaining"
             )));
         }
         assert_eq!(
