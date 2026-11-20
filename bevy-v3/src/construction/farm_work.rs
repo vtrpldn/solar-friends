@@ -870,7 +870,7 @@ impl Construction {
             bed.stage.label()
         };
         let mut label = format!(
-            "Bed {}/{} · {} · {} ({:.0}%) · {:.1} m²\nMoisture {:.0}% · Fertility {:.0}% · {:.1} kg harvest estimate\nDrought loss {:.0}% · Ground cover {:.0}%\nSoil · {:.1} kg residues · {:.1} kg compost · {:.1} kg organic matter\n{}\nWater totals · {:.1} L rain · {:.1} L irrigation · {:.1} L evaporated · {:.1} L drained\nDensity {:.1}× · {} · {} residues",
+            "Bed {}/{} · {} · {} ({:.0}%) · {:.1} m²\nMoisture {:.0}% · Fertility {:.0}%\nDrought loss {:.0}% · Ground cover {:.0}%\nSoil · {:.1} kg residues · {:.1} kg compost · {:.1} kg organic matter\n{}\nWater totals · {:.1} L rain · {:.1} L irrigation · {:.1} L evaporated · {:.1} L drained\nDensity {:.1}× · {} · {} residues",
             index + 1,
             plot.beds.len(),
             bed.crop.label(),
@@ -879,7 +879,6 @@ impl Construction {
             bed.area(),
             bed.moisture * 100.0,
             bed.fertility * 100.0,
-            bed.yield_kg(clock),
             bed.drought_damage() * 100.0,
             bed.ground_cover() * 100.0,
             bed.residue_kg,
@@ -894,8 +893,13 @@ impl Construction {
             irrigation,
             residues,
         );
+        use std::fmt::Write;
         if let Some((remaining, window)) = bed.harvest_timing(clock) {
-            use std::fmt::Write;
+            let _ = write!(
+                label,
+                "\nRecoverable harvest now · {:.1} kg",
+                bed.yield_kg(clock)
+            );
             if remaining > 0.0 {
                 let _ = write!(
                     label,
@@ -904,6 +908,12 @@ impl Construction {
             } else {
                 label.push_str("\nClear the expired crop before replanting.");
             }
+        } else if bed.stage == Stage::Growing {
+            let _ = write!(
+                label,
+                "\nPotential harvest · 0–{:.1} kg",
+                bed.yield_kg(clock)
+            );
         }
         if let Some(job) = self
             .farming
