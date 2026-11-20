@@ -1699,6 +1699,8 @@ fn refresh(
     let show_view = picker.view_open && Action::View.available(&village);
     let show_lenses = Action::LensPage.available(&village);
     let show_beds = !picker.open && Action::Farm(FarmControl::NextBed).available(&village);
+    let plot_actions = (show_beds && village.construction.farming.whole_plot)
+        .then(|| village.construction.whole_plot_action_counts(village.clock));
     let show_recipes = !picker.open && Action::RecipePage(true).available(&village);
     let craft_workspace = show_recipes
         .then(|| village.construction.craft_workspace_label(&catalog))
@@ -1850,6 +1852,9 @@ fn refresh(
             Action::MoveCraft => craft_workspace.is_some(),
             Action::FacilityIrrigation => irrigation.is_some(),
             Action::Beds | Action::Gather => action.available(&village),
+            Action::Farm(FarmControl::Work(work)) => {
+                show_beds && plot_actions.is_none_or(|counts| counts[work as usize] > 0)
+            }
             Action::Farm(_) | Action::SelectBed => show_beds,
             Action::Recipe(row) => recipes.get(row).is_some(),
             Action::FocusSelectedProject | Action::DeselectProject => {
@@ -2016,6 +2021,11 @@ fn refresh(
         };
         if let Ok(mut text) = labels.get_mut(children[0]) {
             let label = match action {
+                Action::Farm(FarmControl::Work(work)) if let Some(counts) = plot_actions => {
+                    let count = counts[work as usize];
+                    let unit = if count == 1 { "bed" } else { "beds" };
+                    format!("{} · {count} {unit}", action.label(&village, &picker))
+                }
                 Action::Sound if sound.open => "Close sound settings".into(),
                 Action::Volume { effects, delta } => format!(
                     "{} {}% {}",

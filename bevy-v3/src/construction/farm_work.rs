@@ -746,6 +746,32 @@ impl Construction {
         }
     }
 
+    pub(crate) fn whole_plot_action_counts(&self, clock: f64) -> [usize; 6] {
+        let mut counts = [0; 6];
+        let Some(site) = self
+            .production
+            .selected
+            .filter(|&site| self.utilities.enabled(site))
+        else {
+            return counts;
+        };
+        let Some(plot) = self.farming.plots.get(&site) else {
+            return counts;
+        };
+        let mut busy = vec![false; plot.beds.len()];
+        for job in self.farming.jobs.iter().filter(|job| job.site == site) {
+            busy[job.bed] = true;
+        }
+        for (bed, busy) in plot.beds.iter().zip(busy) {
+            if !busy {
+                for action in FarmAction::ALL {
+                    counts[action as usize] += usize::from(bed.allows(action, clock));
+                }
+            }
+        }
+        counts
+    }
+
     pub fn farm_status(&self, catalog: &Catalog, stock: &Stock, clock: f64) -> Option<String> {
         let site = self.production.selected?;
         let plot = self.farming.plots.get(&site)?;
@@ -1311,6 +1337,12 @@ mod resize_tests {
         assert_eq!(village.farming.bed, 1);
 
         village.apply_farm_control(&catalog, &mut stock, FarmControl::WholePlot, clock);
+        let available = village.whole_plot_action_counts(clock.seconds);
+        assert_eq!(
+            available[FarmAction::Prepare as usize],
+            village.farming.plots[&0].beds.len() - 1
+        );
+        assert_eq!(available[FarmAction::Harvest as usize], 0);
         let initial_crop = village.farming.plots[&0].beds[0].crop;
         village.apply_farm_control(&catalog, &mut stock, FarmControl::Crop, clock);
         let beds = &village.farming.plots[&0].beds;

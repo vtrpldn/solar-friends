@@ -209,6 +209,17 @@ pub enum FarmAction {
     Collect,
 }
 
+impl FarmAction {
+    pub(crate) const ALL: [Self; 6] = [
+        Self::Prepare,
+        Self::Plant,
+        Self::Harvest,
+        Self::Clear,
+        Self::Amend,
+        Self::Collect,
+    ];
+}
+
 #[derive(Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
 pub enum FarmPhase {
     Pickup,
@@ -534,12 +545,8 @@ impl Bed {
         )
     }
 
-    pub fn requirements(
-        &self,
-        action: FarmAction,
-        clock: f64,
-    ) -> Result<(BTreeMap<String, u32>, f64), &'static str> {
-        let allowed = match action {
+    pub(crate) fn allows(&self, action: FarmAction, clock: f64) -> bool {
+        match action {
             FarmAction::Prepare => matches!(self.stage, Stage::Unprepared | Stage::Harvested),
             FarmAction::Plant => self.stage == Stage::Prepared,
             FarmAction::Harvest => {
@@ -548,8 +555,15 @@ impl Bed {
             FarmAction::Clear => self.standing() || self.stage == Stage::Failed,
             FarmAction::Amend => true,
             FarmAction::Collect => self.residue_kg >= 1.0,
-        };
-        if !allowed {
+        }
+    }
+
+    pub fn requirements(
+        &self,
+        action: FarmAction,
+        clock: f64,
+    ) -> Result<(BTreeMap<String, u32>, f64), &'static str> {
+        if !self.allows(action, clock) {
             return Err(match action {
                 FarmAction::Plant => "Prepare the soil before planting.",
                 FarmAction::Harvest => "There is no ripe harvest remaining in this bed.",
