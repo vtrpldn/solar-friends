@@ -22,6 +22,16 @@ pub(crate) struct HomeOption<'a> {
 
 pub(super) const NAMES: [&str; 5] = ["Iara", "Bento", "Luz", "Cauã", "Nina"];
 
+const NEED_METERS: [(&str, Need); 7] = [
+    ("Food", Need::Hunger),
+    ("Water", Need::Hydration),
+    ("Bladder", Need::Bladder),
+    ("Bowels", Need::Bowels),
+    ("Hygiene", Need::Hygiene),
+    ("Social", Need::Social),
+    ("Fun", Need::Fun),
+];
+
 fn latrine_sites(terrain: &Terrain, camp: IVec2, index: usize) -> impl Iterator<Item = IVec2> + '_ {
     (6..=8).flat_map(move |radius| {
         (0..12).filter_map(move |direction| {
@@ -1646,14 +1656,13 @@ impl Construction {
                     |id| format!("{} #{}", catalog.projects[&self.plans[id].key].name, id + 1),
                 );
                 let marker = if index == selected { "› " } else { "" };
+                let (need, value) = std::iter::once(("Energy", health.energy))
+                    .chain(NEED_METERS.map(|(label, need)| (label, health.levels[need as usize])))
+                    .min_by(|left, right| left.1.total_cmp(&right.1))
+                    .expect("energy is always tracked");
                 format!(
-                    "{marker}{} · {} · {home}\n{} · Energy {:.0}% · Water {:.0}% · Food {:.0}%",
-                    NAMES[index],
-                    profile.role,
-                    action,
-                    health.energy,
-                    health.levels[Need::Hydration as usize],
-                    health.levels[Need::Hunger as usize],
+                    "{marker}{} · {} · {home}\n{action} · {need} {value:.0}%",
+                    NAMES[index], profile.role,
                 )
             })
             .collect::<Vec<_>>()
@@ -1709,15 +1718,7 @@ impl Construction {
             self.resident_home_summary(selected, catalog),
             worker.health.energy,
         );
-        for (label, need) in [
-            ("Food", Need::Hunger),
-            ("Water", Need::Hydration),
-            ("Bladder", Need::Bladder),
-            ("Bowels", Need::Bowels),
-            ("Hygiene", Need::Hygiene),
-            ("Social", Need::Social),
-            ("Fun", Need::Fun),
-        ] {
+        for (label, need) in NEED_METERS {
             let _ = write!(
                 rows,
                 " · {label} {:.0}%",
@@ -1806,6 +1807,20 @@ pub(super) fn approach_points(start: IVec2, size: IVec2, from: Vec2) -> Vec<IVec
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn resident_roster_reports_the_lowest_need_for_each_resident() {
+        let catalog = Catalog::default();
+        let mut village = Construction::default();
+        village.residents[0].health.levels[Need::Social as usize] = 7.;
+        village.residents[1].health.energy = 12.;
+        let summary = village.resident_status(&catalog, &Stock::default(), 0);
+        let mut rows = summary.lines();
+        assert!(rows.next().unwrap().starts_with("› Iara"));
+        assert!(rows.next().unwrap().ends_with("Social 7%"));
+        assert!(rows.next().unwrap().starts_with("Bento"));
+        assert!(rows.next().unwrap().ends_with("Energy 12%"));
+    }
 
     #[test]
     fn resident_home_summary_tracks_assignment_and_housemates() {
