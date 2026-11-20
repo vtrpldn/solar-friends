@@ -1452,7 +1452,20 @@ mod tests {
                 .iter(app.world())
                 .any(|text| text.0.contains("Click home · T Assign · Y Clear"))
         );
-        press_button(&mut app, "Close panel");
+        let before = app
+            .world_mut()
+            .query::<&VillageCamera>()
+            .single(app.world())
+            .unwrap()
+            .target;
+        press_button(&mut app, "Find resident in village");
+        let after = app
+            .world_mut()
+            .query::<&VillageCamera>()
+            .single(app.world())
+            .unwrap()
+            .target;
+        assert_ne!(before, after);
 
         press_button(&mut app, "Food portions");
         assert!(

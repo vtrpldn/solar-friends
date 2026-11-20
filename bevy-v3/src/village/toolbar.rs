@@ -78,6 +78,7 @@ enum Action {
     InventorySearch,
     Resident(usize),
     ResidentProfile(ResidentProfile),
+    FocusResident,
     WorkPriority(WorkGroup),
     WorkerReservation(bool),
     Home(bool),
@@ -324,6 +325,12 @@ impl Action {
             Self::WorkPriority(_) | Self::WorkerReservation(_) => {
                 village.utility_panel == Some(UtilityPanel::Residents)
             }
+            Self::FocusResident => {
+                let resident = village.selected_resident;
+                village.utility_panel == Some(UtilityPanel::Residents)
+                    && !village.construction.away_for_work(resident)
+                    && !village.construction.driver_away(resident)
+            }
             Self::ResidentProfile(_) => village.utility_panel == Some(UtilityPanel::Residents),
             Self::Resident(_) => matches!(
                 village.utility_panel,
@@ -569,6 +576,7 @@ impl Action {
                 format!("› {}", NAMES[index])
             }
             Self::Resident(index) => NAMES[index].into(),
+            Self::FocusResident => "Find resident in village".into(),
             Self::ResidentProfile(profile) if profile == village.resident_profile => {
                 format!("› {}", profile.label())
             }
@@ -917,6 +925,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 for index in 0..NAMES.len() {
                     spawn_button(menu, &assets, Action::Resident(index));
                 }
+                spawn_button(menu, &assets, Action::FocusResident);
                 for profile in ResidentProfile::ALL {
                     spawn_button(menu, &assets, Action::ResidentProfile(profile));
                 }
@@ -1329,6 +1338,15 @@ fn handle_buttons(
                     village.projects_page = 0;
                 }
                 Action::Resident(index) if !picker.open => village.select_resident(index),
+                Action::FocusResident if !picker.open => {
+                    let (position, _) = village
+                        .construction
+                        .resident_visual_position(village.selected_resident, &catalog);
+                    let position = world_position(position.x, position.y);
+                    let height = village.terrain(&setup).height_at(position.x, position.y);
+                    camera.target = Vec3::new(position.x, height, position.y);
+                    village.utility_panel = None;
+                }
                 Action::ResidentProfile(profile) if !picker.open => {
                     village.resident_profile = profile;
                 }
@@ -1567,6 +1585,7 @@ fn handle_buttons(
                 | Action::ProjectFilter
                 | Action::Resident(_)
                 | Action::ResidentProfile(_)
+                | Action::FocusResident
                 | Action::WorkPriority(_)
                 | Action::WorkerReservation(_)
                 | Action::Home(_)
@@ -1816,6 +1835,7 @@ fn refresh(
             Action::ListedHome(row) => homes.get(row).is_some(),
             Action::Resident(_) => show_residents || show_finances,
             Action::ResidentProfile(_) => show_residents,
+            Action::FocusResident => show_residents && action.available(&village),
             Action::WorkPriority(_) | Action::WorkerReservation(_) => show_residents,
             Action::Shift(_) => !picker.open && action.available(&village),
             Action::Ledger => show_finances,
