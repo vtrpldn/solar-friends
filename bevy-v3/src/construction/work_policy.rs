@@ -94,6 +94,7 @@ impl WorkPolicy {
             (
                 group != WorkGroup::Essentials || !urgent,
                 std::cmp::Reverse(self.priorities[group as usize]),
+                group != WorkGroup::Construction,
             )
         });
         order
@@ -166,6 +167,23 @@ impl Construction {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn construction_wins_normal_priority_ties_after_reservations() {
+        let mut policy = WorkPolicy::default();
+        assert!(
+            policy.dispatch_order(false)
+                == [
+                    WorkGroup::Essentials,
+                    WorkGroup::Maintenance,
+                    WorkGroup::Construction,
+                    WorkGroup::Production,
+                ]
+        );
+        policy.set_priority(WorkGroup::Construction, 3).unwrap();
+        assert!(policy.dispatch_order(false)[0] == WorkGroup::Construction);
+        assert!(policy.dispatch_order(true)[0] == WorkGroup::Essentials);
+    }
     use crate::setup::{Mode, WorldSetup};
 
     #[test]
