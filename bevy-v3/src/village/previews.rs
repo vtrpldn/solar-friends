@@ -12,6 +12,7 @@ pub(crate) enum Preview {
     Arrival,
     Needs(UtilitiesPreview),
     Rest,
+    Wildlife,
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
@@ -45,6 +46,7 @@ impl Preview {
                 "--arrival-preview" => Self::Arrival,
                 "--needs-preview" => Self::Needs(UtilitiesPreview::default()),
                 "--rest-preview" => Self::Rest,
+                "--wildlife-preview" => Self::Wildlife,
                 "--interactions" | "--land-seed" | "--lighting-hour" | "--lighting-rain" => {
                     utilities_option = Some(flag);
                     match flag {
@@ -112,6 +114,7 @@ impl Preview {
             Self::Arrival => "Arrival preview",
             Self::Needs(_) => "Needs preview",
             Self::Rest => "Rest preview",
+            Self::Wildlife => "Wildlife preview",
         }
     }
 
@@ -120,7 +123,7 @@ impl Preview {
             Self::Downtime => (Mode::Story, None, 1300.0),
             Self::Utilities(options) => (Mode::Story, Some(options.seed), options.clock()),
             Self::Needs(options) => (Mode::Story, Some(options.seed), 200.0),
-            Self::Arrival | Self::Rest => (Mode::Story, Some(0), 0.0),
+            Self::Arrival | Self::Rest | Self::Wildlife => (Mode::Story, Some(0), 0.0),
         };
         let mut scene = PreviewVillage::new(self.title(), mode, seed, clock);
         match self {
@@ -139,6 +142,12 @@ impl Preview {
                 scene.village.paused = options.hour.is_some();
             }
             Self::Rest => prepare_rest(&mut scene),
+            Self::Wildlife => {
+                prepare_wildlife(&mut scene);
+                app.insert_resource(crate::wildlife::WildlifePreview(
+                    scene.village.session_serial,
+                ));
+            }
         }
         scene.village.stock.sandbox = mode == Mode::Sandbox;
         app.insert_resource(scene.setup)
@@ -414,6 +423,11 @@ fn prepare_rest(scene: &mut PreviewVillage) {
     scene.focus(crate::construction::STOCKPILE + IVec2::new(0, 2), 1.0);
 }
 
+fn prepare_wildlife(scene: &mut PreviewVillage) {
+    scene.village.camp = None;
+    scene.focus(crate::construction::STOCKPILE + IVec2::new(0, 2), 1.0);
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -565,5 +579,25 @@ mod tests {
                 ("Energy", 10.0)
             );
         }
+    }
+
+    #[test]
+    fn wildlife_preview_starts_with_four_birds_in_flight() {
+        let mut app = start(&["--wildlife-preview"]);
+        assert!(app.world().resource::<Village>().camp.is_none());
+        app.init_resource::<Time>()
+            .init_resource::<Assets<Mesh>>()
+            .init_resource::<Assets<StandardMaterial>>()
+            .add_plugins(crate::wildlife::WildlifePlugin);
+        app.update();
+
+        let world = app.world_mut();
+        let mut visitors = world.query::<(&Name, &Transform)>();
+        let birds = visitors
+            .iter(world)
+            .filter(|(name, _)| name.as_str() == "Wildlife visitor")
+            .collect::<Vec<_>>();
+        assert_eq!(birds.len(), 4);
+        assert!(birds.iter().all(|(_, pose)| pose.scale == Vec3::ONE));
     }
 }

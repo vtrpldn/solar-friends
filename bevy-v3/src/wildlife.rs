@@ -1,6 +1,12 @@
 use bevy::prelude::*;
 
-use crate::{setup::WorldSetup, terrain::land_random, village::Village};
+use crate::{
+    arrival::world_position,
+    construction::STOCKPILE,
+    setup::WorldSetup,
+    terrain::{Terrain, land_random},
+    village::Village,
+};
 
 mod capybaras;
 
@@ -11,6 +17,9 @@ const PALETTES: [[u32; 3]; 3] = [
 ];
 
 pub struct WildlifePlugin;
+
+#[derive(Resource)]
+pub(crate) struct WildlifePreview(pub(crate) u64);
 
 impl Plugin for WildlifePlugin {
     fn build(&self, app: &mut App) {
@@ -68,39 +77,83 @@ struct Visitor {
     phase: f32,
 }
 
+impl Visitor {
+    fn progress(&self, age: f32) -> f32 {
+        age / if self.butterfly { 24.0 } else { 18.0 }
+    }
+
+    fn transform(&self, terrain: &Terrain, age: f32) -> Transform {
+        let (distance, sway_rate, sway_width, altitude) = if self.butterfly {
+            (22.0, 1.7, 1.1, 1.1)
+        } else {
+            (100.0, 0.45, 0.8, 9.0)
+        };
+        let progress = self.progress(age);
+        let sway = (age * sway_rate + self.phase).sin() * sway_width;
+        let Vec2 { x, y: z } = self.center
+            + self.direction * ((progress - 0.5) * distance)
+            + self.direction.perp() * sway;
+        Transform {
+            translation: Vec3::new(
+                x,
+                terrain.height_at(x, z) + altitude + (age * 2.0 + self.phase).sin() * 0.15,
+                z,
+            ),
+            rotation: Quat::from_rotation_y(self.direction.x.atan2(self.direction.y)),
+            scale: Vec3::splat((progress * 8.0).min((1.0 - progress) * 8.0).min(1.0)),
+        }
+    }
+}
+
 #[derive(Component)]
 struct Wing(f32);
 
 fn update_visitors(
     mut commands: Commands,
     (setup, village, models, time): (Res<WorldSetup>, Res<Village>, Res<Models>, Res<Time>),
+    preview: Option<Res<WildlifePreview>>,
     mut clock: Local<VisitClock>,
     mut visitors: Query<(Entity, &Visitor, &Children, &mut Transform), Without<Wing>>,
     mut wings: Query<(&Wing, &mut Transform), Without<Visitor>>,
 ) {
+    const PREVIEW_RANDOM: f64 = 0.75;
+    const PREVIEW_WARMUP: f32 = 27.0;
     let serial = village.terrain_key().0;
-    if setup.open || clock.session != Some(serial) {
+    let new_session = clock.session != Some(serial);
+    let preview = preview.is_some_and(|preview| preview.0 == serial);
+    let first_preview_visit = new_session && preview;
+    if setup.open || new_session {
         for (entity, _, _, _) in &mut visitors {
             commands.entity(entity).despawn();
         }
-        if clock.session != Some(serial) {
+        if new_session {
             *clock = VisitClock {
                 session: Some(serial),
                 next: 8.0 + land_random(setup.seed() ^ 0x785c)() as f32 * 15.0,
                 ..default()
             };
         }
+        if setup.open || !first_preview_visit {
+            return;
+        }
+    }
+    if village.is_paused() {
         return;
     }
-    if village.is_paused() || village.camp.is_none() {
+    let Some(anchor) = village.camp.or(preview.then_some(STOCKPILE)) else {
         return;
-    }
+    };
     clock.elapsed += time.delta_secs();
-    if clock.elapsed >= clock.next
-        && visitors.is_empty()
-        && let Some(camp) = village.camp_focus(&setup)
-    {
-        let mut random = land_random(setup.seed() ^ clock.visits.wrapping_mul(0x9e3779b9));
+    let mut age = 0.0;
+    if first_preview_visit {
+        // V2 fast-forwards the initial cooldown to show a flock already in flight.
+        clock.next = 8.0 + PREVIEW_RANDOM as f32 * 15.0;
+        clock.elapsed += PREVIEW_WARMUP;
+        age = PREVIEW_WARMUP - clock.next;
+    }
+    if clock.elapsed >= clock.next && visitors.is_empty() {
+        let mut seeded = land_random(setup.seed() ^ clock.visits.wrapping_mul(0x9e3779b9));
+        let mut random = || if preview { PREVIEW_RANDOM } else { seeded() };
         let butterfly = random() < 0.4;
         let count = if butterfly {
             1 + (random() * 2.0) as u32
@@ -108,22 +161,24 @@ fn update_visitors(
             2 + (random() * 3.0) as u32
         };
         let direction = Vec2::from_angle(random() as f32 * std::f32::consts::TAU);
-        let center = camp.xz() + Vec2::new(random() as f32 - 0.5, random() as f32 - 0.5) * 32.0;
+        let center = world_position(anchor.x as f32, anchor.y as f32)
+            + Vec2::new(random() as f32 - 0.5, random() as f32 - 0.5) * 32.0;
+        let terrain = first_preview_visit.then(|| village.terrain(&setup));
         for index in 0..count {
-            spawn_visitor(
-                &mut commands,
-                &models,
-                setup.biome(),
-                Visitor {
-                    butterfly,
-                    began: clock.elapsed,
-                    center: center + direction.perp() * index as f32 * 1.7,
-                    direction,
-                    phase: random() as f32 * std::f32::consts::TAU,
-                },
+            let visitor = Visitor {
+                butterfly,
+                began: clock.elapsed - age,
+                center: center + direction.perp() * index as f32 * 1.7,
+                direction,
+                phase: random() as f32 * std::f32::consts::TAU,
+            };
+            let transform = terrain.as_ref().map_or_else(
+                || Transform::from_scale(Vec3::splat(0.001)),
+                |terrain| visitor.transform(terrain, age),
             );
+            spawn_visitor(&mut commands, &models, setup.biome(), visitor, transform);
         }
-        clock.next = clock.elapsed + 45.0 + random() as f32 * 65.0;
+        clock.next = clock.elapsed - age + 45.0 + random() as f32 * 65.0;
         clock.visits = clock.visits.wrapping_add(1);
     }
     if visitors.is_empty() {
@@ -132,29 +187,16 @@ fn update_visitors(
     let terrain = village.terrain(&setup);
     for (entity, visitor, children, mut transform) in &mut visitors {
         let age = clock.elapsed - visitor.began;
-        let duration = if visitor.butterfly { 24.0 } else { 18.0 };
-        let progress = age / duration;
-        if progress >= 1.0 {
+        if visitor.progress(age) >= 1.0 {
             commands.entity(entity).despawn();
             continue;
         }
-        let (distance, sway_rate, sway_width, altitude, wing_rate, wing_range) =
-            if visitor.butterfly {
-                (22.0, 1.7, 1.1, 1.1, 22.0, 1.1)
-            } else {
-                (100.0, 0.45, 0.8, 9.0, 9.0, 0.6)
-            };
-        let sway = (age * sway_rate + visitor.phase).sin() * sway_width;
-        let Vec2 { x, y: z } = visitor.center
-            + visitor.direction * ((progress - 0.5) * distance)
-            + visitor.direction.perp() * sway;
-        transform.translation = Vec3::new(
-            x,
-            terrain.height_at(x, z) + altitude + (age * 2.0 + visitor.phase).sin() * 0.15,
-            z,
-        );
-        transform.rotation = Quat::from_rotation_y(visitor.direction.x.atan2(visitor.direction.y));
-        transform.scale = Vec3::splat((progress * 8.0).min((1.0 - progress) * 8.0).min(1.0));
+        *transform = visitor.transform(&terrain, age);
+        let (wing_rate, wing_range) = if visitor.butterfly {
+            (22.0, 1.1)
+        } else {
+            (9.0, 0.6)
+        };
         for child in children.iter() {
             if let Ok((wing, mut pose)) = wings.get_mut(child) {
                 pose.rotation = Quat::from_rotation_z(
@@ -165,7 +207,13 @@ fn update_visitors(
     }
 }
 
-fn spawn_visitor(commands: &mut Commands, models: &Models, biome: usize, visitor: Visitor) {
+fn spawn_visitor(
+    commands: &mut Commands,
+    models: &Models,
+    biome: usize,
+    visitor: Visitor,
+    transform: Transform,
+) {
     let butterfly = visitor.butterfly;
     let [bird, wing, butterfly_wing] = &models.palettes[biome];
     let shape = |material: &Handle<StandardMaterial>, translation: Vec3, scale: Vec3| {
@@ -179,7 +227,7 @@ fn spawn_visitor(commands: &mut Commands, models: &Models, biome: usize, visitor
         .spawn((
             visitor,
             Name::new("Wildlife visitor"),
-            Transform::from_scale(Vec3::splat(0.001)),
+            transform,
             Visibility::Inherited,
         ))
         .with_children(|body| {
