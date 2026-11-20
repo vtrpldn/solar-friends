@@ -22,7 +22,7 @@ The clock switches to 64× while all five residents are asleep or away in town. 
 
 Click a completed workbench, workshop, or kitchen and press C to open its recipes. Residents bring inputs to the building and carry the finished batch back to stores.
 
-Select a completed field, garden, or greenhouse and press K to manage its beds. Prepare the soil, sow a crop, and return to harvest when it is ripe. Bed settings cover crop, density, irrigation, and residues.
+Select a completed field, garden, or greenhouse and press K to manage the whole plot. Choose **Inspect one bed** or press Tab to switch to individual beds. Prepare the soil, sow a crop, and return to harvest when it is ripe. Bed settings cover crop, density, irrigation, and residues.
 
 A completed coop or goat pen can store feed and drinking water, then produce eggs or milk. Residents take fodder to the animals when supplies are available. Select a pen and press C to see its care and collection options.
 

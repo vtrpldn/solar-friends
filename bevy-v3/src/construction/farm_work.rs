@@ -322,8 +322,14 @@ impl Construction {
 
     pub fn toggle_beds(&mut self) {
         if self.has_selected_plot() && !self.menu && !self.production.open {
-            self.farming.open = !self.farming.open;
-            self.farming.pending_plot_clear = None;
+            if self.farming.open {
+                self.farming.close();
+            } else {
+                self.farming.open = true;
+                self.farming.whole_plot = true;
+                self.farming.bed = 0;
+                self.farming.notice.clear();
+            }
         }
     }
 
@@ -395,8 +401,11 @@ impl Construction {
         }
         match action {
             FarmControl::NextBed => {
-                self.farming.whole_plot = false;
-                self.farming.bed = (self.farming.bed + 1) % plot.beds.len();
+                if self.farming.whole_plot {
+                    self.farming.whole_plot = false;
+                } else {
+                    self.farming.bed = (self.farming.bed + 1) % plot.beds.len();
+                }
                 self.farming.notice.clear();
             }
             FarmControl::Irrigation => bed.irrigation = !bed.irrigation,
@@ -1215,8 +1224,8 @@ mod resize_tests {
         village.plans.push(garden);
         village.tick_crops(&catalog, &setup, 0.0, 0.0);
         village.production.selected = Some(0);
-        village.farming.open = true;
-        village.farming.whole_plot = true;
+        village.toggle_beds();
+        assert!(village.farming.whole_plot);
         village.farming.plots.get_mut(&0).unwrap().beds[0].stage = Stage::Growing;
         let clock = TownClock {
             seconds: 0.,
@@ -1228,6 +1237,10 @@ mod resize_tests {
         assert!(overview.contains("Whole garden"));
         assert!(overview.contains("Growing 1"));
         assert!(overview.contains("Unworked soil"));
+        village.apply_farm_control(&catalog, &mut stock, FarmControl::NextBed, clock);
+        assert!(!village.farming.whole_plot);
+        assert_eq!(village.farming.bed, 0);
+        village.apply_farm_control(&catalog, &mut stock, FarmControl::WholePlot, clock);
         let clear = FarmControl::Work(FarmAction::Clear);
         village.apply_farm_control(&catalog, &mut stock, clear, clock);
         assert!(village.farming.jobs.is_empty());
@@ -1359,9 +1372,10 @@ mod resize_tests {
         };
         village.plan(&catalog, &mut stock, ground, corner, clock);
         village.select_facility(corner);
+        village.toggle_beds();
+        village.apply_farm_control(&catalog, &mut stock, FarmControl::WholePlot, clock);
         village.farming.bed = 24;
         let mut input = ButtonInput::default();
-        input.press(KeyCode::KeyK);
         input.press(KeyCode::Digit1);
         village.farm_input(&catalog, &mut stock, &input, ground, clock);
         assert_eq!(village.farming.jobs.len(), 1);
@@ -1463,8 +1477,9 @@ mod resize_tests {
         };
         village.plan(&catalog, &mut stock, ground, corner, clock);
         village.select_facility(corner);
+        village.toggle_beds();
+        village.apply_farm_control(&catalog, &mut stock, FarmControl::WholePlot, clock);
         let mut input = ButtonInput::default();
-        input.press(KeyCode::KeyK);
         input.press(KeyCode::Digit1);
         village.farm_input(&catalog, &mut stock, &input, ground, clock);
 
