@@ -875,8 +875,22 @@ impl Construction {
             ));
         }
         let (used, maximum) = self.storage(catalog, stock);
+        let committed = if self.supplier_construction {
+            self.protected_freight_cash(catalog, clock)
+                .unwrap_or(stock.balance())
+        } else {
+            self.market.committed_fares()
+        };
+        let spendable = stock.balance().saturating_sub(committed);
+        let (transport, fare) = if self.supplier_construction {
+            ("Supplier freight", freight)
+        } else {
+            ("Resident pickup", pickup)
+        };
         display.push_str(&format!(
-            "\nI Buy · D Change purchase transport\nStorage {used}/{maximum} units · {} fulfilled purchases",
+            "\n{transport} · R${:.2} transport · R${:.2} available after commitments\nI Buy · D Change purchase transport\nStorage {used}/{maximum} units · {} fulfilled purchases",
+            fare as f64 / 100.0,
+            spendable as f64 / 100.0,
             self.trade.purchases,
         ));
         if let Some(status) =
@@ -1247,6 +1261,11 @@ mod tests {
         assert_eq!(stock.balance(), protected);
         let summary = village.finance_summary(&catalog, &stock, 0, clock);
         assert!(summary.contains("Available after commitments R$0.00"));
+        assert!(
+            village.trade_status(&catalog, &stock, clock).contains(
+                "Supplier freight · R$44.60 transport · R$0.00 available after commitments"
+            )
+        );
         assert!(summary.contains(&format!(
             "Protected for freight and reserves R${:.2}",
             protected as f64 / 100.0
