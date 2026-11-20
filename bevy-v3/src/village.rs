@@ -792,7 +792,12 @@ impl Village {
             ),
             Some(UtilityPanel::Projects) => (
                 self.construction
-                    .projects_panel(catalog, self.projects_page, self.open_projects_only)
+                    .projects_panel(
+                        catalog,
+                        &self.stock,
+                        self.projects_page,
+                        self.open_projects_only,
+                    )
                     .0,
                 &mut self.projects_page,
             ),
@@ -2646,7 +2651,12 @@ fn show_hud(
             label.push_str(
                 &village
                     .construction
-                    .projects_panel(&catalog, village.projects_page, village.open_projects_only)
+                    .projects_panel(
+                        &catalog,
+                        &village.stock,
+                        village.projects_page,
+                        village.open_projects_only,
+                    )
                     .1,
             );
             if let Some(freight) = village.construction.reserved_freight_status(village.clock) {

@@ -122,17 +122,8 @@ impl Construction {
         if project.removed {
             return None;
         }
-        let label = if let Some(job) = self.changes.get(&index) {
-            if job.target.is_none() && job.work >= job.required {
-                let (recovered, _) = self.dismantling_yield(catalog, index, job.kind);
-                if !self.can_store_dismantling(catalog, stock, index, &recovered) {
-                    return Some(format!(
-                        "{} · Waiting for storage space",
-                        job.action_label()
-                    ));
-                }
-            }
-            job.status()
+        let label = if let Some(status) = self.change_status(catalog, stock, index) {
+            status
         } else if project.work == 0.0 {
             "X Cancel plan · Z Prioritize".into()
         } else if project.work < catalog.projects[&project.key].work {
@@ -141,6 +132,25 @@ impl Construction {
             "Shift+M Move · X Salvage · Shift+X Demolish".into()
         };
         Some(label)
+    }
+
+    pub(super) fn change_status(
+        &self,
+        catalog: &Catalog,
+        stock: &Stock,
+        index: usize,
+    ) -> Option<String> {
+        let job = self.changes.get(&index)?;
+        if job.target.is_none() && job.work >= job.required {
+            let (recovered, _) = self.dismantling_yield(catalog, index, job.kind);
+            if !self.can_store_dismantling(catalog, stock, index, &recovered) {
+                return Some(format!(
+                    "{} · Waiting for storage space",
+                    job.action_label()
+                ));
+            }
+        }
+        Some(job.status())
     }
 
     pub fn lifecycle_input(
@@ -859,7 +869,7 @@ mod tests {
             construction.lifecycle_status(&catalog, &stock).as_deref(),
             Some("Moving · Another project occupies that space.")
         );
-        let (_, projects) = construction.projects_panel(&catalog, 0, true);
+        let (_, projects) = construction.projects_panel(&catalog, &stock, 0, true);
         assert!(projects.contains("Moving · Another project occupies that space."));
         assert_eq!(construction.plans[0].position, original);
         assert_eq!(construction.foundations.len(), 1);
@@ -1005,6 +1015,8 @@ mod tests {
             construction.lifecycle_status(&catalog, &stock).as_deref(),
             Some("Salvaging · Waiting for storage space")
         );
+        let (_, projects) = construction.projects_panel(&catalog, &stock, 0, true);
+        assert!(projects.contains("Salvaging · Waiting for storage space"));
         construction.tick_changes(&catalog, &mut stock, site, 42.0, 3.0);
         assert_eq!(construction.changes[&0].worker, None);
         stock.reserve_available(&fill);

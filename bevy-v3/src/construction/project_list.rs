@@ -30,6 +30,7 @@ impl Construction {
     pub fn projects_panel(
         &self,
         catalog: &Catalog,
+        stock: &Stock,
         page: usize,
         underway: bool,
     ) -> (usize, String) {
@@ -53,7 +54,9 @@ impl Construction {
             .enumerate()
         {
             let def = &catalog.projects[&plan.key];
-            let state = self.project_status(catalog, *index);
+            let state = self
+                .change_status(catalog, stock, *index)
+                .unwrap_or_else(|| self.project_status(catalog, *index));
             let priority = if self.priority == Some(*index) {
                 " · Priority"
             } else {
