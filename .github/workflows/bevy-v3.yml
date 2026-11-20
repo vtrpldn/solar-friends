@@ -120,6 +120,30 @@ jobs:
           "$game" --lab freight-resume.json freight-checkpoint.json > freight-resume-report.json
           "$game" --lab-replay freight-resume-report.json
           diff -u <(jq -S '.village' freight-report.json) <(jq -S '.village' freight-resume-report.json)
+          cat > craft.json <<'JSON'
+          {
+            "setup": {"mode":"Sandbox","seed":42,"biome":0,"landscape":1,"water":1,"savings":1,"supplies":1},
+            "steps": 12000,
+            "orders": [
+              {"step":0,"order":{"type":"build","key":"supply-5","x":40,"z":36}},
+              {"step":0,"order":{"type":"build","key":"supply-5","x":49,"z":36}},
+              {"step":0,"order":{"type":"produce","site":1,"recipe":"craft_harvest-basket"}},
+              {"step":50,"order":{"type":"move-craft","site":1,"destination":2}}
+            ]
+          }
+          JSON
+          jq '.steps = 100' craft.json > craft-start.json
+          "$game" --lab craft-start.json > craft-start-report.json
+          jq -e '.village.construction.production.jobs |
+            length == 1 and .[0].site == 1 and .[0].recipe == "craft_harvest-basket"' craft-start-report.json
+          "$game" --lab craft.json > craft-report.json
+          jq -e '
+            .end_step == 12000
+            and (.orders | length == 4 and all(.error == null))
+            and (.village.construction.production.jobs | length == 0)
+            and any(.village.construction.events[]; .text == "Craft harvest basket: batch in stores.")
+          ' craft-report.json
+          "$game" --lab-replay craft-report.json
       - uses: actions/upload-artifact@v4
         with:
           name: solar-friends-v3-macos
