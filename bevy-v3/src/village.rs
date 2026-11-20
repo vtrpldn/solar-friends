@@ -191,13 +191,18 @@ impl Plugin for VillagePlugin {
                     save_controls,
                     library_controls,
                     read_camp_pointer,
-                    village_input,
+                    (village_input, almanac::sites::input).chain(),
                     crate::camera_controls,
                     advance_days,
                     animate_arrival,
                     draw_blueprints,
                     show_hud,
-                    almanac::refresh,
+                    (
+                        almanac::refresh,
+                        almanac::sites::refresh,
+                        almanac::sites::paint,
+                    )
+                        .chain(),
                     fit_and_scroll_hud,
                     show_construction,
                     construction_models::show_in_progress,
@@ -3067,7 +3072,6 @@ fn show_hud(
                 label.push_str(&village.power_notice);
             }
             label.push_str(&village.construction.power_shortage_summary(&catalog));
-            label.push_str(&village.construction.utility_site_list(&catalog, true));
             label.push_str(&village.construction.queued_installation_hint(true));
         }
         Some(UtilityPanel::Projects) => {
@@ -3239,7 +3243,6 @@ fn show_hud(
                     .sanitation_status(village.construction.residents_needing_sanitation()),
             );
             label.push_str(&village.construction.waste_tank_summary(&catalog));
-            label.push_str(&village.construction.utility_site_list(&catalog, false));
             label.push_str(&village.construction.queued_installation_hint(false));
             label.push_str(&village.construction.connection_summary(
                 &catalog,
@@ -3337,8 +3340,7 @@ fn show_hud(
                     let distance = setup.round_trip_km();
                     let _ = write!(
                         label,
-                        "\nGrid electricity · R${:.2}/h at current use\nTown pickup or export · {distance} km round trip · R${:.2} fuel · About {:.0} game minutes",
-                        village.construction.utilities.grid_cost_per_hour(),
+                        "\nTown pickup or export · {distance} km round trip · R${:.2} fuel · About {:.0} game minutes",
                         crate::market::fare_cents(distance) as f64 / 100.0,
                         crate::market::trip_seconds(distance) * 0.45,
                     );

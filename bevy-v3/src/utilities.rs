@@ -1086,13 +1086,26 @@ impl Utilities {
         })
     }
 
+    pub(crate) fn battery_meter(&self, id: usize) -> Option<(f64, f64)> {
+        let node = self.nodes.get(&id)?;
+        (node.battery > 0.0).then_some((node.charge, node.battery))
+    }
+
     pub fn power_site_summary(&self, id: usize) -> Option<String> {
         use std::fmt::Write;
+        let mut status = self.power_site_status(id)?;
+        if let Some((charge, capacity)) = self.battery_meter(id) {
+            let _ = write!(status, " · Battery {charge:.3}/{capacity:.2} kWh");
+        }
+        Some(status)
+    }
+
+    pub(crate) fn power_site_status(&self, id: usize) -> Option<String> {
         let node = self.nodes.get(&id)?;
         if id != 0 && !node.matches_view(NetworkView::Power) {
             return None;
         }
-        let mut status = if node.enabled {
+        let status = if node.enabled {
             let mut status = format!(
                 "{:.3} kW generated · {:.3} kW requested",
                 node.generation_kw, node.demand_kw
@@ -1108,13 +1121,6 @@ impl Utilities {
         } else {
             String::from("Switched off")
         };
-        if node.battery > 0.0 {
-            let _ = write!(
-                status,
-                " · Battery {:.3}/{:.2} kWh",
-                node.charge, node.battery
-            );
-        }
         Some(status)
     }
 
