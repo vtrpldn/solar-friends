@@ -131,7 +131,7 @@ impl Action {
                 && !village.construction.editing_search
                 && (matches!(self, Self::Lenses) || village.lenses.open);
         }
-        if matches!(self, Self::InventorySearch) {
+        if matches!(self, Self::InventorySearch | Self::InventoryItem(_)) {
             return village.utility_panel == Some(UtilityPanel::Inventory)
                 && !village.guide.open()
                 && !village.lenses.open
@@ -313,8 +313,7 @@ impl Action {
             | Self::HoldTradeQueued(_)
             | Self::Trade(_)
             | Self::TradePolicy(_) => village.trade_open(),
-            Self::InventorySearch => false,
-            Self::InventoryItem(_) => village.utility_panel == Some(UtilityPanel::Inventory),
+            Self::InventorySearch | Self::InventoryItem(_) => false,
             Self::InventoryView => village.utility_panel == Some(UtilityPanel::Inventory),
             Self::Project(_) | Self::ProjectFilter => {
                 village.utility_panel == Some(UtilityPanel::Projects)
@@ -1913,5 +1912,22 @@ fn refresh(
         && text.0 != action_details
     {
         text.0 = action_details;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn stores_trade_actions_remain_available_while_filtering() {
+        let mut village = Village {
+            utility_panel: Some(UtilityPanel::Inventory),
+            editing_inventory: true,
+            ..default()
+        };
+        assert!(Action::InventoryItem(0).available(&village));
+        village.lenses.open = true;
+        assert!(!Action::InventoryItem(0).available(&village));
     }
 }
