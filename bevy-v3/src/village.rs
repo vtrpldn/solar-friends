@@ -76,6 +76,83 @@ const CAMP_SITES: [(KeyCode, IVec2); 3] = [
 
 pub struct VillagePlugin;
 
+pub(crate) fn start_downtime_preview(app: &mut App) -> Result<(), String> {
+    let setup = WorldSetup::default().session();
+    let catalog = Catalog::default();
+    let land = Land::generate(&setup);
+    let camp = CLEARING_CAMP;
+    let mut village = Village {
+        setup: Some(setup.clone()),
+        camp: Some(camp),
+        arrival_time: ARRIVAL_DURATION,
+        clock: 1300.0,
+        stock: Stock::for_start(&setup, &catalog),
+        rebuild_scene: true,
+        save_notice: "Downtime preview · This village is not saved.".into(),
+        ..default()
+    };
+    village.stock.cash = 3000;
+    village.stock.sandbox = true;
+    let clock = TownClock {
+        seconds: village.clock,
+        round_trip_km: setup.round_trip_km(),
+    };
+    for (key, x, z) in [
+        ("solar_farm", 27, 39),
+        ("well", 33, 39),
+        ("workshop", 38, 39),
+        ("warehouse", 45, 39),
+        ("garden", 45, 31),
+        ("eco_toilet", 39, 30),
+        ("banana_treatment", 43, 25),
+        ("wetland", 34, 30),
+        ("house", 27, 30),
+        ("streetlight", 30, 37),
+        ("fire-circle", 33, 36),
+    ] {
+        let terrain = village.terrain(&setup);
+        let ground = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let mut offsets = (-16i32..=16)
+            .flat_map(|dz| (-16i32..=16).map(move |dx| (dx, dz)))
+            .collect::<Vec<_>>();
+        offsets.sort_by_key(|&(dx, dz)| (dx.abs().max(dz.abs()), dx * dx + dz * dz));
+        if !offsets.into_iter().any(|(dx, dz)| {
+            village
+                .construction
+                .lab_order(
+                    &catalog,
+                    &mut village.stock,
+                    ground,
+                    clock,
+                    &crate::construction::LabOrder::Build {
+                        key: key.into(),
+                        x: x + dx,
+                        z: z + dz,
+                        rotation: 0,
+                        size: None,
+                    },
+                    setup.richness(),
+                )
+                .is_ok()
+        }) {
+            return Err(format!("Could not place {key} in the downtime preview"));
+        }
+    }
+    village.stock.sandbox = false;
+    village.construction.prepare_downtime_preview();
+    app.insert_resource(setup)
+        .insert_resource(village)
+        .insert_resource(SaveMenu {
+            preview: true,
+            ..default()
+        });
+    Ok(())
+}
+
 impl Plugin for VillagePlugin {
     fn build(&self, app: &mut App) {
         register_opening_models(app);
@@ -1007,7 +1084,7 @@ fn save_controls(
     mut village: ResMut<Village>,
     mut saves: ResMut<SaveMenu>,
 ) {
-    if !window.focused || saves.open {
+    if !window.focused || saves.open || saves.preview {
         return;
     }
     let resume = if setup.open && village.setup.is_none() {
@@ -1107,6 +1184,9 @@ pub(crate) fn save_session(
     village: &Village,
     catalog: &Catalog,
 ) -> std::io::Result<()> {
+    if menu.preview {
+        return Ok(());
+    }
     let Some(mode) = village.mode() else {
         return Ok(());
     };
@@ -1149,7 +1229,12 @@ fn autosave_continue(
     mut next: Local<f64>,
 ) {
     let now = time.elapsed_secs_f64();
-    if setup.open || saves.open || village.camp.is_none() || village.advance.running.is_some() {
+    if setup.open
+        || saves.open
+        || saves.preview
+        || village.camp.is_none()
+        || village.advance.running.is_some()
+    {
         return;
     }
     if !village.advance_checkpoint && now < next.max(10.0) {
@@ -3444,6 +3529,22 @@ fn outdoor_animation_time(seconds: f64) -> f32 {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn downtime_preview_starts_an_evening_village_without_save_access() {
+        let mut app = App::new();
+        start_downtime_preview(&mut app).unwrap();
+        let world = app.world();
+        let village = world.resource::<Village>();
+        let menu = world.resource::<SaveMenu>();
+        assert_eq!(village.camp, Some(CLEARING_CAMP));
+        assert!(village.mode() == Some(Mode::Story));
+        assert_eq!(crate::weather::game_minutes(village.clock), 1125);
+        assert!(!village.stock.sandbox);
+        assert!(menu.continue_path(Mode::Story).is_err());
+        assert!(menu.directory(Mode::Story).is_err());
+        save_session(menu, village, &Catalog::default()).unwrap();
+    }
 
     #[test]
     fn dispatch_policy_accepts_exact_fill_and_half_hour_wait() {

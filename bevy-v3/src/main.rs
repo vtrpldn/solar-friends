@@ -127,7 +127,19 @@ fn main() {
         return;
     }
     let mut app = App::new();
-    if option.as_deref().is_some_and(|flag| flag == "--play") {
+    let downtime_preview = option
+        .as_deref()
+        .is_some_and(|flag| flag == "--downtime-preview");
+    if downtime_preview {
+        if args.next().is_some() {
+            eprintln!("Usage: solar-friends-v3 --downtime-preview");
+            std::process::exit(2);
+        }
+        if let Err(error) = village::start_downtime_preview(&mut app) {
+            eprintln!("{error}");
+            std::process::exit(1);
+        }
+    } else if option.as_deref().is_some_and(|flag| flag == "--play") {
         let mut setup = WorldSetup::default();
         match args.next().as_deref() {
             None => {}
@@ -145,14 +157,21 @@ fn main() {
         )),
         ..WinitSettings::game()
     })
-    .add_plugins(DefaultPlugins.set(WindowPlugin {
-        primary_window: Some(Window {
-            title: "Solar Friends V3".into(),
-            resolution: WindowResolution::new(1280, 800),
+    .add_plugins(
+        DefaultPlugins.set(WindowPlugin {
+            primary_window: Some(Window {
+                title: if downtime_preview {
+                    "Solar Friends V3 · Downtime preview"
+                } else {
+                    "Solar Friends V3"
+                }
+                .into(),
+                resolution: WindowResolution::new(1280, 800),
+                ..default()
+            }),
             ..default()
         }),
-        ..default()
-    }))
+    )
     .add_plugins((
         WorldSetupPlugin,
         workshop::navigation::ArtToolsPlugin,

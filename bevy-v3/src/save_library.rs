@@ -14,6 +14,7 @@ const SLOT_BYTES: u64 = save::MAX_BYTES * 2 + 16 * 1024;
 
 #[derive(Resource, Default)]
 pub struct SaveMenu {
+    pub preview: bool,
     pub open: bool,
     pub browse_mode: Mode,
     pub selected: usize,
@@ -51,7 +52,17 @@ struct Slot {
 }
 
 impl SaveMenu {
+    fn require_saved_villages(&self) -> io::Result<()> {
+        if self.preview {
+            return Err(io::Error::other(
+                "Saved villages are unavailable in the downtime preview",
+            ));
+        }
+        Ok(())
+    }
+
     pub fn continue_path(&self, mode: Mode) -> io::Result<PathBuf> {
+        self.require_saved_villages()?;
         #[cfg(test)]
         if self.test_directory.is_some() {
             return Ok(self.directory(mode)?.join("continue.json"));
@@ -60,6 +71,7 @@ impl SaveMenu {
     }
 
     pub fn directory(&self, mode: Mode) -> io::Result<PathBuf> {
+        self.require_saved_villages()?;
         #[cfg(test)]
         if let Some(path) = &self.test_directory {
             return Ok(match mode {

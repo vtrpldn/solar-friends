@@ -349,6 +349,24 @@ pub struct Worker {
     town_work: TownWork,
 }
 
+impl Construction {
+    pub(crate) fn prepare_downtime_preview(&mut self) {
+        for (index, worker) in self.residents.iter_mut().enumerate() {
+            let [x, z] = [[32., 35.], [34., 35.], [33., 36.], [32., 36.], [34., 36.]][index];
+            worker.position = Vec2::new(x, z);
+            worker.health.energy = 95.0;
+            worker.health.levels = [95.0; 7];
+            worker.health.levels[4] = [70., 95., 75., 95., 95.][index];
+            worker.health.levels[5] = 85.0;
+        }
+        self.status.clear();
+        self.record_event(
+            1300.0,
+            "Downtime preview · Personal activities and fireside company.".into(),
+        );
+    }
+}
+
 impl Default for Construction {
     fn default() -> Self {
         Self {
