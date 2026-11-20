@@ -946,28 +946,14 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
             for action in [Action::Setup, Action::Library, Action::Sound] {
                 spawn_button(row, &assets, action);
             }
+            // Placement, road and lens controls stay with the dock; screen controls now
+            // live in the action column beside the dialog, as V2 keeps its dock fixed.
             for action in [
-                Action::Page(false),
-                Action::Page(true),
-                Action::Recipes,
-                Action::Gather,
-                Action::Beds,
                 Action::RotatePlacement,
                 Action::CancelPlacement,
                 Action::ConnectRoad,
                 Action::UndoRoad,
                 Action::FinishRoad,
-                Action::ClosePanel,
-                Action::InventoryView,
-                Action::InventorySearch,
-                Action::CraftTab(crate::construction::CraftView::Make),
-                Action::CraftTab(crate::construction::CraftView::Repair),
-                Action::CraftTab(crate::construction::CraftView::Jobs),
-                Action::NextCraftWorkspace,
-                Action::LocateCraftJob,
-                Action::MoveCraftJob,
-                Action::StartCraft,
-                Action::PantryFromStores,
                 Action::LensFilter(false),
                 Action::LensFilter(true),
                 Action::LensSite(false),
@@ -1053,6 +1039,23 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                     },
                 ));
                 spawn_selection_card(menu, &assets);
+                for action in [
+                    Action::Recipes,
+                    Action::Gather,
+                    Action::Beds,
+                    Action::InventoryView,
+                    Action::InventorySearch,
+                    Action::CraftTab(crate::construction::CraftView::Make),
+                    Action::CraftTab(crate::construction::CraftView::Repair),
+                    Action::CraftTab(crate::construction::CraftView::Jobs),
+                    Action::NextCraftWorkspace,
+                    Action::LocateCraftJob,
+                    Action::MoveCraftJob,
+                    Action::StartCraft,
+                    Action::PantryFromStores,
+                ] {
+                    spawn_button(menu, &assets, action);
+                }
                 spawn_button(menu, &assets, Action::FocusSelectedProject);
                 spawn_button(menu, &assets, Action::DeselectProject);
                 for action in [
@@ -1239,6 +1242,9 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                     spawn_button(menu, &assets, Action::TradeItem(row));
                     spawn_button(menu, &assets, Action::TradeQueued(row));
                     spawn_button(menu, &assets, Action::HoldTradeQueued(row));
+                }
+                for action in [Action::Page(false), Action::Page(true), Action::ClosePanel] {
+                    spawn_button(menu, &assets, action);
                 }
             });
             row.spawn((
@@ -2673,9 +2679,12 @@ fn refresh(
             }
         }
     }
-    if !menu_has_items {
-        menu.display = Display::None;
-    }
+    // The column shows exactly when one of its buttons does.
+    menu.display = if menu_has_items && !saves.open && !sound.open {
+        Display::Flex
+    } else {
+        Display::None
+    };
     let (details_id, visibility) = &mut *details;
     **visibility = if action_details.is_empty() {
         Visibility::Hidden
