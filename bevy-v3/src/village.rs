@@ -896,6 +896,7 @@ impl Village {
             && !self.construction.menu
             && !self.construction.production.open
             && !self.construction.farming.open
+            && !self.show_forecast
     }
 
     fn selected_project_focus(&self) -> Option<Vec2> {
@@ -3562,6 +3563,13 @@ fn show_hud(
             })
             .collect::<Vec<_>>()
             .join("\n")
+    } else if village.hud_note() {
+        // Like V2's toast the note stays short: the current goal and the latest message.
+        let lines: Vec<&str> = label.lines().filter(|line| !line.is_empty()).collect();
+        match lines.as_slice() {
+            [first, .., last] => format!("{first}\n{last}"),
+            _ => lines.join("\n"),
+        }
     } else {
         label.trim_start_matches('\n').to_owned()
     };
