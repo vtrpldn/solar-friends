@@ -219,6 +219,15 @@ impl Default for Catalog {
 }
 
 impl Catalog {
+    pub(crate) fn resource_entries(&self) -> impl Iterator<Item = (&str, &str, &Material)> {
+        self.resource_groups.iter().flat_map(|group| {
+            group
+                .ids
+                .iter()
+                .map(|id| (group.name.as_str(), id.as_str(), &self.materials[id]))
+        })
+    }
+
     pub fn loads(&self, project: &Project) -> u32 {
         self.loads_for(&project.materials)
     }

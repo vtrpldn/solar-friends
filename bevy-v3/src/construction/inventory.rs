@@ -232,16 +232,8 @@ impl Construction {
         let search = search.trim().to_lowercase();
         let ledger = self.inventory(catalog, stock, land);
         let rows: Vec<_> = catalog
-            .resource_groups
-            .iter()
-            .flat_map(|group| {
-                group
-                    .ids
-                    .iter()
-                    .map(|id| (group.name.as_str(), id.as_str()))
-            })
-            .filter(|&(_, id)| {
-                let material = &catalog.materials[id];
+            .resource_entries()
+            .filter(|(_, _, material)| {
                 material.equipment == equipment
                     && (search.is_empty() || material.name.to_lowercase().contains(&search))
             })
@@ -263,13 +255,12 @@ impl Construction {
             text.push_str("\nNo matching stock.");
         }
         let mut previous_group = "";
-        for &(group, id) in rows.iter().skip(page * ROWS).take(ROWS) {
+        for &(group, id, item) in rows.iter().skip(page * ROWS).take(ROWS) {
             if group != previous_group && !equipment {
                 let _ = write!(text, "\n{group}");
                 previous_group = group;
             }
             let row = ledger[id];
-            let item = &catalog.materials[id];
             let _ = write!(
                 text,
                 "\n{} · {} available",

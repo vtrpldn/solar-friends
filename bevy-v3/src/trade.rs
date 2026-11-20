@@ -101,10 +101,9 @@ pub struct Policy {
 impl Trade {
     pub fn tradable(catalog: &Catalog) -> Vec<(&str, &Material)> {
         catalog
-            .materials
-            .iter()
-            .filter(|(_, item)| item.pack > 0 && item.price > 0.0)
-            .map(|(id, item)| (id.as_str(), item))
+            .resource_entries()
+            .filter(|(_, _, item)| item.pack > 0 && item.price > 0.0)
+            .map(|(_, id, item)| (id, item))
             .collect()
     }
 
