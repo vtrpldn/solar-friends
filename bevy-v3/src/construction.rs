@@ -3466,13 +3466,16 @@ mod tests {
         let mut stock = Stock::for_start(&setup, &catalog);
         let mut village = Construction::default();
         for x in [40, 42, 44] {
-            village.plans.push(Construction::proposal(
+            let mut plan = Construction::proposal(
                 &catalog,
                 "streetlight",
                 IVec2::new(x, 36),
                 default_field_size(),
                 0,
-            ));
+            );
+            plan.work = catalog.projects["streetlight"].work;
+            plan.delivered = plan.loads;
+            village.plans.push(plan);
         }
         village
             .utilities
@@ -3493,6 +3496,16 @@ mod tests {
             .utilities
             .tick(&setup, &mut stock, 0, 16.0 * crate::weather::HOUR, 0.1);
 
+        assert_eq!(village.project_status(&catalog, 0), "Waiting for power");
+        assert_eq!(village.project_status(&catalog, 1), "Switched off");
+        village.production.selected = Some(1);
+        assert!(
+            village
+                .selected_production(&catalog, &stock, 0.0)
+                .unwrap()
+                .contains("Switched off")
+        );
+        village.production.selected = None;
         for index in [0, 2, 0] {
             assert!(village.select_power_shortage().is_some());
             assert_eq!(village.production.selected, Some(index));

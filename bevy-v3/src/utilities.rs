@@ -749,6 +749,17 @@ impl Utilities {
             * 80.0
     }
 
+    pub(crate) fn operational_blocker(&self, building: usize) -> Option<&'static str> {
+        let node = self.nodes.get(&(building + 1))?;
+        if !node.enabled {
+            Some("Switched off")
+        } else if node.demand_kw > 0.0 && !node.powered {
+            Some("Waiting for power")
+        } else {
+            None
+        }
+    }
+
     pub fn facility_status(&self, building: usize) -> Option<String> {
         let node = self.nodes.get(&(building + 1))?;
         let switchable = light_load(&node.kind) > 0.0

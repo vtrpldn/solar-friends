@@ -736,11 +736,12 @@ impl Construction {
         let active_job = self.production.jobs.iter().find(|job| job.site == index);
         if site.work >= definition.work {
             use std::fmt::Write;
-            if active_job.is_none()
-                && !self.changes.contains_key(&index)
-                && self.utilities.facility_status(index).is_none()
-            {
-                text.push_str(" · Ready to use");
+            if active_job.is_none() && !self.changes.contains_key(&index) {
+                let state = self
+                    .utilities
+                    .operational_blocker(index)
+                    .unwrap_or("Ready to use");
+                let _ = write!(text, " · {state}");
             }
             match definition.kind.as_str() {
                 "goat_pasture" if self.empty_goat_pen(index) && active_job.is_none() => {

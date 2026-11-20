@@ -111,7 +111,10 @@ impl Construction {
         } else if let Some(job) = self.changes.get(&index) {
             job.status()
         } else if plan.work >= def.work {
-            "Complete".to_owned()
+            self.utilities
+                .operational_blocker(index)
+                .unwrap_or("Complete")
+                .into()
         } else if self.construction_delivery_at(index) {
             "Supplier delivery on its way".into()
         } else if let Some(trip) = self.booked_construction_trip(index) {
