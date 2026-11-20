@@ -1639,6 +1639,27 @@
         "wood": 96
       },
       "work": 43201.33333333333,
+      "construction": {
+        "area": 48,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 72
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 140.64960000000002
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 63.36
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 48
+          }
+        ]
+      },
       "category": "Homes & shelter",
       "campEssential": false,
       "repeatable": true,
@@ -1668,6 +1689,27 @@
         "wood": 120
       },
       "work": 51992,
+      "construction": {
+        "area": 60,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 90
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 160.7424
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 79.2
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 60
+          }
+        ]
+      },
       "category": "Homes & shelter",
       "campEssential": false,
       "repeatable": true,
@@ -1697,6 +1739,27 @@
         "wood": 96
       },
       "work": 43201.33333333333,
+      "construction": {
+        "area": 48,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 72
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 140.64960000000002
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 63.36
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 48
+          }
+        ]
+      },
       "category": "Homes & shelter",
       "campEssential": false,
       "repeatable": true,
@@ -1726,6 +1789,27 @@
         "wood": 160
       },
       "work": 64858.66666666667,
+      "construction": {
+        "area": 80,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 120
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 180.83520000000001
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 105.60000000000001
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 80
+          }
+        ]
+      },
       "category": "Homes & shelter",
       "campEssential": false,
       "repeatable": true,
@@ -1755,6 +1839,27 @@
         "wood": 192
       },
       "work": 75686.66666666667,
+      "construction": {
+        "area": 96,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 144
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 200.928
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 126.72
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 96
+          }
+        ]
+      },
       "category": "Homes & shelter",
       "campEssential": false,
       "repeatable": true,
@@ -1784,6 +1889,27 @@
         "wood": 160
       },
       "work": 64858.66666666667,
+      "construction": {
+        "area": 80,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 120
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 180.83520000000001
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 105.60000000000001
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 80
+          }
+        ]
+      },
       "category": "Homes & shelter",
       "campEssential": false,
       "repeatable": true,
@@ -1813,6 +1939,27 @@
         "wood": 192
       },
       "work": 75686.66666666667,
+      "construction": {
+        "area": 96,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 144
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 200.928
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 126.72
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 96
+          }
+        ]
+      },
       "category": "Homes & shelter",
       "campEssential": false,
       "repeatable": true,
@@ -1842,6 +1989,27 @@
         "wood": 280
       },
       "work": 103454.66666666666,
+      "construction": {
+        "area": 140,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 210
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 241.11360000000005
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 184.8
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 140
+          }
+        ]
+      },
       "category": "Homes & shelter",
       "campEssential": false,
       "repeatable": true,
@@ -1871,6 +2039,27 @@
         "wood": 336
       },
       "work": 120396,
+      "construction": {
+        "area": 168,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 252
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 261.2064000000001
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 221.76000000000002
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 168
+          }
+        ]
+      },
       "category": "Homes & shelter",
       "campEssential": false,
       "repeatable": true,
@@ -1900,6 +2089,27 @@
         "wood": 256
       },
       "work": 97342.66666666667,
+      "construction": {
+        "area": 128,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 192
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 241.11360000000005
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 168.96
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 128
+          }
+        ]
+      },
       "category": "Homes & shelter",
       "campEssential": false,
       "repeatable": true,
@@ -1929,6 +2139,27 @@
         "wood": 128
       },
       "work": 54029.333333333336,
+      "construction": {
+        "area": 64,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 96
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 160.7424
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 84.48
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 64
+          }
+        ]
+      },
       "category": "Homes & shelter",
       "campEssential": false,
       "repeatable": true,
@@ -1958,6 +2189,27 @@
         "wood": 224
       },
       "work": 86514.66666666666,
+      "construction": {
+        "area": 112,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 168
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 221.02080000000004
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 147.84000000000003
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 112
+          }
+        ]
+      },
       "category": "Homes & shelter",
       "campEssential": false,
       "repeatable": true,
@@ -2039,6 +2291,27 @@
         "wood": 240
       },
       "work": 90589.33333333333,
+      "construction": {
+        "area": 120,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 180
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 221.02080000000004
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 158.4
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 120
+          }
+        ]
+      },
       "category": "Homes & shelter",
       "campEssential": false,
       "repeatable": true,
@@ -2067,6 +2340,27 @@
         "wood": 288
       },
       "work": 113280,
+      "construction": {
+        "area": 144,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 216
+          },
+          {
+            "name": "Earth wall preparation and assembly",
+            "hours": 299.52000000000004
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 190.07999999999998
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 144
+          }
+        ]
+      },
       "category": "Homes & shelter",
       "campEssential": false,
       "repeatable": true,
@@ -2091,6 +2385,18 @@
         "earth": 1
       },
       "work": 45.333333333333336,
+      "construction": {
+        "phases": [
+          {
+            "name": "Setting out and assembly preparation",
+            "hours": 0.1
+          },
+          {
+            "name": "Groundwork",
+            "hours": 0.24
+          }
+        ]
+      },
       "category": "Paths & boundaries",
       "campEssential": false,
       "repeatable": true
@@ -2115,6 +2421,26 @@
         "stone": 8
       },
       "work": 1221.3333333333333,
+      "construction": {
+        "phases": [
+          {
+            "name": "Setting out and assembly preparation",
+            "hours": 1
+          },
+          {
+            "name": "Groundwork",
+            "hours": 0.96
+          },
+          {
+            "name": "Structure",
+            "hours": 4.8
+          },
+          {
+            "name": "Fasteners and utilities",
+            "hours": 2.4
+          }
+        ]
+      },
       "category": "Paths & boundaries",
       "campEssential": false,
       "repeatable": true
@@ -2143,6 +2469,27 @@
         "wood": 200
       },
       "work": 77723.99999999999,
+      "construction": {
+        "area": 100,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 150
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 200.928
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 132
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 100
+          }
+        ]
+      },
       "category": "Homes & shelter",
       "campEssential": false,
       "repeatable": true
@@ -2169,6 +2516,27 @@
         "earth": 72
       },
       "work": 18336,
+      "construction": {
+        "area": 36,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 54
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 0
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 47.519999999999996
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 36
+          }
+        ]
+      },
       "category": "Homes & shelter",
       "campEssential": false,
       "repeatable": true
@@ -2406,6 +2774,27 @@
         "wood": 160
       },
       "work": 64858.66666666667,
+      "construction": {
+        "area": 80,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 120
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 180.83520000000001
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 105.60000000000001
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 80
+          }
+        ]
+      },
       "category": "Storage & production",
       "campEssential": false,
       "repeatable": true
@@ -2486,6 +2875,27 @@
         "wood": 240
       },
       "work": 90589.33333333333,
+      "construction": {
+        "area": 120,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 180
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 221.02080000000004
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 158.4
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 120
+          }
+        ]
+      },
       "category": "Food & farming",
       "campEssential": false,
       "repeatable": true
@@ -2721,6 +3131,27 @@
         "wood": 240
       },
       "work": 90589.33333333333,
+      "construction": {
+        "area": 120,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 180
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 221.02080000000004
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 158.4
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 120
+          }
+        ]
+      },
       "category": "Homes & shelter",
       "campEssential": false,
       "repeatable": true
@@ -2749,6 +3180,27 @@
         "wood": 200
       },
       "work": 77723.99999999999,
+      "construction": {
+        "area": 100,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 150
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 200.928
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 132
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 100
+          }
+        ]
+      },
       "category": "Homes & shelter",
       "campEssential": false,
       "repeatable": true
@@ -2777,6 +3229,27 @@
         "wood": 240
       },
       "work": 90589.33333333333,
+      "construction": {
+        "area": 120,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 180
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 221.02080000000004
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 158.4
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 120
+          }
+        ]
+      },
       "category": "Homes & shelter",
       "campEssential": false,
       "repeatable": true
@@ -2804,6 +3277,27 @@
         "wood": 200
       },
       "work": 84213.33333333333,
+      "construction": {
+        "area": 100,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 150
+          },
+          {
+            "name": "Earth wall preparation and assembly",
+            "hours": 249.60000000000002
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 132
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 100
+          }
+        ]
+      },
       "category": "Homes & shelter",
       "campEssential": false,
       "repeatable": true
@@ -2831,6 +3325,27 @@
         "wood": 240
       },
       "work": 97728.00000000001,
+      "construction": {
+        "area": 120,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 180
+          },
+          {
+            "name": "Earth wall preparation and assembly",
+            "hours": 274.56000000000006
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 158.4
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 120
+          }
+        ]
+      },
       "category": "Homes & shelter",
       "campEssential": false,
       "repeatable": true

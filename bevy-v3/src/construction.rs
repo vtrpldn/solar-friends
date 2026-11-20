@@ -1414,8 +1414,22 @@ impl Construction {
         }
         let available = status.is_ok();
         let label = match status {
-            Ok(detail) if show_access => format!("{detail} · Blue Work access · Gold Entrance"),
-            Ok(detail) => detail,
+            Ok(detail) => {
+                let mut label = format!(
+                    "{} · Site {} × {} m · {}° · {detail}",
+                    definition.name,
+                    proposal.size.x * 2,
+                    proposal.size.y * 2,
+                    u32::from(proposal.rotation) * 90,
+                );
+                if show_access {
+                    label.push_str(" · Blue Work access");
+                    if building_entrance(&proposal, definition).is_some() {
+                        label.push_str(" · Gold Entrance");
+                    }
+                }
+                label
+            }
             Err(reason) => format!("Blocked · {reason}"),
         };
         Some((label, available))

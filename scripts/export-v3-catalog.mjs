@@ -59,6 +59,12 @@ const projects = Object.fromEntries(buildOptions
       size: definition.size,
       materials: definition.materials,
       work: definition.work,
+      ...(definition.construction ? {
+        construction: {
+          area: definition.construction.area,
+          phases: definition.construction.phases.map(({name, hours}) => ({name, hours})),
+        },
+      } : {}),
       category: buildingCategory(definition) ?? definition.category,
       campEssential: inBuildCategory(id, definition, "Camp essentials"),
       repeatable: Boolean(definition.repeatable),

@@ -106,6 +106,19 @@ pub struct Project {
     pub camp_essential: bool,
     pub repeatable: bool,
     pub beds: Option<usize>,
+    pub construction: Option<ConstructionEstimate>,
+}
+
+#[derive(Deserialize)]
+pub struct ConstructionEstimate {
+    pub area: Option<f64>,
+    pub phases: Vec<ConstructionPhase>,
+}
+
+#[derive(Deserialize)]
+pub struct ConstructionPhase {
+    pub name: String,
+    pub hours: f64,
 }
 
 impl Project {
