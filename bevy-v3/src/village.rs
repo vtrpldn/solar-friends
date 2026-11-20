@@ -3192,7 +3192,7 @@ fn show_hud(
     } else if village.camp.is_none() {
         village
             .camp_error
-            .unwrap_or("Click to choose camp · 1 Shade · 2 Entrance · 3 Clearing")
+            .unwrap_or("Choose where to pitch camp: click open ground, or pick a spot below.")
             .into()
     } else if village.paused && !village.construction.menu {
         String::new()

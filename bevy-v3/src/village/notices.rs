@@ -187,6 +187,11 @@ fn toast(text: &str) -> Toast {
     }
 }
 
+/// Whether a sheet sits where toasts appear: the build catalog, a dialog or the guide.
+fn covered(village: &Village) -> bool {
+    village.modal_panel() || village.guide.open() || village.construction.menu
+}
+
 fn collect_news(
     village: Res<Village>,
     catalog: Res<Catalog>,
@@ -194,7 +199,12 @@ fn collect_news(
     time: Res<Time<Real>>,
     mut news: ResMut<News>,
 ) {
-    let delta = time.delta_secs();
+    // Toasts wait, without ageing, while a sheet covers their place above the dock.
+    let delta = if covered(&village) {
+        0.
+    } else {
+        time.delta_secs()
+    };
     for toast in &mut news.toasts {
         toast.age += delta;
     }
@@ -216,8 +226,10 @@ fn collect_news(
         return;
     };
     let mut fresh = Vec::new();
+    // Milestones such as "Complete" are news; running counts of loads and hours are not.
     if now.0 != seen.0
         && let Some(progress) = &now.0
+        && !progress.chars().any(|character| character.is_ascii_digit())
     {
         fresh.push(toast(progress));
     }
@@ -255,7 +267,7 @@ fn show_toasts(
     if node.bottom != bottom {
         node.bottom = bottom;
     }
-    let display = if village.modal_panel() || village.guide.open() {
+    let display = if covered(&village) {
         Display::None
     } else {
         Display::Flex
@@ -405,11 +417,12 @@ fn show_tip(
 ) {
     let (text, node, edge) = &mut *tip;
     let lens = village.lenses.active.is_some() || village.lenses.network_view().is_some();
-    // Placement feedback has the preview card, and the terrain tools their own card.
+    // The terrain tools show their reading in their own card; placement feedback, such
+    // as why a spot is blocked, belongs right here at the cursor.
     let wanted = notice
         .0
         .as_deref()
-        .filter(|_| notice.1.is_none() && !village.terrain_editor.open)
+        .filter(|_| !village.terrain_editor.open)
         .map(|notice| strip_key_hints_block(tip_text(notice, lens)))
         .unwrap_or_default();
     // Beside the cursor, or beside the screen-centre reticle when steering by keyboard.
