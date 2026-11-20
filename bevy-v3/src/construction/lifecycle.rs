@@ -583,6 +583,7 @@ impl Construction {
                 }
                 let labor = f64::from(dt).min(job.required - job.work);
                 job.work += labor;
+                resident.experience += labor;
                 resident.health.energy = (resident.health.energy - labor * 0.12).max(0.0);
                 if job.work < job.required {
                     continue;
@@ -880,6 +881,7 @@ mod tests {
         construction.production.selected = Some(0);
         construction.apply_project_action(&catalog, &mut stock, ProjectAction::Demolish);
         construction.tick_changes(&catalog, &mut stock, site, 42.0, 0.1);
+        let remaining_work = construction.changes[&0].required - 10.0;
         let original_worker = construction.changes[&0].worker.unwrap();
         construction.changes.get_mut(&0).unwrap().work = 10.0;
         construction.residents[original_worker].health.energy = 24.0;
@@ -897,6 +899,12 @@ mod tests {
         }
 
         assert!(construction.plans[0].removed);
+        let experience: f64 = construction
+            .residents
+            .iter()
+            .map(|worker| worker.experience)
+            .sum();
+        assert!((experience - remaining_work).abs() < 1e-8);
         assert!(construction.livestock.animals.is_empty());
         assert_eq!(stock.available("goats"), 2);
         let history = &construction.building_history[0];
