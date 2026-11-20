@@ -1274,6 +1274,9 @@ mod tests {
         for (label, input, displayed) in [
             ("Set minimum load", "37", "37% (0–100)"),
             ("Set maximum wait", "3.5", "3.5h (0–24)"),
+            ("Keep at least (kg)", "19.5", "19.5 kg · Enter to set"),
+            ("Sell when above (kg)", "4", "4 kg · Enter to set"),
+            ("Maximum per day (kg)", "32", "32 kg · Enter to set"),
         ] {
             press_button(&mut app, label);
             app.world_mut().write_message(KeyboardInput {
@@ -1303,7 +1306,11 @@ mod tests {
             app.world_mut()
                 .query::<&Text>()
                 .iter(app.world())
-                .any(|text| { text.0.contains("Minimum load 37% · J Wait up to 3.5h") })
+                .any(|text| {
+                    text.0.contains("Minimum load 37% · J Wait up to 3.5h")
+                        && text.0.contains("Reserve 16 kg")
+                        && text.0.contains("Trigger 16 kg · Y Daily cap 32 kg")
+                })
         );
         press_button(&mut app, "Close panel");
         press_button(&mut app, "Manage");
