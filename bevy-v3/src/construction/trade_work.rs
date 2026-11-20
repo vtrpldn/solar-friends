@@ -496,8 +496,29 @@ impl Construction {
         fare: u64,
     ) -> Result<(), &'static str> {
         self.check_town_purchase(catalog, stock, clock, material, freight)?;
-        self.market
-            .quote_pack(catalog, stock, material, (clock.day(), fare, freight))?;
+        let (_, price) =
+            self.market
+                .quote_pack(catalog, stock, material, (clock.day(), fare, freight))?;
+        if self.supplier_construction {
+            let (loads, replaced) = self
+                .construction_freight_budget(catalog, BTreeMap::new())
+                .ok_or("Queued construction supplies exceed supplier freight capacity.")?;
+            let committed = self.market.committed_fares();
+            let freight_commitment = committed.saturating_sub(replaced)
+                + u64::from(loads) * freight_cents(clock.round_trip_km)
+                + if loads > 0 {
+                    self.market.expansion_reserve()
+                } else {
+                    0
+                };
+            if stock
+                .balance()
+                .saturating_sub(committed.max(freight_commitment))
+                < price + fare
+            {
+                return Err("Shared savings are committed to queued construction freight.");
+            }
+        }
         Ok(())
     }
 
@@ -509,8 +530,18 @@ impl Construction {
         material: &str,
         freight: bool,
     ) -> Result<bool, &'static str> {
-        self.check_town_purchase(catalog, stock, clock, material, freight)?;
-        if !freight && let Some(slot) = self.sale_trip_for_return_purchase() {
+        let shared = (!freight)
+            .then(|| self.sale_trip_for_return_purchase())
+            .flatten();
+        let fare = if freight {
+            freight_cents(clock.round_trip_km)
+        } else if shared.is_some() {
+            0
+        } else {
+            fare_cents(clock.round_trip_km)
+        };
+        self.purchase_quote(catalog, stock, clock, material, freight, fare)?;
+        if let Some(slot) = shared {
             let index = self.trade.orders.len();
             if self
                 .trade
@@ -520,6 +551,14 @@ impl Construction {
                 self.attach_return_purchase(slot, index);
                 return Ok(true);
             }
+            self.purchase_quote(
+                catalog,
+                stock,
+                clock,
+                material,
+                false,
+                fare_cents(clock.round_trip_km),
+            )?;
         }
         self.trade
             .buy(
@@ -1158,6 +1197,49 @@ mod tests {
             logs % PAGE_KEYS.len() + 1,
             items[logs].material.name
         )));
+    }
+
+    #[test]
+    fn manual_purchase_preserves_cash_for_queued_construction_freight() {
+        let catalog = Catalog::default();
+        let setup = crate::setup::WorldSetup::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut village = Construction::default();
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
+        let mut plan = village.proposed_site(&catalog, "well", IVec2::new(45, 36));
+        Construction::reserve_project(&mut village.market, &mut stock, &catalog, &mut plan, clock)
+            .unwrap();
+        village.plans.push(plan);
+        village.toggle_supplier_construction();
+        let fee = freight_cents(12);
+        let (_, price) = village
+            .market
+            .quote_pack(&catalog, &stock, "food", (0, fee, true))
+            .unwrap();
+        let short_balance = price + fee + village.market.committed_fares();
+        stock.debit(
+            stock.balance() - short_balance,
+            crate::stock::CashKind::Materials,
+        );
+        assert_eq!(
+            village.buy_from_town(&catalog, &mut stock, clock, "food", true),
+            Err("Shared savings are committed to queued construction freight.")
+        );
+        assert_eq!(stock.balance(), short_balance);
+        assert!(village.trade.delivery.is_none());
+        let protected = fee + village.market.expansion_reserve();
+        stock.credit(
+            protected - village.market.committed_fares(),
+            crate::stock::CashKind::Materials,
+        );
+        assert_eq!(
+            village.buy_from_town(&catalog, &mut stock, clock, "food", true),
+            Ok(false)
+        );
+        assert_eq!(stock.balance(), protected);
     }
 
     #[test]
