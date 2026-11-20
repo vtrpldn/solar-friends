@@ -1427,16 +1427,16 @@ impl Construction {
         label.into()
     }
 
-    pub fn draw_residents_lens(
+    pub fn draw_resident_markers(
         &self,
         catalog: &Catalog,
         terrain: &Terrain,
         hovered: Option<Vec3>,
         gizmos: &mut Gizmos,
-    ) -> String {
+        label: &mut String,
+    ) {
         use std::fmt::Write;
 
-        let mut label = "Residents · Green needs above 30% · Red needs at or below 30%".to_owned();
         let mut nearest = None;
         let mut nearest_distance = 9.0;
         let mut away = 0;
@@ -1446,7 +1446,7 @@ impl Construction {
                 continue;
             }
             let health = &worker.health;
-            let urgent = health.energy <= 30.0 || health.levels.iter().any(|level| *level <= 30.0);
+            let urgent = health.energy < 30.0 || health.levels.iter().any(|level| *level < 30.0);
             let color = if urgent {
                 Color::srgb_u8(222, 112, 96)
             } else {
@@ -1478,18 +1478,20 @@ impl Construction {
                 NAMES[index],
                 self.resident_action(catalog, index)
             );
+            if health.energy >= 30.0 && health.levels.iter().all(|level| *level >= 30.0) {
+                label.push_str(" · No needs below 30%");
+            }
             for (name, level) in [
                 "Energy", "Food", "Bladder", "Bowels", "Hygiene", "Social", "Fun", "Water",
             ]
             .into_iter()
             .zip(std::iter::once(health.energy).chain(health.levels))
             {
-                if level <= 30.0 {
+                if level < 30.0 {
                     let _ = write!(label, " · {name} {level:.0}%");
                 }
             }
         }
-        label
     }
 
     pub(crate) fn lab_town_work(&self, resident: usize) -> &TownWork {

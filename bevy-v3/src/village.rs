@@ -3195,12 +3195,7 @@ fn draw_blueprints(
                 pointer.hovered.map(|hit| hit.cell),
                 &mut gizmos,
             )),
-            Some(MapLens::Residents) => Some(village.construction.draw_residents_lens(
-                &catalog,
-                &terrain,
-                pointer.hovered.map(|hit| hit.world),
-                &mut gizmos,
-            )),
+            Some(MapLens::Residents) => Some("Residents".to_owned()),
             Some(MapLens::Work) => Some(village.construction.draw_work_lens(
                 &catalog,
                 &terrain,
@@ -3222,6 +3217,22 @@ fn draw_blueprints(
                 })
             }
         };
+        if matches!(
+            village.lenses.active,
+            Some(MapLens::Residents | MapLens::Comfort | MapLens::Access | MapLens::Work)
+        ) && let Some(label) = &mut notice
+        {
+            label.push_str(
+                " · Green residents with no needs below 30% · Red residents with urgent needs",
+            );
+            village.construction.draw_resident_markers(
+                &catalog,
+                &terrain,
+                pointer.hovered.map(|hit| hit.world),
+                &mut gizmos,
+                label,
+            );
+        }
         if village.terrain_editor.open
             && !pointer.terrain_stroke_finished
             && pointer.terrain_stroke.len() > 1
