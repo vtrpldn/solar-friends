@@ -198,6 +198,12 @@ disable save and load access.
 The needs preview also accepts `--land-seed` and `--interactions`. It always
 starts at 10:30 in dry weather.
 
+### Performance readout
+
+Add `--performance` to any launch (or `&performance` to any web address, such as
+`?downtime-preview&performance`) to show frames per second, 95th-percentile and worst
+frame times, and entity, mesh and light counts in the bottom-right corner.
+
 ## Model workshop
 
 Pass `--workshop` to inspect the full bundled V2 asset collection. Use **←/→** to browse, **/** to find an asset by name, **V** to compare the reference assets together, **Q/E** to orbit, **↑/↓** to tilt, **R** to rotate the model, **+/−** to zoom, **N** to change lighting, **G** to toggle the grid and footprint guides, and **Home** to reset the view.
