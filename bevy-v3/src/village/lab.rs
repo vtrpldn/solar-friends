@@ -707,6 +707,7 @@ enum LabControl {
     AdvanceHour,
     FocusCamp,
     FindBuilding,
+    View(LabView),
     Confirm,
     Cancel,
 }
@@ -745,6 +746,8 @@ fn setup_lab_window(mut commands: Commands, assets: Res<AssetServer>) {
             (Shortcut(KeyCode::F6), "Save lab"),
             (Shortcut(KeyCode::F9), "Load lab"),
             (Shortcut(KeyCode::F5), "Export report"),
+            (LabControl::View(LabView::Trade), "Trade"),
+            (LabControl::View(LabView::Residents), "Residents"),
         ],
         &[
             (CycleSpeed, "Cycle speed"),
@@ -819,7 +822,7 @@ fn setup_lab_window(mut commands: Commands, assets: Res<AssetServer>) {
     }
 }
 
-#[derive(Default, PartialEq, Eq)]
+#[derive(Clone, Copy, Default, PartialEq, Eq)]
 enum LabView {
     #[default]
     Overview,
@@ -2233,8 +2236,16 @@ fn update_lab_window(
         )));
         return;
     }
-    if pressed(KeyCode::Tab) {
-        playback.view = playback.view.next();
+    let selected_view = controls
+        .iter()
+        .find_map(|(interaction, control)| match control {
+            LabControl::View(view) if *interaction == Interaction::Pressed => Some(*view),
+            _ => None,
+        });
+    if let Some(view) =
+        selected_view.or_else(|| pressed(KeyCode::Tab).then(|| playback.view.next()))
+    {
+        playback.view = view;
         playback.inventory_page = 0;
         playback.clear_confirmation = None;
     }
@@ -3330,6 +3341,10 @@ mod tests {
             .world_mut()
             .spawn((Interaction::None, LabControl::FocusCamp))
             .id();
+        let trade = app
+            .world_mut()
+            .spawn((Interaction::None, LabControl::View(LabView::Trade)))
+            .id();
         let faster = app
             .world_mut()
             .spawn((Interaction::None, LabControl::CycleSpeed))
@@ -3347,6 +3362,10 @@ mod tests {
         *app.world_mut().get_mut::<Interaction>(focus).unwrap() = Interaction::Pressed;
         app.update();
         assert!(app.world().resource::<map::MapState>().visible);
+        *app.world_mut().get_mut::<Interaction>(trade).unwrap() = Interaction::Pressed;
+        app.update();
+        assert!(!app.world().resource::<map::MapState>().visible);
+        assert_eq!(app.world().resource::<Runner>().index, 0);
         *app.world_mut().get_mut::<Interaction>(faster).unwrap() = Interaction::Pressed;
         app.update();
         assert!(
