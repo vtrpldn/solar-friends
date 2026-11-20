@@ -340,6 +340,7 @@ type TerrainTexts<'w, 's> = Query<
 fn refresh(
     village: Res<Village>,
     (setup, saves, sound): (Res<WorldSetup>, Res<SaveMenu>, Res<SoundSettings>),
+    notice: Res<MapNotice>,
     mut card: Single<&mut Node, With<TerrainCard>>,
     mut texts: TerrainTexts,
     mut buttons: TerrainButtons,
@@ -391,6 +392,10 @@ fn refresh(
     if !editor.status().is_empty() {
         hint.push('\n');
         hint.push_str(editor.status());
+    }
+    // What the brush would touch under the cursor, e.g. "Ground 3.17 m".
+    if let Some(reading) = &notice.0 {
+        hint = format!("{reading}\n{hint}");
     }
 
     for (part, mut text, mut node) in &mut texts {

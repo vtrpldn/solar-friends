@@ -3086,9 +3086,11 @@ fn show_hud(
         return;
     }
     // The catalog, projects card, lens picker, and advance modal carry their own UI.
+    // Terrain tools carry their own card, with the ground reading under the cursor.
     if build_menu::visible(&setup, &village, &saves, &sound)
         || projects_card::visible(&village, &setup, &saves, &sound)
         || advance_modal::visible(&village, &setup, &saves, &sound)
+        || (village.terrain_editor.open && village.utility_panel.is_none())
     {
         node.display = Display::None;
         text.0.clear();
