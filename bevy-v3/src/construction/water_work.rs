@@ -752,16 +752,24 @@ impl Construction {
         const VISIBLE_WARNINGS: usize = 4;
         let mut details = String::new();
         let mut count = 0;
-        for (id, _, tank, warning) in self.utilities.waste_tanks_needing_attention() {
+        for (id, channel, tank, warning) in self.utilities.waste_tanks_needing_attention() {
             count += 1;
             if count > VISIBLE_WARNINGS {
                 continue;
             }
             if let Some(plan) = id.checked_sub(1).and_then(|index| self.plans.get(index)) {
                 let name = &catalog.projects[&plan.key].name;
-                let _ = write!(details, "\n{name} #{id} · {tank} tank {warning}");
+                let _ = write!(details, "\n{name} #{id}");
             } else {
-                let _ = write!(details, "\nCamp · {tank} tank {warning}");
+                details.push_str("\nCamp");
+            }
+            let _ = write!(details, " · {tank} tank {warning}");
+            if let Some(site) = self.utilities.water_site(id) {
+                let _ = write!(
+                    details,
+                    " · {:.1}/{:.1} L",
+                    site.levels[channel], site.capacity[channel]
+                );
             }
         }
         if count == 0 {
@@ -1351,6 +1359,20 @@ impl Construction {
 mod tests {
     use super::*;
     use crate::setup::WorldSetup;
+
+    #[test]
+    fn waste_attention_shows_each_tanks_volume_and_capacity() {
+        let catalog = Catalog::default();
+        let mut village = Construction::default();
+        village.utilities.ensure_camp();
+        village.utilities.deliver_water(0, 2, 108.0);
+        village.utilities.deliver_water(0, 3, 80.0);
+
+        let summary = village.waste_tank_summary(&catalog);
+        assert!(summary.contains("2 waste tanks need attention"));
+        assert!(summary.contains("Camp · Greywater tank nearly full · 108.0/120.0 L"));
+        assert!(summary.contains("Camp · Sewage tank full · 80.0/80.0 L"));
+    }
 
     #[test]
     fn residents_finish_a_queued_water_connection_after_reload() {
