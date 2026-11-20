@@ -274,12 +274,13 @@ fn sunlight(
     );
     // V2's sky light is a warm hemisphere (#e4eff6 over #777455) that stays near 45% of
     // midday after sunset, so the ground still reads olive at dusk rather than blue-black.
+    // A blue night tint greyed the grass; V2's night keeps a warm, slightly green cast.
     ambient.color = Color::srgb(
-        0.78 + 0.22 * daylight,
-        0.82 + 0.18 * daylight,
         0.86 + 0.14 * daylight,
+        0.90 + 0.10 * daylight,
+        0.80 + 0.20 * daylight,
     );
-    ambient.brightness = 420.0 + 120.0 * daylight * (0.8 + cloud * 0.35);
+    ambient.brightness = 500.0 + 60.0 * daylight * (0.8 + cloud * 0.35);
     sky.0 = Color::srgb(
         0.08 + daylight * (0.63 - cloud * 0.12),
         0.12 + daylight * (0.68 - cloud * 0.15),
