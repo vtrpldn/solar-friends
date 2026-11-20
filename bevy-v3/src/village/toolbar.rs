@@ -1248,6 +1248,28 @@ fn spawn_button(parent: &mut ChildSpawnerCommands, assets: &AssetServer, action:
         button.insert(crate::audio::DisclosureSound);
     }
     button.with_child((Text::default(), ui_font(assets, font_size)));
+    if let Action::ResourcePanel(panel) = action
+        && let Some(slot) = super::thumbnails::icon_slot(panel)
+    {
+        button.insert(Node {
+            padding: UiRect::axes(px(10), px(3)),
+            flex_direction: FlexDirection::RowReverse,
+            justify_content: JustifyContent::FlexEnd,
+            align_items: AlignItems::Center,
+            column_gap: px(4),
+            ..default()
+        });
+        button.with_child((
+            super::thumbnails::ThumbnailImage(slot),
+            ImageNode::default(),
+            Node {
+                width: px(40),
+                height: px(30),
+                flex_shrink: 0.,
+                ..default()
+            },
+        ));
+    }
     if let Action::Resident(index) = action {
         let image = match index {
             0 => load_embedded_asset!(assets, "resident_portraits/iara.png"),

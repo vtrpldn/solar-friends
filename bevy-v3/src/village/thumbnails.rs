@@ -1,7 +1,8 @@
-//! Small rendered portraits of building models for menus and panels.
+//! Small rendered portraits of building and resource models for menus and panels.
 //!
-//! Each slot owns an offscreen camera on its own render layer. A slot's camera only runs
-//! while a menu shows that slot, and it frames the model once its scene has loaded.
+//! Each slot owns an offscreen camera on its own render layer. A slot's camera frames the
+//! model once its scene has loaded, renders a few frames, then stops: the image keeps the
+//! last picture until the slot shows another model.
 
 use bevy::{
     camera::{
@@ -14,9 +15,19 @@ use bevy::{
 
 use super::*;
 
-/// One slot per build-menu row, plus one for the selected building.
-pub(super) const SLOTS: usize = crate::construction::BUILD_ROWS + 1;
-pub(super) const SELECTED_SLOT: usize = SLOTS - 1;
+/// Resource icons for the toolbar's stock buttons, as V2 shows beside its counters.
+const ICONS: [(UtilityPanel, &str); 4] = [
+    (UtilityPanel::Finances, "resource-money"),
+    (UtilityPanel::Pantry, "resource-food"),
+    (UtilityPanel::Power, "resource-power"),
+    (UtilityPanel::Water, "resource-water"),
+];
+/// One slot per build-menu row, one for the selected building, then the resource icons.
+pub(super) const SELECTED_SLOT: usize = crate::construction::BUILD_ROWS;
+const FIRST_ICON_SLOT: usize = SELECTED_SLOT + 1;
+pub(super) const SLOTS: usize = FIRST_ICON_SLOT + ICONS.len();
+/// Frames a framed slot keeps rendering so materials and transforms settle.
+const SETTLE_FRAMES: u8 = 6;
 /// Keeps thumbnail layers clear of the village scene, which renders on layer 0.
 const FIRST_LAYER: usize = 20;
 
@@ -24,6 +35,28 @@ const FIRST_LAYER: usize = 20;
 pub(super) struct Thumbnails {
     pub(super) images: [Handle<Image>; SLOTS],
     shown: [Option<usize>; SLOTS],
+    framed: [bool; SLOTS],
+    rendered: [u8; SLOTS],
+    icon_models: [Option<usize>; ICONS.len()],
+}
+
+/// The thumbnail slot holding a toolbar stock button's resource icon.
+pub(super) fn icon_slot(panel: UtilityPanel) -> Option<usize> {
+    ICONS
+        .iter()
+        .position(|(icon, _)| *icon == panel)
+        .map(|index| FIRST_ICON_SLOT + index)
+}
+
+/// Scene indices of the resource icon models in the bundled model catalog.
+fn icon_models() -> [Option<usize>; ICONS.len()] {
+    let catalog: serde_json::Value =
+        serde_json::from_str(include_str!("../../data/workshop.json")).unwrap_or_default();
+    ICONS.map(|(_, asset)| {
+        catalog[asset]["model"]
+            .as_u64()
+            .and_then(|model| usize::try_from(model).ok())
+    })
 }
 
 /// A UI image that shows whatever model its slot is rendering.
@@ -74,7 +107,11 @@ fn spawn(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
             Camera {
                 order: -10 - slot as isize,
                 is_active: false,
-                clear_color: ClearColorConfig::Custom(Color::srgb_u8(46, 63, 49)),
+                clear_color: ClearColorConfig::Custom(if slot >= FIRST_ICON_SLOT {
+                    Color::NONE
+                } else {
+                    Color::srgb_u8(46, 63, 49)
+                }),
                 ..default()
             },
             Projection::Orthographic(OrthographicProjection::default_3d()),
@@ -87,6 +124,9 @@ fn spawn(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
     commands.insert_resource(Thumbnails {
         images,
         shown: [None; SLOTS],
+        framed: [false; SLOTS],
+        rendered: [0; SLOTS],
+        icon_models: icon_models(),
     });
 }
 
@@ -98,8 +138,12 @@ fn wanted_models(
     saves: &SaveMenu,
     sound: &SoundSettings,
     picker: &toolbar::PanelPicker,
+    icons: [Option<usize>; ICONS.len()],
 ) -> [Option<usize>; SLOTS] {
     let mut wanted = [None; SLOTS];
+    if village.camp.is_some() {
+        wanted[FIRST_ICON_SLOT..].copy_from_slice(&icons);
+    }
     if build_menu::visible(setup, village, saves, sound) {
         for (slot, (_, project)) in village
             .construction
@@ -126,9 +170,22 @@ fn show_models(
     models: Query<(Entity, &ThumbnailModel)>,
     mut cameras: Query<(&ThumbnailCamera, &mut Camera)>,
 ) {
-    let wanted = wanted_models(&setup, &village, &catalog, &saves, &sound, &picker);
+    let icons = thumbnails.icon_models;
+    let wanted = wanted_models(&setup, &village, &catalog, &saves, &sound, &picker, icons);
+    let changed: Vec<usize> = (0..SLOTS)
+        .filter(|&slot| wanted[slot] != thumbnails.shown[slot])
+        .collect();
+    for slot in changed {
+        thumbnails.framed[slot] = false;
+        thumbnails.rendered[slot] = 0;
+    }
     for (camera, mut settings) in &mut cameras {
-        let active = wanted[camera.0].is_some();
+        let slot = camera.0;
+        let active = wanted[slot].is_some()
+            && !(thumbnails.framed[slot] && thumbnails.rendered[slot] >= SETTLE_FRAMES);
+        if active && thumbnails.framed[slot] {
+            thumbnails.rendered[slot] += 1;
+        }
         if settings.is_active != active {
             settings.is_active = active;
         }
@@ -185,11 +242,12 @@ fn frame_model(
     children: Query<&Children>,
     (handles, meshes): (Query<&Mesh3d>, Res<Assets<Mesh>>),
     transforms: TransformHelper,
-    cameras: Query<(Entity, &ThumbnailCamera)>,
+    (cameras, mut thumbnails): (Query<(Entity, &ThumbnailCamera)>, ResMut<Thumbnails>),
 ) {
     let Ok(model) = roots.get(event.entity) else {
         return;
     };
+    thumbnails.framed[model.0] = true;
     let mut low = Vec3::splat(f32::INFINITY);
     let mut high = Vec3::splat(f32::NEG_INFINITY);
     for child in children.iter_descendants(event.entity) {
@@ -245,6 +303,13 @@ fn thumbnail_frame(low: Vec3, high: Vec3) -> (Vec3, f32) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn every_toolbar_resource_icon_has_a_bundled_model() {
+        assert!(icon_models().iter().all(Option::is_some));
+        assert_eq!(icon_slot(UtilityPanel::Water), Some(SLOTS - 1));
+        assert_eq!(icon_slot(UtilityPanel::Trade), None);
+    }
 
     #[test]
     fn framing_fits_the_largest_side_of_a_model() {
