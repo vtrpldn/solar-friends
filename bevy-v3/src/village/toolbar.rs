@@ -35,6 +35,7 @@ enum Action {
     RedoTerrain,
     Advance(AdvanceAction),
     ResizeField(IVec2),
+    FieldDimensions,
     Pause,
     Speed,
     Guide,
@@ -234,6 +235,9 @@ impl Action {
             }
             Self::Build => village.utility_panel.is_none(),
             Self::RotatePlacement | Self::CancelPlacement => village.construction.placing_project(),
+            Self::FieldDimensions => {
+                village.utility_panel.is_none() && village.construction.can_resize_selected_field()
+            }
             Self::ResizeField(_) => {
                 village.construction.placing_field()
                     || (village.utility_panel.is_none()
@@ -456,6 +460,11 @@ impl Action {
                 AdvanceAction::Start => "Start advance".into(),
                 AdvanceAction::Digit(_) | AdvanceAction::Backspace => String::new(),
             },
+            Self::FieldDimensions => numeric_label(
+                village,
+                NumericTarget::FieldDimensions,
+                "Set field dimensions",
+            ),
             Self::ResizeField(delta) => format!(
                 "{} {}",
                 if delta.x != 0 { "Width" } else { "Depth" },
@@ -727,6 +736,7 @@ fn numeric_label(village: &Village, target: NumericTarget, label: &str) -> Strin
                 NumericTarget::MinimumLoad => format!("{entry}% (0–100)"),
                 NumericTarget::DispatchWait => format!("{entry}h (0–24)"),
                 NumericTarget::Bed => format!("Bed {entry}"),
+                NumericTarget::FieldDimensions => format!("Width and depth (e.g. 8 12) · {entry}"),
                 _ => format!("R${entry}"),
             };
             format!("{value} · Enter to set · Esc to cancel")
@@ -945,6 +955,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 spawn_button(menu, &assets, Action::PickFlattenHeight);
                 spawn_button(menu, &assets, Action::UndoTerrain);
                 spawn_button(menu, &assets, Action::RedoTerrain);
+                spawn_button(menu, &assets, Action::FieldDimensions);
                 for delta in [IVec2::NEG_X, IVec2::X, IVec2::NEG_Y, IVec2::Y] {
                     spawn_button(menu, &assets, Action::ResizeField(delta));
                 }
@@ -1240,6 +1251,9 @@ fn handle_buttons(
                     village.apply_advance_action(action);
                     picker.open = false;
                 }
+                Action::FieldDimensions if !picker.open => {
+                    village.numeric_entry = Some((NumericTarget::FieldDimensions, String::new()));
+                }
                 Action::ResizeField(delta) if village.construction.placing_field() => {
                     village.construction.resize_field_placement(delta);
                 }
@@ -1259,7 +1273,7 @@ fn handle_buttons(
                         );
                     }
                 }
-                Action::ResizeField(_) => {}
+                Action::ResizeField(_) | Action::FieldDimensions => {}
                 Action::Pause => village.paused = !village.paused,
                 Action::Speed => village.speed = (village.speed + 1) % SPEEDS.len(),
                 Action::Lenses => {
@@ -1841,6 +1855,7 @@ fn refresh(
             | Action::FinishRoad => action.available(&village),
             Action::UndoRoad => Action::FinishRoad.available(&village),
             Action::ResizeField(_) => !picker.open && show_field_size,
+            Action::FieldDimensions => !picker.open && action.available(&village),
             Action::PickFlattenHeight => action.available(&village),
             Action::TerrainBrush(_)
             | Action::TerrainRadius(_)

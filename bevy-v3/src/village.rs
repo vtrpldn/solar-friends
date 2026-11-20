@@ -1427,6 +1427,7 @@ enum NumericTarget {
     DispatchWait,
     Sale(SaleSetting),
     Bed,
+    FieldDimensions,
 }
 
 fn apply_numeric_entry(
@@ -1475,7 +1476,8 @@ fn apply_numeric_entry(
                 NumericTarget::MinimumLoad
                 | NumericTarget::DispatchWait
                 | NumericTarget::Sale(_)
-                | NumericTarget::Bed => unreachable!(),
+                | NumericTarget::Bed
+                | NumericTarget::FieldDimensions => unreachable!(),
             }
         }
     }
@@ -1572,6 +1574,10 @@ fn village_input(
     }
 
     if village.numeric_entry.as_ref().is_some_and(|(target, _)| {
+        if *target == NumericTarget::FieldDimensions {
+            return village.utility_panel.is_some()
+                || !village.construction.can_resize_selected_field();
+        }
         if *target == NumericTarget::Bed {
             return village.utility_panel.is_some()
                 || !village.construction.farming.open
@@ -1579,7 +1585,7 @@ fn village_input(
         }
         village.utility_panel
             != Some(match target {
-                NumericTarget::Bed => unreachable!(),
+                NumericTarget::Bed | NumericTarget::FieldDimensions => unreachable!(),
                 NumericTarget::Food => UtilityPanel::Pantry,
                 NumericTarget::ExpansionReserve => UtilityPanel::Finances,
                 NumericTarget::MinimumLoad
@@ -1595,13 +1601,37 @@ fn village_input(
     if let Some((target, entry)) = &mut village.numeric_entry {
         if keyboard.any_just_pressed([KeyCode::Enter, KeyCode::NumpadEnter]) {
             let (target, entry) = village.numeric_entry.take().expect("active numeric entry");
-            apply_numeric_entry(target, &entry, &mut village.construction, &catalog);
+            if target == NumericTarget::FieldDimensions {
+                if let Some(camp) = village.camp {
+                    let terrain = village.terrain(&setup);
+                    let sandbox = village.stock.sandbox;
+                    village.construction.set_field_dimensions(
+                        &catalog,
+                        ConstructionSite {
+                            terrain: &terrain,
+                            land: &land,
+                            camp,
+                        },
+                        &entry,
+                        sandbox,
+                    );
+                }
+            } else {
+                apply_numeric_entry(target, &entry, &mut village.construction, &catalog);
+            }
         } else {
             crate::construction::read_search_text(entry, &mut build_text);
             let decimal = matches!(target, NumericTarget::DispatchWait | NumericTarget::Sale(_));
-            entry.retain(|character| character.is_ascii_digit() || decimal && character == '.');
+            let dimensions = *target == NumericTarget::FieldDimensions;
+            entry.retain(|character| {
+                character.is_ascii_digit()
+                    || decimal && character == '.'
+                    || dimensions && character == ' '
+            });
             entry.truncate(if matches!(target, NumericTarget::Sale(_)) {
                 14
+            } else if dimensions {
+                12
             } else {
                 6
             });

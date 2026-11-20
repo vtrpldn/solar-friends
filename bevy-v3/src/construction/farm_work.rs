@@ -315,6 +315,37 @@ impl Construction {
         }
     }
 
+    pub(crate) fn set_field_dimensions(
+        &mut self,
+        catalog: &Catalog,
+        ground: ConstructionSite,
+        entry: &str,
+        sandbox: bool,
+    ) {
+        let mut values = entry.split_ascii_whitespace();
+        let dimensions = match (values.next(), values.next(), values.next()) {
+            (Some(width), Some(depth), None) => {
+                width.parse::<i32>().ok().zip(depth.parse::<i32>().ok())
+            }
+            _ => None,
+        };
+        if let Some((width, depth)) =
+            dimensions.filter(|(w, d)| (2..=32).contains(w) && (2..=32).contains(d))
+        {
+            if let Some(site) = self
+                .production
+                .selected
+                .filter(|_| self.can_resize_selected_field())
+            {
+                let plan = &self.plans[site];
+                let delta = IVec2::new(width, depth) - rotated_size(plan.size, plan.rotation);
+                self.resize_selected_field(catalog, ground, delta, sandbox);
+            }
+        } else {
+            self.farming.notice = "Enter width and depth from 2 to 32 cells.".into();
+        }
+    }
+
     pub fn has_selected_plot(&self) -> bool {
         self.production.selected.is_some_and(|site| {
             self.farming.plots.contains_key(&site) && !self.changes.contains_key(&site)
