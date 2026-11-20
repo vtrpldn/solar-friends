@@ -98,12 +98,23 @@ pub struct Policy {
     sold: u32,
 }
 
+#[derive(Clone, Copy)]
+pub(crate) struct TradeItem<'a> {
+    pub group: &'a str,
+    pub id: &'a str,
+    pub material: &'a Material,
+}
+
 impl Trade {
-    pub fn tradable(catalog: &Catalog) -> Vec<(&str, &Material)> {
+    pub(crate) fn tradable(catalog: &Catalog) -> Vec<TradeItem<'_>> {
         catalog
             .resource_entries()
             .filter(|(_, _, item)| item.pack > 0 && item.price > 0.0)
-            .map(|(_, id, item)| (id, item))
+            .map(|(group, id, material)| TradeItem {
+                group,
+                id,
+                material,
+            })
             .collect()
     }
 

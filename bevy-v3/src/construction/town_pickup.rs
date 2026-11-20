@@ -1262,7 +1262,7 @@ mod tests {
         );
         assert_eq!(village.trade.receipts, 0);
 
-        let selected = Trade::tradable(&catalog)[village.trade.selected].0;
+        let selected = Trade::tradable(&catalog)[village.trade.selected].id;
         let price = (catalog.materials[selected].price * 100.0).round() as u64;
         let freight = crate::market::freight_cents(clock.round_trip_km);
         let quote = village.trade_status(&catalog, &stock, clock);

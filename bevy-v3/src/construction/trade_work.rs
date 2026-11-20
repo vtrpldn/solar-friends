@@ -200,11 +200,11 @@ impl Construction {
             .enumerate()
             .skip(self.trade.page * PAGE_KEYS.len())
             .take(PAGE_KEYS.len())
-            .map(|(index, (_, item))| {
+            .map(|(index, item)| {
                 if index == self.trade.selected {
-                    format!("› {}", item.name)
+                    format!("› {}", item.material.name)
                 } else {
-                    item.name.clone()
+                    item.material.name.clone()
                 }
             })
             .collect()
@@ -306,7 +306,12 @@ impl Construction {
             _ => {}
         }
         let options = Trade::tradable(catalog);
-        let Some((id, definition)) = options.get(self.trade.selected).copied() else {
+        let Some(crate::trade::TradeItem {
+            id,
+            material: definition,
+            ..
+        }) = options.get(self.trade.selected).copied()
+        else {
             return;
         };
         if matches!(action, TradePolicy::HouseholdRestock) {
@@ -400,7 +405,12 @@ impl Construction {
         order: TradeOrder,
     ) {
         let options = Trade::tradable(catalog);
-        let Some((id, definition)) = options.get(self.trade.selected).copied() else {
+        let Some(crate::trade::TradeItem {
+            id,
+            material: definition,
+            ..
+        }) = options.get(self.trade.selected).copied()
+        else {
             return;
         };
         match order {
@@ -531,23 +541,32 @@ impl Construction {
         }
         let options = Trade::tradable(catalog);
         let mut display = String::from("Town trade · Page Up/Down · 1–8 Select · O Orders\n");
-        for (index, &(id, item)) in options
+        let mut previous_group = "";
+        for (index, option) in options
             .iter()
             .skip(self.trade.page * PAGE_KEYS.len())
             .take(PAGE_KEYS.len())
             .enumerate()
         {
-            if id == options[self.trade.selected].0 {
+            if option.group != previous_group {
+                display.push_str(option.group);
+                display.push('\n');
+                previous_group = option.group;
+            }
+            let item = option.material;
+            if option.id == options[self.trade.selected].id {
                 display.push_str("› ");
             }
             display.push_str(&format!(
                 "{} {} · {} in stock\n",
                 index + 1,
                 item.name,
-                item.quantity_text(u64::from(stock.available(id)))
+                item.quantity_text(u64::from(stock.available(option.id)))
             ));
         }
-        let (id, item) = options[self.trade.selected];
+        let crate::trade::TradeItem {
+            id, material: item, ..
+        } = options[self.trade.selected];
         let buyer = &item.buyer.name;
         let day = clock.day();
         let supplier = self.market.supplier_available(catalog, id, day);
@@ -776,7 +795,7 @@ mod tests {
         let mut village = Construction::default();
         village.trade.selected = Trade::tradable(&catalog)
             .iter()
-            .position(|&(id, _)| id == "wood")
+            .position(|item| item.id == "wood")
             .unwrap();
         let clock = TownClock {
             seconds: 0.0,
@@ -806,6 +825,27 @@ mod tests {
                 .reserve_town_sale(&catalog, &mut stock, clock, "wood", true)
                 .is_ok()
         );
+    }
+
+    #[test]
+    fn trade_page_labels_groups_and_selects_the_same_item() {
+        let catalog = Catalog::default();
+        let stock = Stock::for_start(&WorldSetup::default(), &catalog);
+        let mut village = Construction::default();
+        let clock = TownClock {
+            seconds: 0.,
+            round_trip_km: 12,
+        };
+        let items = Trade::tradable(&catalog);
+        let logs = items.iter().position(|item| item.id == "logs").unwrap();
+        village.trade.page = logs / PAGE_KEYS.len();
+        village.select_trade_row(&catalog, logs % PAGE_KEYS.len());
+        let text = village.trade_status(&catalog, &stock, clock);
+        assert!(text.contains(&format!(
+            "Raw materials\n› {} {}",
+            logs % PAGE_KEYS.len() + 1,
+            items[logs].material.name
+        )));
     }
 
     #[test]
