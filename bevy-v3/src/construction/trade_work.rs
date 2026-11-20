@@ -59,10 +59,11 @@ impl Construction {
             .map(|page| page.min(self.trade_queue_pages() - 1) * ORDER_ROWS)
     }
 
-    pub fn trade_queue_labels(&self, catalog: &Catalog) -> Vec<TradeQueueRow> {
+    pub fn trade_queue_labels(&self, catalog: &Catalog, clock: f64) -> Vec<TradeQueueRow> {
         let Some(offset) = self.trade_queue_offset() else {
             return Vec::new();
         };
+        let sale_wait = self.trade.sale_dispatch_wait(clock);
         self.trade
             .orders
             .iter()
@@ -90,6 +91,12 @@ impl Construction {
                     }
                     Some(_) => "Booked · Driver walking to car".into(),
                     None if order.hold_for_pickup => "Held for pickup".into(),
+                    None if !order.buying
+                        && let Some(wait) = sale_wait =>
+                    {
+                        let minutes = crate::weather::remaining_game_minutes(wait);
+                        format!("Queued · Consolidating for {minutes} more game min")
+                    }
                     None => "Queued".into(),
                 };
                 let outcome = if order.settled {
@@ -539,7 +546,7 @@ impl Construction {
         let item = &catalog.materials[&order.material];
         let arrival = order.eta - clock;
         let status = if arrival > 0.0 {
-            let minutes = crate::market::freight_minutes_remaining(arrival);
+            let minutes = crate::weather::remaining_game_minutes(arrival);
             format!("{minutes} game minutes remaining")
         } else if u64::from(order.quantity) > space {
             "Arrived · Waiting for storage space".into()
@@ -595,7 +602,7 @@ impl Construction {
                 offset / ORDER_ROWS + 1,
                 self.trade_queue_pages(),
             );
-            let rows = self.trade_queue_labels(catalog);
+            let rows = self.trade_queue_labels(catalog, clock.seconds);
             if rows.is_empty() {
                 display.push_str("\nNo pickup or sale orders.");
             }
@@ -611,6 +618,18 @@ impl Construction {
                     _ => String::new(),
                 };
                 display.push_str(&format!("\n{} {hint}", row.label));
+            }
+            if let Some(delivery) = self.supplier_delivery_status(
+                catalog,
+                self.storage_space(catalog, stock),
+                clock.seconds,
+            ) {
+                display.push('\n');
+                display.push_str(&delivery);
+            }
+            if let Some(freight) = self.reserved_freight_status(clock.seconds) {
+                display.push('\n');
+                display.push_str(&freight);
             }
             if !self.trade.notice.is_empty() {
                 display.push_str(&format!("\n{}", self.trade.notice));
@@ -824,8 +843,9 @@ mod tests {
             boarded: false,
         });
         village.toggle_trade_queue();
-        let rows = village.trade_queue_labels(&catalog);
-        assert!(rows[0].can_cancel && rows[0].label.contains("Queued"));
+        village.trade.note_sale_queued(clock.seconds);
+        let rows = village.trade_queue_labels(&catalog, clock.seconds);
+        assert!(rows[0].can_cancel && rows[0].label.contains("Consolidating for 18 more game min"));
         assert!(!rows[1].can_cancel && rows[1].label.contains("Booked"));
         village.cancel_trade_queue_row(&catalog, &mut stock, 1);
         assert_eq!(village.trade.orders.len(), 2);
@@ -842,19 +862,19 @@ mod tests {
         trip.boarded = true;
         trip.elapsed = 33.0;
         assert!(
-            village.trade_queue_labels(&catalog)[0]
+            village.trade_queue_labels(&catalog, clock.seconds)[0]
                 .label
                 .contains("In town · 15 game min")
         );
         village.trip.as_mut().unwrap().elapsed = 50.0;
         assert!(
-            village.trade_queue_labels(&catalog)[0]
+            village.trade_queue_labels(&catalog, clock.seconds)[0]
                 .label
                 .contains("Returning · 8 game min")
         );
         village.trip.as_mut().unwrap().elapsed = 66.0;
         assert!(
-            village.trade_queue_labels(&catalog)[0]
+            village.trade_queue_labels(&catalog, clock.seconds)[0]
                 .label
                 .contains("Waiting for storage")
         );
@@ -1013,6 +1033,13 @@ mod tests {
         let pantry = village.pantry_purchase_status(&catalog, &stock, clock);
         assert!(pantry.contains("Supplier freight · R$44.60"));
         assert!(pantry.contains("390 game minutes remaining"));
+        village.toggle_trade_queue();
+        assert!(
+            village
+                .trade_status(&catalog, &stock, clock)
+                .contains("390 game minutes remaining")
+        );
+        village.toggle_trade_queue();
 
         clock.seconds = village.trade.delivery.as_ref().unwrap().eta;
         assert!(

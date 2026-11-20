@@ -130,7 +130,13 @@ impl Trade {
     }
 
     pub(crate) fn sale_dispatch_ready(&self, clock: f64) -> bool {
-        self.dispatch_at.is_none_or(|at| clock >= at)
+        self.sale_dispatch_wait(clock).is_none()
+    }
+
+    pub(crate) fn sale_dispatch_wait(&self, clock: f64) -> Option<f64> {
+        self.dispatch_at
+            .map(|at| at - clock)
+            .filter(|&wait| wait > 0.)
     }
 
     pub fn buyer_reserved(&self, id: &str, day: u64) -> u32 {

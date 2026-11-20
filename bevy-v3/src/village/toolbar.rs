@@ -1633,7 +1633,9 @@ fn refresh(
     let show_trade = !picker.open && Action::TradeItem(0).available(&village);
     let show_trade_queue = show_trade && village.construction.trade.queue_page.is_some();
     let trade_queue = if show_trade_queue {
-        village.construction.trade_queue_labels(&catalog)
+        village
+            .construction
+            .trade_queue_labels(&catalog, village.clock)
     } else {
         Vec::new()
     };

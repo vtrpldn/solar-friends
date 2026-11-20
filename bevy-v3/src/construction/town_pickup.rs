@@ -260,7 +260,7 @@ impl Construction {
             ));
         }
         let delivery = self.construction_delivery.as_ref()?;
-        let minutes = crate::market::freight_minutes_remaining(delivery.eta - clock);
+        let minutes = crate::weather::remaining_game_minutes(delivery.eta - clock);
         let projects = delivery.sites().count();
         Some(format!(
             "Construction freight · {projects} project(s) · {minutes} game minutes remaining"

@@ -383,10 +383,6 @@ pub fn freight_seconds(round_trip_km: u32) -> f64 {
     360.0 / 0.45 + trip_seconds(round_trip_km)
 }
 
-pub(crate) fn freight_minutes_remaining(seconds: f64) -> u64 {
-    (seconds.max(0.0) * (60.0 / crate::weather::HOUR)).ceil() as u64
-}
-
 pub fn fare_cents(round_trip_km: u32) -> u64 {
     ((f64::from(round_trip_km) / KM_PER_LITER) * GASOLINE_REAIS_PER_LITER * 100.0).round() as u64
 }
