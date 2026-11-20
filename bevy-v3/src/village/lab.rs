@@ -714,9 +714,11 @@ enum LabControl {
 #[derive(Component)]
 struct LabControlLabel;
 
-#[derive(Component)]
-struct LabToolbar {
-    prompt: bool,
+#[derive(Clone, Copy, Component, PartialEq, Eq)]
+enum LabToolbar {
+    Main,
+    Prompt,
+    StorySettings,
 }
 
 fn setup_lab_window(mut commands: Commands, assets: Res<AssetServer>) {
@@ -734,7 +736,7 @@ fn setup_lab_window(mut commands: Commands, assets: Res<AssetServer>) {
     ));
     use LabControl::{AdvanceHour, CycleSpeed, SetInterval, Shortcut};
 
-    let rows: [&[(LabControl, &str)]; 3] = [
+    let rows: [&[(LabControl, &str)]; 4] = [
         &[
             (Shortcut(KeyCode::Space), "Run / pause"),
             (Shortcut(KeyCode::KeyJ), "Single step"),
@@ -757,13 +759,27 @@ fn setup_lab_window(mut commands: Commands, assets: Res<AssetServer>) {
             (LabControl::Confirm, "Confirm"),
             (LabControl::Cancel, "Cancel"),
         ],
+        &[
+            (Shortcut(KeyCode::ArrowUp), "Previous setting"),
+            (Shortcut(KeyCode::ArrowDown), "Next setting"),
+            (Shortcut(KeyCode::ArrowLeft), "Previous value"),
+            (Shortcut(KeyCode::ArrowRight), "Next value"),
+        ],
     ];
-    for prompt in [false, true] {
+    for (toolbar, rows) in [
+        (LabToolbar::Main, &rows[..2]),
+        (LabToolbar::Prompt, &rows[2..3]),
+        (LabToolbar::StorySettings, &rows[2..]),
+    ] {
         commands
             .spawn((
-                LabToolbar { prompt },
+                toolbar,
                 Node {
-                    display: if prompt { Display::None } else { Display::Flex },
+                    display: if toolbar == LabToolbar::Main {
+                        Display::Flex
+                    } else {
+                        Display::None
+                    },
                     position_type: PositionType::Absolute,
                     flex_direction: FlexDirection::Column,
                     top: px(10),
@@ -773,7 +789,7 @@ fn setup_lab_window(mut commands: Commands, assets: Res<AssetServer>) {
                 },
             ))
             .with_children(|toolbar| {
-                for row in if prompt { &rows[2..] } else { &rows[..2] } {
+                for row in rows {
                     toolbar
                         .spawn(Node {
                             column_gap: px(6),
@@ -1453,18 +1469,16 @@ struct StorySettings {
 }
 
 impl StorySettings {
-    fn edit(&mut self, keys: &ButtonInput<KeyCode>) {
+    fn edit(&mut self, keys: &ButtonInput<KeyCode>, pressed: impl Fn(KeyCode) -> bool) {
         let options = WorldSetup::WORLD_OPTIONS;
-        if keys.just_pressed(KeyCode::ArrowDown) {
+        if pressed(KeyCode::ArrowDown) {
             self.selected = (self.selected + 1) % options.len();
-        } else if keys.just_pressed(KeyCode::ArrowUp) {
+        } else if pressed(KeyCode::ArrowUp) {
             self.selected = (self.selected + options.len() - 1) % options.len();
         }
-        if keys.any_just_pressed([KeyCode::ArrowLeft, KeyCode::ArrowRight]) {
-            self.world.cycle_world_option(
-                options[self.selected],
-                keys.just_pressed(KeyCode::ArrowRight),
-            );
+        if pressed(KeyCode::ArrowLeft) || pressed(KeyCode::ArrowRight) {
+            self.world
+                .cycle_world_option(options[self.selected], pressed(KeyCode::ArrowRight));
         }
         WorldSetup::edit_seed_digits(&mut self.seed, keys);
     }
@@ -1904,11 +1918,16 @@ fn update_lab_window(
         })
     };
     let pressed = |key| keys.just_pressed(key) || clicked(LabControl::Shortcut(key));
-    let prompt = playback.interval_entry.is_some()
-        || playback.story_settings.is_some()
-        || playback.replacement.is_some();
+    let active_toolbar = if playback.story_settings.is_some() {
+        LabToolbar::StorySettings
+    } else if playback.interval_entry.is_some() || playback.replacement.is_some() {
+        LabToolbar::Prompt
+    } else {
+        LabToolbar::Main
+    };
+    let prompt = active_toolbar != LabToolbar::Main;
     for (toolbar, mut node) in &mut toolbars {
-        let display = if toolbar.prompt == prompt {
+        let display = if *toolbar == active_toolbar {
             Display::Flex
         } else {
             Display::None
@@ -2010,7 +2029,7 @@ fn update_lab_window(
                     playback.notice = "Enter a seed between 1 and 4294967295.".into();
                 }
             } else {
-                settings.edit(&keys);
+                settings.edit(&keys, pressed);
             }
             panel.set_if_neq(Text::new(settings.prompt(&playback.notice)));
             playback.story_settings = Some(settings);
@@ -2635,14 +2654,13 @@ mod tests {
             seed: "42".into(),
             selected: 0,
         };
-        let mut keys = ButtonInput::default();
-        keys.press(KeyCode::ArrowRight);
-        settings.edit(&keys);
+        let keys = ButtonInput::default();
+        settings.edit(&keys, |key| key == KeyCode::ArrowRight);
         assert_eq!(settings.world.biome(), 1);
-        settings.selected = 4;
-        keys.reset_all();
-        keys.press(KeyCode::ArrowLeft);
-        settings.edit(&keys);
+        for _ in 0..4 {
+            settings.edit(&keys, |key| key == KeyCode::ArrowDown);
+        }
+        settings.edit(&keys, |key| key == KeyCode::ArrowLeft);
         let runner = LabSource::Story(settings.world)
             .load(&Catalog::default())
             .unwrap();
