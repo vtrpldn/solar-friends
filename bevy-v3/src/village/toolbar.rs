@@ -669,15 +669,9 @@ impl Action {
                 TradePolicy::DispatchNow => "Send waiting loads now",
             }
             .into(),
-            Self::Resident(index) if index == village.selected_resident => {
-                format!("› {}", NAMES[index])
-            }
             Self::Resident(index) => NAMES[index].into(),
             Self::FocusResident => "Find resident in village".into(),
             Self::FocusResidentProject => "View resident project".into(),
-            Self::ResidentProfile(profile) if profile == village.resident_profile => {
-                format!("› {}", profile.label())
-            }
             Self::ResidentProfile(profile) => profile.label().into(),
             Self::WorkPriority(group) => numeric_label(
                 village,
@@ -2556,6 +2550,8 @@ fn refresh(
             Action::Terrain => village.terrain_editor.open,
             Action::View => picker.view_open,
             Action::Pause => top && village.paused,
+            Action::Resident(index) => index == village.selected_resident,
+            Action::ResidentProfile(profile) => profile == village.resident_profile,
             Action::Guide => top && village.guide.open(),
             Action::Lenses => top && (village.lenses.open || village.lenses.active.is_some()),
             Action::Advance(_) => top && village.advance.open,
@@ -2587,6 +2583,12 @@ fn refresh(
                     if delta < 0 { "−" } else { "+" }
                 ),
                 Action::Library if saves.open => "Close saved villages".into(),
+                // Roster cards, after V2: the name over what they are doing right now.
+                Action::Resident(index) => format!(
+                    "{}\n{}",
+                    NAMES[index],
+                    village.construction.resident_roster_line(&catalog, index)
+                ),
                 Action::Project(row) => projects[row].clone(),
                 Action::UpkeepJob(row) => upkeep_jobs[row].clone(),
                 Action::Recipe(row) => recipes[row].clone(),

@@ -132,6 +132,19 @@ impl Construction {
         [food, power, water]
     }
 
+    /// One line for a roster card: what the resident is doing and their lowest need.
+    pub(crate) fn resident_roster_line(&self, catalog: &Catalog, index: usize) -> String {
+        let health = &self.residents[index].health;
+        let (need, value) = std::iter::once(("Energy", health.energy))
+            .chain(NEED_METERS.map(|(label, need)| (label, health.levels[need as usize])))
+            .min_by(|left, right| left.1.total_cmp(&right.1))
+            .expect("energy is always tracked");
+        format!(
+            "{} · {need} {value:.0}%",
+            self.resident_action(catalog, index)
+        )
+    }
+
     pub fn residents_needing_sanitation(&self) -> usize {
         self.residents
             .iter()

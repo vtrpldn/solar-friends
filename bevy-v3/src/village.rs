@@ -3278,11 +3278,16 @@ fn show_hud(
                         );
                         label.push_str("\n\n");
                     }
-                    label.push_str(&village.construction.resident_status(
-                        &catalog,
-                        &village.stock,
-                        selected,
-                    ));
+                    // The roster cards already list everyone; keep the selected resident.
+                    let status =
+                        village
+                            .construction
+                            .resident_status(&catalog, &village.stock, selected);
+                    label.push_str(
+                        status
+                            .split_once("\n\n")
+                            .map_or(status.as_str(), |(_, profile)| profile),
+                    );
                 }
                 ResidentProfile::Story => {
                     label.push_str(&Construction::resident_story(&catalog, selected));
@@ -3495,9 +3500,13 @@ fn show_hud(
     // Panel buttons already offer the keyboard actions their text used to list.
     let label = if sheet {
         label
+            .trim_start_matches('\n')
             .lines()
-            .map(strip_key_hints)
-            .filter(|line| !line.is_empty())
+            .filter_map(|line| {
+                // Keep paragraph breaks; drop lines that held nothing but shortcuts.
+                let stripped = strip_key_hints(line);
+                (line.is_empty() || !stripped.is_empty()).then_some(stripped)
+            })
             .collect::<Vec<_>>()
             .join("\n")
     } else {

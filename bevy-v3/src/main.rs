@@ -625,9 +625,10 @@ mod tests {
             .find_map(|(entity, children)| {
                 // Labels may sit a level down, as in the top bar's stat cards.
                 let matches = |entity: Entity| {
+                    // A card's first line names it, as on the resident roster.
                     world
                         .get::<Text>(entity)
-                        .is_some_and(|text| text.0 == label)
+                        .is_some_and(|text| text.0 == label || text.0.lines().next() == Some(label))
                 };
                 if !children.iter().any(|child| {
                     matches(child)
