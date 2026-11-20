@@ -534,6 +534,22 @@ impl Construction {
                 "booked for materials"
             };
             let _ = write!(status, "Vehicle {} {phase}", trip.vehicle + 1);
+            if trip.boarded {
+                if trip.elapsed >= trip.duration {
+                    status.push_str(" · At camp");
+                } else {
+                    let journey = match town_drive_phase(trip.elapsed, trip.duration) {
+                        TownDrivePhase::Outbound => "Driving to town",
+                        TownDrivePhase::Away => "In town",
+                        TownDrivePhase::Inbound => "Returning",
+                    };
+                    let minutes =
+                        crate::weather::remaining_game_minutes(trip.duration - trip.elapsed);
+                    let _ = write!(status, " · {journey} · {minutes} game min to camp");
+                }
+            } else {
+                status.push_str(" · Driver walking to car");
+            }
         }
         (!status.is_empty()).then_some(status)
     }
@@ -1708,6 +1724,8 @@ mod tests {
         let status = village.project_status(&catalog, 0);
         assert!(status.contains("Vehicle 1 collecting materials"));
         assert!(status.contains("Vehicle 2 collecting materials"));
+        assert_eq!(status.matches("Driving to town").count(), 2);
+        assert_eq!(status.matches("game min to camp").count(), 2);
         assert_eq!(
             village.construction_pickup_cargo(0).unwrap()["stone"],
             quantity
