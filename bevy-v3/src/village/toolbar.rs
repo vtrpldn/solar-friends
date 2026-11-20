@@ -629,7 +629,7 @@ impl Action {
             Self::RecipePage(false) => "Previous recipes".into(),
             Self::RecipePage(true) => "Next recipes".into(),
             Self::FocusSelectedProject => "Find in village".into(),
-            Self::DeselectProject => "Close project".into(),
+            Self::DeselectProject => "×".into(),
             Self::SelectedProject(action) => match action {
                 ProjectAction::Prioritize => "Prioritize project",
                 ProjectAction::Move => "Move building",
@@ -867,10 +867,7 @@ pub(super) fn install(app: &mut App) {
                 .after(read_camp_pointer)
                 .before(village_input),
         )
-        .add_systems(
-            Update,
-            (refresh, refresh_selection_card, show_dividers).after(village_input),
-        )
+        .add_systems(Update, (refresh, show_dividers).after(village_input))
         .add_systems(Update, fit_and_scroll_menu.after(refresh));
 }
 
@@ -1038,7 +1035,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                         ..default()
                     },
                 ));
-                spawn_selection_card(menu, &assets);
+                super::selection_card::spawn(menu, &assets);
                 for action in [
                     Action::Recipes,
                     Action::Gather,
@@ -1275,21 +1272,46 @@ fn spawn_button(parent: &mut ChildSpawnerCommands, assets: &AssetServer, action:
             | Action::Trade(_)
             | Action::TradePolicy(_)
     );
-    let (vertical_padding, font_size) = if trade_button { (4, 13.0) } else { (6, 14.0) };
+    // A selected building's upkeep and removal actions are quieter than its main ones.
+    let secondary = matches!(action, Action::SelectedProject(_) | Action::BuildingPower);
+    let (vertical_padding, font_size) = if trade_button || secondary {
+        (4, 13.0)
+    } else {
+        (6, 14.0)
+    };
     let mut button = parent.spawn((
         action,
         Button,
         crate::theme::button_node(Node {
-            padding: UiRect::axes(px(12), px(vertical_padding)),
+            padding: UiRect::axes(px(if secondary { 10 } else { 12 }), px(vertical_padding)),
             column_gap: px(6),
             align_items: AlignItems::Center,
             ..default()
         }),
         crate::theme::button(),
     ));
+    // The selected building closes with a round × in the card's corner, as in V2.
+    if matches!(action, Action::DeselectProject) {
+        button.insert(crate::theme::button_node(Node {
+            position_type: PositionType::Absolute,
+            top: px(8),
+            right: px(8),
+            width: px(34),
+            height: px(34),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            border_radius: BorderRadius::all(px(17)),
+            ..default()
+        }));
+    }
     if matches!(action, Action::View | Action::Forecast) {
         button.insert(crate::audio::DisclosureSound);
     }
+    let font_size = if matches!(action, Action::DeselectProject) {
+        20.0
+    } else {
+        font_size
+    };
     button.with_child((
         Text::default(),
         crate::ui_font::ui_font_weight(assets, font_size, 600),
@@ -1322,118 +1344,6 @@ fn spawn_button(parent: &mut ChildSpawnerCommands, assets: &AssetServer, action:
         ));
     }
     button.id()
-}
-
-/// Caption, title, construction bar and status of the selected building, above its
-/// actions, after V2's selection card.
-#[derive(Component)]
-struct SelectionCard;
-
-#[derive(Component)]
-enum SelectionText {
-    Caption,
-    Title,
-    Body,
-}
-
-fn spawn_selection_card(menu: &mut ChildSpawnerCommands, assets: &AssetServer) {
-    use crate::ui_font::{ui_font_styled, ui_font_weight};
-    menu.spawn((
-        SelectionCard,
-        Node {
-            display: Display::None,
-            width: percent(100),
-            flex_direction: FlexDirection::Column,
-            row_gap: px(6),
-            padding: UiRect::bottom(px(4)),
-            ..default()
-        },
-    ))
-    .with_children(|card| {
-        card.spawn((
-            SelectionText::Caption,
-            Text::default(),
-            ui_font_styled(assets, 11.0, 750, crate::theme::CAPTION),
-        ));
-        card.spawn((
-            SelectionText::Title,
-            Text::default(),
-            ui_font_weight(assets, 21.0, 750),
-        ));
-        card.spawn((
-            super::ConstructionProgressTrack,
-            Node {
-                display: Display::None,
-                height: px(6),
-                flex_shrink: 0.0,
-                border_radius: BorderRadius::all(px(3)),
-                overflow: Overflow::clip(),
-                ..default()
-            },
-            BackgroundColor(crate::theme::TRACK),
-        ))
-        .with_child((
-            super::ConstructionProgressFill,
-            Node {
-                width: percent(0),
-                height: percent(100),
-                ..default()
-            },
-            BackgroundColor(crate::theme::LEAF),
-        ));
-        card.spawn((
-            SelectionText::Body,
-            Text::default(),
-            ui_font(assets, 13.0),
-            Node {
-                padding: UiRect::all(px(10)),
-                border: UiRect::left(px(3)),
-                border_radius: BorderRadius::all(px(10)),
-                ..default()
-            },
-            BackgroundColor(crate::theme::ACTIVE),
-            BorderColor::all(crate::theme::ACTIVE_EDGE),
-        ));
-    });
-}
-
-fn refresh_selection_card(
-    (village, catalog, picker): (Res<Village>, Res<Catalog>, Res<PanelPicker>),
-    mut card: Single<&mut Node, With<SelectionCard>>,
-    mut texts: Query<(&SelectionText, &mut Text, &mut Node), Without<SelectionCard>>,
-) {
-    let content = (!picker.open)
-        .then(|| village.selected_building_card(&catalog))
-        .flatten();
-    let display = if content.is_some() {
-        Display::Flex
-    } else {
-        Display::None
-    };
-    if card.display != display {
-        card.display = display;
-    }
-    let Some((caption, title, body)) = content else {
-        return;
-    };
-    for (part, mut text, mut node) in &mut texts {
-        let wanted = match part {
-            SelectionText::Caption => &caption,
-            SelectionText::Title => &title,
-            SelectionText::Body => &body,
-        };
-        if text.0 != *wanted {
-            text.0.clone_from(wanted);
-        }
-        let shown = if wanted.is_empty() {
-            Display::None
-        } else {
-            Display::Flex
-        };
-        if node.display != shown {
-            node.display = shown;
-        }
-    }
 }
 
 fn show_dividers(village: Res<Village>, mut dividers: Query<&mut Node, With<DockDivider>>) {

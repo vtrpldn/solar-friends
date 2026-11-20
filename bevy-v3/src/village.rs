@@ -16,6 +16,7 @@ mod land_lens;
 mod lens_card;
 mod lens_picker;
 mod rich_text;
+mod selection_card;
 mod thumbnails;
 use lens_picker::{LensPicker, MapLens};
 mod library_ui;
@@ -181,6 +182,7 @@ impl Plugin for VillagePlugin {
         lens_card::install(app);
         advance_modal::install(app);
         building_lighting::install(app);
+        selection_card::install(app);
         livestock_motion::install(app);
         vehicle_motion::install(app);
         app.add_systems(PostUpdate, cultivation_surface::show_beds)
@@ -1003,7 +1005,11 @@ impl Village {
             .map(strip_key_hints)
             .filter(|line| !line.is_empty())
             .collect();
-        Some((state.to_uppercase(), title.to_owned(), body.join("\n")))
+        Some((
+            strip_key_hints(state).to_uppercase(),
+            title.to_owned(),
+            body.join("\n"),
+        ))
     }
 
     /// Model shown beside the selected building's actions, while they are on screen.
