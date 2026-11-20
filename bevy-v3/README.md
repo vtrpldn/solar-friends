@@ -66,7 +66,7 @@ Press F4 after pitching camp to edit terrain. Use 1–4 for Raise, Lower, Flatte
 
 Use **Copy bug report** in View & options to copy the current village and simulation diagnostics. If the clipboard is unavailable, the game saves the report locally. **Shift+F5** exports the file directly.
 
-Press F5 to save the current village and F9 to reload it. Press F6 to name, load, rename, recover, or export villages. Drop an exported V3 save or lab checkpoint onto the game window while the library is open to import it as a new named village. An active named village autosaves and retains its previous snapshot. Story and Sandbox have separate save files under `Solar Friends V3` in the local application data directory.
+Press F5 to save the current village and F9 to reload it. Press F6 to name, load, rename, recover, or export villages. Export opens a native dialog to choose the destination. Drop an exported V3 save or lab checkpoint onto the game window while the library is open to import it as a new named village. An active named village autosaves and retains its previous snapshot. Story and Sandbox have separate save files under `Solar Friends V3` in the local application data directory.
 
 Use **Tab** or the mode button in Saved villages to browse the other mode. Loading a village switches the game to that village's mode.
 

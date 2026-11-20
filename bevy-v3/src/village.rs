@@ -3864,7 +3864,11 @@ mod tests {
                 .clock,
             0.0
         );
-        let exported = save_library::export(&directory, id, Mode::Story).unwrap();
+        let exported = save_library::export(&directory, id, Mode::Story, |name| {
+            Some(directory.join("exports").join(name))
+        })
+        .unwrap()
+        .unwrap();
         assert_eq!(save::read(&exported, &catalog).unwrap().clock, 0.0);
         village.clock = 180.0;
         assert_eq!(
@@ -4013,7 +4017,11 @@ mod tests {
         let original =
             save_library::create(&sandbox_directory, Mode::Sandbox, "River camp", &village)
                 .unwrap();
-        let export = save_library::export(&sandbox_directory, original, Mode::Sandbox).unwrap();
+        let export = save_library::export(&sandbox_directory, original, Mode::Sandbox, |name| {
+            Some(sandbox_directory.join("exports").join(name))
+        })
+        .unwrap()
+        .unwrap();
         use bevy::window::FileDragAndDrop;
         let mut app = App::new();
         app.add_message::<FileDragAndDrop>()
@@ -4082,7 +4090,17 @@ mod tests {
 
         let catalog = Catalog::default();
         assert!(save_library::load(&directory, 42, Mode::Story, &catalog).is_err());
-        let exported = save_library::export(&directory, 42, Mode::Story).unwrap();
+        assert_eq!(
+            save_library::export(&directory, 42, Mode::Story, |_| None).unwrap(),
+            None
+        );
+        assert!(save_library::export(&directory, 42, Mode::Story, |_| Some(slot.clone())).is_err());
+        assert_eq!(std::fs::read(&slot).unwrap(), bytes);
+        let exported = save_library::export(&directory, 42, Mode::Story, |name| {
+            Some(directory.join("exports").join(name))
+        })
+        .unwrap()
+        .unwrap();
         let data: serde_json::Value =
             serde_json::from_slice(&std::fs::read(exported).unwrap()).unwrap();
         assert_eq!(data["village"], payload);
@@ -4090,7 +4108,11 @@ mod tests {
 
         let truncated = br#"{"version":"#;
         std::fs::write(&slot, truncated).unwrap();
-        let exported = save_library::export(&directory, 42, Mode::Story).unwrap();
+        let exported = save_library::export(&directory, 42, Mode::Story, |name| {
+            Some(directory.join("exports").join(name))
+        })
+        .unwrap()
+        .unwrap();
         assert!(exported.to_string_lossy().ends_with(".backup.json"));
         assert_eq!(std::fs::read(exported).unwrap(), truncated);
         assert_eq!(std::fs::read(slot).unwrap(), truncated);

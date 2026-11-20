@@ -462,8 +462,15 @@ pub(super) fn library_controls(
             Err(error) => menu.status = format!("Could not open saved village: {error}"),
         }
     } else if matches!(action, Some(Export)) {
-        menu.status = match save_library::export(&path, slot, mode) {
-            Ok(file) => format!("Exported to {}", file.display()),
+        menu.status = match save_library::export(&path, slot, mode, |file_name| {
+            rfd::FileDialog::new()
+                .set_title("Export saved village")
+                .set_file_name(file_name)
+                .add_filter("Village JSON", &["json"])
+                .save_file()
+        }) {
+            Ok(Some(file)) => format!("Exported to {}", file.display()),
+            Ok(None) => "Export canceled.".into(),
             Err(error) => format!("Could not export village: {error}"),
         };
     } else if matches!(action, Some(Remove)) {

@@ -266,19 +266,37 @@ pub fn remove(directory: &Path, id: u64) -> io::Result<()> {
     fs::remove_file(path(directory, id))
 }
 
-pub fn export(directory: &Path, id: u64, mode: Mode) -> io::Result<PathBuf> {
-    let bytes = save::read_bytes(&path(directory, id), SLOT_BYTES)?;
-    let exports = directory.join("exports");
+pub fn export(
+    directory: &Path,
+    id: u64,
+    mode: Mode,
+    choose_destination: impl FnOnce(&str) -> Option<PathBuf>,
+) -> io::Result<Option<PathBuf>> {
+    let source = path(directory, id);
+    let bytes = save::read_bytes(&source, SLOT_BYTES)?;
     let timestamp = timestamp();
-    if let Ok(slot) = decode_slot(&bytes, id, mode) {
-        let export = exports.join(format!("village-{id}-{timestamp}.json"));
-        save::write_export(&export, &slot.current, &slot.name)?;
-        Ok(export)
+    let slot = decode_slot(&bytes, id, mode).ok();
+    let file_name = if slot.is_some() {
+        format!("village-{id}-{timestamp}.json")
     } else {
-        let export = exports.join(format!("slot-{id}-{timestamp}.backup.json"));
-        save::atomic_write(&export, &bytes, SLOT_BYTES)?;
-        Ok(export)
+        format!("slot-{id}-{timestamp}.backup.json")
+    };
+    let Some(export) = choose_destination(&file_name) else {
+        return Ok(None);
+    };
+    if let Ok(existing) = fs::canonicalize(&export)
+        && existing == fs::canonicalize(&source)?
+    {
+        return Err(io::Error::other(
+            "Choose a destination outside the original save.",
+        ));
     }
+    if let Some(slot) = slot {
+        save::write_export(&export, &slot.current, &slot.name)?;
+    } else {
+        save::atomic_write(&export, &bytes, SLOT_BYTES)?;
+    }
+    Ok(Some(export))
 }
 
 fn path(directory: &Path, id: u64) -> PathBuf {
