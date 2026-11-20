@@ -1145,6 +1145,20 @@ impl Construction {
                 }
             }
             let job = &self.farming.jobs[job_index];
+            if matches!(
+                job.phase,
+                FarmPhase::Pickup | FarmPhase::Walk | FarmPhase::Work
+            ) && let Some(worker) = job.worker
+                && self.residents[worker].health.energy < 25.0
+            {
+                self.residents[worker].clear_work_route();
+                let job = &mut self.farming.jobs[job_index];
+                job.worker = None;
+                job.phase = FarmPhase::Pickup;
+                job.retry = clock;
+                job.waiting_for_access = false;
+                continue;
+            }
             if clock < job.retry || job.pickups > 0 {
                 continue;
             }
