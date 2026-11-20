@@ -128,8 +128,8 @@ impl WorldSetup {
         crate::economy_reference::STARTING_CASH[self.savings]
     }
 
-    pub fn supply_scale(&self) -> (u32, u32) {
-        [(6, 10), (1, 1), (17, 10)][self.supplies]
+    pub fn supply_tier(&self) -> usize {
+        self.supplies
     }
 
     fn plot_summary(&self) -> String {

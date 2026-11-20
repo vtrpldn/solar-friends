@@ -38,7 +38,7 @@ pub struct Material {
     pub mass: f64,
     pub volume: f64,
     pub buyer: Buyer,
-    pub starting: u32,
+    pub starting: [u32; 3],
 }
 
 #[derive(Deserialize)]

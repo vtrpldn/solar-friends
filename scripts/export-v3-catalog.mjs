@@ -1,6 +1,6 @@
 // Export the authored V2 construction data for the standalone Bevy game.
 import { readFile, writeFile } from "node:fs/promises";
-import { DEFAULT_SETTINGS, OPTIONS, PRESETS } from "../web/v02/weekend/world-settings.js";
+import { DEFAULT_SETTINGS, OPTIONS, PRESETS, applySettings } from "../web/v02/weekend/world-settings.js";
 import { MATERIALS, PROCESSES, PROJECTS, createWeekend } from "../web/v02/weekend/simulation.js";
 import { buildingCategory, inBuildCategory } from "../web/v02/weekend/build-categories.js";
 import { productionSearchText } from "../web/v02/weekend/project-ui.js";
@@ -22,7 +22,9 @@ import { BIOMES, biomeLandscape } from "../web/v02/land/terrain.js";
 
 import { buildingScenes, buildOptions, constructionScene, workshopModels } from "./v3-building-scene-ids.mjs";
 
-const startingVillage = createWeekend();
+const startingVillages = OPTIONS.supplies.map((supplies, index) =>
+  applySettings(createWeekend(0xffffffff - index), { ...DEFAULT_SETTINGS, supplies }),
+);
 const materials = Object.fromEntries(Object.entries(MATERIALS).map(([id, material]) => [
   id,
   {
@@ -37,7 +39,7 @@ const materials = Object.fromEntries(Object.entries(MATERIALS).map(([id, materia
     mass: materialMeasure(id).kg,
     volume: materialMeasure(id).m3,
     buyer: buyerFor(id),
-    starting: id === "wood" ? startingVillage.wood : startingVillage.materials[id],
+    starting: startingVillages.map(village => id === "wood" ? village.wood : village.materials[id]),
   },
 ]));
 

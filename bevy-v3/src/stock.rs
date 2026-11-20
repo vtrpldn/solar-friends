@@ -155,19 +155,11 @@ impl CashKind {
 
 impl Stock {
     pub fn for_start(settings: &WorldSetup, catalog: &Catalog) -> Self {
-        let (numerator, denominator) = settings.supply_scale();
+        let tier = settings.supply_tier();
         let materials = catalog
             .materials
             .iter()
-            .map(|(id, material)| {
-                let scaled = material.starting * numerator;
-                let count = if id == "wood" {
-                    (scaled + denominator / 2) / denominator
-                } else {
-                    scaled.div_ceil(denominator)
-                };
-                (id.clone(), count)
-            })
+            .map(|(id, material)| (id.clone(), material.starting[tier]))
             .collect();
         let mut stock = Self {
             cash: settings.starting_cash(),

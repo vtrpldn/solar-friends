@@ -19,7 +19,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 36
+      "starting": [
+        22,
+        36,
+        61
+      ]
     },
     "hardware": {
       "name": "fastener packs",
@@ -40,7 +44,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 7
+      "starting": [
+        5,
+        7,
+        12
+      ]
     },
     "roofing": {
       "name": "roof sheets",
@@ -61,7 +69,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 8
+      "starting": [
+        5,
+        8,
+        14
+      ]
     },
     "tarp": {
       "name": "tarp & rope kits",
@@ -82,7 +94,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 1
+      "starting": [
+        1,
+        1,
+        2
+      ]
     },
     "tank": {
       "name": "water tanks",
@@ -103,7 +119,11 @@
         "ratio": 0.4,
         "bulkRatio": 0.3
       },
-      "starting": 1
+      "starting": [
+        1,
+        1,
+        2
+      ]
     },
     "plumbing": {
       "name": "pipe & tap kits",
@@ -124,7 +144,11 @@
         "ratio": 0.4,
         "bulkRatio": 0.3
       },
-      "starting": 1
+      "starting": [
+        1,
+        1,
+        2
+      ]
     },
     "sanitation": {
       "name": "toilet kits",
@@ -145,7 +169,11 @@
         "ratio": 0.4,
         "bulkRatio": 0.3
       },
-      "starting": 1
+      "starting": [
+        1,
+        1,
+        2
+      ]
     },
     "greens": {
       "name": "Leafy greens",
@@ -166,7 +194,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "greens_seed": {
       "name": "Leafy greens seed packets",
@@ -187,7 +219,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "beans": {
       "name": "Bush beans",
@@ -208,7 +244,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "beans_seed": {
       "name": "Bush beans seed packets",
@@ -229,7 +269,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "corn": {
       "name": "Sweet corn",
@@ -250,7 +294,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "corn_seed": {
       "name": "Sweet corn seed packets",
@@ -271,7 +319,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "bucket": {
       "name": "Bucket",
@@ -292,7 +344,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "garden-tools": {
       "name": "Garden tools",
@@ -313,7 +369,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "carpentry-tools": {
       "name": "Carpentry tools",
@@ -334,7 +394,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "harvest-basket": {
       "name": "Harvest basket",
@@ -355,7 +419,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "cleaning-kit": {
       "name": "Cleaning kit",
@@ -376,7 +444,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "watering-can": {
       "name": "Watering can",
@@ -397,7 +469,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "wheelbarrow": {
       "name": "Wheelbarrow",
@@ -418,7 +494,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "bicycle": {
       "name": "Bicycle",
@@ -439,7 +519,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "produce-crates": {
       "name": "Produce crate",
@@ -460,7 +544,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "cooling": {
       "name": "Refrigeration kit",
@@ -481,7 +569,11 @@
         "ratio": 0.4,
         "bulkRatio": 0.3
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "tool_heads": {
       "name": "Garden tool heads",
@@ -502,7 +594,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "repair_supplies": {
       "name": "Repair supplies",
@@ -523,7 +619,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "soap": {
       "name": "Soap refill",
@@ -544,7 +644,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "wheel_kit": {
       "name": "Wheel and axle kit",
@@ -565,7 +669,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "logs": {
       "name": "Raw wood",
@@ -586,7 +694,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "planks": {
       "name": "Planks",
@@ -607,7 +719,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "bamboo": {
       "name": "Bamboo poles",
@@ -628,7 +744,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "earth": {
       "name": "Building earth",
@@ -649,7 +769,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "stone": {
       "name": "Stone",
@@ -670,7 +794,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "frames": {
       "name": "Frames",
@@ -691,7 +819,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "walls": {
       "name": "Wall material",
@@ -712,7 +844,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "tiles": {
       "name": "Roof tiles",
@@ -733,7 +869,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "electrical": {
       "name": "Electrical supplies",
@@ -754,7 +894,11 @@
         "ratio": 0.4,
         "bulkRatio": 0.3
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "covering": {
       "name": "Greenhouse covering",
@@ -775,7 +919,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "panels": {
       "name": "Solar panels",
@@ -796,7 +944,11 @@
         "ratio": 0.4,
         "bulkRatio": 0.3
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "batteries": {
       "name": "Battery equipment",
@@ -817,7 +969,11 @@
         "ratio": 0.4,
         "bulkRatio": 0.3
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "pumps": {
       "name": "Pumps",
@@ -838,7 +994,11 @@
         "ratio": 0.4,
         "bulkRatio": 0.3
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "tools": {
       "name": "Tool supplies",
@@ -859,7 +1019,11 @@
         "ratio": 0.4,
         "bulkRatio": 0.3
       },
-      "starting": 4
+      "starting": [
+        3,
+        4,
+        7
+      ]
     },
     "food": {
       "name": "Ingredients",
@@ -880,7 +1044,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 12
+      "starting": [
+        8,
+        12,
+        21
+      ]
     },
     "meals": {
       "name": "Prepared meals",
@@ -901,7 +1069,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 20
+      "starting": [
+        12,
+        20,
+        34
+      ]
     },
     "eggs": {
       "name": "Eggs",
@@ -922,7 +1094,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "compost": {
       "name": "Mature compost",
@@ -943,7 +1119,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "scraps": {
       "name": "Organic residues",
@@ -964,7 +1144,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "seedlings": {
       "name": "Vegetable seedlings",
@@ -985,7 +1169,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "tree_starts": {
       "name": "Timber seedlings",
@@ -1006,7 +1194,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "bamboo_starts": {
       "name": "Bamboo starts",
@@ -1027,7 +1219,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "fodder": {
       "name": "Dry fodder",
@@ -1048,7 +1244,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "milk": {
       "name": "Fresh milk",
@@ -1069,7 +1269,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "honey": {
       "name": "Honey",
@@ -1090,7 +1294,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "goats": {
       "name": "Goats",
@@ -1111,7 +1319,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "bees": {
       "name": "Bee colonies",
@@ -1132,7 +1344,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     },
     "hens": {
       "name": "Hens",
@@ -1153,7 +1369,11 @@
         "ratio": 0.5,
         "bulkRatio": 0.4
       },
-      "starting": 0
+      "starting": [
+        0,
+        0,
+        0
+      ]
     }
   },
   "resourceGroups": [
