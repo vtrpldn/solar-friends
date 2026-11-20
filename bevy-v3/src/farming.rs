@@ -16,6 +16,8 @@ pub struct Farming {
     #[serde(skip)]
     pub whole_plot: bool,
     #[serde(skip)]
+    pub show_balances: bool,
+    #[serde(skip)]
     pub pending_plot_clear: Option<usize>,
     #[serde(skip)]
     pub notice: String,

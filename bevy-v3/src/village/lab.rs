@@ -1742,7 +1742,7 @@ fn lab_bed_page(
         .lab_job_site_name(catalog, site)
         .unwrap_or("Cultivation");
     let mut details = construction
-        .bed_status(site, index, runner.village.clock)
+        .bed_status(site, index, runner.village.clock, true)
         .unwrap_or_else(|| "No beds.".into());
     if let Some(outcome) = runner.latest_bed_outcome(site + 1, index + 1) {
         use std::fmt::Write as _;

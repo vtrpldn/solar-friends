@@ -526,6 +526,10 @@ impl Action {
                     "Inspect one bed"
                 }
                 FarmControl::WholePlot => "Whole plot",
+                FarmControl::Balances if village.construction.farming.show_balances => {
+                    "Hide water & material balances"
+                }
+                FarmControl::Balances => "Show water & material balances",
                 FarmControl::Irrigation => "Toggle irrigation",
                 FarmControl::Residues => "Toggle residue collection",
                 FarmControl::Crop => "Change crop",
@@ -912,6 +916,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 for action in [
                     FarmControl::NextBed,
                     FarmControl::WholePlot,
+                    FarmControl::Balances,
                     FarmControl::Irrigation,
                     FarmControl::Residues,
                     FarmControl::Crop,
@@ -1854,6 +1859,9 @@ fn refresh(
             Action::Beds | Action::Gather => action.available(&village),
             Action::Farm(FarmControl::Work(work)) => {
                 show_beds && plot_actions.is_none_or(|counts| counts[work as usize] > 0)
+            }
+            Action::Farm(FarmControl::Balances) => {
+                show_beds && !village.construction.farming.whole_plot
             }
             Action::Farm(_) | Action::SelectBed => show_beds,
             Action::Recipe(row) => recipes.get(row).is_some(),

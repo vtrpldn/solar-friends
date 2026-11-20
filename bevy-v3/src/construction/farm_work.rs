@@ -9,6 +9,7 @@ use crate::{
 pub(crate) enum FarmControl {
     NextBed,
     WholePlot,
+    Balances,
     Irrigation,
     Residues,
     Crop,
@@ -365,6 +366,10 @@ impl Construction {
             return;
         };
         let confirmed = self.farming.pending_plot_clear.take() == Some(site);
+        if matches!(action, FarmControl::Balances) {
+            self.farming.show_balances = !self.farming.show_balances;
+            return;
+        }
         if self.farming.whole_plot
             && matches!(action, FarmControl::Work(FarmAction::Clear))
             && !confirmed
@@ -823,7 +828,7 @@ impl Construction {
             ));
         }
         let index = self.farming.bed.min(plot.beds.len() - 1);
-        let mut label = self.bed_status(site, index, clock)?;
+        let mut label = self.bed_status(site, index, clock, self.farming.show_balances)?;
         if let Some(job) = self
             .farming
             .jobs
@@ -851,7 +856,13 @@ impl Construction {
         Some(label)
     }
 
-    pub(crate) fn bed_status(&self, site: usize, index: usize, clock: f64) -> Option<String> {
+    pub(crate) fn bed_status(
+        &self,
+        site: usize,
+        index: usize,
+        clock: f64,
+        show_balances: bool,
+    ) -> Option<String> {
         let plot = self.farming.plots.get(&site)?;
         let bed = plot.beds.get(index)?;
         let irrigation = if bed.irrigation {
@@ -870,7 +881,7 @@ impl Construction {
             bed.stage.label()
         };
         let mut label = format!(
-            "Bed {}/{} · {} · {} ({:.0}%) · {:.1} m²\nMoisture {:.0}% · Fertility {:.0}%\nDrought loss {:.0}% · Ground cover {:.0}%\nSoil · {:.1} kg residues · {:.1} kg compost · {:.1} kg organic matter\n{}\nWater totals · {:.1} L rain · {:.1} L irrigation · {:.1} L evaporated · {:.1} L drained\nDensity {:.1}× · {} · {} residues",
+            "Bed {}/{} · {} · {} ({:.0}%) · {:.1} m²\nMoisture {:.0}% · Fertility {:.0}%\nDrought loss {:.0}% · Ground cover {:.0}%\nSoil · {:.1} kg residues · {:.1} kg compost · {:.1} kg organic matter\nDensity {:.1}× · {} · {} residues",
             index + 1,
             plot.beds.len(),
             bed.crop.label(),
@@ -884,15 +895,22 @@ impl Construction {
             bed.residue_kg,
             bed.amendment_kg,
             bed.soil_organic_kg,
-            bed.material_balance_summary(),
-            bed.rain_liters,
-            bed.irrigated_liters,
-            bed.evaporated_liters,
-            bed.drained_liters,
             bed.density,
             irrigation,
             residues,
         );
+        use std::fmt::Write;
+        if show_balances {
+            let _ = write!(
+                label,
+                "\n{}\nWater totals · {:.1} L rain · {:.1} L irrigation · {:.1} L evaporated · {:.1} L drained",
+                bed.material_balance_summary(),
+                bed.rain_liters,
+                bed.irrigated_liters,
+                bed.evaporated_liters,
+                bed.drained_liters,
+            );
+        }
         if bed.stage == Stage::Failed {
             label.push_str("\nClear the failed crop, then prepare the bed again.");
         } else if bed.stage == Stage::Growing {
@@ -909,7 +927,6 @@ impl Construction {
                 label.push_str("\nEarlier stress has reduced this crop’s yield.");
             }
         }
-        use std::fmt::Write;
         if let Some((remaining, window)) = bed.harvest_timing(clock) {
             let _ = write!(
                 label,
