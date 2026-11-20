@@ -412,7 +412,7 @@ fn refresh(
     if panel.bottom != px(bottom) {
         panel.bottom = px(bottom);
     }
-    let max_height = px((window.height() - bottom - TOP_BAR_CLEARANCE).max(0.));
+    let max_height = px((window.height() - bottom - top_bar_clearance()).max(0.));
     if panel.max_height != max_height {
         panel.max_height = max_height;
     }

@@ -47,7 +47,26 @@ const ALERT: Color = Color::srgb_u8(0xb0, 0x5a, 0x3c);
 
 pub(super) fn install(app: &mut App) {
     app.add_systems(Startup, spawn)
-        .add_systems(Update, refresh.after(village_input));
+        .add_systems(Update, refresh.after(village_input))
+        .add_systems(PostUpdate, measure.after(bevy::ui::UiSystems::Layout))
+        .add_systems(Update, super::super::place_below_top_bar);
+}
+
+/// Records where the top bar ends, so panels open below it however its cards wrap.
+/// Only the stat cards count: left-hand panels sit beneath them, beside the clock.
+fn measure(bar: Single<(&Node, &Children), With<TopBar>>, sizes: Query<&ComputedNode>) {
+    let (node, children) = *bar;
+    if node.display == Display::None {
+        return;
+    }
+    let Some(computed) = children.first().and_then(|cards| sizes.get(*cards).ok()) else {
+        return;
+    };
+    let height = computed.size().y * computed.inverse_scale_factor();
+    if height > 0. {
+        // 18 px from the window top, then a 12 px gap.
+        super::super::set_top_bar_clearance(18. + height + 12.);
+    }
 }
 
 /// Whether the top bar shows: in a village, outside the setup, save and sound screens.
@@ -242,6 +261,8 @@ fn stat_card(
                 padding: UiRect::new(px(8), px(12), px(7), px(7)),
                 column_gap: px(8),
                 align_items: AlignItems::Center,
+                // One width for every card, so they wrap into a tidy grid as in V2.
+                min_width: px(172),
                 ..default()
             }),
             theme::button(),

@@ -1586,7 +1586,7 @@ fn fit_and_scroll_hud(
     }
     // Sheets start below the top bar and stop above the dock.
     let available_height =
-        (window.height() - TOP_BAR_CLEARANCE - 18. - toolbar_height - 14.).max(0.);
+        (window.height() - top_bar_clearance() - 18. - toolbar_height - 14.).max(0.);
     let max_height = px(available_height);
     if !modal && node.max_height != max_height {
         node.max_height = max_height;
@@ -1874,8 +1874,31 @@ fn strip_key_hints(line: &str) -> String {
 /// Top of right-hand panels, below the clock card and its Guide and Lenses buttons.
 const RIGHT_PANEL_TOP: f32 = 176.0;
 
-/// Space the top bar's stat cards take, so panels open beneath them.
-const TOP_BAR_CLEARANCE: f32 = 112.0;
+/// Where panels may start, below the top bar. Measured after each layout, because the
+/// stat cards wrap to a second row in narrow windows; 112 until the first measurement.
+static TOP_BAR_BOTTOM: std::sync::atomic::AtomicU32 =
+    std::sync::atomic::AtomicU32::new(112f32.to_bits());
+
+fn top_bar_clearance() -> f32 {
+    f32::from_bits(TOP_BAR_BOTTOM.load(std::sync::atomic::Ordering::Relaxed))
+}
+
+fn set_top_bar_clearance(value: f32) {
+    TOP_BAR_BOTTOM.store(value.to_bits(), std::sync::atomic::Ordering::Relaxed);
+}
+
+/// Panels whose top edge follows the measured top bar.
+#[derive(Component)]
+struct BelowTopBar;
+
+fn place_below_top_bar(mut nodes: Query<&mut Node, With<BelowTopBar>>) {
+    let top = px(top_bar_clearance());
+    for mut node in &mut nodes {
+        if node.top != top {
+            node.top = top;
+        }
+    }
+}
 
 const CAMP_OFFSET: IVec2 = IVec2::new(-1, -3);
 const CAMP_ACCESS_ERROR: &str = "Choose somewhere reachable from the supplies.";
@@ -3138,7 +3161,7 @@ fn show_hud(
     node.display = Display::Flex;
     // Below the top bar's stat cards; panels and reference pages get more room than the
     // short status notes shown while playing.
-    node.top = px(TOP_BAR_CLEARANCE);
+    node.top = px(top_bar_clearance());
     node.bottom = Val::Auto;
     // An open panel becomes a wide almanac sheet beside its action column.
     let sheet = village.utility_panel.is_some() && !village.guide.open() && !village.lenses.open;

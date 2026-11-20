@@ -190,6 +190,7 @@ fn spawn_project_row(
 fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
     commands
         .spawn((
+            super::BelowTopBar,
             ProjectsCard,
             Interaction::None,
             FocusPolicy::Block,
@@ -198,7 +199,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 display: Display::None,
                 position_type: PositionType::Absolute,
                 left: px(22),
-                top: px(TOP_BAR_CLEARANCE),
+                top: px(top_bar_clearance()),
                 width: px(CARD_WIDTH),
                 flex_direction: FlexDirection::Column,
                 padding: UiRect::all(px(16)),
@@ -652,7 +653,7 @@ fn refresh(
     } else {
         110.0
     };
-    let max_height = px((window.height() - TOP_BAR_CLEARANCE - clearance).max(160.0));
+    let max_height = px((window.height() - top_bar_clearance() - clearance).max(160.0));
     if card_node.max_height != max_height {
         card_node.max_height = max_height;
     }

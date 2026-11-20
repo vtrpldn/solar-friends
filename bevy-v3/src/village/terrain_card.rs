@@ -131,6 +131,7 @@ fn spawn_button(
 fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
     commands
         .spawn((
+            super::BelowTopBar,
             TerrainCard,
             Interaction::None,
             FocusPolicy::Block,
@@ -139,7 +140,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 display: Display::None,
                 position_type: PositionType::Absolute,
                 left: px(22),
-                top: px(TOP_BAR_CLEARANCE),
+                top: px(top_bar_clearance()),
                 width: px(280),
                 flex_direction: FlexDirection::Column,
                 padding: UiRect::all(px(16)),
