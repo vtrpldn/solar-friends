@@ -209,6 +209,7 @@ impl Plugin for VillagePlugin {
                         almanac::widgets::input::<almanac::pantry::Screen>,
                         almanac::widgets::input::<almanac::finances::Screen>,
                         almanac::widgets::input::<almanac::sites::connections::Water>,
+                        almanac::widgets::input::<almanac::sites::connections::Power>,
                         village_input,
                         almanac::sites::input,
                     )
@@ -227,6 +228,7 @@ impl Plugin for VillagePlugin {
                         almanac::widgets::refresh::<almanac::pantry::Screen>,
                         almanac::widgets::refresh::<almanac::finances::Screen>,
                         almanac::widgets::refresh::<almanac::sites::connections::Water>,
+                        almanac::widgets::refresh::<almanac::sites::connections::Power>,
                     )
                         .chain(),
                     fit_and_scroll_hud,
@@ -765,17 +767,6 @@ impl Village {
         }
     }
 
-    fn has_queued_utility_installation(&self) -> bool {
-        match self.utility_panel {
-            Some(UtilityPanel::Power | UtilityPanel::Water) => self
-                .construction
-                .queued_utility_connections(self.utility_panel == Some(UtilityPanel::Power))
-                .next()
-                .is_some(),
-            _ => false,
-        }
-    }
-
     fn focus_next_utility_installation(&mut self, setup: &WorldSetup, camera: &mut VillageCamera) {
         let power = self.utility_panel == Some(UtilityPanel::Power);
         let current = self
@@ -933,7 +924,8 @@ impl Village {
                     | UtilityPanel::Pantry
                     | UtilityPanel::Finances
                     | UtilityPanel::Residents
-                    | UtilityPanel::Water,
+                    | UtilityPanel::Water
+                    | UtilityPanel::Power,
                 ) => true,
                 _ => false,
             }
@@ -3245,31 +3237,6 @@ fn show_hud(
         label.push_str(&natural);
     }
     match village.utility_panel {
-        Some(UtilityPanel::Power) => {
-            label.push('\n');
-            label.push_str(
-                &village
-                    .construction
-                    .utilities
-                    .power_details(village.stock.sandbox),
-            );
-            label.push_str(&village.construction.connection_summary(
-                &catalog,
-                village.power_link,
-                true,
-            ));
-            label.push_str(&village.construction.power_installation_summary(
-                &catalog,
-                village.power_source,
-                village.power_target,
-            ));
-            if !village.power_notice.is_empty() {
-                label.push('\n');
-                label.push_str(&village.power_notice);
-            }
-            label.push_str(&village.construction.power_shortage_summary(&catalog));
-            label.push_str(&village.construction.queued_installation_hint(true));
-        }
         Some(UtilityPanel::Projects) => {
             label.push('\n');
             label.push_str(
@@ -3329,7 +3296,7 @@ fn show_hud(
                     .upkeep_status(&catalog, village.upkeep_page),
             );
         }
-        Some(UtilityPanel::Water) => {}
+        Some(UtilityPanel::Water | UtilityPanel::Power) => {}
         Some(UtilityPanel::Residents) => {}
         Some(UtilityPanel::Finances) => {}
         Some(UtilityPanel::Trade) => {
@@ -3346,16 +3313,6 @@ fn show_hud(
         }
         Some(UtilityPanel::Pantry) => {}
         None => {}
-    }
-    if village.utility_panel == Some(UtilityPanel::Power)
-        && let Some(endpoints) = village.selected_installation()
-        && let Ok(quote) =
-            village
-                .construction
-                .connection_quote(&catalog, &village.stock, endpoints)
-    {
-        label.push('\n');
-        label.push_str(&quote);
     }
     // A selected building is described by its card beside the action buttons.
     let card = village.selected_project_focus().is_some();

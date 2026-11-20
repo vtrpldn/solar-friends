@@ -1,5 +1,8 @@
 use super::*;
-use crate::village::almanac::widgets::{Widget, cycle, stepper};
+use crate::{
+    economy_reference::{GRID_CAPACITY, GRID_TARIFF_CENTS},
+    village::almanac::widgets::{Widget, cycle, stepper},
+};
 
 #[derive(Clone, PartialEq)]
 pub(in crate::village) enum Action {
@@ -14,6 +17,8 @@ pub(in crate::village) enum Action {
     NextInstallation,
     CancelInstallation,
     NextWasteTank,
+    Grid,
+    NextPowerShortage,
 }
 
 type Entry = Widget<Action>;
@@ -87,6 +92,103 @@ impl widgets::Screen for Water {
     }
 }
 
+pub(in crate::village) struct Power;
+
+impl widgets::Screen for Power {
+    type Action = Action;
+    const PANEL: UtilityPanel = UtilityPanel::Power;
+
+    fn content(village: &Village, catalog: &Catalog, _: &WorldSetup, _: &Land) -> Option<Entry> {
+        let construction = &village.construction;
+        let utilities = &construction.utilities;
+        let connected = !utilities.grid_off;
+        let (purchased, spent) = utilities.grid_purchase_totals();
+        let local_share = utilities.local_energy_share().map_or_else(
+            || "No usage yet".into(),
+            |share| format!("{share:.0}% since arrival"),
+        );
+        let cost = if village.stock.sandbox {
+            "Free in Sandbox".into()
+        } else {
+            format!(
+                "R${:.2}/kWh · R${:.2}/h now · R${spent:.2} spent",
+                GRID_TARIFF_CENTS / 100.,
+                utilities.grid_cost_per_hour()
+            )
+        };
+        let grid = Entry::Card(vec![
+            Entry::title("Grid backup"),
+            Entry::body(if connected { "Connected" } else { "Off-grid" }),
+            Entry::note(format!(
+                "Local generation and batteries come first. Grid backup supplies up to {GRID_CAPACITY:.0} kW."
+            )),
+            Entry::note(format!("{purchased:.2} kWh purchased · {cost}")),
+            Entry::note(format!("Local energy share · {local_share}")),
+            Entry::Button(
+                Action::Grid,
+                if connected {
+                    "Disconnect grid"
+                } else {
+                    "Connect grid"
+                }
+                .into(),
+                true,
+                connected,
+            ),
+        ]);
+        let mut cards = vec![grid, connection_card(village, catalog, true)];
+        let shortage_count = utilities.power_shortages().filter(|&id| id != 0).count();
+        if shortage_count > 0 {
+            let mut supply = vec![
+                Entry::title("Waiting for power"),
+                Entry::body(format!("{shortage_count} buildings need power.")),
+            ];
+            if let Some(id) = construction.production.selected.map(|index| index + 1)
+                && utilities.power_shortages().any(|site| site == id)
+            {
+                supply.push(Entry::note(construction.connection_site_name(catalog, id)));
+            }
+            supply.push(button(
+                Action::NextPowerShortage,
+                "Next building without power",
+                true,
+            ));
+            cards.push(Entry::Card(supply));
+        }
+        Some(Entry::Column(cards))
+    }
+
+    fn activate(
+        action: &Action,
+        village: &mut Village,
+        _: &Catalog,
+        setup: &WorldSetup,
+        camera: Option<&mut VillageCamera>,
+    ) {
+        match *action {
+            Action::Source(Some(id)) => {
+                village.power_source = id;
+                village.power_notice.clear();
+            }
+            Action::Destination(id) => {
+                village.power_target = id;
+                village.power_notice.clear();
+            }
+            Action::Install => village.queue_selected_power_connection(),
+            Action::Grid => {
+                let utilities = &mut village.construction.utilities;
+                utilities.grid_off = !utilities.grid_off;
+            }
+            Action::NextPowerShortage => {
+                if let Some(camera) = camera {
+                    village.focus_next_power_shortage(setup, camera);
+                }
+            }
+            _ => activate_link(action, village, setup, camera),
+        }
+    }
+}
+
 fn button(action: Action, label: &str, enabled: bool) -> Entry {
     Entry::Button(action, label.into(), enabled, false)
 }
@@ -130,7 +232,7 @@ fn connection_card(village: &Village, catalog: &Catalog, power: bool) -> Entry {
     let utilities = &construction.utilities;
     let water = &village.water_panel;
     let ids: Vec<_> = if power {
-        utilities.power_ids().map(Some).collect()
+        utilities.power_endpoints().map(Some).collect()
     } else {
         utilities.water_ids().map(Some).collect()
     };
@@ -144,10 +246,26 @@ fn connection_card(village: &Village, catalog: &Catalog, power: bool) -> Entry {
         (water.source, water.target)
     };
     let mut pickers = vec![
-        endpoint_picker("SOURCE", village, catalog, &sources, source, Action::Source),
-        endpoint_picker("DESTINATION", village, catalog, &ids, Some(target), |id| {
-            Action::Destination(id.expect("destination choice is a site"))
-        }),
+        endpoint_picker(
+            if power { "POWER SOURCE" } else { "SOURCE" },
+            village,
+            catalog,
+            &sources,
+            source,
+            Action::Source,
+        ),
+        endpoint_picker(
+            if power {
+                "POWER DESTINATION"
+            } else {
+                "DESTINATION"
+            },
+            village,
+            catalog,
+            &ids,
+            Some(target),
+            |id| Action::Destination(id.expect("destination choice is a site")),
+        ),
     ];
     if !power {
         pickers.push(stepper(

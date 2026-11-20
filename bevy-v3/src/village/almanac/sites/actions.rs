@@ -4,6 +4,7 @@ use super::*;
 enum Action {
     Find,
     Switch,
+    Cooling,
     Water(WaterCommand),
 }
 
@@ -28,6 +29,18 @@ impl SiteButton {
                     if enabled { "Switch off" } else { "Switch on" },
                     Ok(()),
                     enabled,
+                )
+            }
+            Action::Cooling => {
+                let active = utilities.cooling_switch(self.id.checked_sub(1)?)?;
+                (
+                    if active {
+                        "Pause cooling"
+                    } else {
+                        "Resume cooling"
+                    },
+                    Ok(()),
+                    active,
                 )
             }
             Action::Water(command) => {
@@ -93,6 +106,7 @@ pub(super) fn spawn(
     let commands = [
         Action::Find,
         Action::Switch,
+        Action::Cooling,
         Action::Water(WaterCommand::River),
         Action::Water(WaterCommand::Purify),
         Action::Water(WaterCommand::Sanitation),
@@ -111,7 +125,9 @@ pub(super) fn spawn(
     ))
     .with_children(|row| {
         for action in commands {
-            if panel != UtilityPanel::Water && matches!(action, Action::Water(_)) {
+            if matches!(action, Action::Water(_)) && panel != UtilityPanel::Water
+                || matches!(action, Action::Cooling) && panel != UtilityPanel::Power
+            {
                 continue;
             }
             let button = SiteButton { id, panel, action };
@@ -230,6 +246,11 @@ pub(in crate::village) fn input(
             Action::Switch => {
                 if let Some(index) = button.id.checked_sub(1) {
                     town.construction.utilities.toggle(index);
+                }
+            }
+            Action::Cooling => {
+                if let Some(index) = button.id.checked_sub(1) {
+                    town.construction.utilities.toggle_cooling(index);
                 }
             }
             Action::Water(command) => {

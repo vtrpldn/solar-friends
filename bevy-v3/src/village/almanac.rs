@@ -105,6 +105,7 @@ pub(super) fn spawn(card: &mut ChildSpawnerCommands, assets: &AssetServer) {
         }
     });
     widgets::spawn::<sites::connections::Water>(card);
+    widgets::spawn::<sites::connections::Power>(card);
     sites::spawn_list(card);
     inventory::spawn(card, assets);
     crafting::spawn(card, assets);

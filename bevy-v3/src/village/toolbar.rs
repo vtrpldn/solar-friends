@@ -106,16 +106,8 @@ enum Action {
     AutoCook,
     CookingTarget { preserved: bool, increase: bool },
     PantryPolicy(i8, i64, bool),
-    Grid,
     BuildingPower,
     Cooling,
-    InstallPowerLink,
-    NextPowerShortage,
-    UtilityLinkPage(bool),
-    ToggleUtilityLink,
-    RemoveUtilityLink,
-    CancelUtilityInstallation,
-    NextUtilityInstallation,
     AutomaticUpkeep,
     UpkeepJob(usize),
     UpkeepBudget { restock: bool },
@@ -287,26 +279,11 @@ impl Action {
             }
             Self::Panel(_) => true,
             Self::ClosePanel => village.utility_panel.is_some(),
-            Self::Grid => village.utility_panel == Some(UtilityPanel::Power),
             Self::BuildingPower | Self::Cooling => {
-                matches!(village.utility_panel, None | Some(UtilityPanel::Power))
+                village.utility_panel.is_none()
                     && !village.construction.menu
                     && !village.construction.is_placing()
                     && self.facility_switch(village).is_some()
-            }
-            Self::UtilityLinkPage(_) | Self::ToggleUtilityLink => village.utility_link_count() > 0,
-            Self::RemoveUtilityLink => village.can_remove_selected_utility_link(),
-            Self::NextUtilityInstallation => village.has_queued_utility_installation(),
-            Self::CancelUtilityInstallation => village.can_cancel_selected_installation(),
-            Self::InstallPowerLink => village.utility_panel == Some(UtilityPanel::Power),
-            Self::NextPowerShortage => {
-                village.utility_panel == Some(UtilityPanel::Power)
-                    && village
-                        .construction
-                        .utilities
-                        .power_shortages()
-                        .next()
-                        .is_some()
             }
             Self::AutomaticUpkeep | Self::UpkeepBudget { .. } | Self::UpkeepJob(_) => {
                 village.utility_panel == Some(UtilityPanel::Upkeep)
@@ -728,22 +705,12 @@ impl Action {
             Self::PantryPolicy(1, _, false) => "Reserve +0.5d".into(),
             Self::PantryPolicy(_, budget, false) if budget < 0 => "Budget −R$25".into(),
             Self::PantryPolicy(_, _, false) => "Budget +R$25".into(),
-            Self::Grid if village.construction.utilities.grid_off => "Connect grid".into(),
-            Self::Grid => "Disconnect grid".into(),
             Self::BuildingPower if self.facility_switch(village) == Some(true) => {
                 "Switch building off".into()
             }
             Self::BuildingPower => "Switch building on".into(),
             Self::Cooling if self.facility_switch(village) == Some(true) => "Pause cooling".into(),
             Self::Cooling => "Resume cooling".into(),
-            Self::InstallPowerLink => "Install power connection".into(),
-            Self::NextPowerShortage => "Next building without power".into(),
-            Self::UtilityLinkPage(false) => "Previous connection".into(),
-            Self::UtilityLinkPage(true) => "Next connection".into(),
-            Self::ToggleUtilityLink => "Switch connection".into(),
-            Self::RemoveUtilityLink => "Remove manual connection".into(),
-            Self::CancelUtilityInstallation => "Cancel installation".into(),
-            Self::NextUtilityInstallation => "Next installation".into(),
             Self::AutomaticUpkeep => format!(
                 "Automatic maintenance {}",
                 if village.construction.automatic_upkeep() {
@@ -1124,15 +1091,6 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 ] {
                     spawn_button(menu, &assets, Action::PantryPolicy(reserve, budget, toggle));
                 }
-                spawn_button(menu, &assets, Action::Grid);
-                spawn_button(menu, &assets, Action::InstallPowerLink);
-                spawn_button(menu, &assets, Action::NextPowerShortage);
-                spawn_button(menu, &assets, Action::UtilityLinkPage(false));
-                spawn_button(menu, &assets, Action::UtilityLinkPage(true));
-                spawn_button(menu, &assets, Action::ToggleUtilityLink);
-                spawn_button(menu, &assets, Action::RemoveUtilityLink);
-                spawn_button(menu, &assets, Action::CancelUtilityInstallation);
-                spawn_button(menu, &assets, Action::NextUtilityInstallation);
                 spawn_button(menu, &assets, Action::BuildingPower);
                 spawn_button(menu, &assets, Action::Cooling);
                 spawn_button(menu, &assets, Action::AutomaticUpkeep);
@@ -1862,10 +1820,6 @@ fn handle_buttons(
                         }
                     }
                 }
-                Action::Grid if !picker.open => {
-                    let utilities = &mut village.construction.utilities;
-                    utilities.grid_off = !utilities.grid_off;
-                }
                 Action::AutomaticUpkeep if !picker.open => {
                     village.construction.toggle_automatic_upkeep()
                 }
@@ -1885,23 +1839,6 @@ fn handle_buttons(
                         NumericTarget::MaintenanceParts
                     };
                     village.numeric_entry = Some((target, String::new()));
-                }
-                Action::UtilityLinkPage(forward) if !picker.open => {
-                    village.move_utility_link(forward)
-                }
-                Action::ToggleUtilityLink if !picker.open => village.toggle_selected_utility_link(),
-                Action::NextUtilityInstallation if !picker.open => {
-                    village.focus_next_utility_installation(&setup, camera)
-                }
-                Action::CancelUtilityInstallation if !picker.open => {
-                    village.cancel_selected_installation()
-                }
-                Action::RemoveUtilityLink if !picker.open => village.remove_selected_utility_link(),
-                Action::NextPowerShortage if !picker.open => {
-                    village.focus_next_power_shortage(&setup, camera)
-                }
-                Action::InstallPowerLink if !picker.open => {
-                    village.queue_selected_power_connection()
                 }
                 Action::PantryBatches if !picker.open => {
                     village.pantry_batch_page = village.pantry_batch_page.is_none().then_some(0);
@@ -2068,16 +2005,8 @@ fn handle_buttons(
                 | Action::AutoCook
                 | Action::CookingTarget { .. }
                 | Action::PantryPolicy(..)
-                | Action::Grid
                 | Action::BuildingPower
                 | Action::Cooling
-                | Action::InstallPowerLink
-                | Action::NextPowerShortage
-                | Action::UtilityLinkPage(_)
-                | Action::ToggleUtilityLink
-                | Action::RemoveUtilityLink
-                | Action::CancelUtilityInstallation
-                | Action::NextUtilityInstallation
                 | Action::AutomaticUpkeep
                 | Action::UpkeepJob(_)
                 | Action::UpkeepBudget { .. } => {}
@@ -2197,7 +2126,6 @@ fn refresh(
     let show_finances = !picker.open && Action::Ledger.available(&village);
     let show_facility_switches = !picker.open
         && (Action::BuildingPower.available(&village) || Action::Cooling.available(&village));
-    let show_power = !picker.open && Action::Grid.available(&village);
     let show_upkeep = !picker.open && Action::AutomaticUpkeep.available(&village);
     let upkeep_jobs = if show_upkeep {
         village
@@ -2244,7 +2172,6 @@ fn refresh(
         || show_pantry
         || show_trade
         || inventory_items.iter().any(Option::is_some)
-        || show_power
         || show_facility_switches
         || show_upkeep
         || (picker.open && Action::Manage.available(&village))
@@ -2378,13 +2305,6 @@ fn refresh(
             | Action::AutoCook
             | Action::CookingTarget { .. } => show_pantry && action.available(&village),
             Action::Home(_) => show_homes,
-            Action::Grid | Action::InstallPowerLink => show_power,
-            Action::NextPowerShortage => show_power && action.available(&village),
-            Action::UtilityLinkPage(_)
-            | Action::ToggleUtilityLink
-            | Action::RemoveUtilityLink
-            | Action::CancelUtilityInstallation
-            | Action::NextUtilityInstallation => show_power && action.available(&village),
             Action::BuildingPower | Action::Cooling => {
                 show_facility_switches && action.available(&village)
             }

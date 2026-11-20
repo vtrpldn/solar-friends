@@ -584,36 +584,6 @@ impl Construction {
         }
     }
 
-    pub fn connection_summary(&self, catalog: &Catalog, selected: usize, power: bool) -> String {
-        let (connection, count, shortcut, arrow) = if power {
-            (
-                self.utilities
-                    .power_link(selected)
-                    .map(|(from, to, enabled)| (from, to, "Power", enabled)),
-                self.utilities.power_link_count(),
-                "T",
-                "–",
-            )
-        } else {
-            (
-                self.utilities.water_link(selected),
-                self.utilities.water_link_count(),
-                "G",
-                "→",
-            )
-        };
-        let Some((from, to, kind, enabled)) = connection else {
-            return String::new();
-        };
-        let status = if enabled { "on" } else { "off" };
-        format!(
-            "\nConnection {}/{count} · {kind} · {} {arrow} {} · {status}\n[ / ] Select connection · {shortcut} Switch connection",
-            selected.saturating_add(1).min(count),
-            self.connection_site_name(catalog, from),
-            self.connection_site_name(catalog, to),
-        )
-    }
-
     pub(crate) fn expansion_reserve_cents(&self) -> u64 {
         self.market.expansion_reserve()
     }
@@ -666,21 +636,6 @@ impl Construction {
             self.utilities
                 .draw_queued_connection(terrain, (from, to), channel, progress, gizmos);
         }
-    }
-
-    pub fn queued_installation_hint(&self, power: bool) -> String {
-        let count = self.queued_utility_connections(power).count();
-        if count == 0 {
-            return String::new();
-        }
-        let noun = if count == 1 {
-            "installation"
-        } else {
-            "installations"
-        };
-        format!(
-            "\n{count} queued {noun} · Page Up Next installation · Dashed lines under construction"
-        )
     }
 
     fn active_connection(
@@ -737,33 +692,6 @@ impl Construction {
         true
     }
 
-    pub fn power_installation_summary(&self, catalog: &Catalog, from: usize, to: usize) -> String {
-        use std::fmt::Write;
-        let mut text = format!(
-            "\nNew line · {} – {}\nShift-click source · Click destination · C Camp · U Install line",
-            self.connection_site_name(catalog, from),
-            self.connection_site_name(catalog, to),
-        );
-        if let Some(status) = self.utilities.power_site_summary(to) {
-            let _ = write!(
-                text,
-                "\n{} · {status}",
-                self.connection_site_name(catalog, to)
-            );
-        }
-        if let Some(job) = self.active_connection(from, to, None)
-            && let WaterAction::InstallCable { required, .. } = job.action
-        {
-            let _ = write!(
-                text,
-                "\n{} · {:.0}% installed",
-                job.label(),
-                100.0 * job.work / required
-            );
-        }
-        text
-    }
-
     /// One line per power or water building, like V2's network cards.
     pub fn utility_site_list(&self, catalog: &Catalog, power: bool) -> String {
         use std::fmt::Write;
@@ -811,29 +739,6 @@ impl Construction {
                 "\n{} more · Ctrl+Page Up/Down with a map lens to visit each",
                 ids.len() - VISIBLE_SITES
             );
-        }
-        text
-    }
-
-    pub fn power_shortage_summary(&self, catalog: &Catalog) -> String {
-        use std::fmt::Write;
-        const VISIBLE_SHORTAGES: usize = 4;
-        let mut shortages = self.utilities.power_shortages().peekable();
-        if shortages.peek().is_none() {
-            return String::new();
-        }
-        let mut text = String::from("\nWaiting for power · Page Down Next building");
-        for id in shortages.by_ref().take(VISIBLE_SHORTAGES) {
-            if let Some(plan) = id.checked_sub(1).and_then(|index| self.plans.get(index)) {
-                let name = &catalog.projects[&plan.key].name;
-                let _ = write!(text, "\n{name} #{id}");
-            } else {
-                text.push_str("\nCamp");
-            }
-        }
-        let remaining = shortages.count();
-        if remaining > 0 {
-            let _ = write!(text, "\n{remaining} more");
         }
         text
     }
