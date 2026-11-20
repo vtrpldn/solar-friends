@@ -135,7 +135,12 @@ enum Screen {
 pub(super) struct Guide {
     screen: Option<Screen>,
     query: String,
+    /// Diagram magnification relative to fitting the window; 1.0 fits.
+    zoom: Option<f32>,
 }
+
+const ZOOM_STEP: f32 = 0.25;
+const ZOOM_RANGE: (f32, f32) = (0.5, 4.0);
 
 /// Chapters whose title or text contains every word of `query`, title matches first.
 fn search_results(query: &str) -> Vec<usize> {
@@ -201,6 +206,9 @@ enum GuideAction {
     Chapter(usize),
     Diagram,
     Search,
+    ZoomIn,
+    ZoomOut,
+    Fit,
 }
 
 impl GuideAction {
@@ -247,6 +255,10 @@ impl GuideAction {
     fn label(self, screen: Screen, query: &str) -> Option<&'static str> {
         match (self, screen) {
             (Self::Search, Screen::Search) | (Self::Previous | Self::Next, Screen::Search) => None,
+            (Self::ZoomIn, Screen::Diagram(_)) => Some("Zoom in"),
+            (Self::ZoomOut, Screen::Diagram(_)) => Some("Zoom out"),
+            (Self::Fit, Screen::Diagram(_)) => Some("Fit to window"),
+            (Self::ZoomIn | Self::ZoomOut | Self::Fit, _) => None,
             (Self::Search, _) => Some("Find a topic"),
             (Self::Index, Screen::Search) => Some("Chapter index"),
             (Self::Chapter(row), Screen::Search) => search_results(query)
@@ -285,50 +297,104 @@ pub(super) fn install(app: &mut App) {
         .add_systems(Update, (show_navigation, show_diagram).after(village_input));
 }
 
+#[derive(Component)]
+struct GuideDiagramImage;
+
 fn spawn_diagram(mut commands: Commands) {
-    commands.spawn((
-        GuideDiagram,
-        ImageNode::default(),
-        Node {
-            display: Display::None,
-            position_type: PositionType::Absolute,
-            left: px(20),
-            top: px(108),
-            ..default()
-        },
-        BackgroundColor(Color::srgb_u8(251, 249, 239)),
-    ));
+    commands
+        .spawn((
+            GuideDiagram,
+            Interaction::None,
+            Node {
+                display: Display::None,
+                position_type: PositionType::Absolute,
+                left: px(20),
+                top: px(108),
+                overflow: Overflow::scroll(),
+                ..default()
+            },
+            ScrollPosition::default(),
+            BackgroundColor(Color::srgb_u8(251, 249, 239)),
+        ))
+        .with_child((
+            GuideDiagramImage,
+            ImageNode::default(),
+            Node {
+                flex_shrink: 0.,
+                ..default()
+            },
+        ));
 }
+
+/// Pixels the diagram pans per second while an arrow key is held.
+const PAN_SPEED: f32 = 900.0;
+
+type DiagramFrame<'w, 's> = Single<
+    'w,
+    's,
+    (&'static mut Node, &'static mut ScrollPosition),
+    (With<GuideDiagram>, Without<GuideDiagramImage>),
+>;
 
 fn show_diagram(
     (setup, saves, sound): (Res<WorldSetup>, Res<SaveMenu>, Res<SoundSettings>),
     village: Res<Village>,
     window: Single<&Window, With<PrimaryWindow>>,
     (assets, images): (Res<AssetServer>, Res<Assets<Image>>),
-    mut diagram: Single<(&mut ImageNode, &mut Node), With<GuideDiagram>>,
+    (keys, wheel, time): (
+        Res<ButtonInput<KeyCode>>,
+        Res<bevy::input::mouse::AccumulatedMouseScroll>,
+        Res<Time<Real>>,
+    ),
+    mut frame: DiagramFrame,
+    mut diagram: Single<(&mut ImageNode, &mut Node), With<GuideDiagramImage>>,
 ) {
+    let (frame, scroll) = &mut *frame;
     let (image, node) = &mut *diagram;
     let Some(Screen::Diagram(index)) = active_screen(&village, &setup, &saves, &sound) else {
-        node.display = Display::None;
+        frame.display = Display::None;
+        scroll.0 = Vec2::ZERO;
         return;
     };
     let Some(handle) = guide_diagrams::load(&assets, &chapters()[index].title) else {
-        node.display = Display::None;
+        frame.display = Display::None;
         return;
     };
     if image.image != handle {
         image.image = handle;
+        scroll.0 = Vec2::ZERO;
     }
     let Some(texture) = images.get(&image.image) else {
-        node.display = Display::None;
+        frame.display = Display::None;
         return;
     };
     let size = texture.size().as_vec2();
-    let available = Vec2::new(window.width() - 276.0, window.height() - 188.0);
-    let scale = (available / size).min_element().clamp(0.0, 1.0);
-    node.width = px(size.x * scale);
-    node.height = px(size.y * scale);
-    node.display = Display::Flex;
+    let available = Vec2::new(window.width() - 276.0, window.height() - 188.0).max(Vec2::ONE);
+    let fit = (available / size).min_element().clamp(0.0, 1.0);
+    let shown = size * fit * village.guide.diagram_zoom();
+    node.width = px(shown.x);
+    node.height = px(shown.y);
+    let visible = shown.min(available);
+    frame.width = px(visible.x);
+    frame.height = px(visible.y);
+    frame.display = Display::Flex;
+    let mut pan = Vec2::ZERO;
+    for (key, direction) in [
+        (KeyCode::ArrowLeft, Vec2::NEG_X),
+        (KeyCode::ArrowRight, Vec2::X),
+        (KeyCode::ArrowUp, Vec2::NEG_Y),
+        (KeyCode::ArrowDown, Vec2::Y),
+    ] {
+        if keys.pressed(key) {
+            pan += direction * PAN_SPEED * time.delta_secs();
+        }
+    }
+    let step = match wheel.unit {
+        bevy::input::mouse::MouseScrollUnit::Line => 34.,
+        bevy::input::mouse::MouseScrollUnit::Pixel => 1.,
+    };
+    pan -= wheel.delta * step;
+    scroll.0 = (scroll.0 + pan).clamp(Vec2::ZERO, (shown - visible).max(Vec2::ZERO));
 }
 
 fn spawn_navigation(mut commands: Commands, assets: Res<AssetServer>) {
@@ -356,6 +422,9 @@ fn spawn_navigation(mut commands: Commands, assets: Res<AssetServer>) {
                 GuideAction::SwitchView,
                 GuideAction::Index,
                 GuideAction::Diagram,
+                GuideAction::ZoomIn,
+                GuideAction::ZoomOut,
+                GuideAction::Fit,
                 GuideAction::Previous,
                 GuideAction::Next,
             ]
@@ -400,8 +469,7 @@ fn select_navigation(
                 && action.label(screen, &village.guide.query).is_some()
         })
     {
-        let next = action.apply(screen, &village.guide.query);
-        village.guide.enter(next);
+        village.guide.act(*action, screen);
     }
 }
 
@@ -459,7 +527,35 @@ impl Guide {
         };
     }
 
+    fn act(&mut self, action: GuideAction, screen: Screen) {
+        let zoom = self.zoom.unwrap_or(1.0);
+        match action {
+            GuideAction::ZoomIn => {
+                self.zoom = Some((zoom + ZOOM_STEP).min(ZOOM_RANGE.1));
+            }
+            GuideAction::ZoomOut => {
+                self.zoom = Some((zoom - ZOOM_STEP).max(ZOOM_RANGE.0));
+            }
+            GuideAction::Fit => self.zoom = None,
+            _ => {
+                let next = action.apply(screen, &self.query);
+                self.enter(next);
+            }
+        }
+    }
+
+    /// Magnification for the open diagram, where 1.0 fits the window.
+    fn diagram_zoom(&self) -> f32 {
+        self.zoom.unwrap_or(1.0)
+    }
+
     fn enter(&mut self, screen: Screen) {
+        if !matches!(
+            (self.screen, screen),
+            (Some(Screen::Diagram(before)), Screen::Diagram(after)) if before == after
+        ) {
+            self.zoom = None;
+        }
         if matches!(screen, Screen::Search) && !matches!(self.screen, Some(Screen::Search)) {
             self.query.clear();
         }
@@ -485,7 +581,13 @@ impl Guide {
             return true;
         }
         text.clear();
-        let action = if keys.just_pressed(KeyCode::Slash) {
+        let action = if keys.any_just_pressed([KeyCode::Equal, KeyCode::NumpadAdd]) {
+            Some(GuideAction::ZoomIn)
+        } else if keys.any_just_pressed([KeyCode::Minus, KeyCode::NumpadSubtract]) {
+            Some(GuideAction::ZoomOut)
+        } else if keys.any_just_pressed([KeyCode::Digit0, KeyCode::Numpad0]) {
+            Some(GuideAction::Fit)
+        } else if keys.just_pressed(KeyCode::Slash) {
             Some(GuideAction::Search)
         } else if keys.just_pressed(KeyCode::Tab) {
             Some(GuideAction::SwitchView)
@@ -503,8 +605,8 @@ impl Guide {
                 .position(|key| keys.just_pressed(*key))
                 .map(GuideAction::Chapter)
         };
-        if let Some(action) = action {
-            self.enter(action.apply(screen, &self.query));
+        if let Some(action) = action.filter(|action| action.label(screen, &self.query).is_some()) {
+            self.act(action, screen);
         }
         true
     }
@@ -609,7 +711,7 @@ impl Guide {
                 label
             }
             Screen::Diagram(index) => format!(
-                "{} · {}/{}\nPage Up/Down · D Chapter text · Backspace Index · F1 Close",
+                "{} · {}/{}\nPage Up/Down · + / − Zoom · 0 Fit · Arrows or wheel Pan · D Chapter text · Backspace Index · F1 Close",
                 chapters()[index].title,
                 index + 1,
                 chapters().len()
@@ -644,6 +746,33 @@ mod tests {
             bevy::ecs::system::SystemState::<MessageReader<KeyboardInput>>::new(&mut world);
         let mut reader = state.get_mut(&mut world);
         guide.controls(keys, &mut reader)
+    }
+
+    #[test]
+    fn diagrams_zoom_in_steps_and_reset_on_another_chapter() {
+        let mut guide = Guide::default();
+        let mut keys = ButtonInput::default();
+        let mut press = |guide: &mut Guide, key| {
+            keys.press(key);
+            guide_controls(guide, &keys, &[]);
+            keys.reset_all();
+        };
+        for key in [KeyCode::F1, KeyCode::Tab, KeyCode::Digit1, KeyCode::KeyD] {
+            press(&mut guide, key);
+        }
+        assert!(matches!(guide.screen, Some(Screen::Diagram(0))));
+        press(&mut guide, KeyCode::Equal);
+        press(&mut guide, KeyCode::Equal);
+        assert_eq!(guide.diagram_zoom(), 1.5);
+        press(&mut guide, KeyCode::Digit0);
+        assert_eq!(guide.diagram_zoom(), 1.0);
+        for _ in 0..8 {
+            press(&mut guide, KeyCode::Minus);
+        }
+        assert_eq!(guide.diagram_zoom(), ZOOM_RANGE.0);
+        press(&mut guide, KeyCode::PageDown);
+        assert!(matches!(guide.screen, Some(Screen::Diagram(1))));
+        assert_eq!(guide.diagram_zoom(), 1.0);
     }
 
     #[test]
