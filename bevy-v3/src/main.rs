@@ -898,6 +898,14 @@ mod tests {
         assert_eq!(app.world().resource::<WorldSetup>().seed(), 42);
         app.update();
         assert!(app.world().resource::<village::Village>().camp.is_none());
+        // The day/night cycle drives the village sun even with thumbnail lights around.
+        let sun = app
+            .world_mut()
+            .query_filtered::<&DirectionalLight, Without<bevy::camera::visibility::RenderLayers>>()
+            .single(app.world())
+            .unwrap()
+            .illuminance;
+        assert_ne!(sun, 15_000.0, "the sunlight system did not run");
         for _ in 0..180 {
             app.world_mut()
                 .resource_mut::<Time>()

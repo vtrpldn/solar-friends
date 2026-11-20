@@ -181,8 +181,8 @@ fn update_lighting(
     }
     for (slot, mut light, mut transform, mut visibility) in &mut lights {
         if let Some(&(_, _, position, windowed)) = candidates.get(slot.0) {
-            light.intensity = night * if windowed { 150.0 } else { 520.0 };
-            light.range = if windowed { 5.0 } else { 10.0 };
+            light.intensity = night * if windowed { 2_400.0 } else { 5_000.0 };
+            light.range = if windowed { 8.0 } else { 12.0 };
             transform.translation = position;
             *visibility = Visibility::Visible;
         } else if *visibility != Visibility::Hidden {

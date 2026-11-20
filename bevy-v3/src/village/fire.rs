@@ -64,8 +64,8 @@ pub(super) fn light_new_fires(
             FireLight(phase),
             PointLight {
                 color: Color::srgb_u8(255, 174, 85),
-                intensity: 950.0,
-                range: 9.0,
+                intensity: 9_000.0,
+                range: 16.0,
                 radius: 0.18,
                 ..default()
             },
@@ -95,6 +95,6 @@ pub(super) fn animate_fires(
     }
     for (fire, mut light) in &mut lights {
         let time = elapsed + fire.0;
-        light.intensity = 950.0 + (time * 5.3).sin() * 86.0 + (time * 8.1).sin() * 65.0;
+        light.intensity = 9_000.0 + (time * 5.3).sin() * 800.0 + (time * 8.1).sin() * 600.0;
     }
 }

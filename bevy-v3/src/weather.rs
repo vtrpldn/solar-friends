@@ -230,7 +230,11 @@ impl CloudCover {
 fn sunlight(
     setup: Res<WorldSetup>,
     village: Res<Village>,
-    mut sun: Single<(&mut DirectionalLight, &mut Transform)>,
+    // Menu thumbnails light their own render layers; the village sun has none.
+    mut sun: Single<
+        (&mut DirectionalLight, &mut Transform),
+        Without<bevy::camera::visibility::RenderLayers>,
+    >,
     mut ambient: ResMut<GlobalAmbientLight>,
     mut sky: ResMut<ClearColor>,
     mut fog: Single<&mut DistanceFog, With<VillageCamera>>,
@@ -269,7 +273,8 @@ fn sunlight(
             .mix(&overcast, cloud),
     );
     ambient.color = Color::srgb(0.56 + 0.44 * daylight, 0.67 + 0.33 * daylight, 1.0);
-    ambient.brightness = 45.0 + 430.0 * daylight * (0.8 + cloud * 0.35);
+    // After sunset V2 keeps its sky light near 45% of midday, so dusk stays readable.
+    ambient.brightness = 170.0 + 300.0 * daylight * (0.8 + cloud * 0.35);
     sky.0 = Color::srgb(
         0.08 + daylight * (0.63 - cloud * 0.12),
         0.12 + daylight * (0.68 - cloud * 0.15),
