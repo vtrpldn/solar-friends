@@ -73,6 +73,7 @@ enum Action {
     TradePolicy(TradePolicy),
     ProjectFilter,
     InventoryView,
+    InventoryItem(usize),
     InventorySearch,
     Resident(usize),
     WorkPriority(WorkGroup),
@@ -313,6 +314,7 @@ impl Action {
             | Self::Trade(_)
             | Self::TradePolicy(_) => village.trade_open(),
             Self::InventorySearch => false,
+            Self::InventoryItem(_) => village.utility_panel == Some(UtilityPanel::Inventory),
             Self::InventoryView => village.utility_panel == Some(UtilityPanel::Inventory),
             Self::Project(_) | Self::ProjectFilter => {
                 village.utility_panel == Some(UtilityPanel::Projects)
@@ -482,9 +484,11 @@ impl Action {
             Self::InventoryView => "Show items and equipment".into(),
             Self::ProjectFilter if village.open_projects_only => "Show all projects".into(),
             Self::ProjectFilter => "Show underway".into(),
-            Self::Project(_) | Self::TradeItem(_) | Self::Recipe(_) | Self::FacilityIrrigation => {
-                String::new()
-            }
+            Self::Project(_)
+            | Self::TradeItem(_)
+            | Self::InventoryItem(_)
+            | Self::Recipe(_)
+            | Self::FacilityIrrigation => String::new(),
             Self::Recipes if village.construction.production.open => "Close recipes".into(),
             Self::Recipes => "Recipes".into(),
             Self::Gather => "Gather resource".into(),
@@ -995,6 +999,9 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 spawn_button(menu, &assets, Action::RecipePage(true));
                 spawn_button(menu, &assets, Action::CraftWorkspace);
                 spawn_button(menu, &assets, Action::MoveCraft);
+                for row in 0..crate::construction::INVENTORY_ROWS {
+                    spawn_button(menu, &assets, Action::InventoryItem(row));
+                }
                 for row in 0..crate::construction::PAGE_KEYS.len() {
                     spawn_button(menu, &assets, Action::Project(row));
                     spawn_button(menu, &assets, Action::Recipe(row));
@@ -1267,6 +1274,20 @@ fn handle_buttons(
                 Action::Project(row) if !picker.open => {
                     village.focus_project_row(&catalog, &setup, camera, row);
                 }
+                Action::InventoryItem(row) if !picker.open => {
+                    let (_, mut rows) = crate::construction::inventory_rows(
+                        &catalog,
+                        village.inventory_page,
+                        village.inventory_equipment,
+                        &village.inventory_search,
+                    );
+                    if let Some((_, id, _)) = rows.nth(row)
+                        && village.construction.select_trade_material(&catalog, id)
+                    {
+                        village.utility_panel = Some(UtilityPanel::Trade);
+                        village.editing_inventory = false;
+                    }
+                }
                 Action::InventorySearch => village.editing_inventory = !village.editing_inventory,
                 Action::InventoryView => village.toggle_inventory_view(),
                 Action::ProjectFilter if !picker.open => {
@@ -1486,6 +1507,7 @@ fn handle_buttons(
                 | Action::FocusSelectedProject
                 | Action::DeselectProject
                 | Action::TradeItem(_)
+                | Action::InventoryItem(_)
                 | Action::TradeQueue
                 | Action::TradeQueued(_)
                 | Action::HoldTradeQueued(_)
@@ -1595,6 +1617,19 @@ fn refresh(
     };
     let trade_items = if show_trade && !show_trade_queue {
         village.construction.trade_page_labels(&catalog)
+    } else {
+        Vec::new()
+    };
+    let inventory_items: Vec<_> = if !picker.open && Action::InventoryItem(0).available(&village) {
+        crate::construction::inventory_rows(
+            &catalog,
+            village.inventory_page,
+            village.inventory_equipment,
+            &village.inventory_search,
+        )
+        .1
+        .map(|(_, _, item)| (item.pack > 0 && item.price > 0.).then_some(item.name.as_str()))
+        .collect()
     } else {
         Vec::new()
     };
@@ -1709,6 +1744,7 @@ fn refresh(
                     )
             }
             Action::TradeItem(row) => trade_items.get(row).is_some(),
+            Action::InventoryItem(row) => inventory_items.get(row).is_some_and(Option::is_some),
             Action::TradeQueue => show_trade,
             Action::TradeQueued(row) => trade_queue.get(row).is_some_and(|entry| entry.can_cancel),
             Action::HoldTradeQueued(row) => trade_queue
@@ -1846,6 +1882,7 @@ fn refresh(
                     format!("Irrigation · {}", policy.label())
                 }),
                 Action::TradeItem(row) => trade_items[row].clone(),
+                Action::InventoryItem(row) => format!("Trade · {}", inventory_items[row].unwrap()),
                 Action::TradeQueued(row) => format!("Cancel {}", trade_queue[row].label),
                 Action::HoldTradeQueued(row) if trade_queue[row].held == Some(true) => {
                     format!("Order {} · Allow own trip", row + 1)

@@ -210,6 +210,20 @@ impl Construction {
             .collect()
     }
 
+    pub(crate) fn select_trade_material(&mut self, catalog: &Catalog, id: &str) -> bool {
+        let Some(index) = Trade::tradable(catalog)
+            .iter()
+            .position(|item| item.id == id)
+        else {
+            return false;
+        };
+        self.trade.selected = index;
+        self.trade.page = index / PAGE_KEYS.len();
+        self.trade.queue_page = None;
+        self.trade.notice.clear();
+        true
+    }
+
     pub fn select_trade_row(&mut self, catalog: &Catalog, row: usize) {
         let index = self.trade.page * PAGE_KEYS.len() + row;
         if index < Trade::tradable(catalog).len() {
@@ -824,6 +838,25 @@ mod tests {
             village
                 .reserve_town_sale(&catalog, &mut stock, clock, "wood", true)
                 .is_ok()
+        );
+    }
+
+    #[test]
+    fn filtered_store_material_opens_its_trade_page() {
+        let catalog = Catalog::default();
+        let name = &catalog.materials["plumbing"].name;
+        let (_, mut rows) = crate::construction::inventory_rows(&catalog, 0, false, name);
+        let (_, id, _) = rows.next().unwrap();
+        assert_eq!(id, "plumbing");
+        let mut village = Construction::default();
+        village.trade.queue_page = Some(0);
+        assert!(village.select_trade_material(&catalog, id));
+        assert!(village.trade.queue_page.is_none());
+        assert_eq!(Trade::tradable(&catalog)[village.trade.selected].id, id);
+        assert!(
+            village
+                .trade_page_labels(&catalog)
+                .contains(&format!("› {name}"))
         );
     }
 

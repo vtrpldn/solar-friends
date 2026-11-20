@@ -41,6 +41,30 @@ fn record_output(
     }
 }
 
+pub(crate) const INVENTORY_ROWS: usize = 9;
+
+pub(crate) fn inventory_rows<'a>(
+    catalog: &'a Catalog,
+    page: usize,
+    equipment: bool,
+    search: &str,
+) -> (
+    usize,
+    impl Iterator<Item = (&'a str, &'a str, &'a crate::catalog::Material)> + use<'a>,
+) {
+    let search = search.trim().to_lowercase();
+    let rows: Vec<_> = catalog
+        .resource_entries()
+        .filter(|(_, _, material)| {
+            material.equipment == equipment
+                && (search.is_empty() || material.name.to_lowercase().contains(&search))
+        })
+        .collect();
+    let pages = rows.len().div_ceil(INVENTORY_ROWS).max(1);
+    let offset = page.min(pages - 1) * INVENTORY_ROWS;
+    (pages, rows.into_iter().skip(offset).take(INVENTORY_ROWS))
+}
+
 impl Construction {
     fn inventory<'a>(&self, catalog: &'a Catalog, stock: &Stock, land: &Land) -> Ledger<'a> {
         use crate::{farming::FarmPhase, production::Phase};
@@ -228,17 +252,8 @@ impl Construction {
         search: &str,
     ) -> (usize, String) {
         use std::fmt::Write;
-        const ROWS: usize = 9;
-        let search = search.trim().to_lowercase();
         let ledger = self.inventory(catalog, stock, land);
-        let rows: Vec<_> = catalog
-            .resource_entries()
-            .filter(|(_, _, material)| {
-                material.equipment == equipment
-                    && (search.is_empty() || material.name.to_lowercase().contains(&search))
-            })
-            .collect();
-        let pages = rows.len().div_ceil(ROWS).max(1);
+        let (pages, rows) = inventory_rows(catalog, page, equipment, search);
         let page = page.min(pages - 1);
         let (used, capacity) = self.storage(catalog, stock);
         let heading = if equipment {
@@ -251,11 +266,12 @@ impl Construction {
             page + 1,
             pages
         );
-        if rows.is_empty() {
+        let mut rows = rows.peekable();
+        if rows.peek().is_none() {
             text.push_str("\nNo matching stock.");
         }
         let mut previous_group = "";
-        for &(group, id, item) in rows.iter().skip(page * ROWS).take(ROWS) {
+        for (group, id, item) in rows {
             if group != previous_group && !equipment {
                 let _ = write!(text, "\n{group}");
                 previous_group = group;
