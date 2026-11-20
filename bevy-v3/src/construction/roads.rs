@@ -435,6 +435,17 @@ mod tests {
             let tile = village.proposed_site(&catalog, "road", IVec2::new(x, 37));
             village.plans.push(tile);
         }
+        assert_eq!(village.road_project_counts(&catalog), (13, 0));
+        assert!(
+            village
+                .project_page_labels(&catalog, 0, false, false)
+                .is_empty()
+        );
+        assert_eq!(
+            village.project_page_labels(&catalog, 0, false, true).len(),
+            8
+        );
+        assert!(village.focus_project(&catalog, 0, 1, false, true).is_some());
         let path = village.resident_route(&catalog, site, from, to).unwrap();
         assert!(path.iter().all(|cell| cell.y == 36.0));
         for tile in &mut village.plans {

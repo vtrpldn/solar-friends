@@ -27,6 +27,7 @@ impl Construction {
         &'a self,
         catalog: &'a Catalog,
         underway: bool,
+        roads_expanded: bool,
     ) -> Vec<(usize, &'a Blueprint)> {
         let mut rows: Vec<_> = self
             .plans
@@ -34,6 +35,7 @@ impl Construction {
             .enumerate()
             .filter(|(index, plan)| {
                 !plan.removed
+                    && (roads_expanded || plan.key != "road")
                     && (!underway
                         || plan.work < catalog.projects[&plan.key].work
                         || self.changes.contains_key(index))
@@ -49,16 +51,27 @@ impl Construction {
         rows
     }
 
+    pub(crate) fn road_project_counts(&self, catalog: &Catalog) -> (usize, usize) {
+        let work = catalog.projects["road"].work;
+        self.plans
+            .iter()
+            .filter(|plan| !plan.removed && plan.key == "road")
+            .fold((0, 0), |(tiles, ready), plan| {
+                (tiles + 1, ready + usize::from(plan.work >= work))
+            })
+    }
+
     pub fn projects_panel(
         &self,
         catalog: &Catalog,
         stock: &Stock,
         page: usize,
         underway: bool,
+        roads_expanded: bool,
         clock: f64,
     ) -> (usize, String) {
         use std::fmt::Write;
-        let rows = self.visible_projects(catalog, underway);
+        let rows = self.visible_projects(catalog, underway, roads_expanded);
         let pages = rows.len().div_ceil(PAGE_KEYS.len()).max(1);
         let page = page.min(pages - 1);
         let filter = if underway { "Underway" } else { "All" };
@@ -67,7 +80,14 @@ impl Construction {
             page + 1,
             pages
         );
-        if rows.is_empty() {
+        let (roads, ready) = self.road_project_counts(catalog);
+        if roads > 0 {
+            let _ = write!(
+                text,
+                "\nRoads · {roads} tiles · {ready} ready · D Show/hide tiles"
+            );
+        }
+        if rows.is_empty() && roads == 0 {
             text.push_str("\nNo projects here yet.");
         }
         for (row, (index, plan)) in rows
@@ -323,8 +343,9 @@ impl Construction {
         catalog: &Catalog,
         page: usize,
         underway: bool,
+        roads_expanded: bool,
     ) -> Vec<String> {
-        let projects = self.visible_projects(catalog, underway);
+        let projects = self.visible_projects(catalog, underway, roads_expanded);
         let page = page.min(projects.len().div_ceil(PAGE_KEYS.len()).saturating_sub(1));
         projects
             .iter()
@@ -340,8 +361,9 @@ impl Construction {
         row: usize,
         page: usize,
         underway: bool,
+        roads_expanded: bool,
     ) -> Option<Vec2> {
-        let rows = self.visible_projects(catalog, underway);
+        let rows = self.visible_projects(catalog, underway, roads_expanded);
         let page = page.min(rows.len().div_ceil(PAGE_KEYS.len()).saturating_sub(1));
         let &(project, plan) = rows.get(page * PAGE_KEYS.len() + row)?;
         let center = project_center(plan);

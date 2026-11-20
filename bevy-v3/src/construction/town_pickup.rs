@@ -2126,7 +2126,7 @@ mod tests {
                 .unwrap()
                 .contains("2 project(s) · 390 game minutes remaining")
         );
-        let (_, projects) = village.projects_panel(&catalog, &stock, 0, true, clock.seconds);
+        let (_, projects) = village.projects_panel(&catalog, &stock, 0, true, false, clock.seconds);
         for site in [1, 2] {
             let priority = if site == 2 { " · Priority" } else { "" };
             assert!(projects.contains(&format!(
@@ -2152,8 +2152,14 @@ mod tests {
         let mut village: Construction =
             serde_json::from_slice(&serde_json::to_vec(&village).unwrap()).unwrap();
         let eta = village.construction_delivery.as_ref().unwrap().eta;
-        let (_, projects) =
-            village.projects_panel(&catalog, &stock, 0, true, eta - 2.0 * crate::weather::HOUR);
+        let (_, projects) = village.projects_panel(
+            &catalog,
+            &stock,
+            0,
+            true,
+            false,
+            eta - 2.0 * crate::weather::HOUR,
+        );
         assert_eq!(projects.matches("120 game minutes remaining").count(), 2);
         village.tick_construction_delivery(
             &catalog,

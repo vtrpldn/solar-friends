@@ -291,6 +291,7 @@ pub struct Village {
     show_grid: bool,
     #[serde(skip)]
     open_projects_only: bool,
+    project_roads_expanded: bool,
     #[serde(skip)]
     housing_notice: String,
     #[serde(skip)]
@@ -888,6 +889,11 @@ impl Village {
         true
     }
 
+    fn toggle_project_roads(&mut self) {
+        self.project_roads_expanded = !self.project_roads_expanded;
+        self.projects_page = 0;
+    }
+
     fn focus_project_row(
         &mut self,
         catalog: &Catalog,
@@ -900,6 +906,7 @@ impl Village {
             row,
             self.projects_page,
             self.open_projects_only,
+            self.project_roads_expanded,
         ) {
             let terrain = self.terrain(setup);
             camera.target = Vec3::new(point.x, terrain.height_at(point.x, point.y), point.y);
@@ -934,6 +941,7 @@ impl Village {
                         &self.stock,
                         self.projects_page,
                         self.open_projects_only,
+                        self.project_roads_expanded,
                         self.clock,
                     )
                     .0,
@@ -2113,6 +2121,11 @@ fn village_input(
             }
         }
         if town.utility_panel == Some(UtilityPanel::Projects) {
+            if keyboard.just_pressed(KeyCode::KeyD)
+                && town.construction.road_project_counts(&catalog).0 > 0
+            {
+                town.toggle_project_roads();
+            }
             if keyboard.just_pressed(KeyCode::Tab) {
                 town.open_projects_only = !town.open_projects_only;
                 town.projects_page = 0;
@@ -2929,6 +2942,7 @@ fn show_hud(
                         &village.stock,
                         village.projects_page,
                         village.open_projects_only,
+                        village.project_roads_expanded,
                         village.clock,
                     )
                     .1,
@@ -4327,7 +4341,7 @@ mod tests {
             .unwrap();
         let point = village
             .construction
-            .focus_project(&catalog, 0, 0, false)
+            .focus_project(&catalog, 0, 0, false, false)
             .unwrap();
         let mut camera = VillageCamera {
             target: Vec3::ZERO,
