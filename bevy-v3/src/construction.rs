@@ -2271,9 +2271,10 @@ impl Construction {
         self.tick_trip(catalog, stock, site, clock, dt);
         self.maintain_water(catalog, stock.sandbox, clock.seconds);
         self.expire_batch_food(catalog, stock, site, clock.seconds);
-        let urgent = self.residents.iter().any(|resident| {
+        let urgent = self.residents.iter().enumerate().any(|(index, resident)| {
             resident.health.levels[Need::Hunger as usize] < 15.0
-                || resident.health.levels[Need::Hydration as usize] < 15.0
+                || (!self.away_for_work(index)
+                    && resident.health.levels[Need::Hydration as usize] < 30.0)
         });
         let order = self.work_policy.dispatch_order(urgent);
         let (essential, production) = self.reserved_workers();
