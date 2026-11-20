@@ -669,6 +669,12 @@ impl Village {
             let terrain = self.terrain(setup);
             self.lenses.network_site = Some(id);
             camera.target = Vec3::new(point.x, terrain.height_at(point.x, point.y), point.y);
+            // Utility ids are plan indices shifted by one; id 0 is the camp.
+            if let Some(index) = id.checked_sub(1) {
+                self.construction.select_built_project(index);
+            } else {
+                self.construction.clear_selected_project();
+            }
         }
     }
 
@@ -3633,7 +3639,7 @@ fn draw_blueprints(
             Some(MapLens::Construction) => construction_notice,
             Some(MapLens::Power | MapLens::Water | MapLens::Sanitation) | None => {
                 network_lens.map(|view| {
-                    village.construction.utilities.draw_lens(
+                    let mut label = village.construction.utilities.draw_lens(
                         &terrain,
                         view,
                         (
@@ -3641,7 +3647,13 @@ fn draw_blueprints(
                             village.lenses.network_site,
                         ),
                         &mut gizmos,
-                    )
+                    );
+                    label.push_str(
+                        &village
+                            .construction
+                            .utility_site_list(&catalog, view == NetworkView::Power),
+                    );
+                    label
                 })
             }
         };
@@ -3884,6 +3896,70 @@ mod tests {
             "1 waste tank needs service · V"
         );
         assert_eq!(utility_alerts(&utilities, Some(UtilityPanel::Water)), "");
+    }
+
+    #[test]
+    fn stepping_through_lens_facilities_selects_each_building() {
+        let mut setup = WorldSetup::default().session();
+        setup.mode = Mode::Sandbox;
+        let catalog = Catalog::default();
+        let terrain = setup.terrain();
+        let land = Land::generate(&setup);
+        let camp = CAMP_SITES[2].1;
+        let mut village = Village {
+            setup: Some(setup.clone()),
+            camp: Some(camp),
+            stock: Stock::for_start(&setup, &catalog),
+            ..default()
+        };
+        village
+            .construction
+            .lab_order(
+                &catalog,
+                &mut village.stock,
+                ConstructionSite {
+                    terrain: &terrain,
+                    land: &land,
+                    camp,
+                },
+                TownClock {
+                    seconds: 0.0,
+                    round_trip_km: 12,
+                },
+                &crate::construction::LabOrder::Build {
+                    key: "well".into(),
+                    x: 44,
+                    z: 36,
+                    rotation: 0,
+                    size: None,
+                },
+                setup.richness(),
+            )
+            .unwrap();
+        village
+            .construction
+            .utilities
+            .sync(std::iter::once(crate::utilities::Facility {
+                id: 1,
+                kind: "well",
+                location: IVec2::new(44, 36),
+                size: IVec2::splat(3),
+                batteries: 0,
+                panels: 0,
+                working: true,
+            }));
+        village.lenses.choose(Some(MapLens::Water));
+        let mut camera = VillageCamera {
+            target: Vec3::ZERO,
+            heading: 0.0,
+            polar: 0.7,
+        };
+        village.focus_network_site(&setup, &mut camera, true);
+        assert_eq!(village.lenses.network_site, Some(0));
+        assert_eq!(village.construction.production.selected, None);
+        village.focus_network_site(&setup, &mut camera, true);
+        assert_eq!(village.lenses.network_site, Some(1));
+        assert_eq!(village.construction.production.selected, Some(0));
     }
 
     #[test]
