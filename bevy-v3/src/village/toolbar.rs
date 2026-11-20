@@ -626,10 +626,16 @@ impl Action {
                 format!("› {}", profile.label())
             }
             Self::ResidentProfile(profile) => profile.label().into(),
-            Self::WorkPriority(group) => village.construction.work_priority_label(group),
-            Self::WorkerReservation(essential) => {
-                village.construction.worker_reservation_label(essential)
-            }
+            Self::WorkPriority(group) => numeric_label(
+                village,
+                NumericTarget::WorkPriority(group),
+                &village.construction.work_priority_label(group),
+            ),
+            Self::WorkerReservation(essential) => numeric_label(
+                village,
+                NumericTarget::WorkerReservation(essential),
+                &village.construction.worker_reservation_label(essential),
+            ),
             Self::Home(true) => "Assign selected home".into(),
             Self::Home(false) => "Clear home assignment".into(),
             Self::ListedHome(_) => String::new(),
@@ -747,6 +753,10 @@ fn numeric_label(village: &Village, target: NumericTarget, label: &str) -> Strin
             let value = match target {
                 NumericTarget::MinimumLoad => format!("{entry}% (0–100)"),
                 NumericTarget::DispatchWait => format!("{entry}h (0–24)"),
+                NumericTarget::WorkPriority(_) => {
+                    format!("Priority {entry} (0 Low · 1 Normal · 2 High · 3 Highest)")
+                }
+                NumericTarget::WorkerReservation(_) => format!("Reserved workers {entry} (0–5)"),
                 NumericTarget::Bed => format!("Bed {entry}"),
                 NumericTarget::FieldDimensions => format!("Width and depth (e.g. 8 12) · {entry}"),
                 _ => format!("R${entry}"),
@@ -1456,10 +1466,12 @@ fn handle_buttons(
                     village.resident_profile = profile;
                 }
                 Action::WorkerReservation(essential) if !picker.open => {
-                    village.construction.cycle_worker_reservation(essential);
+                    village.numeric_entry =
+                        Some((NumericTarget::WorkerReservation(essential), String::new()));
                 }
                 Action::WorkPriority(group) if !picker.open => {
-                    village.construction.cycle_work_priority(group);
+                    village.numeric_entry =
+                        Some((NumericTarget::WorkPriority(group), String::new()));
                 }
                 Action::Home(assign) if !picker.open => village.set_resident_home(&catalog, assign),
                 Action::ListedHome(row) if !picker.open => {

@@ -41,6 +41,7 @@ use crate::{
     catalog::Catalog,
     construction::{
         Construction, ConstructionSite, InventoryView, SaleSetting, TownClock, WaterAction,
+        WorkGroup,
     },
     land::Land,
     resident_animation::{Motion, ResidentAnimation},
@@ -1428,6 +1429,8 @@ enum NumericTarget {
     Sale(SaleSetting),
     Bed,
     FieldDimensions,
+    WorkPriority(WorkGroup),
+    WorkerReservation(bool),
 }
 
 fn apply_numeric_entry(
@@ -1440,6 +1443,16 @@ fn apply_numeric_entry(
         NumericTarget::Bed => {
             if let Ok(number) = entry.parse::<usize>() {
                 construction.select_bed_number(number);
+            }
+        }
+        NumericTarget::WorkPriority(group) => {
+            if let Ok(level) = entry.parse() {
+                construction.set_work_priority(group, level);
+            }
+        }
+        NumericTarget::WorkerReservation(essential) => {
+            if let Ok(count) = entry.parse() {
+                construction.set_worker_reservation(essential, count);
             }
         }
         NumericTarget::MinimumLoad => {
@@ -1477,7 +1490,9 @@ fn apply_numeric_entry(
                 | NumericTarget::DispatchWait
                 | NumericTarget::Sale(_)
                 | NumericTarget::Bed
-                | NumericTarget::FieldDimensions => unreachable!(),
+                | NumericTarget::FieldDimensions
+                | NumericTarget::WorkPriority(_)
+                | NumericTarget::WorkerReservation(_) => unreachable!(),
             }
         }
     }
@@ -1586,6 +1601,9 @@ fn village_input(
         village.utility_panel
             != Some(match target {
                 NumericTarget::Bed | NumericTarget::FieldDimensions => unreachable!(),
+                NumericTarget::WorkPriority(_) | NumericTarget::WorkerReservation(_) => {
+                    UtilityPanel::Residents
+                }
                 NumericTarget::Food => UtilityPanel::Pantry,
                 NumericTarget::ExpansionReserve => UtilityPanel::Finances,
                 NumericTarget::MinimumLoad

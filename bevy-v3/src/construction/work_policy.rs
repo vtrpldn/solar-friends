@@ -123,7 +123,10 @@ impl Construction {
         self.reservation_pass.is_none_or(|workers| workers[index]) && self.free_for_leisure(index)
     }
 
-    pub(crate) fn cycle_worker_reservation(&mut self, essential: bool) {
+    pub(crate) fn set_worker_reservation(&mut self, essential: bool, count: u8) {
+        if count > 5 {
+            return;
+        }
         let policy = &mut self.work_policy;
         let (selected, other) = if essential {
             (
@@ -136,7 +139,7 @@ impl Construction {
                 &mut policy.essential_workers,
             )
         };
-        *selected = (*selected + 1) % 6;
+        *selected = count;
         *other = (*other).min(5 - *selected);
     }
 
@@ -149,9 +152,8 @@ impl Construction {
         }
     }
 
-    pub(crate) fn cycle_work_priority(&mut self, group: WorkGroup) {
-        let priority = &mut self.work_policy.priorities[group as usize];
-        *priority = (*priority + 1) % 4;
+    pub(crate) fn set_work_priority(&mut self, group: WorkGroup, level: u8) {
+        let _ = self.work_policy.set_priority(group, level);
     }
 
     pub(crate) fn work_priority_label(&self, group: WorkGroup) -> String {
@@ -199,7 +201,7 @@ mod tests {
         village.work_policy.essential_workers = 0;
         village.work_policy.production_workers = 0;
         let before = serde_json::to_vec(&village).unwrap();
-        village.cycle_work_priority(WorkGroup::Construction);
+        village.set_work_priority(WorkGroup::Construction, 3);
         village.tick(&catalog, &mut stock.clone(), ground, clock, 0.1, false);
         assert!(village.residents[0].assignment.is_some());
         assert!(village.production.jobs[0].worker.is_none());
@@ -235,7 +237,7 @@ mod tests {
         assert!(no_batch.residents[0].assignment.is_some());
 
         let mut restored: Construction = serde_json::from_slice(&before).unwrap();
-        restored.cycle_work_priority(WorkGroup::Production);
+        restored.set_work_priority(WorkGroup::Production, 3);
         restored.tick(&catalog, &mut stock, ground, clock, 0.1, false);
         assert_eq!(restored.production.jobs[0].worker, Some(0));
         assert!(restored.residents[0].assignment.is_none());
