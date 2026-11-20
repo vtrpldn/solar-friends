@@ -112,6 +112,7 @@ impl Plugin for VillagePlugin {
                     animate_arrival,
                     draw_blueprints,
                     show_hud,
+                    fit_and_scroll_hud,
                     show_construction,
                     construction_models::show_in_progress,
                     fire::light_new_fires,
@@ -1117,6 +1118,9 @@ struct VillageEntity;
 struct VillageHud;
 
 #[derive(Component)]
+struct VillageHudText;
+
+#[derive(Component)]
 struct BuiltProject {
     index: usize,
     model: usize,
@@ -1139,22 +1143,59 @@ pub(crate) fn opening_model(assets: &AssetServer, index: usize) -> SceneRoot {
 }
 
 fn spawn_hud(mut commands: Commands, assets: Res<AssetServer>) {
-    commands.spawn((
-        VillageHud,
-        Interaction::None,
-        bevy::ui::FocusPolicy::Block,
-        Text::default(),
-        ui_font(&assets, 17.0),
-        Node {
-            display: Display::None,
-            position_type: PositionType::Absolute,
-            top: px(20),
-            left: px(20),
-            padding: UiRect::all(px(14)),
-            ..default()
-        },
-        BackgroundColor(Color::srgb_u8(31, 45, 35)),
-    ));
+    commands
+        .spawn((
+            VillageHud,
+            Interaction::None,
+            bevy::ui::FocusPolicy::Block,
+            Node {
+                display: Display::None,
+                position_type: PositionType::Absolute,
+                top: px(20),
+                left: px(20),
+                padding: UiRect::all(px(14)),
+                overflow: Overflow::scroll_y(),
+                ..default()
+            },
+            BackgroundColor(Color::srgb_u8(31, 45, 35)),
+        ))
+        .with_child((
+            VillageHudText,
+            Text::default(),
+            ui_font(&assets, 17.0),
+            Node {
+                flex_shrink: 0.,
+                ..default()
+            },
+        ));
+}
+
+fn fit_and_scroll_hud(
+    window: Single<&Window, With<PrimaryWindow>>,
+    toolbar: Single<&ComputedNode, With<toolbar::Toolbar>>,
+    mut hud: Single<(&mut Node, &mut ScrollPosition, &Interaction), With<VillageHud>>,
+    village: Res<Village>,
+    mut previous_panel: Local<Option<UtilityPanel>>,
+    scroll: Res<bevy::input::mouse::AccumulatedMouseScroll>,
+) {
+    let (node, position, interaction) = &mut *hud;
+    let toolbar_height = toolbar.size().y * toolbar.inverse_scale_factor();
+    let available_height = (window.height() - 48. - toolbar_height).max(0.);
+    let max_height = px(available_height);
+    if node.max_height != max_height {
+        node.max_height = max_height;
+    }
+    if *previous_panel != village.utility_panel || node.display == Display::None {
+        position.y = 0.;
+        *previous_panel = village.utility_panel;
+    }
+    if **interaction != Interaction::None && scroll.delta.y != 0. {
+        let step = match scroll.unit {
+            bevy::input::mouse::MouseScrollUnit::Line => 34.,
+            bevy::input::mouse::MouseScrollUnit::Pixel => 1.,
+        };
+        position.y = (position.y - scroll.delta.y * step).max(0.);
+    }
 }
 
 #[derive(Resource, Default)]
@@ -2267,7 +2308,8 @@ fn step(
 fn show_hud(
     setup: Res<WorldSetup>,
     village: Res<Village>,
-    mut hud: Single<(&mut Text, &mut Node), With<VillageHud>>,
+    mut text: Single<&mut Text, With<VillageHudText>>,
+    mut node: Single<&mut Node, With<VillageHud>>,
     (catalog, land, saves): (Res<Catalog>, Res<Land>, Res<SaveMenu>),
     (placement, sound): (Res<MapNotice>, Res<SoundSettings>),
     mut resource_trends: Local<resource_trends::ResourceTrends>,
@@ -2295,7 +2337,6 @@ fn show_hud(
         None
     };
     let rate = |index, unit| resource_trends::hourly_rate(rates.map(|rates| rates[index]), unit);
-    let (text, node) = &mut *hud;
     node.max_width = Val::Auto;
     if sound.open {
         node.display = Display::Flex;

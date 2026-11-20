@@ -677,7 +677,7 @@ fn budget_label(village: &Village, target: BudgetTarget, label: &str) -> String 
 }
 
 #[derive(Component)]
-struct Toolbar;
+pub(super) struct Toolbar;
 
 #[derive(Component)]
 struct PanelMenu;
