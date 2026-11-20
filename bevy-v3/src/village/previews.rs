@@ -9,6 +9,7 @@ use crate::{construction::LabOrder, weather};
 pub(crate) enum Preview {
     Downtime,
     Utilities(UtilitiesPreview),
+    Arrival,
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
@@ -39,6 +40,7 @@ impl Preview {
             let next = match flag {
                 "--downtime-preview" => Self::Downtime,
                 "--utilities-preview" => Self::Utilities(UtilitiesPreview::default()),
+                "--arrival-preview" => Self::Arrival,
                 "--interactions" | "--land-seed" | "--lighting-hour" | "--lighting-rain" => {
                     utilities_option = Some(flag);
                     match flag {
@@ -100,6 +102,7 @@ impl Preview {
         match self {
             Self::Downtime => "Downtime preview",
             Self::Utilities(_) => "Utilities preview",
+            Self::Arrival => "Arrival preview",
         }
     }
 
@@ -107,6 +110,7 @@ impl Preview {
         let (mode, seed, clock) = match self {
             Self::Downtime => (Mode::Story, None, 1300.0),
             Self::Utilities(options) => (Mode::Story, Some(options.seed), options.clock()),
+            Self::Arrival => (Mode::Story, Some(0), 0.0),
         };
         let mut scene = PreviewVillage::new(self.title(), mode, seed, clock);
         match self {
@@ -118,6 +122,7 @@ impl Preview {
                         .then_some(options.rain);
                 scene.village.paused = options.hour.is_some() || options.rain;
             }
+            Self::Arrival => prepare_arrival(&mut scene),
         }
         scene.village.stock.sandbox = mode == Mode::Sandbox;
         app.insert_resource(scene.setup)
@@ -233,6 +238,21 @@ impl PreviewVillage {
             .into_iter()
             .find_map(|offset| self.build_at(key, cell + offset, rotation, size).ok())
             .ok_or_else(|| format!("Could not place {key} near ({}, {})", cell.x, cell.y))
+    }
+
+    fn focus(&mut self, cell: IVec2, zoom: f32) {
+        let position = world_position(cell.x as f32, cell.y as f32);
+        let terrain = self.village.terrain(&self.setup);
+        self.village.camera_view = Some(CameraView {
+            target: Vec3::new(
+                position.x,
+                terrain.height_at(position.x, position.y),
+                position.y,
+            ),
+            heading: 0.0,
+            polar: crate::default_camera_polar(),
+            zoom,
+        });
     }
 }
 
@@ -356,6 +376,12 @@ fn prepare_utilities(scene: &mut PreviewVillage, interactions: bool) -> Result<u
     Ok(house)
 }
 
+fn prepare_arrival(scene: &mut PreviewVillage) {
+    scene.village.camp = None;
+    scene.village.arrival_time = 0.0;
+    scene.focus(crate::construction::STOCKPILE, 1.0);
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -459,5 +485,19 @@ mod tests {
         let conditions = village.weather(world.resource::<WorldSetup>());
         assert!(conditions.rain > 0.05);
         assert_eq!(conditions.cloud, 0.85);
+    }
+
+    #[test]
+    fn arrival_preview_starts_before_the_cars_park() {
+        let app = start(&["--arrival-preview"]);
+        let village = app.world().resource::<Village>();
+        assert!(village.camp.is_none());
+        assert_eq!(village.arrival_time, 0.0);
+        let target = village.camera_view.unwrap().target.xz();
+        let stockpile = crate::construction::STOCKPILE;
+        assert_eq!(
+            target,
+            world_position(stockpile.x as f32, stockpile.y as f32)
+        );
     }
 }
