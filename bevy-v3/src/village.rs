@@ -29,6 +29,7 @@ mod terrain_card;
 mod toolbar;
 pub(crate) use toolbar::PanelPicker;
 mod vehicle_motion;
+mod view_options;
 
 use library_ui::{autosave_named, library_controls};
 
@@ -180,6 +181,7 @@ impl Plugin for VillagePlugin {
         terrain_card::install(app);
         lens_card::install(app);
         advance_modal::install(app);
+        view_options::install(app);
         building_lighting::install(app);
         livestock_motion::install(app);
         vehicle_motion::install(app);
@@ -321,7 +323,7 @@ pub struct Village {
     #[serde(skip)]
     lenses: LensPicker,
     #[serde(skip)]
-    show_grid: bool,
+    pub(crate) show_grid: bool,
     #[serde(skip)]
     open_projects_only: bool,
     project_roads_expanded: bool,

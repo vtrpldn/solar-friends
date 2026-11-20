@@ -151,7 +151,7 @@ impl SoundSettings {
         self.set_volume(effects, next);
     }
 
-    fn set_volume(&mut self, effects: bool, next: u8) {
+    pub(crate) fn set_volume(&mut self, effects: bool, next: u8) {
         if self.apply_volume(effects, next) {
             self.persist();
         }

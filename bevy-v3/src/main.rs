@@ -1126,7 +1126,7 @@ mod tests {
         press_button(&mut app, "1×");
 
         press_button(&mut app, "View & options");
-        press_button(&mut app, "Keyboard & camera");
+        press_button(&mut app, "?");
         assert!(
             app.world()
                 .resource::<village::Village>()
@@ -1204,14 +1204,14 @@ mod tests {
         );
 
         press_button(&mut app, "View & options");
-        press_button(&mut app, "Focus river");
+        press_button(&mut app, "River bend");
         let camera = app
             .world_mut()
             .query::<&VillageCamera>()
             .single(app.world())
             .unwrap();
         assert_eq!(camera.target.z, 0.0);
-        press_button(&mut app, "Rotate right");
+        press_button(&mut app, "E");
         let camera = app
             .world_mut()
             .query::<&VillageCamera>()
@@ -1268,11 +1268,11 @@ mod tests {
 
         world.resource_mut::<ButtonInput<MouseButton>>().reset_all();
         world.resource_mut::<AccumulatedMouseMotion>().delta = Vec2::ZERO;
-        press_button(&mut app, "Zoom in");
-        press_button(&mut app, "Show grid");
-        press_button(&mut app, "Hide grid");
-        press_button(&mut app, "Show forecast");
-        press_button(&mut app, "Hide forecast");
+        press_button(&mut app, "+");
+        press_button(&mut app, "Grid");
+        assert!(app.world().resource::<village::Village>().show_grid);
+        press_button(&mut app, "Grid");
+        assert!(!app.world().resource::<village::Village>().show_grid);
         press_button(&mut app, "Reset camera");
         app.world_mut().run_schedule(PostUpdate);
         assert_eq!(
@@ -1659,7 +1659,7 @@ mod tests {
             .text = "Renamed test village".into();
         press_button(&mut app, "Confirm name");
         press_button(&mut app, "Close saved villages");
-        press_button(&mut app, "Setup");
+        press_button(&mut app, "Main menu");
         app.world_mut().run_schedule(Update);
         assert!(app.world().resource::<WorldSetup>().open);
         press_button(&mut app, "Saved villages");
@@ -1682,7 +1682,7 @@ mod tests {
         press_button(&mut app, "Close saved villages");
         std::fs::remove_dir_all(&save_dir).unwrap();
 
-        press_button(&mut app, "Setup");
+        press_button(&mut app, "Main menu");
         app.world_mut().run_schedule(Update);
         assert!(app.world().resource::<WorldSetup>().open);
         press_button(&mut app, "New game");
@@ -1772,7 +1772,7 @@ mod tests {
             .text = "Sandbox test village".into();
         press_button(&mut app, "Confirm name");
         press_button(&mut app, "Close saved villages");
-        press_button(&mut app, "Setup");
+        press_button(&mut app, "Main menu");
         app.world_mut().resource_mut::<WorldSetup>().mode = setup::Mode::Story;
         app.update();
         press_button(&mut app, "Saved villages");
