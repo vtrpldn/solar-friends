@@ -20,44 +20,10 @@ const SAVINGS: [&str; 3] = [
 const SUPPLIES: [&str; 3] = ["Essentials", "Camp", "Prepared"];
 const WATER: [&str; 3] = ["Dry", "Seasonal", "Abundant"];
 
-struct Preset {
-    name: &'static str,
-    landscape: usize,
-    water: usize,
-    resources: usize,
-    savings: usize,
-    supplies: usize,
-    town: usize,
-}
-
-const PRESETS: [Preset; 3] = [
-    Preset {
-        name: "Gentle beginning",
-        landscape: 0,
-        water: 2,
-        resources: 2,
-        savings: 2,
-        supplies: 2,
-        town: 0,
-    },
-    Preset {
-        name: "Starting from scratch",
-        landscape: 1,
-        water: 1,
-        resources: 1,
-        savings: 0,
-        supplies: 0,
-        town: 1,
-    },
-    Preset {
-        name: "Remote homestead",
-        landscape: 2,
-        water: 0,
-        resources: 1,
-        savings: 1,
-        supplies: 1,
-        town: 2,
-    },
+const PRESET_NAMES: [&str; crate::economy_reference::WORLD_PRESETS.len()] = [
+    "Gentle beginning",
+    "Starting from scratch",
+    "Remote homestead",
 ];
 
 #[derive(Clone, Copy, Default, PartialEq, Eq, Deserialize, Serialize)]
@@ -247,25 +213,30 @@ impl WorldSetup {
     }
 
     fn preset(&self) -> Option<usize> {
-        PRESETS.iter().position(|preset| {
-            self.landscape == preset.landscape
-                && self.water == preset.water
-                && self.resources == preset.resources
-                && self.savings == preset.savings
-                && self.supplies == preset.supplies
-                && self.town == preset.town
-        })
+        let settings = [
+            self.landscape,
+            self.water,
+            self.resources,
+            self.savings,
+            self.supplies,
+            self.town,
+        ];
+        crate::economy_reference::WORLD_PRESETS
+            .iter()
+            .position(|preset| *preset == settings)
     }
 
     fn cycle_preset(&mut self) {
-        let index = self.preset().map_or(0, |index| (index + 1) % PRESETS.len());
-        let preset = &PRESETS[index];
-        self.landscape = preset.landscape;
-        self.water = preset.water;
-        self.resources = preset.resources;
-        self.savings = preset.savings;
-        self.supplies = preset.supplies;
-        self.town = preset.town;
+        let presets = crate::economy_reference::WORLD_PRESETS;
+        let index = self.preset().map_or(0, |index| (index + 1) % presets.len());
+        [
+            self.landscape,
+            self.water,
+            self.resources,
+            self.savings,
+            self.supplies,
+            self.town,
+        ] = presets[index];
     }
 
     pub(crate) const WORLD_OPTIONS: [Action; 7] = [
@@ -301,7 +272,7 @@ impl WorldSetup {
             .into(),
             Action::Preset => format!(
                 "Starting point   ·   {}",
-                self.preset().map_or("Custom", |index| PRESETS[index].name)
+                self.preset().map_or("Custom", |index| PRESET_NAMES[index])
             ),
             Action::Biome => format!("Biome   ·   {}", BIOMES[self.biome]),
             Action::Landscape => format!("Landscape   ·   {}", LANDSCAPES[self.landscape]),
