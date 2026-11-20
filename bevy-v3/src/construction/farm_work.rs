@@ -51,24 +51,46 @@ impl Construction {
             } else {
                 season
             };
+            // Beds of one crop that ripen together read as one milestone, not one per bed.
+            let mut crops: Vec<(&str, f64, Vec<usize>)> = Vec::new();
             for (index, bed) in plot.beds.iter().enumerate() {
                 if let Some(remaining) = bed.harvest_forecast(clock, rate) {
-                    let name = &catalog.projects[&project.key].name;
-                    events.push((
-                        remaining,
-                        format!(
-                            "{} · {name} #{} bed {} ready to harvest",
-                            bed.crop.label(),
-                            site + 1,
-                            index + 1
-                        ),
-                        if remaining == 0.0 {
-                            "Queue harvesting before advancing time."
-                        } else {
-                            "Estimated from current soil and seasonal conditions. Residents still need to harvest."
-                        },
-                    ));
+                    let crop = bed.crop.label();
+                    match crops.iter_mut().find(|(label, soonest, _)| {
+                        *label == crop && (soonest - remaining).abs() < 1.0
+                    }) {
+                        Some((_, soonest, beds)) => {
+                            *soonest = soonest.min(remaining);
+                            beds.push(index + 1);
+                        }
+                        None => crops.push((crop, remaining, vec![index + 1])),
+                    }
                 }
+            }
+            let name = &catalog.projects[&project.key].name;
+            for (crop, remaining, beds) in crops {
+                let beds = match beds.as_slice() {
+                    [bed] => format!("bed {bed}"),
+                    [first, .., last] if last - first + 1 == beds.len() => {
+                        format!("beds {first}–{last}")
+                    }
+                    _ => format!(
+                        "beds {}",
+                        beds.iter()
+                            .map(ToString::to_string)
+                            .collect::<Vec<_>>()
+                            .join(", ")
+                    ),
+                };
+                events.push((
+                    remaining,
+                    format!("{crop} · {name} #{} {beds} ready to harvest", site + 1),
+                    if remaining == 0.0 {
+                        "Queue harvesting before advancing time."
+                    } else {
+                        "Estimated from current soil and seasonal conditions. Residents still need to harvest."
+                    },
+                ));
             }
         }
         let default_soil = crate::production::growth::Ground::default();
