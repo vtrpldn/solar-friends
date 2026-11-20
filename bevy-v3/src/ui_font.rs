@@ -11,6 +11,11 @@ impl Plugin for UiFontPlugin {
     }
 }
 
+/// The bundled Outfit font, for text spans that set their own size and weight.
+pub fn outfit(assets: &AssetServer) -> Handle<Font> {
+    load_embedded_asset!(assets, "outfit.ttf")
+}
+
 /// Outfit at V2's body weight, in V2's ink colour.
 pub fn ui_font(assets: &AssetServer, size: f32) -> impl Bundle {
     ui_font_weight(assets, size, 400)

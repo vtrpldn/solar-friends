@@ -13,6 +13,7 @@ mod guide_diagrams;
 pub(crate) mod lab;
 mod land_lens;
 mod lens_picker;
+mod rich_text;
 mod thumbnails;
 use lens_picker::{LensPicker, MapLens};
 mod library_ui;
@@ -167,6 +168,7 @@ impl Plugin for VillagePlugin {
         build_menu::install(app);
         thumbnails::install(app);
         dialog::install(app);
+        rich_text::install(app);
         toolbar::install(app);
         guide::install(app);
         library_ui::install(app);
@@ -1474,9 +1476,13 @@ fn spawn_hud(mut commands: Commands, assets: Res<AssetServer>) {
             hud.spawn((
                 VillageHudText,
                 Text::default(),
-                ui_font(&assets, 15.0),
+                rich_text::RichSource::default(),
+                ui_font(&assets, 14.5),
+                bevy::text::LineHeight::RelativeToFont(1.5),
                 Node {
                     flex_shrink: 0.,
+                    // Long lines are hard to read; V2 keeps prose near 70 characters.
+                    max_width: px(720),
                     ..default()
                 },
             ));
@@ -1785,7 +1791,8 @@ fn nearest_resident(cursor: Vec2, residents: impl Iterator<Item = (usize, Vec2)>
 /// line, for cards whose buttons already offer those actions.
 fn strip_key_hints(line: &str) -> String {
     let is_key = |word: &str| {
-        word.contains('+')
+        matches!(word, "Tab" | "Esc" | "Enter" | "Space" | "Backspace")
+            || word.contains('+')
             || (word.len() <= 3
                 && word
                     .chars()
@@ -1794,6 +1801,17 @@ fn strip_key_hints(line: &str) -> String {
     };
     line.split(" · ")
         .filter_map(|segment| {
+            // Bracket chords: "Shift [ ] Daily limit R$37" keeps its labelled value, while
+            // "[ / ] R$100" only names a step size and goes.
+            let unchorded = ["Shift [ / ] ", "Shift [ ] ", "[ / ] ", "[ ] "]
+                .iter()
+                .find_map(|chord| segment.strip_prefix(chord));
+            if let Some(rest) = unchorded {
+                let labelled = rest
+                    .split_whitespace()
+                    .any(|word| word.chars().all(char::is_alphabetic));
+                return labelled.then_some(rest);
+            }
             let mut words = segment.splitn(2, ' ');
             match (words.next(), words.next()) {
                 (Some(key), Some(rest))
@@ -3025,7 +3043,7 @@ type ConstructionProgressNodes<'w, 's> = Query<
 >;
 
 type VillageHudNodes<'w, 's> = (
-    Single<'w, 's, &'static mut Text, With<VillageHudText>>,
+    Single<'w, 's, &'static mut rich_text::RichSource, With<VillageHudText>>,
     Single<'w, 's, &'static mut Node, With<VillageHud>>,
 );
 
@@ -4073,6 +4091,11 @@ mod tests {
             ""
         );
         assert_eq!(strip_key_hints("Powered · J Switch"), "Powered");
+        assert_eq!(
+            strip_key_hints("Expansion reserve R$100.00 · [ / ] R$100 · Shift [ / ] R$1000"),
+            "Expansion reserve R$100.00"
+        );
+        assert_eq!(strip_key_hints("Tab Town trade"), "");
         assert_eq!(
             strip_key_hints("Trigger 16 kg · Y Daily cap 32 kg"),
             "Trigger 16 kg · Daily cap 32 kg"

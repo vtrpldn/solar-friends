@@ -619,6 +619,26 @@ mod tests {
         interact_with_button(app, label, Interaction::Pressed);
     }
 
+    /// Every text block's full content, with styled spans joined back onto their block.
+    fn ui_texts_in(world: &mut World) -> Vec<Text> {
+        let mut texts = Vec::new();
+        let mut blocks = world.query::<(&Text, Option<&Children>)>();
+        for (text, children) in blocks.iter(world) {
+            let mut full = text.0.clone();
+            for child in children.into_iter().flatten() {
+                if let Some(span) = world.get::<TextSpan>(*child) {
+                    full.push_str(&span.0);
+                }
+            }
+            texts.push(Text(full));
+        }
+        texts
+    }
+
+    fn ui_texts(app: &mut App) -> Vec<Text> {
+        ui_texts_in(app.world_mut())
+    }
+
     fn visible_button(app: &mut App, label: &str) -> Option<Entity> {
         let world = app.world_mut();
         world
@@ -814,22 +834,16 @@ mod tests {
         app.update();
 
         assert!(
-            app.world_mut()
-                .query::<&Text>()
-                .iter(app.world())
+            ui_texts(&mut app)
+                .iter()
                 .any(|text| text.0 == "Solar\nFriends")
         );
         press_button(&mut app, "Continue Story");
         assert!(app.world().resource::<WorldSetup>().open);
-        assert!(
-            app.world_mut()
-                .query::<&Text>()
-                .iter(app.world())
-                .any(|text| {
-                    text.0
-                        .contains("The autosave was preserved. Open Saved villages")
-                })
-        );
+        assert!(ui_texts(&mut app).iter().any(|text| {
+            text.0
+                .contains("The autosave was preserved. Open Saved villages")
+        }));
         press_button(&mut app, "Saved villages");
         press_button(&mut app, "Close saved villages");
         press_button(&mut app, "Sound settings");
@@ -840,9 +854,8 @@ mod tests {
 
         press_button(&mut app, "New sandbox");
         assert!(
-            app.world_mut()
-                .query::<&Text>()
-                .iter(app.world())
+            ui_texts(&mut app)
+                .iter()
                 .any(|text| text.0 == "Choose the land")
         );
         assert!(app.world().resource::<WorldSetup>().mode == setup::Mode::Sandbox);
@@ -867,9 +880,8 @@ mod tests {
         assert_ne!(story_seed, 0);
         press_button(&mut app, "Drive");
         assert!(
-            app.world_mut()
-                .query::<&Text>()
-                .iter(app.world())
+            ui_texts(&mut app)
+                .iter()
                 .any(|text| text.0.contains("36 km") && text.0.contains("66 game minutes"))
         );
         press_button(&mut app, "Remote");
@@ -915,9 +927,8 @@ mod tests {
         }
         interact_with_button(&mut app, "Camp in clearing", Interaction::Hovered);
         assert!(
-            app.world_mut()
-                .query::<&Text>()
-                .iter(app.world())
+            ui_texts(&mut app)
+                .iter()
                 .any(|text| text.0.contains("Dry, roomy ground"))
         );
         press_button(&mut app, "Camp in clearing");
@@ -935,9 +946,8 @@ mod tests {
                 .resource_mut::<ButtonInput<KeyCode>>()
                 .reset(key);
             assert!(
-                app.world_mut()
-                    .query::<&Text>()
-                    .iter(app.world())
+                ui_texts(&mut app)
+                    .iter()
                     .any(|text| text.0.contains(heading))
             );
             app.world_mut()
@@ -1037,12 +1047,7 @@ mod tests {
                     window: build_window,
                 });
             app.world_mut().run_schedule(Update);
-            assert!(
-                app.world_mut()
-                    .query::<&Text>()
-                    .iter(app.world())
-                    .any(|label| label.0 == expected)
-            );
+            assert!(ui_texts(&mut app).iter().any(|label| label.0 == expected));
         }
         press_button(&mut app, "Homes & shelter");
         press_button(&mut app, "Close catalog");
@@ -1073,9 +1078,8 @@ mod tests {
         );
         let world = app.world_mut();
         assert!(
-            world
-                .query::<&Text>()
-                .iter(world)
+            ui_texts_in(world)
+                .iter()
                 .any(|text| text.0.contains("Village guide · Keyboard & camera"))
         );
         app.world_mut()
@@ -1101,7 +1105,7 @@ mod tests {
             .reset(KeyCode::KeyT);
         interact_with_button(&mut app, "Undo terrain edit", Interaction::Hovered);
         let world = app.world_mut();
-        assert!(world.query::<&Text>().iter(world).any(|text| {
+        assert!(ui_texts_in(world).iter().any(|text| {
             text.0
                 .contains("There are no terrain edits to undo in this session.")
         }));
@@ -1244,9 +1248,8 @@ mod tests {
             let shown = app.world().resource::<village::Village>().show_forecast;
             if shown {
                 assert!(
-                    app.world_mut()
-                        .query::<&Text>()
-                        .iter(app.world())
+                    ui_texts(&mut app)
+                        .iter()
                         .any(|text| text.0.contains("Day 3 ·"))
                 );
             }
@@ -1271,9 +1274,8 @@ mod tests {
             }
             press_button(&mut app, button);
             assert!(
-                app.world_mut()
-                    .query::<&Text>()
-                    .iter(app.world())
+                ui_texts(&mut app)
+                    .iter()
                     .any(|text| text.0.contains(legend)),
                 "missing legend for {button}"
             );
@@ -1330,17 +1332,15 @@ mod tests {
             assert_eq!(portraits.len(), village::NAMES.len());
         }
         assert!(
-            app.world_mut()
-                .query::<&Text>()
-                .iter(app.world())
+            ui_texts(&mut app)
+                .iter()
                 .any(|text| text.0.contains("Booked for")
                     && text.0.contains("Repeat 4h shifts on weekdays · on"))
         );
         press_button(&mut app, "Cancel day shift");
         assert!(
-            app.world_mut()
-                .query::<&Text>()
-                .iter(app.world())
+            ui_texts(&mut app)
+                .iter()
                 .any(|text| text.0.contains("Book for")
                     && text.0.contains("Repeat 4h shifts on weekdays · on"))
         );
@@ -1378,9 +1378,8 @@ mod tests {
         assert_eq!(trade_state(&app), (remaining, queued, delivery));
         press_button(&mut app, "View orders");
         assert!(
-            app.world_mut()
-                .query::<&Text>()
-                .iter(app.world())
+            ui_texts(&mut app)
+                .iter()
                 .any(|text| text.0.contains("Freight ·")
                     && text.0.contains("game minutes remaining"))
         );
@@ -1424,9 +1423,8 @@ mod tests {
             .resource_mut::<ButtonInput<KeyCode>>()
             .reset(KeyCode::Enter);
         assert!(
-            app.world_mut()
-                .query::<&Text>()
-                .iter(app.world())
+            ui_texts(&mut app)
+                .iter()
                 .any(|text| text.0.contains("Daily limit R$37\n"))
         );
         press_button(&mut app, "Automatic cooking off");
@@ -1436,19 +1434,13 @@ mod tests {
         press_button(&mut app, "Dried target 2.5d −");
         press_button(&mut app, "Automatic cooking on");
         press_button(&mut app, "Food batches");
-        assert!(
-            app.world_mut()
-                .query::<&Text>()
-                .iter(app.world())
-                .any(|text| {
-                    text.0.contains("On the shelves") && text.0.contains("Dried provisions")
-                })
-        );
+        assert!(ui_texts(&mut app).iter().any(|text| {
+            text.0.contains("On the shelves") && text.0.contains("Dried provisions")
+        }));
         press_button(&mut app, "Next page");
         assert!(
-            app.world_mut()
-                .query::<&Text>()
-                .iter(app.world())
+            ui_texts(&mut app)
+                .iter()
                 .any(|text| text.0.contains("Food batches · 1/"))
         );
         press_button(&mut app, "Previous page");
@@ -1490,23 +1482,18 @@ mod tests {
             });
         }
         app.world_mut().run_schedule(Update);
-        let hud = app
-            .world_mut()
-            .query::<&Text>()
-            .iter(app.world())
+        let texts = ui_texts(&mut app);
+        let hud = texts
+            .iter()
             .find(|text| text.0.contains("Find material · TIMBER"))
             .unwrap();
         assert!(hud.0.contains("timber pieces"));
         assert!(!hud.0.contains("fastener packs"));
         press_button(&mut app, "Trade · timber pieces");
         assert!(app.world().resource::<village::Village>().trade_open());
-        assert!(
-            app.world_mut()
-                .query::<&Text>()
-                .iter(app.world())
-                .any(|text| text.0.contains("timber pieces · Pack")
-                    && text.0.contains("Freight total"))
-        );
+        assert!(ui_texts(&mut app).iter().any(
+            |text| text.0.contains("timber pieces · Pack") && text.0.contains("Freight total")
+        ));
         for (label, input, displayed) in [
             ("Set minimum load", "37", "37% (0–100)"),
             ("Set maximum wait", "3.5", "3.5h (0–24)"),
@@ -1525,9 +1512,8 @@ mod tests {
             });
             app.world_mut().run_schedule(Update);
             assert!(
-                app.world_mut()
-                    .query::<&Text>()
-                    .iter(app.world())
+                ui_texts(&mut app)
+                    .iter()
                     .any(|text| text.0.contains(displayed))
             );
             app.world_mut()
@@ -1538,37 +1524,29 @@ mod tests {
                 .resource_mut::<ButtonInput<KeyCode>>()
                 .reset(KeyCode::Enter);
         }
-        assert!(
-            app.world_mut()
-                .query::<&Text>()
-                .iter(app.world())
-                .any(|text| {
-                    text.0.contains("Minimum load 37% · Wait up to 3.5h")
-                        && text.0.contains("Reserve 16 kg")
-                        && text.0.contains("Trigger 16 kg · Daily cap 32 kg")
-                })
-        );
+        assert!(ui_texts(&mut app).iter().any(|text| {
+            text.0.contains("Minimum load 37% · Wait up to 3.5h")
+                && text.0.contains("Reserve 16 kg")
+                && text.0.contains("Trigger 16 kg · Daily cap 32 kg")
+        }));
         press_button(&mut app, "Close panel");
         press_button(&mut app, "Crafting");
         assert!(
-            app.world_mut()
-                .query::<&Text>()
-                .iter(app.world())
+            ui_texts(&mut app)
+                .iter()
                 .any(|text| text.0.contains("Crafting & repairs"))
         );
         press_button(&mut app, "Craft harvest basket");
         assert!(
-            app.world_mut()
-                .query::<&Text>()
-                .iter(app.world())
+            ui_texts(&mut app)
+                .iter()
                 .any(|text| text.0.contains("Build a suitable workspace first."))
         );
         press_button(&mut app, "Repair");
         press_button(&mut app, "Jobs");
         assert!(
-            app.world_mut()
-                .query::<&Text>()
-                .iter(app.world())
+            ui_texts(&mut app)
+                .iter()
                 .any(|text| text.0.contains("No crafting jobs underway."))
         );
         press_button(&mut app, "Close panel");
@@ -1576,9 +1554,8 @@ mod tests {
         press_button(&mut app, "Show items and equipment");
         press_button(&mut app, "Show food");
         assert!(
-            app.world_mut()
-                .query::<&Text>()
-                .iter(app.world())
+            ui_texts(&mut app)
+                .iter()
                 .any(|text| text.0.contains("Food from town & the village"))
         );
         press_button(&mut app, "Show production sites");
@@ -1688,32 +1665,25 @@ mod tests {
         press_button(&mut app, "Residents");
         press_button(&mut app, "Story");
         assert!(
-            app.world_mut()
-                .query::<&Text>()
-                .iter(app.world())
+            ui_texts(&mut app)
+                .iter()
                 .any(|text| text.0.contains("Iara grew up tending a small garden"))
         );
         press_button(&mut app, "Skills");
         assert!(
-            app.world_mut()
-                .query::<&Text>()
-                .iter(app.world())
+            ui_texts(&mut app)
+                .iter()
                 .any(|text| text.0.contains("Specialties · 25% faster"))
         );
         press_button(&mut app, "Relationships");
-        assert!(
-            app.world_mut()
-                .query::<&Text>()
-                .iter(app.world())
-                .any(|text| text
-                    .0
-                    .contains("Bento · Getting to know each other · 0/100"))
-        );
+        assert!(ui_texts(&mut app).iter().any(|text| {
+            text.0
+                .contains("Bento · Getting to know each other · 0/100")
+        }));
         press_button(&mut app, "Overview");
         assert!(
-            app.world_mut()
-                .query::<&Text>()
-                .iter(app.world())
+            ui_texts(&mut app)
+                .iter()
                 .any(|text| text.0.contains("Click home"))
         );
         let before = app
@@ -1733,9 +1703,8 @@ mod tests {
 
         press_button(&mut app, "Food portions");
         assert!(
-            app.world_mut()
-                .query::<&Text>()
-                .iter(app.world())
+            ui_texts(&mut app)
+                .iter()
                 .any(|text| text.0.contains("Unlimited food · No spoilage"))
         );
         press_button(&mut app, "Chill first · Earliest expiry");
