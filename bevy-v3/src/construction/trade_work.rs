@@ -1275,7 +1275,8 @@ mod tests {
     #[test]
     fn trade_panel_distinguishes_freight_arrival_from_unloading() {
         let catalog = Catalog::default();
-        let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);
+        let setup = WorldSetup::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
         let mut village = Construction::default();
         let mut clock = TownClock {
             seconds: 0.0,
@@ -1343,5 +1344,32 @@ mod tests {
                 .trade_status(&catalog, &stock, clock)
                 .contains("Waiting for storage space")
         );
+        let terrain = setup.terrain();
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp: IVec2::splat(36),
+        };
+        let wood = stock.available("wood");
+        let balance = stock.balance();
+        let purchases = village.trade.purchases;
+        village.trade.set_pantry_policy(false, None, None).unwrap();
+        village.tick(&catalog, &mut stock, site, clock, 0.1, false);
+        assert!(village.trade.delivery.is_some());
+        assert_eq!(stock.available("wood"), wood);
+
+        let saved = serde_json::to_vec(&(village, stock)).unwrap();
+        let (mut village, mut stock): (Construction, Stock) =
+            serde_json::from_slice(&saved).unwrap();
+        assert!(village.valid_save(&catalog, &stock));
+        let pack = catalog.materials["wood"].pack;
+        stock.reserve_available(&BTreeMap::from([("stone".into(), pack)]));
+        village.tick(&catalog, &mut stock, site, clock, 0.1, false);
+        village.tick(&catalog, &mut stock, site, clock, 0.1, false);
+        assert!(village.trade.delivery.is_none());
+        assert_eq!(stock.available("wood"), wood + pack);
+        assert_eq!(village.trade.purchases, purchases + 1);
+        assert_eq!(stock.balance(), balance);
     }
 }
