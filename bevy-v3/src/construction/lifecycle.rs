@@ -53,8 +53,8 @@ pub(super) struct ChangeJob {
     pub work: f64,
     pub required: f64,
     retry: f64,
-    #[serde(skip)]
-    blocked_destination: Option<&'static str>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    blocked_destination: Option<String>,
 }
 
 #[derive(Clone, Copy, Deserialize, Serialize)]
@@ -109,7 +109,7 @@ impl Construction {
                 Change::Salvage => "Salvaging",
                 Change::Demolish => "Demolishing",
             };
-            if let Some(reason) = job.blocked_destination {
+            if let Some(reason) = job.blocked_destination.as_deref() {
                 return Some(format!("{action} · {reason}"));
             }
             if job.target.is_none() && job.work >= job.required {
@@ -593,7 +593,7 @@ impl Construction {
                         self.move_placement_error(catalog, stock, site, index, target)
                     {
                         let job = self.changes.get_mut(&index).expect("blocked move");
-                        job.blocked_destination = Some(error);
+                        job.blocked_destination = Some(error.into());
                         job.retry = 3.0;
                         continue;
                     }
@@ -833,6 +833,13 @@ mod tests {
                 break;
             }
         }
+        construction.production.selected = Some(0);
+        assert_eq!(
+            construction.lifecycle_status(&catalog, &stock).as_deref(),
+            Some("Moving · Another project occupies that space.")
+        );
+        let mut construction: Construction =
+            serde_json::from_str(&serde_json::to_string(&construction).unwrap()).unwrap();
         construction.production.selected = Some(0);
         assert_eq!(
             construction.lifecycle_status(&catalog, &stock).as_deref(),
