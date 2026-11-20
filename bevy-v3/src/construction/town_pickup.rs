@@ -1665,8 +1665,15 @@ mod tests {
             BTreeMap::from([("stone".into(), quantity)]);
         let mut village = Construction::default();
         let mut plan = village.proposed_site(&catalog, "well", IVec2::new(45, 36));
-        Construction::reserve_project(&mut village.market, &mut stock, &catalog, &mut plan, clock)
-            .unwrap();
+        Construction::reserve_project(
+            &mut village.market,
+            &mut stock,
+            &catalog,
+            &mut plan,
+            clock,
+            false,
+        )
+        .unwrap();
         village.plans.push(plan);
         let balance = stock.balance();
         village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
@@ -1896,8 +1903,15 @@ mod tests {
             round_trip_km: 12,
         };
         let mut plan = village.proposed_site(&catalog, "well", IVec2::new(44, 36));
-        Construction::reserve_project(&mut village.market, &mut stock, &catalog, &mut plan, clock)
-            .unwrap();
+        Construction::reserve_project(
+            &mut village.market,
+            &mut stock,
+            &catalog,
+            &mut plan,
+            clock,
+            false,
+        )
+        .unwrap();
         village.plans.push(plan);
         village.toggle_supplier_construction();
         village.logistics_policy.minimum_fill = 100;
@@ -1945,6 +1959,67 @@ mod tests {
     }
 
     #[test]
+    fn consolidated_freight_uses_its_own_cost_to_check_the_expansion_reserve() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let camp = IVec2::splat(36);
+        let terrain = setup.terrain().with_camp(camp);
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 36,
+        };
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut village = Construction::default();
+        for x in [44, 52] {
+            village.choose_blueprint("well");
+            village.plan(&catalog, &mut stock, site, IVec2::new(x, 36), clock);
+        }
+        assert_eq!(village.plans.len(), 2, "{}", village.status);
+        let definition = &catalog.projects["well"];
+        let quote = village
+            .market
+            .quote(
+                &catalog,
+                &definition.materials,
+                &stock,
+                clock.seconds,
+                clock.round_trip_km,
+            )
+            .unwrap();
+        let freight = crate::market::freight_cents(clock.round_trip_km);
+        let reserve = village.market.expansion_reserve();
+        let balance = quote.price + freight + reserve;
+        stock.debit(stock.balance() - balance, crate::stock::CashKind::Materials);
+
+        assert!(
+            village
+                .blueprint_supply_quote(&catalog, &stock, clock, definition)
+                .is_err()
+        );
+        village.toggle_supplier_construction();
+        assert!(
+            village
+                .blueprint_supply_quote(&catalog, &stock, clock, definition)
+                .unwrap()
+                .contains("1 supplier load")
+        );
+        village.choose_blueprint("well");
+        village.plan(&catalog, &mut stock, site, IVec2::new(60, 36), clock);
+        assert_eq!(village.plans.len(), 3, "{}", village.status);
+        assert!(village.valid_save(&catalog, &stock));
+        village.tick_construction_delivery(&catalog, &mut stock, clock);
+        assert!((0..3).all(|plan| village.construction_delivery_at(plan)));
+        assert_eq!(stock.balance(), reserve);
+        assert!(village.valid_save(&catalog, &stock));
+    }
+
+    #[test]
     fn construction_freight_replaces_reserved_pickup_fare_and_survives_a_save() {
         let catalog = Catalog::default();
         let setup = WorldSetup::default();
@@ -1956,8 +2031,15 @@ mod tests {
         };
         assert!(!crate::market::town_is_open(clock.seconds));
         let mut plan = village.proposed_site(&catalog, "well", IVec2::new(36, 36));
-        Construction::reserve_project(&mut village.market, &mut stock, &catalog, &mut plan, clock)
-            .unwrap();
+        Construction::reserve_project(
+            &mut village.market,
+            &mut stock,
+            &catalog,
+            &mut plan,
+            clock,
+            false,
+        )
+        .unwrap();
         village.plans.push(plan);
         let mut second = village.proposed_site(&catalog, "well", IVec2::new(45, 36));
         let definition = &catalog.projects["well"];
@@ -2026,6 +2108,7 @@ mod tests {
             &catalog,
             &mut second,
             clock,
+            false,
         )
         .unwrap();
         village.plans.push(second);
@@ -2105,8 +2188,15 @@ mod tests {
             round_trip_km: 12,
         };
         let mut plan = village.proposed_site(&catalog, "well", IVec2::new(45, 36));
-        Construction::reserve_project(&mut village.market, &mut stock, &catalog, &mut plan, clock)
-            .unwrap();
+        Construction::reserve_project(
+            &mut village.market,
+            &mut stock,
+            &catalog,
+            &mut plan,
+            clock,
+            false,
+        )
+        .unwrap();
         assert!(Construction::fits_construction_freight(&catalog, &plan));
         village.plans.push(plan);
         village.toggle_supplier_construction();
@@ -2221,8 +2311,15 @@ mod tests {
         };
         let reserve = |village: &mut Construction, stock: &mut Stock, x| {
             let mut plan = village.proposed_site(&catalog, "well", IVec2::new(x, 36));
-            Construction::reserve_project(&mut village.market, stock, &catalog, &mut plan, clock)
-                .unwrap();
+            Construction::reserve_project(
+                &mut village.market,
+                stock,
+                &catalog,
+                &mut plan,
+                clock,
+                false,
+            )
+            .unwrap();
             assert_eq!(plan.pickups, 1);
             village.plans.push(plan);
         };

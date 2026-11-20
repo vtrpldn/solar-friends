@@ -201,7 +201,14 @@ impl Construction {
         let mut stock = stock.clone();
         let mut market = self.market.clone();
         for tile in tiles {
-            Self::reserve_project(&mut market, &mut stock, catalog, tile, clock)?;
+            Self::reserve_project(
+                &mut market,
+                &mut stock,
+                catalog,
+                tile,
+                clock,
+                self.supplier_construction,
+            )?;
         }
         Ok((stock, market))
     }

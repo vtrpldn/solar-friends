@@ -937,6 +937,7 @@ mod tests {
                 seconds: 0.0,
                 round_trip_km: 12,
             },
+            false,
         )
         .unwrap();
         let paid = plan.materials(&catalog)["plumbing"];

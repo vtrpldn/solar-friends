@@ -1089,9 +1089,14 @@ impl Construction {
             self.status = error;
             return;
         }
-        if let Err(error) =
-            Self::reserve_project(&mut self.market, stock, catalog, &mut blueprint, clock)
-        {
+        if let Err(error) = Self::reserve_project(
+            &mut self.market,
+            stock,
+            catalog,
+            &mut blueprint,
+            clock,
+            self.supplier_construction,
+        ) {
             self.status = error;
             return;
         }
@@ -1152,6 +1157,7 @@ impl Construction {
         catalog: &Catalog,
         blueprint: &mut Blueprint,
         clock: TownClock,
+        supplier_freight: bool,
     ) -> Result<(), String> {
         let materials = &catalog.projects[&blueprint.key].materials;
         blueprint.materials_paid = Some(materials.clone());
@@ -1159,12 +1165,13 @@ impl Construction {
             blueprint.delivered = blueprint.loads;
             return Ok(());
         }
-        let quote = market.quote(
+        let quote = market.quote_with_pickup_reserve(
             catalog,
             materials,
             stock,
             clock.seconds,
             clock.round_trip_km,
+            !supplier_freight,
         )?;
         blueprint.pickups = quote.trips;
         blueprint.fare = quote.fare;
@@ -1298,12 +1305,13 @@ impl Construction {
         if stock.sandbox {
             return Ok("Free in Sandbox".into());
         }
-        let quote = self.market.quote(
+        let quote = self.market.quote_with_pickup_reserve(
             catalog,
             materials,
             stock,
             clock.seconds,
             clock.round_trip_km,
+            !self.supplier_construction,
         )?;
         if quote.trips == 0 {
             return Ok("Supplies available locally".into());
@@ -3466,8 +3474,15 @@ mod tests {
             round_trip_km: setup.round_trip_km(),
         };
         let mut plan = village.proposed_site(&catalog, "well", IVec2::new(45, 36));
-        Construction::reserve_project(&mut village.market, &mut stock, &catalog, &mut plan, clock)
-            .unwrap();
+        Construction::reserve_project(
+            &mut village.market,
+            &mut stock,
+            &catalog,
+            &mut plan,
+            clock,
+            false,
+        )
+        .unwrap();
         village.plans.push(plan);
         let mut streetlight = village.proposed_site(&catalog, "streetlight", IVec2::new(44, 36));
         streetlight.work = catalog.projects["streetlight"].work;

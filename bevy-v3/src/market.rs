@@ -82,6 +82,18 @@ impl Market {
         clock: f64,
         round_trip_km: u32,
     ) -> Result<Quote, String> {
+        self.quote_with_pickup_reserve(catalog, bill, stock, clock, round_trip_km, true)
+    }
+
+    pub(crate) fn quote_with_pickup_reserve(
+        &self,
+        catalog: &Catalog,
+        bill: &BTreeMap<String, u32>,
+        stock: &Stock,
+        clock: f64,
+        round_trip_km: u32,
+        keep_reserve: bool,
+    ) -> Result<Quote, String> {
         let day = ((540.0 + clock * 0.45) / 1440.0).floor() as u64;
         let mut units = BTreeMap::new();
         let mut total: f64 = 0.0;
@@ -118,12 +130,17 @@ impl Market {
         let fare = fare_cents(round_trip_km);
         let price = (total * 100.0).ceil() as u64;
         let transport = fare * u64::from(trips) + self.committed_fares;
-        if !units.is_empty() && price + transport + self.expansion_reserve > stock.balance() {
+        let reserve = if keep_reserve {
+            self.expansion_reserve
+        } else {
+            0
+        };
+        if !units.is_empty() && price + transport + reserve > stock.balance() {
             return Err(format!(
                 "Shared savings cannot cover R${:.2} for missing materials, R${:.2} for town pickups, and R${:.2} for the expansion reserve.",
                 price as f64 / 100.0,
                 transport as f64 / 100.0,
-                self.expansion_reserve as f64 / 100.0,
+                reserve as f64 / 100.0,
             ));
         }
         Ok(Quote {

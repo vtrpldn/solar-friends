@@ -302,8 +302,15 @@ mod tests {
         let mut village = Construction::default();
         let mut stock = Stock::for_start(&setup, &catalog);
         let mut plan = village.proposed_site(&catalog, "well", IVec2::new(45, 36));
-        Construction::reserve_project(&mut village.market, &mut stock, &catalog, &mut plan, clock)
-            .unwrap();
+        Construction::reserve_project(
+            &mut village.market,
+            &mut stock,
+            &catalog,
+            &mut plan,
+            clock,
+            false,
+        )
+        .unwrap();
         village.plans.push(plan);
         village.toggle_supplier_construction();
         let protected = village.protected_freight_cash(&catalog, clock).unwrap();
