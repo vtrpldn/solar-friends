@@ -73,6 +73,7 @@ enum Action {
     TradePolicy(TradePolicy),
     ProjectFilter,
     InventoryView,
+    SaleQuantity(SaleSetting),
     InventoryItem(usize),
     InventorySearch,
     Resident(usize),
@@ -312,7 +313,8 @@ impl Action {
             | Self::TradeQueued(_)
             | Self::HoldTradeQueued(_)
             | Self::Trade(_)
-            | Self::TradePolicy(_) => village.trade_open(),
+            | Self::TradePolicy(_)
+            | Self::SaleQuantity(_) => village.trade_open(),
             Self::InventorySearch | Self::InventoryItem(_) => false,
             Self::InventoryView => village.utility_panel == Some(UtilityPanel::Inventory),
             Self::Project(_) | Self::ProjectFilter => {
@@ -539,13 +541,13 @@ impl Action {
                 hold_for_pickup: true,
             }) => "Sell on shared trip".into(),
             Self::Trade(TradeOrder::Cancel) => "Cancel last order".into(),
+            Self::SaleQuantity(_) => String::new(),
             Self::TradePolicy(policy) => match policy {
                 TradePolicy::HouseholdRestock => "Toggle household restock",
                 TradePolicy::AutomaticSale => "Toggle auto sale",
                 TradePolicy::Reserve(false) => "Keep one pack less",
                 TradePolicy::Reserve(true) => "Keep one pack more",
-                TradePolicy::Limit => "Cycle sale limit",
-                TradePolicy::Trigger => "Cycle sale trigger",
+                TradePolicy::Limit | TradePolicy::Trigger => "",
                 TradePolicy::MinimumLoad => {
                     return numeric_label(village, NumericTarget::MinimumLoad, "Set minimum load");
                 }
@@ -998,13 +1000,18 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                     TradePolicy::AutomaticSale,
                     TradePolicy::Reserve(false),
                     TradePolicy::Reserve(true),
-                    TradePolicy::Limit,
-                    TradePolicy::Trigger,
                     TradePolicy::MinimumLoad,
                     TradePolicy::DispatchWait,
                     TradePolicy::DispatchNow,
                 ] {
                     spawn_button(menu, &assets, Action::TradePolicy(policy));
+                }
+                for setting in [
+                    SaleSetting::Reserve,
+                    SaleSetting::Trigger,
+                    SaleSetting::Limit,
+                ] {
+                    spawn_button(menu, &assets, Action::SaleQuantity(setting));
                 }
                 spawn_button(menu, &assets, Action::FacilityIrrigation);
                 spawn_button(menu, &assets, Action::RecipePage(false));
@@ -1446,6 +1453,9 @@ fn handle_buttons(
                     town.construction
                         .place_trade_order(&catalog, &mut town.stock, clock, order);
                 }
+                Action::SaleQuantity(setting) if !picker.open => {
+                    village.numeric_entry = Some((NumericTarget::Sale(setting), String::new()));
+                }
                 Action::TradePolicy(TradePolicy::MinimumLoad) if !picker.open => {
                     village.numeric_entry = Some((NumericTarget::MinimumLoad, String::new()));
                 }
@@ -1535,6 +1545,7 @@ fn handle_buttons(
                 | Action::HoldTradeQueued(_)
                 | Action::Trade(_)
                 | Action::TradePolicy(_)
+                | Action::SaleQuantity(_)
                 | Action::ProjectFilter
                 | Action::Resident(_)
                 | Action::WorkPriority(_)
@@ -1779,7 +1790,9 @@ fn refresh(
             Action::HoldTradeQueued(row) => trade_queue
                 .get(row)
                 .is_some_and(|entry| entry.held.is_some()),
-            Action::Trade(_) | Action::TradePolicy(_) => show_trade && !show_trade_queue,
+            Action::Trade(_) | Action::TradePolicy(_) | Action::SaleQuantity(_) => {
+                show_trade && !show_trade_queue
+            }
             Action::ProjectFilter => show_projects,
             Action::ListedHome(row) => homes.get(row).is_some(),
             Action::Resident(_) => show_residents || show_finances,
@@ -1922,6 +1935,21 @@ fn refresh(
                     format!("Irrigation · {}", policy.label())
                 }),
                 Action::TradeItem(row) => trade_items[row].clone(),
+                Action::SaleQuantity(setting) => {
+                    let unit = village.construction.sale_quantity_unit(&catalog);
+                    let label = match setting {
+                        SaleSetting::Reserve => "Keep at least",
+                        SaleSetting::Trigger => "Sell when above",
+                        SaleSetting::Limit => "Maximum per day",
+                    };
+                    if let Some((NumericTarget::Sale(active), entry)) = &village.numeric_entry
+                        && *active == setting
+                    {
+                        format!("{entry} {unit} · Enter to set · Esc to cancel")
+                    } else {
+                        format!("{label} ({unit})")
+                    }
+                }
                 Action::InventoryItem(row) => format!("Trade · {}", inventory_items[row].unwrap()),
                 Action::TradeQueued(row) => format!("Cancel {}", trade_queue[row].label),
                 Action::HoldTradeQueued(row) if trade_queue[row].held == Some(true) => {

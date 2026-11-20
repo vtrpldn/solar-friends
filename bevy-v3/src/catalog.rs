@@ -51,6 +51,22 @@ enum MaterialUnit {
 }
 
 impl Material {
+    pub(crate) fn stock_units_from_quantity(&self, quantity: f64) -> u32 {
+        let factor = match self.unit {
+            MaterialUnit::Kilograms => self.mass,
+            MaterialUnit::Liters | MaterialUnit::Count => 1.,
+        };
+        ((quantity + 1e-8) / factor).floor().clamp(0., 100_000.) as u32
+    }
+
+    pub(crate) fn quantity_unit(&self) -> &'static str {
+        match self.unit {
+            MaterialUnit::Kilograms => "kg",
+            MaterialUnit::Liters => "L",
+            MaterialUnit::Count => "units",
+        }
+    }
+
     pub fn quantity_text(&self, stock_units: u64) -> String {
         match self.unit {
             MaterialUnit::Kilograms => format!("{} kg", stock_units as f64 * self.mass),

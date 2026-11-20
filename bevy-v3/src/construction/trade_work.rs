@@ -9,6 +9,13 @@ pub(crate) enum TradeOrder {
     Cancel,
 }
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub(crate) enum SaleSetting {
+    Reserve,
+    Trigger,
+    Limit,
+}
+
 #[derive(Clone, Copy)]
 pub(crate) enum TradePolicy {
     HouseholdRestock,
@@ -309,6 +316,32 @@ impl Construction {
         }
     }
 
+    pub(crate) fn sale_quantity_unit(&self, catalog: &Catalog) -> &'static str {
+        Trade::tradable(catalog)[self.trade.selected]
+            .material
+            .quantity_unit()
+    }
+
+    pub(crate) fn set_sale_quantity(
+        &mut self,
+        catalog: &Catalog,
+        setting: SaleSetting,
+        quantity: f64,
+    ) {
+        let options = Trade::tradable(catalog);
+        let Some(item) = options.get(self.trade.selected) else {
+            return;
+        };
+        let units = item.material.stock_units_from_quantity(quantity);
+        let policy = self.trade.policies.entry(item.id.into()).or_default();
+        match setting {
+            SaleSetting::Reserve => policy.reserve = units,
+            SaleSetting::Trigger => policy.trigger = units,
+            SaleSetting::Limit => policy.limit = units,
+        }
+        policy.trigger = policy.trigger.max(policy.reserve);
+    }
+
     pub(crate) fn set_minimum_dispatch_fill(&mut self, percent: u8) {
         self.logistics_policy.minimum_fill = percent;
     }
@@ -366,6 +399,7 @@ impl Construction {
             | TradePolicy::DispatchWait
             | TradePolicy::DispatchNow => {}
         }
+        policy.trigger = policy.trigger.max(policy.reserve);
     }
 
     fn check_town_purchase(
@@ -878,6 +912,21 @@ mod tests {
                 .label
                 .contains("Waiting for storage")
         );
+    }
+
+    #[test]
+    fn exact_sale_thresholds_use_the_material_unit_and_protect_the_reserve() {
+        let catalog = Catalog::default();
+        let mut village = Construction::default();
+        assert!(village.select_trade_material(&catalog, "wood"));
+        village.set_sale_quantity(&catalog, SaleSetting::Reserve, 19.5);
+        village.set_sale_quantity(&catalog, SaleSetting::Trigger, 4.);
+        village.set_sale_quantity(&catalog, SaleSetting::Limit, 32.);
+        let policy = &village.trade.policies["wood"];
+        assert_eq!(village.sale_quantity_unit(&catalog), "kg");
+        assert_eq!((policy.reserve, policy.trigger, policy.limit), (4, 4, 8));
+        village.set_sale_quantity(&catalog, SaleSetting::Limit, 0.);
+        assert_eq!(village.trade.policies["wood"].limit, 0);
     }
 
     #[test]

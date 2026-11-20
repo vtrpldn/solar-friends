@@ -39,7 +39,9 @@ use crate::{
         town_vehicle_pose, vehicle_pose, world_position,
     },
     catalog::Catalog,
-    construction::{Construction, ConstructionSite, InventoryView, TownClock, WaterAction},
+    construction::{
+        Construction, ConstructionSite, InventoryView, SaleSetting, TownClock, WaterAction,
+    },
     land::Land,
     resident_animation::{Motion, ResidentAnimation},
     save,
@@ -1367,9 +1369,15 @@ enum NumericTarget {
     MaintenanceShopping,
     MinimumLoad,
     DispatchWait,
+    Sale(SaleSetting),
 }
 
-fn apply_numeric_entry(target: NumericTarget, entry: &str, construction: &mut Construction) {
+fn apply_numeric_entry(
+    target: NumericTarget,
+    entry: &str,
+    construction: &mut Construction,
+    catalog: &Catalog,
+) {
     match target {
         NumericTarget::MinimumLoad => {
             if let Ok(percent) = entry.parse::<u32>() {
@@ -1379,6 +1387,11 @@ fn apply_numeric_entry(target: NumericTarget, entry: &str, construction: &mut Co
         NumericTarget::DispatchWait => {
             if let Ok(hours) = entry.parse::<f64>() {
                 construction.set_dispatch_wait((hours.clamp(0., 24.) * 2.).round() as u8);
+            }
+        }
+        NumericTarget::Sale(setting) => {
+            if let Ok(quantity) = entry.parse::<f64>() {
+                construction.set_sale_quantity(catalog, setting, quantity);
             }
         }
         _ => {
@@ -1397,7 +1410,9 @@ fn apply_numeric_entry(target: NumericTarget, entry: &str, construction: &mut Co
                     construction
                         .set_upkeep_budget(target == NumericTarget::MaintenanceShopping, cents);
                 }
-                NumericTarget::MinimumLoad | NumericTarget::DispatchWait => unreachable!(),
+                NumericTarget::MinimumLoad
+                | NumericTarget::DispatchWait
+                | NumericTarget::Sale(_) => unreachable!(),
             }
         }
     }
@@ -1498,7 +1513,9 @@ fn village_input(
             != Some(match target {
                 NumericTarget::Food => UtilityPanel::Pantry,
                 NumericTarget::ExpansionReserve => UtilityPanel::Finances,
-                NumericTarget::MinimumLoad | NumericTarget::DispatchWait => UtilityPanel::Trade,
+                NumericTarget::MinimumLoad
+                | NumericTarget::DispatchWait
+                | NumericTarget::Sale(_) => UtilityPanel::Trade,
                 NumericTarget::MaintenanceParts | NumericTarget::MaintenanceShopping => {
                     UtilityPanel::Upkeep
                 }
@@ -1509,12 +1526,16 @@ fn village_input(
     if let Some((target, entry)) = &mut village.numeric_entry {
         if keyboard.any_just_pressed([KeyCode::Enter, KeyCode::NumpadEnter]) {
             let (target, entry) = village.numeric_entry.take().expect("active numeric entry");
-            apply_numeric_entry(target, &entry, &mut village.construction);
+            apply_numeric_entry(target, &entry, &mut village.construction, &catalog);
         } else {
             crate::construction::read_search_text(entry, &mut build_text);
-            let decimal = *target == NumericTarget::DispatchWait;
+            let decimal = matches!(target, NumericTarget::DispatchWait | NumericTarget::Sale(_));
             entry.retain(|character| character.is_ascii_digit() || decimal && character == '.');
-            entry.truncate(6);
+            entry.truncate(if matches!(target, NumericTarget::Sale(_)) {
+                14
+            } else {
+                6
+            });
         }
         build_text.clear();
         return;
@@ -3170,15 +3191,35 @@ mod tests {
             seconds: 0.,
             round_trip_km: 12,
         };
-        apply_numeric_entry(NumericTarget::MinimumLoad, "37", &mut construction);
-        apply_numeric_entry(NumericTarget::DispatchWait, "3.5", &mut construction);
+        apply_numeric_entry(
+            NumericTarget::MinimumLoad,
+            "37",
+            &mut construction,
+            &catalog,
+        );
+        apply_numeric_entry(
+            NumericTarget::DispatchWait,
+            "3.5",
+            &mut construction,
+            &catalog,
+        );
         assert!(
             construction
                 .trade_status(&catalog, &stock, clock)
                 .contains("Minimum load 37% · J Wait up to 3.5h")
         );
-        apply_numeric_entry(NumericTarget::MinimumLoad, "999", &mut construction);
-        apply_numeric_entry(NumericTarget::DispatchWait, "48", &mut construction);
+        apply_numeric_entry(
+            NumericTarget::MinimumLoad,
+            "999",
+            &mut construction,
+            &catalog,
+        );
+        apply_numeric_entry(
+            NumericTarget::DispatchWait,
+            "48",
+            &mut construction,
+            &catalog,
+        );
         assert!(
             construction
                 .trade_status(&catalog, &stock, clock)
