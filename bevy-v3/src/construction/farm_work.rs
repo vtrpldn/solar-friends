@@ -26,6 +26,10 @@ fn work_priority(action: FarmAction) -> u8 {
     }
 }
 
+fn planting_started(job: &FarmJob) -> bool {
+    job.action == FarmAction::Plant && job.work > 0.0
+}
+
 impl Construction {
     pub fn advance_milestones(
         &self,
@@ -862,27 +866,30 @@ impl Construction {
         }
         if self.farming.whole_plot {
             let count = plot.beds.len();
-            let busy: std::collections::BTreeSet<_> = self
+            let jobs: BTreeMap<_, _> = self
                 .farming
                 .jobs
                 .iter()
                 .filter(|job| job.site == site)
-                .map(|job| job.bed)
+                .map(|job| (job.bed, job))
                 .collect();
-            let care = count - busy.len();
+            let care = count - jobs.len();
             let mut planting = 0;
             let mut irrigated = 0;
             let mut collect = 0;
             let area: f64 = plot.beds.iter().map(crate::farming::Bed::area).sum();
-            let mut stages = [0; 7];
+            let mut stages = [0; 8];
             for (index, bed) in plot.beds.iter().enumerate() {
-                if !busy.contains(&index) {
+                let job = jobs.get(&index).copied();
+                if job.is_none() {
                     planting += usize::from(bed.editable());
                     irrigated += usize::from(bed.irrigation);
                     collect += usize::from(bed.collect_residues);
                 }
                 let stage = if bed.harvest_expired(clock) {
                     6
+                } else if bed.stage == Stage::Prepared && job.is_some_and(planting_started) {
+                    7
                 } else {
                     bed.stage as usize
                 };
@@ -896,6 +903,7 @@ impl Construction {
                 "Harvest complete",
                 "Crop failed",
                 "Harvest expired",
+                "Planting",
             ]
             .into_iter()
             .zip(stages)
@@ -918,7 +926,7 @@ impl Construction {
             };
             return Some(format!(
                 "Whole {name} · {count} beds · {area:.1} m² · {} queued\n{summary}\n{seed_policy}\nCrop and spacing apply to {planting} available beds\nCare applies to {care} beds · Irrigation on {irrigated}/{care} · Collect residues {collect}/{care}\n1 Prepare · 2 Plant · 3 Harvest · 4 Clear · 5 Amend · 6 Collect\nX Crop · Y Density · T Irrigation · Z Residues · Tab Inspect bed\n{}",
-                busy.len(),
+                jobs.len(),
                 self.farming.notice,
             ));
         }
@@ -1005,8 +1013,15 @@ impl Construction {
         } else {
             "Leave"
         };
+        let job = self
+            .farming
+            .jobs
+            .iter()
+            .find(|job| job.site == site && job.bed == index);
         let stage = if bed.harvest_expired(clock) {
             "Harvest expired"
+        } else if bed.stage == Stage::Prepared && job.is_some_and(planting_started) {
+            "Planting"
         } else {
             bed.stage.label()
         };
@@ -1092,12 +1107,7 @@ impl Construction {
                 bed.yield_kg(clock)
             );
         }
-        if let Some(job) = self
-            .farming
-            .jobs
-            .iter()
-            .find(|job| job.site == site && job.bed == index)
-        {
+        if let Some(job) = job {
             if job.pickups > 0 {
                 label.push('\n');
                 label.push_str(&seed_delivery_status(job, clock));
@@ -1816,6 +1826,12 @@ mod resize_tests {
         job.worker = Some(0);
         village.residents[0].health.energy = 24.0;
 
+        assert!(
+            village
+                .bed_status(0, 0, 0.0, false)
+                .unwrap()
+                .contains("Planting")
+        );
         village.tick_farm_jobs(&catalog, &mut stock, ground, 0.0, 0.1);
         let job = &village.farming.jobs[0];
         assert_eq!(job.worker, Some(1));
