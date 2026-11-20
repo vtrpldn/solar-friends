@@ -738,6 +738,41 @@ impl Construction {
         self.status.clear();
     }
 
+    /// Catalog categories in sidebar order.
+    pub(crate) fn build_categories() -> &'static [&'static str] {
+        &CATEGORIES
+    }
+
+    /// The category shown while no search is active.
+    pub(crate) fn build_category(&self) -> usize {
+        self.category.unwrap_or_default()
+    }
+
+    pub(crate) fn set_build_category(&mut self, index: usize) {
+        if index < CATEGORIES.len() {
+            self.editing_search = false;
+            self.build_query.clear();
+            self.category = Some(index);
+            self.page = 0;
+            self.selection = None;
+            self.status.clear();
+        }
+    }
+
+    pub(crate) fn build_query(&self) -> &str {
+        &self.build_query
+    }
+
+    pub(crate) fn searching_blueprints(&self) -> bool {
+        self.editing_search || !self.build_query.trim().is_empty()
+    }
+
+    /// Current catalog page and page count, both counted from one.
+    pub(crate) fn build_page(&self, catalog: &Catalog) -> (usize, usize) {
+        let pages = self.options(catalog).len().div_ceil(BUILD_ROWS).max(1);
+        (self.page + 1, pages)
+    }
+
     pub fn turn_build_page(&mut self, catalog: &Catalog, forward: bool) {
         let pages = self.options(catalog).len().div_ceil(BUILD_ROWS).max(1);
         self.page = (self.page + if forward { 1 } else { pages - 1 }) % pages;

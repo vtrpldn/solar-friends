@@ -29,6 +29,8 @@ pub(super) const SLOTS: usize = FIRST_ICON_SLOT + ICONS.len();
 /// Seconds a framed slot keeps rendering. Shaders compile asynchronously, so a fixed
 /// frame count could stop before the first visible draw, as it did at startup.
 const SETTLE_SECONDS: f32 = 1.5;
+/// How often a settled slot redraws a single frame.
+const REFRESH_SECONDS: f32 = 3.0;
 /// Keeps thumbnail layers clear of the village scene, which renders on layer 0.
 const FIRST_LAYER: usize = 20;
 
@@ -186,7 +188,10 @@ fn show_models(
             thumbnails.rendered[slot] = Some(now);
         }
         let settled = thumbnails.rendered[slot].is_some_and(|start| now - start > SETTLE_SECONDS);
-        let active = wanted[slot].is_some() && !settled;
+        // Settled slots still redraw one frame now and then, staggered by slot, so a
+        // first draw lost to shaders still compiling at startup is repaired.
+        let refresh = (now + slot as f32 * 0.25) % REFRESH_SECONDS < time.delta_secs();
+        let active = wanted[slot].is_some() && (!settled || refresh);
         if settings.is_active != active {
             settings.is_active = active;
         }

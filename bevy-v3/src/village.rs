@@ -2890,6 +2890,11 @@ fn show_hud(
         text.0.clone_from(&village.save_notice);
         return;
     }
+    // The catalog carries its own headings and hints.
+    if build_menu::visible(&setup, &village, &saves, &sound) {
+        node.display = Display::None;
+        return;
+    }
     node.display = Display::Flex;
     // Below the top bar's stat cards; panels and reference pages get more room than the
     // short status notes shown while playing.

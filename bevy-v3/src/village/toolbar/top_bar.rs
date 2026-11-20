@@ -122,9 +122,10 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
         ))
         .with_children(|bar| {
             bar.spawn(Node {
-                column_gap: px(10),
+                column_gap: px(8),
                 flex_wrap: FlexWrap::Wrap,
                 row_gap: px(8),
+                flex_shrink: 1.,
                 ..default()
             })
             .with_children(|cards| {
@@ -236,10 +237,10 @@ fn stat_card(
             TopBarItem,
             CustomLabel,
             theme::button_node(Node {
-                padding: UiRect::new(px(10), px(14), px(8), px(8)),
-                column_gap: px(10),
+                padding: UiRect::new(px(8), px(12), px(7), px(7)),
+                column_gap: px(8),
                 align_items: AlignItems::Center,
-                min_width: px(168),
+                min_width: px(150),
                 ..default()
             }),
             theme::button(),

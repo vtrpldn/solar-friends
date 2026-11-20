@@ -510,8 +510,8 @@ impl Action {
                 if delta.x != 0 { "Width" } else { "Depth" },
                 if delta.x + delta.y > 0 { "+" } else { "−" }
             ),
-            Self::Pause if village.planning_pause() && village.paused => "Resume on close".into(),
-            Self::Pause if village.planning_pause() => "Stay paused on close".into(),
+            Self::Pause if village.planning_pause() && village.paused => "Resume after".into(),
+            Self::Pause if village.planning_pause() => "Keep paused".into(),
             Self::Pause if village.paused => "Resume".into(),
             Self::Pause => "Pause".into(),
             Self::Speed => village.speed_label(),

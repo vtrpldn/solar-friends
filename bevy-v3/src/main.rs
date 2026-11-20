@@ -981,7 +981,7 @@ mod tests {
         press_button(&mut app, "Build");
         press_button(&mut app, "Auto-buy on");
         press_button(&mut app, "Auto-buy off");
-        press_button(&mut app, "Search");
+        press_button(&mut app, "Find something to build…");
         let build_window = app
             .world_mut()
             .query_filtered::<Entity, With<PrimaryWindow>>()
@@ -1008,8 +1008,8 @@ mod tests {
                     .any(|label| label.0 == expected)
             );
         }
-        press_button(&mut app, "Category");
-        press_button(&mut app, "Close build");
+        press_button(&mut app, "Homes & shelter");
+        press_button(&mut app, "Close catalog");
 
         press_button(&mut app, "Pause");
         assert!(app.world().resource::<village::Village>().is_paused());
@@ -1259,7 +1259,7 @@ mod tests {
         let planning_water = river_vertex_colors(&mut app);
         simulate_river_frame(&mut app);
         assert_eq!(river_vertex_colors(&mut app), planning_water);
-        press_button(&mut app, "Stay paused on close");
+        press_button(&mut app, "Keep paused");
         press_button(&mut app, "Close panel");
         assert!(app.world().resource::<village::Village>().is_paused());
         press_button(&mut app, "Resume");
