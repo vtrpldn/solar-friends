@@ -90,6 +90,28 @@ jobs:
             and .village.stock.materials.wood == 44
           ' report.json
           "$game" --lab-replay report.json
+          cat > freight.json <<'JSON'
+          {
+            "steps": 10000,
+            "orders": [
+              {"step": 0, "order": {"type": "food-policy", "enabled": false}},
+              {"step": 0, "order": {"type": "supply-transport", "freight": true}},
+              {"step": 0, "order": {"type": "build", "key": "well", "x": 44, "z": 36}}
+            ]
+          }
+          JSON
+          "$game" --lab freight.json > freight-report.json
+          jq -e '
+            .end_step == 10000
+            and (.orders | length == 3 and all(.error == null))
+            and (.village.construction |
+              .construction_delivery == null
+              and .opening.town_trips == 0
+              and (.plans | length == 1 and .[0].key == "well" and .[0].pickups == 0)
+              and any(.events[]; .text == "Supplier dispatched construction supplies.")
+              and any(.events[]; .text == "Construction supplies delivered."))
+          ' freight-report.json
+          "$game" --lab-replay freight-report.json
       - uses: actions/upload-artifact@v4
         with:
           name: solar-friends-v3-macos
