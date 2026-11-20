@@ -3315,16 +3315,14 @@ fn show_hud(
             }
         }
         Some(UtilityPanel::Residents) => {
+            if !label.is_empty() {
+                label.push_str("\n\n");
+            }
             let selected = village.selected_resident;
-            label.push_str("\n1–5 Select resident · Tab Change profile view\n\n");
             match village.resident_profile {
                 ResidentProfile::Overview => {
-                    label.push_str("Click home · T Assign · Y Clear\n");
-                    if !village.housing_notice.is_empty() {
-                        label.push_str(&village.housing_notice);
-                        label.push('\n');
-                    }
                     if !village.stock.sandbox {
+                        label.push_str("Paid town work\n");
                         label.push_str(
                             &village
                                 .construction
@@ -3332,16 +3330,13 @@ fn show_hud(
                         );
                         label.push_str("\n\n");
                     }
-                    // The roster cards already list everyone; keep the selected resident.
-                    let status =
-                        village
-                            .construction
-                            .resident_status(&catalog, &village.stock, selected);
-                    label.push_str(
-                        status
-                            .split_once("\n\n")
-                            .map_or(status.as_str(), |(_, profile)| profile),
-                    );
+                    label.push_str(&village.construction.resident_overview(
+                        &catalog,
+                        &village.stock,
+                        selected,
+                        false,
+                        &village.housing_notice,
+                    ));
                 }
                 ResidentProfile::Story => {
                     label.push_str(&Construction::resident_story(&catalog, selected));
@@ -3353,6 +3348,7 @@ fn show_hud(
                     label.push_str(&village.construction.resident_relationships(selected));
                 }
             }
+            label.push_str("\n\n1–5 Select resident · Tab Change profile view");
         }
         Some(UtilityPanel::Finances) => {
             label.push('\n');
