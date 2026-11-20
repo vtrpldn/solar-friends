@@ -1205,8 +1205,15 @@ impl Construction {
                         f64::from(dt),
                         self.repairing(catalog, "garden-tools"),
                     );
+                    let worker = &mut self.residents[index];
+                    let seconds = f64::from(dt);
+                    let progress = seconds
+                        * boost
+                        * worker
+                            .work_multiplier(&catalog.residents[index], &self.plans[job.site].key);
+                    worker.experience += seconds;
                     let job = &mut self.farming.jobs[job_index];
-                    job.work = (job.work + f64::from(dt) * boost).min(job.required);
+                    job.work = (job.work + progress).min(job.required);
                     if job.work < job.required {
                         continue;
                     }
