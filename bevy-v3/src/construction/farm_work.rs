@@ -1806,10 +1806,11 @@ mod resize_tests {
                 (dimensions.as_vec2() - Vec2::ONE) + orientation * offset
             };
             let old_world = center(IVec2::splat(2), offset);
-            village
-                .resize_field(&catalog, ground, 0, IVec2::new(4, 5), false)
-                .unwrap();
+            village.select_facility(corner);
+            village.toggle_beds();
+            village.set_field_dimensions(&catalog, ground, "4 5", false);
             let new_size = village.plans[0].size;
+            assert_eq!(new_size, rotated_size(IVec2::new(4, 5), rotation));
             let plot = &mut village.farming.plots.get_mut(&0).unwrap();
             assert_eq!(plot.beds.len(), 16);
             let bed = plot
@@ -1832,11 +1833,8 @@ mod resize_tests {
                 })
                 .unwrap();
             extra.stage = Stage::Growing;
-            assert!(
-                village
-                    .resize_field(&catalog, ground, 0, IVec2::splat(2), false)
-                    .is_err()
-            );
+            village.set_field_dimensions(&catalog, ground, "2 2", false);
+            assert_ne!(village.farming.notice, "Field resized.");
             assert_eq!(village.plans[0].size, new_size);
             let json = serde_json::to_string(&village).unwrap();
             let saved: Construction = serde_json::from_str(&json).unwrap();
