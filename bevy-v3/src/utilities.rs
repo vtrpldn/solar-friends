@@ -304,6 +304,17 @@ impl Utilities {
         self.topology_valid = true;
     }
 
+    pub(crate) fn has_manual_link(&self, building: usize) -> bool {
+        let id = building + 1;
+        self.installed_power_links
+            .iter()
+            .any(|&(a, b)| a == id || b == id)
+            || self
+                .installed_water_links
+                .iter()
+                .any(|&(a, b, _)| a == id || b == id)
+    }
+
     pub fn remove_facility(&mut self, building: usize) {
         let id = building + 1;
         if let Some(node) = self.nodes.remove(&id) {

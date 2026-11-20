@@ -240,18 +240,19 @@ impl Construction {
             self.status = format!("{} prioritized.", catalog.projects[&project.key].name);
             return;
         }
-        if let Some(issue) = self.can_change(index) {
+        let issue = if matches!(action, ProjectAction::Move) {
+            self.move_blocker(index)
+        } else {
+            self.can_change(index)
+        };
+        if let Some(issue) = issue {
             self.status = issue.into();
             return;
         }
         if matches!(action, ProjectAction::Move) {
-            if self.farming.plots.contains_key(&index) {
-                self.status = "Cultivated soil stays on its land.".into();
-            } else {
-                self.moving = Some(index);
-                self.rotation = project.rotation;
-                self.status.clear();
-            }
+            self.moving = Some(index);
+            self.rotation = project.rotation;
+            self.status.clear();
         } else if project.work == 0.0 {
             self.cancel_plan(catalog, stock, index);
         } else {
@@ -303,6 +304,16 @@ impl Construction {
         None
     }
 
+    fn move_blocker(&self, index: usize) -> Option<&'static str> {
+        if self.plans[index].key == "field" || self.farming.plots.contains_key(&index) {
+            return Some("Cultivated soil stays on its land. Designate a new field instead.");
+        }
+        if self.utilities.has_manual_link(index) {
+            return Some("Disconnect utility lines before relocating this building.");
+        }
+        self.can_change(index)
+    }
+
     pub(super) fn queue_move(
         &mut self,
         catalog: &Catalog,
@@ -311,9 +322,8 @@ impl Construction {
         position: IVec2,
         index: usize,
     ) {
-        if self.plans[index].key == "field" {
-            self.status =
-                "Cultivated soil stays on its land. Designate a new field instead.".into();
+        if let Some(issue) = self.move_blocker(index) {
+            self.status = issue.into();
             self.moving = None;
             return;
         }
@@ -679,6 +689,20 @@ impl Construction {
 mod tests {
     use super::*;
     use crate::setup::WorldSetup;
+
+    #[test]
+    fn relocation_requires_disconnecting_manual_utilities() {
+        let catalog = Catalog::default();
+        let mut village = Construction::default();
+        let kitchen = village.proposed_site(&catalog, "kitchen", IVec2::new(44, 36));
+        village.plans.push(kitchen);
+        assert_eq!(village.move_blocker(0), None);
+        village.utilities.install_power_link(0, 1);
+        assert_eq!(
+            village.move_blocker(0),
+            Some("Disconnect utility lines before relocating this building.")
+        );
+    }
 
     #[test]
     fn dismantling_uses_another_approach_when_a_resident_blocks_the_entrance() {

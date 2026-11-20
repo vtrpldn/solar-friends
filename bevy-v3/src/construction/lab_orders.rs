@@ -539,9 +539,6 @@ impl Construction {
                 if *rotation > 3 || !(-30..94).contains(x) || !(-30..94).contains(z) {
                     return Err("Choose a valid destination and rotation.".into());
                 }
-                if let Some(issue) = self.can_change(index) {
-                    return Err(issue.into());
-                }
                 let previous_rotation = self.rotation;
                 let previous_move = self.moving;
                 self.rotation = *rotation;
