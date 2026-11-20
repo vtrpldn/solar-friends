@@ -230,10 +230,13 @@ impl Construction {
                 self.residents[index].town_work.route_blocked = true;
                 continue;
             };
-            let fare_due = stock
-                .balance()
-                .saturating_sub(self.market.committed_fares())
-                < RETURN_FARE;
+            let committed = if self.supplier_construction {
+                self.protected_freight_cash(catalog, clock)
+                    .unwrap_or(stock.balance())
+            } else {
+                self.market.committed_fares()
+            };
+            let fare_due = stock.balance().saturating_sub(committed) < RETURN_FARE;
             if !fare_due {
                 stock.debit(RETURN_FARE, CashKind::Commuting);
             }
@@ -257,6 +260,46 @@ impl Construction {
 mod tests {
     use super::*;
     use crate::setup::WorldSetup;
+
+    #[test]
+    fn bus_fare_is_deducted_from_wages_when_freight_needs_the_cash() {
+        let setup = WorldSetup::default();
+        let catalog = Catalog::default();
+        let terrain = setup.terrain();
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp: IVec2::splat(36),
+        };
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: setup.round_trip_km(),
+        };
+        let mut village = Construction::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut plan = village.proposed_site(&catalog, "well", IVec2::new(45, 36));
+        Construction::reserve_project(&mut village.market, &mut stock, &catalog, &mut plan, clock)
+            .unwrap();
+        village.plans.push(plan);
+        village.toggle_supplier_construction();
+        let protected = village.protected_freight_cash(&catalog, clock).unwrap();
+        stock.debit(stock.balance() - protected, CashKind::Materials);
+        village.toggle_shift(0);
+        village.residents[0].health.energy = 85.0;
+
+        village.tick_shifts(&catalog, &mut stock, site, clock, 1.0);
+
+        assert!(
+            village.residents[0]
+                .town_work
+                .shift
+                .as_ref()
+                .unwrap()
+                .fare_due
+        );
+        assert_eq!(stock.balance(), protected);
+    }
 
     #[test]
     fn wages_settle_on_return_and_can_cover_the_bus_fare() {
