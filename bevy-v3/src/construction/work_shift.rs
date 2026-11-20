@@ -4,7 +4,7 @@ use crate::{
     weather::{DAY, HOUR, game_hour},
 };
 
-use super::*;
+use super::{resident_work::NAMES, *};
 
 const BUS_STOP: IVec2 = IVec2::new(29, -31);
 
@@ -85,7 +85,14 @@ impl Construction {
                 (count + 1, cents.saturating_add(order.cents))
             });
         let receipts = self.trade.receipts;
-        let names = ["Iara", "Bento", "Luz", "Cauã", "Nina"];
+        let shift = self.resident_shift_summary(selected, seconds);
+        format!(
+            "{status}\nTown sales · {receipts} paid · {pending_sales} pending (R${:.2} before fuel)\n\n{shift}\n1–5 Resident · T Book/cancel day shift · Y Toggle weekdays",
+            expected_cents as f64 / 100.0,
+        )
+    }
+
+    pub(crate) fn resident_shift_summary(&self, selected: usize, seconds: f64) -> String {
         let worker = &self.residents[selected];
         let work = &worker.town_work;
         let (job, wage) = JOBS[selected];
@@ -118,14 +125,7 @@ impl Construction {
                     format!("Booked for {when}, 08:00–11:00")
                 }
             } else {
-                format!(
-                    "Book for {when}, 08:00–11:00 · {}",
-                    if work.repeating {
-                        "Weekdays on"
-                    } else {
-                        "Weekdays off"
-                    }
-                )
+                format!("Book for {when}, 08:00–11:00")
             }
         };
         let (hours, pay) = if work.shift.as_ref().is_some_and(|shift| !shift.full_day) {
@@ -133,11 +133,12 @@ impl Construction {
         } else {
             (8, wage * 2)
         };
+        let weekdays = if work.repeating { "on" } else { "off" };
         format!(
-            "{status}\nTown sales · {receipts} paid · {pending_sales} pending (R${:.2} before fuel)\n\n{} · {job}\n{shift_status} · {hours}h shift · R${} after bus fare\n1–5 Resident · T Book/cancel day shift · Y Toggle weekdays",
-            expected_cents as f64 / 100.0,
-            names[selected],
-            pay - RETURN_FARE / 100
+            "{} · {job}\n{shift_status} · {hours}h shift · R${} after bus fare\nRepeat 4h shifts on weekdays · {weekdays} · R${} after bus fare",
+            NAMES[selected],
+            pay - RETURN_FARE / 100,
+            wage - RETURN_FARE / 100,
         )
     }
 

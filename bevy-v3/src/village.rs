@@ -2721,6 +2721,14 @@ fn show_hud(
                         label.push_str(&village.housing_notice);
                         label.push('\n');
                     }
+                    if !village.stock.sandbox {
+                        label.push_str(
+                            &village
+                                .construction
+                                .resident_shift_summary(selected, village.clock),
+                        );
+                        label.push_str("\n\n");
+                    }
                     label.push_str(&village.construction.resident_status(
                         &catalog,
                         &village.stock,

@@ -1121,6 +1121,24 @@ mod tests {
         press_button(&mut app, "Disconnect grid");
         press_button(&mut app, "Connect grid");
         press_button(&mut app, "Manage");
+        press_button(&mut app, "Residents");
+        assert!(
+            app.world_mut()
+                .query::<&Text>()
+                .iter(app.world())
+                .any(|text| text.0.contains("Booked for")
+                    && text.0.contains("Repeat 4h shifts on weekdays · on"))
+        );
+        press_button(&mut app, "Toggle day shift");
+        assert!(
+            app.world_mut()
+                .query::<&Text>()
+                .iter(app.world())
+                .any(|text| text.0.contains("Book for")
+                    && text.0.contains("Repeat 4h shifts on weekdays · on"))
+        );
+        press_button(&mut app, "Toggle day shift");
+        press_button(&mut app, "Manage");
         press_button(&mut app, "Trade");
         assert!(app.world().resource::<village::Village>().trade_open());
         let trade_state = |app: &App| {
