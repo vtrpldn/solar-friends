@@ -3405,6 +3405,49 @@ mod tests {
     }
 
     #[test]
+    fn unfocused_desktop_keeps_running_unless_the_village_is_paused() {
+        let setup = WorldSetup::default().session();
+        let catalog = Catalog::default();
+        let stock = Stock::for_start(&setup, &catalog);
+        let mut app = App::new();
+        app.insert_resource(setup)
+            .insert_resource(catalog)
+            .init_resource::<Land>()
+            .init_resource::<SaveMenu>()
+            .insert_resource(Time::<Fixed>::from_hz(SIMULATION_HZ))
+            .insert_resource(Village {
+                camp: Some(IVec2::new(36, 36)),
+                stock,
+                ..default()
+            })
+            .add_systems(FixedUpdate, advance_clock);
+        app.world_mut().spawn((
+            Window {
+                focused: false,
+                ..default()
+            },
+            PrimaryWindow,
+        ));
+        app.world_mut()
+            .resource_mut::<Time<Fixed>>()
+            .advance_by(std::time::Duration::from_secs_f64(SIMULATION_STEP));
+
+        app.world_mut().run_schedule(FixedUpdate);
+        assert_eq!(app.world().resource::<Village>().clock, SIMULATION_STEP);
+
+        app.world_mut().resource_mut::<Village>().paused = true;
+        app.world_mut().run_schedule(FixedUpdate);
+        assert_eq!(app.world().resource::<Village>().clock, SIMULATION_STEP);
+
+        app.world_mut().resource_mut::<Village>().paused = false;
+        app.world_mut().run_schedule(FixedUpdate);
+        assert_eq!(
+            app.world().resource::<Village>().clock,
+            2.0 * SIMULATION_STEP
+        );
+    }
+
+    #[test]
     fn opening_the_guide_pauses_story_arrival() {
         let mut app = App::new();
         app.insert_resource(WorldSetup::default().session())
