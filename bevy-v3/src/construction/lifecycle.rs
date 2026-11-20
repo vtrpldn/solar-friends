@@ -57,6 +57,25 @@ pub(super) struct ChangeJob {
     blocked_destination: Option<String>,
 }
 
+impl ChangeJob {
+    fn action_label(&self) -> &'static str {
+        match self.kind {
+            Change::Move => "Moving",
+            Change::Salvage => "Salvaging",
+            Change::Demolish => "Demolishing",
+        }
+    }
+
+    pub(super) fn status(&self) -> String {
+        let action = self.action_label();
+        if let Some(reason) = self.blocked_destination.as_deref() {
+            format!("{action} · {reason}")
+        } else {
+            format!("{action} · {:.0}%", self.work / self.required * 100.0)
+        }
+    }
+}
+
 #[derive(Clone, Copy, Deserialize, Serialize)]
 pub(super) struct Destination {
     pub position: IVec2,
@@ -104,21 +123,16 @@ impl Construction {
             return None;
         }
         let label = if let Some(job) = self.changes.get(&index) {
-            let action = match job.kind {
-                Change::Move => "Moving",
-                Change::Salvage => "Salvaging",
-                Change::Demolish => "Demolishing",
-            };
-            if let Some(reason) = job.blocked_destination.as_deref() {
-                return Some(format!("{action} · {reason}"));
-            }
             if job.target.is_none() && job.work >= job.required {
                 let (recovered, _) = self.dismantling_yield(catalog, index, job.kind);
                 if !self.can_store_dismantling(catalog, stock, index, &recovered) {
-                    return Some(format!("{action} · Waiting for storage space"));
+                    return Some(format!(
+                        "{} · Waiting for storage space",
+                        job.action_label()
+                    ));
                 }
             }
-            format!("{action} · {:.0}%", job.work / job.required * 100.0)
+            job.status()
         } else if project.work == 0.0 {
             "X Cancel plan · Z Prioritize".into()
         } else if project.work < catalog.projects[&project.key].work {
@@ -845,6 +859,8 @@ mod tests {
             construction.lifecycle_status(&catalog, &stock).as_deref(),
             Some("Moving · Another project occupies that space.")
         );
+        let (_, projects) = construction.projects_panel(&catalog, 0, true);
+        assert!(projects.contains("Moving · Another project occupies that space."));
         assert_eq!(construction.plans[0].position, original);
         assert_eq!(construction.foundations.len(), 1);
         assert!(construction.changes[&0].target.is_some());

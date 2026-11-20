@@ -79,8 +79,8 @@ impl Construction {
             .any(|worker| worker.blocked_construction_project() == Some(index))
         {
             "Waiting for access".into()
-        } else if self.changes.contains_key(&index) {
-            "Changes queued".to_owned()
+        } else if let Some(job) = self.changes.get(&index) {
+            job.status()
         } else if plan.work >= def.work {
             "Complete".to_owned()
         } else if self.construction_delivery_at(index) {
