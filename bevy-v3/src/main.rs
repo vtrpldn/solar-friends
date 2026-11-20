@@ -1480,11 +1480,9 @@ mod tests {
         app.world_mut()
             .resource_mut::<ButtonInput<KeyCode>>()
             .reset(KeyCode::Enter);
-        assert!(
-            ui_texts(&mut app)
-                .iter()
-                .any(|text| text.0.contains("Daily limit R$37\n"))
-        );
+        assert!(ui_texts(&mut app).iter().any(|text| text.0 == "R$37"));
+        assert_eq!(press_stepper(&mut app, "DAILY FOOD BUDGET", true), "R$62");
+        assert_eq!(press_stepper(&mut app, "KEEP IN RESERVE", true), "2.0 days");
         press_button(&mut app, "Manage food automatically");
         for caption in ["FRESH-MEAL TARGET", "DRIED-PROVISION TARGET"] {
             let raised = press_stepper(&mut app, caption, true);

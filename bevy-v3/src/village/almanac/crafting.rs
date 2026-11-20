@@ -88,14 +88,9 @@ pub(super) fn refresh(village: &Village, catalog: &Catalog) -> Widget<Action> {
             Producer::CraftRecipe(id) => (
                 Action::Recipe(id.into()),
                 village.craft_recipe.as_deref() == Some(id),
-                if town
-                    .crafting_plan(catalog, &village.stock, id, None)
-                    .is_ok()
-                {
-                    "Ready to make"
-                } else {
-                    "Requirements needed"
-                },
+                // Name what is missing, so the player knows the next step.
+                town.crafting_plan(catalog, &village.stock, id, None)
+                    .map_or_else(|reason| reason, |_| "Ready to make".into()),
                 output_item(&catalog.production[id]),
             ),
             Producer::Site(site) => {
@@ -105,7 +100,7 @@ pub(super) fn refresh(village: &Village, catalog: &Catalog) -> Widget<Action> {
                 (
                     Action::Job(site),
                     village.craft_job_site == Some(site),
-                    town.craft_job_worker(site),
+                    town.craft_job_worker(site).into(),
                     output_item(&catalog.production[&job.recipe]),
                 )
             }

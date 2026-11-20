@@ -418,6 +418,14 @@ impl Trade {
         Ok(())
     }
 
+    /// The food reserve target in half days and the daily food budget in cents.
+    pub fn pantry_plan(&self) -> (u8, u64) {
+        (
+            self.pantry_purchase.reserve_half_days,
+            self.pantry_purchase.allowance_cents,
+        )
+    }
+
     pub fn pantry_controls(&mut self, reserve_change: i8, budget_change: i64, toggle: bool) {
         if toggle {
             self.household_restock_off = !self.household_restock_off;

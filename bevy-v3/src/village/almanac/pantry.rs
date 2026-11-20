@@ -14,6 +14,8 @@ pub(in crate::village) enum Action {
     BatchPage(bool),
     Purchases,
     Budget,
+    Reserve(bool),
+    Limit(bool),
 }
 
 pub(in crate::village) struct Screen;
@@ -175,6 +177,20 @@ pub(super) fn refresh(
                         .as_ref()
                         .is_some_and(|(target, _)| *target == NumericTarget::Food),
                 ),
+                stepper(
+                    "KEEP IN RESERVE",
+                    Action::Reserve(false),
+                    format!("{:.1} days", f32::from(town.trade.pantry_plan().0) / 2.),
+                    Action::Reserve(true),
+                    active,
+                ),
+                stepper(
+                    "DAILY FOOD BUDGET",
+                    Action::Limit(false),
+                    format!("R${:.0}", town.trade.pantry_plan().1 as f64 / 100.),
+                    Action::Limit(true),
+                    active,
+                ),
                 Widget::note(
                     town.pantry_purchase_status(
                         catalog,
@@ -185,7 +201,8 @@ pub(super) fn refresh(
                         },
                     )
                     .lines()
-                    .skip(1)
+                    // The first two lines are the toggle and the steppers above.
+                    .skip(2)
                     .filter(|line| !line.starts_with("D Automatic supplies"))
                     .collect::<Vec<_>>()
                     .join("\n"),
@@ -282,6 +299,16 @@ pub(super) fn input(action: Action, village: &mut Village, catalog: &Catalog, se
         }
         Action::Purchases if !village.stock.sandbox => {
             village.construction.trade.pantry_controls(0, 0, true)
+        }
+        Action::Reserve(up) if !village.stock.sandbox => village
+            .construction
+            .trade
+            .pantry_controls(if up { 1 } else { -1 }, 0, false),
+        Action::Limit(up) if !village.stock.sandbox => {
+            village
+                .construction
+                .trade
+                .pantry_controls(0, if up { 2_500 } else { -2_500 }, false)
         }
         Action::Budget if !village.stock.sandbox => {
             village.numeric_entry = Some((NumericTarget::Food, String::new()))
