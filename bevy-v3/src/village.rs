@@ -15,7 +15,9 @@ pub(crate) mod lab;
 mod land_lens;
 mod lens_card;
 mod lens_picker;
+mod map_cursor;
 mod rich_text;
+mod keyboard_focus;
 mod selection_card;
 mod thumbnails;
 use lens_picker::{LensPicker, MapLens};
@@ -108,11 +110,13 @@ impl Plugin for VillagePlugin {
         resident_meters::install(app);
         terrain_card::install(app);
         lens_card::install(app);
+        map_cursor::install(app);
         advance_modal::install(app);
         view_options::install(app);
         projects_card::install(app);
         building_lighting::install(app);
         selection_card::install(app);
+        keyboard_focus::install(app);
         livestock_motion::install(app);
         vehicle_motion::install(app);
         app.add_systems(PostUpdate, cultivation_surface::show_beds)
@@ -2089,6 +2093,12 @@ fn village_input(
         village.numeric_entry = None;
     }
     if let Some((target, entry)) = &mut village.numeric_entry {
+        // Escape leaves the value as it was.
+        if keyboard.just_pressed(KeyCode::Escape) {
+            village.numeric_entry = None;
+            build_text.clear();
+            return;
+        }
         if keyboard.any_just_pressed([KeyCode::Enter, KeyCode::NumpadEnter]) {
             let (target, entry) = village.numeric_entry.take().expect("active numeric entry");
             if target == NumericTarget::FieldDimensions {
