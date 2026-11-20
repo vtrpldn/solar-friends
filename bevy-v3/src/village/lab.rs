@@ -1321,7 +1321,7 @@ fn order_label(order: &LabOrder) -> String {
             Some(channel) => {
                 format!("Install water connection #{from} → #{to} · channel {channel}")
             }
-            None => format!("Install power connection #{from} ↔ #{to}"),
+            None => format!("Install power connection #{from} – #{to}"),
         },
         LabOrder::SwitchConnection {
             from,

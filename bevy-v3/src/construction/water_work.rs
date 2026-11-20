@@ -556,7 +556,7 @@ impl Construction {
                     .map(|(from, to, enabled)| (from, to, "Power", enabled)),
                 self.utilities.power_link_count(),
                 "T",
-                "↔",
+                "–",
             )
         } else {
             (
@@ -700,7 +700,7 @@ impl Construction {
     pub fn power_installation_summary(&self, catalog: &Catalog, from: usize, to: usize) -> String {
         use std::fmt::Write;
         let mut text = format!(
-            "\nNew line · {} ↔ {}\nShift-click source · Click destination · C Camp · U Install line",
+            "\nNew line · {} – {}\nShift-click source · Click destination · C Camp · U Install line",
             self.connection_site_name(catalog, from),
             self.connection_site_name(catalog, to),
         );
