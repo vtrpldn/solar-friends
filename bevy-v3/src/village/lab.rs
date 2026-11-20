@@ -3690,6 +3690,36 @@ mod tests {
     }
 
     #[test]
+    fn a_live_purchase_refreshes_the_hourly_sample_at_the_same_step() {
+        let catalog = Catalog::default();
+        let scenario = serde_json::from_str(r#"{"steps":3}"#).unwrap();
+        let mut runner = Runner::new(scenario, None, &catalog).unwrap();
+        let opening_cash = runner.village.stock.balance();
+        assert_eq!(runner.trends.samples[0].cash_centavos, opening_cash);
+
+        runner
+            .submit(
+                &catalog,
+                LabOrder::Buy {
+                    material: "wood".into(),
+                    freight: true,
+                },
+            )
+            .unwrap();
+        let cash_after_order = runner.village.stock.balance();
+        assert!(cash_after_order < opening_cash);
+        assert_eq!(runner.trends.samples.len(), 1);
+        assert_eq!(runner.trends.samples[0].cash_centavos, cash_after_order);
+
+        while !runner.done() {
+            runner.advance(&catalog);
+        }
+        let report =
+            serde_json::from_slice(&serde_json::to_vec(&runner.report()).unwrap()).unwrap();
+        assert_eq!(verify_report(report, &catalog).unwrap(), 3);
+    }
+
+    #[test]
     fn cultivation_shortcut_records_the_selected_bed_order_for_replay() {
         let catalog = Catalog::default();
         let scenario = serde_json::from_str(r#"{
