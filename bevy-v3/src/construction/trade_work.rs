@@ -1,4 +1,4 @@
-use crate::market::{fare_cents, freight_cents, town_is_open};
+use crate::market::{fare_cents, freight_cents, freight_seconds, town_is_open};
 
 use super::*;
 
@@ -748,7 +748,15 @@ impl Construction {
                 .push_str("Supplier stock renews tomorrow. Paid orders keep their allocation.\n");
         }
         let issue = |fare, freight| self.purchase_quote(catalog, stock, clock, id, freight, fare);
-        match (issue(pickup, false), issue(freight, true)) {
+        let freight_quote = issue(freight, true);
+        if freight_quote.is_ok() {
+            let minutes =
+                crate::weather::remaining_game_minutes(freight_seconds(clock.round_trip_km));
+            display.push_str(&format!(
+                "Supplier freight arrives in about {minutes} game minutes · No driver needed\n"
+            ));
+        }
+        match (issue(pickup, false), freight_quote) {
             (Err(pickup), Err(freight)) if pickup == freight => {
                 display.push_str(&format!("Purchases unavailable · {pickup}\n"));
             }
