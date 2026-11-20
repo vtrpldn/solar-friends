@@ -112,6 +112,13 @@ impl Construction {
         self.changes.values().any(|job| job.worker == Some(worker))
     }
 
+    pub(super) fn change_activity(&self, worker: usize) -> Option<&'static str> {
+        self.changes
+            .values()
+            .find(|job| job.worker == Some(worker))
+            .map(ChangeJob::action_label)
+    }
+
     pub fn construction_notice(&self) -> &str {
         &self.status
     }
@@ -921,6 +928,10 @@ mod tests {
         construction.tick_changes(&catalog, &mut stock, site, 42.0, 0.1);
         let replacement = construction.changes[&0].worker.unwrap();
         assert_ne!(replacement, original_worker);
+        assert_eq!(
+            construction.resident_action(&catalog, replacement),
+            "Demolishing"
+        );
         assert!(construction.residents[original_worker].path.is_empty());
         assert_eq!(construction.changes[&0].work, 10.0);
 
