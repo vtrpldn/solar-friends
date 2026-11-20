@@ -518,6 +518,26 @@ impl Construction {
             .max_by_key(|trip| trip.boarded)
     }
 
+    pub(super) fn construction_transport_status(&self, site: usize) -> Option<String> {
+        use std::fmt::Write;
+        let mut status = String::new();
+        if self.construction_delivery_at(site) {
+            status.push_str("Supplier delivery on its way");
+        }
+        for trip in self.construction_trips(site) {
+            if !status.is_empty() {
+                status.push_str(" · ");
+            }
+            let phase = if trip.boarded {
+                "collecting materials"
+            } else {
+                "booked for materials"
+            };
+            let _ = write!(status, "Vehicle {} {phase}", trip.vehicle + 1);
+        }
+        (!status.is_empty()).then_some(status)
+    }
+
     pub(super) fn construction_pickup_cargo(&self, site: usize) -> Option<BTreeMap<String, u32>> {
         let mut combined = BTreeMap::<String, u32>::new();
         for load in self
@@ -1624,6 +1644,12 @@ mod tests {
             first_load
         );
         assert_eq!(mixed.construction_freight_cargo(0).unwrap()["stone"], 1);
+        let status = mixed.project_status(&catalog, 0);
+        assert!(status.contains("Supplier delivery on its way"));
+        assert!(status.contains(&format!(
+            "Vehicle {} collecting materials",
+            first.vehicle + 1
+        )));
         assert!(mixed.valid_save(&catalog, &mixed_stock));
         assert_eq!(mixed.market.committed_fares(), 0);
         let arrival = mixed.construction_delivery.as_ref().unwrap().eta;
@@ -1656,6 +1682,9 @@ mod tests {
         village.residents[second.driver].path.clear();
         village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
         assert!(village.second_trip.unwrap().boarded);
+        let status = village.project_status(&catalog, 0);
+        assert!(status.contains("Vehicle 1 collecting materials"));
+        assert!(status.contains("Vehicle 2 collecting materials"));
         assert_eq!(
             village.construction_pickup_cargo(0).unwrap()["stone"],
             quantity

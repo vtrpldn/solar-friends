@@ -115,14 +115,8 @@ impl Construction {
                 .operational_blocker(index)
                 .unwrap_or("Complete")
                 .into()
-        } else if self.construction_delivery_at(index) {
-            "Supplier delivery on its way".into()
-        } else if let Some(trip) = self.booked_construction_trip(index) {
-            if trip.boarded {
-                format!("Vehicle {} collecting materials", trip.vehicle + 1)
-            } else {
-                format!("Vehicle {} booked for materials", trip.vehicle + 1)
-            }
+        } else if let Some(status) = self.construction_transport_status(index) {
+            status
         } else if self.supplier_construction && plan.pickups > 0 {
             if Self::fits_construction_freight(catalog, plan) {
                 "Waiting for supplier freight".into()
