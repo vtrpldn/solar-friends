@@ -1405,10 +1405,12 @@ mod tests {
         ] {
             press_button(&mut app, "Map lenses");
             press_lens_button(&mut app, button);
+            // The legend card titles the lens and lists its colours a frame later.
+            app.world_mut().run_schedule(Update);
+            app.world_mut().run_schedule(Update);
+            let title = legend.split_once(" · ").unwrap().0.to_uppercase();
             assert!(
-                ui_texts(&mut app)
-                    .iter()
-                    .any(|text| text.0.contains(legend)),
+                ui_texts(&mut app).iter().any(|text| text.0 == title),
                 "missing legend for {button}"
             );
         }

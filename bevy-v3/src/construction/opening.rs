@@ -96,20 +96,17 @@ impl Construction {
         })
     }
 
-    pub fn opening_milestones_status(&self, catalog: &Catalog) -> Option<String> {
+    /// The first camp's goals and whether each is built, until the opening is complete.
+    pub(crate) fn opening_goals(&self, catalog: &Catalog) -> Option<[(&'static str, bool); 3]> {
         if self.opening.complete {
             return None;
         }
-        let pending: Vec<_> = ["Gathering place", "Shelter", "Protected supplies"]
-            .into_iter()
-            .zip(self.current_opening_goals(catalog))
-            .filter_map(|(name, done)| (!done).then_some(name))
-            .collect();
-        if pending.is_empty() {
-            Some("First camp · Ready for the first meal once town trips finish".into())
-        } else {
-            Some(format!("First camp · {}", pending.join(" · ")))
-        }
+        let done = self.current_opening_goals(catalog);
+        Some([
+            ("Gathering place", done[0]),
+            ("Shelter", done[1]),
+            ("Protected supplies", done[2]),
+        ])
     }
 }
 
@@ -133,8 +130,12 @@ mod tests {
         construction.plans.push(hall);
         construction.update_opening_milestones(&catalog, 10.0, 100);
         assert_eq!(
-            construction.opening_milestones_status(&catalog).as_deref(),
-            Some("First camp · Protected supplies")
+            construction.opening_goals(&catalog),
+            Some([
+                ("Gathering place", true),
+                ("Shelter", true),
+                ("Protected supplies", false)
+            ])
         );
 
         let saved = serde_json::to_string(&construction).unwrap();
@@ -162,7 +163,7 @@ mod tests {
         restored.trip = None;
         restored.update_opening_milestones(&catalog, 12.0, 100);
         assert!(restored.opening.complete);
-        assert!(restored.opening_milestones_status(&catalog).is_none());
+        assert!(restored.opening_goals(&catalog).is_none());
         assert!(restored.event_log(0, "").1.contains("1 town trip · R$1.00"));
         let saved = serde_json::to_string(&restored).unwrap();
         let mut restored: Construction = serde_json::from_str(&saved).unwrap();

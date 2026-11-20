@@ -17,6 +17,7 @@ mod land_lens;
 mod lens_card;
 mod lens_picker;
 mod map_cursor;
+mod notices;
 mod rich_text;
 mod selection_card;
 mod thumbnails;
@@ -117,6 +118,7 @@ impl Plugin for VillagePlugin {
         building_lighting::install(app);
         selection_card::install(app);
         keyboard_focus::install(app);
+        notices::install(app);
         livestock_motion::install(app);
         vehicle_motion::install(app);
         app.add_systems(PostUpdate, cultivation_surface::show_beds)
@@ -3188,22 +3190,28 @@ fn show_hud(
             .into()
     } else if village.paused && !village.construction.menu {
         String::new()
+    } else if village.construction.is_placing() {
+        // The catalog already described the blueprint; placing needs only its summary.
+        village
+            .construction
+            .instructions(&catalog, village.stock.sandbox)
+            .lines()
+            .next()
+            .unwrap_or_default()
+            .to_owned()
     } else {
         village
             .construction
             .instructions(&catalog, village.stock.sandbox)
     };
-    // The clock, stock counters, date and weather live in the top bar; this card only
-    // carries what the player is doing right now.
+    // The clock, stock counters, date and weather live in the top bar, news arrives as
+    // toasts, the first camp's goals have a checklist and map readouts follow the
+    // cursor (see `notices`); this card only carries what the player is doing now.
     let mut label = if controls == "B Build · Space Pause · 1–4 Speed" {
         String::new()
     } else {
         controls
     };
-    if let Some(notice) = &placement.0 {
-        label.push('\n');
-        label.push_str(notice);
-    }
     if village.show_forecast {
         label.push('\n');
         label.push_str(&forecast(village.clock, setup.biome(), setup.seed()));
@@ -3214,26 +3222,6 @@ fn show_hud(
     }
     if village.terrain_editor.open && !sheet && !village.guide.open() && !village.lenses.open {
         node.left = px(316);
-    }
-    if village.camp.is_some()
-        && !sheet
-        && !village.stock.sandbox
-        && let Some(status) = village.construction.opening_milestones_status(&catalog)
-    {
-        label.push('\n');
-        label.push_str(&status);
-    }
-    if !sheet && let Some(progress) = village.construction.latest_progress(&catalog) {
-        label.push('\n');
-        label.push_str(&progress);
-    }
-    if village.camp.is_some()
-        && village.utility_panel.is_none()
-        && !village.construction.is_placing()
-        && let Some(event) = village.construction.latest_event()
-    {
-        label.push('\n');
-        label.push_str(event);
     }
     if let Some(natural) =
         village
@@ -3328,10 +3316,6 @@ fn show_hud(
     {
         label.push('\n');
         label.push_str(&service);
-    }
-    if !village.save_notice.is_empty() {
-        label.push('\n');
-        label.push_str(&village.save_notice);
     }
     // Panel buttons already offer the keyboard actions their text used to list.
     let label = if sheet {
