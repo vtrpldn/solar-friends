@@ -169,6 +169,7 @@ impl Plugin for VillagePlugin {
         thumbnails::install(app);
         dialog::install(app);
         rich_text::install(app);
+        almanac::art::install(app);
         toolbar::install(app);
         guide::install(app);
         library_ui::install(app);
@@ -196,7 +197,15 @@ impl Plugin for VillagePlugin {
                     save_controls,
                     library_controls,
                     read_camp_pointer,
-                    (village_input, almanac::sites::input).chain(),
+                    (
+                        almanac::widgets::input::<almanac::inventory::Screen>,
+                        almanac::widgets::input::<almanac::crafting::Screen>,
+                        almanac::widgets::input::<almanac::pantry::Screen>,
+                        almanac::widgets::input::<almanac::finances::Screen>,
+                        village_input,
+                        almanac::sites::input,
+                    )
+                        .chain(),
                     crate::camera_controls,
                     advance_days,
                     animate_arrival,
@@ -206,6 +215,10 @@ impl Plugin for VillagePlugin {
                         almanac::refresh,
                         almanac::sites::refresh,
                         almanac::sites::paint,
+                        almanac::widgets::refresh::<almanac::inventory::Screen>,
+                        almanac::widgets::refresh::<almanac::crafting::Screen>,
+                        almanac::widgets::refresh::<almanac::pantry::Screen>,
+                        almanac::widgets::refresh::<almanac::finances::Screen>,
                     )
                         .chain(),
                     fit_and_scroll_hud,
@@ -3273,123 +3286,20 @@ fn show_hud(
                 village.construction.append_recent_events(&mut label, 0, 8);
             }
         }
-        Some(UtilityPanel::Inventory) => {
-            use std::fmt::Write;
-            let cursor = if village.editing_inventory {
-                "| · Enter Done"
-            } else {
-                " · / Search"
-            };
-            let search_label = if village.inventory_view == InventoryView::Production {
-                "Find producer"
-            } else {
-                "Find material"
-            };
-            let _ = write!(
-                label,
-                "\n{search_label} · {}{cursor}",
-                village.inventory_search
-            );
+        Some(UtilityPanel::Inventory) if village.inventory_view == InventoryView::Production => {
             label.push('\n');
-            if village.inventory_view == InventoryView::Production {
-                label.push_str(&village.construction.inventory_production_summary(
-                    &catalog,
-                    &village.stock,
-                    village.inventory_page,
-                    &village.inventory_search,
-                    village.clock,
-                ));
-            } else {
-                label.push_str(
-                    &village
-                        .construction
-                        .inventory_panel(
-                            &catalog,
-                            &village.stock,
-                            &land,
-                            village.inventory_page,
-                            village.inventory_view,
-                            &village.inventory_search,
-                        )
-                        .1,
-                );
-            }
+            label.push_str(&village.construction.inventory_production_summary(
+                &catalog,
+                &village.stock,
+                village.inventory_page,
+                &village.inventory_search,
+                village.clock,
+            ));
             label.push('\n');
             label.push_str(&village.stock.processing_summary(&catalog));
         }
-        Some(UtilityPanel::Crafting) => {
-            use std::fmt::Write;
-            let (pages, rows) = village.producer_rows(&catalog);
-            let page = village.inventory_page.min(pages - 1) + 1;
-            let _ = write!(
-                label,
-                "\nCrafting & repairs · {} · {page}/{pages}",
-                village.craft_view.label()
-            );
-            if rows.is_empty() {
-                label.push_str(match village.craft_view {
-                    crate::construction::CraftView::Make => "\nNo craft recipes available.",
-                    crate::construction::CraftView::Repair => "\nNo owned equipment to repair.",
-                    crate::construction::CraftView::Jobs => "\nNo crafting jobs underway.",
-                });
-            }
-            if let Some(id) = &village.craft_recipe {
-                label.push('\n');
-                label.push_str(&village.construction.craft_recipe_summary(
-                    &catalog,
-                    &village.stock,
-                    id,
-                ));
-                match village.construction.crafting_plan(
-                    &catalog,
-                    &village.stock,
-                    id,
-                    village.craft_workspace,
-                ) {
-                    Ok(site) => {
-                        let name = village.construction.craft_workspace_name(&catalog, site);
-                        let _ = write!(label, "\n{name} · Ready to start");
-                    }
-                    Err(reason) => {
-                        if let Some(site) = village.craft_workspace
-                            && village
-                                .construction
-                                .craft_workspaces(&catalog, id)
-                                .contains(&site)
-                        {
-                            let name = village.construction.craft_workspace_name(&catalog, site);
-                            let _ = write!(label, "\n{name}");
-                        }
-                        let _ = write!(label, "\n{reason}");
-                    }
-                }
-            } else if village.craft_view == crate::construction::CraftView::Jobs {
-                for (target, name) in rows {
-                    if let crate::construction::Producer::Site(site) = target {
-                        let status = village.construction.production_site_status(
-                            &catalog,
-                            &village.stock,
-                            site,
-                            village.clock,
-                        );
-                        let worker = village.construction.craft_job_worker(site);
-                        let _ = write!(label, "\n{name} · {worker}{status}");
-                    }
-                }
-                if let Some(site) = village.craft_job_site {
-                    let name = village.construction.craft_workspace_name(&catalog, site);
-                    let _ = write!(label, "\nSelected workspace · {name}");
-                    if let Some(destination) = village.craft_move_target(&catalog) {
-                        let target = village
-                            .construction
-                            .craft_workspace_name(&catalog, destination);
-                        let _ = write!(label, "\nMove unfinished job to {target}");
-                    } else {
-                        label.push_str("\nNo eligible destination for this job.");
-                    }
-                }
-            }
-        }
+        Some(UtilityPanel::Inventory) => {}
+        Some(UtilityPanel::Crafting) => {}
         Some(UtilityPanel::Events) => {
             label.push('\n');
             label.push_str(
@@ -3474,52 +3384,7 @@ fn show_hud(
             }
             label.push_str("\n\n1–5 Select resident · Tab Change profile view");
         }
-        Some(UtilityPanel::Finances) => {
-            label.push('\n');
-            if village.finance_history_open {
-                label.push_str(
-                    &village
-                        .stock
-                        .finance_history(village.finance_history_page)
-                        .1,
-                );
-                label.push('\n');
-                label.push_str(&village.stock.material_history(&catalog));
-            } else {
-                label.push_str(&village.construction.finance_summary(
-                    &catalog,
-                    &village.stock,
-                    village.selected_resident,
-                    TownClock {
-                        seconds: village.clock,
-                        round_trip_km: setup.round_trip_km(),
-                    },
-                ));
-                label.push('\n');
-                label.push_str(&village.construction.replacement_costs(
-                    &catalog,
-                    &village.stock,
-                    &land,
-                ));
-                label.push('\n');
-                label.push_str(&village.construction.expansion_reserve_label());
-                if !village.stock.sandbox {
-                    use std::fmt::Write;
-                    label.push_str(
-                        "\nConstruction auto-buy accounts for this reserve before placing new orders.\nThe village starts with its land and two cars already owned. Each car has an estimated book value of R$60,000.",
-                    );
-                    let distance = setup.round_trip_km();
-                    let _ = write!(
-                        label,
-                        "\nTown pickup or export · {distance} km round trip · R${:.2} fuel · About {:.0} game minutes",
-                        crate::market::fare_cents(distance) as f64 / 100.0,
-                        crate::market::trip_seconds(distance) * 0.45,
-                    );
-                }
-                label.push_str("\nR Recent transactions");
-            }
-            label.push_str("\nTab Town trade");
-        }
+        Some(UtilityPanel::Finances) => {}
         Some(UtilityPanel::Trade) => {
             label.push('\n');
             label.push_str(&village.construction.trade_status(
@@ -3532,75 +3397,7 @@ fn show_hud(
             ));
             label.push_str("\nTab Pantry");
         }
-        Some(UtilityPanel::Pantry) if village.pantry_batch_page.is_some() => {
-            label.push('\n');
-            if village.stock.sandbox {
-                label.push_str("Food batches · Unlimited food · No spoilage\nR Pantry");
-            } else if village.pantry_batch_page == Some(0) {
-                label.push_str(
-                    &village
-                        .stock
-                        .pantry
-                        .shelves(&catalog, |id| village.stock.available(id)),
-                );
-                label.push('\n');
-                label.push_str(&village.construction.pantry_commitments(
-                    &catalog,
-                    &village.stock,
-                    &land,
-                ));
-                label.push_str("\nR Pantry · Tab Finances");
-            } else {
-                let page = village
-                    .pantry_batch_page
-                    .unwrap_or_default()
-                    .saturating_sub(1);
-                label.push_str(&village.stock.pantry.batches(&catalog, page).1);
-                label.push_str("\nTab Finances");
-            }
-        }
-        Some(UtilityPanel::Pantry) => {
-            label.push('\n');
-            if village.stock.sandbox {
-                let utilities = &village.construction.utilities;
-                use std::fmt::Write;
-                let _ = write!(
-                    label,
-                    "Unlimited food · No spoilage\nKitchen automation is inactive\nRefrigeration · {:.0}/{:.0} L powered · Chill first: {}",
-                    utilities.powered_cold_storage(),
-                    utilities.installed_cold_storage(),
-                    village.stock.pantry.priority.label(),
-                );
-            } else {
-                label.push_str(&village.stock.pantry.status(
-                    &catalog,
-                    village.construction.utilities.powered_cold_storage(),
-                    village.construction.utilities.installed_cold_storage(),
-                ));
-            }
-            label.push('\n');
-            label.push_str(&village.construction.pantry_purchase_status(
-                &catalog,
-                &village.stock,
-                TownClock {
-                    seconds: village.clock,
-                    round_trip_km: setup.round_trip_km(),
-                },
-            ));
-            label.push('\n');
-            if !village.stock.sandbox
-                && let Some(warning) = village.stock.pantry.use_soon(&catalog, village.clock)
-            {
-                label.push_str(&warning);
-                label.push('\n');
-            }
-            if village.stock.sandbox {
-                label.push_str("R Food batches");
-            } else {
-                label.push_str(&village.construction.production.kitchen_policy.status());
-                label.push_str("\nR Food batches · Tab Finances");
-            }
-        }
+        Some(UtilityPanel::Pantry) => {}
         None => {}
     }
     if let Some(endpoints) = village.selected_installation() {

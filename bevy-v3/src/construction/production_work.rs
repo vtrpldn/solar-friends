@@ -13,6 +13,40 @@ use crate::{
 use super::{resident_work::project_access_points, *};
 
 impl Construction {
+    pub(crate) fn equipment_in_stores(
+        &self,
+        catalog: &Catalog,
+        stock: &Stock,
+        id: &str,
+    ) -> (u32, u32, u32, bool) {
+        let equipment = &stock.equipment;
+        let owned = stock.available(id);
+        let repairing = self.repairing(catalog, id);
+        (
+            equipment.available(id, owned, repairing),
+            equipment.borrowed(id),
+            equipment.broken(id).min(owned),
+            repairing,
+        )
+    }
+
+    pub(crate) fn residents_with_jobs(&self) -> usize {
+        (0..self.residents.len())
+            .filter(|&index| {
+                let resident = &self.residents[index];
+                resident.assignment.is_some()
+                    || resident.town_work.active()
+                    || self.production.has_worker(index)
+                    || self.farming.has_worker(index)
+                    || self.gathering.workers_at_site(index)
+                    || self.working_upkeep(index)
+                    || self.working_water(index)
+                    || self.working_change(index)
+                    || self.driver_booked(index)
+            })
+            .count()
+    }
+
     pub fn select_facility(&mut self, cell: IVec2) {
         let index = self
             .plans

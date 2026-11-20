@@ -2,7 +2,7 @@ use crate::market::{fare_cents, freight_cents, freight_seconds, town_is_open};
 
 use super::*;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq)]
 pub(crate) enum TradeOrder {
     Buy { freight: bool },
     Sell { hold_for_pickup: bool },
@@ -455,21 +455,24 @@ impl Construction {
     ) -> Option<&'static str> {
         let options = Trade::tradable(catalog);
         let item = options.get(self.trade.selected)?;
+        self.trade_item_issue(catalog, stock, clock, item.id, order)
+    }
+
+    pub(crate) fn trade_item_issue(
+        &self,
+        catalog: &Catalog,
+        stock: &Stock,
+        clock: TownClock,
+        id: &str,
+        order: TradeOrder,
+    ) -> Option<&'static str> {
         match order {
-            TradeOrder::Buy { freight } => {
-                let fare = if freight {
-                    freight_cents(clock.round_trip_km)
-                } else if self.sale_trip_for_return_purchase().is_some() {
-                    0
-                } else {
-                    fare_cents(clock.round_trip_km)
-                };
-                self.purchase_quote(catalog, stock, clock, item.id, freight, fare)
-                    .err()
-            }
+            TradeOrder::Buy { freight } => self
+                .town_purchase_quote(catalog, stock, clock, id, freight)
+                .err(),
             TradeOrder::Sell { hold_for_pickup } => self
                 .trade
-                .quote_sale_order(catalog, stock, item.id, clock.day(), 0)
+                .quote_sale_order(catalog, stock, id, clock.day(), 0)
                 .err()
                 .or_else(|| {
                     (!hold_for_pickup
@@ -486,6 +489,24 @@ impl Construction {
         }
     }
 
+    pub(crate) fn town_purchase_quote(
+        &self,
+        catalog: &Catalog,
+        stock: &Stock,
+        clock: TownClock,
+        id: &str,
+        freight: bool,
+    ) -> Result<u64, &'static str> {
+        let fare = if freight {
+            freight_cents(clock.round_trip_km)
+        } else if self.sale_trip_for_return_purchase().is_some() {
+            0
+        } else {
+            fare_cents(clock.round_trip_km)
+        };
+        self.purchase_quote(catalog, stock, clock, id, freight, fare)
+    }
+
     fn purchase_quote(
         &self,
         catalog: &Catalog,
@@ -494,7 +515,7 @@ impl Construction {
         material: &str,
         freight: bool,
         fare: u64,
-    ) -> Result<(), &'static str> {
+    ) -> Result<u64, &'static str> {
         self.check_town_purchase(catalog, stock, clock, material, freight)?;
         let (_, price) =
             self.market
@@ -507,7 +528,22 @@ impl Construction {
                 return Err("Shared savings are committed to queued construction freight.");
             }
         }
-        Ok(())
+        Ok(price + fare)
+    }
+
+    pub(crate) fn finance_commitments(
+        &self,
+        catalog: &Catalog,
+        stock: &Stock,
+        clock: TownClock,
+    ) -> (u64, u64) {
+        let committed = if self.supplier_construction {
+            self.protected_freight_cash(catalog, clock)
+                .unwrap_or(stock.balance())
+        } else {
+            self.market.committed_fares()
+        };
+        (stock.balance().saturating_sub(committed), committed)
     }
 
     pub(super) fn protected_freight_cash(
