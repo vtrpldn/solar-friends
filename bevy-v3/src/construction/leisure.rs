@@ -26,6 +26,11 @@ pub(super) fn recreation_benefit(kind: &str) -> Option<&'static str> {
     Activity::at(kind).map(|activity| activity.details().0)
 }
 
+fn comfort_leisure_site(kind: &str) -> bool {
+    Activity::at(kind).is_some()
+        || matches!(kind, "square" | "picnic-table" | "garden-bench" | "hammock")
+}
+
 impl Activity {
     fn at(kind: &str) -> Option<Self> {
         Some(match kind {
@@ -471,7 +476,7 @@ impl Construction {
                     && plan.work >= project.work
                     && !self.changes.contains_key(&index)
                     && self.utilities.enabled(index)
-                    && Activity::at(&project.kind).is_some())
+                    && comfort_leisure_site(&project.kind))
                 .then(|| center(plan.position, plan.size))
             })
             .collect();
@@ -482,7 +487,7 @@ impl Construction {
             let kind = project.kind.as_str();
             if plan.removed
                 || !(matches!(kind, "home" | "kitchen" | "wash-station" | "eco_toilet")
-                    || Activity::at(kind).is_some())
+                    || comfort_leisure_site(kind))
             {
                 continue;
             }
@@ -509,7 +514,7 @@ impl Construction {
                     let meals = from.distance(STOCKPILE.as_vec2());
                     let _ = write!(
                         label,
-                        " · Straight-line distances\nShared meals {meals:.0} cells"
+                        " · Straight-line distances · Access depends on walking routes\nShared meals {meals:.0} cells"
                     );
                     for (service, locations) in [
                         ("Washing", &wash),
