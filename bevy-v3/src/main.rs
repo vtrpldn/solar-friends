@@ -762,6 +762,17 @@ mod tests {
         );
         press_button(&mut app, "Saved villages");
         press_button(&mut app, "Close saved villages");
+        press_button(&mut app, "Sound settings");
+        assert!(app.world().resource::<audio::SoundSettings>().open);
+        app.world_mut().run_schedule(Update);
+        press_button(&mut app, "Close sound settings");
+        assert!(!app.world().resource::<audio::SoundSettings>().open);
+
+        press_button(&mut app, "New sandbox");
+        assert!(app.world().resource::<WorldSetup>().mode == setup::Mode::Sandbox);
+        press_button(&mut app, "Back to main menu");
+        press_button(&mut app, "New game");
+        assert!(app.world().resource::<WorldSetup>().mode == setup::Mode::Story);
         press_button(&mut app, "Town   ·   Drive");
         assert!(
             app.world_mut()
@@ -771,11 +782,6 @@ mod tests {
         );
         press_button(&mut app, "Town   ·   Remote");
         press_button(&mut app, "Town   ·   Nearby");
-        press_button(&mut app, "Sound settings");
-        assert!(app.world().resource::<audio::SoundSettings>().open);
-        app.world_mut().run_schedule(Update);
-        press_button(&mut app, "Close sound settings");
-        assert!(!app.world().resource::<audio::SoundSettings>().open);
 
         press_button(&mut app, "Land seed   ·   42");
         press_button(&mut app, "Start new village");
@@ -1498,8 +1504,10 @@ mod tests {
         press_button(&mut app, "Setup");
         app.world_mut().run_schedule(Update);
         assert!(app.world().resource::<WorldSetup>().open);
+        press_button(&mut app, "New game");
         press_button(&mut app, "Start new village");
         assert!(app.world().resource::<WorldSetup>().open);
+        press_button(&mut app, "Back to main menu");
         press_button(&mut app, "Resume current village");
         assert!(!app.world().resource::<WorldSetup>().open);
         assert_eq!(
@@ -1509,6 +1517,7 @@ mod tests {
 
         app.world_mut().resource_mut::<WorldSetup>().open = true;
         app.world_mut().run_schedule(Update);
+        press_button(&mut app, "New game");
         press_button(&mut app, "Start new village");
         press_button(&mut app, "Confirm new village");
         app.world_mut().run_schedule(Update);

@@ -38,6 +38,8 @@ pub struct WorldSetup {
     #[serde(skip)]
     pub open: bool,
     #[serde(skip)]
+    choosing_land: bool,
+    #[serde(skip)]
     restart: u64,
     #[serde(skip)]
     confirming_new: bool,
@@ -67,6 +69,7 @@ impl Default for WorldSetup {
             crate::economy_reference::WORLD_DEFAULTS;
         Self {
             open: true,
+            choosing_land: false,
             restart: 0,
             confirming_new: false,
             seed_entry: None,
@@ -87,6 +90,7 @@ impl WorldSetup {
     pub fn session(&self) -> Self {
         Self {
             open: false,
+            choosing_land: false,
             confirming_new: false,
             seed_entry: None,
             ..self.clone()
@@ -267,11 +271,9 @@ impl WorldSetup {
 
     pub(crate) fn label(&self, action: Action, has_village: bool) -> String {
         match action {
-            Action::Mode => match self.mode {
-                Mode::Story => "Mode   ·   Story",
-                Mode::Sandbox => "Mode   ·   Sandbox",
-            }
-            .into(),
+            Action::New(Mode::Story) => "New game".into(),
+            Action::New(Mode::Sandbox) => "New sandbox".into(),
+            Action::Back => "Back to main menu".into(),
             Action::Preset => format!(
                 "Starting point   ·   {}",
                 self.preset().map_or("Custom", |index| PRESET_NAMES[index])
@@ -308,7 +310,8 @@ impl WorldSetup {
 
 #[derive(Component, Clone, Copy)]
 pub(crate) enum Action {
-    Mode,
+    New(Mode),
+    Back,
     Preset,
     Biome,
     Landscape,
@@ -325,6 +328,15 @@ pub(crate) enum Action {
     Continue(Mode),
     Library,
     Sound,
+}
+
+impl Action {
+    fn is_title_action(self) -> bool {
+        matches!(
+            self,
+            Self::New(_) | Self::Resume | Self::Continue(_) | Self::Library | Self::Sound
+        )
+    }
 }
 
 #[derive(Component)]
@@ -383,9 +395,14 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
         ))
         .with_children(|panel| {
             panel.spawn((Text::new("Solar Friends"), ui_font(&assets, 30.0)));
-            panel.spawn((Text::new("Choose the land"), ui_font(&assets, 18.0)));
             for action in [
-                Action::Mode,
+                Action::Resume,
+                Action::Continue(Mode::Story),
+                Action::New(Mode::Story),
+                Action::New(Mode::Sandbox),
+                Action::Continue(Mode::Sandbox),
+                Action::Library,
+                Action::Sound,
                 Action::Preset,
                 Action::Biome,
                 Action::Landscape,
@@ -396,22 +413,19 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
                 Action::Town,
                 Action::Seed,
                 Action::Reroll,
-                Action::Resume,
-                Action::Continue(Mode::Story),
-                Action::Continue(Mode::Sandbox),
-                Action::Library,
-                Action::Sound,
                 Action::Explore,
                 Action::CancelNew,
+                Action::Back,
             ] {
                 let mut button = panel.spawn((
                     action,
                     Button,
                     Node {
-                        display: if matches!(
-                            action,
-                            Action::Resume | Action::Continue(_) | Action::CancelNew
-                        ) {
+                        display: if !action.is_title_action()
+                            || matches!(
+                                action,
+                                Action::Resume | Action::Continue(_) | Action::CancelNew
+                            ) {
                             Display::None
                         } else {
                             Display::Flex
@@ -507,6 +521,14 @@ fn setup_input(
         setup.edit_seed(&keyboard);
         return;
     }
+    if setup.choosing_land && keyboard.just_pressed(KeyCode::Escape) {
+        if setup.confirming_new {
+            setup.confirming_new = false;
+        } else {
+            setup.choosing_land = false;
+        }
+        return;
+    }
     for (interaction, action) in &buttons {
         if *interaction != Interaction::Pressed {
             continue;
@@ -515,12 +537,11 @@ fn setup_input(
             setup.confirming_new = false;
         }
         match action {
-            Action::Mode => {
-                setup.mode = match setup.mode {
-                    Mode::Story => Mode::Sandbox,
-                    Mode::Sandbox => Mode::Story,
-                }
+            Action::New(mode) => {
+                setup.mode = *mode;
+                setup.choosing_land = true;
             }
+            Action::Back => setup.choosing_land = false,
             Action::Preset => setup.cycle_preset(),
             Action::Biome
             | Action::Landscape
@@ -568,6 +589,7 @@ fn setup_input(
                     saves.attached = None;
                     setup.restart = setup.restart.wrapping_add(1);
                     setup.confirming_new = false;
+                    setup.choosing_land = false;
                     setup.open = false;
                 }
             }
@@ -607,32 +629,22 @@ fn refresh_panel(
         .continue_path(setup.mode)
         .is_ok_and(|path| path.is_file());
     for (action, children, mut button) in &mut buttons {
-        match action {
-            Action::Resume => {
-                button.display = if has_village {
-                    Display::Flex
-                } else {
-                    Display::None
-                };
-            }
+        let visible = match action {
+            Action::Resume => !setup.choosing_land && has_village,
             Action::Continue(mode) => {
-                let available =
-                    !has_village && saves.continue_path(*mode).is_ok_and(|path| path.is_file());
-                button.display = if available {
-                    Display::Flex
-                } else {
-                    Display::None
-                };
+                !setup.choosing_land
+                    && !has_village
+                    && saves.continue_path(*mode).is_ok_and(|path| path.is_file())
             }
-            Action::CancelNew => {
-                button.display = if setup.confirming_new {
-                    Display::Flex
-                } else {
-                    Display::None
-                };
-            }
-            _ => {}
-        }
+            Action::CancelNew => setup.choosing_land && setup.confirming_new,
+            Action::Library => !setup.choosing_land && !saves.preview,
+            _ => action.is_title_action() != setup.choosing_land,
+        };
+        button.display = if visible {
+            Display::Flex
+        } else {
+            Display::None
+        };
         if let Some(child) = children.first()
             && let Ok(mut label) = labels.get_mut(*child)
         {
@@ -684,7 +696,7 @@ fn refresh_preview(
     if !setup.is_changed() && !saves.is_changed() && !sound.is_changed() {
         return;
     }
-    let visible = setup.open && !saves.open && !sound.open;
+    let visible = setup.open && setup.choosing_land && !saves.open && !sound.open;
     panel.display = if visible {
         Display::Flex
     } else {
