@@ -1,5 +1,18 @@
 # Astra handoff
 
+## Round 6 village dock
+
+- The dock keeps all 12 buttons, both dividers, and the existing key chips in place across village modes. Build and View & options keep their labels when active. Placement, road and map lens controls appear above the dock when needed.
+- A dock press closes the current mode before opening the chosen one. Pressing the active button closes it. Switching away from Map lenses clears the map overlay. Switching away from a running advance uses the existing stop and checkpoint behavior.
+- Finances and Maintenance remain visible in Sandbox with a hover note that they are available in Story villages.
+- Build, Projects, Residents, and Terrain use embedded 14 px icon masks tinted with the theme ink. These are the four leading icons in V2.
+
+### Verification and transfer
+
+Native build, all 360 binary tests, formatting, strict Clippy, and the WebAssembly target check passed. The village integration test verifies dock visibility and highlights while switching modes by label. Desktop and browser visuals are outstanding.
+
+The two step commits are in `/private/tmp/solar-friends-astra-round6.bundle`, based on `823eada5`. The worktree contains the same changes.
+
 ## Round 5 developer previews
 
 - **Utilities** opens a connected power, drinking water, irrigation, and sewage network. It starts with 24 kWh at the solar farm, 3 kWh and a solar upgrade at the house, and the V2 water levels. V3 uses six installed battery modules to sustain the solar farm's 24 kWh charge. The interactions variant adds five sites and queues livestock collection using ready milk and eggs.

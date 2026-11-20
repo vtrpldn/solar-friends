@@ -10,6 +10,7 @@ pub(super) const PANEL_WIDTH: f32 = 272.0;
 // The dock stays clickable over dimmed village screens, including Advance days.
 const DOCK_LAYER: i32 = 26;
 
+mod dock_icon;
 mod top_bar;
 
 #[derive(Component, Clone, Copy)]
@@ -634,6 +635,7 @@ pub(super) fn install(app: &mut App) {
     embedded_asset!(app, "resident_portraits/luz.png");
     embedded_asset!(app, "resident_portraits/caua.png");
     embedded_asset!(app, "resident_portraits/nina.png");
+    dock_icon::install(app);
     top_bar::install(app);
     app.init_resource::<PanelPicker>()
         .add_systems(Startup, spawn)
@@ -979,6 +981,7 @@ fn spawn_button(parent: &mut ChildSpawnerCommands, assets: &AssetServer, action:
     } else {
         font_size
     };
+    dock_icon::spawn(&mut button, assets, action);
     button.with_child((
         Text::default(),
         crate::ui_font::ui_font_weight(assets, font_size, 600),
@@ -1931,7 +1934,8 @@ fn refresh(
                 &mut shadow,
             );
         }
-        if !custom && let Ok(mut text) = labels.get_mut(children[0]) {
+        let mut button_labels = labels.iter_many_mut(children.iter());
+        if !custom && let Some(mut text) = button_labels.fetch_next() {
             let label = match action {
                 Action::Farm(FarmControl::Work(work)) if let Some(counts) = plot_actions => {
                     let count = counts[work as usize];
