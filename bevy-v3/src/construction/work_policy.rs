@@ -187,7 +187,7 @@ mod tests {
     use crate::setup::{Mode, WorldSetup};
 
     #[test]
-    fn animal_care_claims_an_available_resident_before_new_construction() {
+    fn farm_batches_claim_an_available_resident_before_new_construction() {
         let catalog = Catalog::default();
         let mut setup = WorldSetup::default();
         setup.mode = Mode::Sandbox;
@@ -199,28 +199,35 @@ mod tests {
             land: &land,
             camp,
         };
-        let mut stock = Stock::for_start(&setup, &catalog);
-        let mut village = Construction::default();
-        let mut coop = village.proposed_site(&catalog, "coop", IVec2::new(44, 36));
-        coop.work = catalog.projects["coop"].work;
-        coop.delivered = coop.loads;
-        village.plans.push(coop);
-        let well = village.proposed_site(&catalog, "well", IVec2::new(53, 36));
-        village.plans.push(well);
-        village.queue_batch(&catalog, &mut stock, 0, "care-coop");
-        for (index, resident) in village.residents.iter_mut().enumerate() {
-            resident.position = SUPPLY_SPOTS[index].as_vec2();
-            resident.health.energy = if index == 0 { 100.0 } else { 0.0 };
+        for (key, recipe) in [
+            ("coop", "care-coop"),
+            ("coop", "eggs"),
+            ("apiary", "honey"),
+            ("orchard", "fruit"),
+        ] {
+            let mut stock = Stock::for_start(&setup, &catalog);
+            let mut village = Construction::default();
+            let mut farm = village.proposed_site(&catalog, key, IVec2::new(44, 36));
+            farm.work = catalog.projects[key].work;
+            farm.delivered = farm.loads;
+            village.plans.push(farm);
+            let well = village.proposed_site(&catalog, "well", IVec2::new(53, 36));
+            village.plans.push(well);
+            village.queue_batch(&catalog, &mut stock, 0, recipe);
+            for (index, resident) in village.residents.iter_mut().enumerate() {
+                resident.position = SUPPLY_SPOTS[index].as_vec2();
+                resident.health.energy = if index == 0 { 100.0 } else { 0.0 };
+            }
+            village.work_policy.set_reservations(0, 0).unwrap();
+            village.set_work_priority(WorkGroup::Construction, 3);
+            let clock = TownClock {
+                seconds: 0.0,
+                round_trip_km: 12,
+            };
+            village.tick(&catalog, &mut stock, site, clock, 0.1, false);
+            assert_eq!(village.production.jobs[0].worker, Some(0), "{recipe}");
+            assert!(village.residents[0].assignment.is_none());
         }
-        village.work_policy.set_reservations(0, 0).unwrap();
-        village.set_work_priority(WorkGroup::Construction, 3);
-        let clock = TownClock {
-            seconds: 0.0,
-            round_trip_km: 12,
-        };
-        village.tick(&catalog, &mut stock, site, clock, 0.1, false);
-        assert_eq!(village.production.jobs[0].worker, Some(0));
-        assert!(village.residents[0].assignment.is_none());
     }
 
     #[test]

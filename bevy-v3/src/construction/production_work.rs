@@ -1527,6 +1527,22 @@ impl Construction {
         });
     }
 
+    pub(super) fn reserve_farm_batch_workers(
+        &mut self,
+        catalog: &Catalog,
+        stock: &Stock,
+        site: ConstructionSite,
+        clock: f64,
+    ) {
+        self.assign_producers(catalog, stock, site, clock, |job| {
+            matches!(job.recipe.as_str(), "eggs" | "milk" | "honey")
+                || catalog.production[&job.recipe]
+                    .biology
+                    .as_ref()
+                    .is_some_and(|biology| biology.care.is_some())
+        });
+    }
+
     fn assign_producers(
         &mut self,
         catalog: &Catalog,
