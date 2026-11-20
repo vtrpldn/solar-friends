@@ -1,7 +1,7 @@
 use super::*;
 use crate::{
     construction::{FarmControl, ProjectAction, WorkGroup},
-    farming::{Crop, FarmAction},
+    farming::FarmAction,
     time_advance::AdvanceAction,
 };
 use bevy::asset::{embedded_asset, load_embedded_asset};
@@ -49,7 +49,6 @@ enum Action {
     Gather,
     Beds,
     Farm(FarmControl),
-    SelectBed,
     Recipe(usize),
     RecipePage(bool),
     CraftWorkspace,
@@ -178,7 +177,7 @@ impl Action {
                     && !village.construction.production.open
                     && village.construction.has_selected_plot()
             }
-            Self::Farm(_) | Self::SelectBed => {
+            Self::Farm(_) => {
                 village.utility_panel.is_none()
                     && village.construction.farming.open
                     && !village.construction.menu
@@ -426,7 +425,6 @@ impl Action {
             Self::Gather => "Gather resource".into(),
             Self::Beds if village.construction.farming.open => "Close beds".into(),
             Self::Beds => "Beds".into(),
-            Self::SelectBed => numeric_label(village, NumericTarget::Bed, "Go to bed number"),
             Self::Farm(action) => match action {
                 FarmControl::NextBed => "Next bed",
                 FarmControl::WholePlot if village.construction.farming.whole_plot => {
@@ -781,6 +779,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                     },
                 ));
                 super::selection_card::spawn(menu, &assets);
+                super::farm_card::spawn(menu, &assets);
                 for action in [
                     Action::Recipes,
                     Action::Gather,
@@ -810,33 +809,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 ] {
                     spawn_button(menu, &assets, Action::SelectedProject(action));
                 }
-                spawn_button(menu, &assets, Action::SelectBed);
-                for action in [
-                    FarmControl::NextBed,
-                    FarmControl::WholePlot,
-                    FarmControl::Balances,
-                    FarmControl::Irrigation(Some(true)),
-                    FarmControl::Irrigation(Some(false)),
-                    FarmControl::Residues(Some(false)),
-                    FarmControl::Residues(Some(true)),
-                ]
-                .into_iter()
-                .chain(Crop::ALL.map(|crop| FarmControl::Crop(Some(crop))))
-                .chain([0.5, 1.0, 1.5].map(|spacing| FarmControl::Density(Some(spacing))))
-                .chain(
-                    [
-                        FarmAction::Prepare,
-                        FarmAction::Plant,
-                        FarmAction::Harvest,
-                        FarmAction::Clear,
-                        FarmAction::Amend,
-                        FarmAction::Collect,
-                    ]
-                    .into_iter()
-                    .map(FarmControl::Work),
-                ) {
-                    spawn_button(menu, &assets, Action::Farm(action));
-                }
+                // Cultivation controls live on the farm card (`farm_card`).
                 spawn_button(menu, &assets, Action::FieldDimensions);
                 for delta in [IVec2::NEG_X, IVec2::X, IVec2::NEG_Y, IVec2::Y] {
                     spawn_button(menu, &assets, Action::ResizeField(delta));
@@ -1532,9 +1505,6 @@ fn handle_buttons(
                     village.construction.toggle_beds();
                     picker.open = false;
                 }
-                Action::SelectBed if !picker.open => {
-                    village.numeric_entry = Some((NumericTarget::Bed, String::new()));
-                }
                 Action::Farm(action) if !picker.open => {
                     let town = &mut *village;
                     town.construction.apply_farm_control(
@@ -1555,7 +1525,6 @@ fn handle_buttons(
                 | Action::MoveCraft
                 | Action::FacilityIrrigation
                 | Action::Farm(_)
-                | Action::SelectBed
                 | Action::SelectedProject(_)
                 | Action::FocusSelectedProject
                 | Action::DeselectProject
@@ -1770,14 +1739,16 @@ fn refresh(
                 .is_some_and(|(_, count)| *count > 1),
             Action::MoveCraft => craft_workspace.is_some(),
             Action::FacilityIrrigation => irrigation.is_some(),
-            Action::Beds | Action::Gather => action.available(&village),
+            // Once cultivation is open, the farm card carries its controls.
+            Action::Beds => action.available(&village) && !village.construction.farming.open,
+            Action::Gather => action.available(&village),
             Action::Farm(FarmControl::Work(work)) => {
                 show_beds && plot_actions.is_none_or(|counts| counts[work as usize] > 0)
             }
             Action::Farm(FarmControl::Balances) => {
                 show_beds && !village.construction.farming.whole_plot
             }
-            Action::Farm(_) | Action::SelectBed => show_beds,
+            Action::Farm(_) => show_beds,
             Action::Recipe(row) => recipes.get(row).is_some(),
             Action::FocusSelectedProject | Action::DeselectProject => {
                 show_selected_project && action.available(&village)

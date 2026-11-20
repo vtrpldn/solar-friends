@@ -8,6 +8,7 @@ mod construction_models;
 mod cultivation_surface;
 mod diagnostics;
 mod dialog;
+mod farm_card;
 mod fire;
 mod guide;
 mod guide_diagrams;
@@ -117,6 +118,7 @@ impl Plugin for VillagePlugin {
         view_options::install(app);
         projects_card::install(app);
         building_lighting::install(app);
+        farm_card::install(app);
         selection_card::install(app);
         keyboard_focus::install(app);
         notices::install(app);
@@ -3300,17 +3302,6 @@ fn show_hud(
     if !notice.is_empty() && !village.construction.menu {
         label.push('\n');
         label.push_str(notice);
-    }
-    if let Some(farm) = village.construction.farm_status(
-        &catalog,
-        &village.stock,
-        TownClock {
-            seconds: village.clock,
-            round_trip_km: setup.round_trip_km(),
-        },
-    ) {
-        label.push('\n');
-        label.push_str(&farm);
     }
     if !card
         && let Some(index) = village.construction.production.selected

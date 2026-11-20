@@ -878,145 +878,64 @@ impl Construction {
         counts
     }
 
-    pub fn farm_status(&self, catalog: &Catalog, stock: &Stock, town: TownClock) -> Option<String> {
-        let clock = town.seconds;
-        let site = self.production.selected?;
-        let plot = self.farming.plots.get(&site)?;
-        if !self.farming.open {
-            return Some("K Cultivation".into());
-        }
-        if self.farming.whole_plot {
-            let count = plot.beds.len();
-            let jobs: BTreeMap<_, _> = self
+    pub(crate) fn cultivation_name(&self, site: usize) -> &str {
+        self.plans
+            .get(site)
+            .map_or("Cultivation", |plan| match plan.key.as_str() {
+                "garden" => "Garden",
+                "greenhouse" => "Greenhouse",
+                "field" => "Field",
+                _ => "Cultivation",
+            })
+    }
+
+    pub(crate) fn cultivation_stage(&self, site: usize, index: usize, clock: f64) -> &'static str {
+        let bed = &self.farming.plots[&site].beds[index];
+        if bed.harvest_expired(clock) {
+            "Harvest expired"
+        } else if bed.stage == Stage::Prepared
+            && self
                 .farming
                 .jobs
                 .iter()
-                .filter(|job| job.site == site)
-                .map(|job| (job.bed, job))
-                .collect();
-            let care = count - jobs.len();
-            let mut planting = 0;
-            let mut irrigated = 0;
-            let mut collect = 0;
-            let area: f64 = plot.beds.iter().map(crate::farming::Bed::area).sum();
-            let mut stages = [0; 8];
-            for (index, bed) in plot.beds.iter().enumerate() {
-                let job = jobs.get(&index).copied();
-                if job.is_none() {
-                    planting += usize::from(bed.editable());
-                    irrigated += usize::from(bed.irrigation);
-                    collect += usize::from(bed.collect_residues);
-                }
-                let stage = if bed.harvest_expired(clock) {
-                    6
-                } else if bed.stage == Stage::Prepared && job.is_some_and(planting_started) {
-                    7
-                } else {
-                    bed.stage as usize
-                };
-                stages[stage] += 1;
-            }
-            let summary = [
-                "Unworked soil",
-                "Ready to plant",
-                "Growing",
-                "Ready to harvest",
-                "Harvest complete",
-                "Crop failed",
-                "Harvest expired",
-                "Planting",
-            ]
-            .into_iter()
-            .zip(stages)
-            .filter(|(_, beds)| *beds > 0)
-            .map(|(stage, beds)| format!("{stage} {beds}"))
-            .collect::<Vec<_>>()
-            .join(" · ");
-            let name = match self.plans[site].key.as_str() {
-                "field" => "field",
-                "garden" => "garden",
-                "greenhouse" => "greenhouse",
-                _ => "plot",
-            };
-            let seed_policy = if stock.sandbox {
-                "Seeds are unlimited in Sandbox."
-            } else if self.market.auto_buy_off {
-                "Auto-buy is off. Planting needs seeds in stores."
-            } else {
-                "Missing seeds are bought automatically with transport costs. Planting starts after they arrive."
-            };
-            return Some(format!(
-                "Whole {name} · {count} beds · {area:.1} m² · {} queued\n{summary}\n{seed_policy}\nCrop and spacing apply to {planting} available beds\nCare applies to {care} beds · Irrigation on {irrigated}/{care} · Collect residues {collect}/{care}\n1 Prepare · 2 Plant · 3 Harvest · 4 Clear · 5 Amend · 6 Collect\nX Crop · Y Density · T Irrigation · Z Residues\n{}",
-                jobs.len(),
-                self.farming.notice,
-            ));
-        }
-        let index = self.farming.bed.min(plot.beds.len() - 1);
-        let mut label = self.bed_status(site, index, clock, self.farming.show_balances)?;
-        if let Some(job) = self
-            .farming
-            .jobs
-            .iter()
-            .find(|job| job.site == site && job.bed == index)
+                .any(|job| job.site == site && job.bed == index && planting_started(job))
         {
-            label.push('\n');
-            label.push_str(&self.farm_job_status(catalog, stock, job, clock));
+            "Planting"
         } else {
-            let bed = &plot.beds[index];
-            if !stock.sandbox
-                && let Ok((inputs, _)) = bed.requirements(FarmAction::Plant, clock)
-                && stock.missing(&inputs).is_some()
-            {
-                use std::fmt::Write;
-                match self
-                    .market
-                    .quote(catalog, &inputs, stock, clock, town.round_trip_km)
-                {
-                    Ok(quote) => {
-                        let pickup = quote.fare * u64::from(quote.trips);
-                        let (cost, transport) = if self.supplier_construction {
-                            let cost =
-                                quote.price + crate::market::freight_cents(town.round_trip_km);
-                            (cost, "supplier freight")
-                        } else {
-                            (quote.price + pickup, "town pickup")
-                        };
-                        let _ = write!(
-                            label,
-                            "\nAuto-buy seeds · R${:.2} including {transport}",
-                            cost as f64 / 100.0
-                        );
-                        if self.supplier_construction
-                            && !self.market.can_replace_fares_with_freight(
-                                stock,
-                                0,
-                                cost + self.market.expansion_reserve(),
-                            )
-                        {
-                            let _ = write!(label, " · Freight needs more available savings");
-                        }
-                    }
-                    Err(reason) => {
-                        let _ = write!(label, "\nPlanting unavailable · {reason}");
-                    }
-                }
-            }
-            label.push_str("\n1 Prepare · 2 Plant · 3 Harvest · 4 Clear · 5 Amend · 6 Collect");
+            bed.stage.label()
         }
-        label.push_str("\nTab Bed · X Crop · Y Density · T Water · Z Residues · K Close");
-        let plan = &self.plans[site];
-        if plan.key == "field" {
-            let size = rotated_size(plan.size, plan.rotation);
-            label.push_str(&format!(
-                "\n{} × {} cells · [ ] Width · Shift [ ] Depth",
-                size.x, size.y
-            ));
+    }
+
+    pub(crate) fn farm_supply_check(
+        &self,
+        inputs: &BTreeMap<String, u32>,
+        action: FarmAction,
+        catalog: &Catalog,
+        stock: &Stock,
+        clock: TownClock,
+    ) -> Result<(), String> {
+        if stock.sandbox || stock.missing(inputs).is_none() {
+            return Ok(());
         }
-        if !self.farming.notice.is_empty() {
-            label.push('\n');
-            label.push_str(&self.farming.notice);
+        if action != FarmAction::Plant {
+            return Err("Bring compost into stores.".into());
         }
-        Some(label)
+        let quote =
+            self.market
+                .quote(catalog, inputs, stock, clock.seconds, clock.round_trip_km)?;
+        if self.supplier_construction
+            && quote.trips > 0
+            && !self.market.can_replace_fares_with_freight(
+                stock,
+                0,
+                quote.price
+                    + crate::market::freight_cents(clock.round_trip_km)
+                    + self.market.expansion_reserve(),
+            )
+        {
+            return Err("Add expansion funds for seed freight.".into());
+        }
+        Ok(())
     }
 
     pub(crate) fn bed_status(
@@ -1536,10 +1455,9 @@ mod resize_tests {
             seconds: 0.,
             round_trip_km: 12,
         };
-        let overview = village.farm_status(&catalog, &stock, clock).unwrap();
-        assert!(overview.contains("Whole garden"));
-        assert!(overview.contains("Growing 1"));
-        assert!(overview.contains("Unworked soil"));
+        // The farm card reads each bed's stage.
+        assert_eq!(village.cultivation_stage(0, 0, 0.), "Growing");
+        assert_eq!(village.cultivation_stage(0, 1, 0.), "Unprepared");
         village.apply_farm_control(&catalog, &mut stock, FarmControl::NextBed, clock);
         assert!(!village.farming.whole_plot);
         assert_eq!(village.farming.bed, 0);
