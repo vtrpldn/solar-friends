@@ -148,6 +148,12 @@ impl Construction {
         index: usize,
     ) -> Option<String> {
         let job = self.changes.get(&index)?;
+        if self.sheltering_resident(index) {
+            return Some(format!(
+                "{} · Waiting for residents to leave",
+                job.action_label()
+            ));
+        }
         if job.target.is_none() && job.work >= job.required {
             let (recovered, _) = self.dismantling_yield(catalog, index, job.kind);
             if !self.can_store_dismantling(catalog, stock, index, &recovered) {
@@ -308,7 +314,18 @@ impl Construction {
         }
     }
 
+    fn sheltering_resident(&self, index: usize) -> bool {
+        self.residents.iter().any(|resident| {
+            resident.health.task.as_ref().is_some_and(|task| {
+                matches!(task.kind, Need::Rest | Need::Sleep) && task.facility == Some(index + 1)
+            })
+        })
+    }
+
     pub(super) fn can_change(&self, index: usize) -> Option<&'static str> {
+        if self.sheltering_resident(index) {
+            return Some("Wait until everyone has left this building.");
+        }
         if self.upkeep.servicing(index) {
             return Some("Wait for the resident to finish servicing this asset.");
         }
@@ -594,6 +611,16 @@ impl Construction {
     ) {
         let changes: Vec<_> = self.changes.keys().copied().collect();
         for index in changes {
+            if self.sheltering_resident(index) {
+                let job = self.changes.get_mut(&index).expect("active change");
+                if let Some(worker) = job.worker.take()
+                    && self.residents[worker].health.task.is_none()
+                {
+                    self.residents[worker].path.clear();
+                }
+                job.retry = 0.0;
+                continue;
+            }
             let job = self.changes.get_mut(&index).expect("active change");
             if let Some(worker) = job.worker
                 && self.residents[worker].health.energy < MIN_DISMANTLING_ENERGY
@@ -784,6 +811,59 @@ mod tests {
         assert_eq!(construction.changes[&0].worker, Some(0));
         let destination = construction.residents[0].path.back().unwrap();
         assert_ne!(*destination, entrance.as_vec2());
+    }
+
+    #[test]
+    fn queued_dismantling_waits_for_a_sheltering_resident() {
+        let setup = WorldSetup::default();
+        let catalog = Catalog::default();
+        let camp = IVec2::splat(36);
+        let terrain = setup.terrain().with_camp(camp);
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut village = Construction::default();
+        let key = "canvas-tent-teal";
+        let mut tent = village.proposed_site(&catalog, key, IVec2::new(44, 36));
+        tent.work = catalog.projects[key].work;
+        tent.delivered = tent.loads;
+        village.plans.push(tent);
+        village.begin_change(&catalog, 0, Change::Demolish, None);
+        village.tick_changes(&catalog, &mut stock, site, 0.0, 0.1);
+        let worker = village.changes[&0].worker.unwrap();
+        let sleeper = (worker + 1) % village.residents.len();
+        village.residents[sleeper].health.task = Some(crate::residents::NeedTask {
+            kind: Need::Sleep,
+            facility: Some(1),
+            elapsed: 1.0,
+            started_at: Some(0.0),
+            duration: 30.0,
+            water: 0.0,
+            returning: false,
+            partner: None,
+            conversation: None,
+        });
+
+        village.tick_changes(&catalog, &mut stock, site, 1.0, 0.1);
+        assert_eq!(village.changes[&0].work, 0.0);
+        assert!(village.changes[&0].worker.is_none());
+        assert!(village.residents[worker].path.is_empty());
+        assert_eq!(
+            village.can_change(0),
+            Some("Wait until everyone has left this building.")
+        );
+        assert_eq!(
+            village.change_status(&catalog, &stock, 0).as_deref(),
+            Some("Demolishing · Waiting for residents to leave")
+        );
+
+        village.residents[sleeper].health.task = None;
+        village.tick_changes(&catalog, &mut stock, site, 2.0, 0.1);
+        assert!(village.changes[&0].worker.is_some());
     }
 
     #[test]
