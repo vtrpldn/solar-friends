@@ -383,11 +383,51 @@ impl Construction {
         })
     }
 
-    pub(super) fn construction_freight_trips(
+    pub(super) fn construction_freight_budget(
+        &self,
         catalog: &Catalog,
-        units: BTreeMap<String, u32>,
-    ) -> Option<u32> {
-        crate::market::cargo_trips_with_capacity(catalog, units, FREIGHT_CAPACITY).ok()
+        extra: BTreeMap<String, u32>,
+    ) -> Option<(u32, u64)> {
+        let mut orders = Vec::new();
+        let mut reserved = 0;
+        for index in self.construction_dispatch_order() {
+            let plan = &self.plans[index];
+            let Some(mut pending) = Self::pending_construction_cargo(plan).cloned() else {
+                continue;
+            };
+            let booked = self.booked_construction_trip(index);
+            let shipment = self.construction_freight_cargo(index).or_else(|| {
+                booked.and_then(|trip| self.pickup_manifests[trip.vehicle].get(&index))
+            });
+            if booked.is_some() && shipment.is_none() {
+                continue;
+            }
+            let trips = if let Some(shipment) = shipment {
+                let trips = Self::pickups_after_load(catalog, plan, shipment)?;
+                crate::market::subtract_cargo(&mut pending, shipment);
+                trips
+            } else {
+                plan.pickups
+            };
+            reserved += plan.fare * u64::from(trips);
+            orders.push(pending);
+        }
+        orders.push(extra);
+        let mut loads = 0;
+        while orders.iter().any(|order| !order.is_empty()) {
+            let mut capacity = FREIGHT_CAPACITY;
+            let mut packed = false;
+            for order in &mut orders {
+                let load = crate::market::pack_cargo(catalog, order, &mut capacity);
+                packed |= !load.is_empty();
+                crate::market::subtract_cargo(order, &load);
+            }
+            if !packed {
+                return None;
+            }
+            loads += 1;
+        }
+        Some((loads, reserved))
     }
 
     pub(super) fn fits_freight_truck((mass, volume): (f64, f64)) -> bool {
@@ -1649,6 +1689,35 @@ mod tests {
             .unwrap();
         village.plans.push(plan);
         let mut second = village.proposed_site(&catalog, "well", IVec2::new(45, 36));
+        let definition = &catalog.projects["well"];
+        let extra = village
+            .market
+            .quote(
+                &catalog,
+                &definition.materials,
+                &stock,
+                clock.seconds,
+                clock.round_trip_km,
+            )
+            .unwrap();
+        assert_eq!(
+            village.construction_freight_budget(&catalog, extra.units),
+            Some((1, village.market.committed_fares()))
+        );
+        let mut exact_budget = stock.clone();
+        let needed =
+            extra.price + crate::market::freight_cents(12) + village.market.expansion_reserve();
+        exact_budget.debit(
+            exact_budget.balance() - needed,
+            crate::stock::CashKind::Materials,
+        );
+        village.toggle_supplier_construction();
+        assert!(
+            village
+                .blueprint_supply_quote(&catalog, &exact_budget, clock, definition)
+                .unwrap()
+                .contains("1 supplier load")
+        );
         Construction::reserve_project(
             &mut village.market,
             &mut stock,
@@ -1659,7 +1728,6 @@ mod tests {
         .unwrap();
         village.plans.push(second);
         village.request_project_action(&catalog, &mut stock, 1, ProjectAction::Prioritize);
-        village.toggle_supplier_construction();
         let before = stock.balance();
         village.tick_construction_delivery(&catalog, &mut stock, clock);
         let delivery = village.construction_delivery.as_ref().unwrap();

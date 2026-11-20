@@ -622,12 +622,19 @@ impl Construction {
             if stock.missing(&inputs).is_some() && action != FarmAction::Plant {
                 return Err("Not enough compost in supplies.".into());
             }
-            if self.supplier_construction && stock.missing(&inputs).is_some() {
-                self.construction_supply_quote(catalog, stock, clock, &inputs)?;
-            }
             let quote =
                 self.market
                     .quote(catalog, &inputs, stock, clock.seconds, clock.round_trip_km)?;
+            if self.supplier_construction
+                && quote.trips > 0
+                && !self.market.can_replace_fares_with_freight(
+                    stock,
+                    0,
+                    quote.price + crate::market::freight_cents(clock.round_trip_km),
+                )
+            {
+                return Err("Freight exceeds available expansion funds".into());
+            }
             pickups = quote.trips;
             fare = quote.fare;
             self.market.reserve(stock, &inputs, &quote);
