@@ -305,9 +305,9 @@ impl WorldSetup {
             Action::Town => format!("Town   ·   {}", TOWN[self.town]),
             Action::Seed => match &self.seed_entry {
                 Some(entry) if entry.parse::<std::num::NonZeroU32>().is_err() => {
-                    format!("Seed {entry}▏\nUse 1–4294967295 · Esc cancel")
+                    format!("Seed {entry}|\nUse 1–4294967295 · Esc cancel")
                 }
-                Some(entry) => format!("Seed {entry}▏\nEnter apply · Esc cancel"),
+                Some(entry) => format!("Seed {entry}|\nEnter apply · Esc cancel"),
                 None => format!("Land seed   ·   {}", self.seed),
             },
             Action::Reroll => "New plot".into(),

@@ -3127,7 +3127,7 @@ fn show_hud(
         Some(UtilityPanel::Inventory) => {
             use std::fmt::Write;
             let cursor = if village.editing_inventory {
-                "▏ · Enter Done"
+                "| · Enter Done"
             } else {
                 " · / Search"
             };

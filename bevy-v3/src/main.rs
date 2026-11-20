@@ -952,8 +952,8 @@ mod tests {
             .single(app.world())
             .unwrap();
         for (text, expected) in [
-            ("milk", "Search milk▏ · 1 building"),
-            ("xyz", "Search milkxyz▏ · 0 buildings"),
+            ("milk", "Search milk| · 1 building"),
+            ("xyz", "Search milkxyz| · 0 buildings"),
         ] {
             app.world_mut()
                 .write_message(bevy::input::keyboard::KeyboardInput {

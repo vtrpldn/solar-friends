@@ -755,7 +755,7 @@ impl Construction {
 
     fn build_result_heading(&self, count: usize) -> String {
         let title = if self.editing_search {
-            format!("Search {}▏", self.build_query)
+            format!("Search {}|", self.build_query)
         } else if self.build_query.trim().is_empty() {
             CATEGORIES[self.category.unwrap_or_default()].to_owned()
         } else {
@@ -999,7 +999,7 @@ impl Construction {
             .join("\n");
         let (title, controls) = if self.editing_search {
             (
-                format!("Search {}▏", self.build_query),
+                format!("Search {}|", self.build_query),
                 "Type to filter · Enter Apply",
             )
         } else {

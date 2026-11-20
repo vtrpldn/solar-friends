@@ -595,7 +595,7 @@ impl Guide {
             Screen::Search => {
                 let results = search_results(&self.query);
                 let mut label = format!(
-                    "Find a topic · {}_\nType to search · 1–9 or Enter Open · Tab Index · Esc Close\n",
+                    "Find a topic · {}|\nType to search · 1–9 or Enter Open · Tab Index · Esc Close\n",
                     self.query
                 );
                 if self.query.trim().is_empty() {

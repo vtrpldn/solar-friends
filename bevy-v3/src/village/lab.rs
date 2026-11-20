@@ -1473,7 +1473,7 @@ impl StorySettings {
     fn prompt(&self, notice: &str) -> String {
         use std::fmt::Write as _;
         let mut text = format!(
-            "New Story lab run\nSeed {}▏ · digits change seed\nUp/Down Select · Left/Right Change · Enter Start · Esc Cancel\nThis replaces the current lab run.\n",
+            "New Story lab run\nSeed {}| · digits change seed\nUp/Down Select · Left/Right Change · Enter Start · Esc Cancel\nThis replaces the current lab run.\n",
             self.seed
         );
         for (index, action) in WorldSetup::WORLD_OPTIONS.into_iter().enumerate() {
@@ -1506,7 +1506,7 @@ impl LabBuildSearch {
         use std::fmt::Write as _;
         const ROWS: usize = 9;
         let mut text = format!(
-            "Find a building · {}▏\nType to filter · Up/Down Select · Enter Place · Esc Cancel\n",
+            "Find a building · {}|\nType to filter · Up/Down Select · Enter Place · Esc Cancel\n",
             self.query
         );
         if results.is_empty() {
@@ -1992,7 +1992,7 @@ fn update_lab_window(
             crate::construction::read_search_text(&mut entry, &mut events);
         }
         panel.set_if_neq(Text::new(format!(
-            "Custom run interval\nDays · {entry}▏\nEnter Set duration · Esc Cancel\n{}",
+            "Custom run interval\nDays · {entry}|\nEnter Set duration · Esc Cancel\n{}",
             playback.notice
         )));
         playback.interval_entry = Some(entry);
@@ -2261,7 +2261,7 @@ fn update_lab_window(
     if let Some(order) = &playback.order {
         map.visible = false;
         panel.set_if_neq(Text::new(format!(
-            "Order at step {}\nEnter Submit · Esc Cancel\n\nExample {{\"type\":\"grid\",\"enabled\":false}}\n\n{order}▏\n{}",
+            "Order at step {}\nEnter Submit · Esc Cancel\n\nExample {{\"type\":\"grid\",\"enabled\":false}}\n\n{order}|\n{}",
             runner.index, playback.notice
         )));
         return;

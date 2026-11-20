@@ -47,7 +47,7 @@ impl LandLens {
             };
             gizmos.linestrip(tile.outline.iter().copied(), tint);
         }
-        let legend = "Land & slope · Green ≤10° · Gold 10–25° · Red >25°";
+        let legend = "Land & slope · Green up to 10° · Gold 10–25° · Red >25°";
         if let Some(point) = pointer {
             let cell = ((point.xz() + Vec2::splat(MAP_EDGE)) / SAMPLE_WIDTH)
                 .floor()
