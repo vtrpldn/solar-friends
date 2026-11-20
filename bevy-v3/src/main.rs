@@ -1117,7 +1117,7 @@ mod tests {
         press_button(&mut app, "Hide forecast");
         press_button(&mut app, "Map lenses");
         press_button(&mut app, "Other lenses");
-        press_button(&mut app, "Material chains");
+        press_button(&mut app, "Production chains");
         press_button(&mut app, "Next filter");
         press_button(&mut app, "Previous filter");
         press_button(&mut app, "Map lenses");

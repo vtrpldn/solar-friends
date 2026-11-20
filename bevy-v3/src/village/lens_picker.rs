@@ -33,7 +33,7 @@ const LENSES: [(KeyCode, MapLens, &str); 9] = [
 
 const SECOND_PAGE: [(KeyCode, MapLens, &str); 4] = [
     (KeyCode::Digit1, MapLens::Food, "Food"),
-    (KeyCode::Digit2, MapLens::Chains, "Material chains"),
+    (KeyCode::Digit2, MapLens::Chains, "Production chains"),
     (KeyCode::Digit3, MapLens::Residents, "Residents"),
     (KeyCode::Digit4, MapLens::Comfort, "Comfort"),
 ];

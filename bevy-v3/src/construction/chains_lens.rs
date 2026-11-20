@@ -6,14 +6,14 @@ impl Construction {
         &self,
         catalog: &Catalog,
         terrain: &Terrain,
-        (stock, land): (&Stock, &Land),
+        (stock, land, clock): (&Stock, &Land, f64),
         material: &str,
         hovered: Option<IVec2>,
         gizmos: &mut Gizmos,
     ) -> String {
         let name = &catalog.materials[material].name;
         let mut label = format!(
-            "Material chains · {name} · Shift+Page Up/Down Change material\nGreen producer · Gold consumer · Blue upstream or shared supplies"
+            "Production chains · {name} · Shift+Page Up/Down Change material\nGreen producer · Gold consumer · Blue upstream or shared supplies\nLines show shared-stock relationships"
         );
         let mut upstream = BTreeSet::new();
         let mut pending = vec![material];
@@ -43,6 +43,15 @@ impl Construction {
         let point_at = |cell: Vec2| {
             let Vec2 { x, y: z } = world_position(cell.x, cell.y);
             Vec3::new(x, terrain.height_at(x, z) + 0.5, z)
+        };
+        let draw_supply_link = |position: IVec2, size: IVec2, color, gizmos: &mut Gizmos| {
+            let start = STOCKPILE.as_vec2();
+            let end = position.as_vec2() + (size.as_vec2() - Vec2::ONE) * 0.5;
+            let steps = start.distance(end).ceil().max(1.0) as usize;
+            gizmos.linestrip(
+                (0..=steps).map(|i| point_at(start.lerp(end, i as f32 / steps as f32))),
+                color,
+            );
         };
         for (index, plan) in self.plans.iter().enumerate() {
             if plan.removed {
@@ -77,6 +86,9 @@ impl Construction {
                 continue;
             };
             draw_lens_marker(terrain, plan.position, plan.size, color, gizmos);
+            if produces || consumes {
+                draw_supply_link(plan.position, plan.size, color, gizmos);
+            }
             if hovered.is_some_and(|cell| {
                 cell.cmpge(plan.position).all() && cell.cmplt(plan.position + plan.size).all()
             }) {
@@ -92,15 +104,17 @@ impl Construction {
                 }
                 if building {
                     let _ = write!(label, " · {}", self.project_status(catalog, index));
-                }
-                if produces || consumes {
-                    let start = STOCKPILE.as_vec2();
-                    let end = plan.position.as_vec2() + (plan.size.as_vec2() - Vec2::ONE) * 0.5;
-                    let steps = start.distance(end).ceil().max(1.0) as usize;
-                    gizmos.linestrip(
-                        (0..=steps).map(|i| point_at(start.lerp(end, i as f32 / steps as f32))),
-                        color,
-                    );
+                } else {
+                    let mut jobs = self.production.jobs.iter().filter(|job| job.site == index);
+                    if let Some(first) = jobs.next() {
+                        for job in std::iter::once(first).chain(jobs) {
+                            let recipe = &catalog.production[&job.recipe];
+                            let status = self.batch_status(job, catalog, stock, clock);
+                            let _ = write!(label, " · {}: {status}", recipe.name);
+                        }
+                    } else {
+                        label.push_str(" · No production job queued");
+                    }
                 }
             }
         }
@@ -109,7 +123,8 @@ impl Construction {
                 continue;
             }
             let recipe = &catalog.gathering[site.recipe()];
-            let color = if recipe.output.contains_key(material) {
+            let produces = recipe.output.contains_key(material);
+            let color = if produces {
                 green
             } else if recipe
                 .output
@@ -121,6 +136,9 @@ impl Construction {
                 continue;
             };
             draw_lens_marker(terrain, site.position, site.size, color, gizmos);
+            if produces {
+                draw_supply_link(site.position, site.size, color, gizmos);
+            }
             if hovered.and_then(|cell| land.site_at(cell)) == Some(index) {
                 let _ = write!(label, "\n{} · Natural source", recipe.name);
             }

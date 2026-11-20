@@ -3174,7 +3174,7 @@ fn draw_blueprints(
                         village.construction.draw_chains_lens(
                             &catalog,
                             &terrain,
-                            (&village.stock, &land),
+                            (&village.stock, &land, village.clock),
                             material,
                             pointer.hovered.map(|hit| hit.cell),
                             &mut gizmos,
