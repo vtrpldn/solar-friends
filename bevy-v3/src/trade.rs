@@ -120,6 +120,25 @@ impl Trade {
             .collect()
     }
 
+    pub(crate) fn default_sale_reserve(id: &str) -> u32 {
+        if matches!(id, "food" | "meals") {
+            crate::village::NAMES.len() as u32 * 4
+        } else {
+            12
+        }
+    }
+
+    pub(crate) fn sale_policy(&mut self, id: &str) -> &mut Policy {
+        self.policies.entry(id.into()).or_insert_with(|| {
+            let reserve = Self::default_sale_reserve(id);
+            Policy {
+                reserve,
+                trigger: reserve,
+                ..Policy::default()
+            }
+        })
+    }
+
     pub(crate) fn note_sale_queued(&mut self, clock: f64) {
         self.dispatch_at
             .get_or_insert(clock + crate::economy_reference::SALE_DISPATCH_DELAY);
@@ -605,7 +624,8 @@ impl Trade {
     ) -> (u32, Result<(u32, u64), &'static str>) {
         let policy = self.policies.get(id);
         let owned = stock.available(id);
-        let mut reserve = policy.map_or(0, |policy| policy.reserve);
+        let default_reserve = Self::default_sale_reserve(id);
+        let mut reserve = policy.map_or(default_reserve, |policy| policy.reserve);
         if let Some((_, units_per_portion)) = food::SERVINGS.iter().find(|(food, _)| *food == id) {
             let target = (15 * u32::from(self.pantry_purchase.reserve_half_days)).div_ceil(2);
             let other_portions = stock
@@ -615,7 +635,7 @@ impl Trade {
         }
         reserve = reserve.max(stock.equipment.protected(id, owned));
         let pack = catalog.materials[id].pack;
-        let offer = if owned <= policy.map_or(0, |policy| policy.trigger) {
+        let offer = if owned <= policy.map_or(default_reserve, |policy| policy.trigger) {
             Err("Below the sale trigger")
         } else if owned.saturating_sub(reserve) < pack {
             Err("Reserve protected or less than one pack")

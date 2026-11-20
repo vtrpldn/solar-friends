@@ -333,7 +333,7 @@ impl Construction {
             return;
         };
         let units = item.material.stock_units_from_quantity(quantity);
-        let policy = self.trade.policies.entry(item.id.into()).or_default();
+        let policy = self.trade.sale_policy(item.id);
         match setting {
             SaleSetting::Reserve => policy.reserve = units,
             SaleSetting::Trigger => policy.trigger = units,
@@ -387,7 +387,7 @@ impl Construction {
             set if set == pack => pack * 2,
             _ => 0,
         };
-        let policy = self.trade.policies.entry(id.into()).or_default();
+        let policy = self.trade.sale_policy(id);
         match action {
             TradePolicy::AutomaticSale => policy.enabled = !policy.enabled,
             TradePolicy::Reserve(false) => policy.reserve = policy.reserve.saturating_sub(pack),
@@ -777,8 +777,13 @@ impl Construction {
         } else {
             "off"
         };
-        let reserve = item.quantity_text(u64::from(policy.map_or(0, |policy| policy.reserve)));
-        let trigger = item.quantity_text(u64::from(policy.map_or(0, |policy| policy.trigger)));
+        let default_reserve = Trade::default_sale_reserve(id);
+        let reserve = item.quantity_text(u64::from(
+            policy.map_or(default_reserve, |policy| policy.reserve),
+        ));
+        let trigger = item.quantity_text(u64::from(
+            policy.map_or(default_reserve, |policy| policy.trigger),
+        ));
         let limit = item.quantity_text(u64::from(policy.map_or(0, |policy| policy.limit)));
         display.push_str(&format!("T Auto-sale {on} · [ / ] Reserve {reserve}\nR Trigger {trigger} · Y Daily cap {limit} (0 unlimited)\n{} queued · {} delivered",
             self.trade.orders.len(), self.trade.receipts));
@@ -912,6 +917,23 @@ mod tests {
                 .label
                 .contains("Waiting for storage")
         );
+    }
+
+    #[test]
+    fn enabling_automatic_sales_uses_v2_reserves_and_preserves_existing_settings() {
+        let catalog = Catalog::default();
+        let mut village = Construction::default();
+        for (id, expected) in [("wood", 12), ("food", 20), ("meals", 20)] {
+            assert!(village.select_trade_material(&catalog, id));
+            village.adjust_trade_policy(&catalog, TradePolicy::AutomaticSale);
+            let policy = &village.trade.policies[id];
+            assert!(policy.enabled);
+            assert_eq!((policy.reserve, policy.trigger), (expected, expected));
+        }
+        village.set_sale_quantity(&catalog, SaleSetting::Reserve, 3.);
+        village.adjust_trade_policy(&catalog, TradePolicy::AutomaticSale);
+        village.adjust_trade_policy(&catalog, TradePolicy::AutomaticSale);
+        assert_eq!(village.trade.policies["meals"].reserve, 3);
     }
 
     #[test]
