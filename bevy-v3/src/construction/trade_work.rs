@@ -1245,6 +1245,12 @@ mod tests {
             Ok(false)
         );
         assert_eq!(stock.balance(), protected);
+        let summary = village.finance_summary(&catalog, &stock, 0, clock);
+        assert!(summary.contains("Available after commitments R$0.00"));
+        assert!(summary.contains(&format!(
+            "Protected for freight and reserves R${:.2}",
+            protected as f64 / 100.0
+        )));
     }
 
     #[test]

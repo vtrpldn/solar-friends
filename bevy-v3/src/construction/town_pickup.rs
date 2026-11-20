@@ -1444,7 +1444,7 @@ mod tests {
             .sum();
         assert!(
             village
-                .finance_summary(&stock, 0, clock.seconds)
+                .finance_summary(&catalog, &stock, 0, clock)
                 .contains(&format!(
                     "0 paid · 2 pending (R${:.2} before fuel)",
                     receipts as f64 / 100.0
@@ -1454,7 +1454,7 @@ mod tests {
         assert_eq!(village.market.committed_fares(), fare * 3);
         assert!(
             village
-                .finance_summary(&stock, 0, clock.seconds)
+                .finance_summary(&catalog, &stock, 0, clock)
                 .contains(&format!(
                     "Reserved for town trips R${:.2}",
                     (fare * 3) as f64 / 100.0
@@ -1484,7 +1484,7 @@ mod tests {
         assert!(village.trade.orders.is_empty());
         assert!(
             village
-                .finance_summary(&stock, 0, clock.seconds)
+                .finance_summary(&catalog, &stock, 0, clock)
                 .contains("2 paid · 0 pending")
         );
         assert_eq!(village.trade.receipts, 2);

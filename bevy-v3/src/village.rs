@@ -2862,9 +2862,13 @@ fn show_hud(
                 label.push_str(&village.stock.material_history(&catalog));
             } else {
                 label.push_str(&village.construction.finance_summary(
+                    &catalog,
                     &village.stock,
                     village.selected_resident,
-                    village.clock,
+                    TownClock {
+                        seconds: village.clock,
+                        round_trip_km: setup.round_trip_km(),
+                    },
                 ));
                 label.push('\n');
                 label.push_str(&village.construction.replacement_costs(

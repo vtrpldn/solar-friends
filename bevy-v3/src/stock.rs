@@ -544,9 +544,22 @@ impl Stock {
         (income, income - net, -cents(CashKind::Electricity))
     }
 
-    pub fn finance_summary(&self, committed: u64) -> String {
+    pub fn finance_summary(&self, committed: u64, freight: bool) -> String {
+        let (available, reserved, charged) = if freight {
+            (
+                "Available after commitments",
+                "Protected for freight and reserves",
+                "Includes queued construction freight",
+            )
+        } else {
+            (
+                "Available after pickup",
+                "Reserved for town trips",
+                "Charged when a trip departs",
+            )
+        };
         let mut display = format!(
-            "Shared savings R${:.2} · Available after pickup R${:.2}\nReserved for town trips R${:.2} · Charged when a trip departs",
+            "Shared savings R${:.2} · {available} R${:.2}\n{reserved} R${:.2} · {charged}",
             self.balance() as f64 / 100.0,
             self.balance().saturating_sub(committed) as f64 / 100.0,
             committed as f64 / 100.0,
@@ -770,7 +783,7 @@ mod finance_tests {
         assert!(history.contains("Records began Day 1 · 09:00 · Opening savings R$10000.00"));
         assert!(
             stock
-                .finance_summary(committed)
+                .finance_summary(committed, false)
                 .contains("Construction investment R$10.00 · Other cash spending R$4.00")
         );
         assert_eq!(history.matches("Grid electricity, daily total").count(), 1);

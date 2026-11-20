@@ -74,8 +74,20 @@ impl Construction {
         self.residents[index].town_work.away()
     }
 
-    pub fn finance_summary(&self, stock: &Stock, selected: usize, seconds: f64) -> String {
-        let status = stock.finance_summary(self.market.committed_fares());
+    pub fn finance_summary(
+        &self,
+        catalog: &Catalog,
+        stock: &Stock,
+        selected: usize,
+        clock: TownClock,
+    ) -> String {
+        let cash = if self.supplier_construction {
+            self.protected_freight_cash(catalog, clock)
+                .unwrap_or(stock.balance())
+        } else {
+            self.market.committed_fares()
+        };
+        let status = stock.finance_summary(cash, self.supplier_construction);
         let (pending_sales, expected_cents) = self
             .trade
             .orders
@@ -85,7 +97,7 @@ impl Construction {
                 (count + 1, cents.saturating_add(order.cents))
             });
         let receipts = self.trade.receipts;
-        let shift = self.resident_shift_summary(selected, seconds);
+        let shift = self.resident_shift_summary(selected, clock.seconds);
         format!(
             "{status}\nTown sales · {receipts} paid · {pending_sales} pending (R${:.2} before fuel)\n\n{shift}\n1–5 Resident · T Book/cancel day shift · Y Toggle weekdays",
             expected_cents as f64 / 100.0,
@@ -259,22 +271,26 @@ mod tests {
         };
         let mut construction = Construction::default();
         let mut stock = Stock::for_start(&setup, &catalog);
+        let clock = |seconds| TownClock {
+            seconds,
+            round_trip_km: setup.round_trip_km(),
+        };
         stock.cash = 0;
         construction.toggle_shift(0);
         assert!(
             construction
-                .finance_summary(&stock, 0, 0.0)
+                .finance_summary(&catalog, &stock, 0, clock(0.0))
                 .contains("Booked for today")
         );
         assert!(
             construction
-                .finance_summary(&stock, 0, HOUR * 3.0)
+                .finance_summary(&catalog, &stock, 0, clock(HOUR * 3.0))
                 .contains("Booked for tomorrow")
         );
         construction.residents[0].health.energy = 60.0;
         assert!(
             construction
-                .finance_summary(&stock, 0, 0.0)
+                .finance_summary(&catalog, &stock, 0, clock(0.0))
                 .contains("Needs to rest")
         );
         construction.tick_shifts(
@@ -303,7 +319,7 @@ mod tests {
         );
         assert!(
             construction
-                .finance_summary(&stock, 0, 0.0)
+                .finance_summary(&catalog, &stock, 0, clock(0.0))
                 .contains("No walking route")
         );
         assert_eq!(
