@@ -76,7 +76,124 @@ impl std::fmt::Display for ResourceStatus {
     }
 }
 
+#[derive(PartialEq)]
+pub(crate) struct SelectedSite {
+    pub name: String,
+    pub state_caption: &'static str,
+    pub status: String,
+    pub progress: Option<f32>,
+    pub yields: Vec<(String, String)>,
+    pub work_minutes: u32,
+    pub can_gather: bool,
+    pub reason: Option<String>,
+    pub notice: Option<String>,
+}
+
 impl Gathering {
+    pub(crate) fn selected_site(
+        &self,
+        catalog: &Catalog,
+        land: &Land,
+        (seed, richness, clock): (u32, f64, f64),
+        blocked: impl Fn(&GatherJob) -> bool,
+    ) -> Option<SelectedSite> {
+        let index = self.selected?;
+        let site = land.site(index)?;
+        let recipe = &catalog.gathering[site.recipe()];
+        let state = self.markers.get(&index);
+        let extracted = state.map_or(0, |state| state.extracted);
+        let remaining = if recipe.deposit > 0 {
+            Some(Self::deposit_limit(site, recipe, seed, richness).saturating_sub(extracted))
+        } else if recipe.gather_limit > 0 {
+            Some(recipe.gather_limit.saturating_sub(extracted))
+        } else {
+            None
+        };
+        let yields = recipe
+            .output
+            .iter()
+            .map(|(id, &amount)| {
+                let item = &catalog.materials[id];
+                (item.name.clone(), item.quantity_text(u64::from(amount)))
+            })
+            .collect();
+        let work_minutes = (recipe.work * 0.45).ceil() as u32;
+        let notice = (!self.notice.is_empty()).then(|| self.notice.clone());
+
+        let (state_caption, status, progress, can_gather, reason) = if self.felled(index) {
+            (
+                "CLEARED",
+                "This site has been cleared.".into(),
+                None,
+                false,
+                Some("This site has been cleared.".into()),
+            )
+        } else if let Some(job) = self.orders.get(&index) {
+            let (caption, status, progress) = if blocked(job) {
+                ("WAITING", "Waiting for access.".into(), None)
+            } else {
+                match job.phase {
+                    GatherPhase::Approach => ("QUEUED", "Waiting for a resident.".into(), None),
+                    GatherPhase::Work => {
+                        let fraction = (job.work / recipe.work).clamp(0.0, 1.0);
+                        (
+                            "GATHERING",
+                            format!("{:.0}% worked", fraction * 100.0),
+                            Some(fraction as f32),
+                        )
+                    }
+                    GatherPhase::Return => {
+                        ("GATHERING", "Carrying output back to stores.".into(), None)
+                    }
+                    GatherPhase::CollectOutput => {
+                        ("GATHERING", "Returning for the next load.".into(), None)
+                    }
+                }
+            };
+            (
+                caption,
+                status,
+                progress,
+                false,
+                Some("Gathering is already queued.".into()),
+            )
+        } else if remaining == Some(0) {
+            let reason = if recipe.deposit > 0 {
+                "This deposit is exhausted."
+            } else {
+                "This patch is exhausted."
+            };
+            ("DEPLETED", reason.into(), None, false, Some(reason.into()))
+        } else if let Some(state) = state.filter(|state| clock < state.ready) {
+            let days = (state.ready - clock) / 3200.0;
+            (
+                "RECOVERING",
+                format!("Recovering for {days:.1} more days."),
+                None,
+                false,
+                Some(format!("Wait {days:.1} days for this site to recover.")),
+            )
+        } else {
+            let status = remaining.map_or_else(
+                || "Ready to gather.".into(),
+                |units| format!("{units} units remaining."),
+            );
+            ("AVAILABLE", status, None, true, None)
+        };
+
+        Some(SelectedSite {
+            name: recipe.name.clone(),
+            state_caption,
+            status,
+            progress,
+            yields,
+            work_minutes,
+            can_gather,
+            reason,
+            notice,
+        })
+    }
+
     pub fn felled(&self, index: usize) -> bool {
         self.markers.get(&index).is_some_and(|site| site.removed)
     }
@@ -94,44 +211,6 @@ impl Gathering {
 
     pub fn has_selection(&self) -> bool {
         self.selected.is_some_and(|site| !self.felled(site))
-    }
-
-    pub fn selected_status(
-        &self,
-        catalog: &Catalog,
-        land: &Land,
-        clock: f64,
-        blocked: impl Fn(&GatherJob) -> bool,
-    ) -> Option<String> {
-        let index = self.selected?;
-        let name = &catalog.gathering[land.site(index)?.recipe()].name;
-        if !self.notice.is_empty() {
-            return Some(format!("{name} · {}", self.notice));
-        }
-        let status = if let Some(job) = self.orders.get(&index) {
-            if blocked(job) {
-                return Some(format!("{name} · Waiting for access"));
-            }
-            match job.phase {
-                GatherPhase::Approach => "Waiting for a resident".into(),
-                GatherPhase::Work => format!(
-                    "{:.0}% worked",
-                    job.work / catalog.gathering[land.site(index)?.recipe()].work * 100.0
-                ),
-                GatherPhase::Return => "Carrying output back to stores".into(),
-                GatherPhase::CollectOutput => "Returning for the next load".into(),
-            }
-        } else if let Some(state) = self.markers.get(&index).filter(|state| clock < state.ready) {
-            format!(
-                "Recovering for {:.1} more days",
-                (state.ready - clock) / 3200.0
-            )
-        } else if self.felled(index) {
-            "Felled".into()
-        } else {
-            "G Queue work".into()
-        };
-        Some(format!("{name} · {status}"))
     }
 
     pub fn resource_status(

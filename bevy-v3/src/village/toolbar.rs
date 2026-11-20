@@ -780,6 +780,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 ));
                 super::selection_card::spawn(menu, &assets);
                 super::farm_card::spawn(menu, &assets);
+                super::site_card::spawn(menu, &assets);
                 for action in [
                     Action::Recipes,
                     Action::Gather,
@@ -1668,8 +1669,10 @@ fn refresh(
     picker.home_page = picker.home_page.min(home_pages - 1);
     let homes = &homes[(picker.home_page * HOME_ROWS)..];
     picker.visible_homes = std::array::from_fn(|row| homes.get(row).map(|option| option.id));
+    // A selected natural site shows its card in this menu.
     menu.display = if show_beds
         || show_recipes
+        || Action::Gather.available(&village)
         || show_selected_project
         || show_field_size
         || show_residents
@@ -1730,18 +1733,21 @@ fn refresh(
             Action::UndoRoad => Action::FinishRoad.available(&village),
             Action::ResizeField(_) => !picker.open && show_field_size,
             Action::FieldDimensions => !picker.open && action.available(&village),
+            // While recipes are open, their card has the way back.
             Action::Recipes => {
-                action.available(&village) && village.construction.has_recipes(&catalog)
+                action.available(&village)
+                    && village.construction.has_recipes(&catalog)
+                    && !village.construction.production.open
             }
-            Action::RecipePage(_) => show_recipes,
-            Action::CraftWorkspace => craft_workspace
-                .as_ref()
-                .is_some_and(|(_, count)| *count > 1),
-            Action::MoveCraft => craft_workspace.is_some(),
-            Action::FacilityIrrigation => irrigation.is_some(),
+            // The recipes and natural-site cards (`site_card`) carry these actions now.
+            Action::RecipePage(_)
+            | Action::CraftWorkspace
+            | Action::MoveCraft
+            | Action::FacilityIrrigation
+            | Action::Recipe(_)
+            | Action::Gather => false,
             // Once cultivation is open, the farm card carries its controls.
             Action::Beds => action.available(&village) && !village.construction.farming.open,
-            Action::Gather => action.available(&village),
             Action::Farm(FarmControl::Work(work)) => {
                 show_beds && plot_actions.is_none_or(|counts| counts[work as usize] > 0)
             }
@@ -1749,7 +1755,6 @@ fn refresh(
                 show_beds && !village.construction.farming.whole_plot
             }
             Action::Farm(_) => show_beds,
-            Action::Recipe(row) => recipes.get(row).is_some(),
             Action::FocusSelectedProject | Action::DeselectProject => {
                 show_selected_project && action.available(&village)
             }

@@ -22,6 +22,7 @@ mod map_cursor;
 mod notices;
 mod rich_text;
 mod selection_card;
+mod site_card;
 mod thumbnails;
 use lens_picker::{LensPicker, MapLens};
 mod library_ui;
@@ -120,6 +121,7 @@ impl Plugin for VillagePlugin {
         building_lighting::install(app);
         farm_card::install(app);
         selection_card::install(app);
+        site_card::install(app);
         keyboard_focus::install(app);
         notices::install(app);
         loading_screen::install(app);
@@ -3095,7 +3097,7 @@ fn show_hud(
     village: Res<Village>,
     (mut text, mut node): VillageHudNodes,
     mut progress_nodes: ConstructionProgressNodes,
-    (catalog, land, saves): (Res<Catalog>, Res<Land>, Res<SaveMenu>),
+    (catalog, saves): (Res<Catalog>, Res<SaveMenu>),
     (placement, sound): (Res<MapNotice>, Res<SoundSettings>),
 ) {
     if !saves.is_changed()
@@ -3227,19 +3229,6 @@ fn show_hud(
     if village.terrain_editor.open && !sheet && !village.guide.open() && !village.lenses.open {
         node.left = px(316);
     }
-    if let Some(natural) =
-        village
-            .construction
-            .gathering
-            .selected_status(&catalog, &land, village.clock, |job| {
-                village
-                    .construction
-                    .gathering_route_blocked(job, village.clock)
-            })
-    {
-        label.push('\n');
-        label.push_str(&natural);
-    }
     match village.utility_panel {
         Some(UtilityPanel::Projects) => {}
         Some(UtilityPanel::Inventory) if village.inventory_view == InventoryView::Production => {
@@ -3266,7 +3255,8 @@ fn show_hud(
         None => {}
     }
     // A selected building is described by its card beside the action buttons.
-    let card = village.selected_project_focus().is_some();
+    // So is a building whose recipes are open, by the recipes card.
+    let card = village.selected_project_focus().is_some() || village.construction.production.open;
     if !card
         && let Some(production) =
             village

@@ -12,7 +12,143 @@ use crate::{
 
 use super::{resident_work::project_access_points, *};
 
+#[derive(PartialEq)]
+pub(crate) struct RecipePage {
+    pub page: usize,
+    pub pages: usize,
+    pub irrigation: Option<&'static str>,
+    pub craft_move: Option<(String, usize)>,
+    pub notice: Option<String>,
+    pub rows: Vec<RecipeRow>,
+}
+
+#[derive(PartialEq)]
+pub(crate) struct RecipeRow {
+    pub row: usize,
+    pub name: String,
+    pub work_minutes: u32,
+    pub inputs: Vec<(String, String, String, bool)>,
+    pub outputs: Vec<(String, String)>,
+    pub water_liters: f64,
+    pub notes: Vec<String>,
+    pub action_label: &'static str,
+    pub can_start: bool,
+    pub reason: Option<String>,
+}
+
 impl Construction {
+    pub(crate) fn recipe_page(&self, catalog: &Catalog, stock: &Stock) -> Option<RecipePage> {
+        if !self.production.open || self.menu {
+            return None;
+        }
+        let site = self.production.selected?;
+        let all = self.recipes(catalog, site);
+        let pages = all.len().div_ceil(PAGE_KEYS.len()).max(1);
+        let page = self.production.page.min(pages - 1);
+        let rows = all
+            .iter()
+            .skip(page * PAGE_KEYS.len())
+            .take(PAGE_KEYS.len())
+            .enumerate()
+            .map(|(row, (id, recipe))| {
+                let inputs = self
+                    .recipe_materials(catalog, site, id)
+                    .iter()
+                    .map(|(mat_id, &amount)| {
+                        let item = &catalog.materials[mat_id];
+                        let available = stock.available(mat_id);
+                        (
+                            item.name.clone(),
+                            item.quantity_text(u64::from(amount)),
+                            item.quantity_text(u64::from(available)),
+                            stock.sandbox || available >= amount,
+                        )
+                    })
+                    .collect();
+                let outputs = recipe
+                    .output
+                    .iter()
+                    .map(|(mat_id, &amount)| {
+                        let item = &catalog.materials[mat_id];
+                        (item.name.clone(), item.quantity_text(u64::from(amount)))
+                    })
+                    .collect();
+                let mut notes = Vec::new();
+                if let Some(craft) = &recipe.craft {
+                    let mut line = format!("{} level {}", craft.skill.label(), craft.level);
+                    if let Some(tool) = &craft.tool {
+                        line.push_str(", needs ");
+                        line.push_str(&catalog.materials[tool].name);
+                    }
+                    notes.push(line);
+                }
+                if let Some(tool) = &recipe.repair {
+                    let owned = stock.available(tool);
+                    let equipment = &stock.equipment;
+                    if let Some(condition) = equipment.condition_percent(tool, owned) {
+                        let broken = equipment.broken(tool).min(owned);
+                        notes.push(format!(
+                            "{owned} owned, {broken} broken, {condition:.0}% condition"
+                        ));
+                    }
+                }
+                if let Some(biology) = &recipe.biology {
+                    notes.push(format!("{} days of growth at full rate", biology.days));
+                }
+                let plan = self.batch_inputs(catalog, stock, site, id);
+                let (can_start, reason) = match plan {
+                    Ok(_) => (true, None),
+                    Err(reason) => (false, Some(reason)),
+                };
+                RecipeRow {
+                    row,
+                    name: recipe.name.clone(),
+                    work_minutes: (recipe.work * 0.45).ceil() as u32,
+                    inputs,
+                    outputs,
+                    water_liters: recipe.water,
+                    notes,
+                    action_label: if recipe.repair.is_some() {
+                        "Start repair"
+                    } else {
+                        "Start batch"
+                    },
+                    can_start,
+                    reason,
+                }
+            })
+            .collect();
+        Some(RecipePage {
+            page,
+            pages,
+            irrigation: self.facility_irrigation(catalog).map(Irrigation::label),
+            craft_move: self.craft_workspace_label(catalog),
+            notice: (!self.production.notice.is_empty()).then(|| self.production.notice.clone()),
+            rows,
+        })
+    }
+
+    #[cfg(test)]
+    pub(crate) fn add_built_test_facility(&mut self, catalog: &Catalog, key: &str) {
+        let project = &catalog.projects[key];
+        self.plans.push(Blueprint {
+            key: key.into(),
+            position: IVec2::ZERO,
+            size: project.size.into(),
+            rotation: 0,
+            loads: 0,
+            delivered: 0,
+            staged: 0,
+            depot: None,
+            work: project.work,
+            pickups: 0,
+            fare: 0,
+            removed: false,
+            purchase: None,
+            materials_paid: None,
+        });
+    }
+
     pub(crate) fn equipment_in_stores(
         &self,
         catalog: &Catalog,
