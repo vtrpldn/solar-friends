@@ -297,13 +297,16 @@ impl Construction {
         if keys.just_pressed(KeyCode::Digit0) {
             self.adjust_trade_policy(catalog, TradePolicy::HouseholdRestock);
         }
-        if keys.any_just_pressed([KeyCode::KeyI, KeyCode::KeyD]) {
+        if keys.just_pressed(KeyCode::KeyD) {
+            self.toggle_supplier_construction();
+        }
+        if keys.just_pressed(KeyCode::KeyI) {
             self.place_trade_order(
                 catalog,
                 stock,
                 clock,
                 TradeOrder::Buy {
-                    freight: keys.just_pressed(KeyCode::KeyD),
+                    freight: self.supplier_construction,
                 },
             );
         }
@@ -829,7 +832,7 @@ impl Construction {
         }
         let (used, maximum) = self.storage(catalog, stock);
         display.push_str(&format!(
-            "\nI Buy for pickup · D Order freight\nStorage {used}/{maximum} units · {} fulfilled purchases",
+            "\nI Buy · D Change purchase transport\nStorage {used}/{maximum} units · {} fulfilled purchases",
             self.trade.purchases,
         ));
         if let Some(status) =

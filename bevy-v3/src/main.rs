@@ -1183,6 +1183,7 @@ mod tests {
         assert_eq!(trade_state(&app), (balance, orders, delivery));
 
         assert!(!delivery);
+        press_button(&mut app, "Purchases: resident pickup");
         press_button(&mut app, "Buy for delivery");
         let (remaining, queued, delivery) = trade_state(&app);
         assert_eq!(queued, orders);
@@ -1204,8 +1205,8 @@ mod tests {
         assert!(!app.world().resource::<village::Village>().is_paused());
 
         press_button(&mut app, "Food portions");
-        press_button(&mut app, "Purchases: resident pickup");
         press_button(&mut app, "Purchases: supplier freight");
+        press_button(&mut app, "Purchases: resident pickup");
         press_button(&mut app, "Automatic food purchases on");
         press_button(&mut app, "Automatic food purchases off");
         press_button(&mut app, "Set daily food budget");

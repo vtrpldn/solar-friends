@@ -316,6 +316,9 @@ impl Action {
             Self::FocusSelectedProject | Self::DeselectProject => {
                 village.selected_project_focus().is_some()
             }
+            Self::Trade(TradeOrder::Buy { freight }) => {
+                village.trade_open() && freight == village.construction.supplier_construction()
+            }
             Self::TradeItem(_)
             | Self::TradeQueue
             | Self::TradeQueued(_)
@@ -351,6 +354,7 @@ impl Action {
             ),
             Self::PantryBatches => village.utility_panel == Some(UtilityPanel::Pantry),
             Self::AutoCook | Self::CookingTarget { .. } if village.stock.sandbox => false,
+            Self::PantryTransport if village.trade_open() => true,
             Self::PantryPriority
             | Self::PantryTransport
             | Self::PantryBudget
@@ -1963,6 +1967,11 @@ fn refresh(
             Action::HoldTradeQueued(row) => trade_queue
                 .get(row)
                 .is_some_and(|entry| entry.held.is_some()),
+            Action::Trade(TradeOrder::Buy { freight }) => {
+                show_trade
+                    && !show_trade_queue
+                    && freight == village.construction.supplier_construction()
+            }
             Action::Trade(_) | Action::TradePolicy(_) | Action::SaleQuantity(_) => {
                 show_trade && !show_trade_queue
             }
@@ -1979,9 +1988,11 @@ fn refresh(
             Action::ExpansionReserve | Action::GridFromFinances => {
                 show_finances && !village.finance_history_open
             }
+            Action::PantryTransport => {
+                (show_trade && !show_trade_queue) || (show_pantry && action.available(&village))
+            }
             Action::PantryBatches
             | Action::PantryPriority
-            | Action::PantryTransport
             | Action::PantryBudget
             | Action::PantryPolicy(..)
             | Action::AutoCook
