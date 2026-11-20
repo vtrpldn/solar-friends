@@ -3816,6 +3816,57 @@ mod tests {
     }
 
     #[test]
+    fn stopping_a_partial_advance_checkpoints_the_paused_village() {
+        let setup = WorldSetup::default().session();
+        let catalog = Catalog::default();
+        let stock = Stock::for_start(&setup, &catalog);
+        let directory =
+            std::env::temp_dir().join(format!("solar-v3-partial-advance-{}", std::process::id()));
+        let mut village = Village {
+            setup: Some(setup.clone()),
+            camp: Some(IVec2::new(36, 36)),
+            arrival_time: ARRIVAL_DURATION,
+            stock,
+            ..default()
+        };
+        village.apply_advance_action(AdvanceAction::Toggle);
+        village.apply_advance_action(AdvanceAction::Start);
+        let mut app = App::new();
+        app.insert_resource(village)
+            .insert_resource(setup)
+            .insert_resource(catalog)
+            .init_resource::<Land>()
+            .init_resource::<Time<Real>>()
+            .insert_resource(SaveMenu {
+                test_directory: Some(directory.clone()),
+                ..default()
+            })
+            .add_systems(Update, (advance_days, autosave_continue).chain());
+        app.update();
+        let elapsed = app.world().resource::<Village>().clock;
+        assert!(elapsed > 0.0 && elapsed < crate::weather::DAY);
+        app.world_mut()
+            .resource_mut::<Village>()
+            .apply_advance_action(AdvanceAction::Toggle);
+        app.update();
+
+        let (restored, _) = restore_continuation(
+            app.world().resource::<SaveMenu>(),
+            Mode::Story,
+            app.world().resource::<Catalog>(),
+        )
+        .unwrap();
+        assert!(restored.is_paused());
+        assert!(restored.advance.running.is_none());
+        assert_eq!(restored.clock, elapsed);
+        assert_eq!(
+            serde_json::to_value(restored).unwrap(),
+            serde_json::to_value(app.world().resource::<Village>()).unwrap()
+        );
+        std::fs::remove_dir_all(directory).unwrap();
+    }
+
+    #[test]
     fn water_policy_shortcut_yields_to_an_open_advance_dialog() {
         let mut village = Village {
             utility_panel: Some(UtilityPanel::Water),
