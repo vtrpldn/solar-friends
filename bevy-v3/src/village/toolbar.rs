@@ -7,7 +7,7 @@ use crate::{
 };
 use bevy::asset::{embedded_asset, load_embedded_asset};
 
-pub(super) const PANEL_WIDTH: f32 = 240.0;
+pub(super) const PANEL_WIDTH: f32 = 272.0;
 
 mod top_bar;
 
@@ -866,7 +866,10 @@ pub(super) fn install(app: &mut App) {
                 .after(read_camp_pointer)
                 .before(village_input),
         )
-        .add_systems(Update, refresh.after(village_input))
+        .add_systems(
+            Update,
+            (refresh, refresh_selection_card).after(village_input),
+        )
         .add_systems(Update, fit_and_scroll_menu.after(refresh));
 }
 
@@ -1032,6 +1035,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                         ..default()
                     },
                 ));
+                spawn_selection_card(menu, &assets);
                 spawn_button(menu, &assets, Action::FocusSelectedProject);
                 spawn_button(menu, &assets, Action::DeselectProject);
                 for action in [
@@ -1297,6 +1301,118 @@ fn spawn_button(parent: &mut ChildSpawnerCommands, assets: &AssetServer, action:
     button.id()
 }
 
+/// Caption, title, construction bar and status of the selected building, above its
+/// actions, after V2's selection card.
+#[derive(Component)]
+struct SelectionCard;
+
+#[derive(Component)]
+enum SelectionText {
+    Caption,
+    Title,
+    Body,
+}
+
+fn spawn_selection_card(menu: &mut ChildSpawnerCommands, assets: &AssetServer) {
+    use crate::ui_font::{ui_font_styled, ui_font_weight};
+    menu.spawn((
+        SelectionCard,
+        Node {
+            display: Display::None,
+            width: percent(100),
+            flex_direction: FlexDirection::Column,
+            row_gap: px(6),
+            padding: UiRect::bottom(px(4)),
+            ..default()
+        },
+    ))
+    .with_children(|card| {
+        card.spawn((
+            SelectionText::Caption,
+            Text::default(),
+            ui_font_styled(assets, 11.0, 750, crate::theme::CAPTION),
+        ));
+        card.spawn((
+            SelectionText::Title,
+            Text::default(),
+            ui_font_weight(assets, 21.0, 750),
+        ));
+        card.spawn((
+            super::ConstructionProgressTrack,
+            Node {
+                display: Display::None,
+                height: px(6),
+                flex_shrink: 0.0,
+                border_radius: BorderRadius::all(px(3)),
+                overflow: Overflow::clip(),
+                ..default()
+            },
+            BackgroundColor(crate::theme::TRACK),
+        ))
+        .with_child((
+            super::ConstructionProgressFill,
+            Node {
+                width: percent(0),
+                height: percent(100),
+                ..default()
+            },
+            BackgroundColor(crate::theme::LEAF),
+        ));
+        card.spawn((
+            SelectionText::Body,
+            Text::default(),
+            ui_font(assets, 13.0),
+            Node {
+                padding: UiRect::all(px(10)),
+                border: UiRect::left(px(3)),
+                border_radius: BorderRadius::all(px(10)),
+                ..default()
+            },
+            BackgroundColor(crate::theme::ACTIVE),
+            BorderColor::all(crate::theme::ACTIVE_EDGE),
+        ));
+    });
+}
+
+fn refresh_selection_card(
+    (village, catalog, picker): (Res<Village>, Res<Catalog>, Res<PanelPicker>),
+    mut card: Single<&mut Node, With<SelectionCard>>,
+    mut texts: Query<(&SelectionText, &mut Text, &mut Node), Without<SelectionCard>>,
+) {
+    let content = (!picker.open)
+        .then(|| village.selected_building_card(&catalog))
+        .flatten();
+    let display = if content.is_some() {
+        Display::Flex
+    } else {
+        Display::None
+    };
+    if card.display != display {
+        card.display = display;
+    }
+    let Some((caption, title, body)) = content else {
+        return;
+    };
+    for (part, mut text, mut node) in &mut texts {
+        let wanted = match part {
+            SelectionText::Caption => &caption,
+            SelectionText::Title => &title,
+            SelectionText::Body => &body,
+        };
+        if text.0 != *wanted {
+            text.0.clone_from(wanted);
+        }
+        let shown = if wanted.is_empty() {
+            Display::None
+        } else {
+            Display::Flex
+        };
+        if node.display != shown {
+            node.display = shown;
+        }
+    }
+}
+
 fn fit_and_scroll_menu(
     window: Single<&Window, With<PrimaryWindow>>,
     toolbar: Single<(&Node, &ComputedNode), With<Toolbar>>,
@@ -1306,7 +1422,8 @@ fn fit_and_scroll_menu(
     let (toolbar, computed) = *toolbar;
     let (node, position, interaction) = &mut *menu;
     let toolbar_height = computed.size().y * computed.inverse_scale_factor();
-    let max_height = px((window.height() - 40. - toolbar_height).max(0.));
+    // Stay below the clock card and its Guide and Lenses buttons.
+    let max_height = px((window.height() - super::RIGHT_PANEL_TOP - 30. - toolbar_height).max(0.));
     if node.max_height != max_height {
         node.max_height = max_height;
     }

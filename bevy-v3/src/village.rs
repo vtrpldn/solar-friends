@@ -889,6 +889,34 @@ impl Village {
         self.construction.selected_project_center()
     }
 
+    /// Caption, title and details for the selected building's card, as V2 shows them:
+    /// "READY TO USE", "Solar farm #1", then status lines.
+    fn selected_building_card(&self, catalog: &Catalog) -> Option<(String, String, String)> {
+        self.selected_project_focus()?;
+        let production = self
+            .construction
+            .selected_production(catalog, &self.stock, self.clock)?;
+        let mut lines = production.lines();
+        let first = lines.next().unwrap_or_default();
+        let (title, state) = first.split_once(" · ").unwrap_or((first, ""));
+        let mut body: Vec<String> = lines.map(str::to_owned).collect();
+        if let Some(index) = self.construction.production.selected
+            && let Some(service) = self.construction.utilities.facility_status(index)
+        {
+            body.push(service);
+        }
+        if let Some(status) = self.construction.lifecycle_status(catalog, &self.stock) {
+            body.push(status);
+        }
+        let body: Vec<String> = body
+            .iter()
+            .flat_map(|text| text.lines())
+            .map(strip_key_hints)
+            .filter(|line| !line.is_empty())
+            .collect();
+        Some((state.to_uppercase(), title.to_owned(), body.join("\n")))
+    }
+
     /// Model shown beside the selected building's actions, while they are on screen.
     fn selected_building_model(&self, catalog: &Catalog) -> Option<usize> {
         self.selected_project_focus()?;
@@ -1389,27 +1417,6 @@ fn spawn_hud(mut commands: Commands, assets: Res<AssetServer>) {
         .with_children(|hud| {
             resident_meters::spawn(hud, &assets);
             hud.spawn((
-                ConstructionProgressTrack,
-                Node {
-                    display: Display::None,
-                    height: px(6),
-                    flex_shrink: 0.0,
-                    border_radius: BorderRadius::all(px(3)),
-                    overflow: Overflow::clip(),
-                    ..default()
-                },
-                BackgroundColor(crate::theme::TRACK),
-            ))
-            .with_child((
-                ConstructionProgressFill,
-                Node {
-                    width: percent(0),
-                    height: percent(100),
-                    ..default()
-                },
-                BackgroundColor(crate::theme::LEAF),
-            ));
-            hud.spawn((
                 VillageHudText,
                 Text::default(),
                 ui_font(&assets, 15.0),
@@ -1680,6 +1687,30 @@ fn nearest_resident(cursor: Vec2, residents: impl Iterator<Item = (usize, Vec2)>
         .filter(|(_, distance)| *distance <= RESIDENT_PICK_RADIUS)
         .min_by(|a, b| a.1.total_cmp(&b.1))
         .map(|(index, _)| index)
+}
+
+/// Drops keyboard hints such as "J Switch" or "Shift+M Move" from a " · " separated
+/// line, for cards whose buttons already offer those actions.
+fn strip_key_hints(line: &str) -> String {
+    let is_key = |word: &str| {
+        word.contains('+')
+            || (word.len() <= 3
+                && word
+                    .chars()
+                    .all(|c| c.is_ascii_uppercase() || c.is_ascii_digit())
+                && word.chars().any(|c| c.is_ascii_uppercase()))
+    };
+    line.split(" · ")
+        .filter(|segment| {
+            let mut words = segment.split_whitespace();
+            !matches!(
+                (words.next(), words.next()),
+                (Some(key), Some(action)) if is_key(key)
+                    && action.chars().next().is_some_and(char::is_uppercase)
+            )
+        })
+        .collect::<Vec<_>>()
+        .join(" · ")
 }
 
 /// Top of right-hand panels, below the clock card and its Guide and Lenses buttons.
@@ -3388,29 +3419,35 @@ fn show_hud(
                 .connection_quote(&catalog, &village.stock, endpoints),
         );
     }
-    if let Some(production) =
-        village
-            .construction
-            .selected_production(&catalog, &village.stock, village.clock)
+    // A selected building is described by its card beside the action buttons.
+    let card = village.selected_project_focus().is_some();
+    if !card
+        && let Some(production) =
+            village
+                .construction
+                .selected_production(&catalog, &village.stock, village.clock)
     {
         label.push('\n');
         label.push_str(&production);
-        if let Some((_, fraction)) = village
+    }
+    // The construction bar sits on the selection card.
+    if card
+        && let Some((_, fraction)) = village
             .construction
             .selected_construction_progress(&catalog)
-        {
-            for (mut node, track) in &mut progress_nodes {
-                if track {
-                    node.display = Display::Flex;
-                } else {
-                    node.width = percent((fraction * 100.0) as f32);
-                }
+    {
+        for (mut node, track) in &mut progress_nodes {
+            if track {
+                node.display = Display::Flex;
+            } else {
+                node.width = percent((fraction * 100.0) as f32);
             }
         }
     }
-    if let Some(status) = village
-        .construction
-        .lifecycle_status(&catalog, &village.stock)
+    if !card
+        && let Some(status) = village
+            .construction
+            .lifecycle_status(&catalog, &village.stock)
     {
         label.push('\n');
         label.push_str(&status);
@@ -3431,7 +3468,8 @@ fn show_hud(
         label.push('\n');
         label.push_str(&farm);
     }
-    if let Some(index) = village.construction.production.selected
+    if !card
+        && let Some(index) = village.construction.production.selected
         && let Some(service) = village.construction.utilities.facility_status(index)
     {
         label.push('\n');
@@ -3811,6 +3849,24 @@ fn outdoor_animation_time(seconds: f64) -> f32 {
 mod tests {
     use super::*;
     use bevy::ecs::system::RunSystemOnce;
+
+    #[test]
+    fn cards_drop_keyboard_hints_their_buttons_already_offer() {
+        assert_eq!(
+            strip_key_hints("Housing · 0/2 beds assigned · C Recipes"),
+            "Housing · 0/2 beds assigned"
+        );
+        assert_eq!(
+            strip_key_hints("Shift+M Move · X Salvage · Shift+X Demolish"),
+            ""
+        );
+        assert_eq!(strip_key_hints("Powered · J Switch"), "Powered");
+        assert_eq!(strip_key_hints("100 m² basic shell"), "100 m² basic shell");
+        assert_eq!(
+            strip_key_hints("Drinking water · 0.0/8.0 L"),
+            "Drinking water · 0.0/8.0 L"
+        );
+    }
 
     #[test]
     fn stepping_through_lens_facilities_selects_each_building() {
