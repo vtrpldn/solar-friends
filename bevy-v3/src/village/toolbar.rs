@@ -355,7 +355,6 @@ impl Action {
                     UtilityPanel::Projects
                         | UtilityPanel::Inventory
                         | UtilityPanel::Crafting
-                        | UtilityPanel::Events
                         | UtilityPanel::Residents
                 )
             ),

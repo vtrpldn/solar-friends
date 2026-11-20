@@ -1,5 +1,7 @@
 use super::*;
 
+const PAGE_SIZE: usize = 8;
+
 #[derive(Default, Deserialize, Serialize)]
 pub(super) struct VillageEvents(VecDeque<Event>);
 
@@ -8,6 +10,18 @@ struct Event {
     clock: f64,
     text: String,
     count: u32,
+}
+
+impl Event {
+    fn timestamp(&self) -> String {
+        let minute = (540.0 + self.clock * 0.45).floor() as u64;
+        format!(
+            "Day {} · {:02}:{:02}",
+            minute / 1440 + 1,
+            minute / 60 % 24,
+            minute % 60,
+        )
+    }
 }
 
 impl VillageEvents {
@@ -47,16 +61,36 @@ impl Construction {
         self.events.record(clock, text);
     }
 
+    pub(crate) fn event_pages(&self) -> usize {
+        self.events.0.len().div_ceil(PAGE_SIZE).max(1)
+    }
+
+    pub(crate) fn event_page_rows(&self, page: usize) -> impl Iterator<Item = (String, &str)> {
+        let page = page.min(self.event_pages() - 1);
+        self.events
+            .0
+            .iter()
+            .skip(page * PAGE_SIZE)
+            .take(PAGE_SIZE)
+            .map(|event| {
+                let mut caption = event.timestamp();
+                if event.count > 1 {
+                    use std::fmt::Write;
+                    let _ = write!(caption, " · ×{}", event.count);
+                }
+                (caption, event.text.as_str())
+            })
+    }
+
     pub fn event_log(&self, page: usize, controls: &str) -> (usize, String) {
-        const PAGE: usize = 8;
-        let pages = self.events.0.len().div_ceil(PAGE).max(1);
+        let pages = self.event_pages();
         let page = page.min(pages - 1);
         let mut text = format!(
             "Village events · {}/{} · Page Up/Down · {controls}",
             page + 1,
             pages
         );
-        self.append_recent_events(&mut text, page * PAGE, PAGE);
+        self.append_recent_events(&mut text, page * PAGE_SIZE, PAGE_SIZE);
         (pages, text)
     }
 
@@ -66,15 +100,7 @@ impl Construction {
             text.push_str("\nNo village events recorded.");
         }
         for event in self.events.0.iter().skip(start).take(limit) {
-            let minute = (540.0 + event.clock * 0.45).floor() as u64;
-            let _ = write!(
-                text,
-                "\nDay {} · {:02}:{:02} · {}",
-                minute / 1440 + 1,
-                minute / 60 % 24,
-                minute % 60,
-                event.text
-            );
+            let _ = write!(text, "\n{} · {}", event.timestamp(), event.text);
             if event.count > 1 {
                 let _ = write!(text, " ×{}", event.count);
             }
@@ -99,6 +125,14 @@ mod tests {
         assert_eq!(pages, 6);
         assert!(newest.contains("Arrival 49 ×2"));
         assert!(!restored.event_log(5, "F8 Close").1.contains("Arrival 0"));
+        let (caption, newest) = restored.event_page_rows(0).next().unwrap();
+        assert_eq!(newest, "Arrival 49");
+        assert!(caption.ends_with("×2"));
+        assert!(
+            restored
+                .event_page_rows(5)
+                .all(|(_, text)| text != "Arrival 0")
+        );
         assert!(restored.events.valid());
     }
 }

@@ -208,6 +208,7 @@ impl Plugin for VillagePlugin {
                         almanac::widgets::input::<almanac::crafting::Screen>,
                         almanac::widgets::input::<almanac::pantry::Screen>,
                         almanac::widgets::input::<almanac::upkeep::Screen>,
+                        almanac::widgets::input::<almanac::events::Screen>,
                         almanac::widgets::input::<almanac::finances::Screen>,
                         almanac::widgets::input::<almanac::sites::connections::Water>,
                         almanac::widgets::input::<almanac::sites::connections::Power>,
@@ -229,6 +230,7 @@ impl Plugin for VillagePlugin {
                         almanac::widgets::refresh::<almanac::crafting::Screen>,
                         almanac::widgets::refresh::<almanac::pantry::Screen>,
                         almanac::widgets::refresh::<almanac::upkeep::Screen>,
+                        almanac::widgets::refresh::<almanac::events::Screen>,
                         almanac::widgets::refresh::<almanac::finances::Screen>,
                         almanac::widgets::refresh::<almanac::sites::connections::Water>,
                         almanac::widgets::refresh::<almanac::sites::connections::Power>,
@@ -926,6 +928,7 @@ impl Village {
                 Some(
                     UtilityPanel::Crafting
                     | UtilityPanel::Pantry
+                    | UtilityPanel::Events
                     | UtilityPanel::Upkeep
                     | UtilityPanel::Finances
                     | UtilityPanel::Residents
@@ -1092,10 +1095,7 @@ impl Village {
                     .0,
                 &mut self.inventory_page,
             ),
-            Some(UtilityPanel::Events) => (
-                self.construction.event_log(self.event_page, "F8 Close").0,
-                &mut self.event_page,
-            ),
+            Some(UtilityPanel::Events) => (self.construction.event_pages(), &mut self.event_page),
             Some(UtilityPanel::Upkeep) => (self.construction.upkeep_pages(), &mut self.upkeep_page),
             _ => return,
         };
@@ -3283,15 +3283,7 @@ fn show_hud(
         }
         Some(UtilityPanel::Inventory) => {}
         Some(UtilityPanel::Crafting) => {}
-        Some(UtilityPanel::Events) => {
-            label.push('\n');
-            label.push_str(
-                &village
-                    .construction
-                    .event_log(village.event_page, "F8 Close")
-                    .1,
-            );
-        }
+        Some(UtilityPanel::Events) => {}
         Some(UtilityPanel::Upkeep) => {}
         Some(UtilityPanel::Water | UtilityPanel::Power) => {}
         Some(UtilityPanel::Residents) => {}

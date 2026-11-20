@@ -3,6 +3,7 @@
 
 pub(super) mod art;
 pub(super) mod crafting;
+pub(super) mod events;
 pub(super) mod finances;
 pub(super) mod inventory;
 pub(super) mod pantry;
@@ -113,6 +114,7 @@ pub(super) fn spawn(card: &mut ChildSpawnerCommands, assets: &AssetServer) {
     crafting::spawn(card, assets);
     pantry::spawn(card, assets);
     finances::spawn(card, assets);
+    widgets::spawn::<events::Screen>(card);
     widgets::spawn::<upkeep::Screen>(card);
     widgets::spawn::<trade::Screen>(card);
 }
