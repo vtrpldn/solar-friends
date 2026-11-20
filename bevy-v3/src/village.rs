@@ -207,6 +207,7 @@ impl Plugin for VillagePlugin {
                         almanac::widgets::input::<almanac::inventory::Screen>,
                         almanac::widgets::input::<almanac::crafting::Screen>,
                         almanac::widgets::input::<almanac::pantry::Screen>,
+                        almanac::widgets::input::<almanac::upkeep::Screen>,
                         almanac::widgets::input::<almanac::finances::Screen>,
                         almanac::widgets::input::<almanac::sites::connections::Water>,
                         almanac::widgets::input::<almanac::sites::connections::Power>,
@@ -227,6 +228,7 @@ impl Plugin for VillagePlugin {
                         almanac::widgets::refresh::<almanac::inventory::Screen>,
                         almanac::widgets::refresh::<almanac::crafting::Screen>,
                         almanac::widgets::refresh::<almanac::pantry::Screen>,
+                        almanac::widgets::refresh::<almanac::upkeep::Screen>,
                         almanac::widgets::refresh::<almanac::finances::Screen>,
                         almanac::widgets::refresh::<almanac::sites::connections::Water>,
                         almanac::widgets::refresh::<almanac::sites::connections::Power>,
@@ -924,6 +926,7 @@ impl Village {
                 Some(
                     UtilityPanel::Crafting
                     | UtilityPanel::Pantry
+                    | UtilityPanel::Upkeep
                     | UtilityPanel::Finances
                     | UtilityPanel::Residents
                     | UtilityPanel::Water
@@ -3289,14 +3292,7 @@ fn show_hud(
                     .1,
             );
         }
-        Some(UtilityPanel::Upkeep) => {
-            label.push('\n');
-            label.push_str(
-                &village
-                    .construction
-                    .upkeep_status(&catalog, village.upkeep_page),
-            );
-        }
+        Some(UtilityPanel::Upkeep) => {}
         Some(UtilityPanel::Water | UtilityPanel::Power) => {}
         Some(UtilityPanel::Residents) => {}
         Some(UtilityPanel::Finances) => {}

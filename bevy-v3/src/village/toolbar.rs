@@ -52,7 +52,6 @@ enum Action {
     Panel(UtilityPanel),
     ResourcePanel(UtilityPanel),
     GridFromFinances,
-    StoresFromUpkeep,
     PantryFromStores,
     ClosePanel,
     Page(bool),
@@ -101,9 +100,6 @@ enum Action {
     PantryPolicy(i8, i64, bool),
     BuildingPower,
     Cooling,
-    AutomaticUpkeep,
-    UpkeepJob(usize),
-    UpkeepBudget { restock: bool },
 }
 
 impl Action {
@@ -257,7 +253,6 @@ impl Action {
                 village.utility_panel == Some(UtilityPanel::Finances)
                     && !village.finance_history_open
             }
-            Self::StoresFromUpkeep => village.utility_panel == Some(UtilityPanel::Upkeep),
             Self::PantryFromStores => {
                 village.utility_panel == Some(UtilityPanel::Inventory)
                     && matches!(
@@ -277,9 +272,6 @@ impl Action {
                     && !village.construction.menu
                     && !village.construction.is_placing()
                     && self.facility_switch(village).is_some()
-            }
-            Self::AutomaticUpkeep | Self::UpkeepBudget { .. } | Self::UpkeepJob(_) => {
-                village.utility_panel == Some(UtilityPanel::Upkeep)
             }
             Self::SelectedProject(_) => village.utility_panel.is_none(),
             Self::FocusSelectedProject | Self::DeselectProject => {
@@ -356,9 +348,6 @@ impl Action {
             Self::Home(_) | Self::ListedHome(_) => village.resident_overview_open(),
             Self::Page(_) if village.utility_panel == Some(UtilityPanel::Finances) => {
                 village.finance_history_open
-            }
-            Self::Page(_) if village.utility_panel == Some(UtilityPanel::Upkeep) => {
-                village.construction.upkeep_pages() > 1
             }
             Self::Page(_) => matches!(
                 village.utility_panel,
@@ -478,7 +467,6 @@ impl Action {
             Self::Manage if picker.open => "Close menu".into(),
             Self::Manage => "Manage".into(),
             Self::GridFromFinances => "Manage grid power".into(),
-            Self::StoresFromUpkeep => "Manage service supplies".into(),
             Self::PantryFromStores => "Manage food".into(),
             Self::Panel(panel) | Self::ResourcePanel(panel) => Self::PANELS
                 .iter()
@@ -661,25 +649,6 @@ impl Action {
             Self::BuildingPower => "Switch building on".into(),
             Self::Cooling if self.facility_switch(village) == Some(true) => "Pause cooling".into(),
             Self::Cooling => "Resume cooling".into(),
-            Self::AutomaticUpkeep => format!(
-                "Automatic maintenance {}",
-                if village.construction.automatic_upkeep() {
-                    "on"
-                } else {
-                    "off"
-                }
-            ),
-            Self::UpkeepJob(_) => String::new(),
-            Self::UpkeepBudget { restock: false } => numeric_label(
-                village,
-                NumericTarget::MaintenanceParts,
-                "Set parts allowance",
-            ),
-            Self::UpkeepBudget { restock: true } => numeric_label(
-                village,
-                NumericTarget::MaintenanceShopping,
-                "Set feed and repair budget",
-            ),
         }
     }
 }
@@ -1041,14 +1010,6 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 }
                 spawn_button(menu, &assets, Action::BuildingPower);
                 spawn_button(menu, &assets, Action::Cooling);
-                spawn_button(menu, &assets, Action::AutomaticUpkeep);
-                spawn_button(menu, &assets, Action::StoresFromUpkeep);
-                for row in 0..Construction::UPKEEP_ROWS {
-                    spawn_button(menu, &assets, Action::UpkeepJob(row));
-                }
-                for restock in [false, true] {
-                    spawn_button(menu, &assets, Action::UpkeepBudget { restock });
-                }
                 spawn_button(menu, &assets, Action::Home(true));
                 spawn_button(menu, &assets, Action::Home(false));
                 for row in 0..HOME_ROWS {
@@ -1484,10 +1445,6 @@ fn handle_buttons(
                     picker.open = false;
                 }
                 Action::GridFromFinances => village.utility_panel = Some(UtilityPanel::Power),
-                Action::StoresFromUpkeep => {
-                    village.utility_panel = Some(UtilityPanel::Inventory);
-                    village.inventory_page = 0;
-                }
                 Action::PantryFromStores => {
                     village.utility_panel = Some(UtilityPanel::Pantry);
                     village.pantry_batch_page = None;
@@ -1703,26 +1660,6 @@ fn handle_buttons(
                         }
                     }
                 }
-                Action::AutomaticUpkeep if !picker.open => {
-                    village.construction.toggle_automatic_upkeep()
-                }
-                Action::UpkeepJob(row) if !picker.open => {
-                    let page = village.upkeep_page;
-                    if let Some(point) = village.construction.focus_upkeep_job(page, row) {
-                        let terrain = village.terrain(&setup);
-                        camera.target =
-                            Vec3::new(point.x, terrain.height_at(point.x, point.y), point.y);
-                        village.utility_panel = None;
-                    }
-                }
-                Action::UpkeepBudget { restock } if !picker.open => {
-                    let target = if restock {
-                        NumericTarget::MaintenanceShopping
-                    } else {
-                        NumericTarget::MaintenanceParts
-                    };
-                    village.numeric_entry = Some((target, String::new()));
-                }
                 Action::PantryBatches if !picker.open => {
                     village.pantry_batch_page = village.pantry_batch_page.is_none().then_some(0);
                 }
@@ -1854,10 +1791,7 @@ fn handle_buttons(
                 | Action::CookingTarget { .. }
                 | Action::PantryPolicy(..)
                 | Action::BuildingPower
-                | Action::Cooling
-                | Action::AutomaticUpkeep
-                | Action::UpkeepJob(_)
-                | Action::UpkeepBudget { .. } => {}
+                | Action::Cooling => {}
             }
         }
     }
@@ -1956,14 +1890,6 @@ fn refresh(
     let show_finances = !picker.open && Action::Ledger.available(&village);
     let show_facility_switches = !picker.open
         && (Action::BuildingPower.available(&village) || Action::Cooling.available(&village));
-    let show_upkeep = !picker.open && Action::AutomaticUpkeep.available(&village);
-    let upkeep_jobs = if show_upkeep {
-        village
-            .construction
-            .upkeep_job_labels(&catalog, village.upkeep_page)
-    } else {
-        Vec::new()
-    };
     let show_residents = !picker.open && village.utility_panel == Some(UtilityPanel::Residents);
     let show_homes = !picker.open && village.resident_overview_open();
     let projects = if show_projects {
@@ -2002,7 +1928,6 @@ fn refresh(
         || show_pantry
         || inventory_items.iter().any(Option::is_some)
         || show_facility_switches
-        || show_upkeep
         || (picker.open && Action::Manage.available(&village))
     {
         Display::Flex
@@ -2121,10 +2046,6 @@ fn refresh(
             Action::BuildingPower | Action::Cooling => {
                 show_facility_switches && action.available(&village)
             }
-            Action::AutomaticUpkeep | Action::UpkeepBudget { .. } | Action::StoresFromUpkeep => {
-                show_upkeep
-            }
-            Action::UpkeepJob(row) => upkeep_jobs.get(row).is_some(),
             Action::Panel(_) => picker.open,
             Action::ResourcePanel(_) => !picker.open && !show_view && action.available(&village),
             Action::PantryFromStores => !picker.open && !show_view && action.available(&village),
@@ -2284,7 +2205,6 @@ fn refresh(
                     village.construction.resident_roster_line(&catalog, index)
                 ),
                 Action::Project(row) => projects[row].clone(),
-                Action::UpkeepJob(row) => upkeep_jobs[row].clone(),
                 Action::Recipe(row) => recipes[row].clone(),
                 Action::MoveCraft => craft_workspace
                     .as_ref()
