@@ -622,6 +622,9 @@ impl Construction {
             if stock.missing(&inputs).is_some() && action != FarmAction::Plant {
                 return Err("Not enough compost in supplies.".into());
             }
+            if self.supplier_construction && stock.missing(&inputs).is_some() {
+                self.construction_supply_quote(catalog, stock, clock, &inputs)?;
+            }
             let quote =
                 self.market
                     .quote(catalog, &inputs, stock, clock.seconds, clock.round_trip_km)?;
