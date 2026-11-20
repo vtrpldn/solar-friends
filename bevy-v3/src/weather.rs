@@ -294,7 +294,10 @@ fn sunlight(
     );
 }
 
+/// Drops per 50 × 50 patch of ground; the field grows with the view at the same density.
 const RAIN_DROPS: usize = 600;
+const RAIN_PATCH: f32 = 50.;
+const RAIN_DROP_LIMIT: usize = 6_000;
 const RAIN_HEIGHT: f32 = 20.;
 
 #[derive(Default)]
@@ -310,12 +313,13 @@ impl RainField {
             self.seed = Some(seed);
             self.phase = 0.;
             let mut rng = land_random(seed ^ 0x36a1);
-            self.offsets = (0..RAIN_DROPS)
+            // Unit square offsets, scaled to the visible ground each frame.
+            self.offsets = (0..RAIN_DROP_LIMIT)
                 .map(|_| {
                     Vec3::new(
-                        (rng() as f32 - 0.5) * 50.,
+                        rng() as f32 - 0.5,
                         rng() as f32 * RAIN_HEIGHT,
-                        (rng() as f32 - 0.5) * 50.,
+                        rng() as f32 - 0.5,
                     )
                 })
                 .collect();
@@ -327,7 +331,7 @@ impl RainField {
 fn rain(
     setup: Res<WorldSetup>,
     village: Res<Village>,
-    camera: Single<&VillageCamera>,
+    camera: Single<(&VillageCamera, &Projection)>,
     time: Res<Time<Real>>,
     mut field: Local<RainField>,
     mut gizmos: Gizmos,
@@ -341,9 +345,19 @@ fn rain(
     }
     field.update(setup.seed(), time.delta_secs());
     let terrain = village.terrain(&setup);
-    for offset in &field.offsets {
-        let x = camera.target.x + offset.x;
-        let z = camera.target.z + offset.z;
+    let (camera, projection) = *camera;
+    // Cover everything the camera sees: the tilted view reaches about twice as far
+    // across the ground as the screen is tall.
+    let span = match projection {
+        Projection::Orthographic(ortho) => ortho.area.width().max(ortho.area.height() * 2.),
+        _ => RAIN_PATCH,
+    }
+    .max(RAIN_PATCH)
+        * 1.5;
+    let drops = ((RAIN_DROPS as f32 * (span / RAIN_PATCH).powi(2)) as usize).min(RAIN_DROP_LIMIT);
+    for offset in &field.offsets[..drops] {
+        let x = camera.target.x + offset.x * span;
+        let z = camera.target.z + offset.z * span;
         let height = (offset.y - field.phase).rem_euclid(RAIN_HEIGHT);
         let point = Vec3::new(x, terrain.height_at(x, z) + height, z);
         gizmos.line(
