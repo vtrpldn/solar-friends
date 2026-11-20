@@ -692,16 +692,56 @@ fn open_lab(catalog: Catalog, runner: Runner, replay: Option<Replay>, source: Op
         .run();
 }
 
+#[derive(Component)]
+struct LabControl(KeyCode);
+
+#[derive(Component)]
+struct LabControlLabel;
+
 fn setup_lab_window(mut commands: Commands, assets: Res<AssetServer>) {
     commands.spawn(Camera2d);
     commands.spawn((
         Text::default(),
         ui_font(&assets, 18.0),
         Node {
-            margin: UiRect::all(px(24)),
+            margin: UiRect {
+                top: px(58),
+                ..UiRect::all(px(24))
+            },
             ..default()
         },
     ));
+    commands
+        .spawn(Node {
+            position_type: PositionType::Absolute,
+            top: px(10),
+            left: px(24),
+            column_gap: px(6),
+            ..default()
+        })
+        .with_children(|toolbar| {
+            for (key, label) in [
+                (KeyCode::Space, "Run / pause"),
+                (KeyCode::KeyJ, "Single step"),
+                (KeyCode::Tab, "Next view"),
+                (KeyCode::F7, "New story run"),
+                (KeyCode::F6, "Save lab"),
+                (KeyCode::F9, "Load lab"),
+                (KeyCode::F5, "Export report"),
+            ] {
+                toolbar
+                    .spawn((
+                        Button,
+                        LabControl(key),
+                        Node {
+                            padding: UiRect::axes(px(12), px(8)),
+                            ..default()
+                        },
+                        BackgroundColor(Color::srgb_u8(62, 83, 65)),
+                    ))
+                    .with_child((Text::new(label), LabControlLabel, ui_font(&assets, 15.0)));
+            }
+        });
 }
 
 #[derive(Default, PartialEq, Eq)]
@@ -1773,6 +1813,9 @@ fn lab_bed_page(
     )
 }
 
+type LabControlPresses<'w, 's> =
+    Query<'w, 's, (&'static Interaction, &'static LabControl), Changed<Interaction>>;
+
 fn update_lab_window(
     mut runner: ResMut<Runner>,
     catalog: Res<Catalog>,
@@ -1783,13 +1826,22 @@ fn update_lab_window(
         MessageReader<bevy::window::FileDragAndDrop>,
     ),
     mut playback: Local<Playback>,
-    mut panel: Single<&mut Text>,
+    (mut panel, controls): (
+        Single<&mut Text, Without<LabControlLabel>>,
+        LabControlPresses,
+    ),
     (mut replay, mut map, source): (
         Option<ResMut<Replay>>,
         ResMut<map::MapState>,
         Option<Res<LabSource>>,
     ),
 ) {
+    let pressed = |key| {
+        keys.just_pressed(key)
+            || controls.iter().any(|(interaction, control)| {
+                *interaction == Interaction::Pressed && control.0 == key
+            })
+    };
     playback.replaying = replay.is_some();
     let dropped = files
         .read()
@@ -1845,7 +1897,7 @@ fn update_lab_window(
         && playback.build_search.is_none()
         && playback.replacement.is_none()
     {
-        if keys.just_pressed(KeyCode::F7) {
+        if pressed(KeyCode::F7) {
             playback.running = false;
             playback.reset_timing();
             playback.notice.clear();
@@ -1894,7 +1946,7 @@ fn update_lab_window(
         } else if keys.just_pressed(KeyCode::Escape) {
             playback.replacement = None;
             None
-        } else if keys.just_pressed(KeyCode::F9) {
+        } else if pressed(KeyCode::F9) {
             match lab_save_path() {
                 Ok(path) if path.is_file() => Some(LabReplacement::SavedLab(path)),
                 Ok(_) => {
@@ -2046,8 +2098,8 @@ fn update_lab_window(
             playback.clear_confirmation = None;
             playback.order = Some(String::new());
         }
-        if keys.just_pressed(KeyCode::F6) {
-            let export = keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]);
+        if pressed(KeyCode::F6) {
+            let export = keys.just_pressed(KeyCode::F6) && shift;
             let path = if export {
                 runner.output_path("checkpoint")
             } else {
@@ -2061,7 +2113,7 @@ fn update_lab_window(
                 Err(error) => format!("Could not save lab village · {error}"),
             };
         }
-        if keys.just_pressed(KeyCode::F5) {
+        if pressed(KeyCode::F5) {
             playback.notice = match runner.export() {
                 Ok(path) => format!("Report saved to {}", path.display()),
                 Err(error) => format!("Could not export report · {error}"),
@@ -2076,7 +2128,7 @@ fn update_lab_window(
         )));
         return;
     }
-    if keys.just_pressed(KeyCode::Tab) {
+    if pressed(KeyCode::Tab) {
         playback.view = playback.view.next();
         playback.inventory_page = 0;
         playback.clear_confirmation = None;
@@ -2118,7 +2170,7 @@ fn update_lab_window(
             playback.set_speed(index);
         }
     }
-    if keys.just_pressed(KeyCode::Space) && !reached_end(&runner) {
+    if pressed(KeyCode::Space) && !reached_end(&runner) {
         playback.running = !playback.running;
         playback.reset_timing();
     }
@@ -2135,13 +2187,11 @@ fn update_lab_window(
         if keys.just_pressed(KeyCode::F3) {
             let (days, label) = playback.interval();
             playback.start_interval(runner.index, limit, days * crate::weather::DAY, &label);
-        } else if keys.just_pressed(KeyCode::KeyJ)
-            && keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight])
-        {
+        } else if keys.just_pressed(KeyCode::KeyJ) && shift {
             playback.start_interval(runner.index, limit, crate::weather::HOUR, "one hour");
         }
     }
-    if keys.just_pressed(KeyCode::KeyJ) && !playback.running && !reached_end(&runner) {
+    if pressed(KeyCode::KeyJ) && !playback.running && !reached_end(&runner) {
         runner.advance(&catalog);
     }
     if playback.running {
@@ -3163,6 +3213,11 @@ mod tests {
             .add_message::<bevy::window::FileDragAndDrop>()
             .add_systems(Update, update_lab_window);
         let panel = app.world_mut().spawn(Text::default()).id();
+        let step = app
+            .world_mut()
+            .spawn((Interaction::None, LabControl(KeyCode::KeyJ)))
+            .with_child((Text::new("Single step"), LabControlLabel))
+            .id();
         let key = |app: &mut App, key| {
             let mut keys = app.world_mut().resource_mut::<ButtonInput<KeyCode>>();
             keys.reset_all();
@@ -3173,7 +3228,8 @@ mod tests {
         let view = &app.world().get::<Text>(panel).unwrap().0;
         assert!(view.contains("Replay paused"));
         assert!(!view.contains("Enter order"));
-        key(&mut app, KeyCode::KeyJ);
+        *app.world_mut().get_mut::<Interaction>(step).unwrap() = Interaction::Pressed;
+        app.update();
         assert!(
             app.world()
                 .get::<Text>(panel)

@@ -328,6 +328,7 @@ pub(super) fn draw(
     runner: Res<Runner>,
     catalog: Res<Catalog>,
     window: Single<&Window, With<PrimaryWindow>>,
+    controls: Query<&Interaction, With<super::LabControl>>,
     mut gizmos: Gizmos,
 ) {
     if !map.visible {
@@ -363,7 +364,13 @@ pub(super) fn draw(
     }
     let scale = side / 256.0 * 1.15_f32.powf(map.zoom_steps);
     if mouse.just_pressed(MouseButton::Left) {
-        map.drag = inside.map(|position| (position, map.camera));
+        map.drag = inside
+            .filter(|_| {
+                !controls
+                    .iter()
+                    .any(|interaction| *interaction != Interaction::None)
+            })
+            .map(|position| (position, map.camera));
         map.dragging = false;
     }
     if let Some((origin, camera)) = map.drag
