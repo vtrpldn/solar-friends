@@ -405,7 +405,6 @@ impl Construction {
         if !self.supplier_construction
             || self.trade.delivery.is_some()
             || self.seed_freight_active()
-            || !crate::market::town_is_open(clock.seconds)
             || self.pending_dispatch_cargo(catalog).is_some_and(|cargo| {
                 !self
                     .logistics_policy
@@ -1593,9 +1592,10 @@ mod tests {
         let mut stock = Stock::for_start(&setup, &catalog);
         let mut village = Construction::default();
         let clock = TownClock {
-            seconds: 0.0,
+            seconds: 11.0 * crate::weather::HOUR,
             round_trip_km: 12,
         };
+        assert!(!crate::market::town_is_open(clock.seconds));
         let mut plan = village.proposed_site(&catalog, "well", IVec2::new(36, 36));
         Construction::reserve_project(&mut village.market, &mut stock, &catalog, &mut plan, clock)
             .unwrap();
@@ -1617,7 +1617,7 @@ mod tests {
         assert!(village.construction_delivery_at(1));
         assert!(
             village
-                .reserved_freight_status(0.0)
+                .reserved_freight_status(clock.seconds)
                 .unwrap()
                 .contains("2 project(s)")
         );
