@@ -10,6 +10,7 @@ pub(crate) enum Preview {
     Downtime,
     Utilities(UtilitiesPreview),
     Arrival,
+    Needs(UtilitiesPreview),
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
@@ -41,6 +42,7 @@ impl Preview {
                 "--downtime-preview" => Self::Downtime,
                 "--utilities-preview" => Self::Utilities(UtilitiesPreview::default()),
                 "--arrival-preview" => Self::Arrival,
+                "--needs-preview" => Self::Needs(UtilitiesPreview::default()),
                 "--interactions" | "--land-seed" | "--lighting-hour" | "--lighting-rain" => {
                     utilities_option = Some(flag);
                     match flag {
@@ -78,7 +80,9 @@ impl Preview {
         }
         let Some(scene) = scene else {
             return if let Some(flag) = utilities_option {
-                Err(format!("{flag} requires --utilities-preview."))
+                Err(format!(
+                    "{flag} requires --utilities-preview or --needs-preview."
+                ))
             } else {
                 Ok(None)
             };
@@ -88,9 +92,10 @@ impl Preview {
         }
         Ok(Some(match scene {
             Self::Utilities(_) => Self::Utilities(utilities),
+            Self::Needs(_) => Self::Needs(utilities),
             _ if utilities_option.is_some() => {
                 return Err(format!(
-                    "{} requires --utilities-preview.",
+                    "{} requires --utilities-preview or --needs-preview.",
                     utilities_option.expect("utility preview option")
                 ));
             }
@@ -103,6 +108,7 @@ impl Preview {
             Self::Downtime => "Downtime preview",
             Self::Utilities(_) => "Utilities preview",
             Self::Arrival => "Arrival preview",
+            Self::Needs(_) => "Needs preview",
         }
     }
 
@@ -110,6 +116,7 @@ impl Preview {
         let (mode, seed, clock) = match self {
             Self::Downtime => (Mode::Story, None, 1300.0),
             Self::Utilities(options) => (Mode::Story, Some(options.seed), options.clock()),
+            Self::Needs(options) => (Mode::Story, Some(options.seed), 200.0),
             Self::Arrival => (Mode::Story, Some(0), 0.0),
         };
         let mut scene = PreviewVillage::new(self.title(), mode, seed, clock);
@@ -123,6 +130,11 @@ impl Preview {
                 scene.village.paused = options.hour.is_some() || options.rain;
             }
             Self::Arrival => prepare_arrival(&mut scene),
+            Self::Needs(options) => {
+                let home = prepare_utilities(&mut scene, options.interactions)?;
+                prepare_needs(&mut scene, home);
+                scene.village.paused = options.hour.is_some();
+            }
         }
         scene.village.stock.sandbox = mode == Mode::Sandbox;
         app.insert_resource(scene.setup)
@@ -382,6 +394,16 @@ fn prepare_arrival(scene: &mut PreviewVillage) {
     scene.focus(crate::construction::STOCKPILE, 1.0);
 }
 
+fn prepare_needs(scene: &mut PreviewVillage, house: usize) {
+    scene.village.preview_rain = Some(false);
+    scene.village.construction.prepare_needs_preview();
+    scene
+        .village
+        .construction
+        .utilities
+        .deliver_water(house, 0, 5.0);
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -498,6 +520,26 @@ mod tests {
         assert_eq!(
             target,
             world_position(stockpile.x as f32, stockpile.y as f32)
+        );
+    }
+
+    #[test]
+    fn needs_preview_starts_with_five_different_low_needs() {
+        let app = start(&["--needs-preview"]);
+        let village = app.world().resource::<Village>();
+        assert_eq!(village.camp, Some(CLEARING_CAMP));
+        assert_eq!(village.clock, 200.0);
+        for (index, need) in ["Food", "Bladder", "Hygiene", "Social", "Fun"]
+            .into_iter()
+            .enumerate()
+        {
+            let meters = village.construction.resident_need_meters(index);
+            assert_eq!(meters[0], ("Energy", 80.0 + 3.0 * index as f64));
+            assert!(meters.contains(&(need, 8.0)), "{meters:?}");
+        }
+        assert_eq!(
+            village.construction.utilities.water_site(9).unwrap().levels[0],
+            5.0
         );
     }
 }

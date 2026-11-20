@@ -85,6 +85,26 @@ struct RestPose {
 }
 
 impl Construction {
+    pub(crate) fn prepare_needs_preview(&mut self) {
+        for (index, (worker, need)) in self
+            .residents
+            .iter_mut()
+            .zip([
+                Need::Hunger,
+                Need::Bladder,
+                Need::Hygiene,
+                Need::Social,
+                Need::Fun,
+            ])
+            .enumerate()
+        {
+            worker.position = Vec2::new(32.0 + index as f32, 37.0);
+            worker.health.energy = 80.0 + index as f64 * 3.0;
+            worker.health.levels[..Need::Hydration as usize].fill(85.0);
+            worker.health.levels[need as usize] = 8.0;
+        }
+    }
+
     pub(crate) fn resident_need_meters(&self, resident: usize) -> [(&'static str, f64); 8] {
         let health = &self.residents[resident].health;
         std::array::from_fn(|index| {
