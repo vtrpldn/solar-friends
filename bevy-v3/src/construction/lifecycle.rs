@@ -248,10 +248,10 @@ impl Construction {
             self.status = format!("{} prioritized.", catalog.projects[&project.key].name);
             return;
         }
-        let issue = if matches!(action, ProjectAction::Move) {
-            self.move_blocker(index)
-        } else {
-            self.can_change(index)
+        let issue = match action {
+            ProjectAction::Move => self.move_blocker(index),
+            ProjectAction::Cancel => self.cancel_plan_issue(index),
+            _ => self.can_change(index),
         };
         if let Some(issue) = issue {
             self.status = issue.into();
@@ -262,11 +262,7 @@ impl Construction {
             self.rotation = project.rotation;
             self.status.clear();
         } else if matches!(action, ProjectAction::Cancel) {
-            if project.work == 0.0 {
-                self.cancel_plan(catalog, stock, index);
-            } else {
-                self.status = "Construction has already started.".into();
-            }
+            self.cancel_plan(catalog, stock, index);
         } else {
             if project.pickups > 0 {
                 self.status = "Wait for the purchased supplies to arrive.".into();
@@ -376,27 +372,41 @@ impl Construction {
         )
     }
 
-    fn cancel_plan(&mut self, catalog: &Catalog, stock: &mut Stock, index: usize) {
-        if self.construction_delivery_at(index) {
-            self.status = "Materials are on their way. Cancel after delivery.".into();
-            return;
+    pub(crate) fn selected_cancel_issue(&self) -> Option<&'static str> {
+        self.production
+            .selected
+            .and_then(|index| self.cancel_plan_issue(index))
+    }
+
+    fn cancel_plan_issue(&self, index: usize) -> Option<&'static str> {
+        let plan = &self.plans[index];
+        if plan.work > 0.0 {
+            return Some("Construction has already started.");
         }
+        if self.construction_delivery_at(index)
+            || self
+                .booked_construction_trip(index)
+                .is_some_and(|trip| trip.boarded)
+        {
+            return Some("Materials are on their way. Cancel after delivery.");
+        }
+        if plan.pickups > 0
+            && plan
+                .purchase
+                .as_ref()
+                .is_none_or(|order| order.trips != plan.pickups)
+        {
+            return Some("Wait until the remaining supplies arrive before canceling.");
+        }
+        self.can_change(index)
+    }
+
+    fn cancel_plan(&mut self, catalog: &Catalog, stock: &mut Stock, index: usize) {
         let plan = &self.plans[index];
         let mut returned = plan.materials(catalog).clone();
         if plan.pickups > 0 {
             let active = self.booked_construction_trip(index).copied();
-            let Some(order) = plan
-                .purchase
-                .as_ref()
-                .filter(|order| order.trips == plan.pickups)
-            else {
-                self.status = "Wait until the remaining supplies arrive before canceling.".into();
-                return;
-            };
-            if active.is_some_and(|trip| trip.boarded) {
-                self.status = "Materials are on their way. Cancel after delivery.".into();
-                return;
-            }
+            let order = plan.purchase.as_ref().expect("validated pending purchase");
             for (id, units) in &order.units {
                 if let Some(amount) = returned.get_mut(id) {
                     *amount = amount.saturating_sub(*units);

@@ -1926,6 +1926,9 @@ fn refresh(
             continue;
         }
         let action_issue = match action {
+            Action::SelectedProject(ProjectAction::Cancel) => {
+                village.construction.selected_cancel_issue()
+            }
             Action::Trade(order) => village.construction.selected_trade_issue(
                 &catalog,
                 &village.stock,
@@ -1944,6 +1947,11 @@ fn refresh(
         };
         if interaction != Interaction::None {
             let description = match action {
+                Action::SelectedProject(ProjectAction::Cancel) => Some(
+                    action_issue
+                        .unwrap_or("Remove this unstarted plan and return reserved supplies.")
+                        .into(),
+                ),
                 Action::Trade(_) | Action::ListedHome(_) => action_issue.map(str::to_owned),
                 Action::CampPreset(index) => Some(
                     [
