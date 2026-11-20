@@ -575,8 +575,14 @@ impl Bed {
     ) -> Result<(BTreeMap<String, u32>, f64), &'static str> {
         if !self.allows(action, clock) {
             return Err(match action {
+                FarmAction::Prepare => "Clear this bed before preparing it.",
                 FarmAction::Plant => "Prepare the soil before planting.",
-                FarmAction::Harvest => "There is no ripe harvest remaining in this bed.",
+                FarmAction::Harvest if self.harvest_expired(clock) => {
+                    "The harvest has expired. Clear this bed before replanting."
+                }
+                FarmAction::Harvest => "This crop is not ready for harvest.",
+                FarmAction::Clear => "There is no standing crop to clear.",
+                FarmAction::Collect => "At least 1 kg of residues is needed for collection.",
                 _ => "That action is unavailable for this bed.",
             });
         }

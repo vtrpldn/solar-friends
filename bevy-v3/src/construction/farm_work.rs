@@ -955,7 +955,20 @@ impl Construction {
         }
         if bed.stage == Stage::Failed {
             label.push_str("\nClear the failed crop, then prepare the bed again.");
-        } else if bed.stage == Stage::Growing {
+        } else if matches!(bed.stage, Stage::Growing | Stage::Harvestable)
+            && !bed.harvest_expired(clock)
+        {
+            if bed.drought_damage() > 0.0 {
+                let _ = write!(
+                    label,
+                    "\nDamaged · {:.0}% irreversible drought loss",
+                    bed.drought_damage() * 100.0
+                );
+            } else if bed.moisture < 0.2 {
+                label.push_str("\nWilting · Restore irrigation");
+            } else {
+                label.push_str("\nHealthy");
+            }
             if bed.moisture < 0.4 {
                 label.push_str("\nDry soil is slowing growth.");
             }
