@@ -112,6 +112,20 @@ impl WorldSetup {
     }
 
     pub(crate) fn with_seed(mut self, seed: std::num::NonZeroU32) -> Self {
+    fn reroll_seed(&mut self) {
+        let time = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default();
+        let entropy = time.subsec_nanos() ^ time.as_secs() as u32 ^ self.seed.rotate_left(13);
+        let seed = (crate::terrain::land_random(entropy)() * f64::from(u32::MAX)) as u32;
+        self.seed = if seed == 0 || seed == self.seed {
+            self.seed.wrapping_add(1).max(1)
+        } else {
+            seed
+        };
+        self.seed_entry = None;
+    }
+
         self.seed = seed.get();
         self
     }
@@ -544,6 +558,7 @@ fn setup_input(
             Action::Back => setup.choosing_land = false,
             Action::Preset => setup.cycle_preset(),
             Action::Biome
+                setup.reroll_seed();
             | Action::Landscape
             | Action::Water
             | Action::Resources
@@ -555,20 +570,7 @@ fn setup_input(
             Action::Seed => {
                 setup.seed_entry = Some(String::new());
             }
-            Action::Reroll => {
-                let time = std::time::SystemTime::now()
-                    .duration_since(std::time::UNIX_EPOCH)
-                    .unwrap_or_default();
-                let entropy =
-                    time.subsec_nanos() ^ time.as_secs() as u32 ^ setup.seed.rotate_left(13);
-                let seed = (crate::terrain::land_random(entropy)() * f64::from(u32::MAX)) as u32;
-                setup.seed = if seed == 0 || seed == setup.seed {
-                    setup.seed.wrapping_add(1).max(1)
-                } else {
-                    seed
-                };
-                setup.seed_entry = None;
-            }
+            Action::Reroll => setup.reroll_seed(),
             Action::Explore => {
                 if !setup.apply_seed_entry() {
                     continue;

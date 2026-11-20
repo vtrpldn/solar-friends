@@ -770,6 +770,9 @@ mod tests {
 
         press_button(&mut app, "New sandbox");
         assert!(app.world().resource::<WorldSetup>().mode == setup::Mode::Sandbox);
+        let sandbox_seed = app.world().resource::<WorldSetup>().seed();
+        assert_ne!(sandbox_seed, 42);
+        assert_ne!(sandbox_seed, 0);
         press_button(&mut app, "Back to main menu");
         press_button(&mut app, "New game");
         assert!(app.world().resource::<WorldSetup>().mode == setup::Mode::Story);
@@ -782,8 +785,11 @@ mod tests {
         );
         press_button(&mut app, "Town   ·   Remote");
         press_button(&mut app, "Town   ·   Nearby");
+        let story_seed = app.world().resource::<WorldSetup>().seed();
+        assert_ne!(story_seed, sandbox_seed);
+        assert_ne!(story_seed, 0);
 
-        press_button(&mut app, "Land seed   ·   42");
+        press_button(&mut app, &format!("Land seed   ·   {story_seed}"));
         press_button(&mut app, "Start new village");
         assert!(app.world().resource::<WorldSetup>().open);
         for key in [KeyCode::Digit4, KeyCode::Digit2] {
@@ -1525,7 +1531,11 @@ mod tests {
         assert!(!app.world().resource::<WorldSetup>().open);
         assert!(app.world().resource::<village::Village>().camp.is_none());
 
-        app.world_mut().resource_mut::<WorldSetup>().mode = setup::Mode::Sandbox;
+        let mut setup = app.world_mut().resource_mut::<WorldSetup>();
+        *setup = setup
+            .clone()
+            .with_seed(std::num::NonZeroU32::new(42).unwrap());
+        setup.mode = setup::Mode::Sandbox;
         app.update();
         let sandbox = app.world().resource::<village::Village>();
         assert_eq!(sandbox.camp, Some(IVec2::new(36, 36)));
