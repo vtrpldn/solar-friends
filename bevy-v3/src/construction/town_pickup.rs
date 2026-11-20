@@ -63,6 +63,12 @@ impl ConstructionDelivery {
 }
 
 impl Construction {
+    pub(crate) fn valid_dispatch_time(&self, clock: f64) -> bool {
+        self.logistics_policy
+            .waiting_since
+            .is_none_or(|start| start <= clock)
+    }
+
     fn pending_dispatch_cargo(&self, catalog: &Catalog) -> Option<(f64, f64)> {
         let mut goods = BTreeMap::<String, u32>::new();
         for (site, plan) in self.plans.iter().enumerate() {

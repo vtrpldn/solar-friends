@@ -938,6 +938,7 @@ impl Village {
             return false;
         }
         self.construction.valid_save(catalog, &self.stock)
+            && self.construction.valid_dispatch_time(self.clock)
             && self
                 .construction
                 .valid_building_history(catalog, self.clock)
@@ -3707,6 +3708,26 @@ mod tests {
         assert_eq!(camera.heading, 0.4);
         village.utility_panel = Some(UtilityPanel::Inventory);
         assert!(!village.focus_selected_project(&setup, &mut camera));
+    }
+
+    #[test]
+    fn village_save_rejects_a_dispatch_wait_from_the_future() {
+        let setup = WorldSetup::default().session();
+        let catalog = Catalog::default();
+        let village = Village {
+            stock: Stock::for_start(&setup, &catalog),
+            setup: Some(setup),
+            clock: 100.0,
+            ..default()
+        };
+        assert!(village.valid_save(&catalog));
+
+        let mut snapshot = serde_json::to_value(village).unwrap();
+        for (start, valid) in [(100.0, true), (101.0, false)] {
+            snapshot["construction"]["logistics_policy"]["waiting_since"] = start.into();
+            let restored: Village = serde_json::from_value(snapshot.clone()).unwrap();
+            assert_eq!(restored.valid_save(&catalog), valid);
+        }
     }
 
     #[test]
