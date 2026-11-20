@@ -80,6 +80,8 @@ pub struct Utilities {
     #[serde(default)]
     waste_removed: f64,
     #[serde(default, skip_serializing_if = "zero_liters")]
+    water_lost_liters: f64,
+    #[serde(default, skip_serializing_if = "zero_liters")]
     latrine_waste_liters: f64,
 }
 
@@ -326,21 +328,25 @@ impl Utilities {
                 .retain(|&(from, to, _)| from != id && to != id);
             self.installed_water_links
                 .retain(|&(from, to, _)| from != id && to != id);
+            self.water_lost_liters += node.water.into_iter().sum::<f64>();
             self.curtailed_kwh += node.charge;
             self.topology_valid = false;
         }
     }
 
     pub fn valid_save(&self, valid_building: impl Fn(usize, &str) -> bool) -> bool {
-        self.disabled_water_links
-            .iter()
-            .chain(&self.installed_water_links)
-            .all(|&(from, to, channel)| {
-                from != to
-                    && channel < LIQUID_NAMES.len()
-                    && self.nodes.contains_key(&from)
-                    && self.nodes.contains_key(&to)
-            })
+        self.water_lost_liters.is_finite()
+            && self.water_lost_liters >= 0.0
+            && self
+                .disabled_water_links
+                .iter()
+                .chain(&self.installed_water_links)
+                .all(|&(from, to, channel)| {
+                    from != to
+                        && channel < LIQUID_NAMES.len()
+                        && self.nodes.contains_key(&from)
+                        && self.nodes.contains_key(&to)
+                })
             && self
                 .disabled_power_links
                 .iter()
@@ -1164,6 +1170,12 @@ impl Utilities {
                 self.latrine_waste_liters
             ));
         }
+        if self.water_lost_liters > 0.0 {
+            text.push_str(&format!(
+                "\nWater lost to treatment or dismantling · {:.1} L",
+                self.water_lost_liters
+            ));
+        }
         if let Some(ground) = &self.ground {
             text.push_str(&format!(
                 "\nAquifer {:.0} / {:.0} L · River reserve {:.0} L · Flow {:.0} L/day",
@@ -1432,12 +1444,14 @@ impl Utilities {
                     continue;
                 }
                 "wetland" => {
-                    transform_water(node, 2, 1, 10.0 * hours, 0.85);
+                    let treated = transform_water(node, 2, 1, 10.0 * hours, 0.85);
+                    self.water_lost_liters += treated * 0.15;
                     continue;
                 }
                 "banana_treatment" | "biodigester" => {
                     let used = (8.0 * hours).min(node.water[3]);
                     node.water[3] -= used;
+                    self.water_lost_liters += used;
                     if node.kind == "biodigester" {
                         self.biogas += used * 0.15;
                     }
@@ -2614,6 +2628,17 @@ mod tests {
         assert_eq!(camp.water[0], 40.0);
         assert_eq!(wetland.water[0], 0.0);
         assert!(wetland.water[1] > 0.0);
-        assert!(camp.water[2] + wetland.water[1] + wetland.water[2] < 10.0);
+        let stored = camp.water[2] + wetland.water[1] + wetland.water[2];
+        assert!(stored < 10.0);
+        assert!((stored + utilities.water_lost_liters - 10.0).abs() < 1e-8);
+
+        utilities.remove_facility(0);
+        let mut restored: Utilities =
+            serde_json::from_str(&serde_json::to_string(&utilities).unwrap()).unwrap();
+        let remaining = restored.nodes[&0].water[2];
+        assert!((remaining + restored.water_lost_liters - 10.0).abs() < 1e-8);
+        let lost = restored.water_lost_liters;
+        restored.remove_facility(0);
+        assert_eq!(restored.water_lost_liters, lost);
     }
 }
