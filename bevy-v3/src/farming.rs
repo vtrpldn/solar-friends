@@ -16,6 +16,8 @@ pub struct Farming {
     #[serde(skip)]
     pub whole_plot: bool,
     #[serde(skip)]
+    pub pending_plot_clear: Option<usize>,
+    #[serde(skip)]
     pub notice: String,
 }
 
@@ -692,6 +694,11 @@ pub struct CropClimate {
 }
 
 impl Farming {
+    pub fn close(&mut self) {
+        self.open = false;
+        self.pending_plot_clear = None;
+    }
+
     pub fn has_worker(&self, worker: usize) -> bool {
         self.jobs.iter().any(|job| job.worker == Some(worker))
     }

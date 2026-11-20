@@ -883,7 +883,7 @@ impl Village {
             self.construction.cancel_placement();
             self.construction.menu = false;
             self.construction.production.open = false;
-            self.construction.farming.open = false;
+            self.construction.farming.close();
             self.utility_panel = None;
         }
     }

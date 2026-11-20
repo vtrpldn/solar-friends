@@ -517,7 +517,7 @@ impl Construction {
         if self.production.selected == Some(index) {
             self.production.selected = None;
             self.production.open = false;
-            self.farming.open = false;
+            self.farming.close();
         }
         self.farming.plots.remove(&index);
         self.upkeep.remove(index);

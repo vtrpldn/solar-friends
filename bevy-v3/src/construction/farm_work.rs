@@ -227,18 +227,18 @@ impl Construction {
         clock: TownClock,
     ) {
         if self.menu || self.production.open || keyboard.just_pressed(KeyCode::KeyB) {
-            self.farming.open = false;
+            self.farming.close();
             return;
         }
         let Some(site) = self.production.selected else {
             return;
         };
         if self.changes.contains_key(&site) {
-            self.farming.open = false;
+            self.farming.close();
             return;
         }
         if !self.farming.plots.contains_key(&site) {
-            self.farming.open = false;
+            self.farming.close();
             return;
         }
         if keyboard.just_pressed(KeyCode::KeyK) {
@@ -323,6 +323,7 @@ impl Construction {
     pub fn toggle_beds(&mut self) {
         if self.has_selected_plot() && !self.menu && !self.production.open {
             self.farming.open = !self.farming.open;
+            self.farming.pending_plot_clear = None;
         }
     }
 
@@ -339,6 +340,16 @@ impl Construction {
         let Some(site) = self.production.selected else {
             return;
         };
+        let confirmed = self.farming.pending_plot_clear.take() == Some(site);
+        if self.farming.whole_plot
+            && matches!(action, FarmControl::Work(FarmAction::Clear))
+            && !confirmed
+        {
+            self.farming.pending_plot_clear = Some(site);
+            self.farming.notice =
+                "Clear crops across this plot? Confirm with Clear crops again or press 4. Only recoverable residues will remain.".into();
+            return;
+        }
         if matches!(action, FarmControl::WholePlot) {
             self.farming.whole_plot = !self.farming.whole_plot;
             self.farming.notice.clear();
@@ -1161,6 +1172,37 @@ pub(super) fn seed_delivery_status(job: &FarmJob, clock: f64) -> String {
 mod resize_tests {
     use super::*;
     use crate::farming::{Crop, Stage};
+
+    #[test]
+    fn whole_plot_clear_requires_confirmation_for_the_selected_plot() {
+        let setup = WorldSetup::default();
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut village = Construction::default();
+        let mut garden = village.proposed_site(&catalog, "garden", IVec2::new(44, 36));
+        garden.work = catalog.projects["garden"].work;
+        village.plans.push(garden);
+        village.tick_crops(&catalog, &setup, 0.0, 0.0);
+        village.production.selected = Some(0);
+        village.farming.open = true;
+        village.farming.whole_plot = true;
+        village.farming.plots.get_mut(&0).unwrap().beds[0].stage = Stage::Growing;
+        let clock = TownClock {
+            seconds: 0.,
+            round_trip_km: 12,
+        };
+        let clear = FarmControl::Work(FarmAction::Clear);
+        village.apply_farm_control(&catalog, &mut stock, clear, clock);
+        assert!(village.farming.jobs.is_empty());
+        assert!(village.farming.notice.contains("Confirm"));
+        village.toggle_beds();
+        village.toggle_beds();
+        village.apply_farm_control(&catalog, &mut stock, clear, clock);
+        assert!(village.farming.jobs.is_empty());
+        village.apply_farm_control(&catalog, &mut stock, clear, clock);
+        assert_eq!(village.farming.jobs.len(), 1);
+        assert!(village.farming.jobs[0].action == FarmAction::Clear);
+    }
 
     #[test]
     fn queued_bed_work_locks_watering_and_residue_settings() {

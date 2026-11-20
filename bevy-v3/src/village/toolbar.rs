@@ -531,6 +531,14 @@ impl Action {
                 FarmControl::Work(FarmAction::Prepare) => "Prepare soil",
                 FarmControl::Work(FarmAction::Plant) => "Sow",
                 FarmControl::Work(FarmAction::Harvest) => "Harvest",
+                FarmControl::Work(FarmAction::Clear)
+                    if village.construction.farming.pending_plot_clear.is_some() =>
+                {
+                    "Confirm clear crops"
+                }
+                FarmControl::Work(FarmAction::Clear) if village.construction.farming.whole_plot => {
+                    "Clear crops"
+                }
                 FarmControl::Work(FarmAction::Clear) => "Clear bed",
                 FarmControl::Work(FarmAction::Amend) => "Amend soil",
                 FarmControl::Work(FarmAction::Collect) => "Collect residues",
