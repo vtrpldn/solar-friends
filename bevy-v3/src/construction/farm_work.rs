@@ -419,19 +419,31 @@ impl Construction {
             && let FarmControl::Work(action) = action
         {
             let count = self.farming.plots[&site].beds.len();
+            let busy: std::collections::BTreeSet<_> = self
+                .farming
+                .jobs
+                .iter()
+                .filter(|job| job.site == site)
+                .map(|job| job.bed)
+                .collect();
             let mut queued = 0;
-            let mut first_error = None;
+            let mut errors = std::collections::BTreeSet::new();
             for bed in 0..count {
+                if busy.contains(&bed)
+                    || !self.farming.plots[&site].beds[bed].allows(action, clock.seconds)
+                {
+                    continue;
+                }
                 match self.queue_bed_job(catalog, stock, (site, bed, action), clock) {
                     Ok(()) => queued += 1,
                     Err(error) => {
-                        first_error.get_or_insert(error);
+                        errors.insert(error);
                     }
                 }
             }
             let skipped = count - queued;
             self.farming.notice = format!("{queued} beds queued · {skipped} skipped.");
-            if let Some(error) = first_error {
+            for error in errors {
                 self.farming.notice.push(' ');
                 self.farming.notice.push_str(&error);
             }
@@ -1565,7 +1577,10 @@ mod resize_tests {
         let count = village.farming.plots[&0].beds.len();
         assert!(count > 1);
         assert_eq!(village.farming.jobs.len(), count);
-        assert!(village.farming.notice.contains("1 skipped"));
+        assert_eq!(
+            village.farming.notice,
+            format!("{} beds queued · 1 skipped.", count - 1)
+        );
     }
 
     #[test]
