@@ -438,8 +438,11 @@ impl Worker {
         } else {
             1.0
         };
-        let experience = 1.0 + (self.experience / 10_000.0).clamp(0.0, 0.15);
-        skill * experience * self.health.hydration_factor()
+        skill * (1.0 + self.experience_bonus()) * self.health.hydration_factor()
+    }
+
+    fn experience_bonus(&self) -> f64 {
+        (self.experience / 10_000.0).clamp(0.0, 0.15)
     }
 
     fn move_along_path(&mut self, dt: f32, carrying: bool) {

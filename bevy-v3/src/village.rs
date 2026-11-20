@@ -172,7 +172,7 @@ pub struct Village {
     #[serde(skip)]
     selected_resident: usize,
     #[serde(skip)]
-    resident_story_open: bool,
+    resident_profile: ResidentProfile,
     #[serde(skip)]
     finance_history_open: bool,
     #[serde(skip)]
@@ -349,6 +349,37 @@ impl WaterControls {
             Ok(()) => "Water job queued.".into(),
             Err(reason) => reason.into(),
         };
+    }
+}
+
+#[derive(Clone, Copy, Default, PartialEq)]
+enum ResidentProfile {
+    #[default]
+    Overview,
+    Story,
+    Skills,
+    Relationships,
+}
+
+impl ResidentProfile {
+    const ALL: [Self; 4] = [
+        Self::Overview,
+        Self::Story,
+        Self::Skills,
+        Self::Relationships,
+    ];
+
+    fn label(self) -> &'static str {
+        match self {
+            Self::Overview => "Overview",
+            Self::Story => "Story",
+            Self::Skills => "Skills",
+            Self::Relationships => "Relationships",
+        }
+    }
+
+    fn next(self) -> Self {
+        Self::ALL[(self as usize + 1) % Self::ALL.len()]
     }
 }
 
@@ -1979,7 +2010,7 @@ fn village_input(
         }
         if town.utility_panel == Some(UtilityPanel::Residents) {
             if keyboard.just_pressed(KeyCode::Tab) {
-                town.resident_story_open = !town.resident_story_open;
+                town.resident_profile = town.resident_profile.next();
             }
             if let Some(index) = [
                 KeyCode::Digit1,
@@ -2681,25 +2712,30 @@ fn show_hud(
             }
         }
         Some(UtilityPanel::Residents) => {
-            label.push_str("\n1–5 Select resident · Tab Overview / Story");
-            if village.resident_story_open {
-                label.push_str("\n\n");
-                label.push_str(&Construction::resident_story(
-                    &catalog,
-                    village.selected_resident,
-                ));
-            } else {
-                label.push('\n');
-                label.push_str("Click home · T Assign · Y Clear\n");
-                if !village.housing_notice.is_empty() {
-                    label.push_str(&village.housing_notice);
-                    label.push('\n');
+            let selected = village.selected_resident;
+            label.push_str("\n1–5 Select resident · Tab Change profile view\n\n");
+            match village.resident_profile {
+                ResidentProfile::Overview => {
+                    label.push_str("Click home · T Assign · Y Clear\n");
+                    if !village.housing_notice.is_empty() {
+                        label.push_str(&village.housing_notice);
+                        label.push('\n');
+                    }
+                    label.push_str(&village.construction.resident_status(
+                        &catalog,
+                        &village.stock,
+                        selected,
+                    ));
                 }
-                label.push_str(&village.construction.resident_status(
-                    &catalog,
-                    &village.stock,
-                    village.selected_resident,
-                ));
+                ResidentProfile::Story => {
+                    label.push_str(&Construction::resident_story(&catalog, selected));
+                }
+                ResidentProfile::Skills => {
+                    label.push_str(&village.construction.resident_skills(&catalog, selected));
+                }
+                ResidentProfile::Relationships => {
+                    label.push_str(&village.construction.resident_relationships(selected));
+                }
             }
         }
         Some(UtilityPanel::Finances) => {

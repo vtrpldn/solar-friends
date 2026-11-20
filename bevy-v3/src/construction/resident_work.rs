@@ -1513,6 +1513,59 @@ impl Construction {
         story
     }
 
+    pub(crate) fn resident_skills(&self, catalog: &Catalog, selected: usize) -> String {
+        use crate::production::crafting::Skill;
+        use std::fmt::Write;
+
+        let worker = &self.residents[selected];
+        let specialties = catalog.residents[selected]
+            .strengths
+            .iter()
+            .filter_map(|key| {
+                catalog
+                    .projects
+                    .get(key)
+                    .map(|project| project.name.as_str())
+            })
+            .collect::<Vec<_>>()
+            .join(" · ");
+        let bonus = (100.0 * worker.experience_bonus()).floor();
+        let mut skills = format!(
+            "{} · Skills\n\nSpecialties · 25% faster\n{specialties}\n\nLearning by doing\n+{bonus}% work speed from experience (up to 15%)\n\nCraft skills",
+            NAMES[selected]
+        );
+        for skill in [Skill::Woodworking, Skill::Basketry, Skill::Repair] {
+            let _ = write!(
+                skills,
+                "\n{} · Level {}",
+                skill.label(),
+                worker.craft.level(selected, skill)
+            );
+        }
+        skills
+    }
+
+    pub(crate) fn resident_relationships(&self, selected: usize) -> String {
+        use std::fmt::Write;
+
+        let health = &self.residents[selected].health;
+        let mut relationships = format!("{} · Relationships", NAMES[selected]);
+        for (id, &name) in NAMES.iter().enumerate().filter(|(id, _)| *id != selected) {
+            let score = health.friendships[id];
+            let label = friendship_label(score);
+            let _ = write!(relationships, "\n\n{name} · {label} · {score}/100");
+            if let Some(memory) = health
+                .mind
+                .memories
+                .iter()
+                .find(|memory| memory.partner == Some(id))
+            {
+                let _ = write!(relationships, "\n{}", memory.text);
+            }
+        }
+        relationships
+    }
+
     pub fn resident_status(&self, catalog: &Catalog, stock: &Stock, selected: usize) -> String {
         let mut rows = self
             .residents
@@ -1602,11 +1655,7 @@ impl Construction {
             .enumerate()
             .filter(|&(id, score)| id != selected && *score > 0)
             .map(|(id, score)| {
-                let relationship = match score {
-                    64.. => "Close friends",
-                    24.. => "Growing closer",
-                    _ => "Getting to know each other",
-                };
+                let relationship = friendship_label(*score);
                 format!("{} · {relationship}", NAMES[id])
             })
             .collect::<Vec<_>>();
@@ -1617,6 +1666,14 @@ impl Construction {
             let _ = write!(rows, "\n{}", memory.text);
         }
         rows
+    }
+}
+
+fn friendship_label(score: i16) -> &'static str {
+    match score {
+        64.. => "Close friends",
+        24.. => "Growing closer",
+        _ => "Getting to know each other",
     }
 }
 
