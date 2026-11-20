@@ -1430,6 +1430,7 @@ mod tests {
                 .iter(app.world())
                 .any(|text| text.0.contains("Food from town & the village"))
         );
+        press_button(&mut app, "Show production sites");
         press_button(&mut app, "Show resources");
         press_button(&mut app, "Manage food");
         press_button(&mut app, "Chill first · Earliest expiry");

@@ -43,12 +43,19 @@ fn record_output(
 
 pub(crate) const INVENTORY_ROWS: usize = 9;
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum Producer<'a> {
+    Site(usize),
+    Blueprint(&'a str),
+}
+
 #[derive(Clone, Copy, Default, PartialEq, Eq)]
 pub(crate) enum InventoryView {
     #[default]
     Resources,
     Equipment,
     Food,
+    Production,
 }
 
 impl InventoryView {
@@ -56,7 +63,8 @@ impl InventoryView {
         match self {
             Self::Resources => Self::Equipment,
             Self::Equipment => Self::Food,
-            Self::Food => Self::Resources,
+            Self::Food => Self::Production,
+            Self::Production => Self::Resources,
         }
     }
 
@@ -65,6 +73,7 @@ impl InventoryView {
             Self::Resources => "Resources",
             Self::Equipment => "Items & equipment",
             Self::Food => "Food",
+            Self::Production => "Production sites",
         }
     }
 }
@@ -98,6 +107,91 @@ pub(crate) fn inventory_rows<'a>(
 }
 
 impl Construction {
+    pub(crate) fn inventory_producers<'a>(
+        &self,
+        catalog: &'a Catalog,
+        page: usize,
+        search: &str,
+        sandbox: bool,
+    ) -> (usize, Vec<(Producer<'a>, String)>) {
+        let search = search.trim().to_lowercase();
+        let matches = |name: &str| name.to_lowercase().contains(&search);
+        let matches_recipe = |recipe: &crate::catalog::ProductionRecipe| {
+            matches(&recipe.name)
+                || recipe.output.keys().any(|id| {
+                    catalog
+                        .materials
+                        .get(id)
+                        .is_some_and(|material| matches(&material.name))
+                })
+        };
+        let mut rows: Vec<_> = self
+            .plans
+            .iter()
+            .enumerate()
+            .filter_map(|(index, plan)| {
+                let definition = &catalog.projects[&plan.key];
+                if plan.removed || plan.work < definition.work || self.changes.contains_key(&index)
+                {
+                    return None;
+                }
+                let recipes = self.recipes(catalog, index);
+                let plot = self.farming.plots.get(&index);
+                if recipes.is_empty() && plot.is_none() {
+                    return None;
+                }
+                let label = format!("{} #{}", definition.name, index + 1);
+                let found = matches(&label)
+                    || recipes.iter().any(|(_, recipe)| matches_recipe(recipe))
+                    || plot
+                        .is_some_and(|plot| plot.beds.iter().any(|bed| matches(bed.crop.label())));
+                found.then_some((Producer::Site(index), format!("Open · {label}")))
+            })
+            .collect();
+        if !search.is_empty() {
+            rows.extend(catalog.build_options().filter_map(|(key, definition)| {
+                let matches_building = matches(&definition.name);
+                let matches_production = catalog.production.values().any(|recipe| {
+                    recipe.kind == definition.kind && (matches_building || matches_recipe(recipe))
+                });
+                (matches_production
+                    && !self.blueprint_already_planned(key, definition, sandbox, None))
+                .then(|| {
+                    (
+                        Producer::Blueprint(key),
+                        format!("Build producer · {}", definition.name),
+                    )
+                })
+            }));
+        }
+        let pages = rows.len().div_ceil(INVENTORY_ROWS).max(1);
+        let offset = page.min(pages - 1) * INVENTORY_ROWS;
+        (
+            pages,
+            rows.into_iter().skip(offset).take(INVENTORY_ROWS).collect(),
+        )
+    }
+
+    pub(crate) fn open_inventory_producer(&mut self, catalog: &Catalog, site: usize) {
+        self.farming.close();
+        self.select_project(Some(site));
+        if self.has_selected_plot() {
+            self.toggle_beds();
+        } else {
+            self.toggle_recipes(catalog);
+        }
+    }
+
+    pub(crate) fn place_inventory_producer(&mut self, key: &str, sandbox: bool) {
+        self.farming.close();
+        self.select_project(None);
+        self.cancel_placement();
+        if !self.menu {
+            self.toggle_build_menu(sandbox);
+        }
+        self.choose_blueprint(key);
+    }
+
     fn inventory<'a>(&self, catalog: &'a Catalog, stock: &Stock, land: &Land) -> Ledger<'a> {
         use crate::{farming::FarmPhase, production::Phase};
         let mut ledger: Ledger<'a> = catalog
@@ -290,6 +384,17 @@ impl Construction {
         search: &str,
     ) -> (usize, String) {
         use std::fmt::Write;
+        if view == InventoryView::Production {
+            let (pages, rows) = self.inventory_producers(catalog, page, search, stock.sandbox);
+            let page = page.min(pages - 1) + 1;
+            let mut text = format!(
+                "Production sites · {page}/{pages} · Tab Switch view · Page Up/Down · F10 Close"
+            );
+            if rows.is_empty() {
+                text.push_str("\nNo completed production sites match. Search for a building, crop, recipe or product.");
+            }
+            return (pages, text);
+        }
         let ledger = self.inventory(catalog, stock, land);
         let (pages, rows) = inventory_rows(catalog, page, view, search);
         let page = page.min(pages - 1);
@@ -359,6 +464,41 @@ impl Construction {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn producer_search_finds_recipe_outputs_at_completed_sites() {
+        let catalog = Catalog::default();
+        let mut construction = Construction::default();
+        let key = "supply-5";
+        let mut ready = construction.proposed_site(&catalog, key, IVec2::new(42, 36));
+        ready.work = catalog.projects[key].work;
+        let planned = construction.proposed_site(&catalog, key, IVec2::new(45, 36));
+        construction.plans.extend([ready, planned]);
+
+        let (_, rows) = construction.inventory_producers(&catalog, 0, " TIMBER PIECES ", true);
+        assert_eq!(
+            rows[0],
+            (Producer::Site(0), "Open · Timber workbench #1".into())
+        );
+        assert!(
+            rows.iter()
+                .any(|(producer, _)| *producer == Producer::Blueprint(key))
+        );
+        assert!(
+            !rows
+                .iter()
+                .any(|(producer, _)| *producer == Producer::Site(1))
+        );
+        construction.open_inventory_producer(&catalog, 0);
+        assert_eq!(construction.production.selected, Some(0));
+        assert!(construction.production.open);
+        construction.place_inventory_producer(key, true);
+        assert_eq!(construction.selection.as_deref(), Some(key));
+        let mut keyboard = ButtonInput::default();
+        keyboard.press(KeyCode::KeyR);
+        construction.input(&keyboard, &catalog, true);
+        assert_eq!(construction.rotation, 1);
+    }
 
     #[test]
     fn food_view_lists_v2_foods_and_excludes_farm_supplies() {

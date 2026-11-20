@@ -2881,9 +2881,14 @@ fn show_hud(
             } else {
                 " · / Search"
             };
+            let search_label = if village.inventory_view == InventoryView::Production {
+                "Find producer"
+            } else {
+                "Find material"
+            };
             let _ = write!(
                 label,
-                "\nFind material · {}{cursor}",
+                "\n{search_label} · {}{cursor}",
                 village.inventory_search
             );
             label.push('\n');

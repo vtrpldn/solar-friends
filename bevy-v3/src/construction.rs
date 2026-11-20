@@ -5,7 +5,7 @@ pub(crate) use farm_work::FarmControl;
 mod food_lens;
 mod gather_work;
 mod inventory;
-pub(crate) use inventory::{INVENTORY_ROWS, InventoryView, inventory_rows};
+pub(crate) use inventory::{INVENTORY_ROWS, InventoryView, Producer, inventory_rows};
 mod kitchen_work;
 mod lab_orders;
 pub(crate) use lab_orders::{LabOrder, LabStop};

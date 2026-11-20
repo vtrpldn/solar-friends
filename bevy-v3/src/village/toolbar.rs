@@ -267,7 +267,10 @@ impl Action {
             Self::StoresFromUpkeep => village.utility_panel == Some(UtilityPanel::Upkeep),
             Self::PantryFromStores => {
                 village.utility_panel == Some(UtilityPanel::Inventory)
-                    && village.inventory_view != InventoryView::Equipment
+                    && matches!(
+                        village.inventory_view,
+                        InventoryView::Resources | InventoryView::Food
+                    )
                     && !village.editing_inventory
                     && Self::Panel(UtilityPanel::Pantry).available(village)
             }
@@ -513,11 +516,15 @@ impl Action {
             Self::Page(false) => "Previous page".into(),
             Self::Page(true) => "Next page".into(),
             Self::InventorySearch if village.editing_inventory => "Done searching".into(),
+            Self::InventorySearch if village.inventory_view == InventoryView::Production => {
+                "Find producer".into()
+            }
             Self::InventorySearch => "Find material".into(),
             Self::InventoryView => match village.inventory_view.next() {
                 InventoryView::Resources => "Show resources",
                 InventoryView::Equipment => "Show items and equipment",
                 InventoryView::Food => "Show food",
+                InventoryView::Production => "Show production sites",
             }
             .into(),
             Self::ProjectFilter if village.open_projects_only => "Show all projects".into(),
@@ -1429,6 +1436,30 @@ fn handle_buttons(
                 Action::Project(row) if !picker.open => {
                     village.focus_project_row(&catalog, &setup, camera, row);
                 }
+                Action::InventoryItem(row)
+                    if !picker.open && village.inventory_view == InventoryView::Production =>
+                {
+                    let (_, rows) = village.construction.inventory_producers(
+                        &catalog,
+                        village.inventory_page,
+                        &village.inventory_search,
+                        village.stock.sandbox,
+                    );
+                    if let Some(&(producer, _)) = rows.get(row) {
+                        village.utility_panel = None;
+                        village.editing_inventory = false;
+                        match producer {
+                            crate::construction::Producer::Site(site) => {
+                                village.construction.open_inventory_producer(&catalog, site);
+                                village.focus_selected_project(&setup, camera);
+                            }
+                            crate::construction::Producer::Blueprint(key) => {
+                                let sandbox = village.stock.sandbox;
+                                village.construction.place_inventory_producer(key, sandbox);
+                            }
+                        }
+                    }
+                }
                 Action::InventoryItem(row) if !picker.open => {
                     let (_, mut rows) = crate::construction::inventory_rows(
                         &catalog,
@@ -1826,15 +1857,32 @@ fn refresh(
         Vec::new()
     };
     let inventory_items: Vec<_> = if !picker.open && Action::InventoryItem(0).available(&village) {
-        crate::construction::inventory_rows(
-            &catalog,
-            village.inventory_page,
-            village.inventory_view,
-            &village.inventory_search,
-        )
-        .1
-        .map(|(_, _, item)| (item.pack > 0 && item.price > 0.).then_some(item.name.as_str()))
-        .collect()
+        if village.inventory_view == InventoryView::Production {
+            village
+                .construction
+                .inventory_producers(
+                    &catalog,
+                    village.inventory_page,
+                    &village.inventory_search,
+                    village.stock.sandbox,
+                )
+                .1
+                .into_iter()
+                .map(|(_, name)| Some(name))
+                .collect()
+        } else {
+            crate::construction::inventory_rows(
+                &catalog,
+                village.inventory_page,
+                village.inventory_view,
+                &village.inventory_search,
+            )
+            .1
+            .map(|(_, _, item)| {
+                (item.pack > 0 && item.price > 0.).then(|| format!("Trade · {}", item.name))
+            })
+            .collect()
+        }
     } else {
         Vec::new()
     };
@@ -2160,7 +2208,7 @@ fn refresh(
                         format!("{label} ({unit})")
                     }
                 }
-                Action::InventoryItem(row) => format!("Trade · {}", inventory_items[row].unwrap()),
+                Action::InventoryItem(row) => inventory_items[row].clone().unwrap(),
                 Action::TradeQueued(row) => format!("Cancel {}", trade_queue[row].label),
                 Action::HoldTradeQueued(row) if trade_queue[row].held == Some(true) => {
                     format!("Order {} · Allow own trip", row + 1)
