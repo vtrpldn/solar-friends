@@ -455,6 +455,12 @@ impl Construction {
         (!plan.removed).then(|| project_center(plan))
     }
 
+    /// Catalog key of the selected, still-standing project.
+    pub(crate) fn selected_project_key(&self) -> Option<&str> {
+        let plan = self.plans.get(self.production.selected?)?;
+        (!plan.removed).then_some(plan.key.as_str())
+    }
+
     pub fn clear_selected_project(&mut self) {
         self.select_project(None);
     }

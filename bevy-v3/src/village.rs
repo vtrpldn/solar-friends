@@ -11,6 +11,7 @@ mod guide_diagrams;
 pub(crate) mod lab;
 mod land_lens;
 mod lens_picker;
+mod thumbnails;
 use lens_picker::{LensPicker, MapLens};
 mod library_ui;
 mod livestock_motion;
@@ -161,6 +162,7 @@ impl Plugin for VillagePlugin {
         road_surface::install(app);
         building_preview::install(app);
         build_menu::install(app);
+        thumbnails::install(app);
         toolbar::install(app);
         guide::install(app);
         library_ui::install(app);
@@ -879,6 +881,13 @@ impl Village {
             return None;
         }
         self.construction.selected_project_center()
+    }
+
+    /// Model shown beside the selected building's actions, while they are on screen.
+    fn selected_building_model(&self, catalog: &Catalog) -> Option<usize> {
+        self.selected_project_focus()?;
+        let key = self.construction.selected_project_key()?;
+        catalog.projects.get(key).map(|project| project.model)
     }
 
     fn focus_selected_project(&self, setup: &WorldSetup, camera: &mut VillageCamera) -> bool {

@@ -21,7 +21,12 @@ enum BuildButton {
     Close,
 }
 
-fn visible(setup: &WorldSetup, village: &Village, saves: &SaveMenu, sound: &SoundSettings) -> bool {
+pub(super) fn visible(
+    setup: &WorldSetup,
+    village: &Village,
+    saves: &SaveMenu,
+    sound: &SoundSettings,
+) -> bool {
     !setup.open
         && !saves.open
         && !sound.open
@@ -88,7 +93,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                     button(row, &assets, BuildButton::Close, "Close");
                 });
             for index in 0..crate::construction::BUILD_ROWS {
-                button(panel, &assets, BuildButton::Blueprint(index), "");
+                blueprint_row(panel, &assets, index);
             }
             panel
                 .spawn(Node {
@@ -136,6 +141,36 @@ fn button(
             BackgroundColor(Color::srgb_u8(58, 78, 61)),
         ))
         .with_child((Text::new(label), ui_font(assets, 17.0)));
+}
+
+/// A catalog row: text first (refresh writes to the first child), drawn after its picture.
+fn blueprint_row(parent: &mut ChildSpawnerCommands, assets: &AssetServer, index: usize) {
+    parent
+        .spawn((
+            BuildButton::Blueprint(index),
+            Button,
+            Node {
+                padding: UiRect::axes(px(8), px(5)),
+                flex_shrink: 0.,
+                flex_direction: FlexDirection::RowReverse,
+                justify_content: JustifyContent::FlexEnd,
+                align_items: AlignItems::Center,
+                column_gap: px(8),
+                ..default()
+            },
+            BackgroundColor(Color::srgb_u8(58, 78, 61)),
+        ))
+        .with_child((Text::default(), ui_font(assets, 17.0)))
+        .with_child((
+            super::thumbnails::ThumbnailImage(index),
+            ImageNode::default(),
+            Node {
+                width: px(64),
+                height: px(48),
+                flex_shrink: 0.,
+                ..default()
+            },
+        ));
 }
 
 fn select(

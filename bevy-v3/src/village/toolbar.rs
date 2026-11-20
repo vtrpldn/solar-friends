@@ -838,7 +838,7 @@ const HOME_ROWS: usize = 4;
 
 #[derive(Default, Resource)]
 pub(crate) struct PanelPicker {
-    open: bool,
+    pub(super) open: bool,
     home_page: usize,
     view_open: bool,
     visible_homes: [Option<usize>; HOME_ROWS],
@@ -1007,6 +1007,17 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 ] {
                     spawn_button(menu, &assets, Action::Advance(action));
                 }
+                menu.spawn((
+                    super::thumbnails::ThumbnailImage(super::thumbnails::SELECTED_SLOT),
+                    ImageNode::default(),
+                    Node {
+                        display: Display::None,
+                        width: px(160),
+                        height: px(120),
+                        align_self: AlignSelf::Center,
+                        ..default()
+                    },
+                ));
                 spawn_button(menu, &assets, Action::FocusSelectedProject);
                 spawn_button(menu, &assets, Action::DeselectProject);
                 for action in [
