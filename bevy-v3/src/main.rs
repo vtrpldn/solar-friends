@@ -19,6 +19,7 @@ mod land;
 mod livestock;
 mod market;
 mod navigation;
+mod performance;
 mod production;
 mod resident_animation;
 mod residents;
@@ -74,7 +75,11 @@ fn launch_args() -> Vec<std::ffi::OsString> {
 }
 
 fn main() {
-    let mut args = launch_args().into_iter();
+    // The frame readout combines with any other option, so it is taken out first.
+    let mut args = launch_args();
+    let performance = args.iter().any(|arg| arg == "--performance");
+    args.retain(|arg| arg != "--performance");
+    let mut args = args.into_iter();
     let option = args.next();
     if option.as_deref().is_some_and(|flag| flag == "--residents") {
         let pose = args.next();
@@ -211,8 +216,11 @@ fn main() {
         resident_animation::ResidentAnimationPlugin,
         wildlife::WildlifePlugin,
     ))
-    .add_systems(Startup, setup_scene)
-    .add_systems(
+    .add_systems(Startup, setup_scene);
+    if performance {
+        app.add_plugins(performance::PerformancePlugin);
+    }
+    app.add_systems(
         PostUpdate,
         (update_land, animate_river)
             .chain()

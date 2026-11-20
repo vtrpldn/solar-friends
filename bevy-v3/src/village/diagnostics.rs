@@ -1,8 +1,8 @@
+use std::{io, path::PathBuf, time::Duration};
+#[cfg(not(target_arch = "wasm32"))]
 use std::{
-    io::{self, Write},
-    path::PathBuf,
+    io::Write,
     process::{Command, Stdio},
-    time::Duration,
 };
 
 use serde::Serialize;
@@ -59,6 +59,15 @@ fn export(village: &Village, catalog: &Catalog, window: &Window) -> io::Result<P
     save_report(village, captured, &bytes)
 }
 
+/// A browser cannot write files directly, so the web build downloads the report.
+#[cfg(target_arch = "wasm32")]
+fn save_report(_village: &Village, captured: Duration, bytes: &[u8]) -> io::Result<PathBuf> {
+    let name = format!("bug-report-{}.json", captured.as_secs());
+    web::download(bytes, &name)?;
+    Ok(PathBuf::from(format!("Downloads/{name}")))
+}
+
+#[cfg(not(target_arch = "wasm32"))]
 fn save_report(village: &Village, captured: Duration, bytes: &[u8]) -> io::Result<PathBuf> {
     let mode = village
         .mode()
@@ -98,6 +107,82 @@ fn report_bytes(
     Ok(serde_json::to_vec(&report)?)
 }
 
+#[cfg(target_arch = "wasm32")]
+fn copy_to_clipboard(bytes: &[u8]) -> io::Result<()> {
+    web::copy(std::str::from_utf8(bytes).map_err(io::Error::other)?)
+}
+
+/// The browser's clipboard and downloads, after V2's `copyDiagnostics`.
+#[cfg(target_arch = "wasm32")]
+mod web {
+    use std::io;
+
+    use web_sys::wasm_bindgen::JsCast;
+
+    fn failed(_: impl std::fmt::Debug) -> io::Error {
+        io::Error::other("The browser refused.")
+    }
+
+    fn document() -> io::Result<web_sys::Document> {
+        web_sys::window()
+            .and_then(|window| window.document())
+            .ok_or_else(|| io::Error::other("No page document."))
+    }
+
+    /// Copies through a hidden text area, which works while the click that asked for
+    /// it still counts as the player's gesture; the asynchronous clipboard is the
+    /// fallback.
+    pub(super) fn copy(text: &str) -> io::Result<()> {
+        let document = document()?;
+        let area: web_sys::HtmlTextAreaElement = document
+            .create_element("textarea")
+            .map_err(failed)?
+            .unchecked_into();
+        area.set_value(text);
+        area.style()
+            .set_property("position", "fixed")
+            .and_then(|()| area.style().set_property("left", "-10000px"))
+            .map_err(failed)?;
+        let body = document
+            .body()
+            .ok_or_else(|| io::Error::other("No page body."))?;
+        body.append_child(&area).map_err(failed)?;
+        area.select();
+        let copied = document
+            .unchecked_ref::<web_sys::HtmlDocument>()
+            .exec_command("copy")
+            .unwrap_or(false);
+        area.remove();
+        if copied {
+            return Ok(());
+        }
+        let clipboard = web_sys::window()
+            .map(|window| window.navigator().clipboard())
+            .ok_or_else(|| io::Error::other("No clipboard."))?;
+        // The promise settles after this frame; like V2, a granted clipboard counts.
+        let _ = clipboard.write_text(text);
+        Ok(())
+    }
+
+    pub(super) fn download(bytes: &[u8], name: &str) -> io::Result<()> {
+        let parts = js_sys::Array::of1(&js_sys::Uint8Array::from(bytes));
+        let options = web_sys::BlobPropertyBag::new();
+        options.set_type("application/json");
+        let blob = web_sys::Blob::new_with_u8_array_sequence_and_options(&parts, &options)
+            .map_err(failed)?;
+        let url = web_sys::Url::create_object_url_with_blob(&blob).map_err(failed)?;
+        let link: web_sys::HtmlAnchorElement = document()?
+            .create_element("a")
+            .map_err(failed)?
+            .unchecked_into();
+        link.set_href(&url);
+        link.set_download(name);
+        link.click();
+        web_sys::Url::revoke_object_url(&url).map_err(failed)
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
 fn copy_to_clipboard(bytes: &[u8]) -> io::Result<()> {
     if cfg!(target_os = "macos") {
         return clipboard_command("/usr/bin/pbcopy", &[], bytes);
@@ -118,6 +203,7 @@ fn copy_to_clipboard(bytes: &[u8]) -> io::Result<()> {
     clipboard_command("xclip", &["-selection", "clipboard", "-in"], bytes)
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 fn clipboard_command(program: &str, args: &[&str], bytes: &[u8]) -> io::Result<()> {
     let mut child = Command::new(program)
         .args(args)
