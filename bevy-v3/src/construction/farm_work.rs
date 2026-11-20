@@ -547,6 +547,28 @@ impl Construction {
                 .is_some_and(|worker| self.residents[worker].waiting_for_route())
     }
 
+    pub(super) fn farm_activity(&self, resident: usize) -> Option<&'static str> {
+        let job = self
+            .farming
+            .jobs
+            .iter()
+            .find(|job| job.worker == Some(resident))?;
+        Some(match job.phase {
+            FarmPhase::Pickup => "Collecting farm supplies",
+            FarmPhase::Walk => "Walking to the bed",
+            FarmPhase::Return => "Returning to stores",
+            FarmPhase::CollectOutput => "Returning for the next harvest load",
+            FarmPhase::Work => match job.action {
+                FarmAction::Prepare => "Preparing soil",
+                FarmAction::Plant => "Sowing crops",
+                FarmAction::Harvest => "Harvesting crops",
+                FarmAction::Clear => "Clearing the bed",
+                FarmAction::Amend => "Adding compost",
+                FarmAction::Collect => "Collecting crop residues",
+            },
+        })
+    }
+
     pub(super) fn farm_job_status(
         &self,
         catalog: &Catalog,
@@ -1277,6 +1299,10 @@ mod resize_tests {
         stock.reserve_available(&filler);
         let job = &village.farming.jobs[0];
         assert!(job.phase == FarmPhase::CollectOutput);
+        assert_eq!(
+            village.farm_activity(job.worker.unwrap()),
+            Some("Returning for the next harvest load")
+        );
         assert_eq!(job.output["greens"], total - first_load);
 
         village = serde_json::from_str(&serde_json::to_string(&village).unwrap()).unwrap();

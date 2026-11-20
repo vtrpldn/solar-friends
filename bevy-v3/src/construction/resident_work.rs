@@ -1412,11 +1412,10 @@ impl Construction {
             "In production"
         } else if self.gathering.workers_at_site(index) {
             "Gathering"
-        } else if self.farming.has_worker(index) {
-            "Working a bed"
         } else if let Some(activity) = self
             .service_activity(index)
             .or_else(|| self.water_activity(index))
+            .or_else(|| self.farm_activity(index))
             .or_else(|| self.change_activity(index))
         {
             activity
