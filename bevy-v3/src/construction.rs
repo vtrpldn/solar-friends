@@ -899,13 +899,13 @@ impl Construction {
         }
         if self.planning_roads() {
             return format!(
-                "Village road · Click to start · Shift-click to extend\nZ Undo stroke · B or Esc Finish\n{}",
+                "Village road · Click to start · Shift-click to extend\nZ Undo stroke · B or Esc Finish and keep the plan\n{}",
                 self.status
             );
         }
         if self.selection.as_deref() == Some("field") {
             return format!(
-                "Cultivated field · {} × {} cells\n[ ] Width · Shift [ ] Depth · R Rotate {}°\nClick to designate · Shift-click Repeat · B Close\n{}",
+                "Cultivated field · {} × {} cells\n[ ] Width · Shift [ ] Depth · R Rotate {}°\nClick to designate · Shift-click Repeat · Esc Cancel\n{}",
                 self.field_size.x,
                 self.field_size.y,
                 u32::from(self.rotation) * 90,
@@ -953,13 +953,18 @@ impl Construction {
                 details.push_str("\nMaterials\n");
                 details.push_str(&bill);
             }
+            if key == "bridge" {
+                details.push_str("\nSpan the river with both ends on dry land.");
+            } else if Self::uses_foundation(key) {
+                details.push_str("\nThe footprint levels automatically when you place the plan.");
+            }
             let repeat = if sandbox || definition.repeatable {
                 " · Shift-click Repeat"
             } else {
                 ""
             };
             return format!(
-                "{details}\nClick to plan · R Rotate ({degrees}°){repeat} · B Close\n{}",
+                "{details}\nClick to plan · R Rotate ({degrees}°){repeat} · Esc Cancel\n{}",
                 self.status
             );
         }
