@@ -84,10 +84,13 @@ fn style(tone: Tone) -> (u16, Color, f32) {
 fn restyle(
     mut commands: Commands,
     assets: Res<AssetServer>,
-    blocks: Query<(Entity, &RichSource, Option<&Children>), Changed<RichSource>>,
+    mut blocks: Query<(Entity, &RichSource, Option<&Children>, &mut Text), Changed<RichSource>>,
     spans: Query<(), With<TextSpan>>,
 ) {
-    for (entity, source, children) in &blocks {
+    for (entity, source, children, mut text) in &mut blocks {
+        // Rebuilding the spans must also re-lay out the block: a layout kept from more
+        // spans than the block now has makes Bevy's text pipeline index past its end.
+        text.set_changed();
         for child in children.into_iter().flatten() {
             if spans.contains(*child) {
                 commands.entity(*child).despawn();

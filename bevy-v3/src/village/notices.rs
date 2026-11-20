@@ -59,6 +59,9 @@ struct GoalHeading;
 struct CursorTip;
 
 #[derive(Component)]
+struct CursorTipText;
+
+#[derive(Component)]
 struct LegendCard;
 
 #[derive(Component)]
@@ -130,21 +133,24 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 });
             }
         });
-    commands.spawn((
-        CursorTip,
-        Text::default(),
-        ui_font_weight(&assets, 13.0, 500),
-        paper_card(Node {
-            display: Display::None,
-            position_type: PositionType::Absolute,
-            max_width: px(300),
-            padding: UiRect::axes(px(10), px(6)),
-            border_radius: BorderRadius::all(px(10)),
-            ..default()
-        }),
-        Pickable::IGNORE,
-        GlobalZIndex(30),
-    ));
+    commands
+        .spawn((
+            CursorTip,
+            paper_card(Node {
+                display: Display::None,
+                position_type: PositionType::Absolute,
+                max_width: px(300),
+                padding: UiRect::axes(px(12), px(7)),
+                ..default()
+            }),
+            Pickable::IGNORE,
+            GlobalZIndex(30),
+        ))
+        .with_child((
+            CursorTipText,
+            Text::default(),
+            ui_font_weight(&assets, 13.0, 500),
+        ));
     commands
         .spawn((
             LegendCard,
@@ -413,9 +419,10 @@ fn show_tip(
     notice: Res<MapNotice>,
     village: Res<Village>,
     window: Single<&Window, With<PrimaryWindow>>,
-    mut tip: Single<(&mut Text, &mut Node, &mut BorderColor), With<CursorTip>>,
+    mut tip: Single<(&mut Node, &mut BorderColor), With<CursorTip>>,
+    mut text: Single<&mut Text, With<CursorTipText>>,
 ) {
-    let (text, node, edge) = &mut *tip;
+    let (node, edge) = &mut *tip;
     let lens = village.lenses.active.is_some() || village.lenses.network_view().is_some();
     // The terrain tools show their reading in their own card; placement feedback, such
     // as why a spot is blocked, belongs right here at the cursor.
