@@ -1,0 +1,4908 @@
+{
+  "materials": {
+    "wood": {
+      "name": "timber pieces",
+      "batch": 4,
+      "pack": 12,
+      "price": 432,
+      "supplier": 1536,
+      "supplierName": "Hardware store",
+      "unit": "kg",
+      "equipment": false,
+      "mass": 4,
+      "volume": 0.012,
+      "buyer": {
+        "id": "materials",
+        "name": "Builders’ cooperative",
+        "batches": 8,
+        "fullPriceBatches": 4,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        22,
+        36,
+        61
+      ]
+    },
+    "hardware": {
+      "name": "fastener packs",
+      "batch": 1,
+      "pack": 2,
+      "price": 30,
+      "supplier": 256,
+      "supplierName": "Hardware store",
+      "unit": "units",
+      "equipment": false,
+      "mass": 2,
+      "volume": 0.01,
+      "buyer": {
+        "id": "materials",
+        "name": "Builders’ cooperative",
+        "batches": 8,
+        "fullPriceBatches": 4,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        5,
+        7,
+        12
+      ]
+    },
+    "roofing": {
+      "name": "roof sheets",
+      "batch": 2,
+      "pack": 6,
+      "price": 120,
+      "supplier": 768,
+      "supplierName": "Hardware store",
+      "unit": "units",
+      "equipment": false,
+      "mass": 8,
+      "volume": 0.035,
+      "buyer": {
+        "id": "materials",
+        "name": "Builders’ cooperative",
+        "batches": 8,
+        "fullPriceBatches": 4,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        5,
+        8,
+        14
+      ]
+    },
+    "tarp": {
+      "name": "tarp & rope kits",
+      "batch": 1,
+      "pack": 1,
+      "price": 50,
+      "supplier": 128,
+      "supplierName": "Hardware store",
+      "unit": "units",
+      "equipment": false,
+      "mass": 2,
+      "volume": 0.01,
+      "buyer": {
+        "id": "materials",
+        "name": "Builders’ cooperative",
+        "batches": 8,
+        "fullPriceBatches": 4,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        1,
+        1,
+        2
+      ]
+    },
+    "tank": {
+      "name": "water tanks",
+      "batch": 1,
+      "pack": 1,
+      "price": 320,
+      "supplier": 16,
+      "supplierName": "Hardware store",
+      "unit": "units",
+      "equipment": false,
+      "mass": 12,
+      "volume": 0.35,
+      "buyer": {
+        "id": "equipment",
+        "name": "Hardware resale counter",
+        "batches": 2,
+        "fullPriceBatches": 1,
+        "ratio": 0.4,
+        "bulkRatio": 0.3
+      },
+      "starting": [
+        1,
+        1,
+        2
+      ]
+    },
+    "plumbing": {
+      "name": "pipe & tap kits",
+      "batch": 1,
+      "pack": 1,
+      "price": 40,
+      "supplier": 16,
+      "supplierName": "Hardware store",
+      "unit": "units",
+      "equipment": false,
+      "mass": 2,
+      "volume": 0.01,
+      "buyer": {
+        "id": "equipment",
+        "name": "Hardware resale counter",
+        "batches": 2,
+        "fullPriceBatches": 1,
+        "ratio": 0.4,
+        "bulkRatio": 0.3
+      },
+      "starting": [
+        1,
+        1,
+        2
+      ]
+    },
+    "sanitation": {
+      "name": "toilet kits",
+      "batch": 1,
+      "pack": 1,
+      "price": 80,
+      "supplier": 16,
+      "supplierName": "Hardware store",
+      "unit": "units",
+      "equipment": false,
+      "mass": 2,
+      "volume": 0.01,
+      "buyer": {
+        "id": "equipment",
+        "name": "Hardware resale counter",
+        "batches": 2,
+        "fullPriceBatches": 1,
+        "ratio": 0.4,
+        "bulkRatio": 0.3
+      },
+      "starting": [
+        1,
+        1,
+        2
+      ]
+    },
+    "greens": {
+      "name": "Leafy greens",
+      "batch": 1,
+      "pack": 10,
+      "price": 30,
+      "supplier": 160,
+      "supplierName": "Town food market",
+      "unit": "kg",
+      "equipment": false,
+      "mass": 1,
+      "volume": 0.004,
+      "buyer": {
+        "id": "produce",
+        "name": "Town produce stall",
+        "batches": 8,
+        "fullPriceBatches": 4,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "greens_seed": {
+      "name": "Leafy greens seed packets",
+      "batch": 1,
+      "pack": 5,
+      "price": 10,
+      "supplier": 40,
+      "supplierName": "Agricultural supply store",
+      "unit": "units",
+      "equipment": false,
+      "mass": 0.02,
+      "volume": 0.0001,
+      "buyer": {
+        "id": "livestock",
+        "name": "Smallholders’ cooperative",
+        "batches": 2,
+        "fullPriceBatches": 1,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "beans": {
+      "name": "Bush beans",
+      "batch": 1,
+      "pack": 10,
+      "price": 30,
+      "supplier": 160,
+      "supplierName": "Town food market",
+      "unit": "kg",
+      "equipment": false,
+      "mass": 1,
+      "volume": 0.002,
+      "buyer": {
+        "id": "produce",
+        "name": "Town produce stall",
+        "batches": 8,
+        "fullPriceBatches": 4,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "beans_seed": {
+      "name": "Bush beans seed packets",
+      "batch": 1,
+      "pack": 5,
+      "price": 10,
+      "supplier": 40,
+      "supplierName": "Agricultural supply store",
+      "unit": "units",
+      "equipment": false,
+      "mass": 0.1,
+      "volume": 0.0002,
+      "buyer": {
+        "id": "livestock",
+        "name": "Smallholders’ cooperative",
+        "batches": 2,
+        "fullPriceBatches": 1,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "corn": {
+      "name": "Sweet corn",
+      "batch": 1,
+      "pack": 10,
+      "price": 30,
+      "supplier": 160,
+      "supplierName": "Town food market",
+      "unit": "kg",
+      "equipment": false,
+      "mass": 1,
+      "volume": 0.003,
+      "buyer": {
+        "id": "produce",
+        "name": "Town produce stall",
+        "batches": 8,
+        "fullPriceBatches": 4,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "corn_seed": {
+      "name": "Sweet corn seed packets",
+      "batch": 1,
+      "pack": 5,
+      "price": 10,
+      "supplier": 40,
+      "supplierName": "Agricultural supply store",
+      "unit": "units",
+      "equipment": false,
+      "mass": 0.1,
+      "volume": 0.0002,
+      "buyer": {
+        "id": "livestock",
+        "name": "Smallholders’ cooperative",
+        "batches": 2,
+        "fullPriceBatches": 1,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "bucket": {
+      "name": "Bucket",
+      "batch": 1,
+      "pack": 1,
+      "price": 30,
+      "supplier": 128,
+      "supplierName": "Hardware store",
+      "unit": "units",
+      "equipment": true,
+      "mass": 1,
+      "volume": 0.015,
+      "buyer": {
+        "id": "materials",
+        "name": "Builders’ cooperative",
+        "batches": 8,
+        "fullPriceBatches": 4,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "garden-tools": {
+      "name": "Garden tools",
+      "batch": 1,
+      "pack": 1,
+      "price": 95,
+      "supplier": 128,
+      "supplierName": "Hardware store",
+      "unit": "units",
+      "equipment": true,
+      "mass": 3,
+      "volume": 0.025,
+      "buyer": {
+        "id": "materials",
+        "name": "Builders’ cooperative",
+        "batches": 8,
+        "fullPriceBatches": 4,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "carpentry-tools": {
+      "name": "Carpentry tools",
+      "batch": 1,
+      "pack": 1,
+      "price": 120,
+      "supplier": 128,
+      "supplierName": "Hardware store",
+      "unit": "units",
+      "equipment": true,
+      "mass": 4,
+      "volume": 0.02,
+      "buyer": {
+        "id": "materials",
+        "name": "Builders’ cooperative",
+        "batches": 8,
+        "fullPriceBatches": 4,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "harvest-basket": {
+      "name": "Harvest basket",
+      "batch": 1,
+      "pack": 1,
+      "price": 25,
+      "supplier": 128,
+      "supplierName": "Hardware store",
+      "unit": "units",
+      "equipment": true,
+      "mass": 1,
+      "volume": 0.04,
+      "buyer": {
+        "id": "materials",
+        "name": "Builders’ cooperative",
+        "batches": 8,
+        "fullPriceBatches": 4,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "cleaning-kit": {
+      "name": "Cleaning kit",
+      "batch": 1,
+      "pack": 1,
+      "price": 55,
+      "supplier": 128,
+      "supplierName": "Hardware store",
+      "unit": "units",
+      "equipment": true,
+      "mass": 2,
+      "volume": 0.02,
+      "buyer": {
+        "id": "materials",
+        "name": "Builders’ cooperative",
+        "batches": 8,
+        "fullPriceBatches": 4,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "watering-can": {
+      "name": "Watering can",
+      "batch": 1,
+      "pack": 1,
+      "price": 45,
+      "supplier": 128,
+      "supplierName": "Hardware store",
+      "unit": "units",
+      "equipment": true,
+      "mass": 1,
+      "volume": 0.015,
+      "buyer": {
+        "id": "materials",
+        "name": "Builders’ cooperative",
+        "batches": 8,
+        "fullPriceBatches": 4,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "wheelbarrow": {
+      "name": "Wheelbarrow",
+      "batch": 1,
+      "pack": 1,
+      "price": 180,
+      "supplier": 128,
+      "supplierName": "Hardware store",
+      "unit": "units",
+      "equipment": true,
+      "mass": 15,
+      "volume": 0.35,
+      "buyer": {
+        "id": "materials",
+        "name": "Builders’ cooperative",
+        "batches": 8,
+        "fullPriceBatches": 4,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "bicycle": {
+      "name": "Bicycle",
+      "batch": 1,
+      "pack": 1,
+      "price": 450,
+      "supplier": 128,
+      "supplierName": "Hardware store",
+      "unit": "units",
+      "equipment": true,
+      "mass": 16,
+      "volume": 0.5,
+      "buyer": {
+        "id": "materials",
+        "name": "Builders’ cooperative",
+        "batches": 8,
+        "fullPriceBatches": 4,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "produce-crates": {
+      "name": "Produce crate",
+      "batch": 1,
+      "pack": 1,
+      "price": 25,
+      "supplier": 128,
+      "supplierName": "Hardware store",
+      "unit": "units",
+      "equipment": true,
+      "mass": 2,
+      "volume": 0.04,
+      "buyer": {
+        "id": "materials",
+        "name": "Builders’ cooperative",
+        "batches": 8,
+        "fullPriceBatches": 4,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "cooling": {
+      "name": "Refrigeration kit",
+      "batch": 1,
+      "pack": 1,
+      "price": 600,
+      "supplier": 16,
+      "supplierName": "Hardware store",
+      "unit": "units",
+      "equipment": false,
+      "mass": 35,
+      "volume": 0.35,
+      "buyer": {
+        "id": "equipment",
+        "name": "Hardware resale counter",
+        "batches": 2,
+        "fullPriceBatches": 1,
+        "ratio": 0.4,
+        "bulkRatio": 0.3
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "tool_heads": {
+      "name": "Garden tool heads",
+      "batch": 1,
+      "pack": 1,
+      "price": 65,
+      "supplier": 128,
+      "supplierName": "Hardware store",
+      "unit": "units",
+      "equipment": false,
+      "mass": 2,
+      "volume": 0.005,
+      "buyer": {
+        "id": "materials",
+        "name": "Builders’ cooperative",
+        "batches": 8,
+        "fullPriceBatches": 4,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "repair_supplies": {
+      "name": "Repair supplies",
+      "batch": 1,
+      "pack": 1,
+      "price": 15,
+      "supplier": 128,
+      "supplierName": "Hardware store",
+      "unit": "units",
+      "equipment": false,
+      "mass": 1,
+      "volume": 0.003,
+      "buyer": {
+        "id": "materials",
+        "name": "Builders’ cooperative",
+        "batches": 8,
+        "fullPriceBatches": 4,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "soap": {
+      "name": "Soap refill",
+      "batch": 1,
+      "pack": 1,
+      "price": 8,
+      "supplier": 128,
+      "supplierName": "Hardware store",
+      "unit": "units",
+      "equipment": false,
+      "mass": 1,
+      "volume": 0.002,
+      "buyer": {
+        "id": "materials",
+        "name": "Builders’ cooperative",
+        "batches": 8,
+        "fullPriceBatches": 4,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "wheel_kit": {
+      "name": "Wheel and axle kit",
+      "batch": 1,
+      "pack": 1,
+      "price": 65,
+      "supplier": 128,
+      "supplierName": "Hardware store",
+      "unit": "units",
+      "equipment": false,
+      "mass": 5,
+      "volume": 0.04,
+      "buyer": {
+        "id": "materials",
+        "name": "Builders’ cooperative",
+        "batches": 8,
+        "fullPriceBatches": 4,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "logs": {
+      "name": "Raw wood",
+      "batch": 4,
+      "pack": 12,
+      "price": 96,
+      "supplier": 1536,
+      "supplierName": "Hardware store",
+      "unit": "kg",
+      "equipment": false,
+      "mass": 6,
+      "volume": 0.015,
+      "buyer": {
+        "id": "materials",
+        "name": "Builders’ cooperative",
+        "batches": 8,
+        "fullPriceBatches": 4,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "planks": {
+      "name": "Planks",
+      "batch": 4,
+      "pack": 12,
+      "price": 240,
+      "supplier": 1536,
+      "supplierName": "Hardware store",
+      "unit": "units",
+      "equipment": false,
+      "mass": 1.5,
+      "volume": 0.005,
+      "buyer": {
+        "id": "materials",
+        "name": "Builders’ cooperative",
+        "batches": 8,
+        "fullPriceBatches": 4,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "bamboo": {
+      "name": "Bamboo poles",
+      "batch": 4,
+      "pack": 12,
+      "price": 48,
+      "supplier": 1536,
+      "supplierName": "Hardware store",
+      "unit": "units",
+      "equipment": false,
+      "mass": 3,
+      "volume": 0.018,
+      "buyer": {
+        "id": "materials",
+        "name": "Builders’ cooperative",
+        "batches": 8,
+        "fullPriceBatches": 4,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "earth": {
+      "name": "Building earth",
+      "batch": 4,
+      "pack": 12,
+      "price": 18,
+      "supplier": 1536,
+      "supplierName": "Hardware store",
+      "unit": "kg",
+      "equipment": false,
+      "mass": 20,
+      "volume": 0.015,
+      "buyer": {
+        "id": "materials",
+        "name": "Builders’ cooperative",
+        "batches": 8,
+        "fullPriceBatches": 4,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "stone": {
+      "name": "Stone",
+      "batch": 4,
+      "pack": 12,
+      "price": 42,
+      "supplier": 1536,
+      "supplierName": "Hardware store",
+      "unit": "kg",
+      "equipment": false,
+      "mass": 20,
+      "volume": 0.012,
+      "buyer": {
+        "id": "materials",
+        "name": "Builders’ cooperative",
+        "batches": 8,
+        "fullPriceBatches": 4,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "frames": {
+      "name": "Frames",
+      "batch": 2,
+      "pack": 4,
+      "price": 320,
+      "supplier": 512,
+      "supplierName": "Hardware store",
+      "unit": "units",
+      "equipment": false,
+      "mass": 4,
+      "volume": 0.04,
+      "buyer": {
+        "id": "materials",
+        "name": "Builders’ cooperative",
+        "batches": 8,
+        "fullPriceBatches": 4,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "walls": {
+      "name": "Wall material",
+      "batch": 4,
+      "pack": 8,
+      "price": 80,
+      "supplier": 1024,
+      "supplierName": "Hardware store",
+      "unit": "kg",
+      "equipment": false,
+      "mass": 18,
+      "volume": 0.025,
+      "buyer": {
+        "id": "materials",
+        "name": "Builders’ cooperative",
+        "batches": 8,
+        "fullPriceBatches": 4,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "tiles": {
+      "name": "Roof tiles",
+      "batch": 4,
+      "pack": 12,
+      "price": 108,
+      "supplier": 1536,
+      "supplierName": "Hardware store",
+      "unit": "kg",
+      "equipment": false,
+      "mass": 12,
+      "volume": 0.012,
+      "buyer": {
+        "id": "materials",
+        "name": "Builders’ cooperative",
+        "batches": 8,
+        "fullPriceBatches": 4,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "electrical": {
+      "name": "Electrical supplies",
+      "batch": 1,
+      "pack": 4,
+      "price": 144,
+      "supplier": 64,
+      "supplierName": "Hardware store",
+      "unit": "units",
+      "equipment": false,
+      "mass": 2,
+      "volume": 0.01,
+      "buyer": {
+        "id": "equipment",
+        "name": "Hardware resale counter",
+        "batches": 2,
+        "fullPriceBatches": 1,
+        "ratio": 0.4,
+        "bulkRatio": 0.3
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "covering": {
+      "name": "Greenhouse covering",
+      "batch": 1,
+      "pack": 1,
+      "price": 80,
+      "supplier": 128,
+      "supplierName": "Hardware store",
+      "unit": "units",
+      "equipment": false,
+      "mass": 2,
+      "volume": 0.01,
+      "buyer": {
+        "id": "materials",
+        "name": "Builders’ cooperative",
+        "batches": 8,
+        "fullPriceBatches": 4,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "panels": {
+      "name": "Solar panels",
+      "batch": 1,
+      "pack": 2,
+      "price": 1400,
+      "supplier": 8,
+      "supplierName": "Hardware store",
+      "unit": "units",
+      "equipment": false,
+      "mass": 20,
+      "volume": 0.12,
+      "buyer": {
+        "id": "equipment",
+        "name": "Hardware resale counter",
+        "batches": 2,
+        "fullPriceBatches": 1,
+        "ratio": 0.4,
+        "bulkRatio": 0.3
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "batteries": {
+      "name": "Battery equipment",
+      "batch": 1,
+      "pack": 1,
+      "price": 6000,
+      "supplier": 4,
+      "supplierName": "Hardware store",
+      "unit": "units",
+      "equipment": false,
+      "mass": 30,
+      "volume": 0.05,
+      "buyer": {
+        "id": "equipment",
+        "name": "Hardware resale counter",
+        "batches": 2,
+        "fullPriceBatches": 1,
+        "ratio": 0.4,
+        "bulkRatio": 0.3
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "pumps": {
+      "name": "Pumps",
+      "batch": 1,
+      "pack": 1,
+      "price": 160,
+      "supplier": 16,
+      "supplierName": "Hardware store",
+      "unit": "units",
+      "equipment": false,
+      "mass": 2,
+      "volume": 0.01,
+      "buyer": {
+        "id": "equipment",
+        "name": "Hardware resale counter",
+        "batches": 2,
+        "fullPriceBatches": 1,
+        "ratio": 0.4,
+        "bulkRatio": 0.3
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "tools": {
+      "name": "Tool supplies",
+      "batch": 1,
+      "pack": 4,
+      "price": 36,
+      "supplier": 64,
+      "supplierName": "Hardware store",
+      "unit": "units",
+      "equipment": true,
+      "mass": 2,
+      "volume": 0.01,
+      "buyer": {
+        "id": "equipment",
+        "name": "Hardware resale counter",
+        "batches": 2,
+        "fullPriceBatches": 1,
+        "ratio": 0.4,
+        "bulkRatio": 0.3
+      },
+      "starting": [
+        3,
+        4,
+        7
+      ]
+    },
+    "food": {
+      "name": "Ingredients",
+      "batch": 4,
+      "pack": 12,
+      "price": 48,
+      "supplier": 192,
+      "supplierName": "Town food market",
+      "unit": "kg",
+      "equipment": false,
+      "mass": 1,
+      "volume": 0.002,
+      "buyer": {
+        "id": "produce",
+        "name": "Town produce stall",
+        "batches": 8,
+        "fullPriceBatches": 4,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        8,
+        12,
+        21
+      ]
+    },
+    "meals": {
+      "name": "Prepared meals",
+      "batch": 4,
+      "pack": 12,
+      "price": 96,
+      "supplier": 192,
+      "supplierName": "Town food market",
+      "unit": "units",
+      "equipment": false,
+      "mass": 1,
+      "volume": 0.002,
+      "buyer": {
+        "id": "meals",
+        "name": "Local café",
+        "batches": 4,
+        "fullPriceBatches": 2,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        12,
+        20,
+        34
+      ]
+    },
+    "eggs": {
+      "name": "Eggs",
+      "batch": 4,
+      "pack": 12,
+      "price": 36,
+      "supplier": 192,
+      "supplierName": "Town food market",
+      "unit": "units",
+      "equipment": false,
+      "mass": 0.06,
+      "volume": 0.0001,
+      "buyer": {
+        "id": "produce",
+        "name": "Town produce stall",
+        "batches": 8,
+        "fullPriceBatches": 4,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "compost": {
+      "name": "Mature compost",
+      "batch": 4,
+      "pack": 8,
+      "price": 64,
+      "supplier": 64,
+      "supplierName": "Agricultural supply store",
+      "unit": "kg",
+      "equipment": false,
+      "mass": 1,
+      "volume": 0.002,
+      "buyer": {
+        "id": "livestock",
+        "name": "Smallholders’ cooperative",
+        "batches": 2,
+        "fullPriceBatches": 1,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "scraps": {
+      "name": "Organic residues",
+      "batch": 4,
+      "pack": 0,
+      "price": 0,
+      "supplier": 0,
+      "supplierName": "",
+      "unit": "kg",
+      "equipment": false,
+      "mass": 1,
+      "volume": 0.002,
+      "buyer": {
+        "id": "materials",
+        "name": "Builders’ cooperative",
+        "batches": 8,
+        "fullPriceBatches": 4,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "seedlings": {
+      "name": "Vegetable seedlings",
+      "batch": 4,
+      "pack": 8,
+      "price": 24,
+      "supplier": 64,
+      "supplierName": "Agricultural supply store",
+      "unit": "units",
+      "equipment": false,
+      "mass": 2,
+      "volume": 0.01,
+      "buyer": {
+        "id": "livestock",
+        "name": "Smallholders’ cooperative",
+        "batches": 2,
+        "fullPriceBatches": 1,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "tree_starts": {
+      "name": "Timber seedlings",
+      "batch": 2,
+      "pack": 4,
+      "price": 40,
+      "supplier": 32,
+      "supplierName": "Agricultural supply store",
+      "unit": "units",
+      "equipment": false,
+      "mass": 2,
+      "volume": 0.01,
+      "buyer": {
+        "id": "livestock",
+        "name": "Smallholders’ cooperative",
+        "batches": 2,
+        "fullPriceBatches": 1,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "bamboo_starts": {
+      "name": "Bamboo starts",
+      "batch": 2,
+      "pack": 4,
+      "price": 80,
+      "supplier": 32,
+      "supplierName": "Agricultural supply store",
+      "unit": "units",
+      "equipment": false,
+      "mass": 2,
+      "volume": 0.01,
+      "buyer": {
+        "id": "livestock",
+        "name": "Smallholders’ cooperative",
+        "batches": 2,
+        "fullPriceBatches": 1,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "fodder": {
+      "name": "Dry fodder",
+      "batch": 4,
+      "pack": 12,
+      "price": 24,
+      "supplier": 96,
+      "supplierName": "Agricultural supply store",
+      "unit": "kg",
+      "equipment": false,
+      "mass": 1,
+      "volume": 0.002,
+      "buyer": {
+        "id": "livestock",
+        "name": "Smallholders’ cooperative",
+        "batches": 2,
+        "fullPriceBatches": 1,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "milk": {
+      "name": "Fresh milk",
+      "batch": 4,
+      "pack": 6,
+      "price": 42,
+      "supplier": 96,
+      "supplierName": "Town food market",
+      "unit": "L",
+      "equipment": false,
+      "mass": 1,
+      "volume": 0.002,
+      "buyer": {
+        "id": "produce",
+        "name": "Town produce stall",
+        "batches": 8,
+        "fullPriceBatches": 4,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "honey": {
+      "name": "Honey",
+      "batch": 4,
+      "pack": 4,
+      "price": 48,
+      "supplier": 64,
+      "supplierName": "Town food market",
+      "unit": "kg",
+      "equipment": false,
+      "mass": 1,
+      "volume": 0.002,
+      "buyer": {
+        "id": "produce",
+        "name": "Town produce stall",
+        "batches": 8,
+        "fullPriceBatches": 4,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "goats": {
+      "name": "Goats",
+      "batch": 1,
+      "pack": 2,
+      "price": 1800,
+      "supplier": 16,
+      "supplierName": "Agricultural supply store",
+      "unit": "units",
+      "equipment": false,
+      "mass": 40,
+      "volume": 0.4,
+      "buyer": {
+        "id": "livestock",
+        "name": "Smallholders’ cooperative",
+        "batches": 2,
+        "fullPriceBatches": 1,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "bees": {
+      "name": "Bee colonies",
+      "batch": 1,
+      "pack": 1,
+      "price": 400,
+      "supplier": 8,
+      "supplierName": "Agricultural supply store",
+      "unit": "units",
+      "equipment": false,
+      "mass": 15,
+      "volume": 0.08,
+      "buyer": {
+        "id": "livestock",
+        "name": "Smallholders’ cooperative",
+        "batches": 2,
+        "fullPriceBatches": 1,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    },
+    "hens": {
+      "name": "Hens",
+      "batch": 1,
+      "pack": 3,
+      "price": 180,
+      "supplier": 24,
+      "supplierName": "Agricultural supply store",
+      "unit": "units",
+      "equipment": false,
+      "mass": 2,
+      "volume": 0.025,
+      "buyer": {
+        "id": "livestock",
+        "name": "Smallholders’ cooperative",
+        "batches": 2,
+        "fullPriceBatches": 1,
+        "ratio": 0.5,
+        "bulkRatio": 0.4
+      },
+      "starting": [
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "resourceGroups": [
+    {
+      "name": "Items & equipment",
+      "ids": [
+        "bucket",
+        "garden-tools",
+        "carpentry-tools",
+        "harvest-basket",
+        "cleaning-kit",
+        "watering-can",
+        "wheelbarrow",
+        "bicycle",
+        "produce-crates",
+        "tools"
+      ]
+    },
+    {
+      "name": "Raw materials",
+      "ids": [
+        "logs",
+        "bamboo",
+        "earth",
+        "stone"
+      ]
+    },
+    {
+      "name": "Manufactured / industrial materials",
+      "ids": [
+        "wood",
+        "planks",
+        "frames",
+        "walls",
+        "tiles",
+        "hardware",
+        "roofing",
+        "tarp",
+        "tank",
+        "plumbing",
+        "sanitation",
+        "electrical",
+        "covering",
+        "panels",
+        "batteries",
+        "cooling",
+        "pumps",
+        "wheel_kit",
+        "tool_heads",
+        "repair_supplies",
+        "soap"
+      ]
+    },
+    {
+      "name": "Food & farm supplies",
+      "ids": [
+        "food",
+        "greens",
+        "beans",
+        "corn",
+        "meals",
+        "eggs",
+        "milk",
+        "honey",
+        "fodder",
+        "compost",
+        "scraps"
+      ]
+    },
+    {
+      "name": "Plants & animals",
+      "ids": [
+        "greens_seed",
+        "beans_seed",
+        "corn_seed",
+        "seedlings",
+        "tree_starts",
+        "bamboo_starts",
+        "goats",
+        "bees",
+        "hens"
+      ]
+    }
+  ],
+  "foodResources": {
+    "name": "Food from town & the village",
+    "ids": [
+      "food",
+      "greens",
+      "beans",
+      "corn",
+      "meals",
+      "eggs",
+      "milk",
+      "honey"
+    ]
+  },
+  "buildOrder": [
+    "gathering",
+    "shelter",
+    "toilet",
+    "home-studio",
+    "home-lane",
+    "home-garden",
+    "home-ochre",
+    "home-deep-porch",
+    "home-blue-gallery",
+    "home-paired",
+    "home-broad-veranda",
+    "home-shaded-retreat",
+    "home-ranch",
+    "home-cottage",
+    "home-longhouse",
+    "groundwater-well",
+    "water-pump",
+    "home-family",
+    "home-shared",
+    "road",
+    "bridge",
+    "house",
+    "shed",
+    "orchard",
+    "goat_pasture",
+    "apiary",
+    "hydro",
+    "eco_toilet",
+    "banana_treatment",
+    "wetland",
+    "biodigester",
+    "warehouse",
+    "solar_farm",
+    "streetlight",
+    "kitchen",
+    "grove",
+    "garden",
+    "greenhouse",
+    "well",
+    "compost",
+    "square",
+    "workshop",
+    "coop",
+    "home-veranda",
+    "home-gable",
+    "home-courtyard",
+    "adobe-gable",
+    "adobe-veranda",
+    "supply-0",
+    "supply-1",
+    "supply-5",
+    "supply-6",
+    "rain-barrel",
+    "tool-rack",
+    "seedling-bench",
+    "woodpile",
+    "picnic-table",
+    "garden-bench",
+    "clothesline",
+    "hammock",
+    "wayfinding-sign",
+    "wash-station",
+    "farm-gate",
+    "fire-circle",
+    "canvas-tent-teal",
+    "canvas-tent-ochre",
+    "reading-room",
+    "outdoor-classroom",
+    "community-hall",
+    "exercise-garden",
+    "volleyball-court",
+    "field"
+  ],
+  "projects": {
+    "gathering": {
+      "name": "Gathering place",
+      "description": "Assemble a table and benches from pre-cut boards. About 1 person-hour of assembly, plus carrying.",
+      "benefit": "Recreation: residents visit during breaks to recover fun.",
+      "searchText": "gathering place assemble a table and benches from pre-cut boards. about 1 person-hour of assembly, plus carrying. community & leisure",
+      "model": 45,
+      "unpackingModel": 170,
+      "kind": "square",
+      "size": [
+        2,
+        2
+      ],
+      "materials": {
+        "wood": 8,
+        "hardware": 1
+      },
+      "work": 134,
+      "category": "Community & leisure",
+      "campEssential": true,
+      "repeatable": true
+    },
+    "shelter": {
+      "name": "Basic shelter",
+      "description": "Raise a small open timber shelter with a sheet roof. About 8 person-hours with pre-cut timber, plus carrying. The frame gives shade halfway through.",
+      "benefit": "",
+      "searchText": "basic shelter raise a small open timber shelter with a sheet roof. about 8 person-hours with pre-cut timber, plus carrying. the frame gives shade halfway through. homes & shelter",
+      "model": 50,
+      "constructionModels": [
+        150,
+        151
+      ],
+      "kind": "shed",
+      "size": [
+        3,
+        3
+      ],
+      "materials": {
+        "wood": 24,
+        "hardware": 3,
+        "roofing": 6
+      },
+      "work": 1067,
+      "category": "Homes & shelter",
+      "campEssential": true,
+      "repeatable": true
+    },
+    "toilet": {
+      "name": "Private toilet",
+      "description": "Assemble a temporary screened toilet around a purchased dry-toilet kit. About 4 person-hours, plus carrying; permanent sanitation comes later.",
+      "benefit": "",
+      "searchText": "private toilet assemble a temporary screened toilet around a purchased dry-toilet kit. about 4 person-hours, plus carrying; permanent sanitation comes later. water & sanitation",
+      "model": 12,
+      "constructionModels": [
+        88,
+        89
+      ],
+      "kind": "eco_toilet",
+      "size": [
+        2,
+        2
+      ],
+      "materials": {
+        "wood": 16,
+        "hardware": 2,
+        "roofing": 2,
+        "sanitation": 1
+      },
+      "work": 534,
+      "category": "Water & sanitation",
+      "campEssential": true,
+      "repeatable": true
+    },
+    "home-studio": {
+      "name": "Little limewash studio",
+      "description": "Little limewash studio. 3 × 4 cells. Build with physical supplies and resident labor. Reserved site: 6 × 8 m (3 × 4 cells). 4.4 × 6 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Housing: 1 resting places for residents.",
+      "searchText": "little limewash studio little limewash studio. 3 × 4 cells. build with physical supplies and resident labor. reserved site: 6 × 8 m (3 × 4 cells). 4.4 × 6 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
+      "model": 38,
+      "constructionModels": [
+        132,
+        133
+      ],
+      "kind": "home",
+      "size": [
+        3,
+        4
+      ],
+      "materials": {
+        "earth": 96,
+        "stone": 288,
+        "frames": 6,
+        "walls": 259,
+        "tiles": 192,
+        "hardware": 3,
+        "wood": 96
+      },
+      "work": 43201.33333333333,
+      "construction": {
+        "area": 48,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 72
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 140.64960000000002
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 63.36
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 48
+          }
+        ]
+      },
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true,
+      "beds": 1
+    },
+    "home-lane": {
+      "name": "Narrow lane house",
+      "description": "Narrow lane house. 3 × 5 cells. Build with physical supplies and resident labor. Reserved site: 6 × 10 m (3 × 5 cells). 4.4 × 8 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Housing: 2 resting places for residents.",
+      "searchText": "narrow lane house narrow lane house. 3 × 5 cells. build with physical supplies and resident labor. reserved site: 6 × 10 m (3 × 5 cells). 4.4 × 8 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
+      "model": 31,
+      "constructionModels": [
+        118,
+        119
+      ],
+      "kind": "home",
+      "size": [
+        3,
+        5
+      ],
+      "materials": {
+        "earth": 120,
+        "stone": 360,
+        "frames": 6,
+        "walls": 296,
+        "tiles": 240,
+        "hardware": 3,
+        "wood": 120
+      },
+      "work": 51992,
+      "construction": {
+        "area": 60,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 90
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 160.7424
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 79.2
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 60
+          }
+        ]
+      },
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true,
+      "beds": 2
+    },
+    "home-garden": {
+      "name": "Garden cottage",
+      "description": "Garden cottage. 4 × 3 cells. Build with physical supplies and resident labor. Reserved site: 8 × 6 m (4 × 3 cells). 6 × 4 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Housing: 1 resting places for residents.",
+      "searchText": "garden cottage garden cottage. 4 × 3 cells. build with physical supplies and resident labor. reserved site: 8 × 6 m (4 × 3 cells). 6 × 4 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
+      "model": 30,
+      "constructionModels": [
+        116,
+        117
+      ],
+      "kind": "home",
+      "size": [
+        4,
+        3
+      ],
+      "materials": {
+        "earth": 96,
+        "stone": 288,
+        "frames": 8,
+        "walls": 259,
+        "tiles": 192,
+        "hardware": 4,
+        "wood": 96
+      },
+      "work": 43201.33333333333,
+      "construction": {
+        "area": 48,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 72
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 140.64960000000002
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 63.36
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 48
+          }
+        ]
+      },
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true,
+      "beds": 1
+    },
+    "home-ochre": {
+      "name": "Ochre gable house",
+      "description": "Ochre gable house. 4 × 5 cells. Build with physical supplies and resident labor. Reserved site: 8 × 10 m (4 × 5 cells). 6 × 8 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Housing: 2 resting places for residents.",
+      "searchText": "ochre gable house ochre gable house. 4 × 5 cells. build with physical supplies and resident labor. reserved site: 8 × 10 m (4 × 5 cells). 6 × 8 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
+      "model": 33,
+      "constructionModels": [
+        122,
+        123
+      ],
+      "kind": "home",
+      "size": [
+        4,
+        5
+      ],
+      "materials": {
+        "earth": 160,
+        "stone": 480,
+        "frames": 8,
+        "walls": 333,
+        "tiles": 320,
+        "hardware": 4,
+        "wood": 160
+      },
+      "work": 64858.66666666667,
+      "construction": {
+        "area": 80,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 120
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 180.83520000000001
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 105.60000000000001
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 80
+          }
+        ]
+      },
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true,
+      "beds": 2
+    },
+    "home-deep-porch": {
+      "name": "Deep porch house",
+      "description": "Deep porch house. 4 × 6 cells. Build with physical supplies and resident labor. Reserved site: 8 × 12 m (4 × 6 cells). 6 × 8 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Housing: 2 resting places for residents.",
+      "searchText": "deep porch house deep porch house. 4 × 6 cells. build with physical supplies and resident labor. reserved site: 8 × 12 m (4 × 6 cells). 6 × 8 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
+      "model": 27,
+      "constructionModels": [
+        110,
+        111
+      ],
+      "kind": "home",
+      "size": [
+        4,
+        6
+      ],
+      "materials": {
+        "earth": 192,
+        "stone": 576,
+        "frames": 8,
+        "walls": 370,
+        "tiles": 384,
+        "hardware": 4,
+        "wood": 192
+      },
+      "work": 75686.66666666667,
+      "construction": {
+        "area": 96,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 144
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 200.928
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 126.72
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 96
+          }
+        ]
+      },
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true,
+      "beds": 2
+    },
+    "home-blue-gallery": {
+      "name": "Sage terrace house",
+      "description": "Sage terrace house. 5 × 4 cells. Build with physical supplies and resident labor. Reserved site: 10 × 8 m (5 × 4 cells). 6 × 6 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Housing: 2 resting places for residents.",
+      "searchText": "sage terrace house sage terrace house. 5 × 4 cells. build with physical supplies and resident labor. reserved site: 10 × 8 m (5 × 4 cells). 6 × 6 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
+      "model": 23,
+      "constructionModels": [
+        102,
+        103
+      ],
+      "kind": "home",
+      "size": [
+        5,
+        4
+      ],
+      "materials": {
+        "earth": 160,
+        "stone": 480,
+        "frames": 10,
+        "walls": 333,
+        "tiles": 320,
+        "hardware": 5,
+        "wood": 160
+      },
+      "work": 64858.66666666667,
+      "construction": {
+        "area": 80,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 120
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 180.83520000000001
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 105.60000000000001
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 80
+          }
+        ]
+      },
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true,
+      "beds": 2
+    },
+    "home-paired": {
+      "name": "Paired roof house",
+      "description": "Paired roof house. 6 × 4 cells. Build with physical supplies and resident labor. Reserved site: 12 × 8 m (6 × 4 cells). 10 × 6 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Housing: 3 resting places for residents.",
+      "searchText": "paired roof house paired roof house. 6 × 4 cells. build with physical supplies and resident labor. reserved site: 12 × 8 m (6 × 4 cells). 10 × 6 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
+      "model": 34,
+      "constructionModels": [
+        124,
+        125
+      ],
+      "kind": "home",
+      "size": [
+        6,
+        4
+      ],
+      "materials": {
+        "earth": 192,
+        "stone": 576,
+        "frames": 12,
+        "walls": 370,
+        "tiles": 384,
+        "hardware": 6,
+        "wood": 192
+      },
+      "work": 75686.66666666667,
+      "construction": {
+        "area": 96,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 144
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 200.928
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 126.72
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 96
+          }
+        ]
+      },
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true,
+      "beds": 3
+    },
+    "home-broad-veranda": {
+      "name": "Broad veranda house",
+      "description": "Broad veranda house. 7 × 5 cells. Build with physical supplies and resident labor. Reserved site: 14 × 10 m (7 × 5 cells). 12 × 6 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Housing: 3 resting places for residents.",
+      "searchText": "broad veranda house broad veranda house. 7 × 5 cells. build with physical supplies and resident labor. reserved site: 14 × 10 m (7 × 5 cells). 12 × 6 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
+      "model": 24,
+      "constructionModels": [
+        104,
+        105
+      ],
+      "kind": "home",
+      "size": [
+        7,
+        5
+      ],
+      "materials": {
+        "earth": 280,
+        "stone": 840,
+        "frames": 14,
+        "walls": 444,
+        "tiles": 560,
+        "hardware": 7,
+        "wood": 280
+      },
+      "work": 103454.66666666666,
+      "construction": {
+        "area": 140,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 210
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 241.11360000000005
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 184.8
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 140
+          }
+        ]
+      },
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true,
+      "beds": 3
+    },
+    "home-shaded-retreat": {
+      "name": "Shaded terrace home",
+      "description": "Shaded terrace home. 6 × 7 cells. Build with physical supplies and resident labor. Reserved site: 12 × 14 m (6 × 7 cells). 8 × 10 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Housing: 3 resting places for residents.",
+      "searchText": "shaded terrace home shaded terrace home. 6 × 7 cells. build with physical supplies and resident labor. reserved site: 12 × 14 m (6 × 7 cells). 8 × 10 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
+      "model": 36,
+      "constructionModels": [
+        128,
+        129
+      ],
+      "kind": "home",
+      "size": [
+        6,
+        7
+      ],
+      "materials": {
+        "earth": 336,
+        "stone": 1008,
+        "frames": 12,
+        "walls": 481,
+        "tiles": 672,
+        "hardware": 6,
+        "wood": 336
+      },
+      "work": 120396,
+      "construction": {
+        "area": 168,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 252
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 261.2064000000001
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 221.76000000000002
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 168
+          }
+        ]
+      },
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true,
+      "beds": 3
+    },
+    "home-ranch": {
+      "name": "Long clay-roof house",
+      "description": "Long clay-roof house. 8 × 4 cells. Build with physical supplies and resident labor. Reserved site: 16 × 8 m (8 × 4 cells). 14 × 6 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Housing: 3 resting places for residents.",
+      "searchText": "long clay-roof house long clay-roof house. 8 × 4 cells. build with physical supplies and resident labor. reserved site: 16 × 8 m (8 × 4 cells). 14 × 6 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
+      "model": 35,
+      "constructionModels": [
+        126,
+        127
+      ],
+      "kind": "home",
+      "size": [
+        8,
+        4
+      ],
+      "materials": {
+        "earth": 256,
+        "stone": 768,
+        "frames": 16,
+        "walls": 444,
+        "tiles": 512,
+        "hardware": 8,
+        "wood": 256
+      },
+      "work": 97342.66666666667,
+      "construction": {
+        "area": 128,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 192
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 241.11360000000005
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 168.96
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 128
+          }
+        ]
+      },
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true,
+      "beds": 3
+    },
+    "home-cottage": {
+      "name": "Small cottage",
+      "description": "Small cottage. 4 × 4 cells. Build with physical supplies and resident labor. Reserved site: 8 × 8 m (4 × 4 cells). 6 × 6 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Housing: 1 resting places for residents.",
+      "searchText": "small cottage small cottage. 4 × 4 cells. build with physical supplies and resident labor. reserved site: 8 × 8 m (4 × 4 cells). 6 × 6 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
+      "model": 25,
+      "constructionModels": [
+        106,
+        107
+      ],
+      "kind": "home",
+      "size": [
+        4,
+        4
+      ],
+      "materials": {
+        "earth": 128,
+        "stone": 384,
+        "frames": 8,
+        "walls": 296,
+        "tiles": 256,
+        "hardware": 4,
+        "wood": 128
+      },
+      "work": 54029.333333333336,
+      "construction": {
+        "area": 64,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 96
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 160.7424
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 84.48
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 64
+          }
+        ]
+      },
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true,
+      "beds": 1
+    },
+    "home-longhouse": {
+      "name": "Long veranda house",
+      "description": "Long veranda house. 7 × 4 cells. Build with physical supplies and resident labor. Reserved site: 14 × 8 m (7 × 4 cells). 12 × 6 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Housing: 3 resting places for residents.",
+      "searchText": "long veranda house long veranda house. 7 × 4 cells. build with physical supplies and resident labor. reserved site: 14 × 8 m (7 × 4 cells). 12 × 6 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
+      "model": 32,
+      "constructionModels": [
+        120,
+        121
+      ],
+      "kind": "home",
+      "size": [
+        7,
+        4
+      ],
+      "materials": {
+        "earth": 224,
+        "stone": 672,
+        "frames": 14,
+        "walls": 407,
+        "tiles": 448,
+        "hardware": 7,
+        "wood": 224
+      },
+      "work": 86514.66666666666,
+      "construction": {
+        "area": 112,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 168
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 221.02080000000004
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 147.84000000000003
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 112
+          }
+        ]
+      },
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true,
+      "beds": 3
+    },
+    "groundwater-well": {
+      "name": "Water well",
+      "description": "A covered groundwater well. Recharges up to 8 untreated water per hour (less in dry conditions), storing 40. Residents can carry it to a cistern for filtering; no electricity needed. Reserved site: 4 × 4 m (2 × 2 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "",
+      "searchText": "water well a covered groundwater well. recharges up to 8 untreated water per hour (less in dry conditions), storing 40. residents can carry it to a cistern for filtering; no electricity needed. reserved site: 4 × 4 m (2 × 2 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. water & sanitation",
+      "model": 20,
+      "constructionModels": [
+        98,
+        99
+      ],
+      "kind": "groundwater-well",
+      "size": [
+        2,
+        2
+      ],
+      "materials": {
+        "stone": 18,
+        "wood": 8,
+        "hardware": 4,
+        "plumbing": 2,
+        "tiles": 4
+      },
+      "work": 792,
+      "category": "Water & sanitation",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "water-pump": {
+      "name": "Water pump",
+      "description": "An electric intake beside a river or within 6 cells of a completed water well. Draws up to 600 liters of untreated water per hour and feeds cisterns and irrigation. Requires power; well recharge can limit supply. Reserved site: 2 × 2 m (1 × 1 cells). 1.5 × 1.4 m physical footprint. Pump pad with service space inside the reserved site. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "",
+      "searchText": "water pump an electric intake beside a river or within 6 cells of a completed water well. draws up to 600 liters of untreated water per hour and feeds cisterns and irrigation. requires power; well recharge can limit supply. reserved site: 2 × 2 m (1 × 1 cells). 1.5 × 1.4 m physical footprint. pump pad with service space inside the reserved site. access uses reachable neighbouring cells; it is not extra productive land. water & sanitation",
+      "model": 62,
+      "constructionModels": [
+        162,
+        163
+      ],
+      "kind": "water-pump",
+      "size": [
+        1,
+        1
+      ],
+      "materials": {
+        "stone": 4,
+        "pumps": 1,
+        "plumbing": 4,
+        "electrical": 2,
+        "hardware": 2
+      },
+      "work": 286,
+      "category": "Water & sanitation",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "home-family": {
+      "name": "Family house",
+      "description": "Family house. 6 × 5 cells. Build with physical supplies and resident labor. Reserved site: 12 × 10 m (6 × 5 cells). 10 × 8 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Housing: 3 resting places for residents.",
+      "searchText": "family house family house. 6 × 5 cells. build with physical supplies and resident labor. reserved site: 12 × 10 m (6 × 5 cells). 10 × 8 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
+      "model": 28,
+      "constructionModels": [
+        112,
+        113
+      ],
+      "kind": "home",
+      "size": [
+        6,
+        5
+      ],
+      "materials": {
+        "earth": 240,
+        "stone": 720,
+        "frames": 12,
+        "walls": 407,
+        "tiles": 480,
+        "hardware": 6,
+        "wood": 240
+      },
+      "work": 90589.33333333333,
+      "construction": {
+        "area": 120,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 180
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 221.02080000000004
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 158.4
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 120
+          }
+        ]
+      },
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true,
+      "beds": 3
+    },
+    "home-shared": {
+      "name": "Shared adobe house",
+      "description": "Shared adobe house. 6 × 6 cells. Build with physical supplies and resident labor. Reserved site: 12 × 12 m (6 × 6 cells). 10.5 × 9.5 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Housing: 4 resting places for residents.",
+      "searchText": "shared adobe house shared adobe house. 6 × 6 cells. build with physical supplies and resident labor. reserved site: 12 × 12 m (6 × 6 cells). 10.5 × 9.5 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
+      "model": 37,
+      "constructionModels": [
+        130,
+        131
+      ],
+      "kind": "home",
+      "size": [
+        6,
+        6
+      ],
+      "materials": {
+        "earth": 1287,
+        "stone": 864,
+        "bamboo": 24,
+        "hardware": 12,
+        "tiles": 576,
+        "wood": 288
+      },
+      "work": 113280,
+      "construction": {
+        "area": 144,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 216
+          },
+          {
+            "name": "Earth wall preparation and assembly",
+            "hours": 299.52000000000004
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 190.07999999999998
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 144
+          }
+        ]
+      },
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true,
+      "beds": 4
+    },
+    "road": {
+      "name": "Village road",
+      "description": "Village road. 1 × 1 cells. Build with physical supplies and resident labor. Reserved site: 2 × 2 m (1 × 1 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "",
+      "searchText": "village road village road. 1 × 1 cells. build with physical supplies and resident labor. reserved site: 2 × 2 m (1 × 1 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. paths & boundaries",
+      "model": 48,
+      "constructionModels": [
+        148,
+        149
+      ],
+      "kind": "road",
+      "size": [
+        1,
+        1
+      ],
+      "materials": {
+        "stone": 1,
+        "earth": 1
+      },
+      "work": 45.333333333333336,
+      "construction": {
+        "phases": [
+          {
+            "name": "Setting out and assembly preparation",
+            "hours": 0.1
+          },
+          {
+            "name": "Groundwork",
+            "hours": 0.24
+          }
+        ]
+      },
+      "category": "Paths & boundaries",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "bridge": {
+      "name": "Timber footbridge",
+      "description": "Timber footbridge. 8 × 1 cells. Build with physical supplies and resident labor. Reserved site: 16 × 2 m (8 × 1 cells). 16 × 1.96 m physical footprint. 1.75 m walking deck. Both ends must remain reachable on dry land. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "",
+      "searchText": "timber footbridge timber footbridge. 8 × 1 cells. build with physical supplies and resident labor. reserved site: 16 × 2 m (8 × 1 cells). 16 × 1.96 m physical footprint. 1.75 m walking deck. both ends must remain reachable on dry land. access uses reachable neighbouring cells; it is not extra productive land. paths & boundaries",
+      "model": 5,
+      "constructionModels": [
+        78,
+        79
+      ],
+      "kind": "bridge",
+      "size": [
+        8,
+        1
+      ],
+      "materials": {
+        "wood": 32,
+        "hardware": 8,
+        "stone": 8
+      },
+      "work": 1221.3333333333333,
+      "construction": {
+        "phases": [
+          {
+            "name": "Setting out and assembly preparation",
+            "hours": 1
+          },
+          {
+            "name": "Groundwork",
+            "hours": 0.96
+          },
+          {
+            "name": "Structure",
+            "hours": 4.8
+          },
+          {
+            "name": "Fasteners and utilities",
+            "hours": 2.4
+          }
+        ]
+      },
+      "category": "Paths & boundaries",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "house": {
+      "name": "Limewashed house",
+      "description": "Limewashed house. 5 × 5 cells. Build with physical supplies and resident labor. Reserved site: 10 × 10 m (5 × 5 cells). 8 × 8 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Housing: 2 resting places for residents.",
+      "searchText": "limewashed house limewashed house. 5 × 5 cells. build with physical supplies and resident labor. reserved site: 10 × 10 m (5 × 5 cells). 8 × 8 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
+      "model": 40,
+      "constructionModels": [
+        136,
+        137
+      ],
+      "kind": "home",
+      "size": [
+        5,
+        5
+      ],
+      "materials": {
+        "earth": 200,
+        "stone": 600,
+        "frames": 10,
+        "walls": 370,
+        "tiles": 400,
+        "hardware": 5,
+        "wood": 200
+      },
+      "work": 77723.99999999999,
+      "construction": {
+        "area": 100,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 150
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 200.928
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 132
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 100
+          }
+        ]
+      },
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "shed": {
+      "name": "Open timber shed",
+      "description": "Open timber shed. 3 × 3 cells. Build with physical supplies and resident labor. Reserved site: 6 × 6 m (3 × 3 cells). 5 × 4 m structure. Open timber work shelter with a dry bench and space to move around it. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "",
+      "searchText": "open timber shed open timber shed. 3 × 3 cells. build with physical supplies and resident labor. reserved site: 6 × 6 m (3 × 3 cells). 5 × 4 m structure. open timber work shelter with a dry bench and space to move around it. access uses reachable neighbouring cells; it is not extra productive land. homes & shelter",
+      "model": 50,
+      "constructionModels": [
+        150,
+        151
+      ],
+      "kind": "shed",
+      "size": [
+        3,
+        3
+      ],
+      "materials": {
+        "wood": 72,
+        "hardware": 1,
+        "tiles": 144,
+        "stone": 216,
+        "earth": 72
+      },
+      "work": 18336,
+      "construction": {
+        "area": 36,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 54
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 0
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 47.519999999999996
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 36
+          }
+        ]
+      },
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "orchard": {
+      "name": "Fruit orchard",
+      "description": "Fruit orchard. 5 × 5 cells. Build with physical supplies and resident labor. Reserved site: 10 × 10 m (5 × 5 cells). 10 × 10 m plot. Four compact fruit trees on 4 m centres. Mature size and yield remain species-dependent. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Available work: Harvest orchard fruit.",
+      "searchText": "fruit orchard fruit orchard. 5 × 5 cells. build with physical supplies and resident labor. reserved site: 10 × 10 m (5 × 5 cells). 10 × 10 m plot. four compact fruit trees on 4 m centres. mature size and yield remain species-dependent. access uses reachable neighbouring cells; it is not extra productive land. harvest orchard fruit ingredients organic residues food & farming",
+      "model": 43,
+      "constructionModels": [
+        142,
+        143
+      ],
+      "kind": "orchard",
+      "size": [
+        5,
+        5
+      ],
+      "materials": {
+        "earth": 8,
+        "compost": 2,
+        "tree_starts": 4
+      },
+      "work": 308,
+      "category": "Food & farming",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "goat_pasture": {
+      "name": "Goat pen",
+      "description": "Goat pen. 6 × 5 cells. Build with physical supplies and resident labor. Reserved site: 12 × 10 m (6 × 5 cells). 11 × 9 m physical footprint. Two-goat pen with a 9 m² shelter and 90 m² outdoor area. Supplied feed or separate grazing is needed. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Available work: Feed and milk goats.",
+      "searchText": "goat pen goat pen. 6 × 5 cells. build with physical supplies and resident labor. reserved site: 12 × 10 m (6 × 5 cells). 11 × 9 m physical footprint. two-goat pen with a 9 m² shelter and 90 m² outdoor area. supplied feed or separate grazing is needed. access uses reachable neighbouring cells; it is not extra productive land. feed and milk goats fresh milk animals",
+      "model": 18,
+      "constructionModels": [
+        94,
+        95
+      ],
+      "kind": "goat_pasture",
+      "size": [
+        6,
+        5
+      ],
+      "materials": {
+        "bamboo": 10,
+        "tiles": 3,
+        "hardware": 2,
+        "plumbing": 1,
+        "goats": 2
+      },
+      "work": 396,
+      "category": "Animals",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "apiary": {
+      "name": "Stingless bee apiary",
+      "description": "Stingless bee apiary. 2 × 2 cells. Build with physical supplies and resident labor. Reserved site: 4 × 4 m (2 × 2 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Available work: Tend hives and collect honey.",
+      "searchText": "stingless bee apiary stingless bee apiary. 2 × 2 cells. build with physical supplies and resident labor. reserved site: 4 × 4 m (2 × 2 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. tend hives and collect honey honey animals",
+      "model": 2,
+      "constructionModels": [
+        72,
+        73
+      ],
+      "kind": "apiary",
+      "size": [
+        2,
+        2
+      ],
+      "materials": {
+        "wood": 3,
+        "tiles": 1,
+        "hardware": 1,
+        "bees": 1
+      },
+      "work": 132,
+      "category": "Animals",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "hydro": {
+      "name": "River generator",
+      "description": "River generator. 3 × 3 cells. Build with physical supplies and resident labor. Reserved site: 6 × 6 m (3 × 3 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "",
+      "searchText": "river generator river generator. 3 × 3 cells. build with physical supplies and resident labor. reserved site: 6 × 6 m (3 × 3 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. power",
+      "model": 41,
+      "constructionModels": [
+        138,
+        139
+      ],
+      "kind": "hydro",
+      "size": [
+        3,
+        3
+      ],
+      "materials": {
+        "stone": 6,
+        "bamboo": 4,
+        "hardware": 4,
+        "electrical": 2,
+        "pumps": 1,
+        "batteries": 1
+      },
+      "work": 396,
+      "category": "Power",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "eco_toilet": {
+      "name": "Ecological toilet",
+      "description": "Ecological toilet. 2 × 2 cells. Build with physical supplies and resident labor. Reserved site: 4 × 4 m (2 × 2 cells). 1.8 × 2.2 m structure. Single dry-toilet building with a human-sized doorway, ventilation and rear service access. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "",
+      "searchText": "ecological toilet ecological toilet. 2 × 2 cells. build with physical supplies and resident labor. reserved site: 4 × 4 m (2 × 2 cells). 1.8 × 2.2 m structure. single dry-toilet building with a human-sized doorway, ventilation and rear service access. access uses reachable neighbouring cells; it is not extra productive land. water & sanitation",
+      "model": 12,
+      "constructionModels": [
+        88,
+        89
+      ],
+      "kind": "eco_toilet",
+      "size": [
+        2,
+        2
+      ],
+      "materials": {
+        "stone": 4,
+        "earth": 6,
+        "bamboo": 6,
+        "tiles": 3,
+        "plumbing": 2,
+        "hardware": 2
+      },
+      "work": 506,
+      "category": "Water & sanitation",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "banana_treatment": {
+      "name": "Banana treatment bed",
+      "description": "Banana treatment bed. 3 × 4 cells. Build with physical supplies and resident labor. Reserved site: 6 × 8 m (3 × 4 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "",
+      "searchText": "banana treatment bed banana treatment bed. 3 × 4 cells. build with physical supplies and resident labor. reserved site: 6 × 8 m (3 × 4 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. water & sanitation",
+      "model": 3,
+      "constructionModels": [
+        74,
+        75
+      ],
+      "kind": "banana_treatment",
+      "size": [
+        3,
+        4
+      ],
+      "materials": {
+        "stone": 8,
+        "earth": 8,
+        "walls": 6,
+        "plumbing": 3,
+        "hardware": 2,
+        "tree_starts": 2
+      },
+      "work": 638,
+      "category": "Water & sanitation",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "wetland": {
+      "name": "Reed bed",
+      "description": "Reed bed. 3 × 5 cells. Build with physical supplies and resident labor. Reserved site: 6 × 10 m (3 × 5 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "",
+      "searchText": "reed bed reed bed. 3 × 5 cells. build with physical supplies and resident labor. reserved site: 6 × 10 m (3 × 5 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. water & sanitation",
+      "model": 65,
+      "constructionModels": [
+        166,
+        167
+      ],
+      "kind": "wetland",
+      "size": [
+        3,
+        5
+      ],
+      "materials": {
+        "stone": 8,
+        "earth": 4,
+        "covering": 1,
+        "plumbing": 3,
+        "hardware": 2
+      },
+      "work": 396,
+      "category": "Water & sanitation",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "biodigester": {
+      "name": "Biodigester",
+      "description": "Biodigester. 4 × 4 cells. Build with physical supplies and resident labor. Reserved site: 8 × 8 m (4 × 4 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "",
+      "searchText": "biodigester biodigester. 4 × 4 cells. build with physical supplies and resident labor. reserved site: 8 × 8 m (4 × 4 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. water & sanitation",
+      "model": 4,
+      "constructionModels": [
+        76,
+        77
+      ],
+      "kind": "biodigester",
+      "size": [
+        4,
+        4
+      ],
+      "materials": {
+        "stone": 4,
+        "walls": 6,
+        "plumbing": 5,
+        "hardware": 3,
+        "tiles": 2
+      },
+      "work": 440,
+      "category": "Water & sanitation",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "warehouse": {
+      "name": "Storage house",
+      "description": "Storage house. 5 × 4 cells. Build with physical supplies and resident labor. Nearby construction can stage bundled deliveries here to reduce hauling trips. Reserved site: 10 × 8 m (5 × 4 cells). 8 × 6 m structure. Community storehouse with four shelving units, a receiving space and a central aisle. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Storage: adds 600 supply spaces in story mode. Sandbox storage stays unlimited.",
+      "searchText": "storage house storage house. 5 × 4 cells. build with physical supplies and resident labor. nearby construction can stage bundled deliveries here to reduce hauling trips. reserved site: 10 × 8 m (5 × 4 cells). 8 × 6 m structure. community storehouse with four shelving units, a receiving space and a central aisle. access uses reachable neighbouring cells; it is not extra productive land. storage & production",
+      "model": 60,
+      "constructionModels": [
+        160,
+        161
+      ],
+      "kind": "warehouse",
+      "size": [
+        5,
+        4
+      ],
+      "materials": {
+        "stone": 480,
+        "earth": 160,
+        "bamboo": 12,
+        "hardware": 5,
+        "tiles": 320,
+        "frames": 2,
+        "walls": 333,
+        "wood": 160
+      },
+      "work": 64858.66666666667,
+      "construction": {
+        "area": 80,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 120
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 180.83520000000001
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 105.60000000000001
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 80
+          }
+        ]
+      },
+      "category": "Storage & production",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "solar_farm": {
+      "name": "Solar farm",
+      "description": "Solar farm. 4 × 4 cells. Build with physical supplies and resident labor. Reserved site: 8 × 8 m (4 × 4 cells). 5.2 × 5.4 m physical footprint. Six 1.1 × 1.8 m panels: 11.88 m² panel surface, with row and service access. Rated output is separate. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "",
+      "searchText": "solar farm solar farm. 4 × 4 cells. build with physical supplies and resident labor. reserved site: 8 × 8 m (4 × 4 cells). 5.2 × 5.4 m physical footprint. six 1.1 × 1.8 m panels: 11.88 m² panel surface, with row and service access. rated output is separate. access uses reachable neighbouring cells; it is not extra productive land. power",
+      "model": 51,
+      "constructionModels": [
+        152,
+        153
+      ],
+      "kind": "solar_farm",
+      "size": [
+        4,
+        4
+      ],
+      "materials": {
+        "stone": 6,
+        "hardware": 3,
+        "panels": 6,
+        "batteries": 1,
+        "electrical": 2
+      },
+      "work": 308,
+      "category": "Power",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "streetlight": {
+      "name": "Street light",
+      "description": "Street light. 1 × 1 cells. Build with physical supplies and resident labor. Reserved site: 2 × 2 m (1 × 1 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "",
+      "searchText": "street light street light. 1 × 1 cells. build with physical supplies and resident labor. reserved site: 2 × 2 m (1 × 1 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. power",
+      "model": 53,
+      "constructionModels": [
+        156,
+        157
+      ],
+      "kind": "streetlight",
+      "size": [
+        1,
+        1
+      ],
+      "materials": {
+        "stone": 1,
+        "wood": 2,
+        "electrical": 1,
+        "hardware": 1
+      },
+      "work": 110,
+      "category": "Power",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "kitchen": {
+      "name": "Community kitchen",
+      "description": "Community kitchen. 6 × 5 cells. Build with physical supplies and resident labor. Reserved site: 12 × 10 m (6 × 5 cells). 10 × 8 m structure. Community kitchen with two cooking positions, washing and pantry space, and dining for eight. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Available work: Cook a meal batch · Prepare dried provisions · Install kitchen cold storage · Cook leafy greens · Cook bush beans · Cook sweet corn.",
+      "searchText": "community kitchen community kitchen. 6 × 5 cells. build with physical supplies and resident labor. reserved site: 12 × 10 m (6 × 5 cells). 10 × 8 m structure. community kitchen with two cooking positions, washing and pantry space, and dining for eight. access uses reachable neighbouring cells; it is not extra productive land. cook a meal batch prepared meals organic residues prepare dried provisions prepared meals organic residues install kitchen cold storage cook leafy greens prepared meals cook bush beans prepared meals cook sweet corn prepared meals food & farming",
+      "model": 42,
+      "constructionModels": [
+        140,
+        141
+      ],
+      "kind": "kitchen",
+      "size": [
+        6,
+        5
+      ],
+      "materials": {
+        "earth": 240,
+        "stone": 720,
+        "frames": 4,
+        "walls": 407,
+        "tiles": 480,
+        "plumbing": 2,
+        "hardware": 2,
+        "wood": 240
+      },
+      "work": 90589.33333333333,
+      "construction": {
+        "area": 120,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 180
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 221.02080000000004
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 158.4
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 120
+          }
+        ]
+      },
+      "category": "Food & farming",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "grove": {
+      "name": "Banana grove",
+      "description": "Banana grove. 4 × 4 cells. Build with physical supplies and resident labor. Reserved site: 8 × 8 m (4 × 4 cells). 8 × 8 m plot. Four banana clumps on 3 m centres, with harvesting access. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Available work: Harvest bananas.",
+      "searchText": "banana grove banana grove. 4 × 4 cells. build with physical supplies and resident labor. reserved site: 8 × 8 m (4 × 4 cells). 8 × 8 m plot. four banana clumps on 3 m centres, with harvesting access. access uses reachable neighbouring cells; it is not extra productive land. harvest bananas ingredients organic residues food & farming",
+      "model": 21,
+      "constructionModels": [
+        100,
+        101
+      ],
+      "kind": "grove",
+      "size": [
+        4,
+        4
+      ],
+      "materials": {
+        "earth": 6,
+        "wood": 2,
+        "tree_starts": 2
+      },
+      "work": 220,
+      "category": "Food & farming",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "garden": {
+      "name": "Vegetable garden",
+      "description": "Vegetable garden. 4 × 6 cells. Build with physical supplies and resident labor. Reserved site: 8 × 12 m (4 × 6 cells). 4.28 × 9.36 m physical footprint. Four 1.2 × 4 m beds; 19.2 m² planted. Central and end aisles remain clear. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Available work: Grow baby salad greens · Plant and harvest vegetables.",
+      "searchText": "vegetable garden vegetable garden. 4 × 6 cells. build with physical supplies and resident labor. reserved site: 8 × 12 m (4 × 6 cells). 4.28 × 9.36 m physical footprint. four 1.2 × 4 m beds; 19.2 m² planted. central and end aisles remain clear. access uses reachable neighbouring cells; it is not extra productive land. grow baby salad greens ingredients organic residues plant and harvest vegetables ingredients organic residues food & farming",
+      "model": 16,
+      "constructionModels": [
+        92,
+        93
+      ],
+      "kind": "garden",
+      "size": [
+        4,
+        6
+      ],
+      "materials": {
+        "earth": 4,
+        "wood": 4,
+        "seedlings": 2
+      },
+      "work": 220,
+      "category": "Food & farming",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "greenhouse": {
+      "name": "Greenhouse",
+      "description": "Greenhouse. 4 × 6 cells. Build with physical supplies and resident labor. Reserved site: 8 × 12 m (4 × 6 cells). 6 × 10 m physical footprint. Two 1.2 × 8 m beds; 19.2 m² planted, a 1 m central aisle and 1 m end access. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Available work: Grow greenhouse vegetables.",
+      "searchText": "greenhouse greenhouse. 4 × 6 cells. build with physical supplies and resident labor. reserved site: 8 × 12 m (4 × 6 cells). 6 × 10 m physical footprint. two 1.2 × 8 m beds; 19.2 m² planted, a 1 m central aisle and 1 m end access. access uses reachable neighbouring cells; it is not extra productive land. grow greenhouse vegetables ingredients organic residues food & farming",
+      "model": 19,
+      "constructionModels": [
+        96,
+        97
+      ],
+      "kind": "greenhouse",
+      "size": [
+        4,
+        6
+      ],
+      "materials": {
+        "stone": 4,
+        "earth": 2,
+        "frames": 4,
+        "hardware": 2,
+        "covering": 1,
+        "plumbing": 2,
+        "seedlings": 2
+      },
+      "work": 374,
+      "category": "Food & farming",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "well": {
+      "name": "Cistern",
+      "description": "A cistern storing 1,000 liters of clean and 1,000 liters of untreated water. Collects rainwater and filters supplied untreated water at 25 per hour while powered. Reserved site: 6 × 6 m (3 × 3 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "",
+      "searchText": "cistern a cistern storing 1,000 liters of clean and 1,000 liters of untreated water. collects rainwater and filters supplied untreated water at 25 per hour while powered. reserved site: 6 × 6 m (3 × 3 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. water & sanitation",
+      "model": 64,
+      "constructionModels": [
+        164,
+        165
+      ],
+      "kind": "well",
+      "size": [
+        3,
+        3
+      ],
+      "materials": {
+        "stone": 6,
+        "earth": 2,
+        "plumbing": 4,
+        "hardware": 2,
+        "pumps": 1,
+        "tank": 4
+      },
+      "work": 352,
+      "category": "Water & sanitation",
+      "campEssential": true,
+      "repeatable": true
+    },
+    "compost": {
+      "name": "Compost station",
+      "description": "Compost station. 3 × 2 cells. Build with physical supplies and resident labor. Reserved site: 6 × 4 m (3 × 2 cells). 3.9 × 1.1 m physical footprint. Three 1 m³ bays plus front working access. Actual output depends on feedstock. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Available work: Turn compost.",
+      "searchText": "compost station compost station. 3 × 2 cells. build with physical supplies and resident labor. reserved site: 6 × 4 m (3 × 2 cells). 3.9 × 1.1 m physical footprint. three 1 m³ bays plus front working access. actual output depends on feedstock. access uses reachable neighbouring cells; it is not extra productive land. turn compost mature compost food & farming",
+      "model": 10,
+      "constructionModels": [
+        84,
+        85
+      ],
+      "kind": "compost",
+      "size": [
+        3,
+        2
+      ],
+      "materials": {
+        "earth": 2,
+        "wood": 4,
+        "hardware": 1
+      },
+      "work": 154,
+      "category": "Food & farming",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "square": {
+      "name": "Community square",
+      "description": "Community square. 5 × 5 cells. Build with physical supplies and resident labor. Reserved site: 10 × 10 m (5 × 5 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Recreation: residents visit during breaks to recover fun.",
+      "searchText": "community square community square. 5 × 5 cells. build with physical supplies and resident labor. reserved site: 10 × 10 m (5 × 5 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. community & leisure",
+      "model": 52,
+      "constructionModels": [
+        154,
+        155
+      ],
+      "kind": "square",
+      "size": [
+        5,
+        5
+      ],
+      "materials": {
+        "stone": 10,
+        "earth": 4,
+        "frames": 4,
+        "wood": 4,
+        "hardware": 2
+      },
+      "work": 528,
+      "category": "Community & leisure",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "workshop": {
+      "name": "Workshop",
+      "description": "Workshop. 5 × 4 cells. Build with physical supplies and resident labor. Reserved site: 10 × 8 m (5 × 4 cells). 8 × 6 m structure. Two-person repair workshop with separate benches, an assembly table and stock racks. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Available work: Prepare frames · Make earth walls · Fire roof tiles · Craft wheelbarrow.",
+      "searchText": "workshop workshop. 5 × 4 cells. build with physical supplies and resident labor. reserved site: 10 × 8 m (5 × 4 cells). 8 × 6 m structure. two-person repair workshop with separate benches, an assembly table and stock racks. access uses reachable neighbouring cells; it is not extra productive land. prepare frames frames make earth walls wall material fire roof tiles roof tiles craft wheelbarrow wheelbarrow storage & production",
+      "model": 67,
+      "constructionModels": [
+        168,
+        169
+      ],
+      "kind": "workshop",
+      "size": [
+        5,
+        4
+      ],
+      "materials": {
+        "stone": 6,
+        "earth": 4,
+        "frames": 6,
+        "walls": 4,
+        "tiles": 4,
+        "wood": 6,
+        "hardware": 3
+      },
+      "work": 726,
+      "category": "Storage & production",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "coop": {
+      "name": "Chicken coop",
+      "description": "Chicken coop. 4 × 4 cells. Build with physical supplies and resident labor. Reserved site: 8 × 8 m (4 × 4 cells). 2 × 2 m structure. Six-hen coop with perches, nesting boxes, feed, water and an enclosed outdoor run. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Available work: Feed hens and collect eggs.",
+      "searchText": "chicken coop chicken coop. 4 × 4 cells. build with physical supplies and resident labor. reserved site: 8 × 8 m (4 × 4 cells). 2 × 2 m structure. six-hen coop with perches, nesting boxes, feed, water and an enclosed outdoor run. access uses reachable neighbouring cells; it is not extra productive land. feed hens and collect eggs eggs animals",
+      "model": 11,
+      "constructionModels": [
+        86,
+        87
+      ],
+      "kind": "coop",
+      "size": [
+        4,
+        4
+      ],
+      "materials": {
+        "stone": 2,
+        "frames": 2,
+        "tiles": 2,
+        "hardware": 1,
+        "hens": 3
+      },
+      "work": 220,
+      "category": "Animals",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "home-veranda": {
+      "name": "Veranda house",
+      "description": "Veranda house. 5 × 6 cells. Build with physical supplies and resident labor. Reserved site: 10 × 12 m (5 × 6 cells). 8 × 8 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Housing: 2 resting places for residents.",
+      "searchText": "veranda house veranda house. 5 × 6 cells. build with physical supplies and resident labor. reserved site: 10 × 12 m (5 × 6 cells). 8 × 8 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
+      "model": 39,
+      "constructionModels": [
+        134,
+        135
+      ],
+      "kind": "home",
+      "size": [
+        5,
+        6
+      ],
+      "materials": {
+        "earth": 240,
+        "stone": 720,
+        "frames": 10,
+        "walls": 407,
+        "tiles": 480,
+        "hardware": 5,
+        "wood": 240
+      },
+      "work": 90589.33333333333,
+      "construction": {
+        "area": 120,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 180
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 221.02080000000004
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 158.4
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 120
+          }
+        ]
+      },
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "home-gable": {
+      "name": "Gabled house",
+      "description": "Gabled house. 5 × 5 cells. Build with physical supplies and resident labor. Reserved site: 10 × 10 m (5 × 5 cells). 8 × 8 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Housing: 2 resting places for residents.",
+      "searchText": "gabled house gabled house. 5 × 5 cells. build with physical supplies and resident labor. reserved site: 10 × 10 m (5 × 5 cells). 8 × 8 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
+      "model": 29,
+      "constructionModels": [
+        114,
+        115
+      ],
+      "kind": "home",
+      "size": [
+        5,
+        5
+      ],
+      "materials": {
+        "earth": 200,
+        "stone": 600,
+        "frames": 10,
+        "walls": 370,
+        "tiles": 400,
+        "hardware": 5,
+        "wood": 200
+      },
+      "work": 77723.99999999999,
+      "construction": {
+        "area": 100,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 150
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 200.928
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 132
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 100
+          }
+        ]
+      },
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "home-courtyard": {
+      "name": "Terrace house",
+      "description": "Terrace house. 6 × 5 cells. Build with physical supplies and resident labor. Reserved site: 12 × 10 m (6 × 5 cells). 8 × 8 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Housing: 2 resting places for residents.",
+      "searchText": "terrace house terrace house. 6 × 5 cells. build with physical supplies and resident labor. reserved site: 12 × 10 m (6 × 5 cells). 8 × 8 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
+      "model": 26,
+      "constructionModels": [
+        108,
+        109
+      ],
+      "kind": "home",
+      "size": [
+        6,
+        5
+      ],
+      "materials": {
+        "earth": 240,
+        "stone": 720,
+        "frames": 12,
+        "walls": 407,
+        "tiles": 480,
+        "hardware": 6,
+        "wood": 240
+      },
+      "work": 90589.33333333333,
+      "construction": {
+        "area": 120,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 180
+          },
+          {
+            "name": "Wall assembly",
+            "hours": 221.02080000000004
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 158.4
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 120
+          }
+        ]
+      },
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "adobe-gable": {
+      "name": "Adobe gabled house",
+      "description": "Adobe gabled house. 5 × 5 cells. Build with physical supplies and resident labor. Reserved site: 10 × 10 m (5 × 5 cells). 8 × 8 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Housing: 2 resting places for residents.",
+      "searchText": "adobe gabled house adobe gabled house. 5 × 5 cells. build with physical supplies and resident labor. reserved site: 10 × 10 m (5 × 5 cells). 8 × 8 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
+      "model": 0,
+      "constructionModels": [
+        68,
+        69
+      ],
+      "kind": "home",
+      "size": [
+        5,
+        5
+      ],
+      "materials": {
+        "earth": 1032,
+        "stone": 600,
+        "bamboo": 20,
+        "hardware": 10,
+        "tiles": 400,
+        "wood": 200
+      },
+      "work": 84213.33333333333,
+      "construction": {
+        "area": 100,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 150
+          },
+          {
+            "name": "Earth wall preparation and assembly",
+            "hours": 249.60000000000002
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 132
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 100
+          }
+        ]
+      },
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "adobe-veranda": {
+      "name": "Adobe veranda house",
+      "description": "Adobe veranda house. 5 × 6 cells. Build with physical supplies and resident labor. Reserved site: 10 × 12 m (5 × 6 cells). 8 × 8 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Housing: 2 resting places for residents.",
+      "searchText": "adobe veranda house adobe veranda house. 5 × 6 cells. build with physical supplies and resident labor. reserved site: 10 × 12 m (5 × 6 cells). 8 × 8 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
+      "model": 1,
+      "constructionModels": [
+        70,
+        71
+      ],
+      "kind": "home",
+      "size": [
+        5,
+        6
+      ],
+      "materials": {
+        "earth": 1156,
+        "stone": 720,
+        "bamboo": 20,
+        "hardware": 10,
+        "tiles": 480,
+        "wood": 240
+      },
+      "work": 97728.00000000001,
+      "construction": {
+        "area": 120,
+        "phases": [
+          {
+            "name": "Foundation and level floor",
+            "hours": 180
+          },
+          {
+            "name": "Earth wall preparation and assembly",
+            "hours": 274.56000000000006
+          },
+          {
+            "name": "Roof structure and weather covering",
+            "hours": 158.4
+          },
+          {
+            "name": "Openings and basic fit-out",
+            "hours": 120
+          }
+        ]
+      },
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "supply-0": {
+      "name": "Managed timber",
+      "description": "Managed timber. 6 × 6 cells. Build with physical supplies and resident labor. Reserved site: 12 × 12 m (6 × 6 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Available work: Grow and harvest timber.",
+      "searchText": "managed timber managed timber. 6 × 6 cells. build with physical supplies and resident labor. reserved site: 12 × 12 m (6 × 6 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. grow and harvest timber raw wood storage & production",
+      "model": 54,
+      "kind": "supply-0",
+      "size": [
+        6,
+        6
+      ],
+      "materials": {
+        "tree_starts": 4
+      },
+      "work": 90,
+      "category": "Storage & production",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "supply-1": {
+      "name": "Bamboo stand",
+      "description": "Bamboo stand. 3 × 3 cells. Build with physical supplies and resident labor. Reserved site: 6 × 6 m (3 × 3 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Available work: Cut mature bamboo.",
+      "searchText": "bamboo stand bamboo stand. 3 × 3 cells. build with physical supplies and resident labor. reserved site: 6 × 6 m (3 × 3 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. cut mature bamboo bamboo poles storage & production",
+      "model": 55,
+      "kind": "supply-1",
+      "size": [
+        3,
+        3
+      ],
+      "materials": {
+        "bamboo_starts": 4
+      },
+      "work": 90,
+      "category": "Storage & production",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "supply-5": {
+      "name": "Timber workbench",
+      "description": "A hand-saw workbench. Residents turn felled raw wood into timber, then saw timber into planks. They also weave baskets, fit garden-tool handles, make crates, assemble wheelbarrows with purchased parts, and repair shared equipment. No electricity required. Reserved site: 2 × 2 m (1 × 1 cells). 2 × 0.85 m physical footprint. A 2 × 0.85 m bench; the rest of the site is working space. Keep one neighbouring side reachable. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Available work: Saw raw wood into timber · Saw timber into planks · Craft garden tools · Craft harvest basket · Craft produce crate · Repair bucket · Repair garden tools · Repair carpentry tools · Repair harvest basket · Repair cleaning kit · Prepare corn feed supplement.",
+      "searchText": "timber workbench a hand-saw workbench. residents turn felled raw wood into timber, then saw timber into planks. they also weave baskets, fit garden-tool handles, make crates, assemble wheelbarrows with purchased parts, and repair shared equipment. no electricity required. reserved site: 2 × 2 m (1 × 1 cells). 2 × 0.85 m physical footprint. a 2 × 0.85 m bench; the rest of the site is working space. keep one neighbouring side reachable. access uses reachable neighbouring cells; it is not extra productive land. saw raw wood into timber timber pieces saw timber into planks planks craft garden tools garden tools craft harvest basket harvest basket craft produce crate produce crate repair bucket repair garden tools repair carpentry tools repair harvest basket repair cleaning kit prepare corn feed supplement dry fodder organic residues storage & production",
+      "model": 56,
+      "kind": "supply-5",
+      "size": [
+        1,
+        1
+      ],
+      "materials": {
+        "wood": 4
+      },
+      "work": 90,
+      "category": "Storage & production",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "supply-6": {
+      "name": "Battery station",
+      "description": "Battery station. 1 × 1 cells. Build with physical supplies and resident labor. Reserved site: 2 × 2 m (1 × 1 cells). 0.78 × 0.57 m physical footprint. A compact battery unit with a whole-cell service reservation. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "",
+      "searchText": "battery station battery station. 1 × 1 cells. build with physical supplies and resident labor. reserved site: 2 × 2 m (1 × 1 cells). 0.78 × 0.57 m physical footprint. a compact battery unit with a whole-cell service reservation. access uses reachable neighbouring cells; it is not extra productive land. power",
+      "model": 57,
+      "kind": "supply-6",
+      "size": [
+        1,
+        1
+      ],
+      "materials": {
+        "batteries": 1,
+        "electrical": 1
+      },
+      "work": 90,
+      "category": "Power",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "rain-barrel": {
+      "name": "Rainwater barrel",
+      "description": "Rainwater barrel. 1 × 1 cells. Build with physical supplies and resident labor. Reserved site: 2 × 2 m (1 × 1 cells). 0.96 × 0.86 m physical footprint. The reserved site includes room to reach the tap; the barrel itself is about 0.74 m across. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "",
+      "searchText": "rainwater barrel rainwater barrel. 1 × 1 cells. build with physical supplies and resident labor. reserved site: 2 × 2 m (1 × 1 cells). 0.96 × 0.86 m physical footprint. the reserved site includes room to reach the tap; the barrel itself is about 0.74 m across. access uses reachable neighbouring cells; it is not extra productive land. water & sanitation",
+      "model": 46,
+      "kind": "rain-barrel",
+      "size": [
+        1,
+        1
+      ],
+      "materials": {
+        "tank": 1,
+        "plumbing": 1
+      },
+      "work": 90,
+      "category": "Water & sanitation",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "tool-rack": {
+      "name": "Garden tool rack",
+      "description": "Garden tool rack. 1 × 1 cells. Build with physical supplies and resident labor. Reserved site: 2 × 2 m (1 × 1 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "",
+      "searchText": "garden tool rack garden tool rack. 1 × 1 cells. build with physical supplies and resident labor. reserved site: 2 × 2 m (1 × 1 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. storage & production",
+      "model": 58,
+      "kind": "tool-rack",
+      "size": [
+        1,
+        1
+      ],
+      "materials": {
+        "wood": 4,
+        "hardware": 1
+      },
+      "work": 110,
+      "category": "Storage & production",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "seedling-bench": {
+      "name": "Seedling bench",
+      "description": "Seedling bench. 1 × 1 cells. Build with physical supplies and resident labor. Reserved site: 2 × 2 m (1 × 1 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "",
+      "searchText": "seedling bench seedling bench. 1 × 1 cells. build with physical supplies and resident labor. reserved site: 2 × 2 m (1 × 1 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. food & farming",
+      "model": 49,
+      "kind": "seedling-bench",
+      "size": [
+        1,
+        1
+      ],
+      "materials": {
+        "wood": 4,
+        "hardware": 1
+      },
+      "work": 110,
+      "category": "Food & farming",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "woodpile": {
+      "name": "Seasoned firewood",
+      "description": "Seasoned firewood. 1 × 1 cells. Build with physical supplies and resident labor. Reserved site: 2 × 2 m (1 × 1 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "",
+      "searchText": "seasoned firewood seasoned firewood. 1 × 1 cells. build with physical supplies and resident labor. reserved site: 2 × 2 m (1 × 1 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. storage & production",
+      "model": 66,
+      "kind": "woodpile",
+      "size": [
+        1,
+        1
+      ],
+      "materials": {
+        "wood": 4,
+        "hardware": 1
+      },
+      "work": 110,
+      "category": "Storage & production",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "picnic-table": {
+      "name": "Picnic table",
+      "description": "Picnic table. 2 × 2 cells. Build with physical supplies and resident labor. Reserved site: 4 × 4 m (2 × 2 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Recreation: residents visit during breaks to recover fun.",
+      "searchText": "picnic table picnic table. 2 × 2 cells. build with physical supplies and resident labor. reserved site: 4 × 4 m (2 × 2 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. community & leisure",
+      "model": 45,
+      "kind": "picnic-table",
+      "size": [
+        2,
+        2
+      ],
+      "materials": {
+        "wood": 4,
+        "hardware": 1
+      },
+      "work": 110,
+      "category": "Community & leisure",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "garden-bench": {
+      "name": "Garden bench",
+      "description": "Garden bench. 1 × 1 cells. Build with physical supplies and resident labor. Reserved site: 2 × 2 m (1 × 1 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Recreation: residents visit during breaks to recover fun.",
+      "searchText": "garden bench garden bench. 1 × 1 cells. build with physical supplies and resident labor. reserved site: 2 × 2 m (1 × 1 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. community & leisure",
+      "model": 17,
+      "kind": "garden-bench",
+      "size": [
+        1,
+        1
+      ],
+      "materials": {
+        "wood": 4,
+        "hardware": 1
+      },
+      "work": 110,
+      "category": "Community & leisure",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "clothesline": {
+      "name": "Clothesline",
+      "description": "Clothesline. 2 × 1 cells. Build with physical supplies and resident labor. Reserved site: 4 × 2 m (2 × 1 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "",
+      "searchText": "clothesline clothesline. 2 × 1 cells. build with physical supplies and resident labor. reserved site: 4 × 2 m (2 × 1 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. water & sanitation",
+      "model": 8,
+      "kind": "clothesline",
+      "size": [
+        2,
+        1
+      ],
+      "materials": {
+        "wood": 4,
+        "hardware": 1
+      },
+      "work": 110,
+      "category": "Water & sanitation",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "hammock": {
+      "name": "Hammock",
+      "description": "Hammock. 2 × 1 cells. Build with physical supplies and resident labor. Reserved site: 4 × 2 m (2 × 1 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Recreation: residents visit during breaks to recover fun.",
+      "searchText": "hammock hammock. 2 × 1 cells. build with physical supplies and resident labor. reserved site: 4 × 2 m (2 × 1 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. community & leisure",
+      "model": 22,
+      "kind": "hammock",
+      "size": [
+        2,
+        1
+      ],
+      "materials": {
+        "wood": 4,
+        "hardware": 1
+      },
+      "work": 110,
+      "category": "Community & leisure",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "wayfinding-sign": {
+      "name": "Wayfinding sign",
+      "description": "Wayfinding sign. 1 × 1 cells. Build with physical supplies and resident labor. Reserved site: 2 × 2 m (1 × 1 cells). 1.2 × 0.15 m physical footprint. A small sign, with a whole-cell placement reservation. Keep a walking route beside it. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "",
+      "searchText": "wayfinding sign wayfinding sign. 1 × 1 cells. build with physical supplies and resident labor. reserved site: 2 × 2 m (1 × 1 cells). 1.2 × 0.15 m physical footprint. a small sign, with a whole-cell placement reservation. keep a walking route beside it. access uses reachable neighbouring cells; it is not extra productive land. paths & boundaries",
+      "model": 63,
+      "kind": "wayfinding-sign",
+      "size": [
+        1,
+        1
+      ],
+      "materials": {
+        "wood": 4,
+        "hardware": 1
+      },
+      "work": 110,
+      "category": "Paths & boundaries",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "wash-station": {
+      "name": "Outdoor wash station",
+      "description": "Outdoor wash station. 1 × 1 cells. Build with physical supplies and resident labor. Reserved site: 2 × 2 m (1 × 1 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "",
+      "searchText": "outdoor wash station outdoor wash station. 1 × 1 cells. build with physical supplies and resident labor. reserved site: 2 × 2 m (1 × 1 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. water & sanitation",
+      "model": 61,
+      "kind": "wash-station",
+      "size": [
+        1,
+        1
+      ],
+      "materials": {
+        "wood": 4,
+        "plumbing": 1
+      },
+      "work": 110,
+      "category": "Water & sanitation",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "farm-gate": {
+      "name": "Farm gate",
+      "description": "Farm gate. 1 × 1 cells. Build with physical supplies and resident labor. Reserved site: 2 × 2 m (1 × 1 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "",
+      "searchText": "farm gate farm gate. 1 × 1 cells. build with physical supplies and resident labor. reserved site: 2 × 2 m (1 × 1 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. paths & boundaries",
+      "model": 14,
+      "kind": "farm-gate",
+      "size": [
+        1,
+        1
+      ],
+      "materials": {
+        "wood": 4,
+        "hardware": 1
+      },
+      "work": 110,
+      "category": "Paths & boundaries",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "fire-circle": {
+      "name": "Fire circle",
+      "description": "Fire circle. 1 × 1 cells. Build with physical supplies and resident labor. Reserved site: 2 × 2 m (1 × 1 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Recreation: residents visit during breaks to recover fun.",
+      "searchText": "fire circle fire circle. 1 × 1 cells. build with physical supplies and resident labor. reserved site: 2 × 2 m (1 × 1 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. community & leisure",
+      "model": 15,
+      "kind": "fire-circle",
+      "size": [
+        1,
+        1
+      ],
+      "materials": {
+        "wood": 4,
+        "hardware": 1
+      },
+      "work": 110,
+      "category": "Community & leisure",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "canvas-tent-teal": {
+      "name": "Sage canvas tent",
+      "description": "Sage canvas tent. 2 × 2 cells. Build with physical supplies and resident labor. Reserved site: 4 × 4 m (2 × 2 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "",
+      "searchText": "sage canvas tent sage canvas tent. 2 × 2 cells. build with physical supplies and resident labor. reserved site: 4 × 4 m (2 × 2 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. homes & shelter",
+      "model": 7,
+      "kind": "canvas-tent-teal",
+      "size": [
+        2,
+        2
+      ],
+      "materials": {
+        "tarp": 1,
+        "wood": 2
+      },
+      "work": 90,
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "canvas-tent-ochre": {
+      "name": "Ochre canvas tent",
+      "description": "Ochre canvas tent. 2 × 2 cells. Build with physical supplies and resident labor. Reserved site: 4 × 4 m (2 × 2 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "",
+      "searchText": "ochre canvas tent ochre canvas tent. 2 × 2 cells. build with physical supplies and resident labor. reserved site: 4 × 4 m (2 × 2 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. homes & shelter",
+      "model": 6,
+      "constructionModels": [
+        80,
+        81
+      ],
+      "kind": "canvas-tent-ochre",
+      "size": [
+        2,
+        2
+      ],
+      "materials": {
+        "tarp": 1,
+        "wood": 2
+      },
+      "work": 90,
+      "category": "Homes & shelter",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "reading-room": {
+      "name": "Village reading room",
+      "description": "A quiet book room with shaded reading benches. Residents visit to unwind and share stories. Reserved site: 10 × 8 m (5 × 4 cells). 8 × 6 m structure. Quiet reading room with shelves, two shared tables and eight seats. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Recreation: reading and sharing stories. Helps residents recover fun during breaks.",
+      "searchText": "village reading room a quiet book room with shaded reading benches. residents visit to unwind and share stories. reserved site: 10 × 8 m (5 × 4 cells). 8 × 6 m structure. quiet reading room with shelves, two shared tables and eight seats. access uses reachable neighbouring cells; it is not extra productive land. community & leisure",
+      "model": 47,
+      "constructionModels": [
+        146,
+        147
+      ],
+      "kind": "reading-room",
+      "size": [
+        5,
+        4
+      ],
+      "materials": {
+        "wood": 12,
+        "walls": 16,
+        "tiles": 18,
+        "hardware": 3,
+        "tools": 2
+      },
+      "work": 1122,
+      "category": "Community & leisure",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "outdoor-classroom": {
+      "name": "Outdoor classroom",
+      "description": "A roofed learning space with a chalkboard and work tables. Friends exchange practical knowledge during free time. Reserved site: 10 × 10 m (5 × 5 cells). 8 × 8 m structure. Covered classroom with twelve seats, tables and a clear teaching area. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Recreation: sharing practical knowledge. Helps residents recover fun during breaks.",
+      "searchText": "outdoor classroom a roofed learning space with a chalkboard and work tables. friends exchange practical knowledge during free time. reserved site: 10 × 10 m (5 × 5 cells). 8 × 8 m structure. covered classroom with twelve seats, tables and a clear teaching area. access uses reachable neighbouring cells; it is not extra productive land. community & leisure",
+      "model": 44,
+      "constructionModels": [
+        144,
+        145
+      ],
+      "kind": "outdoor-classroom",
+      "size": [
+        5,
+        5
+      ],
+      "materials": {
+        "wood": 20,
+        "frames": 6,
+        "tiles": 24,
+        "hardware": 4
+      },
+      "work": 1188,
+      "category": "Community & leisure",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "community-hall": {
+      "name": "Community hall",
+      "description": "An open-front hall for conversation and village gatherings, with a long table and noticeboard. Reserved site: 14 × 12 m (7 × 6 cells). 12 × 10 m structure. Open-front community hall with six tables and seating for twenty-four. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Recreation: gathering with neighbors. Helps residents recover fun during breaks.",
+      "searchText": "community hall an open-front hall for conversation and village gatherings, with a long table and noticeboard. reserved site: 14 × 12 m (7 × 6 cells). 12 × 10 m structure. open-front community hall with six tables and seating for twenty-four. access uses reachable neighbouring cells; it is not extra productive land. community & leisure",
+      "model": 9,
+      "constructionModels": [
+        82,
+        83
+      ],
+      "kind": "community-hall",
+      "size": [
+        7,
+        6
+      ],
+      "materials": {
+        "wood": 20,
+        "walls": 24,
+        "frames": 8,
+        "tiles": 30,
+        "hardware": 6
+      },
+      "work": 1936,
+      "category": "Community & leisure",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "exercise-garden": {
+      "name": "Exercise garden",
+      "description": "Timber parallel bars, stepping logs and a stretching deck. A gentle outdoor break between projects. Reserved site: 10 × 10 m (5 × 5 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Recreation: stretching in the exercise garden. Helps residents recover fun during breaks.",
+      "searchText": "exercise garden timber parallel bars, stepping logs and a stretching deck. a gentle outdoor break between projects. reserved site: 10 × 10 m (5 × 5 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. community & leisure",
+      "model": 13,
+      "constructionModels": [
+        90,
+        91
+      ],
+      "kind": "exercise-garden",
+      "size": [
+        5,
+        5
+      ],
+      "materials": {
+        "wood": 12,
+        "hardware": 4,
+        "stone": 6
+      },
+      "work": 484,
+      "category": "Community & leisure",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "volleyball-court": {
+      "name": "Volleyball court",
+      "description": "A sand court with a net and spectator benches. A recreation destination; organized matches are not simulated yet. Reserved site: 22 × 14 m (11 × 7 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "benefit": "Recreation: taking a break at the court. Helps residents recover fun during breaks.",
+      "searchText": "volleyball court a sand court with a net and spectator benches. a recreation destination; organized matches are not simulated yet. reserved site: 22 × 14 m (11 × 7 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. community & leisure",
+      "model": 59,
+      "constructionModels": [
+        158,
+        159
+      ],
+      "kind": "volleyball-court",
+      "size": [
+        11,
+        7
+      ],
+      "materials": {
+        "earth": 24,
+        "wood": 4,
+        "tarp": 2,
+        "hardware": 4
+      },
+      "work": 748,
+      "category": "Community & leisure",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "field": {
+      "name": "Cultivated field",
+      "description": "Cultivate ground in beds with working aisles. Each bed requires resident preparation and planting.",
+      "benefit": "Available work: Grow baby salad greens · Plant and harvest vegetables.",
+      "searchText": "cultivated field cultivate ground in beds with working aisles. each bed requires resident preparation and planting. grow baby salad greens ingredients organic residues plant and harvest vegetables ingredients organic residues food & farming",
+      "model": 16,
+      "constructionModels": [
+        92,
+        93
+      ],
+      "kind": "garden",
+      "size": [
+        2,
+        2
+      ],
+      "materials": {},
+      "work": 1,
+      "category": "Food & farming",
+      "campEssential": false,
+      "repeatable": true
+    },
+    "goat-pasture-empty": {
+      "name": "Empty goat pen",
+      "description": "Build the pen first. Stock it later with two goats from village supplies.",
+      "benefit": "Available work: Feed and milk goats.",
+      "searchText": "goat pen goat pen. 6 × 5 cells. build with physical supplies and resident labor. reserved site: 12 × 10 m (6 × 5 cells). 11 × 9 m physical footprint. two-goat pen with a 9 m² shelter and 90 m² outdoor area. supplied feed or separate grazing is needed. access uses reachable neighbouring cells; it is not extra productive land. feed and milk goats fresh milk animals",
+      "model": 171,
+      "constructionModels": [
+        94,
+        95
+      ],
+      "kind": "goat_pasture",
+      "size": [
+        6,
+        5
+      ],
+      "materials": {
+        "bamboo": 10,
+        "tiles": 3,
+        "hardware": 2,
+        "plumbing": 1
+      },
+      "work": 396,
+      "category": "Animals",
+      "campEssential": false,
+      "repeatable": true
+    }
+  },
+  "gathering": {
+    "fell_tree": {
+      "name": "Fell selected tree",
+      "input": {},
+      "output": {
+        "logs": 12
+      },
+      "kind": "wild-tree",
+      "work": 90
+    },
+    "earth": {
+      "name": "Extract building earth",
+      "input": {},
+      "output": {
+        "earth": 12
+      },
+      "kind": "supply-2",
+      "work": 40,
+      "deposit": 240
+    },
+    "stone": {
+      "name": "Extract stone",
+      "input": {},
+      "output": {
+        "stone": 8
+      },
+      "kind": "supply-3",
+      "work": 50,
+      "deposit": 160
+    },
+    "gather-wild-fruit": {
+      "name": "Gather wild fruit thicket",
+      "kind": "wild-fruit",
+      "input": {},
+      "output": {
+        "food": 4
+      },
+      "work": 55,
+      "renew": 96000,
+      "gathering": true
+    },
+    "gather-fallen-wood": {
+      "name": "Gather fallen branches",
+      "kind": "fallen-wood",
+      "input": {},
+      "output": {
+        "logs": 3
+      },
+      "work": 45,
+      "renew": 0,
+      "gatherLimit": 6,
+      "gathering": true
+    },
+    "gather-wild-bamboo": {
+      "name": "Gather wild bamboo stand",
+      "kind": "wild-bamboo",
+      "input": {},
+      "output": {
+        "bamboo": 3
+      },
+      "work": 90,
+      "renew": 1168000,
+      "gathering": true
+    },
+    "gather-wild-forage": {
+      "name": "Gather wild forage grasses",
+      "kind": "wild-forage",
+      "input": {},
+      "output": {
+        "fodder": 6
+      },
+      "work": 55,
+      "renew": 44800,
+      "gathering": true
+    },
+    "gather-loose-stone": {
+      "name": "Gather loose surface stones",
+      "kind": "loose-stone",
+      "input": {},
+      "output": {
+        "stone": 2
+      },
+      "work": 65,
+      "renew": 0,
+      "gatherLimit": 6,
+      "gathering": true
+    }
+  },
+  "production": {
+    "solar_upgrade": {
+      "name": "Install rooftop solar and battery",
+      "kind": "home",
+      "input": {
+        "panels": 1,
+        "batteries": 1,
+        "electrical": 1
+      },
+      "output": {},
+      "work": 90,
+      "handcraft": false,
+      "preserved": {}
+    },
+    "saw_timber": {
+      "name": "Saw raw wood into timber",
+      "kind": "supply-5",
+      "input": {
+        "logs": 6
+      },
+      "output": {
+        "wood": 4
+      },
+      "work": 240,
+      "handcraft": false,
+      "preserved": {}
+    },
+    "saw_planks": {
+      "name": "Saw timber into planks",
+      "kind": "supply-5",
+      "input": {
+        "wood": 3
+      },
+      "output": {
+        "planks": 6
+      },
+      "work": 160,
+      "handcraft": false,
+      "preserved": {}
+    },
+    "frames": {
+      "name": "Prepare frames",
+      "kind": "workshop",
+      "input": {
+        "planks": 2,
+        "hardware": 1
+      },
+      "output": {
+        "frames": 1
+      },
+      "work": 30,
+      "handcraft": false,
+      "preserved": {}
+    },
+    "walls": {
+      "name": "Make earth walls",
+      "kind": "workshop",
+      "input": {
+        "earth": 2
+      },
+      "output": {
+        "walls": 2
+      },
+      "work": 30,
+      "handcraft": false,
+      "preserved": {}
+    },
+    "tiles": {
+      "name": "Fire roof tiles",
+      "kind": "workshop",
+      "input": {
+        "earth": 2,
+        "wood": 1
+      },
+      "output": {
+        "tiles": 2
+      },
+      "work": 40,
+      "handcraft": false,
+      "preserved": {}
+    },
+    "meals": {
+      "name": "Cook a meal batch",
+      "kind": "kitchen",
+      "input": {
+        "food": 4
+      },
+      "output": {
+        "meals": 4,
+        "scraps": 1
+      },
+      "work": 25,
+      "handcraft": false,
+      "preserved": {},
+      "water": 2
+    },
+    "preserve_meals": {
+      "name": "Prepare dried provisions",
+      "kind": "kitchen",
+      "input": {
+        "food": 6
+      },
+      "output": {
+        "meals": 4,
+        "scraps": 2
+      },
+      "work": 75,
+      "handcraft": false,
+      "preserved": {
+        "meals": 10
+      },
+      "biogas": 0.6,
+      "water": 2
+    },
+    "cold_storage": {
+      "name": "Install kitchen cold storage",
+      "kind": "kitchen",
+      "input": {
+        "cooling": 1,
+        "electrical": 1,
+        "hardware": 1
+      },
+      "output": {},
+      "work": 120,
+      "handcraft": false,
+      "preserved": {}
+    },
+    "compost": {
+      "name": "Turn compost",
+      "kind": "compost",
+      "input": {
+        "scraps": 4
+      },
+      "output": {
+        "compost": 2
+      },
+      "work": 40,
+      "handcraft": false,
+      "preserved": {},
+      "biology": {
+        "days": 60,
+        "window": null,
+        "seasonal": false,
+        "on_site_water": 0,
+        "planting_fraction": 0.5,
+        "care": null
+      }
+    },
+    "wood": {
+      "name": "Grow and harvest timber",
+      "kind": "supply-0",
+      "input": {},
+      "output": {
+        "logs": 48
+      },
+      "work": 720,
+      "handcraft": false,
+      "preserved": {},
+      "biology": {
+        "days": 2190,
+        "window": null,
+        "seasonal": true,
+        "on_site_water": 0,
+        "planting_fraction": 0.1,
+        "care": [
+          36,
+          36
+        ]
+      }
+    },
+    "bamboo": {
+      "name": "Cut mature bamboo",
+      "kind": "supply-1",
+      "input": {},
+      "output": {
+        "bamboo": 8
+      },
+      "work": 40,
+      "handcraft": false,
+      "preserved": {},
+      "biology": {
+        "days": 365,
+        "window": null,
+        "seasonal": true,
+        "on_site_water": 0,
+        "planting_fraction": 0.5,
+        "care": [
+          16,
+          24
+        ]
+      }
+    },
+    "fruit": {
+      "name": "Harvest orchard fruit",
+      "kind": "orchard",
+      "input": {},
+      "output": {
+        "food": 12,
+        "scraps": 2
+      },
+      "work": 35,
+      "handcraft": false,
+      "preserved": {},
+      "biology": {
+        "days": 120,
+        "window": 14,
+        "seasonal": true,
+        "on_site_water": 4,
+        "planting_fraction": 0.5,
+        "care": [
+          64,
+          32
+        ]
+      }
+    },
+    "bananas": {
+      "name": "Harvest bananas",
+      "kind": "grove",
+      "input": {},
+      "output": {
+        "food": 12,
+        "scraps": 2
+      },
+      "work": 35,
+      "handcraft": false,
+      "preserved": {},
+      "biology": {
+        "days": 270,
+        "window": 14,
+        "seasonal": true,
+        "on_site_water": 4,
+        "planting_fraction": 0.5,
+        "care": [
+          32,
+          48
+        ]
+      }
+    },
+    "eggs": {
+      "name": "Collect eggs",
+      "kind": "coop",
+      "input": {},
+      "output": {
+        "eggs": 6
+      },
+      "work": 25,
+      "handcraft": false,
+      "preserved": {}
+    },
+    "milk": {
+      "name": "Collect milk",
+      "kind": "goat_pasture",
+      "input": {},
+      "output": {
+        "milk": 4
+      },
+      "work": 35,
+      "handcraft": false,
+      "preserved": {}
+    },
+    "honey": {
+      "name": "Tend hives and collect honey",
+      "kind": "apiary",
+      "input": {},
+      "output": {
+        "honey": 3
+      },
+      "work": 35,
+      "handcraft": false,
+      "preserved": {},
+      "biology": {
+        "days": 90,
+        "window": 30,
+        "seasonal": true,
+        "on_site_water": 0,
+        "planting_fraction": 0.5,
+        "care": null
+      }
+    },
+    "craft_garden-tools": {
+      "name": "Craft garden tools",
+      "kind": "supply-5",
+      "input": {
+        "wood": 2,
+        "tool_heads": 1
+      },
+      "output": {
+        "garden-tools": 1
+      },
+      "work": 180,
+      "handcraft": true,
+      "preserved": {},
+      "craft": {
+        "skill": "woodworking",
+        "level": 1,
+        "kind": "supply-5",
+        "tool": "carpentry-tools",
+        "work": 180,
+        "stages": [
+          "Shape wooden handles",
+          "Fit purchased tool heads",
+          "Secure and inspect"
+        ]
+      }
+    },
+    "craft_harvest-basket": {
+      "name": "Craft harvest basket",
+      "kind": "supply-5",
+      "input": {
+        "bamboo": 2
+      },
+      "output": {
+        "harvest-basket": 1
+      },
+      "work": 240,
+      "handcraft": true,
+      "preserved": {},
+      "craft": {
+        "skill": "basketry",
+        "level": 0,
+        "kind": "supply-5",
+        "tool": "carpentry-tools",
+        "work": 240,
+        "stages": [
+          "Split and prepare bamboo",
+          "Weave body and base",
+          "Bind rim and handles"
+        ]
+      }
+    },
+    "craft_wheelbarrow": {
+      "name": "Craft wheelbarrow",
+      "kind": "workshop",
+      "input": {
+        "planks": 4,
+        "hardware": 1,
+        "wheel_kit": 1
+      },
+      "output": {
+        "wheelbarrow": 1
+      },
+      "work": 360,
+      "handcraft": true,
+      "preserved": {},
+      "craft": {
+        "skill": "woodworking",
+        "level": 2,
+        "kind": "workshop",
+        "tool": "carpentry-tools",
+        "work": 360,
+        "stages": [
+          "Build frame and tray",
+          "Fit purchased axle and wheel",
+          "Balance and load-test"
+        ]
+      }
+    },
+    "craft_produce-crates": {
+      "name": "Craft produce crate",
+      "kind": "supply-5",
+      "input": {
+        "planks": 2,
+        "hardware": 1
+      },
+      "output": {
+        "produce-crates": 1
+      },
+      "work": 120,
+      "handcraft": true,
+      "preserved": {},
+      "craft": {
+        "skill": "woodworking",
+        "level": 0,
+        "kind": "supply-5",
+        "tool": "carpentry-tools",
+        "work": 120,
+        "stages": [
+          "Cut planks to length",
+          "Assemble and fasten",
+          "Smooth and inspect"
+        ]
+      }
+    },
+    "repair_bucket": {
+      "name": "Repair bucket",
+      "kind": "supply-5",
+      "input": {
+        "repair_supplies": 1
+      },
+      "output": {},
+      "work": 120,
+      "handcraft": true,
+      "preserved": {},
+      "repair": "bucket",
+      "craft": {
+        "skill": "repair",
+        "level": 1,
+        "kind": "supply-5",
+        "tool": "carpentry-tools",
+        "work": 120,
+        "stages": [
+          "Inspect wear",
+          "Replace worn parts from repair kit",
+          "Test and service"
+        ]
+      }
+    },
+    "repair_garden-tools": {
+      "name": "Repair garden tools",
+      "kind": "supply-5",
+      "input": {
+        "repair_supplies": 1
+      },
+      "output": {},
+      "work": 120,
+      "handcraft": true,
+      "preserved": {},
+      "repair": "garden-tools",
+      "craft": {
+        "skill": "repair",
+        "level": 1,
+        "kind": "supply-5",
+        "tool": "carpentry-tools",
+        "work": 120,
+        "stages": [
+          "Inspect wear",
+          "Replace worn parts from repair kit",
+          "Test and service"
+        ]
+      }
+    },
+    "repair_carpentry-tools": {
+      "name": "Repair carpentry tools",
+      "kind": "supply-5",
+      "input": {
+        "repair_supplies": 1
+      },
+      "output": {},
+      "work": 120,
+      "handcraft": true,
+      "preserved": {},
+      "repair": "carpentry-tools",
+      "craft": {
+        "skill": "repair",
+        "level": 1,
+        "kind": "supply-5",
+        "tool": null,
+        "work": 120,
+        "stages": [
+          "Inspect wear",
+          "Replace worn parts from repair kit",
+          "Test and service"
+        ]
+      }
+    },
+    "repair_harvest-basket": {
+      "name": "Repair harvest basket",
+      "kind": "supply-5",
+      "input": {
+        "repair_supplies": 1
+      },
+      "output": {},
+      "work": 120,
+      "handcraft": true,
+      "preserved": {},
+      "repair": "harvest-basket",
+      "craft": {
+        "skill": "basketry",
+        "level": 1,
+        "kind": "supply-5",
+        "tool": "carpentry-tools",
+        "work": 120,
+        "stages": [
+          "Inspect damaged weave",
+          "Replace and bind fibers",
+          "Check handles"
+        ]
+      }
+    },
+    "repair_cleaning-kit": {
+      "name": "Repair cleaning kit",
+      "kind": "supply-5",
+      "input": {
+        "repair_supplies": 1
+      },
+      "output": {},
+      "work": 120,
+      "handcraft": true,
+      "preserved": {},
+      "repair": "cleaning-kit",
+      "craft": {
+        "skill": "repair",
+        "level": 1,
+        "kind": "supply-5",
+        "tool": "carpentry-tools",
+        "work": 120,
+        "stages": [
+          "Inspect wear",
+          "Replace worn parts from repair kit",
+          "Test and service"
+        ]
+      }
+    },
+    "cook_greens": {
+      "name": "Cook leafy greens",
+      "kind": "kitchen",
+      "input": {
+        "greens": 4
+      },
+      "output": {
+        "meals": 4
+      },
+      "work": 40,
+      "handcraft": false,
+      "preserved": {},
+      "water": 2
+    },
+    "cook_beans": {
+      "name": "Cook bush beans",
+      "kind": "kitchen",
+      "input": {
+        "beans": 4
+      },
+      "output": {
+        "meals": 4
+      },
+      "work": 40,
+      "handcraft": false,
+      "preserved": {},
+      "water": 2
+    },
+    "cook_corn": {
+      "name": "Cook sweet corn",
+      "kind": "kitchen",
+      "input": {
+        "corn": 4
+      },
+      "output": {
+        "meals": 4
+      },
+      "work": 40,
+      "handcraft": false,
+      "preserved": {},
+      "water": 2
+    },
+    "corn_feed": {
+      "name": "Prepare corn feed supplement",
+      "kind": "supply-5",
+      "input": {
+        "corn": 4
+      },
+      "output": {
+        "fodder": 1,
+        "scraps": 1
+      },
+      "work": 30,
+      "handcraft": false,
+      "preserved": {}
+    },
+    "care-coop": {
+      "name": "Feed and water animals",
+      "kind": "coop",
+      "input": {
+        "fodder": 1
+      },
+      "output": {},
+      "work": 25,
+      "handcraft": false
+    },
+    "care-goat_pasture": {
+      "name": "Feed and water animals",
+      "kind": "goat_pasture",
+      "input": {
+        "fodder": 3
+      },
+      "output": {},
+      "work": 35,
+      "handcraft": false
+    },
+    "stock-goats": {
+      "name": "Stock pen with two goats",
+      "kind": "goat_pasture",
+      "input": {
+        "goats": 2
+      },
+      "output": {},
+      "work": 35,
+      "handcraft": false
+    }
+  },
+  "residents": [
+    {
+      "role": "Grower & naturalist",
+      "bio": "Keeps seeds in her pockets and notices which plants thrive in the shade. Wants the village to feed itself.",
+      "backstory": "Iara grew up tending a small garden with her grandmother, then spent years maintaining ornamental gardens for people who rarely went outside. She met Luz through a community kitchen, bringing surplus herbs after work. She joined the village to grow food people would actually share, and to stop treating her own plans as something for later.",
+      "traits": [
+        "Observant",
+        "Generous",
+        "Stubborn"
+      ],
+      "desire": "Grow enough food to share without emptying the pantry.",
+      "motivation": "Caring for living things gives her a sense of continuity and belonging.",
+      "fear": "Watching a garden fail while everyone depends on it.",
+      "flaw": "Takes setbacks personally and keeps checking on things instead of asking for help.",
+      "boundary": "Enjoys company, but needs quiet outdoor time after a demanding stretch.",
+      "growth": "Learning that sharing responsibility is also a way of caring.",
+      "hobby": "Time in the garden",
+      "favorites": [
+        "garden-bench",
+        "square",
+        "picnic-table"
+      ],
+      "rates": {
+        "fun": 0.8,
+        "hygiene": 0.8
+      },
+      "strengths": [
+        "garden",
+        "grove",
+        "orchard",
+        "greenhouse",
+        "compost",
+        "supply-0",
+        "supply-1"
+      ],
+      "effect": "Gets dirty more slowly and needs recreation less often.",
+      "interests": [
+        "growing",
+        "food",
+        "nature"
+      ],
+      "aspiration": {
+        "label": "A village orchard",
+        "key": "orchard",
+        "reason": "Plant something that will feed us for years."
+      },
+      "temperament": {
+        "socialAt": 48,
+        "acceptsAt": 78,
+        "breakAt": 48,
+        "bedtime": 21,
+        "downtime": "breathe"
+      },
+      "reflection": "I can leave the garden in someone else’s hands for a little while."
+    },
+    {
+      "role": "Carpenter & practical problem-solver",
+      "bio": "Would rather repair a wobbly chair than replace it. Dreams of building comfortable homes with his own hands.",
+      "backstory": "Bento learned repairs in his father’s tiny furniture shop. On building crews he became the person who quietly stayed late to fix rushed work. Nina met him while organizing a repair workshop and kept inviting him back. He came to the village hoping to build things carefully, with people who would still be there when the work was finished.",
+      "traits": [
+        "Patient",
+        "Dependable",
+        "Reserved"
+      ],
+      "desire": "Build a comfortable home and have time left to enjoy it.",
+      "motivation": "Making something useful is his easiest way of showing affection.",
+      "fear": "Letting people down when they are counting on him.",
+      "flaw": "Says yes too often and assumes others will notice when he is worn out.",
+      "boundary": "Likes one-to-one company; quiet breaks help him recover.",
+      "growth": "Learning to say what he needs before exhaustion says it for him.",
+      "hobby": "Quiet reading",
+      "favorites": [
+        "reading-room",
+        "hammock",
+        "garden-bench"
+      ],
+      "rates": {
+        "social": 0.75,
+        "fun": 0.9
+      },
+      "strengths": [
+        "shelter",
+        "shed",
+        "house",
+        "workshop",
+        "warehouse",
+        "bridge"
+      ],
+      "effect": "Comfortable with longer stretches of quiet work.",
+      "interests": [
+        "making",
+        "books",
+        "home"
+      ],
+      "aspiration": {
+        "label": "A comfortable home",
+        "key": "house",
+        "reason": "Make somewhere we can properly rest."
+      },
+      "temperament": {
+        "socialAt": 38,
+        "acceptsAt": 62,
+        "breakAt": 40,
+        "bedtime": 21.5,
+        "downtime": "look"
+      },
+      "reflection": "A little quiet helps. I do not have to finish everything today."
+    },
+    {
+      "role": "Cook & community host",
+      "bio": "Turns whatever is in the pantry into a meal worth sharing. Sees a good gathering place as the heart of the village.",
+      "backstory": "Luz worked long café shifts and spent her free evenings cooking at a neighborhood kitchen. She could remember everyone’s usual order, but often ate her own dinner standing up. Iara became a friend over those late meals. Luz wanted a village where being together was part of everyday life, and where she could be a guest sometimes too.",
+      "traits": [
+        "Warm",
+        "Playful",
+        "Restless"
+      ],
+      "desire": "Make room for a shared meal that nobody has to rush.",
+      "motivation": "Feels at home when people choose to spend time together.",
+      "fear": "Being useful to everyone but truly known by no one.",
+      "flaw": "Fills silences and offers help before checking whether it is wanted.",
+      "boundary": "Seeks company often, but is learning that a quiet friend is not an unhappy friend.",
+      "growth": "Learning to receive care and let others set the pace.",
+      "hobby": "Gathering with friends",
+      "favorites": [
+        "community-hall",
+        "fire-circle",
+        "picnic-table",
+        "square"
+      ],
+      "rates": {
+        "social": 1.3,
+        "fun": 1.15
+      },
+      "strengths": [
+        "gathering",
+        "kitchen",
+        "community-hall",
+        "picnic-table"
+      ],
+      "effect": "Seeks conversation and recreation more often.",
+      "interests": [
+        "food",
+        "stories",
+        "community"
+      ],
+      "aspiration": {
+        "label": "A shared kitchen",
+        "key": "kitchen",
+        "reason": "Cook together, then sit down together."
+      },
+      "temperament": {
+        "socialAt": 62,
+        "acceptsAt": 95,
+        "breakAt": 55,
+        "bedtime": 22.3,
+        "downtime": "stretch"
+      },
+      "reflection": "It is good to pause. I can let somebody else look after things."
+    },
+    {
+      "role": "Water & energy tinkerer",
+      "bio": "Likes tracing a problem back to its source. Wants to hear the river and know the village is running on clean energy.",
+      "backstory": "Cauã fixed pumps and electrical equipment with a traveling maintenance crew. He liked solving problems, but disliked leaving before people could learn the repair themselves. Bento once lent him a workbench; they spent the afternoon rebuilding a discarded fan. He joined the village for the chance to make reliable systems and stay long enough to see them used.",
+      "traits": [
+        "Curious",
+        "Resourceful",
+        "Independent"
+      ],
+      "desire": "Help the village generate its own electricity.",
+      "motivation": "Wants people to understand and control the things they depend on.",
+      "fear": "A preventable failure leaving everyone without essentials.",
+      "flaw": "Disappears into a problem and forgets to explain what he is doing.",
+      "boundary": "Prefers a conversation with a purpose, and space to think afterward.",
+      "growth": "Learning that explaining and listening are part of fixing things.",
+      "hobby": "Outdoor exercise",
+      "favorites": [
+        "exercise-garden",
+        "volleyball-court",
+        "outdoor-classroom"
+      ],
+      "rates": {
+        "social": 0.85,
+        "hunger": 1.1
+      },
+      "strengths": [
+        "water",
+        "well",
+        "hydro",
+        "solar_farm",
+        "streetlight",
+        "rain-barrel"
+      ],
+      "effect": "Needs less social time, but gets hungry a little faster.",
+      "interests": [
+        "making",
+        "nature",
+        "learning"
+      ],
+      "aspiration": {
+        "label": "Our own solar power",
+        "key": "solar_farm",
+        "reason": "Turn the sunlight here into something we can depend on."
+      },
+      "temperament": {
+        "socialAt": 42,
+        "acceptsAt": 68,
+        "breakAt": 44,
+        "bedtime": 22.5,
+        "downtime": "stretch"
+      },
+      "reflection": "The problem will still be there after a walk. I might see it differently."
+    },
+    {
+      "role": "Ecological builder & organizer",
+      "bio": "Thinks about where everything goes after we use it. Wants a healthy village where useful things never become waste.",
+      "backstory": "Nina helped run a neighborhood repair group while studying ecological building. She was good at turning a vague idea into a checklist, and less good at letting someone else change it. Organizing a workshop brought her together with Bento and, later, the others. She came to the village to put her ideas into practice and learn how to make plans with people, not just for them.",
+      "traits": [
+        "Thoughtful",
+        "Organized",
+        "Exacting"
+      ],
+      "desire": "Give the village a safe, useful way to handle wastewater.",
+      "motivation": "Believes care includes the consequences people do not immediately see.",
+      "fear": "An overlooked detail harming the place they are trying to care for.",
+      "flaw": "Can turn a helpful suggestion into a correction and struggle to leave things unfinished.",
+      "boundary": "Values calm conversation and uninterrupted reading time.",
+      "growth": "Learning to make room for experiments and other people’s methods.",
+      "hobby": "Reading and learning",
+      "favorites": [
+        "reading-room",
+        "outdoor-classroom",
+        "garden-bench"
+      ],
+      "rates": {
+        "hygiene": 1.2,
+        "fun": 0.9
+      },
+      "strengths": [
+        "toilet",
+        "eco_toilet",
+        "banana_treatment",
+        "wetland",
+        "biodigester"
+      ],
+      "effect": "Notices the need to wash sooner and enjoys quiet leisure.",
+      "interests": [
+        "books",
+        "learning",
+        "nature"
+      ],
+      "aspiration": {
+        "label": "A planted treatment bed",
+        "key": "banana_treatment",
+        "reason": "Care for what leaves the village as well as what comes in."
+      },
+      "temperament": {
+        "socialAt": 44,
+        "acceptsAt": 70,
+        "breakAt": 46,
+        "bedtime": 21.8,
+        "downtime": "breathe"
+      },
+      "reflection": "A pause is part of the plan, even when the list is not finished."
+    }
+  ],
+  "animalRations": {
+    "coop": {
+      "days": 3,
+      "fodder": 1,
+      "water": 2,
+      "work": 25,
+      "product": "eggs",
+      "dailyOutput": 2,
+      "batch": 6,
+      "shelfDays": 7
+    },
+    "goat_pasture": {
+      "days": 1,
+      "fodder": 3,
+      "water": 16,
+      "work": 35,
+      "product": "milk",
+      "dailyOutput": 4,
+      "batch": 4,
+      "shelfDays": 1
+    }
+  },
+  "workshopComparison": 172
+}

@@ -1,0 +1,942 @@
+use std::{collections::BTreeMap, sync::LazyLock};
+
+use bevy::prelude::*;
+use serde::{Deserialize, Serialize};
+
+use crate::{catalog::Catalog, weather::DAY};
+
+#[derive(Default, Deserialize, Serialize)]
+pub struct Farming {
+    pub plots: BTreeMap<usize, Plot>,
+    pub jobs: Vec<FarmJob>,
+    #[serde(skip)]
+    pub open: bool,
+    #[serde(skip)]
+    pub bed: usize,
+    #[serde(skip)]
+    pub whole_plot: bool,
+    #[serde(skip)]
+    pub show_balances: bool,
+    #[serde(skip)]
+    pub pending_crop_clear: Option<(usize, Option<usize>)>,
+    #[serde(skip)]
+    pub notice: String,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct Plot {
+    pub beds: Vec<Bed>,
+    remainders: [f64; 3],
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    warning: Option<CropWarning>,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Deserialize, Serialize)]
+pub(crate) enum CropWarning {
+    Wilting,
+    Damaged,
+    Expired,
+    Failed,
+}
+
+impl CropWarning {
+    pub(crate) fn message(self) -> &'static str {
+        match self {
+            Self::Wilting => "Crops wilting. Restore irrigation.",
+            Self::Damaged => "Crops damaged. Restore irrigation to prevent further damage.",
+            Self::Expired => "Harvest window closed. Clear expired crops before replanting.",
+            Self::Failed => "Crops failed. Clear failed beds before replanting.",
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
+pub enum Crop {
+    Greens,
+    Beans,
+    Corn,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct CropDefinition {
+    name: String,
+    days: f64,
+    window: f64,
+    yield_kg: f64,
+    water: f64,
+    residue: f64,
+    plants: f32,
+    height: f32,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct CropCatalog {
+    greens: CropDefinition,
+    beans: CropDefinition,
+    corn: CropDefinition,
+}
+
+static CROPS: LazyLock<CropCatalog> = LazyLock::new(|| {
+    serde_json::from_str(include_str!("../data/crops.json")).expect("embedded crop catalog")
+});
+
+impl Crop {
+    pub(crate) const ALL: [Self; 3] = [Self::Greens, Self::Beans, Self::Corn];
+
+    fn definition(self) -> &'static CropDefinition {
+        match self {
+            Self::Greens => &CROPS.greens,
+            Self::Beans => &CROPS.beans,
+            Self::Corn => &CROPS.corn,
+        }
+    }
+
+    pub fn label(self) -> &'static str {
+        &self.definition().name
+    }
+
+    pub fn seed(self) -> &'static str {
+        ["greens_seed", "beans_seed", "corn_seed"][self as usize]
+    }
+
+    pub(crate) fn material(self) -> &'static str {
+        ["greens", "beans", "corn"][self as usize]
+    }
+
+    pub(crate) fn days(self) -> f64 {
+        self.definition().days
+    }
+    fn window(self) -> f64 {
+        self.definition().window
+    }
+    fn yield_kg(self) -> f64 {
+        self.definition().yield_kg
+    }
+    fn water(self) -> f64 {
+        self.definition().water
+    }
+    fn residue(self) -> f64 {
+        self.definition().residue
+    }
+    pub(crate) fn plants_per_square_meter(self) -> f32 {
+        self.definition().plants
+    }
+    pub(crate) fn height(self) -> f32 {
+        self.definition().height
+    }
+    pub fn next(self) -> Self {
+        Self::ALL[(self as usize + 1) % Self::ALL.len()]
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
+pub enum Stage {
+    Unprepared,
+    Prepared,
+    Growing,
+    Harvestable,
+    Harvested,
+    Failed,
+}
+
+impl Stage {
+    pub fn label(self) -> &'static str {
+        [
+            "Unprepared",
+            "Prepared",
+            "Growing",
+            "Harvestable",
+            "Harvested",
+            "Failed",
+        ][self as usize]
+    }
+}
+
+#[derive(Clone, Default, Deserialize, Serialize)]
+struct CropMass {
+    seeds_kg: f64,
+    grown_kg: f64,
+    standing_kg: Option<f64>,
+    field_loss_kg: f64,
+    harvested_kg: f64,
+    residue_exported_kg: f64,
+    #[serde(default)]
+    compost_applied_kg: f64,
+}
+
+#[derive(Clone, Deserialize, Serialize)]
+pub struct Bed {
+    pub offset: Vec2,
+    pub dimensions: Vec2,
+    pub crop: Crop,
+    pub stage: Stage,
+    pub density: f64,
+    pub irrigation: bool,
+    pub collect_residues: bool,
+    pub moisture: f64,
+    pub fertility: f64,
+    pub growth: f64,
+    progress_seconds: f64,
+    drought_seconds: f64,
+    damage: f64,
+    #[serde(default)]
+    pub irrigated_liters: f64,
+    #[serde(default)]
+    pub rain_liters: f64,
+    #[serde(default)]
+    pub evaporated_liters: f64,
+    #[serde(default)]
+    pub drained_liters: f64,
+    stress: f64,
+    ripe_at: f64,
+    pub(crate) residue_kg: f64,
+    pub(crate) amendment_kg: f64,
+    #[serde(default)]
+    pub(crate) soil_organic_kg: f64,
+    #[serde(default)]
+    pub(crate) decomposed_gas_kg: f64,
+    #[serde(default)]
+    mass: CropMass,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
+pub enum FarmAction {
+    Prepare,
+    Plant,
+    Harvest,
+    Clear,
+    Amend,
+    Collect,
+}
+
+impl FarmAction {
+    pub(crate) const ALL: [Self; 6] = [
+        Self::Prepare,
+        Self::Plant,
+        Self::Harvest,
+        Self::Clear,
+        Self::Amend,
+        Self::Collect,
+    ];
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
+pub enum FarmPhase {
+    Pickup,
+    Walk,
+    Work,
+    Return,
+    CollectOutput,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct FarmJob {
+    pub site: usize,
+    pub bed: usize,
+    pub action: FarmAction,
+    pub worker: Option<usize>,
+    pub phase: FarmPhase,
+    pub work: f64,
+    pub required: f64,
+    pub inputs: BTreeMap<String, u32>,
+    pub output: BTreeMap<String, u32>,
+    #[serde(default)]
+    pub food_output: Option<crate::food::FoodLots>,
+    pub retry: f64,
+    #[serde(default)]
+    pub waiting_for_access: bool,
+    #[serde(default)]
+    pub pickups: u32,
+    #[serde(default)]
+    pub fare: u64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub seed_freight_eta: Option<f64>,
+}
+
+impl Plot {
+    pub fn new(kind: &str, size: IVec2) -> Option<Self> {
+        let mut beds = Vec::new();
+        match kind {
+            "garden" => {
+                for x in [-1.5, 1.5] {
+                    for z in [-2.6, 2.6] {
+                        beds.push(Bed::new(Vec2::new(x, z), 4.0));
+                    }
+                }
+            }
+            "greenhouse" => beds.extend([-1.2, 1.2].map(|x| Bed::new(Vec2::new(x, 0.0), 8.0))),
+            "field" => {
+                for x in ((-size.x + 1)..size.x).step_by(2) {
+                    for z in ((-size.y + 1)..size.y - 1).step_by(2) {
+                        let length = (size.y - 1 - z).min(2) as f32;
+                        beds.push(Bed::new(
+                            Vec2::new(x as f32, z as f32 + length * 0.5),
+                            length,
+                        ));
+                    }
+                }
+            }
+            _ => return None,
+        }
+        Some(Self {
+            beds,
+            remainders: [0.0; 3],
+            warning: None,
+        })
+    }
+
+    pub(crate) fn update_warning(&mut self, clock: f64) -> Option<CropWarning> {
+        let warning = self
+            .beds
+            .iter()
+            .filter_map(|bed| {
+                if bed.stage == Stage::Failed {
+                    Some(CropWarning::Failed)
+                } else if bed.harvest_expired(clock) {
+                    Some(CropWarning::Expired)
+                } else if bed.standing() && bed.drought_damage() > 0.0 {
+                    Some(CropWarning::Damaged)
+                } else if bed.standing() && bed.moisture < 0.2 {
+                    Some(CropWarning::Wilting)
+                } else {
+                    None
+                }
+            })
+            .max();
+        let previous = std::mem::replace(&mut self.warning, warning);
+        warning.filter(|warning| Some(*warning) != previous)
+    }
+
+    pub fn field_size_valid(size: IVec2) -> bool {
+        size.cmpge(IVec2::splat(2)).all() && size.cmple(IVec2::splat(32)).all()
+    }
+
+    pub fn resize_field(&mut self, size: IVec2, shift: IVec2) -> Result<(), &'static str> {
+        let mut layout = Self::new("field", size).expect("valid field dimensions");
+        let mut remaining: BTreeMap<_, _> = self
+            .beds
+            .iter()
+            .map(|bed| {
+                let offset = bed.offset - shift.as_vec2();
+                (
+                    (offset.x as i32, offset.y as i32, bed.dimensions.y as i32),
+                    bed,
+                )
+            })
+            .collect();
+        for bed in &mut layout.beds {
+            let key = (
+                bed.offset.x as i32,
+                bed.offset.y as i32,
+                bed.dimensions.y as i32,
+            );
+            if let Some(old) = remaining.remove(&key) {
+                let offset = bed.offset;
+                *bed = old.clone();
+                bed.offset = offset;
+            }
+        }
+        if remaining.values().any(|bed| {
+            !matches!(
+                bed.stage,
+                Stage::Unprepared | Stage::Prepared | Stage::Harvested
+            ) || bed.residue_kg >= 1.0
+                || bed.amendment_kg >= 1.0
+        }) {
+            return Err("Clear crops and collect residues before shrinking occupied beds.");
+        }
+        for bed in remaining.values() {
+            layout.beds[0].residue_kg += bed.residue_kg;
+            layout.beds[0].amendment_kg += bed.amendment_kg;
+        }
+        self.beds = layout.beds;
+        Ok(())
+    }
+
+    pub fn finish(
+        &mut self,
+        catalog: &Catalog,
+        job: &FarmJob,
+        clock: f64,
+        sandbox: bool,
+    ) -> BTreeMap<String, u32> {
+        let bed = &mut self.beds[job.bed];
+        let area = bed.area();
+        let mut output = BTreeMap::new();
+        match job.action {
+            FarmAction::Prepare => bed.stage = Stage::Prepared,
+            FarmAction::Plant => {
+                bed.stage = if sandbox {
+                    Stage::Harvestable
+                } else {
+                    Stage::Growing
+                };
+                bed.growth = if sandbox { 1.0 } else { 0.0 };
+                bed.stress = 0.0;
+                bed.progress_seconds = 0.0;
+                bed.drought_seconds = 0.0;
+                bed.damage = 0.0;
+                bed.ripe_at = clock;
+                let seeds: f64 = job
+                    .inputs
+                    .iter()
+                    .map(|(id, amount)| catalog.materials[id].mass * f64::from(*amount))
+                    .sum();
+                let grown = bed.growth * bed.potential_biomass();
+                bed.mass.seeds_kg += seeds;
+                bed.mass.grown_kg += grown;
+                bed.mass.standing_kg = Some(seeds + grown);
+            }
+            FarmAction::Amend => {
+                let compost = f64::from(job.inputs["compost"]);
+                bed.amendment_kg += compost;
+                bed.mass.compost_applied_kg += compost;
+            }
+            FarmAction::Collect => collect_residues(bed, &mut output),
+            FarmAction::Clear | FarmAction::Harvest => {
+                let edible = if job.action == FarmAction::Harvest {
+                    bed.yield_kg(clock)
+                } else {
+                    0.0
+                };
+                let remainder = &mut self.remainders[bed.crop as usize];
+                let total = *remainder + edible;
+                let units = total.floor() as u32;
+                *remainder = total.fract();
+                if units > 0 {
+                    output.insert(bed.crop.material().into(), units);
+                }
+                let residues = area * bed.crop.residue() * bed.growth * bed.health();
+                bed.mass.field_loss_kg += (bed.standing_biomass() - edible - residues).max(0.0);
+                bed.mass.standing_kg = Some(0.0);
+                bed.mass.harvested_kg += f64::from(units);
+                bed.residue_kg += residues;
+                if bed.collect_residues {
+                    collect_residues(bed, &mut output);
+                }
+                bed.fertility = (bed.fertility - f64::from(units) / (area * 20.0)).max(0.0);
+                bed.stage = Stage::Harvested;
+                bed.growth = 0.0;
+            }
+        }
+        output
+    }
+}
+
+fn collect_residues(bed: &mut Bed, output: &mut BTreeMap<String, u32>) {
+    let units = bed.residue_kg.floor() as u32;
+    bed.residue_kg -= f64::from(units);
+    bed.mass.residue_exported_kg += f64::from(units);
+    if units > 0 {
+        output.insert("scraps".into(), units);
+    }
+}
+
+impl Bed {
+    pub fn next_density(&self) -> f64 {
+        if self.density == 1.5 {
+            0.5
+        } else {
+            self.density + 0.5
+        }
+    }
+
+    fn new(offset: Vec2, length: f32) -> Self {
+        Self {
+            offset,
+            dimensions: Vec2::new(1.2, length),
+            crop: Crop::Greens,
+            stage: Stage::Unprepared,
+            density: 1.0,
+            irrigation: true,
+            collect_residues: false,
+            moisture: 0.75,
+            fertility: 1.0,
+            growth: 0.0,
+            progress_seconds: 0.0,
+            drought_seconds: 0.0,
+            damage: 0.0,
+            irrigated_liters: 0.0,
+            rain_liters: 0.0,
+            evaporated_liters: 0.0,
+            drained_liters: 0.0,
+            stress: 0.0,
+            ripe_at: 0.0,
+            residue_kg: 0.0,
+            amendment_kg: 0.0,
+            soil_organic_kg: 0.0,
+            decomposed_gas_kg: 0.0,
+            mass: CropMass::default(),
+        }
+    }
+
+    pub fn area(&self) -> f64 {
+        1.2 * f64::from(self.dimensions.y)
+    }
+
+    pub(crate) fn health(&self) -> f64 {
+        let conditioned = if self.progress_seconds > 0.0 {
+            (1.0 - self.stress / self.progress_seconds).max(0.0)
+        } else {
+            1.0
+        };
+        conditioned.min(1.0 - self.damage)
+    }
+
+    fn standing(&self) -> bool {
+        matches!(self.stage, Stage::Growing | Stage::Harvestable)
+    }
+
+    pub fn drought_damage(&self) -> f64 {
+        self.damage
+    }
+
+    pub fn harvest_expired(&self, clock: f64) -> bool {
+        self.stage == Stage::Harvestable && self.harvest_factor(clock) == 0.0
+    }
+
+    pub(crate) fn harvest_timing(&self, clock: f64) -> Option<(f64, f64)> {
+        (self.stage == Stage::Harvestable).then(|| {
+            let window = self.crop.window();
+            let remaining = (2.0 * window - (clock - self.ripe_at) / DAY).max(0.0);
+            (remaining, window)
+        })
+    }
+
+    fn harvest_factor(&self, clock: f64) -> f64 {
+        if self.stage != Stage::Harvestable {
+            return 1.0;
+        }
+        let window = self.crop.window();
+        (1.0 - ((clock - self.ripe_at) / DAY - window).max(0.0) / window).max(0.0)
+    }
+
+    pub fn visual_health(&self, clock: f64) -> f64 {
+        self.health() * self.harvest_factor(clock).max(0.15)
+    }
+
+    fn potential_yield(&self) -> f64 {
+        self.area() * self.crop.yield_kg() * self.density.min(1.2)
+            / (1.0 + (self.density - 1.0).max(0.0) * 1.5)
+    }
+
+    fn potential_biomass(&self) -> f64 {
+        self.potential_yield() + self.area() * self.crop.residue()
+    }
+
+    pub(crate) fn standing_biomass(&self) -> f64 {
+        self.mass
+            .standing_kg
+            .unwrap_or_else(|| self.growth * self.potential_biomass())
+    }
+
+    pub(crate) fn material_balance_summary(&self) -> String {
+        format!(
+            "Crop mass · {:.1} kg standing · {:.1} kg lost in field\nHarvest totals · {:.1} kg produce · {:.1} kg residues collected\nSoil totals · {:.1} kg compost applied · {:.1} kg decomposition losses",
+            self.standing_biomass(),
+            self.mass.field_loss_kg,
+            self.mass.harvested_kg,
+            self.mass.residue_exported_kg,
+            self.mass.compost_applied_kg,
+            self.decomposed_gas_kg
+        )
+    }
+
+    pub fn yield_kg(&self, clock: f64) -> f64 {
+        self.potential_yield() * self.health() * self.harvest_factor(clock)
+    }
+
+    pub fn editable(&self) -> bool {
+        matches!(
+            self.stage,
+            Stage::Unprepared | Stage::Prepared | Stage::Harvested
+        )
+    }
+
+    pub(crate) fn allows(&self, action: FarmAction, clock: f64) -> bool {
+        match action {
+            FarmAction::Prepare => matches!(self.stage, Stage::Unprepared | Stage::Harvested),
+            FarmAction::Plant => self.stage == Stage::Prepared,
+            FarmAction::Harvest => {
+                self.stage == Stage::Harvestable && self.harvest_factor(clock) > 0.0
+            }
+            FarmAction::Clear => self.standing() || self.stage == Stage::Failed,
+            FarmAction::Amend => true,
+            FarmAction::Collect => self.residue_kg >= 1.0,
+        }
+    }
+
+    pub fn requirements(
+        &self,
+        action: FarmAction,
+        clock: f64,
+    ) -> Result<(BTreeMap<String, u32>, f64), &'static str> {
+        if !self.allows(action, clock) {
+            return Err(match action {
+                FarmAction::Prepare => "Clear this bed before preparing it.",
+                FarmAction::Plant => "Prepare the soil before planting.",
+                FarmAction::Harvest if self.harvest_expired(clock) => {
+                    "The harvest has expired. Clear this bed before replanting."
+                }
+                FarmAction::Harvest => "This crop is not ready for harvest.",
+                FarmAction::Clear => "There is no standing crop to clear.",
+                FarmAction::Collect => "At least 1 kg of residues is needed for collection.",
+                _ => "That action is unavailable for this bed.",
+            });
+        }
+        let mut input = BTreeMap::new();
+        if action == FarmAction::Plant {
+            input.insert(
+                self.crop.seed().into(),
+                (self.area() * self.density / 4.0).ceil().max(1.0) as u32,
+            );
+        } else if action == FarmAction::Amend {
+            input.insert("compost".into(), (self.area() * 0.5).ceil() as u32);
+        }
+        let work = match action {
+            FarmAction::Prepare => 18.0,
+            FarmAction::Plant => 12.0 * self.density,
+            FarmAction::Harvest => 15.0 * self.density,
+            FarmAction::Clear => 8.0,
+            FarmAction::Amend | FarmAction::Collect => 5.0,
+        };
+        Ok((input, (self.area() * work).ceil()))
+    }
+
+    fn growing_condition(&self) -> f64 {
+        (self.moisture / 0.4).min(1.0) * (0.3 + 0.7 * self.fertility)
+            / (1.0 + (self.density - 1.0).max(0.0))
+    }
+
+    pub fn harvest_forecast(&self, clock: f64, season: f64) -> Option<f64> {
+        match self.stage {
+            Stage::Harvestable if self.harvest_factor(clock) > 0.0 => Some(0.0),
+            Stage::Growing => {
+                let rate = self.growing_condition() * season;
+                (rate > 0.0).then(|| (1.0 - self.growth) * self.crop.days() / rate)
+            }
+            _ => None,
+        }
+    }
+
+    pub(crate) fn ground_cover(&self) -> f64 {
+        (self.residue_kg / (self.area() * 0.5)).min(1.0)
+    }
+
+    pub(crate) fn organic_matter_index(&self) -> f64 {
+        (self.soil_organic_kg / (self.area() * 2.0)).min(1.0)
+    }
+
+    pub fn tick(&mut self, climate: CropClimate, mut use_water: impl FnMut(f64) -> bool) {
+        let CropClimate {
+            clock,
+            dt,
+            rain,
+            season,
+            sheltered,
+            sandbox,
+        } = climate;
+        let area = self.area();
+        let days = dt / DAY;
+        let residue_decay = self.residue_kg * -(-days / 60.0).exp_m1();
+        let amendment_decay = self.amendment_kg * -(-days / 30.0).exp_m1();
+        self.residue_kg -= residue_decay;
+        self.amendment_kg -= amendment_decay;
+        let decomposed = residue_decay + amendment_decay;
+        self.soil_organic_kg += decomposed * 0.2;
+        self.decomposed_gas_kg += decomposed * 0.8;
+        self.fertility = (self.fertility + decomposed / (area * 8.0)).min(1.0);
+        if sandbox {
+            return;
+        }
+        let cover = self.ground_cover();
+        let water = if self.standing() {
+            self.crop.water() * self.density
+        } else {
+            1.0
+        };
+        let demand = area * water * (1.0 - 0.4 * cover) * days;
+        let rain = if sheltered {
+            0.0
+        } else {
+            area * rain * 24.0 * days
+        };
+        let refill = (demand - rain).max(0.0) + area * 2.0 * days;
+        let irrigated = if self.standing()
+            && self.harvest_factor(clock) > 0.0
+            && self.irrigation
+            && self.moisture < 0.75
+            && rain < demand
+            && use_water(refill)
+        {
+            refill
+        } else {
+            0.0
+        };
+        let capacity = area * 16.0;
+        let available = self.moisture * capacity + rain + irrigated;
+        self.irrigated_liters += irrigated;
+        self.rain_liters += rain;
+        self.evaporated_liters += available.min(demand);
+        self.drained_liters += (available - demand - capacity).max(0.0);
+        self.moisture = ((available - demand) / capacity).clamp(0.0, 1.0);
+        if !self.standing() {
+            return;
+        }
+        self.drought_seconds = if self.moisture < 0.1 {
+            self.drought_seconds + dt
+        } else {
+            0.0
+        };
+        self.damage = self
+            .damage
+            .max(((self.drought_seconds - DAY) / (6.0 * DAY)).clamp(0.0, 1.0));
+        if self.damage >= 1.0 {
+            self.stage = Stage::Failed;
+            return;
+        }
+        let condition = self.growing_condition();
+        self.progress_seconds += dt;
+        self.stress += dt * (1.0 - condition);
+        if self.stage == Stage::Growing {
+            let previous_growth = self.growth;
+            let previous_mass = self.standing_biomass();
+            self.growth = (self.growth
+                + days / self.crop.days() * condition * if sheltered { 1.0 } else { season })
+            .min(1.0);
+            let grown = (self.growth - previous_growth) * self.potential_biomass();
+            self.mass.grown_kg += grown;
+            self.mass.standing_kg = Some(previous_mass + grown);
+            if self.growth >= 1.0 {
+                self.stage = Stage::Harvestable;
+                self.ripe_at = clock;
+            }
+        }
+    }
+}
+
+#[derive(Clone, Copy)]
+pub struct CropClimate {
+    pub clock: f64,
+    pub dt: f64,
+    pub rain: f64,
+    pub season: f64,
+    pub sheltered: bool,
+    pub sandbox: bool,
+}
+
+impl Farming {
+    pub fn close(&mut self) {
+        self.open = false;
+        self.pending_crop_clear = None;
+    }
+
+    pub fn has_worker(&self, worker: usize) -> bool {
+        self.jobs.iter().any(|job| job.worker == Some(worker))
+    }
+
+    pub fn valid_save(&self, has_plot: impl Fn(usize) -> bool) -> bool {
+        self.plots.iter().all(|(&id, plot)| {
+            has_plot(id)
+                && !plot.beds.is_empty()
+                && plot.beds.len() <= 32 * 31
+                && plot.beds.iter().all(|bed| {
+                    bed.offset.is_finite()
+                        && bed.dimensions.is_finite()
+                        && bed.dimensions.x == 1.2
+                        && bed.dimensions.y >= 1.0
+                        && [0.5, 1.0, 1.5].contains(&bed.density)
+                        && [
+                            bed.irrigated_liters,
+                            bed.rain_liters,
+                            bed.evaporated_liters,
+                            bed.drained_liters,
+                            bed.soil_organic_kg,
+                            bed.decomposed_gas_kg,
+                            bed.mass.seeds_kg,
+                            bed.mass.grown_kg,
+                            bed.mass.standing_kg.unwrap_or(0.0),
+                            bed.mass.field_loss_kg,
+                            bed.mass.harvested_kg,
+                            bed.mass.residue_exported_kg,
+                            bed.mass.compost_applied_kg,
+                        ]
+                        .into_iter()
+                        .all(|amount| amount.is_finite() && amount >= 0.0)
+                        && [bed.moisture, bed.fertility, bed.growth]
+                            .iter()
+                            .all(|value| (0.0..=1.0).contains(value))
+                })
+        }) && self.jobs.iter().all(|job| {
+            self.plots
+                .get(&job.site)
+                .is_some_and(|plot| job.bed < plot.beds.len())
+                && (0.0..=job.required).contains(&job.work)
+                && job.worker.is_none_or(|id| id < 5)
+                && job.seed_freight_eta.is_none_or(|eta| {
+                    eta.is_finite()
+                        && eta >= 0.0
+                        && job.pickups > 0
+                        && job.worker.is_none()
+                        && job.action == FarmAction::Plant
+                })
+        })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn decomposing_residues_and_compost_follow_v2_mass_fractions() {
+        let mut bed = Bed::new(Vec2::ZERO, 4.0);
+        bed.residue_kg = 6.0;
+        bed.amendment_kg = 3.0;
+        bed.tick(
+            CropClimate {
+                clock: DAY,
+                dt: DAY,
+                rain: 0.0,
+                season: 1.0,
+                sheltered: false,
+                sandbox: false,
+            },
+            |_| false,
+        );
+        let decomposed = 9.0 - bed.residue_kg - bed.amendment_kg;
+        assert!(decomposed > 0.0);
+        assert!((bed.soil_organic_kg - decomposed * 0.2).abs() < 1e-9);
+        assert!((bed.organic_matter_index() - decomposed * 0.1 / bed.area()).abs() < 1e-9);
+        assert!((bed.decomposed_gas_kg - decomposed * 0.8).abs() < 1e-9);
+    }
+
+    #[test]
+    fn crop_water_is_accounted_for_through_rain_irrigation_and_drainage() {
+        let mut bed = Bed::new(Vec2::ZERO, 4.0);
+        bed.stage = Stage::Growing;
+        let capacity = bed.area() * 16.0;
+        let initial = bed.moisture * capacity;
+        for (hour, rain) in [0.0, 0.0, 40.0, 0.0].into_iter().enumerate() {
+            let dt = DAY / 24.0;
+            bed.tick(
+                CropClimate {
+                    clock: (hour as f64 + 1.0) * dt,
+                    dt,
+                    rain,
+                    season: 1.0,
+                    sheltered: false,
+                    sandbox: false,
+                },
+                |_| true,
+            );
+        }
+        assert!(bed.irrigated_liters > 0.0);
+        assert!(bed.drained_liters > 0.0);
+        assert!(bed.evaporated_liters > 0.0);
+        let remaining = initial + bed.rain_liters + bed.irrigated_liters
+            - bed.evaporated_liters
+            - bed.drained_liters;
+        assert!((remaining - bed.moisture * capacity).abs() < 1e-9);
+    }
+
+    #[test]
+    fn irrigated_greens_mature_in_45_days_and_preserve_fractional_harvest() {
+        let catalog = Catalog::default();
+        let mut plot = Plot::new("garden", IVec2::new(3, 5)).unwrap();
+        let mut job = FarmJob {
+            site: 0,
+            bed: 0,
+            action: FarmAction::Prepare,
+            worker: None,
+            phase: FarmPhase::Work,
+            work: 0.0,
+            required: 1.0,
+            inputs: BTreeMap::new(),
+            output: BTreeMap::new(),
+            food_output: None,
+            retry: 0.0,
+            waiting_for_access: false,
+            pickups: 0,
+            fare: 0,
+            seed_freight_eta: None,
+        };
+        plot.finish(&catalog, &job, 0.0, false);
+        job.action = FarmAction::Plant;
+        let (seeds, work) = plot.beds[0].requirements(FarmAction::Plant, 0.0).unwrap();
+        assert_eq!(seeds["greens_seed"], 2);
+        assert_eq!(work, 58.0);
+        job.inputs = seeds;
+        plot.finish(&catalog, &job, 0.0, false);
+        let mut withdrawn = 0.0;
+        for hour in 1..=45 * 24 + 1 {
+            let dt = DAY / 24.0;
+            plot.beds[0].tick(
+                CropClimate {
+                    clock: dt * f64::from(hour),
+                    dt,
+                    rain: 0.0,
+                    season: 1.0,
+                    sheltered: true,
+                    sandbox: false,
+                },
+                |amount| {
+                    withdrawn += amount;
+                    true
+                },
+            );
+        }
+        assert!(plot.beds[0].stage == Stage::Harvestable);
+        assert!(withdrawn > 0.0);
+        assert_eq!(plot.beds[0].irrigated_liters, withdrawn);
+        job.action = FarmAction::Harvest;
+        let output = plot.finish(&catalog, &job, 45.5 * DAY, false);
+        assert_eq!(output["greens"], 9);
+        let bed = &plot.beds[0];
+        assert_eq!(bed.standing_biomass(), 0.0);
+        assert!(bed.material_balance_summary().contains("9.0 kg produce"));
+        let accounted = 9.0 + plot.remainders[0] + bed.residue_kg + bed.mass.field_loss_kg;
+        assert!((accounted - bed.mass.seeds_kg - bed.mass.grown_kg).abs() < 1e-9);
+        assert!((plot.remainders[0] - 0.6).abs() < 1e-9);
+
+        // A job queued while the crop was ripe can finish after the window closes.
+        job.action = FarmAction::Plant;
+        plot.finish(&catalog, &job, 46.0 * DAY, true);
+        let expired = 60.0 * DAY;
+        assert_eq!(plot.beds[0].harvest_timing(expired).unwrap().0, 0.0);
+        assert!(plot.beds[0].harvest_expired(expired));
+        let remainder = plot.remainders[0];
+        let previous_loss = plot.beds[0].mass.field_loss_kg;
+        job.action = FarmAction::Harvest;
+        let output = plot.finish(&catalog, &job, expired, false);
+        assert!(!output.contains_key("greens"));
+        assert_eq!(plot.remainders[0], remainder);
+        assert!(plot.beds[0].stage == Stage::Harvested);
+        assert!(plot.beds[0].mass.field_loss_kg > previous_loss);
+    }
+
+    #[test]
+    fn prolonged_drought_fails_a_standing_crop() {
+        let mut bed = Bed::new(Vec2::ZERO, 4.0);
+        bed.stage = Stage::Growing;
+        bed.moisture = 0.0;
+        for hour in 0..=8 * 24 {
+            let dt = DAY / 24.0;
+            bed.tick(
+                CropClimate {
+                    clock: dt * f64::from(hour),
+                    dt,
+                    rain: 0.0,
+                    season: 1.0,
+                    sheltered: false,
+                    sandbox: false,
+                },
+                |_| false,
+            );
+        }
+        assert!(bed.stage == Stage::Failed);
+        assert_eq!(bed.yield_kg(8.0 * DAY), 0.0);
+    }
+}

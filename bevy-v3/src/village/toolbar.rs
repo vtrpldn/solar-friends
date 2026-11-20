@@ -1,0 +1,2039 @@
+use super::*;
+use crate::{
+    construction::{FarmControl, ProjectAction, WorkGroup},
+    farming::FarmAction,
+    time_advance::AdvanceAction,
+};
+use bevy::asset::{embedded_asset, load_embedded_asset};
+
+pub(super) const PANEL_WIDTH: f32 = 272.0;
+// Above the village and its cards, below the dimmed backdrop of almanac screens and
+// Advance days, which cover the dock as in V2.
+const DOCK_LAYER: i32 = 5;
+
+mod dock_icon;
+mod top_bar;
+
+#[derive(Component, Clone, Copy)]
+enum Action {
+    Build,
+    CampPreset(usize),
+    View,
+    Forecast,
+    Library,
+    Sound,
+    Volume { effects: bool, delta: i16 },
+    RotatePlacement,
+    CancelPlacement,
+    ConnectRoad,
+    UndoRoad,
+    FinishRoad,
+    Terrain,
+    Advance,
+    ResizeField(IVec2),
+    FieldDimensions,
+    Pause,
+    Speed,
+    Guide,
+    Lenses,
+    LensFilter(bool),
+    LensSite(bool),
+    Manage,
+    Panel(UtilityPanel),
+    ResourcePanel(UtilityPanel),
+    GridFromFinances,
+    PantryFromStores,
+    ClosePanel,
+    Page(bool),
+    Recipes,
+    Gather,
+    Beds,
+    Farm(FarmControl),
+    Recipe(usize),
+    RecipePage(bool),
+    CraftWorkspace,
+    MoveCraft,
+    FacilityIrrigation,
+    SelectedProject(ProjectAction),
+    FocusSelectedProject,
+    DeselectProject,
+    InventoryView,
+    InventoryItem(usize),
+    InventorySearch,
+    CraftTab(crate::construction::CraftView),
+    NextCraftWorkspace,
+    LocateCraftJob,
+    MoveCraftJob,
+    StartCraft,
+    Resident(usize),
+    ResidentProfile(ResidentProfile),
+    FocusResident,
+    FocusResidentProject,
+    WorkPriority(WorkGroup),
+    WorkerReservation(bool),
+    Home(bool),
+    ListedHome(usize),
+    Shift(bool),
+    Ledger,
+    ExpansionReserve,
+    PantryBatches,
+    PantryPriority,
+    PantryTransport,
+    PantryBudget,
+    AutoCook,
+    CookingTarget { preserved: bool, increase: bool },
+    PantryPolicy(i8, i64, bool),
+    BuildingPower,
+    Cooling,
+}
+
+impl Action {
+    const PANELS: [(UtilityPanel, &'static str); 11] = [
+        (UtilityPanel::Residents, "Residents"),
+        (UtilityPanel::Projects, "Projects"),
+        (UtilityPanel::Inventory, "Stores"),
+        (UtilityPanel::Crafting, "Crafting"),
+        (UtilityPanel::Power, "Power"),
+        (UtilityPanel::Water, "Water"),
+        (UtilityPanel::Upkeep, "Maintenance"),
+        (UtilityPanel::Events, "Events"),
+        (UtilityPanel::Finances, "Finances"),
+        (UtilityPanel::Trade, "Trade"),
+        (UtilityPanel::Pantry, "Pantry"),
+    ];
+
+    fn supported(self, village: &Village) -> bool {
+        !matches!(
+            self,
+            Self::Panel(UtilityPanel::Finances | UtilityPanel::Trade | UtilityPanel::Upkeep)
+                | Self::ResourcePanel(UtilityPanel::Finances | UtilityPanel::Trade | UtilityPanel::Upkeep)
+                if village.stock.sandbox
+        )
+    }
+
+    fn dock_active(self, village: &Village, picker: &PanelPicker) -> bool {
+        if village.guide.open() || village.lenses.open || village.advance_open() {
+            return false;
+        }
+        match self {
+            Self::Build => village.construction.menu || village.construction.is_placing(),
+            Self::Terrain => village.terrain_editor.open,
+            Self::ResourcePanel(panel) => village.utility_panel == Some(panel),
+            Self::View => picker.view_open,
+            _ => false,
+        }
+    }
+
+    fn available(self, village: &Village) -> bool {
+        if matches!(self, Self::Lenses) {
+            return !village.guide.open() && !village.construction.editing_search;
+        }
+        if matches!(self, Self::InventorySearch | Self::InventoryItem(_)) {
+            return (village.utility_panel == Some(UtilityPanel::Inventory)
+                || matches!(self, Self::InventoryItem(_)) && village.producer_view())
+                && !village.guide.open()
+                && !village.lenses.open
+                && !village.advance_open()
+                && !village.terrain_editor.open;
+        }
+        if matches!(self, Self::Guide) {
+            return !village.construction.editing_search;
+        }
+        if matches!(self, Self::Advance) {
+            return village.camp.is_some()
+                && !village.map_input_blocked()
+                && !village.planning_roads();
+        }
+        if matches!(self, Self::ConnectRoad | Self::UndoRoad | Self::FinishRoad) {
+            return village.planning_roads()
+                && !village.map_input_blocked()
+                && (!matches!(self, Self::UndoRoad) || village.construction.can_undo_roads());
+        }
+        if !village.map_input_blocked() && !village.advance_open() && !village.planning_roads() {
+            match self {
+                Self::Terrain => return true,
+                Self::Build => return village.utility_panel.is_none(),
+                Self::View => return !village.trade_open(),
+                Self::ResourcePanel(panel) => {
+                    return !village.construction.menu
+                        && !village.construction.is_placing()
+                        && Self::Panel(panel).available(village);
+                }
+                _ => {}
+            }
+        }
+        if village.map_input_blocked()
+            || village.advance_open()
+            || village.planning_roads()
+            || village.terrain_editor.open
+        {
+            return false;
+        }
+        match self {
+            Self::Terrain | Self::Advance => false,
+            Self::Beds => {
+                village.utility_panel.is_none()
+                    && !village.construction.menu
+                    && !village.construction.production.open
+                    && village.construction.has_selected_plot()
+            }
+            Self::Farm(_) => {
+                village.utility_panel.is_none()
+                    && village.construction.farming.open
+                    && !village.construction.menu
+                    && !village.construction.production.open
+            }
+            Self::Recipes => village.utility_panel.is_none() && !village.construction.menu,
+            Self::Recipe(_)
+            | Self::RecipePage(_)
+            | Self::FacilityIrrigation
+            | Self::CraftWorkspace
+            | Self::MoveCraft => {
+                village.utility_panel.is_none()
+                    && village.construction.production.open
+                    && !village.construction.menu
+            }
+            Self::Gather => {
+                village.utility_panel.is_none()
+                    && !village.construction.menu
+                    && !village.construction.is_placing()
+                    && village.construction.gathering.has_selection()
+            }
+            Self::View | Self::Forecast => !village.trade_open(),
+            Self::Library | Self::Sound => true,
+            Self::Volume { .. } => false,
+            Self::CampPreset(_) => {
+                village.camp.is_none() && village.arrival_time >= ARRIVAL_DURATION
+            }
+            Self::Build => village.utility_panel.is_none(),
+            Self::RotatePlacement | Self::CancelPlacement => village.construction.placing_project(),
+            Self::FieldDimensions => {
+                village.utility_panel.is_none() && village.construction.can_resize_selected_field()
+            }
+            Self::ResizeField(_) => {
+                village.construction.placing_field()
+                    || (village.utility_panel.is_none()
+                        && village.construction.can_resize_selected_field())
+            }
+            Self::Pause => true,
+            Self::Speed => {
+                !village.construction.menu
+                    && !village.construction.production.open
+                    && !village.construction.farming.open
+                    && village.utility_panel.is_none()
+            }
+            Self::Lenses => false,
+            Self::LensFilter(_) => village.lenses.has_filter(),
+            Self::LensSite(_) => village.lenses.network_view().is_some(),
+            Self::Guide | Self::ConnectRoad | Self::UndoRoad | Self::FinishRoad => true,
+            Self::Manage => !village.construction.menu && !village.construction.is_placing(),
+            // Dock and stat-card shortcuts switch between panels or close their own.
+            Self::ResourcePanel(panel) => {
+                Self::Manage.available(village) && Self::Panel(panel).available(village)
+            }
+            Self::GridFromFinances => {
+                village.utility_panel == Some(UtilityPanel::Finances)
+                    && !village.finance_history_open
+            }
+            Self::PantryFromStores => {
+                village.utility_panel == Some(UtilityPanel::Inventory)
+                    && matches!(
+                        village.inventory_view,
+                        InventoryView::Resources | InventoryView::Food
+                    )
+                    && !village.editing_inventory
+                    && Self::Panel(UtilityPanel::Pantry).available(village)
+            }
+            Self::Panel(_) => self.supported(village),
+            Self::ClosePanel => village
+                .utility_panel
+                .is_some_and(|panel| panel != UtilityPanel::Projects),
+            Self::BuildingPower | Self::Cooling => {
+                village.utility_panel.is_none()
+                    && !village.construction.menu
+                    && !village.construction.is_placing()
+                    && self.facility_switch(village).is_some()
+            }
+            Self::SelectedProject(_) => village.utility_panel.is_none(),
+            Self::FocusSelectedProject | Self::DeselectProject => {
+                village.selected_project_focus().is_some()
+            }
+            Self::InventorySearch | Self::InventoryItem(_) => false,
+            Self::InventoryView => village.utility_panel == Some(UtilityPanel::Inventory),
+            Self::CraftTab(_) => village.utility_panel == Some(UtilityPanel::Crafting),
+            Self::LocateCraftJob | Self::MoveCraftJob => {
+                village.utility_panel == Some(UtilityPanel::Crafting)
+                    && village.craft_job_site.is_some()
+            }
+            Self::NextCraftWorkspace => {
+                village.utility_panel == Some(UtilityPanel::Crafting)
+                    && (village.craft_recipe.is_some() || village.craft_job_site.is_some())
+            }
+            Self::StartCraft => {
+                village.utility_panel == Some(UtilityPanel::Crafting)
+                    && village.craft_recipe.is_some()
+            }
+            Self::WorkPriority(_) | Self::WorkerReservation(_) => {
+                village.utility_panel == Some(UtilityPanel::Residents)
+            }
+            Self::FocusResidentProject => {
+                village.utility_panel == Some(UtilityPanel::Residents)
+                    && village
+                        .construction
+                        .resident_project(village.selected_resident)
+                        .is_some()
+            }
+            Self::FocusResident => {
+                let resident = village.selected_resident;
+                village.utility_panel == Some(UtilityPanel::Residents)
+                    && !village.construction.away_for_work(resident)
+                    && !village.construction.driver_away(resident)
+            }
+            Self::ResidentProfile(_) => village.utility_panel == Some(UtilityPanel::Residents),
+            Self::Resident(_) => {
+                village.utility_panel == Some(UtilityPanel::Residents)
+                    || (!village.stock.sandbox
+                        && village.utility_panel == Some(UtilityPanel::Finances))
+            }
+            Self::PantryBatches => village.utility_panel == Some(UtilityPanel::Pantry),
+            Self::AutoCook | Self::CookingTarget { .. } if village.stock.sandbox => false,
+            Self::PantryPriority
+            | Self::PantryTransport
+            | Self::PantryBudget
+            | Self::PantryPolicy(..)
+            | Self::AutoCook
+            | Self::CookingTarget { .. } => {
+                village.utility_panel == Some(UtilityPanel::Pantry)
+                    && village.pantry_batch_page.is_none()
+            }
+            Self::Page(_) if village.utility_panel == Some(UtilityPanel::Pantry) => {
+                village.pantry_batch_page.is_some()
+            }
+            Self::Shift(repeat) => {
+                !village.stock.sandbox
+                    && (village.utility_panel == Some(UtilityPanel::Finances)
+                        || village.resident_overview_open())
+                    && village
+                        .construction
+                        .shift_action(village.selected_resident, repeat)
+                        .is_some()
+            }
+            Self::Ledger => village.utility_panel == Some(UtilityPanel::Finances),
+            Self::ExpansionReserve => {
+                village.utility_panel == Some(UtilityPanel::Finances)
+                    && !village.finance_history_open
+            }
+            Self::Home(_) | Self::ListedHome(_) => village.resident_overview_open(),
+            Self::Page(_) if village.utility_panel == Some(UtilityPanel::Finances) => {
+                village.finance_history_open
+            }
+            Self::Page(_) => matches!(
+                village.utility_panel,
+                Some(UtilityPanel::Inventory | UtilityPanel::Crafting | UtilityPanel::Residents)
+            ),
+        }
+    }
+
+    fn facility_switch(self, village: &Village) -> Option<bool> {
+        let building = village.construction.production.selected?;
+        let utilities = &village.construction.utilities;
+        match self {
+            Self::BuildingPower => utilities.building_switch(building),
+            Self::Cooling => utilities.cooling_switch(building),
+            _ => None,
+        }
+    }
+
+    fn label(self, village: &Village, picker: &PanelPicker) -> String {
+        match self {
+            Self::Build => "Build".into(),
+            Self::CampPreset(index) => {
+                ["Camp in shade", "Camp near entrance", "Camp in clearing"][index].into()
+            }
+            Self::View => "View & options".into(),
+            Self::Forecast if village.show_forecast => "Hide forecast".into(),
+            Self::Forecast => "Show forecast".into(),
+            Self::Library => "Saved villages".into(),
+            Self::Sound => "Sound settings".into(),
+            Self::Volume { .. } => String::new(),
+            Self::RotatePlacement => "Rotate".into(),
+            Self::CancelPlacement => "Cancel placement".into(),
+            Self::ConnectRoad if village.connect_road_strokes => "Connected route".into(),
+            Self::ConnectRoad => "Single road tile".into(),
+            Self::UndoRoad => "Undo road stroke".into(),
+            Self::FinishRoad => "Finish roads".into(),
+            Self::Terrain => "Terrain".into(),
+            Self::Advance => "Advance days".into(),
+            Self::FieldDimensions => numeric_label(
+                village,
+                NumericTarget::FieldDimensions,
+                "Set field dimensions",
+            ),
+            Self::ResizeField(delta) => format!(
+                "{} {}",
+                if delta.x != 0 { "Width" } else { "Depth" },
+                if delta.x + delta.y > 0 { "+" } else { "−" }
+            ),
+            // Planning pauses the village; this chooses what happens when planning ends.
+            Self::Pause if village.planning_pause() && village.paused => "Resume when done".into(),
+            Self::Pause if village.planning_pause() => "Stay paused".into(),
+            Self::Pause if village.paused => "Resume".into(),
+            Self::Pause => "Pause".into(),
+            Self::Speed => village.speed_label(),
+            Self::Guide if village.guide.open() => "Close guide".into(),
+            Self::Guide => "Guide".into(),
+            Self::Lenses if village.lenses.open => "Close lenses".into(),
+            Self::Lenses => "Map lenses".into(),
+            Self::LensSite(false) => "Previous facility".into(),
+            Self::LensSite(true) => "Next facility".into(),
+            Self::LensFilter(false) => "Previous filter".into(),
+            Self::LensFilter(true) => "Next filter".into(),
+            Self::Manage if picker.open => "Close menu".into(),
+            Self::Manage => "Manage".into(),
+            Self::GridFromFinances => "Manage grid power".into(),
+            Self::PantryFromStores => "Manage food".into(),
+            Self::Panel(panel) | Self::ResourcePanel(panel) => Self::PANELS
+                .iter()
+                .find_map(|(item, label)| (*item == panel).then_some(*label))
+                .unwrap_or_default()
+                .into(),
+            Self::ClosePanel => "Close panel".into(),
+            Self::Page(false) => "Previous page".into(),
+            Self::Page(true) => "Next page".into(),
+            Self::InventorySearch if village.editing_inventory => "Done searching".into(),
+            Self::InventorySearch if village.inventory_view == InventoryView::Production => {
+                "Find producer".into()
+            }
+            Self::InventorySearch => "Find material".into(),
+            Self::CraftTab(view) => view.label().into(),
+            Self::NextCraftWorkspace => "Choose next workspace".into(),
+            Self::LocateCraftJob => "Find job in village".into(),
+            Self::MoveCraftJob => "Move unfinished job".into(),
+            Self::StartCraft if village.craft_view == crate::construction::CraftView::Repair => {
+                "Start repair".into()
+            }
+            Self::StartCraft => "Make this item".into(),
+            Self::InventoryView => match village.inventory_view.next() {
+                InventoryView::Resources => "Show resources",
+                InventoryView::Equipment => "Show items and equipment",
+                InventoryView::Food => "Show food",
+                InventoryView::Production => "Show production sites",
+            }
+            .into(),
+            Self::InventoryItem(_) | Self::Recipe(_) | Self::FacilityIrrigation => String::new(),
+            Self::Recipes if village.construction.production.open => "Close recipes".into(),
+            Self::Recipes => "Recipes".into(),
+            Self::Gather => "Gather resource".into(),
+            Self::Beds if village.construction.farming.open => "Close beds".into(),
+            Self::Beds => "Beds".into(),
+            Self::Farm(action) => match action {
+                FarmControl::NextBed => "Next bed",
+                FarmControl::WholePlot if village.construction.farming.whole_plot => {
+                    "Inspect one bed"
+                }
+                FarmControl::WholePlot => "Whole plot",
+                FarmControl::Balances if village.construction.farming.show_balances => {
+                    "Hide water & material balances"
+                }
+                FarmControl::Balances => "Show water & material balances",
+                FarmControl::Irrigation(Some(true)) => "Irrigate from village supplies",
+                FarmControl::Irrigation(Some(false)) => "Turn off irrigation",
+                FarmControl::Irrigation(None) => "Toggle irrigation",
+                FarmControl::Residues(Some(false)) => "Leave residues as cover",
+                FarmControl::Residues(Some(true)) => "Collect residues after harvest",
+                FarmControl::Residues(None) => "Toggle residue collection",
+                FarmControl::Crop(Some(crop)) => crop.label(),
+                FarmControl::Crop(None) => "Change crop",
+                FarmControl::Density(Some(0.5)) => "Wide spacing",
+                FarmControl::Density(Some(1.0)) => "Standard spacing",
+                FarmControl::Density(Some(1.5)) => "Dense spacing",
+                FarmControl::Density(_) => "Change spacing",
+                FarmControl::Work(FarmAction::Prepare) => "Prepare soil",
+                FarmControl::Work(FarmAction::Plant) => "Sow",
+                FarmControl::Work(FarmAction::Harvest) => "Harvest",
+                FarmControl::Work(FarmAction::Clear)
+                    if village.construction.farming.pending_crop_clear.is_some() =>
+                {
+                    if village.construction.farming.whole_plot {
+                        "Confirm clear crops"
+                    } else {
+                        "Confirm clear crop"
+                    }
+                }
+                FarmControl::Work(FarmAction::Clear) if village.construction.farming.whole_plot => {
+                    "Clear crops"
+                }
+                FarmControl::Work(FarmAction::Clear) => "Clear bed",
+                FarmControl::Work(FarmAction::Amend) => "Amend soil",
+                FarmControl::Work(FarmAction::Collect) => "Collect residues",
+            }
+            .into(),
+            Self::CraftWorkspace => "Next workspace".into(),
+            Self::MoveCraft => "Move unfinished job".into(),
+            Self::RecipePage(false) => "Previous recipes".into(),
+            Self::RecipePage(true) => "Next recipes".into(),
+            Self::FocusSelectedProject => "Find in village".into(),
+            Self::DeselectProject => "×".into(),
+            Self::SelectedProject(action) => match action {
+                ProjectAction::Prioritize => "Prioritize project",
+                ProjectAction::Move => "Move building",
+                ProjectAction::Copy => "Copy blueprint",
+                ProjectAction::Cancel => "Cancel plan",
+                ProjectAction::Salvage => "Salvage building",
+                ProjectAction::Demolish => "Demolish",
+            }
+            .into(),
+            Self::Resident(index) => NAMES[index].into(),
+            Self::FocusResident => "Find resident in village".into(),
+            Self::FocusResidentProject => "View resident project".into(),
+            Self::ResidentProfile(profile) => profile.label().into(),
+            Self::WorkPriority(group) => numeric_label(
+                village,
+                NumericTarget::WorkPriority(group),
+                &village.construction.work_priority_label(group),
+            ),
+            Self::WorkerReservation(essential) => numeric_label(
+                village,
+                NumericTarget::WorkerReservation(essential),
+                &village.construction.worker_reservation_label(essential),
+            ),
+            Self::Home(true) => "Assign selected home".into(),
+            Self::Home(false) => "Clear home assignment".into(),
+            Self::ListedHome(_) => String::new(),
+            Self::Shift(repeat) => village
+                .construction
+                .shift_action(village.selected_resident, repeat)
+                .unwrap_or_default()
+                .into(),
+            Self::Ledger if village.finance_history_open => "Close ledger".into(),
+            Self::Ledger => "Open ledger".into(),
+            Self::ExpansionReserve => numeric_label(
+                village,
+                NumericTarget::ExpansionReserve,
+                "Set construction cash reserve",
+            ),
+            Self::PantryBatches if village.pantry_batch_page.is_some() => {
+                "Close food batches".into()
+            }
+            Self::PantryBatches => "Food batches".into(),
+            Self::PantryPriority => {
+                format!("Chill first · {}", village.stock.pantry.priority.label())
+            }
+            Self::PantryTransport if village.construction.supplier_construction() => {
+                "Purchases: supplier freight".into()
+            }
+            Self::PantryTransport => "Purchases: resident pickup".into(),
+            Self::PantryBudget => {
+                numeric_label(village, NumericTarget::Food, "Set daily food budget")
+            }
+            Self::AutoCook if village.construction.production.kitchen_policy.automatic => {
+                "Automatic cooking on".into()
+            }
+            Self::AutoCook => "Automatic cooking off".into(),
+            Self::CookingTarget {
+                preserved,
+                increase,
+            } => format!(
+                "{} {:.1}d {}",
+                if preserved {
+                    "Dried target"
+                } else {
+                    "Fresh target"
+                },
+                f64::from(
+                    village
+                        .construction
+                        .production
+                        .kitchen_policy
+                        .half_days(preserved)
+                ) / 2.0,
+                if increase { "+" } else { "−" }
+            ),
+            Self::PantryPolicy(_, _, true) if village.construction.trade.household_restock_off => {
+                "Automatic food purchases off".into()
+            }
+            Self::PantryPolicy(_, _, true) => "Automatic food purchases on".into(),
+            Self::PantryPolicy(-1, _, false) => "Reserve −0.5d".into(),
+            Self::PantryPolicy(1, _, false) => "Reserve +0.5d".into(),
+            Self::PantryPolicy(_, budget, false) if budget < 0 => "Budget −R$25".into(),
+            Self::PantryPolicy(_, _, false) => "Budget +R$25".into(),
+            Self::BuildingPower if self.facility_switch(village) == Some(true) => {
+                "Switch building off".into()
+            }
+            Self::BuildingPower => "Switch building on".into(),
+            Self::Cooling if self.facility_switch(village) == Some(true) => "Pause cooling".into(),
+            Self::Cooling => "Resume cooling".into(),
+        }
+    }
+}
+
+fn numeric_label(village: &Village, target: NumericTarget, label: &str) -> String {
+    match &village.numeric_entry {
+        Some((active, entry)) if *active == target => {
+            let value = match target {
+                NumericTarget::WorkPriority(_) => {
+                    format!("Priority {entry} (0 Low · 1 Normal · 2 High · 3 Highest)")
+                }
+                NumericTarget::WorkerReservation(_) => format!("Reserved workers {entry} (0–5)"),
+                NumericTarget::Bed => format!("Bed {entry}"),
+                NumericTarget::FieldDimensions => format!("Width and depth (e.g. 8 12) · {entry}"),
+                _ => format!("R${entry}"),
+            };
+            format!("{value} · Enter to set · Esc to cancel")
+        }
+        _ => label.into(),
+    }
+}
+
+#[derive(Component)]
+pub(super) struct Toolbar;
+
+#[derive(Component)]
+pub(crate) struct DockButton;
+
+#[derive(Component)]
+enum ControlsRow {
+    Dock,
+    Context,
+}
+
+/// The dock's "View & options" button, used to anchor its popover above it.
+#[derive(Component)]
+pub(super) struct ViewOptionsButton;
+
+/// The action column, which the dialog frame lifts above its dimmed backdrop.
+#[derive(Component)]
+pub(super) struct PanelMenu;
+
+pub(super) type PanelMenuMarker = PanelMenu;
+
+#[derive(Component)]
+struct ActionDetails;
+
+const HOME_ROWS: usize = 4;
+
+#[derive(Default, Resource)]
+pub(crate) struct PanelPicker {
+    pub(super) open: bool,
+    home_page: usize,
+    pub(super) view_open: bool,
+    visible_homes: [Option<usize>; HOME_ROWS],
+}
+
+impl PanelPicker {
+    pub(crate) fn dismiss(&mut self) -> bool {
+        let was_open = self.open || self.view_open;
+        self.open = false;
+        self.view_open = false;
+        was_open
+    }
+}
+
+pub(super) fn install(app: &mut App) {
+    embedded_asset!(app, "resident_portraits/iara.png");
+    embedded_asset!(app, "resident_portraits/bento.png");
+    embedded_asset!(app, "resident_portraits/luz.png");
+    embedded_asset!(app, "resident_portraits/caua.png");
+    embedded_asset!(app, "resident_portraits/nina.png");
+    dock_icon::install(app);
+    top_bar::install(app);
+    app.init_resource::<PanelPicker>()
+        .add_systems(Startup, spawn)
+        .add_systems(
+            Update,
+            handle_buttons
+                .after(read_camp_pointer)
+                .before(village_input),
+        )
+        .add_systems(Update, refresh.after(village_input))
+        .add_systems(Update, fit_and_scroll_menu.after(refresh));
+}
+
+fn visible(village: &Village, setup: &WorldSetup, saves: &SaveMenu, sound: &SoundSettings) -> bool {
+    sound.open
+        || saves.open
+        || (!setup.open && (village.camp.is_some() || village.arrival_time >= ARRIVAL_DURATION))
+}
+
+fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
+    commands
+        .spawn((
+            Toolbar,
+            Node {
+                display: Display::None,
+                position_type: PositionType::Absolute,
+                bottom: px(18),
+                left: px(22),
+                right: px(22),
+                flex_direction: FlexDirection::Column,
+                ..default()
+            },
+        ))
+        .with_children(|row| {
+            row.spawn((ControlsRow::Dock, GlobalZIndex(DOCK_LAYER), dock_row()))
+                .with_children(|row| {
+                    // V2's dock: building and land first, then the village's panels, then options.
+                    for (action, key) in [
+                        (Action::Build, Some("B")),
+                        (Action::ResourcePanel(UtilityPanel::Projects), Some("F11")),
+                        (Action::ResourcePanel(UtilityPanel::Residents), Some("N")),
+                        (Action::Terrain, Some("F4")),
+                        (Action::ResourcePanel(UtilityPanel::Inventory), Some("F10")),
+                        (Action::ResourcePanel(UtilityPanel::Crafting), None),
+                        (Action::ResourcePanel(UtilityPanel::Pantry), None),
+                        (Action::ResourcePanel(UtilityPanel::Water), Some("V")),
+                        (Action::ResourcePanel(UtilityPanel::Power), Some("P")),
+                        (Action::ResourcePanel(UtilityPanel::Finances), Some("H")),
+                        (Action::ResourcePanel(UtilityPanel::Upkeep), Some("F7")),
+                        (Action::View, None),
+                    ] {
+                        // Thin rules split building, village panels and options, as in V2's dock.
+                        if matches!(
+                            action,
+                            Action::ResourcePanel(UtilityPanel::Inventory) | Action::View
+                        ) {
+                            row.spawn((
+                                Node {
+                                    width: px(2),
+                                    height: px(30),
+                                    margin: UiRect::horizontal(px(4)),
+                                    align_self: AlignSelf::Center,
+                                    ..default()
+                                },
+                                BackgroundColor(crate::theme::EDGE),
+                            ));
+                        }
+                        let button = spawn_button(row, &assets, action);
+                        row.commands_mut().entity(button).insert(DockButton);
+                        if matches!(action, Action::View) {
+                            row.commands_mut().entity(button).insert(ViewOptionsButton);
+                        }
+                        if let Some(key) = key {
+                            row.commands_mut()
+                                .entity(button)
+                                .with_children(|button| top_bar::key_chip(button, &assets, key));
+                        }
+                    }
+                });
+            row.spawn((ControlsRow::Context, GlobalZIndex(DOCK_LAYER), dock_row()))
+                .with_children(|row| {
+                    // Shown on their own only while their screen is open; otherwise they live in
+                    // the View & options popover.
+                    for action in [Action::Library, Action::Sound] {
+                        spawn_button(row, &assets, action);
+                    }
+                    // Tool controls get their own row above the dock.
+                    for action in [
+                        Action::RotatePlacement,
+                        Action::CancelPlacement,
+                        Action::ConnectRoad,
+                        Action::UndoRoad,
+                        Action::FinishRoad,
+                        Action::LensFilter(false),
+                        Action::LensFilter(true),
+                        Action::LensSite(false),
+                        Action::LensSite(true),
+                    ] {
+                        spawn_button(row, &assets, action);
+                    }
+                    for index in 0..CAMP_SITES.len() {
+                        spawn_button(row, &assets, Action::CampPreset(index));
+                    }
+                    for effects in [false, true] {
+                        for delta in [-5, 5] {
+                            spawn_button(row, &assets, Action::Volume { effects, delta });
+                        }
+                    }
+                });
+            row.spawn((
+                PanelMenu,
+                GlobalZIndex(0),
+                Interaction::None,
+                bevy::ui::FocusPolicy::Block,
+                crate::theme::panel_node(Node {
+                    display: Display::None,
+                    position_type: PositionType::Absolute,
+                    right: px(0),
+                    bottom: percent(100),
+                    width: px(PANEL_WIDTH),
+                    flex_wrap: FlexWrap::Wrap,
+                    padding: UiRect::all(px(6)),
+                    row_gap: px(5),
+                    column_gap: px(5),
+                    overflow: Overflow::scroll_y(),
+                    align_content: AlignContent::Start,
+                    ..default()
+                }),
+                ScrollPosition::default(),
+                crate::theme::panel(),
+            ))
+            .with_children(|menu| {
+                menu.spawn((
+                    super::thumbnails::ThumbnailImage(super::thumbnails::SELECTED_SLOT),
+                    ImageNode::default(),
+                    Node {
+                        display: Display::None,
+                        width: px(160),
+                        height: px(120),
+                        align_self: AlignSelf::Center,
+                        ..default()
+                    },
+                ));
+                super::selection_card::spawn(menu, &assets);
+                super::farm_card::spawn(menu, &assets);
+                super::site_card::spawn(menu, &assets);
+                for action in [
+                    Action::Recipes,
+                    Action::Gather,
+                    Action::Beds,
+                    Action::InventoryView,
+                    Action::InventorySearch,
+                    Action::CraftTab(crate::construction::CraftView::Make),
+                    Action::CraftTab(crate::construction::CraftView::Repair),
+                    Action::CraftTab(crate::construction::CraftView::Jobs),
+                    Action::NextCraftWorkspace,
+                    Action::LocateCraftJob,
+                    Action::MoveCraftJob,
+                    Action::StartCraft,
+                    Action::PantryFromStores,
+                ] {
+                    spawn_button(menu, &assets, action);
+                }
+                spawn_button(menu, &assets, Action::FocusSelectedProject);
+                spawn_button(menu, &assets, Action::DeselectProject);
+                for action in [
+                    ProjectAction::Prioritize,
+                    ProjectAction::Move,
+                    ProjectAction::Copy,
+                    ProjectAction::Cancel,
+                    ProjectAction::Salvage,
+                    ProjectAction::Demolish,
+                ] {
+                    spawn_button(menu, &assets, Action::SelectedProject(action));
+                }
+                // Cultivation controls live on the farm card (`farm_card`).
+                spawn_button(menu, &assets, Action::FieldDimensions);
+                for delta in [IVec2::NEG_X, IVec2::X, IVec2::NEG_Y, IVec2::Y] {
+                    spawn_button(menu, &assets, Action::ResizeField(delta));
+                }
+                for (panel, _) in Action::PANELS {
+                    spawn_button(menu, &assets, Action::Panel(panel));
+                }
+                for index in 0..NAMES.len() {
+                    spawn_button(menu, &assets, Action::Resident(index));
+                }
+                spawn_button(menu, &assets, Action::FocusResident);
+                spawn_button(menu, &assets, Action::FocusResidentProject);
+                for profile in ResidentProfile::ALL {
+                    spawn_button(menu, &assets, Action::ResidentProfile(profile));
+                }
+                for group in WorkGroup::ALL {
+                    spawn_button(menu, &assets, Action::WorkPriority(group));
+                }
+                spawn_button(menu, &assets, Action::WorkerReservation(true));
+                spawn_button(menu, &assets, Action::WorkerReservation(false));
+                spawn_button(menu, &assets, Action::Shift(false));
+                spawn_button(menu, &assets, Action::Shift(true));
+                spawn_button(menu, &assets, Action::Ledger);
+                spawn_button(menu, &assets, Action::ExpansionReserve);
+                spawn_button(menu, &assets, Action::GridFromFinances);
+                spawn_button(menu, &assets, Action::PantryBatches);
+                spawn_button(menu, &assets, Action::PantryPriority);
+                spawn_button(menu, &assets, Action::PantryTransport);
+                spawn_button(menu, &assets, Action::PantryBudget);
+                spawn_button(menu, &assets, Action::AutoCook);
+                for preserved in [false, true] {
+                    for increase in [false, true] {
+                        spawn_button(
+                            menu,
+                            &assets,
+                            Action::CookingTarget {
+                                preserved,
+                                increase,
+                            },
+                        );
+                    }
+                }
+                for (reserve, budget, toggle) in [
+                    (-1, 0, false),
+                    (1, 0, false),
+                    (0, -2_500, false),
+                    (0, 2_500, false),
+                    (0, 0, true),
+                ] {
+                    spawn_button(menu, &assets, Action::PantryPolicy(reserve, budget, toggle));
+                }
+                spawn_button(menu, &assets, Action::BuildingPower);
+                spawn_button(menu, &assets, Action::Cooling);
+                spawn_button(menu, &assets, Action::Home(true));
+                spawn_button(menu, &assets, Action::Home(false));
+                for row in 0..HOME_ROWS {
+                    spawn_button(menu, &assets, Action::ListedHome(row));
+                }
+                spawn_button(menu, &assets, Action::FacilityIrrigation);
+                spawn_button(menu, &assets, Action::RecipePage(false));
+                spawn_button(menu, &assets, Action::RecipePage(true));
+                spawn_button(menu, &assets, Action::CraftWorkspace);
+                spawn_button(menu, &assets, Action::MoveCraft);
+                for row in 0..crate::construction::INVENTORY_ROWS {
+                    spawn_button(menu, &assets, Action::InventoryItem(row));
+                }
+                for row in 0..crate::construction::PAGE_KEYS.len() {
+                    spawn_button(menu, &assets, Action::Recipe(row));
+                }
+                for action in [Action::Page(false), Action::Page(true), Action::ClosePanel] {
+                    spawn_button(menu, &assets, action);
+                }
+            });
+            row.spawn((
+                ActionDetails,
+                Text::default(),
+                ui_font(&assets, 15.0),
+                Visibility::Hidden,
+                GlobalZIndex(DOCK_LAYER + 1),
+                crate::theme::panel(),
+                crate::theme::panel_node(Node {
+                    position_type: PositionType::Absolute,
+                    right: px(PANEL_WIDTH + 8.),
+                    bottom: percent(100),
+                    width: px(254),
+                    padding: UiRect::all(px(12)),
+                    ..default()
+                }),
+            ));
+        });
+}
+
+fn dock_row() -> impl Bundle {
+    (
+        Interaction::None,
+        bevy::ui::FocusPolicy::Block,
+        crate::theme::panel_node(Node {
+            flex_wrap: FlexWrap::Wrap,
+            justify_content: JustifyContent::Center,
+            row_gap: px(8),
+            column_gap: px(8),
+            padding: UiRect::all(px(12)),
+            ..default()
+        }),
+        crate::theme::panel(),
+    )
+}
+
+fn spawn_button(parent: &mut ChildSpawnerCommands, assets: &AssetServer, action: Action) -> Entity {
+    // A selected building's upkeep and removal actions are quieter than its main ones.
+    let secondary = matches!(action, Action::SelectedProject(_) | Action::BuildingPower);
+    let (vertical_padding, font_size) = if secondary { (4, 13.0) } else { (6, 14.0) };
+    let mut button = parent.spawn((
+        action,
+        Button,
+        crate::theme::button_node(Node {
+            padding: UiRect::axes(px(if secondary { 10 } else { 12 }), px(vertical_padding)),
+            column_gap: px(6),
+            align_items: AlignItems::Center,
+            ..default()
+        }),
+        crate::theme::button(),
+    ));
+    // The selected building closes with a round × in the card's corner, as in V2.
+    if matches!(action, Action::DeselectProject) {
+        button.insert(crate::theme::button_node(Node {
+            position_type: PositionType::Absolute,
+            top: px(8),
+            right: px(8),
+            width: px(34),
+            height: px(34),
+            justify_content: JustifyContent::Center,
+            align_items: AlignItems::Center,
+            border_radius: BorderRadius::all(px(17)),
+            ..default()
+        }));
+    }
+    if matches!(action, Action::View | Action::Forecast) {
+        button.insert(crate::audio::DisclosureSound);
+    }
+    let font_size = if matches!(action, Action::DeselectProject) {
+        20.0
+    } else {
+        font_size
+    };
+    dock_icon::spawn(&mut button, assets, action);
+    button.with_child((
+        Text::default(),
+        crate::ui_font::ui_font_weight(assets, font_size, 600),
+    ));
+    if let Action::Resident(index) = action {
+        let image = match index {
+            0 => load_embedded_asset!(assets, "resident_portraits/iara.png"),
+            1 => load_embedded_asset!(assets, "resident_portraits/bento.png"),
+            2 => load_embedded_asset!(assets, "resident_portraits/luz.png"),
+            3 => load_embedded_asset!(assets, "resident_portraits/caua.png"),
+            4 => load_embedded_asset!(assets, "resident_portraits/nina.png"),
+            _ => unreachable!("the roster has five residents"),
+        };
+        button.insert(crate::theme::button_node(Node {
+            padding: UiRect::axes(px(10), px(3)),
+            flex_direction: FlexDirection::RowReverse,
+            justify_content: JustifyContent::FlexEnd,
+            align_items: AlignItems::Center,
+            column_gap: px(6),
+            ..default()
+        }));
+        button.with_child((
+            ImageNode::new(image),
+            Node {
+                width: px(48),
+                height: px(36),
+                flex_shrink: 0.,
+                ..default()
+            },
+        ));
+    }
+    button.id()
+}
+
+fn fit_and_scroll_menu(
+    window: Single<&Window, With<PrimaryWindow>>,
+    toolbar: Single<(&Node, &ComputedNode), With<Toolbar>>,
+    mut menu: ScrollablePanelMenu,
+    scroll: Res<bevy::input::mouse::AccumulatedMouseScroll>,
+) {
+    let (toolbar, computed) = *toolbar;
+    let (node, position, interaction) = &mut *menu;
+    let toolbar_height = computed.size().y * computed.inverse_scale_factor();
+    // Stay below the clock card and its Guide and Lenses buttons.
+    let max_height = px((window.height() - super::RIGHT_PANEL_TOP - 30. - toolbar_height).max(0.));
+    if node.max_height != max_height {
+        node.max_height = max_height;
+    }
+    if toolbar.display == Display::None || node.display == Display::None {
+        position.y = 0.;
+    } else if **interaction != Interaction::None && scroll.delta.y != 0. {
+        let step = match scroll.unit {
+            bevy::input::mouse::MouseScrollUnit::Line => 34.,
+            bevy::input::mouse::MouseScrollUnit::Pixel => 1.,
+        };
+        position.y = (position.y - scroll.delta.y * step).max(0.);
+    }
+}
+
+type ScrollablePanelMenu<'w, 's> = Single<
+    'w,
+    's,
+    (
+        &'static mut Node,
+        &'static mut ScrollPosition,
+        &'static Interaction,
+    ),
+    (With<PanelMenu>, Without<Toolbar>),
+>;
+
+fn close_village_modes(village: &mut Village, picker: &mut PanelPicker) {
+    picker.dismiss();
+    if village.guide.open() {
+        village.guide.toggle();
+    }
+    village.lenses.open = false;
+    if village.advance_open() {
+        village.apply_advance_action(AdvanceAction::Toggle);
+    }
+    if village.terrain_editor.open {
+        village.terrain_editor.toggle();
+    }
+    if village.planning_roads() {
+        village.finish_road_planning();
+    }
+    if village.construction.is_placing() {
+        village.construction.cancel_placement();
+    }
+    if village.construction.menu {
+        village
+            .construction
+            .toggle_build_menu(village.stock.sandbox);
+    }
+    village.construction.production.open = false;
+    village.construction.farming.close();
+    village.utility_panel = None;
+    village.editing_inventory = false;
+    village.numeric_entry = None;
+    village.show_forecast = false;
+}
+
+fn handle_buttons(
+    (setup, mut saves, mut sound): (Res<WorldSetup>, ResMut<SaveMenu>, ResMut<SoundSettings>),
+    (catalog, land): (Res<Catalog>, Res<Land>),
+    (mut village, mut pointer): (ResMut<Village>, ResMut<CampPointer>),
+    mut picker: ResMut<PanelPicker>,
+    mut camera: Single<&mut VillageCamera>,
+    buttons: Query<(&Action, &Interaction, Has<DockButton>), Changed<Interaction>>,
+) {
+    if !visible(&village, &setup, &saves, &sound) {
+        picker.view_open = false;
+        picker.open = false;
+        return;
+    }
+    if !Action::Manage.available(&village) {
+        picker.open = false;
+    }
+    if !Action::View.available(&village)
+        || village.construction.menu
+        || village.construction.is_placing()
+        || village.terrain_editor.open
+        || village.utility_panel.is_some()
+    {
+        picker.view_open = false;
+    }
+    let camera = &mut *camera;
+    for (&action, &interaction, dock) in &buttons {
+        if interaction != Interaction::Pressed {
+            continue;
+        }
+        if dock {
+            if setup.open || village.camp.is_none() || !action.supported(&village) {
+                continue;
+            }
+            let active = !sound.open && !saves.open && action.dock_active(&village, &picker);
+            sound.open = false;
+            if saves.open {
+                library_ui::toggle_library(&mut saves, setup.mode);
+            }
+            close_village_modes(&mut village, &mut picker);
+            village.lenses.choose(None);
+            if active {
+                continue;
+            }
+        } else if sound.open {
+            match action {
+                Action::Sound => sound.open = false,
+                Action::Volume { effects, delta } => sound.adjust_volume(effects, delta),
+                _ => {}
+            }
+            continue;
+        } else if saves.open {
+            if matches!(action, Action::Library) {
+                library_ui::toggle_library(&mut saves, setup.mode);
+            }
+            continue;
+        }
+        if dock
+            || (!setup.open
+                && (village.camp.is_some() || matches!(action, Action::CampPreset(_)))
+                && action.available(&village))
+        {
+            match action {
+                Action::Sound => {
+                    sound.open = true;
+                    picker.open = false;
+                    picker.view_open = false;
+                }
+                Action::Volume { .. } => {}
+                Action::View => picker.view_open = true,
+                Action::Forecast => village.show_forecast = !village.show_forecast,
+                Action::CampPreset(index) => pointer.preset = Some(CAMP_SITES[index].1),
+                Action::Library => {
+                    library_ui::toggle_library(&mut saves, setup.mode);
+                    picker.open = false;
+                    picker.view_open = false;
+                }
+                Action::Build => {
+                    let sandbox = village.stock.sandbox;
+                    village.construction.toggle_build_menu(sandbox);
+                }
+                Action::RotatePlacement => village.construction.rotate_placement(false),
+                Action::CancelPlacement => village.construction.cancel_placement(),
+                Action::ConnectRoad => village.connect_road_strokes = !village.connect_road_strokes,
+                Action::UndoRoad => {
+                    let town = &mut *village;
+                    town.construction.undo_roads(&mut town.stock);
+                }
+                Action::FinishRoad => village.finish_road_planning(),
+                Action::Terrain => village.terrain_editor.toggle(),
+                Action::Advance => {
+                    let was_open = village.advance_open();
+                    close_village_modes(&mut village, &mut picker);
+                    if !was_open {
+                        village.apply_advance_action(AdvanceAction::Toggle);
+                    }
+                }
+                Action::FieldDimensions if !picker.open => {
+                    village.numeric_entry = Some((NumericTarget::FieldDimensions, String::new()));
+                }
+                Action::ResizeField(delta) if village.construction.placing_field() => {
+                    village.construction.resize_field_placement(delta);
+                }
+                Action::ResizeField(delta) if !picker.open => {
+                    if let Some(camp) = village.camp {
+                        let terrain = village.terrain(&setup);
+                        let sandbox = village.stock.sandbox;
+                        village.construction.resize_selected_field(
+                            &catalog,
+                            ConstructionSite {
+                                terrain: &terrain,
+                                land: &land,
+                                camp,
+                            },
+                            delta,
+                            sandbox,
+                        );
+                    }
+                }
+                Action::ResizeField(_) | Action::FieldDimensions => {}
+                Action::Pause => village.paused = !village.paused,
+                Action::Speed => village.speed = (village.speed + 1) % SPEEDS.len(),
+                Action::Lenses => {
+                    let was_open = village.lenses.open;
+                    close_village_modes(&mut village, &mut picker);
+                    if !was_open {
+                        village.lenses.toggle();
+                    }
+                }
+                Action::LensSite(forward) => village.focus_network_site(&setup, camera, forward),
+                Action::LensFilter(forward) => {
+                    village
+                        .lenses
+                        .adjust_filter(catalog.materials.len(), forward);
+                }
+                Action::Guide => {
+                    let was_open = village.guide.open();
+                    close_village_modes(&mut village, &mut picker);
+                    if !was_open {
+                        village.guide.toggle();
+                    }
+                }
+                Action::Manage => {
+                    picker.open = !picker.open;
+                    picker.view_open = false;
+                }
+                Action::ResourcePanel(panel) if village.utility_panel == Some(panel) => {
+                    village.utility_panel = None;
+                    picker.view_open = false;
+                }
+                Action::Panel(panel) | Action::ResourcePanel(panel)
+                    if picker.open || matches!(action, Action::ResourcePanel(_)) =>
+                {
+                    village.open_panel(panel);
+                    if panel == UtilityPanel::Residents {
+                        picker.home_page = 0;
+                    }
+                    picker.open = false;
+                    picker.view_open = false;
+                }
+                Action::ClosePanel => {
+                    village.utility_panel = None;
+                    picker.open = false;
+                }
+                Action::GridFromFinances => village.utility_panel = Some(UtilityPanel::Power),
+                Action::PantryFromStores => {
+                    village.utility_panel = Some(UtilityPanel::Pantry);
+                    village.pantry_batch_page = None;
+                }
+                Action::Page(forward) if village.utility_panel == Some(UtilityPanel::Residents) => {
+                    let pages = village
+                        .construction
+                        .home_options(&catalog, village.selected_resident)
+                        .count()
+                        .div_ceil(HOME_ROWS)
+                        .max(1);
+                    let page = picker.home_page.min(pages - 1);
+                    picker.home_page = (page + if forward { 1 } else { pages - 1 }) % pages;
+                }
+                Action::Page(forward) => village.change_panel_page(&catalog, &land, forward),
+                Action::InventoryItem(row) if !picker.open && village.producer_view() => {
+                    let (_, rows) = village.producer_rows(&catalog);
+                    if let Some(&(producer, _)) = rows.get(row) {
+                        if let crate::construction::Producer::CraftRecipe(id) = producer {
+                            village.craft_recipe = Some(id.to_owned());
+                            village.craft_workspace = None;
+                            continue;
+                        }
+                        if let crate::construction::Producer::Site(site) = producer
+                            && village.utility_panel == Some(UtilityPanel::Crafting)
+                        {
+                            village.craft_job_site = Some(site);
+                            village.craft_workspace = None;
+                            continue;
+                        }
+                        village.utility_panel = None;
+                        village.editing_inventory = false;
+                        match producer {
+                            crate::construction::Producer::Site(site) => {
+                                if let Some(point) =
+                                    village.construction.open_inventory_producer(&catalog, site)
+                                {
+                                    let terrain = village.terrain(&setup);
+                                    camera.target = Vec3::new(
+                                        point.x,
+                                        terrain.height_at(point.x, point.y),
+                                        point.y,
+                                    );
+                                }
+                            }
+                            crate::construction::Producer::CraftRecipe(_) => unreachable!(),
+                            crate::construction::Producer::Blueprint(key) => {
+                                let sandbox = village.stock.sandbox;
+                                village.construction.place_inventory_producer(key, sandbox);
+                            }
+                        }
+                    }
+                }
+                Action::InventoryItem(row) if !picker.open => {
+                    let (_, mut rows) = crate::construction::inventory_rows(
+                        &catalog,
+                        village.inventory_page,
+                        village.inventory_view,
+                        &village.inventory_search,
+                    );
+                    if let Some((_, id, _)) = rows.nth(row)
+                        && village.construction.select_trade_material(&catalog, id)
+                    {
+                        village.utility_panel = Some(UtilityPanel::Trade);
+                        village.editing_inventory = false;
+                    }
+                }
+                Action::InventorySearch => village.editing_inventory = !village.editing_inventory,
+                Action::InventoryView => village.toggle_inventory_view(),
+                Action::CraftTab(view) => {
+                    village.craft_view = view;
+                    village.craft_recipe = None;
+                    village.craft_workspace = None;
+                    village.craft_job_site = None;
+                    village.inventory_page = 0;
+                }
+                Action::NextCraftWorkspace => {
+                    let town = &mut *village;
+                    let workspaces = town.craft_workspace_choices(&catalog);
+                    if !workspaces.is_empty() {
+                        let current = town
+                            .craft_workspace
+                            .or_else(|| town.craft_move_target(&catalog))
+                            .or_else(|| {
+                                town.craft_recipe.as_ref().and_then(|recipe| {
+                                    town.construction
+                                        .crafting_plan(&catalog, &town.stock, recipe, None)
+                                        .ok()
+                                })
+                            });
+                        let next = current
+                            .and_then(|site| {
+                                workspaces.iter().position(|&candidate| candidate == site)
+                            })
+                            .map_or(0, |index| index + 1);
+                        town.craft_workspace = Some(workspaces[next % workspaces.len()]);
+                    }
+                }
+                Action::LocateCraftJob => {
+                    if let Some(site) = village.craft_job_site
+                        && let Some(point) =
+                            village.construction.open_inventory_producer(&catalog, site)
+                    {
+                        village.utility_panel = None;
+                        let terrain = village.terrain(&setup);
+                        camera.target =
+                            Vec3::new(point.x, terrain.height_at(point.x, point.y), point.y);
+                    }
+                }
+                Action::MoveCraftJob => {
+                    let town = &mut *village;
+                    if let (Some(source), Some(destination)) =
+                        (town.craft_job_site, town.craft_move_target(&catalog))
+                        && town.construction.move_crafting_from_site(
+                            &catalog,
+                            &mut town.stock,
+                            source,
+                            destination,
+                        )
+                    {
+                        town.craft_job_site = Some(destination);
+                        town.craft_workspace = None;
+                    }
+                }
+                Action::StartCraft => {
+                    let town = &mut *village;
+                    if let Some(id) = &town.craft_recipe
+                        && let Some(site) = town.construction.start_crafting(
+                            &catalog,
+                            &mut town.stock,
+                            id,
+                            town.craft_workspace,
+                        )
+                    {
+                        town.craft_view = crate::construction::CraftView::Jobs;
+                        town.craft_job_site = Some(site);
+                        town.craft_recipe = None;
+                        town.craft_workspace = None;
+                        town.inventory_page = 0;
+                    }
+                }
+                Action::Resident(index) if !picker.open => village.select_resident(index),
+                Action::FocusResidentProject if !picker.open => {
+                    let resident = village.selected_resident;
+                    if village.construction.select_resident_project(resident) {
+                        village.utility_panel = None;
+                        village.focus_selected_project(&setup, camera);
+                    }
+                }
+                Action::FocusResident if !picker.open => {
+                    let (position, _) = village
+                        .construction
+                        .resident_visual_position(village.selected_resident, &catalog);
+                    let position = world_position(position.x, position.y);
+                    let height = village.terrain(&setup).height_at(position.x, position.y);
+                    camera.target = Vec3::new(position.x, height, position.y);
+                    village.utility_panel = None;
+                }
+                Action::ResidentProfile(profile) if !picker.open => {
+                    village.resident_profile = profile;
+                }
+                Action::WorkerReservation(essential) if !picker.open => {
+                    village.numeric_entry =
+                        Some((NumericTarget::WorkerReservation(essential), String::new()));
+                }
+                Action::WorkPriority(group) if !picker.open => {
+                    village.numeric_entry =
+                        Some((NumericTarget::WorkPriority(group), String::new()));
+                }
+                Action::Home(assign) if !picker.open => village.set_resident_home(&catalog, assign),
+                Action::ListedHome(row) if !picker.open => {
+                    if let Some(home) = picker.visible_homes[row] {
+                        let resident = village.selected_resident;
+                        village.housing_notice = village
+                            .construction
+                            .assign_home(resident, &catalog, home)
+                            .unwrap_or_else(str::to_owned);
+                    }
+                }
+                Action::Shift(repeat) if !picker.open => {
+                    let resident = village.selected_resident;
+                    if repeat {
+                        village.construction.toggle_weekday_shift(resident);
+                    } else {
+                        village.construction.toggle_shift(resident);
+                    }
+                }
+                Action::ExpansionReserve if !picker.open => {
+                    village.numeric_entry = Some((NumericTarget::ExpansionReserve, String::new()));
+                }
+                Action::Ledger if !picker.open => {
+                    village.finance_history_open = !village.finance_history_open;
+                    village.finance_history_page = 0;
+                }
+                Action::BuildingPower | Action::Cooling if !picker.open => {
+                    let construction = &mut village.construction;
+                    if let Some(building) = construction.production.selected {
+                        if matches!(action, Action::Cooling) {
+                            construction.utilities.toggle_cooling(building);
+                        } else {
+                            construction.utilities.toggle(building);
+                        }
+                    }
+                }
+                Action::PantryBatches if !picker.open => {
+                    village.pantry_batch_page = village.pantry_batch_page.is_none().then_some(0);
+                }
+                Action::PantryPriority if !picker.open => {
+                    village.stock.pantry.priority = village.stock.pantry.priority.next();
+                }
+                Action::AutoCook if !picker.open => {
+                    village.construction.production.kitchen_policy.toggle()
+                }
+                Action::CookingTarget {
+                    preserved,
+                    increase,
+                } if !picker.open => {
+                    village
+                        .construction
+                        .production
+                        .kitchen_policy
+                        .change(preserved, if increase { 1 } else { -1 });
+                }
+                Action::PantryTransport if !picker.open => {
+                    village.construction.toggle_supplier_construction()
+                }
+                Action::PantryBudget if !picker.open => {
+                    village.numeric_entry = Some((NumericTarget::Food, String::new()));
+                }
+                Action::PantryPolicy(reserve, budget, toggle) if !picker.open => {
+                    village
+                        .construction
+                        .trade
+                        .pantry_controls(reserve, budget, toggle);
+                }
+                Action::FocusSelectedProject if !picker.open => {
+                    village.focus_selected_project(&setup, camera);
+                }
+                Action::DeselectProject if !picker.open => {
+                    village.construction.clear_selected_project()
+                }
+                Action::SelectedProject(action) if !picker.open => {
+                    let town = &mut *village;
+                    town.construction
+                        .apply_project_action(&catalog, &mut town.stock, action);
+                }
+                Action::Gather => {
+                    let seed = village.terrain(&setup).seed;
+                    let clock = village.clock;
+                    village.construction.gathering.queue(
+                        &catalog,
+                        &land,
+                        seed,
+                        setup.richness(),
+                        clock,
+                    );
+                }
+                Action::Recipes => {
+                    village.construction.toggle_recipes(&catalog);
+                    picker.open = false;
+                }
+                Action::FacilityIrrigation if !picker.open => {
+                    village.construction.cycle_facility_irrigation(&catalog);
+                }
+                Action::RecipePage(forward) if !picker.open => {
+                    village.construction.page_recipes(&catalog, forward)
+                }
+                Action::CraftWorkspace if !picker.open => {
+                    village.construction.cycle_craft_workspace(&catalog, true);
+                }
+                Action::MoveCraft if !picker.open => {
+                    let town = &mut *village;
+                    town.construction
+                        .move_selected_craft(&catalog, &mut town.stock);
+                }
+                Action::Recipe(row) if !picker.open => {
+                    let town = &mut *village;
+                    town.construction
+                        .queue_recipe_row(&catalog, &mut town.stock, row);
+                }
+                Action::Beds => {
+                    village.construction.toggle_beds();
+                    picker.open = false;
+                }
+                Action::Farm(action) if !picker.open => {
+                    let town = &mut *village;
+                    town.construction.apply_farm_control(
+                        &catalog,
+                        &mut town.stock,
+                        action,
+                        TownClock {
+                            seconds: town.clock,
+                            round_trip_km: setup.round_trip_km(),
+                        },
+                    );
+                }
+                Action::Panel(_)
+                | Action::ResourcePanel(_)
+                | Action::Recipe(_)
+                | Action::RecipePage(_)
+                | Action::CraftWorkspace
+                | Action::MoveCraft
+                | Action::FacilityIrrigation
+                | Action::Farm(_)
+                | Action::SelectedProject(_)
+                | Action::FocusSelectedProject
+                | Action::DeselectProject
+                | Action::InventoryItem(_)
+                | Action::Resident(_)
+                | Action::ResidentProfile(_)
+                | Action::FocusResident
+                | Action::FocusResidentProject
+                | Action::WorkPriority(_)
+                | Action::WorkerReservation(_)
+                | Action::Home(_)
+                | Action::ListedHome(_)
+                | Action::Shift(_)
+                | Action::Ledger
+                | Action::ExpansionReserve
+                | Action::PantryBatches
+                | Action::PantryPriority
+                | Action::PantryTransport
+                | Action::PantryBudget
+                | Action::AutoCook
+                | Action::CookingTarget { .. }
+                | Action::PantryPolicy(..)
+                | Action::BuildingPower
+                | Action::Cooling => {}
+            }
+        }
+    }
+}
+
+type ToolbarButtons<'w, 's> = Query<
+    'w,
+    's,
+    (
+        &'static Action,
+        &'static Interaction,
+        &'static Children,
+        &'static ChildOf,
+        (
+            &'static mut BackgroundColor,
+            &'static mut BorderColor,
+            &'static mut BoxShadow,
+        ),
+        &'static mut Node,
+        (
+            Has<top_bar::TopBarItem>,
+            Has<top_bar::CustomLabel>,
+            Has<DockButton>,
+        ),
+    ),
+    (Without<Toolbar>, Without<PanelMenu>),
+>;
+
+type PanelNode<'w, 's> =
+    Single<'w, 's, (Entity, &'static mut Node), (With<PanelMenu>, Without<Toolbar>)>;
+
+type ControlsRows<'w, 's> = Query<
+    'w,
+    's,
+    (&'static ControlsRow, &'static mut Node),
+    (Without<Action>, Without<Toolbar>, Without<PanelMenu>),
+>;
+
+type ActionTooltip<'w, 's> = Single<'w, 's, (Entity, &'static mut Visibility), With<ActionDetails>>;
+
+fn refresh(
+    (setup, saves, sound): (Res<WorldSetup>, Res<SaveMenu>, Res<SoundSettings>),
+    (village, catalog): (Res<Village>, Res<Catalog>),
+    mut picker: ResMut<PanelPicker>,
+    mut toolbar: Single<&mut Node, (With<Toolbar>, Without<PanelMenu>)>,
+    (mut menu, mut rows): (PanelNode, ControlsRows),
+    mut buttons: ToolbarButtons,
+    (mut labels, mut details): (Query<&mut Text>, ActionTooltip),
+) {
+    toolbar.display = if visible(&village, &setup, &saves, &sound) {
+        Display::Flex
+    } else {
+        Display::None
+    };
+    if toolbar.display == Display::None {
+        return;
+    }
+    let dock_visible = !setup.open && village.camp.is_some();
+    let (menu_id, menu) = &mut *menu;
+    let show_beds = !picker.open && Action::Farm(FarmControl::NextBed).available(&village);
+    let plot_actions = (show_beds && village.construction.farming.whole_plot)
+        .then(|| village.construction.whole_plot_action_counts(village.clock));
+    let show_recipes = !picker.open && Action::RecipePage(true).available(&village);
+    let craft_workspace = show_recipes
+        .then(|| village.construction.craft_workspace_label(&catalog))
+        .flatten();
+    let irrigation = show_recipes
+        .then(|| village.construction.facility_irrigation(&catalog))
+        .flatten();
+    let recipes = if show_recipes {
+        village.construction.recipe_page_labels(&catalog)
+    } else {
+        Vec::new()
+    };
+    let show_selected_project =
+        !picker.open && Action::SelectedProject(ProjectAction::Salvage).available(&village);
+    let show_field_size = Action::ResizeField(IVec2::ZERO).available(&village);
+    let inventory_items: Vec<_> = if !picker.open && Action::InventoryItem(0).available(&village) {
+        if village.producer_view() {
+            village
+                .producer_rows(&catalog)
+                .1
+                .into_iter()
+                .map(|(_, name)| Some(name))
+                .collect()
+        } else {
+            crate::construction::inventory_rows(
+                &catalog,
+                village.inventory_page,
+                village.inventory_view,
+                &village.inventory_search,
+            )
+            .1
+            .map(|(_, _, item)| {
+                (item.pack > 0 && item.price > 0.).then(|| format!("Trade · {}", item.name))
+            })
+            .collect()
+        }
+    } else {
+        Vec::new()
+    };
+    let show_pantry = !picker.open && Action::PantryBatches.available(&village);
+    let show_finances = !picker.open && Action::Ledger.available(&village);
+    let show_facility_switches = !picker.open
+        && (Action::BuildingPower.available(&village) || Action::Cooling.available(&village));
+    let show_residents = !picker.open && village.utility_panel == Some(UtilityPanel::Residents);
+    let show_homes = !picker.open && village.resident_overview_open();
+    let homes: Vec<_> = if show_homes {
+        village
+            .construction
+            .home_options(&catalog, village.selected_resident)
+            .collect()
+    } else {
+        Vec::new()
+    };
+    let home_pages = homes.len().div_ceil(HOME_ROWS).max(1);
+    picker.home_page = picker.home_page.min(home_pages - 1);
+    let homes = &homes[(picker.home_page * HOME_ROWS)..];
+    picker.visible_homes = std::array::from_fn(|row| homes.get(row).map(|option| option.id));
+    // A selected natural site shows its card in this menu.
+    menu.display = if show_beds
+        || show_recipes
+        || Action::Gather.available(&village)
+        || show_selected_project
+        || show_field_size
+        || show_residents
+        || show_finances
+        || show_pantry
+        || inventory_items.iter().any(Option::is_some)
+        || show_facility_switches
+        || (picker.open && Action::Manage.available(&village))
+    {
+        Display::Flex
+    } else {
+        Display::None
+    };
+    if saves.open || sound.open {
+        menu.display = Display::None;
+    }
+    let mut action_details = String::new();
+    let top_bar_visible = top_bar::visible(&village, &setup, &saves, &sound);
+    let mut menu_has_items = false;
+    let mut context_has_items = false;
+    for (&action, &interaction, children, parent, paint, mut node, (top, custom, dock)) in
+        &mut buttons
+    {
+        let (mut background, mut border, mut shadow) = paint;
+        let show = match action {
+            Action::LensFilter(_) | Action::LensSite(_) | Action::Advance => {
+                action.available(&village)
+            }
+            Action::Volume { .. } => false,
+            Action::Page(_) if village.utility_panel == Some(UtilityPanel::Residents) => {
+                show_homes && home_pages > 1
+            }
+            Action::Page(_)
+            | Action::InventorySearch
+            | Action::InventoryView
+            | Action::CraftTab(_)
+            | Action::ClosePanel
+            | Action::RotatePlacement
+            | Action::CancelPlacement
+            | Action::ConnectRoad
+            | Action::FinishRoad => action.available(&village),
+            Action::NextCraftWorkspace => {
+                action.available(&village) && village.craft_workspace_choices(&catalog).len() > 1
+            }
+            Action::LocateCraftJob => action.available(&village),
+            Action::MoveCraftJob => {
+                action.available(&village) && village.craft_move_target(&catalog).is_some()
+            }
+            Action::StartCraft => {
+                action.available(&village)
+                    && village.craft_recipe.as_ref().is_some_and(|id| {
+                        village
+                            .construction
+                            .crafting_plan(&catalog, &village.stock, id, village.craft_workspace)
+                            .is_ok()
+                    })
+            }
+            Action::UndoRoad => Action::FinishRoad.available(&village),
+            Action::ResizeField(_) => !picker.open && show_field_size,
+            Action::FieldDimensions => !picker.open && action.available(&village),
+            // While recipes are open, their card has the way back.
+            Action::Recipes => {
+                action.available(&village)
+                    && village.construction.has_recipes(&catalog)
+                    && !village.construction.production.open
+            }
+            // The recipes and natural-site cards (`site_card`) carry these actions now.
+            Action::RecipePage(_)
+            | Action::CraftWorkspace
+            | Action::MoveCraft
+            | Action::FacilityIrrigation
+            | Action::Recipe(_)
+            | Action::Gather => false,
+            // Once cultivation is open, the farm card carries its controls.
+            Action::Beds => action.available(&village) && !village.construction.farming.open,
+            Action::Farm(FarmControl::Work(work)) => {
+                show_beds && plot_actions.is_none_or(|counts| counts[work as usize] > 0)
+            }
+            Action::Farm(FarmControl::Balances) => {
+                show_beds && !village.construction.farming.whole_plot
+            }
+            Action::Farm(_) => show_beds,
+            Action::FocusSelectedProject | Action::DeselectProject => {
+                show_selected_project && action.available(&village)
+            }
+            Action::SelectedProject(action) => {
+                show_selected_project
+                    && (village.construction.project_action_available(
+                        &catalog,
+                        action,
+                        village.stock.sandbox,
+                    ) || village
+                        .construction
+                        .project_action_issue(&catalog, action, village.stock.sandbox)
+                        .is_some())
+            }
+            Action::InventoryItem(row) => inventory_items.get(row).is_some_and(Option::is_some),
+            Action::ListedHome(row) => homes.get(row).is_some(),
+            Action::Resident(_) => !picker.open && action.available(&village),
+            Action::ResidentProfile(_) => show_residents,
+            Action::FocusResident | Action::FocusResidentProject => {
+                show_residents && action.available(&village)
+            }
+            Action::WorkPriority(_) | Action::WorkerReservation(_) => show_residents,
+            Action::Shift(_) => !picker.open && action.available(&village),
+            Action::Ledger => show_finances,
+            Action::ExpansionReserve | Action::GridFromFinances => {
+                show_finances && !village.finance_history_open
+            }
+            Action::PantryTransport
+            | Action::PantryBatches
+            | Action::PantryPriority
+            | Action::PantryBudget
+            | Action::PantryPolicy(..)
+            | Action::AutoCook
+            | Action::CookingTarget { .. } => show_pantry && action.available(&village),
+            Action::Home(_) => show_homes,
+            Action::BuildingPower | Action::Cooling => {
+                show_facility_switches && action.available(&village)
+            }
+            Action::Panel(_) => picker.open,
+            Action::PantryFromStores => !picker.open && action.available(&village),
+            _ => true,
+        };
+        let show = if matches!(action, Action::Forecast) {
+            !picker.open && action.available(&village)
+        } else if matches!(action, Action::Library | Action::Sound) {
+            // The dock copies only show while their own screen is open (handled below).
+            false
+        } else {
+            show
+        };
+        let show = if sound.open {
+            matches!(action, Action::Sound | Action::Volume { .. })
+        } else if saves.open {
+            matches!(action, Action::Library)
+        } else if village.camp.is_none() {
+            matches!(action, Action::CampPreset(_)) && action.available(&village)
+        } else if matches!(action, Action::CampPreset(_)) {
+            false
+        } else {
+            show
+        };
+        let show = if dock {
+            dock_visible
+        } else if top {
+            top_bar_visible
+        } else {
+            show
+        };
+        // Screens rebuilt as V2 dialogs hold their own controls.
+        let show = show && !(village.widget_screen() && parent.parent() == *menu_id);
+        menu_has_items |= show && parent.parent() == *menu_id;
+        context_has_items |= show && !dock && !top && parent.parent() != *menu_id;
+        node.display = if show { Display::Flex } else { Display::None };
+        if !show {
+            continue;
+        }
+        let action_issue =
+            match action {
+                Action::SelectedProject(ProjectAction::Cancel) => village
+                    .construction
+                    .project_action_issue(&catalog, ProjectAction::Cancel, village.stock.sandbox)
+                    .or_else(|| village.construction.selected_cancel_issue()),
+                Action::SelectedProject(project_action) => village
+                    .construction
+                    .project_action_issue(&catalog, project_action, village.stock.sandbox),
+                Action::ListedHome(row) if !homes[row].open => {
+                    Some("Reopen this home before assigning residents.")
+                }
+                Action::ListedHome(row)
+                    if homes[row].occupants >= homes[row].beds && !homes[row].assigned =>
+                {
+                    Some("This home has no free beds.")
+                }
+                _ if dock && !action.supported(&village) => Some("Available in Story villages."),
+                _ => None,
+            };
+        if interaction != Interaction::None {
+            let description = match action {
+                Action::SelectedProject(ProjectAction::Cancel) => Some(
+                    action_issue
+                        .unwrap_or("Remove this unstarted plan and return reserved supplies.")
+                        .into(),
+                ),
+                _ if action_issue.is_some() => action_issue.map(str::to_owned),
+                Action::CampPreset(index) => Some(
+                    [
+                        "Cool afternoons, but a longer walk from the unloading point.",
+                        "Quick unloading beside the entrance clearing.",
+                        "Dry, roomy ground. You’ll need to make your own shade.",
+                    ][index]
+                        .into(),
+                ),
+                Action::UndoRoad if !village.construction.can_undo_roads() => {
+                    Some("Place a road stroke before trying to undo it.".into())
+                }
+                Action::Recipe(row) => {
+                    village
+                        .construction
+                        .recipe_row_details(&catalog, &village.stock, row)
+                }
+                _ => None,
+            };
+            if let Some(description) = description {
+                action_details = description;
+            }
+        }
+        let enabled = action_issue.is_none()
+            && (top
+                || dock
+                || action.available(&village)
+                || matches!(
+                    action,
+                    Action::Volume { .. } | Action::Library | Action::Sound
+                ));
+        let active = match action {
+            _ if dock => !saves.open && !sound.open && action.dock_active(&village, &picker),
+            Action::ResourcePanel(panel) => village.utility_panel == Some(panel),
+            Action::Pause => top && village.paused,
+            Action::Resident(index) => index == village.selected_resident,
+            Action::ResidentProfile(profile) => profile == village.resident_profile,
+            Action::Guide => top && village.guide.open(),
+            Action::Lenses => top && (village.lenses.open || village.lenses.active.is_some()),
+            Action::Advance => top && village.advance.open,
+            _ => false,
+        };
+        // The weather line is a plain link inside the clock card, not a raised button.
+        if !(top && matches!(action, Action::Forecast)) {
+            crate::theme::paint_button(
+                interaction,
+                enabled,
+                active,
+                &mut background,
+                &mut border,
+                &mut shadow,
+            );
+        }
+        let mut button_labels = labels.iter_many_mut(children.iter());
+        if !custom && let Some(mut text) = button_labels.fetch_next() {
+            let label = match action {
+                Action::Farm(FarmControl::Work(work)) if let Some(counts) = plot_actions => {
+                    let count = counts[work as usize];
+                    let unit = if count == 1 { "bed" } else { "beds" };
+                    format!("{} · {count} {unit}", action.label(&village, &picker))
+                }
+                Action::Sound if sound.open => "Close sound settings".into(),
+                Action::Volume { effects, delta } => format!(
+                    "{} {}% {}",
+                    if effects { "Effects" } else { "Music" },
+                    sound.volume(effects),
+                    if delta < 0 { "−" } else { "+" }
+                ),
+                Action::Library if saves.open => "Close saved villages".into(),
+                // Roster cards, after V2: the name over what they are doing right now.
+                Action::Resident(index) => format!(
+                    "{}\n{}",
+                    NAMES[index],
+                    village.construction.resident_roster_line(&catalog, index)
+                ),
+                Action::Recipe(row) => recipes[row].clone(),
+                Action::MoveCraft => craft_workspace
+                    .as_ref()
+                    .expect("visible craft destination")
+                    .0
+                    .clone(),
+                Action::FacilityIrrigation => irrigation.map_or_else(String::new, |policy| {
+                    format!("Irrigation · {}", policy.label())
+                }),
+                Action::InventoryItem(row) => inventory_items[row].clone().unwrap(),
+                Action::ListedHome(row) => {
+                    let home = &homes[row];
+                    let state = if home.assigned {
+                        " · Assigned"
+                    } else if !home.open {
+                        " · Closed"
+                    } else if home.occupants >= home.beds {
+                        " · Full"
+                    } else {
+                        ""
+                    };
+                    format!(
+                        "{} #{} · ({}, {}) · {}/{} beds{state}",
+                        home.name,
+                        home.id + 1,
+                        home.position.x,
+                        home.position.y,
+                        home.occupants,
+                        home.beds
+                    )
+                }
+                _ => action.label(&village, &picker),
+            };
+            if text.0 != label {
+                text.0 = label;
+            }
+        }
+    }
+    for (row, mut node) in &mut rows {
+        let visible = match row {
+            ControlsRow::Dock => dock_visible,
+            ControlsRow::Context => {
+                // Before camp the campsite choices occupy this space. After camp, the dock
+                // keeps its height and the contextual controls sit just above it.
+                if dock_visible {
+                    node.position_type = PositionType::Absolute;
+                    node.bottom = percent(100);
+                    node.left = px(0);
+                    node.right = px(0);
+                    node.margin.bottom = px(8);
+                } else {
+                    node.position_type = PositionType::Relative;
+                    node.bottom = Val::Auto;
+                    node.left = Val::Auto;
+                    node.right = Val::Auto;
+                    node.margin.bottom = px(0);
+                }
+                context_has_items
+            }
+        };
+        node.display = if visible {
+            Display::Flex
+        } else {
+            Display::None
+        };
+    }
+    // The column shows when one of its buttons does, or when it holds a card that
+    // carries its own controls: cultivation, recipes or a natural site.
+    let card_shown = show_beds || show_recipes || Action::Gather.available(&village);
+    menu.display = if (menu_has_items || card_shown) && !saves.open && !sound.open {
+        Display::Flex
+    } else {
+        Display::None
+    };
+    let (details_id, visibility) = &mut *details;
+    **visibility = if action_details.is_empty() {
+        Visibility::Hidden
+    } else {
+        Visibility::Inherited
+    };
+    if let Ok(mut text) = labels.get_mut(*details_id)
+        && text.0 != action_details
+    {
+        text.0 = action_details;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn stores_trade_actions_remain_available_while_filtering() {
+        let mut village = Village {
+            utility_panel: Some(UtilityPanel::Inventory),
+            editing_inventory: true,
+            ..default()
+        };
+        assert!(Action::InventoryItem(0).available(&village));
+        village.lenses.open = true;
+        assert!(!Action::InventoryItem(0).available(&village));
+    }
+}
