@@ -539,7 +539,9 @@ impl Action {
                     "Hide water & material balances"
                 }
                 FarmControl::Balances => "Show water & material balances",
-                FarmControl::Irrigation => "Toggle irrigation",
+                FarmControl::Irrigation(Some(true)) => "Irrigate from village supplies",
+                FarmControl::Irrigation(Some(false)) => "Turn off irrigation",
+                FarmControl::Irrigation(None) => "Toggle irrigation",
                 FarmControl::Residues(Some(false)) => "Leave residues as cover",
                 FarmControl::Residues(Some(true)) => "Collect residues after harvest",
                 FarmControl::Residues(None) => "Toggle residue collection",
@@ -937,7 +939,8 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                     FarmControl::NextBed,
                     FarmControl::WholePlot,
                     FarmControl::Balances,
-                    FarmControl::Irrigation,
+                    FarmControl::Irrigation(Some(true)),
+                    FarmControl::Irrigation(Some(false)),
                     FarmControl::Residues(Some(false)),
                     FarmControl::Residues(Some(true)),
                 ]

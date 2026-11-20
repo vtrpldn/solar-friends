@@ -10,7 +10,7 @@ pub(crate) enum FarmControl {
     NextBed,
     WholePlot,
     Balances,
-    Irrigation,
+    Irrigation(Option<bool>),
     Residues(Option<bool>),
     Crop(Option<Crop>),
     Density(Option<f64>),
@@ -256,7 +256,7 @@ impl Construction {
         }
         let actions = [
             (KeyCode::Tab, FarmControl::NextBed),
-            (KeyCode::KeyT, FarmControl::Irrigation),
+            (KeyCode::KeyT, FarmControl::Irrigation(None)),
             (KeyCode::KeyZ, FarmControl::Residues(None)),
             (KeyCode::KeyX, FarmControl::Crop(None)),
             (KeyCode::KeyY, FarmControl::Density(None)),
@@ -462,7 +462,7 @@ impl Construction {
                 }
                 self.farming.notice.clear();
             }
-            FarmControl::Irrigation => bed.irrigation = !bed.irrigation,
+            FarmControl::Irrigation(choice) => bed.irrigation = choice.unwrap_or(!bed.irrigation),
             FarmControl::Residues(choice) => {
                 bed.collect_residues = choice.unwrap_or(!bed.collect_residues);
             }
@@ -524,7 +524,10 @@ impl Construction {
             FarmControl::Density(Some(choice)) => choice,
             _ => beds[first].next_density(),
         };
-        let irrigation = !eligible.iter().all(|&index| beds[index].irrigation);
+        let irrigation = match action {
+            FarmControl::Irrigation(Some(enabled)) => enabled,
+            _ => !eligible.iter().all(|&index| beds[index].irrigation),
+        };
         let residues = match action {
             FarmControl::Residues(Some(collect)) => collect,
             _ => !eligible.iter().all(|&index| beds[index].collect_residues),
@@ -534,7 +537,7 @@ impl Construction {
             match action {
                 FarmControl::Crop(_) => bed.crop = crop,
                 FarmControl::Density(_) => bed.density = density,
-                FarmControl::Irrigation => bed.irrigation = irrigation,
+                FarmControl::Irrigation(_) => bed.irrigation = irrigation,
                 FarmControl::Residues(_) => bed.collect_residues = residues,
                 _ => return,
             }
@@ -542,7 +545,7 @@ impl Construction {
         let applied = match action {
             FarmControl::Crop(_) => crop.label().to_owned(),
             FarmControl::Density(_) => format!("Density {density:.1}×"),
-            FarmControl::Irrigation => if irrigation {
+            FarmControl::Irrigation(_) => if irrigation {
                 "Irrigation on"
             } else {
                 "Irrigation off"
@@ -1460,7 +1463,10 @@ mod resize_tests {
         let bed = &village.farming.plots[&0].beds[0];
         let original = (bed.irrigation, bed.collect_residues);
 
-        for action in [FarmControl::Irrigation, FarmControl::Residues(Some(true))] {
+        for action in [
+            FarmControl::Irrigation(Some(false)),
+            FarmControl::Residues(Some(true)),
+        ] {
             village.apply_farm_control(&catalog, &mut stock, action, clock);
         }
         let bed = &village.farming.plots[&0].beds[0];
@@ -1506,7 +1512,13 @@ mod resize_tests {
                 .iter()
                 .all(|bed| bed.crop == Crop::Corn && bed.density == 0.5)
         );
-        village.apply_farm_control(&catalog, &mut stock, FarmControl::Irrigation, clock);
+        village.farming.plots.get_mut(&0).unwrap().beds[1].irrigation = false;
+        village.apply_farm_control(
+            &catalog,
+            &mut stock,
+            FarmControl::Irrigation(Some(false)),
+            clock,
+        );
         let beds = &village.farming.plots[&0].beds;
         assert_eq!(beds[0].irrigation, original.0);
         assert!(beds[1..].iter().all(|bed| bed.irrigation != original.0));
