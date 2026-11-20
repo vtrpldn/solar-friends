@@ -82,6 +82,7 @@ pub fn run(requested_category: Option<&str>, detail: bool) {
     app.add_plugins(DefaultPlugins.set(WindowPlugin {
         primary_window: Some(Window {
             title: "Solar Friends V3 · The 3D collection".into(),
+            canvas: cfg!(target_arch = "wasm32").then(|| "#solar-friends".into()),
             ..default()
         }),
         ..default()
@@ -443,6 +444,14 @@ fn input(
     for action in actions {
         match action {
             Control::Open(tool) => {
+                #[cfg(target_arch = "wasm32")]
+                {
+                    if let Err(error) = tool.open_in_browser() {
+                        collection.status = format!("Could not open {}: {error}", tool.label());
+                        collection.dirty = true;
+                    }
+                }
+                #[cfg(not(target_arch = "wasm32"))]
                 if let Err(error) = tool.launch().map(|child| children.push(child)) {
                     collection.status = format!("Could not open {}: {error}", tool.label());
                     collection.dirty = true;

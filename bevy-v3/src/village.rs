@@ -549,6 +549,18 @@ impl Village {
         )
     }
 
+    pub(crate) fn resume_summary(&self) -> String {
+        if matches!(self.mode(), Some(Mode::Sandbox)) {
+            if self.camp.is_none() {
+                return "Sandbox · Choose a place for your tents.".into();
+            }
+            let projects = self.construction.project_count();
+            let noun = if projects == 1 { "project" } else { "projects" };
+            return format!("Sandbox · {projects} {noun}");
+        }
+        self.story_resume_summary()
+    }
+
     pub fn mode(&self) -> Option<Mode> {
         self.setup.as_ref().map(|setup| setup.mode)
     }
@@ -1218,6 +1230,39 @@ impl Village {
     }
 }
 
+pub(crate) fn open_save_library(saves: &mut SaveMenu, mode: Mode) {
+    if !saves.open && !saves.preview {
+        library_ui::toggle_library(saves, mode);
+    }
+}
+
+pub(crate) fn continue_saved_village(
+    mode: Mode,
+    setup: &mut WorldSetup,
+    village: &mut Village,
+    saves: &mut SaveMenu,
+    catalog: &Catalog,
+) {
+    if saves.open || saves.preview || village.setup.is_some() {
+        return;
+    }
+    match restore_continuation(saves, mode, catalog) {
+        Ok((mut loaded, named_slot)) => {
+            *setup = loaded.setup.as_ref().expect("validated setup").session();
+            loaded.save_notice = "Village loaded.".into();
+            loaded.rebuild_scene = true;
+            loaded.session_serial = village.session_serial.wrapping_add(1);
+            saves.attached = named_slot.map(|id| (setup.mode, id, loaded.session_serial));
+            *village = loaded;
+        }
+        Err(error) => {
+            village.save_notice = format!(
+                "Could not continue the autosave: {error}\nThe autosave was preserved. Open Load village to load a named village."
+            );
+        }
+    }
+}
+
 fn save_controls(
     keyboard: Res<ButtonInput<KeyCode>>,
     buttons: Query<(&Interaction, &crate::setup::Action), Changed<Interaction>>,
@@ -1240,27 +1285,17 @@ fn save_controls(
     } else {
         None
     };
-    if resume.is_some() || keyboard.just_pressed(KeyCode::F9) {
-        let restored = if let Some(mode) = resume {
-            restore_continuation(&saves, mode, &catalog)
-        } else {
-            save::location(setup.mode)
-                .and_then(|path| save::read(&path, &catalog))
-                .map(|village| (village, None))
-        };
-        match restored {
-            Ok((mut loaded, named_slot)) => {
+    if let Some(mode) = resume {
+        continue_saved_village(mode, &mut setup, &mut village, &mut saves, &catalog);
+    } else if keyboard.just_pressed(KeyCode::F9) {
+        match save::location(setup.mode).and_then(|path| save::read(&path, &catalog)) {
+            Ok(mut loaded) => {
                 *setup = loaded.setup.as_ref().expect("validated setup").session();
                 loaded.save_notice = "Village loaded.".into();
                 loaded.rebuild_scene = true;
                 loaded.session_serial = village.session_serial.wrapping_add(1);
-                saves.attached = named_slot.map(|id| (setup.mode, id, loaded.session_serial));
+                saves.attached = None;
                 *village = loaded;
-            }
-            Err(error) if resume.is_some() => {
-                village.save_notice = format!(
-                    "Could not continue the autosave: {error}\nThe autosave was preserved. Open Saved villages to load a named village."
-                );
             }
             Err(error) => village.save_notice = format!("Could not load village: {error}"),
         }

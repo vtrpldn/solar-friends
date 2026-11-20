@@ -150,3 +150,18 @@ pub const SUBTLE_BORDER: Color = Color::srgb_u8(0xd8, 0xc7, 0x9e);
 pub const NEED_LOW: Color = Color::srgb_u8(0xb5, 0x66, 0x4e);
 pub const NEED_WARN: Color = Color::srgb_u8(0xbb, 0x9b, 0x4e);
 pub const NEED_GOOD: Color = Color::srgb_u8(0x81, 0x99, 0x5e);
+
+/// V2's title screen poster palette (`web/v02/weekend/menu.css`).
+pub const TITLE_BG: Color = Color::srgb_u8(0xe9, 0xe0, 0xc8);
+pub const TITLE_FRAME: Color = Color::srgb_u8(0x8b, 0x98, 0x75);
+pub const TITLE_INK: Color = Color::srgb_u8(0x36, 0x52, 0x3f);
+pub const TITLE_ART_CAPTION: Color = Color::srgb_u8(0x5b, 0x70, 0x4d);
+pub const TITLE_PRIMARY_TEXT: Color = Color::srgb_u8(0xf7, 0xed, 0xcf);
+pub const TITLE_PRIMARY_SUBTEXT: Color = Color::srgba_u8(0xf7, 0xed, 0xcf, 0xd4);
+pub const TITLE_PRIMARY_HOVER: Color = Color::srgb_u8(0x41, 0x62, 0x4b);
+pub const TITLE_PRIMARY_PRESSED: Color = Color::srgb_u8(0x2a, 0x42, 0x32);
+pub const TITLE_PRIMARY_SHADOW: Color = Color::srgb_u8(0x26, 0x3d, 0x30);
+pub const TITLE_ROW_HOVER: Color = Color::srgba_u8(0x36, 0x52, 0x3f, 0x1e);
+pub const TITLE_ROW_PRESSED: Color = Color::srgba_u8(0x36, 0x52, 0x3f, 0x30);
+/// Warm ochre keyboard focus outline matching V2's `:focus-visible`.
+pub const FOCUS_RING: Color = Color::srgb_u8(0xaa, 0x77, 0x3c);

@@ -12,7 +12,7 @@ use crate::{
     save_library::SaveMenu,
     terrain::Terrain,
     theme,
-    ui_font::{ui_font, ui_font_styled, ui_font_weight},
+    ui_font::{ui_font_styled, ui_font_weight},
 };
 
 const BIOMES: [&str; 3] = ["Mata Atlântica", "Cerrado", "Caatinga"];
@@ -33,7 +33,7 @@ const PRESET_NAMES: [&str; crate::economy_reference::WORLD_PRESETS.len()] = [
     "Remote homestead",
 ];
 
-#[derive(Clone, Copy, Default, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
 pub enum Mode {
     #[default]
     Story,
@@ -116,6 +116,10 @@ impl WorldSetup {
         self.open = true;
         self.choosing_land = true;
         self.confirming_new = false;
+    }
+
+    pub(crate) fn choosing_land(&self) -> bool {
+        self.choosing_land
     }
 
     pub fn valid_save(&self) -> bool {
@@ -398,15 +402,16 @@ impl WorldSetup {
             Action::Explore => "Enter village".into(),
             Action::CancelNew => "Keep current village".into(),
             Action::Resume => "Resume current village".into(),
-            Action::Continue(Mode::Story) => "Continue Story".into(),
-            Action::Continue(Mode::Sandbox) => "Continue Sandbox".into(),
-            Action::Library => "Saved villages".into(),
+            Action::Continue(Mode::Story) => "Continue".into(),
+            Action::Continue(Mode::Sandbox) => "Continue sandbox".into(),
+            Action::Library => "Load village".into(),
             Action::Sound => "Sound settings".into(),
+            Action::ArtCollection => "Browse the art collection ↗".into(),
         }
     }
 }
 
-#[derive(Component, Clone, Copy)]
+#[derive(Component, Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum Action {
     New(Mode),
     Back,
@@ -426,9 +431,31 @@ pub(crate) enum Action {
     Continue(Mode),
     Library,
     Sound,
+    ArtCollection,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum ButtonStyle {
+    TitlePrimary,
+    TitleRow,
+    TitleLink,
+    RaisedPaper,
+    SetupPrimary,
+    PickerValue,
 }
 
 impl Action {
+    const TITLE_FOCUS_ORDER: [Self; 8] = [
+        Self::Resume,
+        Self::Continue(Mode::Story),
+        Self::New(Mode::Story),
+        Self::New(Mode::Sandbox),
+        Self::Continue(Mode::Sandbox),
+        Self::Sound,
+        Self::ArtCollection,
+        Self::Library,
+    ];
+
     fn enabled(self, mode: Mode) -> bool {
         mode == Mode::Story || !matches!(self, Self::Savings | Self::Supplies)
     }
@@ -436,29 +463,52 @@ impl Action {
     fn is_title_action(self) -> bool {
         matches!(
             self,
-            Self::New(_) | Self::Resume | Self::Continue(_) | Self::Library | Self::Sound
+            Self::New(_)
+                | Self::Resume
+                | Self::Continue(_)
+                | Self::Library
+                | Self::Sound
+                | Self::ArtCollection
         )
     }
 
-    fn is_picker_value(self) -> bool {
-        matches!(
-            self,
-            Self::Preset
-                | Self::Biome
-                | Self::Landscape
-                | Self::Water
-                | Self::Resources
-                | Self::Savings
-                | Self::Supplies
-                | Self::Town
-                | Self::Seed
-        )
+    fn style(self, has_village: bool, has_story_autosave: bool) -> ButtonStyle {
+        match self {
+            Self::Resume | Self::Continue(Mode::Story) => ButtonStyle::TitlePrimary,
+            Self::New(Mode::Story) if !has_village && !has_story_autosave => {
+                ButtonStyle::TitlePrimary
+            }
+            Self::New(_) | Self::Continue(Mode::Sandbox) | Self::Sound => ButtonStyle::TitleRow,
+            Self::ArtCollection => ButtonStyle::TitleLink,
+            Self::Library | Self::Back | Self::Reroll | Self::CancelNew => ButtonStyle::RaisedPaper,
+            Self::Explore => ButtonStyle::SetupPrimary,
+            _ => ButtonStyle::PickerValue,
+        }
     }
 
-    fn is_primary(self) -> bool {
-        matches!(self, Self::New(Mode::Story) | Self::Explore)
+    fn visible_on_title(
+        self,
+        has_village: bool,
+        has_story_autosave: bool,
+        has_sandbox_autosave: bool,
+        preview: bool,
+    ) -> bool {
+        match self {
+            Self::Resume => has_village,
+            Self::Continue(Mode::Story) => !has_village && has_story_autosave,
+            Self::Continue(Mode::Sandbox) => !has_village && has_sandbox_autosave,
+            Self::Library => !preview,
+            Self::New(_) | Self::Sound | Self::ArtCollection => true,
+            _ => false,
+        }
     }
 }
+
+#[derive(Resource, Default)]
+struct TitleFocus(Option<Action>);
+
+#[derive(Resource, Default)]
+struct TitleStatus(String);
 
 #[derive(Component, Clone, Copy)]
 struct PickerStep(Action, bool);
@@ -469,32 +519,31 @@ struct ActionValueLabel;
 #[derive(Component)]
 struct SetupPanel;
 
-#[derive(Component)]
-struct TitleBackdrop;
-
-#[derive(Component)]
-struct SetupCaption;
+#[derive(Component, Clone, Copy)]
+enum SetupSection {
+    Backdrop,
+    Tagline,
+    Caption,
+    Subtitle,
+    TitleGroup,
+    LandBody,
+    LandFooter,
+}
 
 #[derive(Component)]
 struct SetupHeading;
 
 #[derive(Component)]
-struct SetupSubtitle;
-
-#[derive(Component)]
-struct TitleActionsGroup;
-
-#[derive(Component)]
-struct LandSetupBody;
-
-#[derive(Component)]
-struct LandSetupFooter;
+struct TitleStatusText;
 
 #[derive(Component)]
 struct PlotPreviewImage;
 
 #[derive(Component)]
 struct PlotSummary;
+
+#[derive(Component)]
+struct ResumeSummary;
 
 #[derive(Component)]
 struct StoryResumeSummary;
@@ -510,6 +559,8 @@ impl Plugin for WorldSetupPlugin {
     fn build(&self, app: &mut App) {
         embedded_asset!(app, "title-art.png");
         app.init_resource::<WorldSetup>()
+            .init_resource::<TitleFocus>()
+            .init_resource::<TitleStatus>()
             .add_systems(Startup, spawn_panel)
             .add_systems(Update, setup_input)
             .add_systems(
@@ -529,6 +580,170 @@ impl Plugin for WorldSetupPlugin {
     }
 }
 
+fn title_focus_outline() -> Outline {
+    Outline {
+        width: px(3.5),
+        offset: px(3.5),
+        color: Color::NONE,
+    }
+}
+
+fn spawn_title_row_button(
+    parent: &mut ChildSpawnerCommands,
+    assets: &AssetServer,
+    setup: &WorldSetup,
+    action: Action,
+    visible: bool,
+) {
+    let primary = matches!(action.style(false, false), ButtonStyle::TitlePrimary);
+    let is_settings = matches!(action, Action::Sound);
+    let mut button = parent.spawn((
+        action,
+        Button,
+        UiTransform::default(),
+        title_focus_outline(),
+        Node {
+            display: if visible {
+                Display::Flex
+            } else {
+                Display::None
+            },
+            width: percent(100),
+            padding: if is_settings {
+                UiRect::axes(px(22), px(10))
+            } else {
+                UiRect::axes(px(22), px(13))
+            },
+            margin: if is_settings {
+                UiRect::top(px(8))
+            } else {
+                UiRect::ZERO
+            },
+            border: UiRect::all(px(1)),
+            border_radius: BorderRadius::all(px(6)),
+            flex_shrink: 0.,
+            flex_direction: FlexDirection::Column,
+            row_gap: px(4),
+            ..default()
+        },
+        BackgroundColor(if primary {
+            theme::TITLE_INK
+        } else {
+            Color::NONE
+        }),
+        BorderColor::all(if primary {
+            theme::TITLE_INK
+        } else {
+            Color::NONE
+        }),
+        if primary {
+            BoxShadow::new(theme::TITLE_PRIMARY_SHADOW, px(0), px(3.5), px(0), px(0))
+        } else {
+            BoxShadow::default()
+        },
+    ));
+    button.with_child((
+        ActionValueLabel,
+        Text::new(setup.button_value(action, false)),
+        ui_font_styled(
+            assets,
+            if is_settings { 17.5 } else { 22.0 },
+            600,
+            if primary {
+                theme::TITLE_PRIMARY_TEXT
+            } else {
+                theme::TITLE_INK
+            },
+        ),
+    ));
+    if matches!(action, Action::Resume) {
+        button.with_child((
+            ResumeSummary,
+            Text::default(),
+            ui_font_styled(assets, 13.5, 400, theme::TITLE_PRIMARY_SUBTEXT),
+            Node {
+                display: Display::None,
+                ..default()
+            },
+        ));
+    }
+    if matches!(action, Action::Continue(Mode::Story)) {
+        button.with_child((
+            StoryResumeSummary,
+            Text::default(),
+            ui_font_styled(assets, 13.5, 400, theme::TITLE_PRIMARY_SUBTEXT),
+            Node {
+                display: Display::None,
+                ..default()
+            },
+        ));
+    }
+}
+
+fn spawn_title_link_button(
+    parent: &mut ChildSpawnerCommands,
+    assets: &AssetServer,
+    setup: &WorldSetup,
+) {
+    parent
+        .spawn((
+            Action::ArtCollection,
+            Button,
+            UiTransform::default(),
+            title_focus_outline(),
+            Node {
+                padding: UiRect::new(px(2), px(2), px(2), px(4)),
+                border: UiRect::bottom(px(1.5)),
+                border_radius: BorderRadius::all(px(3)),
+                flex_shrink: 0.,
+                ..default()
+            },
+            BackgroundColor(Color::NONE),
+            BorderColor {
+                bottom: theme::TITLE_INK,
+                ..BorderColor::all(Color::NONE)
+            },
+            BoxShadow::default(),
+        ))
+        .with_child((
+            ActionValueLabel,
+            Text::new(setup.button_value(Action::ArtCollection, false)),
+            ui_font_styled(assets, 15.0, 500, theme::TITLE_INK),
+        ));
+}
+
+fn spawn_title_raised_button(
+    parent: &mut ChildSpawnerCommands,
+    assets: &AssetServer,
+    setup: &WorldSetup,
+    action: Action,
+    visible: bool,
+) {
+    parent
+        .spawn((
+            action,
+            Button,
+            UiTransform::default(),
+            title_focus_outline(),
+            theme::button_node(Node {
+                display: if visible {
+                    Display::Flex
+                } else {
+                    Display::None
+                },
+                padding: UiRect::axes(px(16), px(10)),
+                flex_shrink: 0.,
+                ..default()
+            }),
+            theme::button(),
+        ))
+        .with_child((
+            ActionValueLabel,
+            Text::new(setup.button_value(action, false)),
+            ui_font_weight(assets, 17.0, 600),
+        ));
+}
+
 fn spawn_action_button(
     parent: &mut ChildSpawnerCommands,
     assets: &AssetServer,
@@ -536,7 +751,7 @@ fn spawn_action_button(
     action: Action,
     visible: bool,
 ) {
-    let primary = action.is_primary();
+    let primary = matches!(action, Action::Explore);
     let mut button = parent.spawn((
         action,
         Button,
@@ -557,7 +772,7 @@ fn spawn_action_button(
         button.insert((
             BackgroundColor(theme::INK),
             BorderColor::all(theme::INK),
-            BoxShadow::new(Color::srgb_u8(0x26, 0x3d, 0x30), px(0), px(3), px(0), px(0)),
+            BoxShadow::new(theme::TITLE_PRIMARY_SHADOW, px(0), px(3), px(0), px(0)),
         ));
     }
     button.with_child((
@@ -570,9 +785,6 @@ fn spawn_action_button(
             if primary { theme::PAPER } else { theme::INK },
         ),
     ));
-    if matches!(action, Action::Continue(Mode::Story)) {
-        button.with_child((StoryResumeSummary, Text::default(), ui_font(assets, 13.0)));
-    }
 }
 
 fn spawn_picker_row(
@@ -653,7 +865,7 @@ fn spawn_picker_row(
 fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<AssetServer>) {
     commands
         .spawn((
-            TitleBackdrop,
+            SetupSection::Backdrop,
             Node {
                 display: Display::None,
                 position_type: PositionType::Absolute,
@@ -661,33 +873,81 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
                 height: percent(100),
                 ..default()
             },
-            BackgroundColor(Color::srgb_u8(233, 224, 200)),
+            BackgroundColor(theme::TITLE_BG),
             GlobalZIndex(-1),
         ))
         .with_children(|backdrop| {
+            // Outer hairline frame matching V2's `.frame`.
             backdrop.spawn((
                 Node {
                     position_type: PositionType::Absolute,
-                    top: px(25),
-                    left: px(25),
-                    right: px(25),
-                    bottom: px(25),
-                    border: UiRect::all(px(1)),
+                    top: px(30),
+                    left: px(30),
+                    right: px(30),
+                    bottom: px(30),
+                    border: UiRect::all(px(1.25)),
                     ..default()
                 },
-                BorderColor::all(Color::srgb_u8(139, 152, 117)),
+                BorderColor::all(theme::TITLE_FRAME),
             ));
-            backdrop.spawn((
-                Node {
+
+            // Right-side sun-and-leaf poster art with V2's caption underneath.
+            backdrop
+                .spawn(Node {
                     position_type: PositionType::Absolute,
-                    top: vh(7),
-                    right: vw(6),
-                    height: vh(37),
-                    aspect_ratio: Some(0.9),
+                    left: vw(54),
+                    top: vh(14),
+                    width: vw(34),
+                    height: vh(70),
+                    flex_direction: FlexDirection::Column,
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
                     ..default()
-                },
-                ImageNode::new(load_embedded_asset!(&*assets, "title-art.png")),
-            ));
+                })
+                .with_children(|art| {
+                    art.spawn((
+                        Node {
+                            height: vh(52),
+                            max_height: px(660),
+                            max_width: percent(100),
+                            aspect_ratio: Some(0.9),
+                            ..default()
+                        },
+                        // Shift right so the sun-and-stem mass centers above the caption.
+                        UiTransform::from_translation(Val2::percent(10.8, 0.0)),
+                        ImageNode::new(load_embedded_asset!(&*assets, "title-art.png")),
+                    ));
+                    art.spawn((
+                        Text::new("GROW SOMETHING GOOD"),
+                        TextLayout::new_with_justify(Justify::Center),
+                        ui_font_styled(&assets, 13.0, 600, theme::TITLE_ART_CAPTION),
+                        Node {
+                            margin: UiRect::top(px(-4)),
+                            ..default()
+                        },
+                    ));
+                });
+
+            // Bottom-left colophon aligned to the left brand axis (`left: 10vw`).
+            backdrop
+                .spawn(Node {
+                    position_type: PositionType::Absolute,
+                    left: vw(10),
+                    bottom: px(50),
+                    flex_direction: FlexDirection::Column,
+                    row_gap: px(4),
+                    ..default()
+                })
+                .with_children(|corner| {
+                    corner.spawn((
+                        Text::new("SOLAR FRIENDS"),
+                        ui_font_styled(&assets, 11.5, 750, theme::TITLE_INK),
+                    ));
+                    corner.spawn((
+                        Text::new("v3"),
+                        ui_font_styled(&assets, 12.5, 400, Color::srgba_u8(0x36, 0x52, 0x3f, 0xcc)),
+                    ));
+                });
         });
 
     commands
@@ -696,15 +956,14 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
             UiTransform::default(),
             theme::panel_node(Node {
                 position_type: PositionType::Absolute,
-                left: px(32),
-                top: px(32),
-                padding: UiRect::all(px(26)),
-                width: px(340),
-                max_width: vw(94),
-                max_height: vh(92),
+                left: vw(10),
+                top: vh(9.5),
+                padding: UiRect::ZERO,
+                width: px(460),
+                max_width: vw(46),
                 flex_direction: FlexDirection::Column,
-                row_gap: px(10),
-                overflow: Overflow::scroll_y(),
+                row_gap: px(0),
+                overflow: Overflow::visible(),
                 ..default()
             }),
             theme::panel(),
@@ -713,7 +972,17 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
         ))
         .with_children(|panel| {
             panel.spawn((
-                SetupCaption,
+                SetupSection::Tagline,
+                Text::new("A LITTLE LAND. A LIFE TOGETHER."),
+                ui_font_styled(&assets, 11.5, 750, theme::TITLE_INK),
+                Node {
+                    margin: UiRect::bottom(px(18)),
+                    flex_shrink: 0.,
+                    ..default()
+                },
+            ));
+            panel.spawn((
+                SetupSection::Caption,
                 Text::new("YOUR VILLAGE"),
                 ui_font_styled(&assets, 11.0, 750, theme::CAPTION),
                 Node {
@@ -724,15 +993,16 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
             ));
             panel.spawn((
                 SetupHeading,
-                Text::new("Solar Friends"),
-                ui_font_weight(&assets, 30.0, 750),
+                Text::new("Solar\nFriends"),
+                ui_font_styled(&assets, 100.0, 800, theme::TITLE_INK),
+                bevy::text::LineHeight::RelativeToFont(0.88),
                 Node {
                     flex_shrink: 0.,
                     ..default()
                 },
             ));
             panel.spawn((
-                SetupSubtitle,
+                SetupSection::Subtitle,
                 Text::new("Choose the land and the circumstances your friends arrive with."),
                 ui_font_styled(&assets, 14.0, 400, theme::MUTED),
                 Node {
@@ -742,37 +1012,79 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
                 },
             ));
 
-            // Title screen actions.
+            // Title screen actions: primary block + plain text rows, then art link and Load village.
             panel
                 .spawn((
-                    TitleActionsGroup,
+                    SetupSection::TitleGroup,
                     Node {
                         flex_direction: FlexDirection::Column,
-                        row_gap: px(8),
                         flex_shrink: 0.,
-                        margin: UiRect::top(px(8)),
+                        margin: UiRect::top(px(34)),
                         ..default()
                     },
                 ))
                 .with_children(|title| {
-                    for action in [
-                        Action::Resume,
-                        Action::Continue(Mode::Story),
-                        Action::New(Mode::Story),
-                        Action::New(Mode::Sandbox),
-                        Action::Continue(Mode::Sandbox),
-                        Action::Library,
-                        Action::Sound,
-                    ] {
-                        let visible = !matches!(action, Action::Resume | Action::Continue(_));
-                        spawn_action_button(title, &assets, &setup, action, visible);
-                    }
+                    title
+                        .spawn(Node {
+                            width: px(340),
+                            max_width: percent(100),
+                            flex_direction: FlexDirection::Column,
+                            row_gap: px(7),
+                            ..default()
+                        })
+                        .with_children(|rows| {
+                            for action in [
+                                Action::Resume,
+                                Action::Continue(Mode::Story),
+                                Action::New(Mode::Story),
+                                Action::New(Mode::Sandbox),
+                                Action::Continue(Mode::Sandbox),
+                                Action::Sound,
+                            ] {
+                                let visible =
+                                    !matches!(action, Action::Resume | Action::Continue(_));
+                                spawn_title_row_button(rows, &assets, &setup, action, visible);
+                            }
+                        });
+
+                    title
+                        .spawn(Node {
+                            flex_direction: FlexDirection::Row,
+                            align_items: AlignItems::Center,
+                            flex_wrap: FlexWrap::Wrap,
+                            column_gap: px(22),
+                            row_gap: px(10),
+                            margin: UiRect::new(px(22), px(0), px(24), px(0)),
+                            ..default()
+                        })
+                        .with_children(|utility| {
+                            spawn_title_link_button(utility, &assets, &setup);
+                            spawn_title_raised_button(
+                                utility,
+                                &assets,
+                                &setup,
+                                Action::Library,
+                                true,
+                            );
+                        });
+
+                    title.spawn((
+                        TitleStatusText,
+                        Text::default(),
+                        ui_font_styled(&assets, 14.0, 400, theme::TITLE_INK),
+                        Node {
+                            display: Display::None,
+                            margin: UiRect::new(px(22), px(0), px(10), px(0)),
+                            max_width: px(360),
+                            ..default()
+                        },
+                    ));
                 });
 
             // Unified two-column land setup sheet: pickers on the left, plot preview on the right.
             panel
                 .spawn((
-                    LandSetupBody,
+                    SetupSection::LandBody,
                     Node {
                         display: Display::None,
                         column_gap: px(24),
@@ -915,7 +1227,7 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
             // Footer action row on the land setup sheet.
             panel
                 .spawn((
-                    LandSetupFooter,
+                    SetupSection::LandFooter,
                     Node {
                         display: Display::None,
                         justify_content: JustifyContent::SpaceBetween,
@@ -955,151 +1267,88 @@ type SetupPanelStyle<'w, 's> = Single<
         &'static mut BorderColor,
         &'static mut BoxShadow,
     ),
-    (
-        With<SetupPanel>,
-        Without<TitleBackdrop>,
-        Without<SetupCaption>,
-        Without<SetupSubtitle>,
-        Without<TitleActionsGroup>,
-        Without<LandSetupBody>,
-        Without<LandSetupFooter>,
-    ),
+    (With<SetupPanel>, Without<SetupSection>),
 >;
 
-type SetupSectionNodes<'w, 's> = (
-    Single<
-        'w,
-        's,
-        &'static mut Node,
-        (
-            With<TitleBackdrop>,
-            Without<SetupPanel>,
-            Without<SetupCaption>,
-            Without<SetupSubtitle>,
-            Without<TitleActionsGroup>,
-            Without<LandSetupBody>,
-            Without<LandSetupFooter>,
-        ),
-    >,
-    Single<
-        'w,
-        's,
-        &'static mut Node,
-        (
-            With<SetupCaption>,
-            Without<SetupPanel>,
-            Without<TitleBackdrop>,
-            Without<SetupSubtitle>,
-            Without<TitleActionsGroup>,
-            Without<LandSetupBody>,
-            Without<LandSetupFooter>,
-        ),
-    >,
-    Single<
-        'w,
-        's,
-        &'static mut Node,
-        (
-            With<SetupSubtitle>,
-            Without<SetupPanel>,
-            Without<TitleBackdrop>,
-            Without<SetupCaption>,
-            Without<TitleActionsGroup>,
-            Without<LandSetupBody>,
-            Without<LandSetupFooter>,
-        ),
-    >,
-    Single<
-        'w,
-        's,
-        &'static mut Node,
-        (
-            With<TitleActionsGroup>,
-            Without<SetupPanel>,
-            Without<TitleBackdrop>,
-            Without<SetupCaption>,
-            Without<SetupSubtitle>,
-            Without<LandSetupBody>,
-            Without<LandSetupFooter>,
-        ),
-    >,
-    Single<
-        'w,
-        's,
-        &'static mut Node,
-        (
-            With<LandSetupBody>,
-            Without<SetupPanel>,
-            Without<TitleBackdrop>,
-            Without<SetupCaption>,
-            Without<SetupSubtitle>,
-            Without<TitleActionsGroup>,
-            Without<LandSetupFooter>,
-        ),
-    >,
-    Single<
-        'w,
-        's,
-        &'static mut Node,
-        (
-            With<LandSetupFooter>,
-            Without<SetupPanel>,
-            Without<TitleBackdrop>,
-            Without<SetupCaption>,
-            Without<SetupSubtitle>,
-            Without<TitleActionsGroup>,
-            Without<LandSetupBody>,
-        ),
-    >,
-);
+type SetupHeadingStyle<'w, 's> = Single<
+    'w,
+    's,
+    (
+        &'static mut Text,
+        &'static mut TextFont,
+        &'static mut bevy::text::LineHeight,
+        &'static mut TextColor,
+    ),
+    With<SetupHeading>,
+>;
 
 fn refresh_title(
     setup: Res<WorldSetup>,
     saves: Res<SaveMenu>,
     sound: Res<crate::audio::SoundSettings>,
-    (mut backdrop, mut caption, mut subtitle, mut title_group, mut land_body, mut land_footer): SetupSectionNodes,
+    mut sections: Query<(&SetupSection, &mut Node), Without<SetupPanel>>,
     mut panel: SetupPanelStyle,
-    mut heading: Single<(&mut Text, &mut TextFont, &mut TextColor), With<SetupHeading>>,
+    mut heading: SetupHeadingStyle,
 ) {
     if !setup.is_changed() && !saves.is_changed() && !sound.is_changed() {
         return;
     }
     let title = !setup.choosing_land;
-    backdrop.display = if title && setup.open && !saves.open && !sound.open {
-        Display::Flex
-    } else {
-        Display::None
-    };
-    caption.display = if title { Display::None } else { Display::Flex };
-    subtitle.display = if title { Display::None } else { Display::Flex };
-    title_group.display = if title { Display::Flex } else { Display::None };
-    land_body.display = if title { Display::None } else { Display::Flex };
-    land_footer.display = if title { Display::None } else { Display::Flex };
+    let show_backdrop = title && setup.open && !saves.open && !sound.open;
+    for (section, mut node) in &mut sections {
+        let visible = match section {
+            SetupSection::Backdrop => show_backdrop,
+            SetupSection::Tagline | SetupSection::TitleGroup => title,
+            SetupSection::Caption
+            | SetupSection::Subtitle
+            | SetupSection::LandBody
+            | SetupSection::LandFooter => !title,
+        };
+        node.display = if visible {
+            Display::Flex
+        } else {
+            Display::None
+        };
+    }
 
     let (panel, transform, background, border, shadow) = &mut *panel;
-    let (text, font, color) = &mut *heading;
+    let (text, font, line_height, color) = &mut *heading;
     if title {
-        panel.left = vw(8);
-        panel.top = vh(6);
-        panel.width = px(340);
+        panel.left = vw(10);
+        panel.top = vh(9.5);
+        panel.width = px(460);
+        panel.max_width = vw(46);
+        panel.max_height = Val::Auto;
+        panel.padding = UiRect::ZERO;
+        panel.row_gap = px(0);
+        panel.overflow = Overflow::visible();
         transform.translation = Val2::ZERO;
-        // On the title screen the menu sits on the backdrop like V2's, without a card.
+        // On the title screen the menu sits directly on the parchment backdrop like V2's.
         background.0 = Color::NONE;
         **border = BorderColor::all(Color::NONE);
         **shadow = BoxShadow::default();
         text.0 = "Solar\nFriends".into();
-        font.font_size = 66.;
-        color.0 = Color::srgb_u8(54, 82, 63);
+        font.font_size = 100.;
+        font.weight = bevy::text::FontWeight(800);
+        **line_height = bevy::text::LineHeight::RelativeToFont(0.88);
+        color.0 = theme::TITLE_INK;
     } else {
         panel.left = percent(50);
         panel.top = px(28);
         panel.width = px(880);
+        panel.max_width = vw(94);
+        panel.max_height = vh(92);
+        panel.padding = UiRect::all(px(26));
+        panel.row_gap = px(10);
+        panel.overflow = Overflow::scroll_y();
         transform.translation = Val2::new(percent(-50), px(0));
         background.0 = theme::PAPER;
         **border = BorderColor::all(theme::EDGE);
         **shadow = theme::panel_shadow();
         text.0 = "Choose the land".into();
         font.font_size = 28.;
+        font.weight = bevy::text::FontWeight(750);
+        **line_height = bevy::text::LineHeight::RelativeToFont(1.15);
         color.0 = theme::INK;
     }
 }
@@ -1121,9 +1370,101 @@ fn scroll_setup_panel(
     }
 }
 
+fn has_autosave(saves: &SaveMenu, mode: Mode) -> bool {
+    saves
+        .continue_path(mode)
+        .is_ok_and(|path| crate::save::exists(&path))
+}
+
+fn visible_title_actions(
+    has_village: bool,
+    has_story_autosave: bool,
+    has_sandbox_autosave: bool,
+    preview: bool,
+) -> Vec<Action> {
+    Action::TITLE_FOCUS_ORDER
+        .into_iter()
+        .filter(|action| {
+            action.visible_on_title(
+                has_village,
+                has_story_autosave,
+                has_sandbox_autosave,
+                preview,
+            )
+        })
+        .collect()
+}
+
+fn step_title_focus(current: Option<Action>, visible: &[Action], forward: bool) -> Option<Action> {
+    if visible.is_empty() {
+        return None;
+    }
+    let Some(index) = current.and_then(|action| visible.iter().position(|item| *item == action))
+    else {
+        return Some(if forward {
+            visible[0]
+        } else {
+            visible[visible.len() - 1]
+        });
+    };
+    let next = if forward {
+        (index + 1) % visible.len()
+    } else {
+        (index + visible.len() - 1) % visible.len()
+    };
+    Some(visible[next])
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn open_art_collection(
+    status: &mut TitleStatus,
+    collection_process: &mut Option<std::process::Child>,
+) {
+    if let Some(child) = collection_process.as_mut() {
+        if matches!(child.try_wait(), Ok(Some(_))) {
+            *collection_process = None;
+        } else {
+            status.0 = "The art collection is already open.".into();
+            return;
+        }
+    }
+    match crate::workshop::navigation::ArtTool::Collection.launch() {
+        Ok(child) => {
+            *collection_process = Some(child);
+            status.0.clear();
+        }
+        Err(error) => {
+            status.0 = format!("Could not open the art collection: {error}");
+        }
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+fn open_art_collection(status: &mut TitleStatus, _collection_process: &mut Option<()>) {
+    if let Err(error) = crate::workshop::navigation::ArtTool::Collection.open_in_browser() {
+        status.0 = format!("Could not open the art collection: {error}");
+    } else {
+        status.0.clear();
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+type CollectionProcess = Option<std::process::Child>;
+#[cfg(target_arch = "wasm32")]
+type CollectionProcess = Option<()>;
+
 type SetupInputQueries<'w, 's> = (
     Query<'w, 's, (&'static Interaction, &'static Action), Changed<Interaction>>,
     Query<'w, 's, (&'static Interaction, &'static PickerStep), Changed<Interaction>>,
+);
+
+type SetupInputResources<'w> = (
+    ResMut<'w, SaveMenu>,
+    ResMut<'w, crate::audio::SoundSettings>,
+    ResMut<'w, crate::village::Village>,
+    Res<'w, crate::catalog::Catalog>,
+    ResMut<'w, TitleFocus>,
+    ResMut<'w, TitleStatus>,
 );
 
 fn setup_input(
@@ -1132,17 +1473,15 @@ fn setup_input(
     (buttons, step_buttons): SetupInputQueries,
     window: Single<&Window, With<PrimaryWindow>>,
     mut picker: Option<ResMut<crate::village::PanelPicker>>,
-    (mut saves, mut sound, mut village, catalog): (
-        ResMut<SaveMenu>,
-        ResMut<crate::audio::SoundSettings>,
-        ResMut<crate::village::Village>,
-        Res<crate::catalog::Catalog>,
-    ),
+    (mut saves, mut sound, mut village, catalog, mut focus, mut title_status): SetupInputResources,
+    mut collection_process: Local<CollectionProcess>,
 ) {
     if !window.focused || saves.open || sound.open {
+        focus.0 = None;
         return;
     }
     if !setup.open {
+        focus.0 = None;
         if keyboard.just_pressed(KeyCode::Escape)
             && !village.advance_open()
             && !village.planning_roads()
@@ -1161,32 +1500,85 @@ fn setup_input(
         setup.edit_seed(&keyboard);
         return;
     }
-    if setup.choosing_land && keyboard.just_pressed(KeyCode::Escape) {
-        if setup.confirming_new {
-            setup.confirming_new = false;
-        } else {
-            setup.choosing_land = false;
+    if setup.choosing_land {
+        focus.0 = None;
+        if keyboard.just_pressed(KeyCode::Escape) {
+            if setup.confirming_new {
+                setup.confirming_new = false;
+            } else {
+                setup.choosing_land = false;
+            }
+            return;
         }
-        return;
     }
+
+    let mut keyboard_activated = None;
+    if !setup.choosing_land {
+        let visible = visible_title_actions(
+            village.session_setup().is_some(),
+            has_autosave(&saves, Mode::Story),
+            has_autosave(&saves, Mode::Sandbox),
+            saves.preview,
+        );
+        if focus.0.is_some_and(|current| !visible.contains(&current)) {
+            focus.0 = None;
+        }
+        if buttons.iter().any(|(interaction, action)| {
+            action.is_title_action()
+                && matches!(interaction, Interaction::Hovered | Interaction::Pressed)
+        }) {
+            focus.0 = None;
+        }
+        let shift = keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]);
+        if keyboard.just_pressed(KeyCode::ArrowDown)
+            || (keyboard.just_pressed(KeyCode::Tab) && !shift)
+        {
+            focus.0 = step_title_focus(focus.0, &visible, true);
+        } else if keyboard.just_pressed(KeyCode::ArrowUp)
+            || (keyboard.just_pressed(KeyCode::Tab) && shift)
+        {
+            focus.0 = step_title_focus(focus.0, &visible, false);
+        } else if keyboard.just_pressed(KeyCode::Escape) {
+            focus.0 = None;
+        } else if keyboard.any_just_pressed([KeyCode::Enter, KeyCode::NumpadEnter, KeyCode::Space])
+        {
+            keyboard_activated = focus.0;
+        }
+    }
+
     for (interaction, &PickerStep(action, forward)) in &step_buttons {
         if *interaction == Interaction::Pressed && action.enabled(setup.mode) {
             setup.confirming_new = false;
             setup.cycle_world_option(action, forward);
         }
     }
-    for (interaction, action) in &buttons {
-        if *interaction != Interaction::Pressed || !action.enabled(setup.mode) {
-            continue;
-        }
+
+    let mut triggered: Vec<(Action, bool)> = buttons
+        .iter()
+        .filter_map(|(interaction, action)| {
+            (*interaction == Interaction::Pressed && action.enabled(setup.mode))
+                .then_some((*action, false))
+        })
+        .collect();
+    if let Some(action) = keyboard_activated
+        && action.enabled(setup.mode)
+    {
+        triggered.push((action, true));
+    }
+
+    for (action, from_keyboard) in triggered {
         if !matches!(action, Action::Explore) {
             setup.confirming_new = false;
         }
+        if !matches!(action, Action::ArtCollection) && !title_status.0.is_empty() {
+            title_status.0.clear();
+        }
         match action {
             Action::New(mode) => {
-                setup.mode = *mode;
+                setup.mode = mode;
                 setup.reroll_seed();
                 setup.choosing_land = true;
+                focus.0 = None;
             }
             Action::Back => setup.choosing_land = false,
             Action::Preset
@@ -1197,7 +1589,7 @@ fn setup_input(
             | Action::Savings
             | Action::Supplies
             | Action::Town => {
-                setup.cycle_world_option(*action, true);
+                setup.cycle_world_option(action, true);
             }
             Action::Seed => {
                 setup.seed_entry = Some(String::new());
@@ -1207,9 +1599,7 @@ fn setup_input(
                 if !setup.apply_seed_entry() {
                     continue;
                 }
-                let autosave_exists = saves
-                    .continue_path(setup.mode)
-                    .is_ok_and(|path| crate::save::exists(&path));
+                let autosave_exists = has_autosave(&saves, setup.mode);
                 if (village.session_setup().is_some() || autosave_exists) && !setup.confirming_new {
                     setup.confirming_new = true;
                 } else {
@@ -1228,10 +1618,31 @@ fn setup_input(
                 }
             }
             Action::CancelNew => setup.confirming_new = false,
+            Action::Continue(mode) if from_keyboard => {
+                focus.0 = None;
+                crate::village::continue_saved_village(
+                    mode,
+                    &mut setup,
+                    &mut village,
+                    &mut saves,
+                    &catalog,
+                );
+            }
+            Action::Library if from_keyboard => {
+                focus.0 = None;
+                crate::village::open_save_library(&mut saves, setup.mode);
+            }
             Action::Continue(_) | Action::Library => {}
-            Action::Sound => sound.open = true,
+            Action::Sound => {
+                focus.0 = None;
+                sound.open = true;
+            }
+            Action::ArtCollection => {
+                open_art_collection(&mut title_status, &mut collection_process)
+            }
             Action::Resume => {
                 if let Some(active) = village.session_setup() {
+                    focus.0 = None;
                     *setup = active.session();
                 }
             }
@@ -1250,7 +1661,12 @@ type SetupButtons<'w, 's> = Query<
         &'static mut BackgroundColor,
         Has<InteractionDisabled>,
     ),
-    (Without<SetupPanel>, Without<PickerStep>),
+    (
+        Without<SetupPanel>,
+        Without<PickerStep>,
+        Without<ResumeSummary>,
+        Without<TitleStatusText>,
+    ),
 >;
 
 type StepButtons<'w, 's> = Query<
@@ -1260,19 +1676,65 @@ type StepButtons<'w, 's> = Query<
     (Without<SetupPanel>, Without<Action>),
 >;
 
+type TitleDetailNodes<'w, 's> = (
+    Single<
+        'w,
+        's,
+        (&'static mut Text, &'static mut Node),
+        (
+            With<ResumeSummary>,
+            Without<ActionValueLabel>,
+            Without<SetupPanel>,
+            Without<Action>,
+            Without<TitleStatusText>,
+        ),
+    >,
+    Single<
+        'w,
+        's,
+        (&'static mut Text, &'static mut Node),
+        (
+            With<TitleStatusText>,
+            Without<ActionValueLabel>,
+            Without<SetupPanel>,
+            Without<Action>,
+            Without<ResumeSummary>,
+        ),
+    >,
+);
+
+type SetupPanelNode<'w, 's> = Single<
+    'w,
+    's,
+    &'static mut Node,
+    (
+        With<SetupPanel>,
+        Without<Action>,
+        Without<ResumeSummary>,
+        Without<TitleStatusText>,
+    ),
+>;
+
 fn refresh_panel(
     mut commands: Commands,
     setup: Res<WorldSetup>,
-    mut panel: Single<&mut Node, With<SetupPanel>>,
+    mut panel: SetupPanelNode,
     (mut buttons, step_buttons): (SetupButtons, StepButtons),
-    (village, saves, sound): (
+    (village, saves, sound, title_status): (
         Res<crate::village::Village>,
         Res<SaveMenu>,
         Res<crate::audio::SoundSettings>,
+        Res<TitleStatus>,
     ),
     mut labels: Query<(&mut Text, &mut TextColor), With<ActionValueLabel>>,
+    (mut resume_summary, mut status_text): TitleDetailNodes,
 ) {
-    if !setup.is_changed() && !saves.is_changed() && !sound.is_changed() {
+    if !setup.is_changed()
+        && !saves.is_changed()
+        && !sound.is_changed()
+        && !title_status.is_changed()
+        && !(setup.open && village.is_changed())
+    {
         return;
     }
     panel.display = if setup.open && !saves.open && !sound.open {
@@ -1281,9 +1743,34 @@ fn refresh_panel(
         Display::None
     };
     let has_village = village.session_setup().is_some();
-    let autosave_exists = saves
-        .continue_path(setup.mode)
-        .is_ok_and(|path| crate::save::exists(&path));
+    let has_story_autosave = has_autosave(&saves, Mode::Story);
+    let has_sandbox_autosave = has_autosave(&saves, Mode::Sandbox);
+    let autosave_exists = has_autosave(&saves, setup.mode);
+
+    let (resume_text, resume_node) = &mut *resume_summary;
+    if has_village {
+        let summary = village.resume_summary();
+        resume_text.0 = summary;
+        resume_node.display = if resume_text.0.is_empty() {
+            Display::None
+        } else {
+            Display::Flex
+        };
+    } else {
+        resume_text.0.clear();
+        resume_node.display = Display::None;
+    }
+
+    let (status_label, status_node) = &mut *status_text;
+    if status_label.0 != title_status.0 {
+        status_label.0.clone_from(&title_status.0);
+    }
+    status_node.display = if title_status.0.is_empty() {
+        Display::None
+    } else {
+        Display::Flex
+    };
+
     for (entity, &PickerStep(action, _), disabled) in &step_buttons {
         let enabled = action.enabled(setup.mode);
         if enabled == disabled {
@@ -1296,28 +1783,29 @@ fn refresh_panel(
     }
     for (entity, action, children, mut button, mut background, disabled) in &mut buttons {
         let enabled = action.enabled(setup.mode);
+        let style = action.style(has_village, has_story_autosave);
         if enabled == disabled {
             if enabled {
                 commands.entity(entity).remove::<InteractionDisabled>();
             } else {
                 commands.entity(entity).insert(InteractionDisabled);
             }
-            if !action.is_primary() && !action.is_picker_value() {
+            if matches!(style, ButtonStyle::RaisedPaper) {
                 background.0 = theme::button_fill(Interaction::None, enabled);
             }
         }
-        let visible = match action {
-            Action::Resume => !setup.choosing_land && has_village,
-            Action::Continue(mode) => {
-                !setup.choosing_land
-                    && !has_village
-                    && saves
-                        .continue_path(*mode)
-                        .is_ok_and(|path| crate::save::exists(&path))
-            }
-            Action::CancelNew => setup.choosing_land && setup.confirming_new,
-            Action::Library => !setup.choosing_land && !saves.preview,
-            _ => action.is_title_action() != setup.choosing_land,
+        let visible = if action.is_title_action() {
+            !setup.choosing_land
+                && action.visible_on_title(
+                    has_village,
+                    has_story_autosave,
+                    has_sandbox_autosave,
+                    saves.preview,
+                )
+        } else if matches!(action, Action::CancelNew) {
+            setup.choosing_land && setup.confirming_new
+        } else {
+            setup.choosing_land
         };
         button.display = if visible {
             Display::Flex
@@ -1327,8 +1815,21 @@ fn refresh_panel(
         for child in children.iter() {
             if let Ok((mut label, mut color)) = labels.get_mut(child) {
                 label.0 = setup.button_value(*action, has_village || autosave_exists);
-                if action.is_picker_value() {
-                    color.0 = if enabled { theme::INK } else { theme::MUTED };
+                let wanted = match style {
+                    ButtonStyle::TitlePrimary => theme::TITLE_PRIMARY_TEXT,
+                    ButtonStyle::TitleRow | ButtonStyle::TitleLink => theme::TITLE_INK,
+                    ButtonStyle::SetupPrimary => theme::PAPER,
+                    ButtonStyle::RaisedPaper => theme::INK,
+                    ButtonStyle::PickerValue => {
+                        if enabled {
+                            theme::INK
+                        } else {
+                            theme::MUTED
+                        }
+                    }
+                };
+                if color.0 != wanted {
+                    color.0 = wanted;
                 }
             }
         }
@@ -1344,6 +1845,8 @@ type PaintActionButtons<'w, 's> = Query<
         &'static mut BackgroundColor,
         Option<&'static mut BorderColor>,
         Option<&'static mut BoxShadow>,
+        Option<&'static mut UiTransform>,
+        Option<&'static mut Outline>,
     ),
     Without<PickerStep>,
 >;
@@ -1363,45 +1866,170 @@ type PaintStepButtons<'w, 's> = Query<
 
 fn paint_setup_buttons(
     setup: Res<WorldSetup>,
+    (village, saves, focus): (Res<crate::village::Village>, Res<SaveMenu>, Res<TitleFocus>),
     mut action_buttons: PaintActionButtons,
     mut step_buttons: PaintStepButtons,
 ) {
     if !setup.open {
         return;
     }
-    for (action, interaction, mut background, border, shadow) in &mut action_buttons {
+    let has_village = village.session_setup().is_some();
+    let has_story_autosave = has_autosave(&saves, Mode::Story);
+    for (action, interaction, mut background, border, shadow, transform, outline) in
+        &mut action_buttons
+    {
         let enabled = action.enabled(setup.mode);
-        if action.is_picker_value() {
-            let fill = if matches!(action, Action::Seed) && setup.seed_entry.is_some() {
-                theme::ACTIVE
-            } else if enabled && *interaction == Interaction::Hovered {
-                theme::BUTTON_HOVER
-            } else if enabled && *interaction == Interaction::Pressed {
-                theme::BUTTON_PRESSED
+        let style = action.style(has_village, has_story_autosave);
+        let focused = !setup.choosing_land && focus.0 == Some(*action);
+        if let Some(mut outline) = outline {
+            let ring = if focused {
+                theme::FOCUS_RING
             } else {
                 Color::NONE
             };
-            if background.0 != fill {
-                background.0 = fill;
+            if outline.color != ring {
+                outline.color = ring;
             }
-        } else if action.is_primary() {
-            let fill = match interaction {
-                Interaction::Hovered => Color::srgb_u8(0x4c, 0x62, 0x47),
-                Interaction::Pressed => Color::srgb_u8(0x32, 0x42, 0x30),
-                Interaction::None => theme::INK,
-            };
-            if background.0 != fill {
-                background.0 = fill;
+        }
+        match style {
+            ButtonStyle::TitlePrimary => {
+                let fill = match interaction {
+                    Interaction::Hovered => theme::TITLE_PRIMARY_HOVER,
+                    Interaction::Pressed => theme::TITLE_PRIMARY_PRESSED,
+                    Interaction::None => theme::TITLE_INK,
+                };
+                if background.0 != fill {
+                    background.0 = fill;
+                }
+                if let Some(mut border) = border {
+                    let edge = BorderColor::all(fill);
+                    if *border != edge {
+                        *border = edge;
+                    }
+                }
+                if let Some(mut shadow) = shadow {
+                    let lift = if *interaction == Interaction::Pressed {
+                        1.0
+                    } else {
+                        3.5
+                    };
+                    let wanted =
+                        BoxShadow::new(theme::TITLE_PRIMARY_SHADOW, px(0), px(lift), px(0), px(0));
+                    if *shadow != wanted {
+                        *shadow = wanted;
+                    }
+                }
+                if let Some(mut transform) = transform {
+                    let shift = match interaction {
+                        Interaction::Hovered => Val2::px(4.0, 0.0),
+                        Interaction::Pressed => Val2::px(2.0, 0.0),
+                        Interaction::None => Val2::ZERO,
+                    };
+                    if transform.translation != shift {
+                        transform.translation = shift;
+                    }
+                }
             }
-        } else if let (Some(mut border), Some(mut shadow)) = (border, shadow) {
-            theme::paint_button(
-                *interaction,
-                enabled,
-                false,
-                &mut background,
-                &mut border,
-                &mut shadow,
-            );
+            ButtonStyle::TitleRow => {
+                let fill = match interaction {
+                    Interaction::Pressed => theme::TITLE_ROW_PRESSED,
+                    Interaction::Hovered => theme::TITLE_ROW_HOVER,
+                    Interaction::None if focused => theme::TITLE_ROW_HOVER,
+                    Interaction::None => Color::NONE,
+                };
+                if background.0 != fill {
+                    background.0 = fill;
+                }
+                if let Some(mut border) = border {
+                    let edge = BorderColor::all(Color::NONE);
+                    if *border != edge {
+                        *border = edge;
+                    }
+                }
+                if let Some(mut shadow) = shadow {
+                    let none = BoxShadow::default();
+                    if *shadow != none {
+                        *shadow = none;
+                    }
+                }
+                if let Some(mut transform) = transform {
+                    let shift = match interaction {
+                        Interaction::Pressed => Val2::px(2.0, 0.0),
+                        Interaction::Hovered => Val2::px(4.0, 0.0),
+                        Interaction::None if focused => Val2::px(4.0, 0.0),
+                        Interaction::None => Val2::ZERO,
+                    };
+                    if transform.translation != shift {
+                        transform.translation = shift;
+                    }
+                }
+            }
+            ButtonStyle::TitleLink => {
+                let fill = match interaction {
+                    Interaction::Pressed => theme::TITLE_ROW_PRESSED,
+                    Interaction::Hovered => theme::TITLE_ROW_HOVER,
+                    Interaction::None if focused => theme::TITLE_ROW_HOVER,
+                    Interaction::None => Color::NONE,
+                };
+                if background.0 != fill {
+                    background.0 = fill;
+                }
+                if let Some(mut border) = border {
+                    let underline = BorderColor {
+                        bottom: theme::TITLE_INK,
+                        ..BorderColor::all(Color::NONE)
+                    };
+                    if *border != underline {
+                        *border = underline;
+                    }
+                }
+                if let Some(mut transform) = transform
+                    && transform.translation != Val2::ZERO
+                {
+                    transform.translation = Val2::ZERO;
+                }
+            }
+            ButtonStyle::SetupPrimary => {
+                let fill = match interaction {
+                    Interaction::Hovered => Color::srgb_u8(0x4c, 0x62, 0x47),
+                    Interaction::Pressed => Color::srgb_u8(0x32, 0x42, 0x30),
+                    Interaction::None => theme::INK,
+                };
+                if background.0 != fill {
+                    background.0 = fill;
+                }
+            }
+            ButtonStyle::PickerValue => {
+                let fill = if matches!(action, Action::Seed) && setup.seed_entry.is_some() {
+                    theme::ACTIVE
+                } else if enabled && *interaction == Interaction::Hovered {
+                    theme::BUTTON_HOVER
+                } else if enabled && *interaction == Interaction::Pressed {
+                    theme::BUTTON_PRESSED
+                } else {
+                    Color::NONE
+                };
+                if background.0 != fill {
+                    background.0 = fill;
+                }
+            }
+            ButtonStyle::RaisedPaper => {
+                if let (Some(mut border), Some(mut shadow)) = (border, shadow) {
+                    theme::paint_button(
+                        *interaction,
+                        enabled,
+                        false,
+                        &mut background,
+                        &mut border,
+                        &mut shadow,
+                    );
+                }
+                if let Some(mut transform) = transform
+                    && transform.translation != Val2::ZERO
+                {
+                    transform.translation = Val2::ZERO;
+                }
+            }
         }
     }
     for (&PickerStep(action, _), interaction, mut background, mut border, mut shadow) in
@@ -1423,7 +2051,7 @@ fn refresh_story_resume(
     saves: Res<SaveMenu>,
     village: Res<crate::village::Village>,
     catalog: Res<crate::catalog::Catalog>,
-    mut label: Single<&mut Text, With<StoryResumeSummary>>,
+    mut label: Single<(&mut Text, &mut Node), With<StoryResumeSummary>>,
     mut preview: Local<Option<crate::save::SaveSnapshot>>,
 ) {
     if !setup.open
@@ -1437,12 +2065,18 @@ fn refresh_story_resume(
         .ok()
         .and_then(|path| crate::save::snapshot(&path));
     if *preview != snapshot {
-        label.0 = if snapshot.is_some() {
+        let (text, node) = &mut *label;
+        text.0 = if snapshot.is_some() {
             crate::village::restore_continuation(&saves, Mode::Story, &catalog)
                 .map(|(saved, _)| saved.story_resume_summary())
                 .unwrap_or_default()
         } else {
             String::new()
+        };
+        node.display = if text.0.is_empty() {
+            Display::None
+        } else {
+            Display::Flex
         };
         *preview = snapshot;
     }
@@ -1579,5 +2213,174 @@ mod tests {
         app.world_mut().resource_mut::<WorldSetup>().choosing_land = false;
         app.update();
         assert_eq!(app.world().get::<ScrollPosition>(panel).unwrap().y, 0.);
+    }
+
+    #[test]
+    fn title_primary_action_follows_active_session_then_story_save_then_new_game() {
+        assert!(matches!(
+            Action::New(Mode::Story).style(false, false),
+            ButtonStyle::TitlePrimary
+        ));
+        assert!(matches!(
+            Action::New(Mode::Sandbox).style(false, false),
+            ButtonStyle::TitleRow
+        ));
+        assert!(matches!(
+            Action::Continue(Mode::Story).style(false, true),
+            ButtonStyle::TitlePrimary
+        ));
+        assert!(matches!(
+            Action::New(Mode::Story).style(false, true),
+            ButtonStyle::TitleRow
+        ));
+        assert!(matches!(
+            Action::Resume.style(true, true),
+            ButtonStyle::TitlePrimary
+        ));
+        assert!(matches!(
+            Action::New(Mode::Story).style(true, false),
+            ButtonStyle::TitleRow
+        ));
+        assert!(matches!(
+            Action::ArtCollection.style(false, false),
+            ButtonStyle::TitleLink
+        ));
+        assert!(matches!(
+            Action::Library.style(false, false),
+            ButtonStyle::RaisedPaper
+        ));
+    }
+
+    #[test]
+    fn title_keyboard_focus_cycles_visible_rows_shows_outline_and_activates() {
+        let mut app = App::new();
+        app.add_plugins((
+            MinimalPlugins,
+            AssetPlugin::default(),
+            WindowPlugin::default(),
+        ))
+        .init_asset::<Image>()
+        .init_asset::<Font>()
+        .init_resource::<ButtonInput<KeyCode>>()
+        .init_resource::<AccumulatedMouseScroll>()
+        .init_resource::<SaveMenu>()
+        .init_resource::<crate::audio::SoundSettings>()
+        .init_resource::<crate::village::Village>()
+        .init_resource::<crate::catalog::Catalog>()
+        .add_plugins((WorldSetupPlugin, crate::ui_font::UiFontPlugin));
+        app.finish();
+        app.cleanup();
+        // Keep test isolated from any real autosave on disk.
+        let temp_dir =
+            std::env::temp_dir().join(format!("solar-v3-title-focus-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&temp_dir);
+        std::fs::create_dir_all(&temp_dir).unwrap();
+        app.world_mut().resource_mut::<SaveMenu>().test_directory = Some(temp_dir.clone());
+        app.update();
+
+        // V2 poster copy and footer are present on the title screen.
+        let texts: Vec<String> = {
+            let world = app.world_mut();
+            world
+                .query::<&Text>()
+                .iter(world)
+                .map(|text| text.0.clone())
+                .collect()
+        };
+        for expected in [
+            "A LITTLE LAND. A LIFE TOGETHER.",
+            "Solar\nFriends",
+            "GROW SOMETHING GOOD",
+            "SOLAR FRIENDS",
+            "v3",
+            "Browse the art collection ↗",
+            "Load village",
+        ] {
+            assert!(
+                texts.iter().any(|text| text == expected),
+                "missing title text: {expected}"
+            );
+        }
+
+        // Plain text row ("New sandbox") is transparent at rest and highlights + shifts on hover.
+        let sandbox_entity = {
+            let world = app.world_mut();
+            world
+                .query::<(Entity, &Action)>()
+                .iter(world)
+                .find_map(|(entity, action)| {
+                    (*action == Action::New(Mode::Sandbox)).then_some(entity)
+                })
+                .unwrap()
+        };
+        assert_eq!(
+            app.world()
+                .get::<BackgroundColor>(sandbox_entity)
+                .unwrap()
+                .0,
+            Color::NONE
+        );
+        *app.world_mut()
+            .get_mut::<Interaction>(sandbox_entity)
+            .unwrap() = Interaction::Hovered;
+        app.update();
+        assert_eq!(
+            app.world()
+                .get::<BackgroundColor>(sandbox_entity)
+                .unwrap()
+                .0,
+            theme::TITLE_ROW_HOVER
+        );
+        assert_eq!(
+            app.world()
+                .get::<UiTransform>(sandbox_entity)
+                .unwrap()
+                .translation,
+            Val2::px(4.0, 0.0)
+        );
+        *app.world_mut()
+            .get_mut::<Interaction>(sandbox_entity)
+            .unwrap() = Interaction::None;
+        app.update();
+
+        // ArrowDown focuses the primary action first, then cycles to New sandbox with visible focus ring.
+        let press_key = |app: &mut App, key: KeyCode| {
+            app.world_mut()
+                .resource_mut::<ButtonInput<KeyCode>>()
+                .press(key);
+            app.world_mut().run_schedule(Update);
+            app.world_mut()
+                .resource_mut::<ButtonInput<KeyCode>>()
+                .reset(key);
+        };
+        press_key(&mut app, KeyCode::ArrowDown);
+        assert_eq!(
+            app.world().resource::<TitleFocus>().0,
+            Some(Action::New(Mode::Story))
+        );
+        press_key(&mut app, KeyCode::ArrowDown);
+        assert_eq!(
+            app.world().resource::<TitleFocus>().0,
+            Some(Action::New(Mode::Sandbox))
+        );
+        assert_eq!(
+            app.world().get::<Outline>(sandbox_entity).unwrap().color,
+            theme::FOCUS_RING
+        );
+        assert_eq!(
+            app.world()
+                .get::<BackgroundColor>(sandbox_entity)
+                .unwrap()
+                .0,
+            theme::TITLE_ROW_HOVER
+        );
+
+        // Pressing Enter activates the focused row (New sandbox -> opens land setup in Sandbox mode).
+        press_key(&mut app, KeyCode::Enter);
+        assert!(app.world().resource::<WorldSetup>().choosing_land);
+        assert!(app.world().resource::<WorldSetup>().mode == Mode::Sandbox);
+        assert_eq!(app.world().resource::<TitleFocus>().0, None);
+
+        let _ = std::fs::remove_dir_all(&temp_dir);
     }
 }
