@@ -1189,6 +1189,15 @@ mod tests {
         assert!(remaining < balance && delivery);
         press_button(&mut app, "Buy for delivery");
         assert_eq!(trade_state(&app), (remaining, queued, delivery));
+        press_button(&mut app, "View orders");
+        assert!(
+            app.world_mut()
+                .query::<&Text>()
+                .iter(app.world())
+                .any(|text| text.0.contains("Freight ·")
+                    && text.0.contains("game minutes remaining"))
+        );
+        press_button(&mut app, "Browse materials");
 
         press_button(&mut app, "Close panel");
         assert!(!app.world().resource::<village::Village>().trade_open());
