@@ -238,6 +238,33 @@ impl Construction {
         })
     }
 
+    /// Why a selected-building action is unavailable, when the action still deserves a
+    /// dimmed button instead of disappearing.
+    pub(crate) fn project_action_issue(
+        &self,
+        catalog: &Catalog,
+        action: ProjectAction,
+        sandbox: bool,
+    ) -> Option<&'static str> {
+        if self.menu || self.moving.is_some() || self.production.open || self.farming.open {
+            return None;
+        }
+        let index = self.production.selected?;
+        let project = &self.plans[index];
+        if project.removed || self.project_action_available(catalog, action, sandbox) {
+            return None;
+        }
+        if matches!(action, ProjectAction::Copy) {
+            return None;
+        }
+        if self.changes.contains_key(&index) {
+            return Some("Residents are already moving or removing this building.");
+        }
+        let unfinished = project.work < catalog.projects[&project.key].work;
+        (matches!(action, ProjectAction::Cancel) && unfinished)
+            .then_some("Construction has already started. Salvage or demolish it instead.")
+    }
+
     pub fn apply_project_action(
         &mut self,
         catalog: &Catalog,
@@ -787,6 +814,34 @@ impl Construction {
 mod tests {
     use super::*;
     use crate::setup::WorldSetup;
+
+    #[test]
+    fn blocked_building_actions_explain_themselves() {
+        let catalog = Catalog::default();
+        let mut village = Construction::default();
+        let kitchen = village.proposed_site(&catalog, "kitchen", IVec2::new(44, 36));
+        village.plans.push(kitchen);
+        village.production.selected = Some(0);
+        assert_eq!(
+            village.project_action_issue(&catalog, ProjectAction::Cancel, false),
+            None
+        );
+        village.plans[0].work = 1.0;
+        assert_eq!(
+            village.project_action_issue(&catalog, ProjectAction::Cancel, false),
+            Some("Construction has already started. Salvage or demolish it instead.")
+        );
+        village.plans[0].work = catalog.projects["kitchen"].work;
+        assert_eq!(
+            village.project_action_issue(&catalog, ProjectAction::Cancel, false),
+            None
+        );
+        village.begin_change(&catalog, 0, Change::Salvage, None);
+        assert_eq!(
+            village.project_action_issue(&catalog, ProjectAction::Move, false),
+            Some("Residents are already moving or removing this building.")
+        );
+    }
 
     #[test]
     fn relocation_requires_disconnecting_manual_utilities() {

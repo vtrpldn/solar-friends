@@ -2203,11 +2203,14 @@ fn refresh(
             }
             Action::SelectedProject(action) => {
                 show_selected_project
-                    && village.construction.project_action_available(
+                    && (village.construction.project_action_available(
                         &catalog,
                         action,
                         village.stock.sandbox,
-                    )
+                    ) || village
+                        .construction
+                        .project_action_issue(&catalog, action, village.stock.sandbox)
+                        .is_some())
             }
             Action::TradeItem(row) => trade_items.get(row).is_some(),
             Action::InventoryItem(row) => inventory_items.get(row).is_some_and(Option::is_some),
@@ -2302,26 +2305,31 @@ fn refresh(
         if !show {
             continue;
         }
-        let action_issue = match action {
-            Action::SelectedProject(ProjectAction::Cancel) => {
-                village.construction.selected_cancel_issue()
-            }
-            Action::Trade(order) => village.construction.selected_trade_issue(
-                &catalog,
-                &village.stock,
-                trade_clock,
-                order,
-            ),
-            Action::ListedHome(row) if !homes[row].open => {
-                Some("Reopen this home before assigning residents.")
-            }
-            Action::ListedHome(row)
-                if homes[row].occupants >= homes[row].beds && !homes[row].assigned =>
-            {
-                Some("This home has no free beds.")
-            }
-            _ => None,
-        };
+        let action_issue =
+            match action {
+                Action::SelectedProject(ProjectAction::Cancel) => village
+                    .construction
+                    .project_action_issue(&catalog, ProjectAction::Cancel, village.stock.sandbox)
+                    .or_else(|| village.construction.selected_cancel_issue()),
+                Action::SelectedProject(project_action) => village
+                    .construction
+                    .project_action_issue(&catalog, project_action, village.stock.sandbox),
+                Action::Trade(order) => village.construction.selected_trade_issue(
+                    &catalog,
+                    &village.stock,
+                    trade_clock,
+                    order,
+                ),
+                Action::ListedHome(row) if !homes[row].open => {
+                    Some("Reopen this home before assigning residents.")
+                }
+                Action::ListedHome(row)
+                    if homes[row].occupants >= homes[row].beds && !homes[row].assigned =>
+                {
+                    Some("This home has no free beds.")
+                }
+                _ => None,
+            };
         if interaction != Interaction::None {
             let description = match action {
                 Action::SelectedProject(ProjectAction::Cancel) => Some(
@@ -2329,7 +2337,9 @@ fn refresh(
                         .unwrap_or("Remove this unstarted plan and return reserved supplies.")
                         .into(),
                 ),
-                Action::Trade(_) | Action::ListedHome(_) => action_issue.map(str::to_owned),
+                Action::Trade(_) | Action::ListedHome(_) | Action::SelectedProject(_) => {
+                    action_issue.map(str::to_owned)
+                }
                 Action::CampPreset(index) => Some(
                     [
                         "Cool afternoons, but a longer walk from the unloading point.",
