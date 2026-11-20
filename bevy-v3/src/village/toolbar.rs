@@ -1834,12 +1834,6 @@ fn refresh(
             Action::MoveCraft => craft_workspace.is_some(),
             Action::FacilityIrrigation => irrigation.is_some(),
             Action::Beds | Action::Gather => action.available(&village),
-            Action::Farm(
-                FarmControl::Irrigation
-                | FarmControl::Residues
-                | FarmControl::Crop
-                | FarmControl::Density,
-            ) => show_beds && !village.construction.farming.whole_plot,
             Action::Farm(_) => show_beds,
             Action::Recipe(row) => recipes.get(row).is_some(),
             Action::FocusSelectedProject | Action::DeselectProject => {

@@ -367,6 +367,7 @@ impl Construction {
             return;
         }
         if self.farming.whole_plot && !matches!(action, FarmControl::NextBed) {
+            self.configure_whole_plot(site, action);
             return;
         }
         let plot = self.farming.plots.get_mut(&site).expect("selected plot");
@@ -401,6 +402,69 @@ impl Construction {
             }
             _ => {}
         }
+    }
+
+    fn configure_whole_plot(&mut self, site: usize, action: FarmControl) {
+        let beds = &mut self
+            .farming
+            .plots
+            .get_mut(&site)
+            .expect("selected plot")
+            .beds;
+        let busy: std::collections::BTreeSet<_> = self
+            .farming
+            .jobs
+            .iter()
+            .filter(|job| job.site == site)
+            .map(|job| job.bed)
+            .collect();
+        let planting = matches!(action, FarmControl::Crop | FarmControl::Density);
+        let eligible: Vec<_> = beds
+            .iter()
+            .enumerate()
+            .filter(|(index, bed)| !busy.contains(index) && (!planting || bed.editable()))
+            .map(|(index, _)| index)
+            .collect();
+        let Some(&first) = eligible.first() else {
+            self.farming.notice = "No beds are available for this setting.".into();
+            return;
+        };
+        let crop = beds[first].crop.next();
+        let density = beds[first].next_density();
+        let irrigation = !eligible.iter().all(|&index| beds[index].irrigation);
+        let residues = !eligible.iter().all(|&index| beds[index].collect_residues);
+        for &index in &eligible {
+            let bed = &mut beds[index];
+            match action {
+                FarmControl::Crop => bed.crop = crop,
+                FarmControl::Density => bed.density = density,
+                FarmControl::Irrigation => bed.irrigation = irrigation,
+                FarmControl::Residues => bed.collect_residues = residues,
+                _ => return,
+            }
+        }
+        let applied = match action {
+            FarmControl::Crop => crop.label().to_owned(),
+            FarmControl::Density => format!("Density {density:.1}×"),
+            FarmControl::Irrigation => if irrigation {
+                "Irrigation on"
+            } else {
+                "Irrigation off"
+            }
+            .into(),
+            FarmControl::Residues => if residues {
+                "Collect residues"
+            } else {
+                "Leave residues as cover"
+            }
+            .into(),
+            _ => return,
+        };
+        self.farming.notice = format!(
+            "{applied} · {} beds updated · {} skipped.",
+            eligible.len(),
+            beds.len() - eligible.len()
+        );
     }
 
     pub(super) fn queue_bed_job(
@@ -659,7 +723,7 @@ impl Construction {
                 .filter(|job| job.site == site)
                 .count();
             return Some(format!(
-                "Whole plot · {count} beds · {busy} queued\n1 Prepare · 2 Plant · 3 Harvest · 4 Clear · 5 Amend · 6 Collect\n{}",
+                "Whole plot · {count} beds · {busy} queued\n1 Prepare · 2 Plant · 3 Harvest · 4 Clear · 5 Amend · 6 Collect\nX Crop · Y Density · T Irrigation · Z Residues · Tab Inspect bed\n{}",
                 self.farming.notice,
             ));
         }
@@ -1131,6 +1195,15 @@ mod resize_tests {
         assert_eq!(village.farming.bed, 1);
 
         village.apply_farm_control(&catalog, &mut stock, FarmControl::WholePlot, clock);
+        let initial_crop = village.farming.plots[&0].beds[0].crop;
+        village.apply_farm_control(&catalog, &mut stock, FarmControl::Crop, clock);
+        let beds = &village.farming.plots[&0].beds;
+        assert!(beds[0].crop == initial_crop);
+        assert!(beds[1..].iter().all(|bed| bed.crop == initial_crop.next()));
+        village.apply_farm_control(&catalog, &mut stock, FarmControl::Irrigation, clock);
+        let beds = &village.farming.plots[&0].beds;
+        assert_eq!(beds[0].irrigation, original.0);
+        assert!(beds[1..].iter().all(|bed| bed.irrigation != original.0));
         village.apply_farm_control(
             &catalog,
             &mut stock,
