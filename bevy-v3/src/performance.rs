@@ -77,7 +77,8 @@ fn record(
     lights: Query<(), AnyLight>,
 ) {
     let delta = time.delta_secs();
-    if delta <= 0. {
+    // Loading and a hidden tab pause the game for seconds; those are not frames.
+    if delta <= 0. || delta > 1. {
         return;
     }
     frames.times.push_back(delta);
