@@ -33,6 +33,7 @@ impl Construction {
         stock: &Stock,
         page: usize,
         underway: bool,
+        clock: f64,
     ) -> (usize, String) {
         use std::fmt::Write;
         let rows = self.visible_projects(catalog, underway);
@@ -69,6 +70,9 @@ impl Construction {
                 def.name,
                 index + 1
             );
+            if let Some(minutes) = self.construction_delivery_minutes(*index, clock) {
+                let _ = write!(text, " · {minutes} game minutes remaining");
+            }
         }
         (pages, text)
     }

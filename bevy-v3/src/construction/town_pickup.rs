@@ -251,6 +251,14 @@ impl Construction {
             .is_some_and(|order| order.sites().any(|id| id == site))
     }
 
+    pub(super) fn construction_delivery_minutes(&self, site: usize, clock: f64) -> Option<u64> {
+        let order = self.construction_delivery.as_ref()?;
+        order
+            .sites()
+            .any(|id| id == site)
+            .then(|| crate::weather::remaining_game_minutes(order.eta - clock))
+    }
+
     pub fn reserved_freight_status(&self, clock: f64) -> Option<String> {
         if let Some(job) = self
             .farming

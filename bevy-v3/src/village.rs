@@ -798,6 +798,7 @@ impl Village {
                         &self.stock,
                         self.projects_page,
                         self.open_projects_only,
+                        self.clock,
                     )
                     .0,
                 &mut self.projects_page,
@@ -2723,6 +2724,7 @@ fn show_hud(
                         &village.stock,
                         village.projects_page,
                         village.open_projects_only,
+                        village.clock,
                     )
                     .1,
             );

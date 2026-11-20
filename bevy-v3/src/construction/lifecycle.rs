@@ -876,7 +876,7 @@ mod tests {
             construction.lifecycle_status(&catalog, &stock).as_deref(),
             Some("Moving · Another project occupies that space.")
         );
-        let (_, projects) = construction.projects_panel(&catalog, &stock, 0, true);
+        let (_, projects) = construction.projects_panel(&catalog, &stock, 0, true, 0.0);
         assert!(projects.contains("Moving · Another project occupies that space."));
         assert_eq!(construction.plans[0].position, original);
         assert_eq!(construction.foundations.len(), 1);
@@ -1026,7 +1026,7 @@ mod tests {
             construction.lifecycle_status(&catalog, &stock).as_deref(),
             Some("Salvaging · Waiting for storage space")
         );
-        let (_, projects) = construction.projects_panel(&catalog, &stock, 0, true);
+        let (_, projects) = construction.projects_panel(&catalog, &stock, 0, true, 0.0);
         assert!(projects.contains("Salvaging · Waiting for storage space"));
         construction.tick_changes(&catalog, &mut stock, site, 42.0, 3.0);
         assert_eq!(construction.changes[&0].worker, None);
