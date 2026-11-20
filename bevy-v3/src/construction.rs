@@ -806,8 +806,9 @@ impl Construction {
         self.status.clear();
     }
 
-    pub fn rotate_placement(&mut self) {
-        self.rotation = (self.rotation + 1) % 4;
+    /// Turns the placement a quarter turn clockwise, or counter-clockwise when `reverse`.
+    pub fn rotate_placement(&mut self, reverse: bool) {
+        self.rotation = (self.rotation + if reverse { 3 } else { 1 }) % 4;
     }
 
     pub fn cancel_placement(&mut self) {
@@ -827,7 +828,7 @@ impl Construction {
     pub fn input(&mut self, keyboard: &ButtonInput<KeyCode>, catalog: &Catalog, sandbox: bool) {
         if self.moving.is_some() {
             if keyboard.just_pressed(KeyCode::KeyR) {
-                self.rotate_placement();
+                self.rotate_placement(shift_held(keyboard));
             }
             if keyboard.just_pressed(KeyCode::KeyB) {
                 self.cancel_placement();
@@ -857,7 +858,7 @@ impl Construction {
             self.resize_field_placement(delta);
         }
         if self.selection.is_some() && keyboard.just_pressed(KeyCode::KeyR) {
-            self.rotate_placement();
+            self.rotate_placement(shift_held(keyboard));
         }
     }
 
@@ -907,7 +908,7 @@ impl Construction {
     pub fn instructions(&self, catalog: &Catalog, sandbox: bool) -> String {
         if self.moving.is_some() {
             return format!(
-                "Click destination · R Rotate {}° · B Cancel move\n{}",
+                "Click destination · R / Shift+R Rotate {}° · B Cancel move\n{}",
                 u32::from(self.rotation) * 90,
                 self.status
             );
@@ -923,7 +924,7 @@ impl Construction {
         }
         if self.selection.as_deref() == Some("field") {
             return format!(
-                "Cultivated field · {} × {} cells\n[ ] Width · Shift [ ] Depth · R Rotate {}°\nClick to designate · Shift-click Repeat · Esc Cancel\n{}",
+                "Cultivated field · {} × {} cells\n[ ] Width · Shift [ ] Depth · R / Shift+R Rotate {}°\nClick to designate · Shift-click Repeat · Esc Cancel\n{}",
                 self.field_size.x,
                 self.field_size.y,
                 u32::from(self.rotation) * 90,
@@ -982,7 +983,7 @@ impl Construction {
                 ""
             };
             return format!(
-                "{details}\nClick to plan · R Rotate ({degrees}°){repeat} · Esc Cancel\n{}",
+                "{details}\nClick to plan · R / Shift+R Rotate ({degrees}°){repeat} · Esc Cancel\n{}",
                 self.status
             );
         }
@@ -2929,6 +2930,10 @@ pub(crate) fn default_field_size() -> IVec2 {
     IVec2::splat(2)
 }
 
+fn shift_held(keyboard: &ButtonInput<KeyCode>) -> bool {
+    keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight])
+}
+
 fn field_size_input(keyboard: &ButtonInput<KeyCode>) -> Option<IVec2> {
     let amount = i32::from(keyboard.just_pressed(KeyCode::BracketRight))
         - i32::from(keyboard.just_pressed(KeyCode::BracketLeft));
@@ -2944,6 +2949,25 @@ fn field_size_input(keyboard: &ButtonInput<KeyCode>) -> Option<IVec2> {
 mod tests {
     use super::*;
     use crate::setup::WorldSetup;
+
+    #[test]
+    fn shift_r_turns_the_placement_back_the_other_way() {
+        let mut construction = Construction::default();
+        construction.menu = true;
+        construction.selection = Some("tent".into());
+        let mut keyboard = ButtonInput::<KeyCode>::default();
+        keyboard.press(KeyCode::ShiftLeft);
+        keyboard.press(KeyCode::KeyR);
+        construction.input(&keyboard, &Catalog::default(), false);
+        assert_eq!(construction.rotation, 3);
+        keyboard.release(KeyCode::ShiftLeft);
+        keyboard.clear();
+        keyboard.release(KeyCode::KeyR);
+        keyboard.clear();
+        keyboard.press(KeyCode::KeyR);
+        construction.input(&keyboard, &Catalog::default(), false);
+        assert_eq!(construction.rotation, 0);
+    }
 
     #[test]
     fn every_catalog_blueprint_has_a_valid_site_on_the_default_sandbox_plot() {

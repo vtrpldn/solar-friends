@@ -1393,7 +1393,7 @@ fn handle_buttons(
                     village.construction.toggle_build_menu(sandbox);
                     picker.open = false;
                 }
-                Action::RotatePlacement => village.construction.rotate_placement(),
+                Action::RotatePlacement => village.construction.rotate_placement(false),
                 Action::CancelPlacement => village.construction.cancel_placement(),
                 Action::ConnectRoad => village.connect_road_strokes = !village.connect_road_strokes,
                 Action::UndoRoad => {
