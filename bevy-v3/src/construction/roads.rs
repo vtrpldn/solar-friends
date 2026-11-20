@@ -11,6 +11,11 @@ struct RoadStroke {
     first_project: usize,
     stock: Stock,
     market: Market,
+    after: Vec<u8>,
+}
+
+fn road_stroke_state(stock: &Stock, market: &Market, tiles: &[Blueprint]) -> Vec<u8> {
+    serde_json::to_vec(&(stock, market, tiles)).expect("road stroke state serializes")
 }
 
 impl Construction {
@@ -77,10 +82,25 @@ impl Construction {
     }
 
     pub fn undo_roads(&mut self, stock: &mut Stock) {
-        let Some(stroke) = self.road_planning.history.pop() else {
+        let Some(stroke) = self.road_planning.history.last() else {
             self.status = "No road strokes to undo.".into();
             return;
         };
+        if self
+            .plans
+            .get(stroke.first_project..)
+            .is_none_or(|tiles| road_stroke_state(stock, &self.market, tiles) != stroke.after)
+        {
+            self.status =
+                "The village changed since this stroke. Finish planning to keep the current plan."
+                    .into();
+            return;
+        }
+        let stroke = self
+            .road_planning
+            .history
+            .pop()
+            .expect("checked road stroke");
         self.plans.truncate(stroke.first_project);
         self.market = stroke.market;
         *stock = stroke.stock;
@@ -157,6 +177,7 @@ impl Construction {
         self.road_planning.history.push(RoadStroke {
             anchor: self.road_planning.anchor,
             first_project: self.plans.len(),
+            after: road_stroke_state(&draft_stock, &draft_market, &added),
             stock: std::mem::replace(stock, draft_stock),
             market: std::mem::replace(&mut self.market, draft_market),
         });
@@ -426,5 +447,16 @@ mod tests {
         assert_eq!(tile.delivered, tile.loads);
         assert_eq!(tile.work, 0.0);
         assert_eq!(stock.available("stone"), stone);
+
+        stock.receive(&BTreeMap::from([("wood".into(), 5)]));
+        let wood = stock.available("wood");
+        construction.undo_roads(&mut stock);
+        assert_eq!(construction.plans.len(), 2);
+        assert_eq!(stock.available("wood"), wood);
+        assert!(
+            construction
+                .status
+                .contains("The village changed since this stroke.")
+        );
     }
 }
