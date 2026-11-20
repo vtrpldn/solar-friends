@@ -172,7 +172,11 @@ impl Construction {
         )
     }
 
-    pub(crate) fn open_inventory_producer(&mut self, catalog: &Catalog, site: usize) {
+    pub(crate) fn open_inventory_producer(
+        &mut self,
+        catalog: &Catalog,
+        site: usize,
+    ) -> Option<Vec2> {
         self.farming.close();
         self.select_project(Some(site));
         if self.has_selected_plot() {
@@ -180,6 +184,66 @@ impl Construction {
         } else {
             self.toggle_recipes(catalog);
         }
+        self.selected_project_center()
+    }
+
+    pub(crate) fn inventory_production_summary(
+        &self,
+        catalog: &Catalog,
+        stock: &Stock,
+        page: usize,
+        search: &str,
+        clock: f64,
+    ) -> String {
+        use std::fmt::Write;
+        let (pages, rows) = self.inventory_producers(catalog, page, search, stock.sandbox);
+        let page = page.min(pages - 1) + 1;
+        let mut text = format!(
+            "Production sites · {page}/{pages} · Tab Switch view · Page Up/Down · F10 Close"
+        );
+        if rows.is_empty() {
+            text.push_str("\nNo completed production sites match. Search for a building, crop, recipe or product.");
+        }
+        for (producer, _) in rows {
+            let Producer::Site(site) = producer else {
+                continue;
+            };
+            let name = &catalog.projects[&self.plans[site].key].name;
+            let _ = write!(text, "\n{name} #{}", site + 1);
+            if let Some(plot) = self.farming.plots.get(&site) {
+                let ready = plot
+                    .beds
+                    .iter()
+                    .filter(|bed| {
+                        bed.stage == crate::farming::Stage::Harvestable
+                            && !bed.harvest_expired(clock)
+                    })
+                    .count();
+                let jobs = self
+                    .farming
+                    .jobs
+                    .iter()
+                    .filter(|job| job.site == site)
+                    .count();
+                let _ = write!(
+                    text,
+                    " · {} beds · {ready} ready to harvest · {jobs} jobs",
+                    plot.beds.len()
+                );
+            } else {
+                let activity = self.production_site_status(catalog, stock, site, clock);
+                let enabled = self.utilities.enabled(site);
+                if !enabled {
+                    text.push_str(" · Switched off");
+                }
+                if activity.is_empty() && enabled {
+                    text.push_str(" · No batch queued");
+                } else {
+                    text.push_str(&activity);
+                }
+            }
+        }
+        text
     }
 
     pub(crate) fn place_inventory_producer(&mut self, key: &str, sandbox: bool) {
@@ -384,17 +448,6 @@ impl Construction {
         search: &str,
     ) -> (usize, String) {
         use std::fmt::Write;
-        if view == InventoryView::Production {
-            let (pages, rows) = self.inventory_producers(catalog, page, search, stock.sandbox);
-            let page = page.min(pages - 1) + 1;
-            let mut text = format!(
-                "Production sites · {page}/{pages} · Tab Switch view · Page Up/Down · F10 Close"
-            );
-            if rows.is_empty() {
-                text.push_str("\nNo completed production sites match. Search for a building, crop, recipe or product.");
-            }
-            return (pages, text);
-        }
         let ledger = self.inventory(catalog, stock, land);
         let (pages, rows) = inventory_rows(catalog, page, view, search);
         let page = page.min(pages - 1);
@@ -489,7 +542,16 @@ mod tests {
                 .iter()
                 .any(|(producer, _)| *producer == Producer::Site(1))
         );
-        construction.open_inventory_producer(&catalog, 0);
+        let summary = construction.inventory_production_summary(
+            &catalog,
+            &Stock::default(),
+            0,
+            "timber pieces",
+            0.0,
+        );
+        assert!(summary.contains("Timber workbench #1 · No batch queued"));
+        assert!(!summary.contains("Timber workbench #2"));
+        assert!(construction.open_inventory_producer(&catalog, 0).is_some());
         assert_eq!(construction.production.selected, Some(0));
         assert!(construction.production.open);
         construction.place_inventory_producer(key, true);

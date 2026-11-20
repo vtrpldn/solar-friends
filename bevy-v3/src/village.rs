@@ -884,6 +884,17 @@ impl Village {
                     .0,
                 &mut self.projects_page,
             ),
+            Some(UtilityPanel::Inventory) if self.inventory_view == InventoryView::Production => (
+                self.construction
+                    .inventory_producers(
+                        catalog,
+                        self.inventory_page,
+                        &self.inventory_search,
+                        self.stock.sandbox,
+                    )
+                    .0,
+                &mut self.inventory_page,
+            ),
             Some(UtilityPanel::Inventory) => (
                 self.construction
                     .inventory_panel(
@@ -2892,19 +2903,29 @@ fn show_hud(
                 village.inventory_search
             );
             label.push('\n');
-            label.push_str(
-                &village
-                    .construction
-                    .inventory_panel(
-                        &catalog,
-                        &village.stock,
-                        &land,
-                        village.inventory_page,
-                        village.inventory_view,
-                        &village.inventory_search,
-                    )
-                    .1,
-            );
+            if village.inventory_view == InventoryView::Production {
+                label.push_str(&village.construction.inventory_production_summary(
+                    &catalog,
+                    &village.stock,
+                    village.inventory_page,
+                    &village.inventory_search,
+                    village.clock,
+                ));
+            } else {
+                label.push_str(
+                    &village
+                        .construction
+                        .inventory_panel(
+                            &catalog,
+                            &village.stock,
+                            &land,
+                            village.inventory_page,
+                            village.inventory_view,
+                            &village.inventory_search,
+                        )
+                        .1,
+                );
+            }
             label.push('\n');
             label.push_str(&village.stock.processing_summary(&catalog));
         }

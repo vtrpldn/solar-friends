@@ -187,7 +187,7 @@ impl MapState {
         if let Some(index) = self.selected {
             let village = &runner.village;
             let mut details =
-                construction.lab_production_status(catalog, &village.stock, index, village.clock);
+                construction.production_site_status(catalog, &village.stock, index, village.clock);
             let recipes = construction.recipes(catalog, index);
             if let Some((_, recipe)) = recipes.get(self.recipe.min(recipes.len().saturating_sub(1)))
             {

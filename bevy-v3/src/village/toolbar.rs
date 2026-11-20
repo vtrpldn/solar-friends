@@ -1450,8 +1450,16 @@ fn handle_buttons(
                         village.editing_inventory = false;
                         match producer {
                             crate::construction::Producer::Site(site) => {
-                                village.construction.open_inventory_producer(&catalog, site);
-                                village.focus_selected_project(&setup, camera);
+                                if let Some(point) =
+                                    village.construction.open_inventory_producer(&catalog, site)
+                                {
+                                    let terrain = village.terrain(&setup);
+                                    camera.target = Vec3::new(
+                                        point.x,
+                                        terrain.height_at(point.x, point.y),
+                                        point.y,
+                                    );
+                                }
                             }
                             crate::construction::Producer::Blueprint(key) => {
                                 let sandbox = village.stock.sandbox;

@@ -666,7 +666,7 @@ impl Construction {
         }
     }
 
-    pub(crate) fn lab_production_status(
+    pub(crate) fn production_site_status(
         &self,
         catalog: &Catalog,
         stock: &Stock,
@@ -1776,7 +1776,7 @@ mod upgrade_tests {
         pen.water = 7.0;
         village.livestock.animals.insert(0, pen);
         assert_eq!(
-            village.lab_production_status(&catalog, &Stock::default(), 0, 0.0),
+            village.production_site_status(&catalog, &Stock::default(), 0, 0.0),
             "\nHealth 85% · feed 2.50 kg · water 7.0 L · 0 ready"
         );
     }
