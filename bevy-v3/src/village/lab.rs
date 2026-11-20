@@ -1601,7 +1601,7 @@ impl Playback {
         self.debt = (self.debt + elapsed.min(0.25) * speed).min(speed * 2.0);
         let before = runner.index;
         let endpoint = self.pause_at.unwrap_or(limit).min(limit);
-        let start = std::time::Instant::now();
+        let start = bevy::platform::time::Instant::now();
         while self.debt >= STEP
             && runner.index < endpoint
             && !runner.done()
@@ -1881,11 +1881,7 @@ type LabChartRoot<'w, 's> =
     Single<'w, 's, &'static mut Node, (With<trends::ChartRoot>, Without<LabToolbar>)>;
 
 fn choose_lab_export(file_name: &str) -> Option<PathBuf> {
-    rfd::FileDialog::new()
-        .set_title("Export Balance Lab file")
-        .set_file_name(file_name)
-        .add_filter("Lab JSON", &["json"])
-        .save_file()
+    crate::file_dialog::save_json("Export Balance Lab file", file_name, "Lab JSON")
 }
 
 fn update_lab_window(
@@ -2049,10 +2045,7 @@ fn update_lab_window(
     if playback.order.is_none() && playback.build_search.is_none() {
         let file = dropped.cloned().or_else(|| {
             if playback.replacement.is_none() && clicked(LabControl::OpenFile) {
-                rfd::FileDialog::new()
-                    .set_title("Open Balance Lab checkpoint or replay")
-                    .add_filter("Lab JSON", &["json"])
-                    .pick_file()
+                crate::file_dialog::pick_json("Open Balance Lab checkpoint or replay", "Lab JSON")
             } else {
                 None
             }

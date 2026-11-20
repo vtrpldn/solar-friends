@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Solar Friends V3</title>
+    <style>
+      html, body { margin: 0; height: 100%; background: #c9d4a4; overflow: hidden; }
+      #solar-friends { display: block; width: 100%; height: 100%; outline: none; }
+      #status { position: fixed; inset: auto 0 24px 0; text-align: center;
+        font: 600 15px system-ui, sans-serif; color: #40503c; }
+    </style>
+  </head>
+  <body>
+    <canvas id="solar-friends" tabindex="0"></canvas>
+    <p id="status">Loading Solar Friends…</p>
+    <script type="module">
+      import init from "./solar-friends-v3.js";
+      const status = document.getElementById("status");
+      if (!navigator.gpu) status.textContent = "This browser has no WebGPU support.";
+      try {
+        await init();
+        status.remove();
+      } catch (error) {
+        // Bevy hands control to the browser's event loop by throwing; that is not a failure.
+        if (!String(error).includes("Using exceptions for control flow")) {
+          status.textContent = `Could not start: ${error}`;
+          throw error;
+        }
+        status.remove();
+      }
+    </script>
+  </body>
+</html>

@@ -318,11 +318,7 @@ pub(super) fn library_controls(
                 .find_map(|(key, action)| keys.just_pressed(key).then_some(action))
         });
     if matches!(action, Some(Import)) && menu.entry.is_none() {
-        if let Some(file) = rfd::FileDialog::new()
-            .set_title("Import saved village")
-            .add_filter("Village JSON", &["json"])
-            .pick_file()
-        {
+        if let Some(file) = crate::file_dialog::pick_json("Import saved village", "Village JSON") {
             import_snapshot(&mut menu, &file, &catalog);
         }
         return;
@@ -479,11 +475,7 @@ pub(super) fn library_controls(
         }
     } else if matches!(action, Some(Export)) {
         menu.status = match save_library::export(&path, slot, mode, |file_name| {
-            rfd::FileDialog::new()
-                .set_title("Export saved village")
-                .set_file_name(file_name)
-                .add_filter("Village JSON", &["json"])
-                .save_file()
+            crate::file_dialog::save_json("Export saved village", file_name, "Village JSON")
         }) {
             Ok(Some(file)) => format!("Exported to {}", file.display()),
             Ok(None) => "Export canceled.".into(),

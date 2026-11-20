@@ -20,7 +20,7 @@ pub(super) struct SpriteCapture {
     placement: serde_json::Value,
     night: bool,
     warmup: Option<u8>,
-    started: std::time::Instant,
+    started: bevy::platform::time::Instant,
     light: Entity,
 }
 
@@ -324,7 +324,7 @@ pub(super) fn start(
         placement,
         night,
         warmup: None,
-        started: std::time::Instant::now(),
+        started: bevy::platform::time::Instant::now(),
         light: light_entity,
     });
     workshop.export_notice = "Rendering four sprite views…".into();

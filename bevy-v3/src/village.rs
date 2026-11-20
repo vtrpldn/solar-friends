@@ -2753,7 +2753,7 @@ fn advance_clock(
         camp,
     };
     *budget += UNAVAILABLE_SPEED;
-    let started = std::time::Instant::now();
+    let started = bevy::platform::time::Instant::now();
     loop {
         let cost = UNAVAILABLE_SPEED / village.effective_speed();
         if *budget < cost {
@@ -2785,7 +2785,7 @@ fn advance_days(
         land: &land,
         camp,
     };
-    let started = std::time::Instant::now();
+    let started = bevy::platform::time::Instant::now();
     let dt = run.step_seconds();
     loop {
         step(&mut village, &catalog, &setup, site, dt);

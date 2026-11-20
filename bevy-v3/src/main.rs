@@ -12,6 +12,7 @@ mod construction;
 mod economy_reference;
 mod equipment;
 mod farming;
+mod file_dialog;
 mod food;
 mod gathering;
 mod land;
@@ -50,8 +51,29 @@ fn default_camera_polar() -> f32 {
     (32.0_f32.hypot(32.0) / 35.0).atan()
 }
 
+/// Launch options: command-line flags natively, or the page's query string on the web,
+/// where `?downtime-preview` stands for `--downtime-preview`.
+fn launch_args() -> Vec<std::ffi::OsString> {
+    #[cfg(target_arch = "wasm32")]
+    {
+        let query = web_sys::window()
+            .and_then(|window| window.location().search().ok())
+            .unwrap_or_default();
+        query
+            .trim_start_matches('?')
+            .split('&')
+            .filter(|key| !key.is_empty())
+            .map(|key| format!("--{key}").into())
+            .collect()
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        std::env::args_os().skip(1).collect()
+    }
+}
+
 fn main() {
-    let mut args = std::env::args_os().skip(1);
+    let mut args = launch_args().into_iter();
     let option = args.next();
     if option.as_deref().is_some_and(|flag| flag == "--residents") {
         let pose = args.next();
@@ -168,6 +190,9 @@ fn main() {
                 }
                 .into(),
                 resolution: WindowResolution::new(1280, 800),
+                // On the web, draw into the page's canvas and follow its size.
+                canvas: cfg!(target_arch = "wasm32").then(|| "#solar-friends".into()),
+                fit_canvas_to_parent: true,
                 ..default()
             }),
             ..default()

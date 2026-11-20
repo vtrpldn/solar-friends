@@ -1080,10 +1080,7 @@ fn import_scene(
     });
     let path = dropped_path.or_else(|| {
         if clicked_import {
-            rfd::FileDialog::new()
-                .set_title("Import Solar Friends scene")
-                .add_filter("Scene JSON", &["json"])
-                .pick_file()
+            crate::file_dialog::pick_json("Import Solar Friends scene", "Scene JSON")
         } else {
             None
         }

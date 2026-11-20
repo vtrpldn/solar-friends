@@ -10,3 +10,8 @@ glam = { version = "0.30", features = ["serde"] }
 rfd = "0.17"
 serde = { version = "1", features = ["derive", "rc"] }
 serde_json = { version = "1", features = ["float_roundtrip"] }
+
+# The web build renders through WebGPU in the browser.
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+bevy = { version = "0.18", default-features = false, features = ["3d", "ui", "webgpu"] }
+web-sys = { version = "0.3", features = ["Window", "Location"] }
