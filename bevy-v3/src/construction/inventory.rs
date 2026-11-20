@@ -625,7 +625,7 @@ impl Construction {
         }
         let [stored, reserved, processing, transit, installed] = totals;
         format!(
-            "Material replacement estimates\nStores R${stored:.2} · Reserved R${reserved:.2} · In work R${processing:.2}\nIn transit R${transit:.2} · Installed R${installed:.2}"
+            "Material replacement estimates\nStores R${stored:.2} · Reserved R${reserved:.2} · In work R${processing:.2}\nIn transit R${transit:.2} · Installed R${installed:.2}\nEstimates exclude land, vehicles, labor and depreciation."
         )
     }
 

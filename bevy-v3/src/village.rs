@@ -3169,6 +3169,9 @@ fn show_hud(
                 label.push_str(&village.construction.expansion_reserve_label());
                 if !village.stock.sandbox {
                     use std::fmt::Write;
+                    label.push_str(
+                        "\nConstruction auto-buy accounts for this reserve before placing new orders.\nThe village starts with its land and two cars already owned. Each car has an estimated book value of R$60,000.",
+                    );
                     let distance = setup.round_trip_km();
                     let _ = write!(
                         label,
