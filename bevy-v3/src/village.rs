@@ -1921,6 +1921,12 @@ fn village_input(
         return;
     }
 
+    if village.guide.open() {
+        village.guide.controls(&keyboard, &mut build_text);
+        build_text.clear();
+        return;
+    }
+
     if village.utility_panel == Some(UtilityPanel::Inventory)
         && (village.editing_inventory || keyboard.just_pressed(KeyCode::Slash))
     {
@@ -1946,7 +1952,7 @@ fn village_input(
     }
     build_text.clear();
 
-    if village.guide.controls(&keyboard) {
+    if village.guide.controls(&keyboard, &mut build_text) {
         return;
     }
 

@@ -128,11 +128,48 @@ enum Screen {
     Index(usize),
     Chapter(usize),
     Diagram(usize),
+    Search,
 }
 
 #[derive(Default)]
 pub(super) struct Guide {
     screen: Option<Screen>,
+    query: String,
+}
+
+/// Chapters whose title or text contains every word of `query`, title matches first.
+fn search_results(query: &str) -> Vec<usize> {
+    let words: Vec<String> = query.split_whitespace().map(str::to_lowercase).collect();
+    if words.is_empty() {
+        return Vec::new();
+    }
+    let mut results: Vec<(bool, usize)> = chapters()
+        .iter()
+        .enumerate()
+        .filter_map(|(index, chapter)| {
+            let title = chapter.title.to_lowercase();
+            let body = format!(
+                "{title} {} {} {}",
+                chapter.description, chapter.tip, chapter.boundary
+            )
+            .to_lowercase();
+            words
+                .iter()
+                .all(|word| body.contains(word.as_str()))
+                .then(|| {
+                    (
+                        !words.iter().all(|word| title.contains(word.as_str())),
+                        index,
+                    )
+                })
+        })
+        .collect();
+    results.sort();
+    results
+        .into_iter()
+        .map(|(_, index)| index)
+        .take(CHAPTER_KEYS.len())
+        .collect()
 }
 
 const CHAPTER_KEYS: [KeyCode; 9] = [
@@ -163,11 +200,17 @@ enum GuideAction {
     Index,
     Chapter(usize),
     Diagram,
+    Search,
 }
 
 impl GuideAction {
-    fn apply(self, screen: Screen) -> Screen {
+    fn apply(self, screen: Screen, query: &str) -> Screen {
         match (self, screen) {
+            (Self::Search, _) => Screen::Search,
+            (Self::Index, Screen::Search) => Screen::Index(0),
+            (Self::Chapter(row), Screen::Search) => search_results(query)
+                .get(row)
+                .map_or(screen, |&chapter| Screen::Chapter(chapter)),
             (Self::SwitchView, Screen::Quick(_)) => Screen::Index(0),
             (Self::SwitchView, _) => Screen::Quick(0),
             (Self::Index, Screen::Chapter(chapter) | Screen::Diagram(chapter)) => {
@@ -194,14 +237,21 @@ impl GuideAction {
                     Screen::Diagram(page) => {
                         Screen::Diagram(turn_page(page, chapters().len(), forward))
                     }
+                    Screen::Search => screen,
                 }
             }
             _ => screen,
         }
     }
 
-    fn label(self, screen: Screen) -> Option<&'static str> {
+    fn label(self, screen: Screen, query: &str) -> Option<&'static str> {
         match (self, screen) {
+            (Self::Search, Screen::Search) | (Self::Previous | Self::Next, Screen::Search) => None,
+            (Self::Search, _) => Some("Find a topic"),
+            (Self::Index, Screen::Search) => Some("Chapter index"),
+            (Self::Chapter(row), Screen::Search) => search_results(query)
+                .get(row)
+                .map(|&chapter| chapters()[chapter].title.as_str()),
             (Self::Previous, _) => Some("Previous"),
             (Self::Next, _) => Some("Next"),
             (Self::SwitchView, Screen::Quick(_)) => Some("Reference"),
@@ -302,6 +352,7 @@ fn spawn_navigation(mut commands: Commands, assets: Res<AssetServer>) {
         ))
         .with_children(|panel| {
             for action in [
+                GuideAction::Search,
                 GuideAction::SwitchView,
                 GuideAction::Index,
                 GuideAction::Diagram,
@@ -345,10 +396,12 @@ fn select_navigation(
 ) {
     if let Some(screen) = active_screen(&village, &setup, &saves, &sound)
         && let Some((action, _)) = buttons.iter().find(|(action, interaction)| {
-            **interaction == Interaction::Pressed && action.label(screen).is_some()
+            **interaction == Interaction::Pressed
+                && action.label(screen, &village.guide.query).is_some()
         })
     {
-        village.guide.screen = Some(action.apply(screen));
+        let next = action.apply(screen, &village.guide.query);
+        village.guide.enter(next);
     }
 }
 
@@ -371,7 +424,7 @@ fn show_navigation(
     };
     panel.display = Display::Flex;
     for (action, children, interaction, mut node, mut background) in &mut buttons {
-        let Some(label) = action.label(screen) else {
+        let Some(label) = action.label(screen, &village.guide.query) else {
             node.display = Display::None;
             continue;
         };
@@ -406,16 +459,40 @@ impl Guide {
         };
     }
 
+    fn enter(&mut self, screen: Screen) {
+        if matches!(screen, Screen::Search) && !matches!(self.screen, Some(Screen::Search)) {
+            self.query.clear();
+        }
+        self.screen = Some(screen);
+    }
+
     /// Consume the whole frame when opening, reading or closing the guide.
-    pub(super) fn controls(&mut self, keys: &ButtonInput<KeyCode>) -> bool {
+    pub(super) fn controls(
+        &mut self,
+        keys: &ButtonInput<KeyCode>,
+        text: &mut MessageReader<bevy::input::keyboard::KeyboardInput>,
+    ) -> bool {
         if keys.just_pressed(KeyCode::F1) {
             self.toggle();
+            text.clear();
             return true;
         }
         let Some(screen) = self.screen else {
             return false;
         };
-        let action = if keys.just_pressed(KeyCode::Tab) {
+        if keys.just_pressed(KeyCode::Escape) {
+            self.screen = None;
+            text.clear();
+            return true;
+        }
+        if matches!(screen, Screen::Search) {
+            self.search_controls(keys, text);
+            return true;
+        }
+        text.clear();
+        let action = if keys.just_pressed(KeyCode::Slash) {
+            Some(GuideAction::Search)
+        } else if keys.just_pressed(KeyCode::Tab) {
             Some(GuideAction::SwitchView)
         } else if keys.just_pressed(KeyCode::Backspace) {
             Some(GuideAction::Index)
@@ -432,9 +509,35 @@ impl Guide {
                 .map(GuideAction::Chapter)
         };
         if let Some(action) = action {
-            self.screen = Some(action.apply(screen));
+            self.enter(action.apply(screen, &self.query));
         }
         true
+    }
+
+    fn search_controls(
+        &mut self,
+        keys: &ButtonInput<KeyCode>,
+        text: &mut MessageReader<bevy::input::keyboard::KeyboardInput>,
+    ) {
+        let row = if keys.any_just_pressed([KeyCode::Enter, KeyCode::NumpadEnter]) {
+            Some(0)
+        } else {
+            CHAPTER_KEYS.iter().position(|key| keys.just_pressed(*key))
+        };
+        if let Some(row) = row {
+            text.clear();
+            self.enter(GuideAction::Chapter(row).apply(Screen::Search, &self.query));
+            return;
+        }
+        if keys.just_pressed(KeyCode::Tab)
+            || keys.just_pressed(KeyCode::Backspace) && self.query.is_empty()
+        {
+            text.clear();
+            self.screen = Some(Screen::Index(0));
+            return;
+        }
+        crate::construction::read_search_text(&mut self.query, text);
+        self.query.retain(|character| !character.is_ascii_digit());
     }
 
     pub(super) fn text(&self, catalog: &Catalog) -> Option<String> {
@@ -450,7 +553,7 @@ impl Guide {
             }
             Screen::Index(page) => {
                 let mut label = format!(
-                    "Village reference · {}/{}\n1–9 Open chapter · Page Up/Down · Tab Quick guide · F1 Close\n",
+                    "Village reference · {}/{}\n1–9 Open chapter · / Find · Page Up/Down · Tab Quick guide · F1 Close\n",
                     page + 1,
                     index_pages()
                 );
@@ -494,6 +597,22 @@ impl Guide {
                 }
                 label
             }
+            Screen::Search => {
+                let results = search_results(&self.query);
+                let mut label = format!(
+                    "Find a topic · {}_\nType to search · 1–9 or Enter Open · Tab Index · Esc Close\n",
+                    self.query
+                );
+                if self.query.trim().is_empty() {
+                    label.push_str("\nType a word such as water, compost or grid.");
+                } else if results.is_empty() {
+                    label.push_str("\nNo chapter mentions that yet.");
+                }
+                for (row, chapter) in results.iter().enumerate() {
+                    let _ = write!(label, "\n{} {}", row + 1, chapters()[*chapter].title);
+                }
+                label
+            }
             Screen::Diagram(index) => format!(
                 "{} · {}/{}\nPage Up/Down · D Chapter text · Backspace Index · F1 Close",
                 chapters()[index].title,
@@ -507,6 +626,55 @@ impl Guide {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use bevy::input::{
+        ButtonState,
+        keyboard::{Key, KeyboardInput},
+    };
+
+    /// Runs one frame of guide controls with `typed` delivered as keyboard text.
+    fn guide_controls(guide: &mut Guide, keys: &ButtonInput<KeyCode>, typed: &[&str]) -> bool {
+        let mut world = World::new();
+        world.init_resource::<Messages<KeyboardInput>>();
+        for text in typed {
+            world.write_message(KeyboardInput {
+                key_code: KeyCode::KeyA,
+                logical_key: Key::Character((*text).into()),
+                state: ButtonState::Pressed,
+                text: Some((*text).into()),
+                repeat: false,
+                window: Entity::PLACEHOLDER,
+            });
+        }
+        let mut state =
+            bevy::ecs::system::SystemState::<MessageReader<KeyboardInput>>::new(&mut world);
+        let mut reader = state.get_mut(&mut world);
+        guide.controls(keys, &mut reader)
+    }
+
+    #[test]
+    fn slash_finds_a_chapter_by_what_it_explains() {
+        let mut guide = Guide::default();
+        let mut keys = ButtonInput::default();
+        keys.press(KeyCode::F1);
+        guide_controls(&mut guide, &keys, &[]);
+        keys.reset_all();
+        keys.press(KeyCode::Slash);
+        guide_controls(&mut guide, &keys, &["/"]);
+        keys.reset_all();
+        assert!(matches!(guide.screen, Some(Screen::Search)));
+        assert_eq!(guide.query, "");
+        guide_controls(&mut guide, &keys, &["s", "a", "n", "i", "t"]);
+        let results = search_results(&guide.query);
+        assert!(!results.is_empty());
+        assert!(chapters()[results[0]].title.starts_with("Sanitation"));
+        keys.press(KeyCode::Enter);
+        guide_controls(&mut guide, &keys, &[]);
+        assert!(matches!(guide.screen, Some(Screen::Chapter(chapter)) if chapter == results[0]));
+        keys.reset_all();
+        keys.press(KeyCode::Escape);
+        guide_controls(&mut guide, &keys, &[]);
+        assert!(!guide.open());
+    }
 
     #[test]
     fn native_reference_can_open_the_last_chapter_and_return_to_its_index() {
@@ -514,7 +682,7 @@ mod tests {
         let mut keys = ButtonInput::default();
         for key in [KeyCode::F1, KeyCode::Tab, KeyCode::PageUp, KeyCode::Digit9] {
             keys.press(key);
-            assert!(guide.controls(&keys));
+            assert!(guide_controls(&mut guide, &keys, &[]));
             keys.reset_all();
         }
         assert!(
@@ -524,7 +692,7 @@ mod tests {
                 .starts_with("Inspecting village conditions")
         );
         keys.press(KeyCode::Backspace);
-        assert!(guide.controls(&keys));
+        assert!(guide_controls(&mut guide, &keys, &[]));
         assert!(
             guide
                 .text(&Catalog::default())
