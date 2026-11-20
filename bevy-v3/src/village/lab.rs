@@ -2774,8 +2774,14 @@ mod tests {
             .single_mut(world)
             .unwrap()
             .0 = "Balance Lab readout".into();
+        world
+            .query_filtered::<&mut Node, With<trends::ChartRoot>>()
+            .single_mut(world)
+            .unwrap()
+            .display = Display::Flex;
 
         let mut previous_height = 0.0;
+        let mut previous_chart_height = 0.0;
         for width in [1280, 800] {
             let world = app.world_mut();
             let mut camera = world.query::<&mut Camera>().single_mut(world).unwrap();
@@ -2810,7 +2816,19 @@ mod tests {
                 readout_top >= toolbar_bottom,
                 "readout must stay below the toolbar"
             );
+            let readout_bottom = transform.translation.y + readout.size().y * 0.5;
+            let (charts, transform) = world
+                .query_filtered::<(&ComputedNode, &UiGlobalTransform), With<trends::ChartRoot>>()
+                .single(world)
+                .unwrap();
+            assert!(
+                charts.size().y > previous_chart_height,
+                "charts should wrap at {width}px"
+            );
+            assert!(transform.translation.y - charts.size().y * 0.5 >= readout_bottom);
+            assert!(transform.translation.y + charts.size().y * 0.5 <= 600.);
             previous_height = height;
+            previous_chart_height = charts.size().y;
         }
     }
 
