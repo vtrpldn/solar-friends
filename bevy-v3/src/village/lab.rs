@@ -692,8 +692,13 @@ fn open_lab(catalog: Catalog, runner: Runner, replay: Option<Replay>, source: Op
         .run();
 }
 
-#[derive(Component)]
-struct LabControl(KeyCode);
+#[derive(Clone, Copy, Component, PartialEq, Eq)]
+enum LabControl {
+    Shortcut(KeyCode),
+    CycleSpeed,
+    SetInterval,
+    AdvanceHour,
+}
 
 #[derive(Component)]
 struct LabControlLabel;
@@ -705,41 +710,67 @@ fn setup_lab_window(mut commands: Commands, assets: Res<AssetServer>) {
         ui_font(&assets, 18.0),
         Node {
             margin: UiRect {
-                top: px(58),
+                top: px(96),
                 ..UiRect::all(px(24))
             },
             ..default()
         },
     ));
+    use LabControl::{AdvanceHour, CycleSpeed, SetInterval, Shortcut};
+
+    let rows: [&[(LabControl, &str)]; 2] = [
+        &[
+            (Shortcut(KeyCode::Space), "Run / pause"),
+            (Shortcut(KeyCode::KeyJ), "Single step"),
+            (Shortcut(KeyCode::Tab), "Next view"),
+            (Shortcut(KeyCode::F7), "New story run"),
+            (Shortcut(KeyCode::F6), "Save lab"),
+            (Shortcut(KeyCode::F9), "Load lab"),
+            (Shortcut(KeyCode::F5), "Export report"),
+        ],
+        &[
+            (CycleSpeed, "Cycle speed"),
+            (AdvanceHour, "Advance 1 hour"),
+            (SetInterval, "Set interval"),
+            (Shortcut(KeyCode::F3), "Run interval"),
+            (Shortcut(KeyCode::F4), "Cycle stop condition"),
+        ],
+    ];
     commands
         .spawn(Node {
             position_type: PositionType::Absolute,
+            flex_direction: FlexDirection::Column,
             top: px(10),
             left: px(24),
-            column_gap: px(6),
+            row_gap: px(6),
             ..default()
         })
         .with_children(|toolbar| {
-            for (key, label) in [
-                (KeyCode::Space, "Run / pause"),
-                (KeyCode::KeyJ, "Single step"),
-                (KeyCode::Tab, "Next view"),
-                (KeyCode::F7, "New story run"),
-                (KeyCode::F6, "Save lab"),
-                (KeyCode::F9, "Load lab"),
-                (KeyCode::F5, "Export report"),
-            ] {
+            for row in rows {
                 toolbar
-                    .spawn((
-                        Button,
-                        LabControl(key),
-                        Node {
-                            padding: UiRect::axes(px(12), px(8)),
-                            ..default()
-                        },
-                        BackgroundColor(Color::srgb_u8(62, 83, 65)),
-                    ))
-                    .with_child((Text::new(label), LabControlLabel, ui_font(&assets, 15.0)));
+                    .spawn(Node {
+                        column_gap: px(6),
+                        ..default()
+                    })
+                    .with_children(|group| {
+                        for &(action, label) in row {
+                            group
+                                .spawn((
+                                    Button,
+                                    action,
+                                    Node {
+                                        padding: UiRect::axes(px(12), px(8)),
+                                        ..default()
+                                    },
+                                    BackgroundColor(Color::srgb_u8(62, 83, 65)),
+                                ))
+                                .with_child((
+                                    Text::new(label),
+                                    LabControlLabel,
+                                    ui_font(&assets, 15.0),
+                                ));
+                        }
+                    });
             }
         });
 }
@@ -1836,12 +1867,12 @@ fn update_lab_window(
         Option<Res<LabSource>>,
     ),
 ) {
-    let pressed = |key| {
-        keys.just_pressed(key)
-            || controls.iter().any(|(interaction, control)| {
-                *interaction == Interaction::Pressed && control.0 == key
-            })
+    let clicked = |action| {
+        controls.iter().any(|(interaction, control)| {
+            *interaction == Interaction::Pressed && *control == action
+        })
     };
+    let pressed = |key| keys.just_pressed(key) || clicked(LabControl::Shortcut(key));
     playback.replaying = replay.is_some();
     let dropped = files
         .read()
@@ -1856,8 +1887,7 @@ fn update_lab_window(
         && playback.build_search.is_none()
         && playback.story_settings.is_none()
         && playback.replacement.is_none()
-        && shift
-        && keys.just_pressed(KeyCode::F2)
+        && (clicked(LabControl::SetInterval) || (shift && keys.just_pressed(KeyCode::F2)))
     {
         playback.running = false;
         playback.pause_at = None;
@@ -2170,11 +2200,15 @@ fn update_lab_window(
             playback.set_speed(index);
         }
     }
+    if clicked(LabControl::CycleSpeed) {
+        let speed = (playback.speed + 1) % SPEEDS.len();
+        playback.set_speed(speed);
+    }
     if pressed(KeyCode::Space) && !reached_end(&runner) {
         playback.running = !playback.running;
         playback.reset_timing();
     }
-    if !playback.replaying && keys.just_pressed(KeyCode::F4) {
+    if !playback.replaying && pressed(KeyCode::F4) {
         playback.cycle_stop();
     }
     if !playback.replaying
@@ -2184,10 +2218,10 @@ fn update_lab_window(
         playback.interval = (playback.interval + 1) % RUN_INTERVALS.len();
     }
     if !playback.replaying && !reached_end(&runner) {
-        if keys.just_pressed(KeyCode::F3) {
+        if pressed(KeyCode::F3) {
             let (days, label) = playback.interval();
             playback.start_interval(runner.index, limit, days * crate::weather::DAY, &label);
-        } else if keys.just_pressed(KeyCode::KeyJ) && shift {
+        } else if clicked(LabControl::AdvanceHour) || (keys.just_pressed(KeyCode::KeyJ) && shift) {
             playback.start_interval(runner.index, limit, crate::weather::HOUR, "one hour");
         }
     }
@@ -3215,8 +3249,12 @@ mod tests {
         let panel = app.world_mut().spawn(Text::default()).id();
         let step = app
             .world_mut()
-            .spawn((Interaction::None, LabControl(KeyCode::KeyJ)))
+            .spawn((Interaction::None, LabControl::Shortcut(KeyCode::KeyJ)))
             .with_child((Text::new("Single step"), LabControlLabel))
+            .id();
+        let faster = app
+            .world_mut()
+            .spawn((Interaction::None, LabControl::CycleSpeed))
             .id();
         let key = |app: &mut App, key| {
             let mut keys = app.world_mut().resource_mut::<ButtonInput<KeyCode>>();
@@ -3228,6 +3266,15 @@ mod tests {
         let view = &app.world().get::<Text>(panel).unwrap().0;
         assert!(view.contains("Replay paused"));
         assert!(!view.contains("Enter order"));
+        *app.world_mut().get_mut::<Interaction>(faster).unwrap() = Interaction::Pressed;
+        app.update();
+        assert!(
+            app.world()
+                .get::<Text>(panel)
+                .unwrap()
+                .0
+                .contains("Target 256×")
+        );
         *app.world_mut().get_mut::<Interaction>(step).unwrap() = Interaction::Pressed;
         app.update();
         assert!(
