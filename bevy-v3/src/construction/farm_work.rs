@@ -834,7 +834,8 @@ impl Construction {
         counts
     }
 
-    pub fn farm_status(&self, catalog: &Catalog, stock: &Stock, clock: f64) -> Option<String> {
+    pub fn farm_status(&self, catalog: &Catalog, stock: &Stock, town: TownClock) -> Option<String> {
+        let clock = town.seconds;
         let site = self.production.selected?;
         let plot = self.farming.plots.get(&site)?;
         if !self.farming.open {
@@ -906,6 +907,41 @@ impl Construction {
             label.push('\n');
             label.push_str(&self.farm_job_status(catalog, stock, job, clock));
         } else {
+            let bed = &plot.beds[index];
+            if !stock.sandbox
+                && let Ok((inputs, _)) = bed.requirements(FarmAction::Plant, clock)
+                && stock.missing(&inputs).is_some()
+            {
+                use std::fmt::Write;
+                match self
+                    .market
+                    .quote(catalog, &inputs, stock, clock, town.round_trip_km)
+                {
+                    Ok(quote) => {
+                        let pickup = quote.fare * u64::from(quote.trips);
+                        let (cost, transport) = if self.supplier_construction {
+                            let cost =
+                                quote.price + crate::market::freight_cents(town.round_trip_km);
+                            (cost, "supplier freight")
+                        } else {
+                            (quote.price + pickup, "town pickup")
+                        };
+                        let _ = write!(
+                            label,
+                            "\nAuto-buy seeds · R${:.2} including {transport}",
+                            cost as f64 / 100.0
+                        );
+                        if self.supplier_construction
+                            && !self.market.can_replace_fares_with_freight(stock, 0, cost)
+                        {
+                            let _ = write!(label, " · Freight needs more available savings");
+                        }
+                    }
+                    Err(reason) => {
+                        let _ = write!(label, "\nPlanting unavailable · {reason}");
+                    }
+                }
+            }
             label.push_str("\n1 Prepare · 2 Plant · 3 Harvest · 4 Clear · 5 Amend · 6 Collect");
         }
         label.push_str("\nTab Bed · X Crop · Y Density · T Water · Z Residues · K Close");
@@ -1412,9 +1448,7 @@ mod resize_tests {
             seconds: 0.,
             round_trip_km: 12,
         };
-        let overview = village
-            .farm_status(&catalog, &stock, clock.seconds)
-            .unwrap();
+        let overview = village.farm_status(&catalog, &stock, clock).unwrap();
         assert!(overview.contains("Whole garden"));
         assert!(overview.contains("Growing 1"));
         assert!(overview.contains("Unworked soil"));
