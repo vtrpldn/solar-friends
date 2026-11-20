@@ -1087,7 +1087,7 @@ fn spawn_button(parent: &mut ChildSpawnerCommands, assets: &AssetServer, action:
     };
     button.with_child((
         Text::default(),
-        crate::ui_font::ui_font_weight(assets, 14.0, 600),
+        crate::ui_font::ui_font_weight(assets, font_size, 600),
     ));
     if let Action::Resident(index) = action {
         let image = match index {
