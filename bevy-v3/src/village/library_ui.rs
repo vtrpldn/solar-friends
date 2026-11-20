@@ -48,6 +48,7 @@ pub(super) enum LibraryAction {
     Load,
     Recover,
     Export,
+    Import,
     Remove,
     Confirm,
     Cancel,
@@ -81,25 +82,29 @@ pub(super) fn import_dropped_snapshot(
         if *window != *primary || !menu.open || menu.entry.is_some() {
             continue;
         }
-        match menu.import_snapshot(path_buf, &catalog) {
-            Ok((mode, id)) => {
-                menu.browse_mode = mode;
-                menu.delete_request = None;
-                let collection = match mode {
-                    Mode::Story => "Story",
-                    Mode::Sandbox => "Sandbox",
-                };
-                menu.status =
-                    format!("Imported a copy into {collection}. Select Load village to open it.");
-                if let Ok(directory) = menu.directory(mode) {
-                    refresh_library(&mut menu, &directory, mode);
-                }
-                if let Some(index) = menu.rows.iter().position(|row| row.id == id) {
-                    menu.selected = index;
-                }
+        import_snapshot(&mut menu, path_buf, &catalog);
+    }
+}
+
+fn import_snapshot(menu: &mut SaveMenu, path: &std::path::Path, catalog: &Catalog) {
+    match menu.import_snapshot(path, catalog) {
+        Ok((mode, id)) => {
+            menu.browse_mode = mode;
+            menu.delete_request = None;
+            let collection = match mode {
+                Mode::Story => "Story",
+                Mode::Sandbox => "Sandbox",
+            };
+            menu.status =
+                format!("Imported a copy into {collection}. Select Load village to open it.");
+            if let Ok(directory) = menu.directory(mode) {
+                refresh_library(menu, &directory, mode);
             }
-            Err(error) => menu.status = format!("Could not import village: {error}"),
+            if let Some(index) = menu.rows.iter().position(|row| row.id == id) {
+                menu.selected = index;
+            }
         }
+        Err(error) => menu.status = format!("Could not import village: {error}"),
     }
 }
 
@@ -133,6 +138,7 @@ fn spawn_library(mut commands: Commands, assets: Res<AssetServer>) {
                 LibraryAction::Load,
                 LibraryAction::Recover,
                 LibraryAction::Export,
+                LibraryAction::Import,
                 LibraryAction::Remove,
                 LibraryAction::Confirm,
                 LibraryAction::Cancel,
@@ -191,6 +197,7 @@ fn library_label(action: LibraryAction, menu: &SaveMenu, may_create: bool) -> Op
             "Recover previous save".into()
         }
         Export if !menu.rows.is_empty() => "Export".into(),
+        Import => "Import village".into(),
         Remove if menu.delete_request.is_some() => "Confirm removal".into(),
         Remove if !menu.rows.is_empty() => "Remove save".into(),
         _ => return None,
@@ -311,6 +318,16 @@ pub(super) fn library_controls(
                 .into_iter()
                 .find_map(|(key, action)| keys.just_pressed(key).then_some(action))
         });
+    if matches!(action, Some(Import)) && menu.entry.is_none() {
+        if let Some(file) = rfd::FileDialog::new()
+            .set_title("Import saved village")
+            .add_filter("Village JSON", &["json"])
+            .pick_file()
+        {
+            import_snapshot(&mut menu, &file, &catalog);
+        }
+        return;
+    }
     if matches!(action, Some(SwitchMode)) && menu.entry.is_none() {
         let mode = match menu.browse_mode {
             Mode::Story => Mode::Sandbox,
