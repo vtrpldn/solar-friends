@@ -7,12 +7,19 @@ use serde::Deserialize;
 #[serde(rename_all = "camelCase")]
 pub struct Catalog {
     pub materials: BTreeMap<String, Material>,
+    pub resource_groups: Vec<ResourceGroup>,
     pub projects: BTreeMap<String, Project>,
     pub gathering: BTreeMap<String, GatherRecipe>,
     pub production: BTreeMap<String, ProductionRecipe>,
     pub residents: [Profile; 5],
     pub animal_rations: BTreeMap<String, AnimalRation>,
     pub workshop_comparison: usize,
+}
+
+#[derive(Deserialize)]
+pub struct ResourceGroup {
+    pub name: String,
+    pub ids: Vec<String>,
 }
 
 #[derive(Deserialize)]

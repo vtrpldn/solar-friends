@@ -231,15 +231,21 @@ impl Construction {
         const ROWS: usize = 9;
         let search = search.trim().to_lowercase();
         let ledger = self.inventory(catalog, stock, land);
-        let mut rows: Vec<_> = ledger
-            .into_iter()
-            .filter(|(id, _)| {
-                catalog.materials[*id].equipment == equipment
-                    && (search.is_empty()
-                        || catalog.materials[*id].name.to_lowercase().contains(&search))
+        let rows: Vec<_> = catalog
+            .resource_groups
+            .iter()
+            .flat_map(|group| {
+                group
+                    .ids
+                    .iter()
+                    .map(|id| (group.name.as_str(), id.as_str()))
+            })
+            .filter(|&(_, id)| {
+                let material = &catalog.materials[id];
+                material.equipment == equipment
+                    && (search.is_empty() || material.name.to_lowercase().contains(&search))
             })
             .collect();
-        rows.sort_by(|(a, _), (b, _)| catalog.materials[*a].name.cmp(&catalog.materials[*b].name));
         let pages = rows.len().div_ceil(ROWS).max(1);
         let page = page.min(pages - 1);
         let (used, capacity) = self.storage(catalog, stock);
@@ -256,8 +262,14 @@ impl Construction {
         if rows.is_empty() {
             text.push_str("\nNo matching stock.");
         }
-        for (id, row) in rows.iter().skip(page * ROWS).take(ROWS) {
-            let item = &catalog.materials[*id];
+        let mut previous_group = "";
+        for &(group, id) in rows.iter().skip(page * ROWS).take(ROWS) {
+            if group != previous_group && !equipment {
+                let _ = write!(text, "\n{group}");
+                previous_group = group;
+            }
+            let row = ledger[id];
+            let item = &catalog.materials[id];
             let _ = write!(
                 text,
                 "\n{} · {} available",
@@ -273,7 +285,7 @@ impl Construction {
                     let _ = write!(text, " · {} {label}", item.quantity_text(amount));
                 }
             }
-            if crate::equipment::TOOLS.contains(id) {
+            if crate::equipment::TOOLS.contains(&id) {
                 let count = stock.available(id);
                 let repairing = self.repairing(catalog, id);
                 let equipment = &stock.equipment;
@@ -306,6 +318,33 @@ impl Construction {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn resource_groups_cover_every_material_and_label_filtered_rows() {
+        let catalog = Catalog::default();
+        let ids: Vec<_> = catalog
+            .resource_groups
+            .iter()
+            .flat_map(|group| &group.ids)
+            .collect();
+        let unique: std::collections::BTreeSet<_> = ids.iter().copied().collect();
+        assert_eq!(ids.len(), unique.len());
+        assert_eq!(unique, catalog.materials.keys().collect());
+        let stock = Stock::for_start(&WorldSetup::default(), &catalog);
+        let material = &catalog.materials["plumbing"];
+        let (_, text) = Construction::default().inventory_panel(
+            &catalog,
+            &stock,
+            &Land::default(),
+            0,
+            false,
+            &material.name,
+        );
+        assert!(text.contains(&format!(
+            "Manufactured / industrial materials\n{}",
+            material.name
+        )));
+    }
 
     #[test]
     fn inventory_search_keeps_depleted_supplies_visible() {
