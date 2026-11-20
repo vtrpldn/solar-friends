@@ -6,6 +6,7 @@ mod building_preview;
 mod construction_models;
 mod cultivation_surface;
 mod diagnostics;
+mod dialog;
 mod fire;
 mod guide;
 mod guide_diagrams;
@@ -165,6 +166,7 @@ impl Plugin for VillagePlugin {
         building_preview::install(app);
         build_menu::install(app);
         thumbnails::install(app);
+        dialog::install(app);
         toolbar::install(app);
         guide::install(app);
         library_ui::install(app);
@@ -884,6 +886,32 @@ impl Village {
         self.water_panel.channel = channel;
     }
 
+    /// Opens a panel on its first page, as from the dock or the dialog sidebar.
+    fn open_panel(&mut self, panel: UtilityPanel) {
+        self.utility_panel = Some(panel);
+        if panel == UtilityPanel::Crafting {
+            self.craft_view = crate::construction::CraftView::Make;
+            self.craft_recipe = None;
+            self.craft_workspace = None;
+            self.craft_job_site = None;
+        }
+        match panel {
+            UtilityPanel::Projects => self.projects_page = 0,
+            UtilityPanel::Inventory | UtilityPanel::Crafting => self.inventory_page = 0,
+            UtilityPanel::Events => self.event_page = 0,
+            UtilityPanel::Upkeep => self.upkeep_page = 0,
+            _ => {}
+        }
+    }
+
+    /// Whether an open panel shows as V2's centred almanac dialog over a dimmed village.
+    fn modal_panel(&self) -> bool {
+        self.utility_panel
+            .is_some_and(|panel| panel != UtilityPanel::Projects)
+            && !self.guide.open()
+            && !self.lenses.open
+    }
+
     /// Whether the status card is just a short note: no panel, reference or tool open.
     fn hud_note(&self) -> bool {
         self.camp.is_some()
@@ -1424,6 +1452,7 @@ fn spawn_hud(mut commands: Commands, assets: Res<AssetServer>) {
         .spawn((
             VillageHud,
             UiTransform::default(),
+            GlobalZIndex(0),
             Interaction::None,
             bevy::ui::FocusPolicy::Block,
             crate::theme::panel_node(Node {
@@ -1482,6 +1511,8 @@ fn fit_and_scroll_hud(
 ) {
     let (node, position, interaction, transform) = &mut *hud;
     let toolbar_height = toolbar.size().y * toolbar.inverse_scale_factor();
+    // The dialog frame sizes the sheet while an almanac screen is open.
+    let modal = !setup.open && village.modal_panel();
     // While nothing is open, status reads as V2's short note centred above the dock
     // instead of a block over the village.
     let note = !setup.open && village.hud_note();
@@ -1507,7 +1538,7 @@ fn fit_and_scroll_hud(
     let available_height =
         (window.height() - TOP_BAR_CLEARANCE - 18. - toolbar_height - 14.).max(0.);
     let max_height = px(available_height);
-    if node.max_height != max_height {
+    if !modal && node.max_height != max_height {
         node.max_height = max_height;
     }
     let resident_view = (village.utility_panel == Some(UtilityPanel::Residents))

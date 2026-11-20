@@ -824,8 +824,11 @@ pub(super) struct Toolbar;
 #[derive(Component)]
 struct DockDivider;
 
+/// The action column, which the dialog frame lifts above its dimmed backdrop.
 #[derive(Component)]
-struct PanelMenu;
+pub(super) struct PanelMenu;
+
+pub(super) type PanelMenuMarker = PanelMenu;
 
 #[derive(Component)]
 struct ActionDetails;
@@ -982,6 +985,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
             }
             row.spawn((
                 PanelMenu,
+                GlobalZIndex(0),
                 Interaction::None,
                 bevy::ui::FocusPolicy::Block,
                 crate::theme::panel_node(Node {
@@ -1647,22 +1651,9 @@ fn handle_buttons(
                 Action::Panel(panel) | Action::ResourcePanel(panel)
                     if picker.open || matches!(action, Action::ResourcePanel(_)) =>
                 {
-                    village.utility_panel = Some(panel);
-                    if panel == UtilityPanel::Crafting {
-                        village.craft_view = crate::construction::CraftView::Make;
-                        village.craft_recipe = None;
-                        village.craft_workspace = None;
-                        village.craft_job_site = None;
-                    }
-                    match panel {
-                        UtilityPanel::Projects => village.projects_page = 0,
-                        UtilityPanel::Inventory | UtilityPanel::Crafting => {
-                            village.inventory_page = 0
-                        }
-                        UtilityPanel::Events => village.event_page = 0,
-                        UtilityPanel::Upkeep => village.upkeep_page = 0,
-                        UtilityPanel::Residents => picker.home_page = 0,
-                        _ => {}
+                    village.open_panel(panel);
+                    if panel == UtilityPanel::Residents {
+                        picker.home_page = 0;
                     }
                     picker.open = false;
                 }
