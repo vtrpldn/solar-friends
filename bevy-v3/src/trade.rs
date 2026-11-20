@@ -107,6 +107,20 @@ pub(crate) struct TradeItem<'a> {
     pub material: &'a Material,
 }
 
+fn sale_cents(item: &Material, sold: u32, quantity: u32) -> u64 {
+    let rate = |before| {
+        let ratio = if before / item.pack < item.buyer.full_price_batches {
+            item.buyer.ratio
+        } else {
+            item.buyer.bulk_ratio
+        };
+        (item.price * ratio).floor() as u64 * 100
+    };
+    let first = quantity.min((sold / item.pack + 1) * item.pack - sold);
+    (rate(sold) * u64::from(first) + rate(sold + first) * u64::from(quantity - first))
+        / u64::from(item.pack)
+}
+
 impl Trade {
     pub(crate) fn tradable(catalog: &Catalog) -> Vec<TradeItem<'_>> {
         catalog
@@ -197,19 +211,7 @@ impl Trade {
         {
             return Err("This batch needs a larger vehicle.");
         }
-        let rate = |before| {
-            let ratio = if before / item.pack < item.buyer.full_price_batches {
-                item.buyer.ratio
-            } else {
-                item.buyer.bulk_ratio
-            };
-            (item.price * ratio).floor() as u64 * 100
-        };
-        let first = quantity.min((sold / item.pack + 1) * item.pack - sold);
-        let cents = (rate(sold) * u64::from(first)
-            + rate(sold + first) * u64::from(quantity - first))
-            / u64::from(item.pack);
-        Ok((quantity, cents))
+        Ok((quantity, sale_cents(item, sold, quantity)))
     }
 
     pub fn quote_sale_order(
@@ -634,18 +636,34 @@ impl Trade {
             reserve = reserve.max(target.saturating_sub(other_portions) * units_per_portion);
         }
         reserve = reserve.max(stock.equipment.protected(id, owned));
-        let pack = catalog.materials[id].pack;
+        let item = &catalog.materials[id];
+        let pack = item.pack;
+        let surplus = owned.saturating_sub(reserve);
+        let available = policy.map_or(surplus, |policy| {
+            if policy.limit == 0 {
+                surplus
+            } else {
+                let sold = if policy.day == day { policy.sold } else { 0 };
+                surplus.min(policy.limit.saturating_sub(sold))
+            }
+        });
         let offer = if owned <= policy.map_or(default_reserve, |policy| policy.trigger) {
             Err("Below the sale trigger")
-        } else if owned.saturating_sub(reserve) < pack {
+        } else if surplus < pack {
             Err("Reserve protected or less than one pack")
-        } else if policy.is_some_and(|policy| {
-            let sold = if policy.day == day { policy.sold } else { 0 };
-            policy.limit > 0 && sold + pack > policy.limit
-        }) {
+        } else if available < pack {
             Err("Daily sale limit reached")
         } else {
-            self.quote(catalog, stock, id, day, reserve)
+            self.quote_sale_order(catalog, stock, id, day, reserve)
+                .map(|_| {
+                    let sold = self.buyer_reserved(id, day);
+                    let demand = (item.buyer.batches * pack).saturating_sub(sold);
+                    let batches = (available.min(demand) / pack).min(32 - self.orders.len() as u32);
+                    let cents = (0..batches)
+                        .map(|batch| sale_cents(item, sold + batch * pack, pack))
+                        .sum();
+                    (batches * pack, cents)
+                })
         };
         (reserve, offer)
     }
@@ -671,22 +689,16 @@ impl Trade {
             .collect();
         for id in keys {
             let (reserve, offer) = self.automatic_sale_offer(catalog, stock, &id, day);
-            if offer.is_err() {
+            let Ok((offered, _)) = offer else {
                 continue;
-            }
+            };
             let policy = self.policies.get_mut(&id).expect("active sale policy");
             if policy.day != day {
                 policy.day = day;
                 policy.sold = 0;
             }
             let pack = catalog.materials[&id].pack;
-            let surplus = stock.available(&id).saturating_sub(reserve);
-            let available = if policy.limit == 0 {
-                surplus
-            } else {
-                surplus.min(policy.limit.saturating_sub(policy.sold))
-            };
-            for _ in 0..available / pack {
+            for _ in 0..offered / pack {
                 let Ok(quantity) = self.reserve(catalog, stock, market, &id, (day, fare, reserve))
                 else {
                     break;
@@ -1112,8 +1124,15 @@ mod tests {
             policy.enabled = true;
             policy.trigger = 30;
             policy.limit = limit;
+            let (_, offer) = trade.automatic_sale_offer(&catalog, &stock, "wood", 0);
+            let (quantity, cents) = offer.unwrap();
+            assert_eq!(quantity, 36 - remaining);
             trade.auto_sell(&catalog, &mut stock, &mut market, 0., 776);
             assert_eq!(trade.orders.len(), batches);
+            assert_eq!(
+                trade.orders.iter().map(|order| order.cents).sum::<u64>(),
+                cents
+            );
             assert_eq!(stock.available("wood"), remaining);
             assert_eq!(trade.policies["wood"].sold, 36 - remaining);
             assert_eq!(trade.sale_dispatch_wait(0.), Some(40.));
