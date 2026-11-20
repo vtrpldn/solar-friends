@@ -1,5 +1,21 @@
 # Astra handoff
 
+## Round 5 developer previews
+
+- **Utilities** opens a connected power, drinking water, irrigation, and sewage network. It starts with 24 kWh at the solar farm, 3 kWh and a solar upgrade at the house, and the V2 water levels. V3 uses six installed battery modules to sustain the solar farm's 24 kWh charge. The interactions variant adds five sites and queues livestock collection using ready milk and eggs.
+- **Arrival**, **Needs**, and **Rest** seed the opening drive, five different low needs, and five residents at 10 energy. Rest starts at the campsite picker, as in V2.
+- **Wildlife** starts with four birds already in flight over the entrance. It uses V3's visitor models and motion. The entrance scenes use V3's existing roadside scenery.
+- **Scale** reproduces the three layouts, streets, and camera frames. Both crossings use V3's current footbridge model.
+- **Downtime** moved into the shared preview module. All preview sessions disable save and load access. The README lists the desktop flags and V3 web query format.
+
+All requested previews have V3 equivalents. Lighting flags pause the starting scene for comparison. The village resumes procedural weather when the simulation runs.
+
+### Verification and transfer
+
+Native build, 358 binary tests, formatting, strict Clippy, and the WebAssembly target check passed. The visual browser and desktop passes are outstanding.
+
+The verified bundle at `/private/tmp/solar-friends-astra-round5.bundle` contains one commit per new preview and a documentation commit, based on `282ea1f5`. The worktree retains the completed changes.
+
 ## Round 4 almanac dialogs
 
 - **Water & sanitation** now has source, destination, and channel steppers, linked-channel switching, and installation and carry actions. Building cards show water levels, tank warnings, and job progress. Disabled jobs display the reason beside the buttons.

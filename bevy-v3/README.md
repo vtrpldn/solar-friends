@@ -8,8 +8,6 @@ cargo run --locked --manifest-path bevy-v3/Cargo.toml
 
 Pass `-- --play` to open the default Story plot directly, or `-- --play --sandbox` to open the Sandbox plot.
 
-Pass `-- --downtime-preview` to watch the residents take breaks and socialize in an unsaved evening village.
-
 Each new village starts land setup with a fresh seed. Keep it, use **New plot**, or enter a seed to revisit the same terrain.
 
 Select **New game** for Story or **New sandbox**. Choose a biome, landscape, water availability, resource richness, land seed, starting savings, supplies, and distance to town, then select **Enter village**. Pan with WASD, the arrow keys, or left drag. Hold Shift to pan faster. Rotate with Q/E or right drag horizontally, and right drag vertically to tilt. Zoom with the wheel, middle drag, or +/−. Press Home to center on camp, Shift+Home to reset the camera, Shift+End to frame the whole plot, and Escape to return to the main menu.
@@ -163,6 +161,42 @@ In the native lab, press **O** to enter a JSON order at the current step and **F
 In the lab map, drag to pan, scroll to zoom, and press **Home** to focus camp. Use **Page Up/Down** to browse village sites. Press **/** to find a blueprint by name, then **Enter** to select it for placement. Select a completed production site to choose a recipe and queue a batch. With camp selected, use **U** for grid power and **F** for Story food restocking. Use **Tab** to reach **Resources & trade** for town purchases, sale quotes, and shared pickup, **Residents** for needs and town work, or **Simulation trends** and review savings, clean water, lowest resident hydration, and food ingredients over the latest 240 hourly samples. The lab retains up to 90 game days of hourly trend history.
 
 Press **F8** twice to reload the scenario file and any starting checkpoint. This starts a new run at step 0, so export the current report or save a checkpoint first if you want to keep it.
+
+## Developer previews
+
+Launch a preview from the repository root with a command like this.
+
+```sh
+cargo run --locked --manifest-path bevy-v3/Cargo.toml -- --utilities-preview --land-seed=7 --lighting-hour=18 --lighting-rain
+```
+
+In the V3 web build, use the same flags without `--` in the page URL, such as
+`?utilities-preview&land-seed=7&lighting-hour=18&lighting-rain`. All preview sessions
+disable save and load access.
+
+| Launch flag | Starting scene |
+| --- | --- |
+| `--utilities-preview` | A built village with connected solar power, batteries, water supply, sanitation, and production. |
+| `--arrival-preview` | The two cars arrive and residents walk to the stockpile before you choose a campsite. |
+| `--needs-preview` | The utilities village with one low need per resident and drinking water in the house. |
+| `--rest-preview` | The residents have arrived at the stockpile with 10 energy each. Pitch camp to observe them rest. |
+| `--wildlife-preview` | A flock of wild birds is already flying near the stockpile. |
+| `--scale-preview` or `--scale-preview=default` | A paused Sandbox village with residences, work sites, streets, and bridges. |
+| `--scale-preview=homes` | A paused comparison of the original home designs, centered on the housing streets. |
+| `--scale-preview=new-homes` | A paused comparison of the newer home designs, framed between the two streets. |
+| `--downtime-preview` | An evening village where residents take breaks and socialize. |
+
+### Utilities preview options
+
+| Option | Effect |
+| --- | --- |
+| `--interactions` | Start at 09:00 with a goat pasture, coop, wash station, shed, and square. |
+| `--land-seed=N` | Select an unsigned 32-bit land seed. The default is 0. |
+| `--lighting-hour=H` | Start paused at the specified 24-hour time, from 0 through 24. Decimal hours are accepted. |
+| `--lighting-rain` | Start paused with rain and overcast lighting. Add `--lighting-hour` to choose the time. |
+
+The needs preview also accepts `--land-seed` and `--interactions`. It always
+starts at 10:30 in dry weather.
 
 ## Model workshop
 
