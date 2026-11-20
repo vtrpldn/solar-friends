@@ -136,6 +136,7 @@ ${worldPresets.map(preset => `    [${preset.join(", ")}],`).join("\n")}
 ];
 pub(crate) const ROUND_TRIP_KM: [u32; 3] = [${["nearby", "drive", "remote"].map(setting => tripEstimate(setting).km).join(", ")}];
 pub(crate) const STARTING_CASH: [u32; 3] = [${["tight", "modest", "comfortable"].map(setting => STARTING_CAPITAL[setting]).join(", ")}];
+pub(crate) const STARTING_EXPANSION_RESERVE_CENTS: u64 = ${Math.round(createWeekend().expansionReserve * 100)};
 pub(crate) const PICKUP_CAPACITY: (f64, f64) = ${cargoLimits(TRADE_RULES)};
 pub(crate) const SALE_DISPATCH_DELAY: f64 = ${rustFloat(TRADE_RULES.dispatchAfter)};
 pub(crate) const FREIGHT_CAPACITY: (f64, f64) = ${cargoLimits(DELIVERY_LIMITS)};

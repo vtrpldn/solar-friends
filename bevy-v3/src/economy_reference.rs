@@ -8,6 +8,7 @@ pub(crate) const WORLD_PRESETS: [[usize; 6]; 3] = [
 ];
 pub(crate) const ROUND_TRIP_KM: [u32; 3] = [8, 12, 36];
 pub(crate) const STARTING_CASH: [u32; 3] = [3000, 10000, 20000];
+pub(crate) const STARTING_EXPANSION_RESERVE_CENTS: u64 = 10000;
 pub(crate) const PICKUP_CAPACITY: (f64, f64) = (350.0, 1.2);
 pub(crate) const SALE_DISPATCH_DELAY: f64 = 40.0;
 pub(crate) const FREIGHT_CAPACITY: (f64, f64) = (5000.0, 12.0);

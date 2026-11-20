@@ -14,7 +14,7 @@ use crate::{
 const MAX_EXPANSION_RESERVE: u64 = 10_000_000;
 
 const fn default_expansion_reserve() -> u64 {
-    10_000
+    crate::economy_reference::STARTING_EXPANSION_RESERVE_CENTS
 }
 pub(crate) use crate::economy_reference::PICKUP_CAPACITY;
 
