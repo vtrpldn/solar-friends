@@ -652,8 +652,7 @@ impl Construction {
         let query = self.build_query.trim().to_lowercase();
         let matches = |text: &str| text.to_lowercase().contains(&query);
         let mut projects: Vec<_> = catalog
-            .projects
-            .iter()
+            .build_options()
             .filter(|(id, project)| {
                 if query.is_empty() {
                     return match category {

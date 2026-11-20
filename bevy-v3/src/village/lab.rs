@@ -1395,8 +1395,7 @@ impl LabBuildSearch {
     fn matches<'a>(&self, catalog: &'a Catalog) -> Vec<(&'a String, &'a crate::catalog::Project)> {
         let query = self.query.trim().to_lowercase();
         let mut results: Vec<_> = catalog
-            .projects
-            .iter()
+            .build_options()
             .filter(|(_, project)| project.name.to_lowercase().contains(&query))
             .collect();
         results.sort_by(|a, b| a.1.name.cmp(&b.1.name).then_with(|| a.0.cmp(b.0)));

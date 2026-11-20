@@ -61,11 +61,12 @@ const projects = Object.fromEntries(buildOptions
     },
   ]));
 
-// Keep the existing desktop construction duration for saved in-progress pens.
+// Retired in V2. Keep the existing desktop definition for saved villages and lab reports.
 const emptyGoatPen = PROJECTS["goat-pasture-empty"];
 projects["goat-pasture-empty"] = {
   ...projects.goat_pasture,
   name: emptyGoatPen.name,
+  retired: true,
   description: "Build the pen first. Stock it later with two goats from village supplies.",
   model: buildingScenes.indexOf(emptyGoatPen.asset),
   materials: emptyGoatPen.materials,

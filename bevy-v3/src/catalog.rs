@@ -103,6 +103,8 @@ pub struct Project {
     pub work: f64,
     pub camp_essential: bool,
     pub repeatable: bool,
+    #[serde(default)]
+    pub retired: bool,
     pub beds: Option<usize>,
 }
 
@@ -245,6 +247,10 @@ impl Default for Catalog {
 }
 
 impl Catalog {
+    pub fn build_options(&self) -> impl Iterator<Item = (&String, &Project)> {
+        self.projects.iter().filter(|(_, project)| !project.retired)
+    }
+
     pub(crate) fn resource_entries(&self) -> impl Iterator<Item = (&str, &str, &Material)> {
         self.resource_groups
             .iter()

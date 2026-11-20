@@ -2980,7 +2980,8 @@
       "work": 396,
       "category": "Animals",
       "campEssential": false,
-      "repeatable": true
+      "repeatable": true,
+      "retired": true
     }
   },
   "gathering": {
