@@ -450,17 +450,6 @@ enum ButtonStyle {
 }
 
 impl Action {
-    const TITLE_FOCUS_ORDER: [Self; 8] = [
-        Self::Resume,
-        Self::Continue(Mode::Story),
-        Self::New(Mode::Story),
-        Self::New(Mode::Sandbox),
-        Self::Continue(Mode::Sandbox),
-        Self::Sound,
-        Self::ArtCollection,
-        Self::Library,
-    ];
-
     fn enabled(self, mode: Mode) -> bool {
         mode == Mode::Story || !matches!(self, Self::Savings | Self::Supplies)
     }
@@ -911,10 +900,11 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
                 })
                 .with_children(|art| {
                     art.spawn((
+                        // Sized by width so the art keeps its shape: the column's width,
+                        // but never taller than about half the window.
                         Node {
-                            height: vh(52),
-                            max_height: px(660),
-                            max_width: percent(100),
+                            width: percent(100),
+                            max_width: vh(46.8),
                             aspect_ratio: Some(0.9),
                             ..default()
                         },
@@ -1381,45 +1371,6 @@ fn has_autosave(saves: &SaveMenu, mode: Mode) -> bool {
         .is_ok_and(|path| crate::save::exists(&path))
 }
 
-fn visible_title_actions(
-    has_village: bool,
-    has_story_autosave: bool,
-    has_sandbox_autosave: bool,
-    preview: bool,
-) -> Vec<Action> {
-    Action::TITLE_FOCUS_ORDER
-        .into_iter()
-        .filter(|action| {
-            action.visible_on_title(
-                has_village,
-                has_story_autosave,
-                has_sandbox_autosave,
-                preview,
-            )
-        })
-        .collect()
-}
-
-fn step_title_focus(current: Option<Action>, visible: &[Action], forward: bool) -> Option<Action> {
-    if visible.is_empty() {
-        return None;
-    }
-    let Some(index) = current.and_then(|action| visible.iter().position(|item| *item == action))
-    else {
-        return Some(if forward {
-            visible[0]
-        } else {
-            visible[visible.len() - 1]
-        });
-    };
-    let next = if forward {
-        (index + 1) % visible.len()
-    } else {
-        (index + visible.len() - 1) % visible.len()
-    };
-    Some(visible[next])
-}
-
 #[cfg(not(target_arch = "wasm32"))]
 fn open_art_collection(
     status: &mut TitleStatus,
@@ -1517,39 +1468,8 @@ fn setup_input(
         }
     }
 
-    let mut keyboard_activated = None;
-    if !setup.choosing_land {
-        let visible = visible_title_actions(
-            village.session_setup().is_some(),
-            has_autosave(&saves, Mode::Story),
-            has_autosave(&saves, Mode::Sandbox),
-            saves.preview,
-        );
-        if focus.0.is_some_and(|current| !visible.contains(&current)) {
-            focus.0 = None;
-        }
-        if buttons.iter().any(|(interaction, action)| {
-            action.is_title_action()
-                && matches!(interaction, Interaction::Hovered | Interaction::Pressed)
-        }) {
-            focus.0 = None;
-        }
-        let shift = keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]);
-        if keyboard.just_pressed(KeyCode::ArrowDown)
-            || (keyboard.just_pressed(KeyCode::Tab) && !shift)
-        {
-            focus.0 = step_title_focus(focus.0, &visible, true);
-        } else if keyboard.just_pressed(KeyCode::ArrowUp)
-            || (keyboard.just_pressed(KeyCode::Tab) && shift)
-        {
-            focus.0 = step_title_focus(focus.0, &visible, false);
-        } else if keyboard.just_pressed(KeyCode::Escape) {
-            focus.0 = None;
-        } else if keyboard.any_just_pressed([KeyCode::Enter, KeyCode::NumpadEnter, KeyCode::Space])
-        {
-            keyboard_activated = focus.0;
-        }
-    }
+    // Tab, the arrows and Enter reach the title rows through the shared keyboard focus.
+    focus.0 = None;
 
     for (interaction, &PickerStep(action, forward)) in &step_buttons {
         if *interaction == Interaction::Pressed && action.enabled(setup.mode) {
@@ -1558,18 +1478,13 @@ fn setup_input(
         }
     }
 
-    let mut triggered: Vec<(Action, bool)> = buttons
+    let triggered: Vec<(Action, bool)> = buttons
         .iter()
         .filter_map(|(interaction, action)| {
             (*interaction == Interaction::Pressed && action.enabled(setup.mode))
                 .then_some((*action, false))
         })
         .collect();
-    if let Some(action) = keyboard_activated
-        && action.enabled(setup.mode)
-    {
-        triggered.push((action, true));
-    }
 
     for (action, from_keyboard) in triggered {
         if !matches!(action, Action::Explore) {
@@ -2347,44 +2262,6 @@ mod tests {
             .get_mut::<Interaction>(sandbox_entity)
             .unwrap() = Interaction::None;
         app.update();
-
-        // ArrowDown focuses the primary action first, then cycles to New sandbox with visible focus ring.
-        let press_key = |app: &mut App, key: KeyCode| {
-            app.world_mut()
-                .resource_mut::<ButtonInput<KeyCode>>()
-                .press(key);
-            app.world_mut().run_schedule(Update);
-            app.world_mut()
-                .resource_mut::<ButtonInput<KeyCode>>()
-                .reset(key);
-        };
-        press_key(&mut app, KeyCode::ArrowDown);
-        assert_eq!(
-            app.world().resource::<TitleFocus>().0,
-            Some(Action::New(Mode::Story))
-        );
-        press_key(&mut app, KeyCode::ArrowDown);
-        assert_eq!(
-            app.world().resource::<TitleFocus>().0,
-            Some(Action::New(Mode::Sandbox))
-        );
-        assert_eq!(
-            app.world().get::<Outline>(sandbox_entity).unwrap().color,
-            theme::FOCUS_RING
-        );
-        assert_eq!(
-            app.world()
-                .get::<BackgroundColor>(sandbox_entity)
-                .unwrap()
-                .0,
-            theme::TITLE_ROW_HOVER
-        );
-
-        // Pressing Enter activates the focused row (New sandbox -> opens land setup in Sandbox mode).
-        press_key(&mut app, KeyCode::Enter);
-        assert!(app.world().resource::<WorldSetup>().choosing_land);
-        assert!(app.world().resource::<WorldSetup>().mode == Mode::Sandbox);
-        assert_eq!(app.world().resource::<TitleFocus>().0, None);
 
         let _ = std::fs::remove_dir_all(&temp_dir);
     }

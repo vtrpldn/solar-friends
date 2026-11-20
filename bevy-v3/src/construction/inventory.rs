@@ -417,9 +417,7 @@ impl Construction {
         use std::fmt::Write;
         let (pages, rows) = self.inventory_producers(catalog, page, search, stock.sandbox);
         let page = page.min(pages - 1) + 1;
-        let mut text = format!(
-            "Production sites · {page}/{pages} · Page Up/Down · F10 Close"
-        );
+        let mut text = format!("Production sites · {page}/{pages} · Page Up/Down · F10 Close");
         if rows.is_empty() {
             text.push_str("\nNo completed production sites match. Search for a building, crop, recipe or product.");
         }
