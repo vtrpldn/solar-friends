@@ -102,8 +102,8 @@ pub struct SoundSettings {
 impl Default for SoundSettings {
     fn default() -> Self {
         Self {
-            music: 30,
-            effects: 45,
+            music: 0,
+            effects: 0,
             open: false,
             effects_selected: false,
             save_failed: false,
@@ -345,9 +345,13 @@ fn prepare_audio(
     mut sounds: ResMut<Assets<Sound>>,
     mut settings: ResMut<SoundSettings>,
 ) {
+    // Every session starts muted, whatever volumes were last chosen; the player turns
+    // sound up from Sound settings.
     if let Some(saved) = SoundSettings::load() {
         *settings = saved;
     }
+    settings.music = 0;
+    settings.effects = 0;
     let click = |note| {
         let mut samples = vec![0.0; sample_count(0.085)];
         tone(&mut samples, note, 0.0, 0.085, 0.065, false);
@@ -502,5 +506,16 @@ fn brush(output: &mut [f32], start: f64, seconds: f32, gain: f32, frequency: f32
         (x1, x2, y1, y2) = (x, x1, y, y1);
         let index = (start + frame) % output.len();
         output[index] += gain * (decay * frame as f32 / RATE as f32).exp() * y;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn the_game_starts_muted() {
+        let settings = SoundSettings::default();
+        assert_eq!((settings.volume(false), settings.volume(true)), (0, 0));
     }
 }
