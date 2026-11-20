@@ -506,7 +506,8 @@ impl Construction {
         index: usize,
         kind: Change,
     ) -> (BTreeMap<String, u32>, BTreeMap<String, u32>) {
-        let mut installed = self.plans[index].materials(catalog).clone();
+        let plan = &self.plans[index];
+        let mut installed = plan.materials(catalog).clone();
         if let Some(goats) = self.installed_goats(catalog, index) {
             installed.extend(goats.clone());
         }
@@ -523,7 +524,7 @@ impl Construction {
         let mut returned = BTreeMap::new();
         let mut lost = BTreeMap::new();
         for (id, amount) in installed {
-            let keep = if matches!(id.as_str(), "goats" | "hens" | "bees") {
+            let keep = if plan.work == 0.0 || matches!(id.as_str(), "goats" | "hens" | "bees") {
                 amount
             } else if kind == Change::Salvage {
                 amount / 2
@@ -902,6 +903,27 @@ mod tests {
         assert_eq!(history.recovered["goats"], 2);
         assert_eq!(history.lost["bamboo"], 10);
         assert!(!history.lost.contains_key("goats"));
+    }
+
+    #[test]
+    fn dismantling_an_unstarted_project_returns_its_full_reserved_bill() {
+        let catalog = Catalog::default();
+        let mut construction = Construction::default();
+        let mut project = construction.proposed_site(&catalog, "gathering", IVec2::new(44, 36));
+        let paid = BTreeMap::from([("wood".into(), 7)]);
+        project.materials_paid = Some(paid.clone());
+        construction.plans.push(project);
+
+        for kind in [Change::Salvage, Change::Demolish] {
+            let (recovered, lost) = construction.dismantling_yield(&catalog, 0, kind);
+            assert_eq!(recovered, paid);
+            assert!(lost.is_empty());
+        }
+
+        construction.plans[0].work = 1.0;
+        let (recovered, lost) = construction.dismantling_yield(&catalog, 0, Change::Salvage);
+        assert_eq!(recovered["wood"], 3);
+        assert_eq!(lost["wood"], 4);
     }
 
     #[test]
