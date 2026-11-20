@@ -135,14 +135,12 @@ impl Construction {
             return;
         };
         let definition = &catalog.projects["road"];
-        let mut draft_stock = stock.clone();
-        let mut draft_market = self.market.clone();
         let mut added = Vec::new();
         for position in cells {
             if self.has_road(position) {
                 continue;
             }
-            let mut tile = Self::proposal(catalog, "road", position, IVec2::ONE, 0);
+            let tile = Self::proposal(catalog, "road", position, IVec2::ONE, 0);
             if let Some(reason) = self.placement_error(
                 site.terrain,
                 site.land,
@@ -150,16 +148,6 @@ impl Construction {
                 &tile,
                 definition,
                 (catalog, stock.sandbox, None),
-            ) {
-                self.status = format!("Road not placed. {reason}");
-                return;
-            }
-            if let Err(reason) = Self::reserve_project(
-                &mut draft_market,
-                &mut draft_stock,
-                catalog,
-                &mut tile,
-                clock,
             ) {
                 self.status = format!("Road not placed. {reason}");
                 return;
@@ -174,6 +162,14 @@ impl Construction {
             self.status = "This village has reached the project limit.".into();
             return;
         }
+        let (draft_stock, draft_market) =
+            match self.road_supply_draft(catalog, stock, clock, &mut added) {
+                Ok(draft) => draft,
+                Err(reason) => {
+                    self.status = format!("Road not placed. {reason}");
+                    return;
+                }
+            };
         self.road_planning.history.push(RoadStroke {
             anchor: self.road_planning.anchor,
             first_project: self.plans.len(),
@@ -184,6 +180,21 @@ impl Construction {
         self.road_planning.anchor = Some(end);
         self.status = format!("{} road tile(s) planned.", added.len());
         self.plans.extend(added);
+    }
+
+    fn road_supply_draft(
+        &self,
+        catalog: &Catalog,
+        stock: &Stock,
+        clock: TownClock,
+        tiles: &mut [Blueprint],
+    ) -> Result<(Stock, Market), String> {
+        let mut stock = stock.clone();
+        let mut market = self.market.clone();
+        for tile in tiles {
+            Self::reserve_project(&mut market, &mut stock, catalog, tile, clock)?;
+        }
+        Ok((stock, market))
     }
 
     pub fn is_road(&self, project: usize) -> bool {
@@ -228,14 +239,13 @@ impl Construction {
         };
         let definition = &catalog.projects["road"];
         let mut issue = None;
-        let mut sections = 0;
+        let mut tiles = Vec::new();
         let mut previous: Option<Vec2> = None;
         for cell in cells {
             let point = world_position(cell.x as f32, cell.y as f32);
             let color = if self.has_road(cell) {
                 Color::srgb_u8(155, 162, 148)
             } else {
-                sections += 1;
                 let tile = Self::proposal(catalog, "road", cell, IVec2::ONE, 0);
                 if let Some(reason) = self.placement_error(
                     site.terrain,
@@ -248,6 +258,7 @@ impl Construction {
                     issue.get_or_insert(reason);
                     Color::srgb_u8(222, 112, 96)
                 } else {
+                    tiles.push(tile);
                     Color::srgb_u8(217, 237, 165)
                 }
             };
@@ -281,8 +292,15 @@ impl Construction {
         if let Some(issue) = issue {
             return (issue.into(), false);
         }
+        let sections = tiles.len() as u32;
         if sections == 0 {
             return ("These road tiles are already planned.".into(), false);
+        }
+        if self.plans.len() + tiles.len() > 128 * 128 {
+            return ("This village has reached the project limit.".into(), false);
+        }
+        if let Err(reason) = self.road_supply_draft(catalog, stock, clock, &mut tiles) {
+            return (reason, false);
         }
         let materials = definition
             .materials
