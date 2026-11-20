@@ -560,15 +560,26 @@ impl Construction {
         boarded_only: bool,
     ) -> Option<BTreeMap<String, u32>> {
         let mut units = Self::pending_construction_cargo(&self.plans[site])?.clone();
+        // Save validation also reads this balance before it trusts the manifests.
+        let mut subtract = |load: &BTreeMap<String, u32>| {
+            if load
+                .iter()
+                .any(|(id, &amount)| amount > units.get(id).copied().unwrap_or(0))
+            {
+                return None;
+            }
+            crate::market::subtract_cargo(&mut units, load);
+            Some(())
+        };
         if let Some(freight) = self.construction_freight_cargo(site) {
-            crate::market::subtract_cargo(&mut units, freight);
+            subtract(freight)?;
         }
         for trip in self.construction_trips(site) {
             if Some(trip.vehicle) == excluded_vehicle || (boarded_only && !trip.boarded) {
                 continue;
             }
             let load = self.pickup_manifests.get(trip.vehicle)?.get(&site)?;
-            crate::market::subtract_cargo(&mut units, load);
+            subtract(load)?;
         }
         Some(units)
     }
@@ -1652,6 +1663,18 @@ mod tests {
         )));
         assert!(mixed.valid_save(&catalog, &mixed_stock));
         assert_eq!(mixed.market.committed_fares(), 0);
+        let mut overlapping: Construction =
+            serde_json::from_slice(&serde_json::to_vec(&mixed).unwrap()).unwrap();
+        overlapping
+            .construction_delivery
+            .as_mut()
+            .unwrap()
+            .cargo
+            .get_mut(&0)
+            .unwrap()
+            .insert("stone".into(), 2);
+        assert!(!overlapping.valid_pickup_manifests(&catalog));
+        assert!(!overlapping.valid_save(&catalog, &mixed_stock));
         let arrival = mixed.construction_delivery.as_ref().unwrap().eta;
         mixed.tick_construction_delivery(
             &catalog,
@@ -1694,6 +1717,13 @@ mod tests {
         assert_eq!(balance - stock.balance(), 2 * crate::market::fare_cents(12));
 
         let saved = serde_json::to_vec(&village).unwrap();
+        let mut overlapping: Construction = serde_json::from_slice(&saved).unwrap();
+        overlapping.pickup_manifests[second.vehicle]
+            .get_mut(&0)
+            .unwrap()
+            .insert("stone".into(), 2);
+        assert!(!overlapping.valid_pickup_manifests(&catalog));
+        assert!(!overlapping.valid_save(&catalog, &stock));
         let mut village: Construction = serde_json::from_slice(&saved).unwrap();
         village.second_trip.as_mut().unwrap().elapsed = second.duration;
         village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
