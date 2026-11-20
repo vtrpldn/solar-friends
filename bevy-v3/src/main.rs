@@ -749,6 +749,12 @@ mod tests {
             .test_directory = Some(save_dir.clone());
         app.update();
 
+        assert!(
+            app.world_mut()
+                .query::<&Text>()
+                .iter(app.world())
+                .any(|text| text.0 == "Solar\nFriends")
+        );
         press_button(&mut app, "Continue Story");
         assert!(app.world().resource::<WorldSetup>().open);
         assert!(
@@ -769,6 +775,12 @@ mod tests {
         assert!(!app.world().resource::<audio::SoundSettings>().open);
 
         press_button(&mut app, "New sandbox");
+        assert!(
+            app.world_mut()
+                .query::<&Text>()
+                .iter(app.world())
+                .any(|text| text.0 == "Choose the land")
+        );
         assert!(app.world().resource::<WorldSetup>().mode == setup::Mode::Sandbox);
         let sandbox_seed = app.world().resource::<WorldSetup>().seed();
         assert_ne!(sandbox_seed, 42);

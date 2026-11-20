@@ -1,5 +1,5 @@
 use bevy::{
-    asset::RenderAssetUsages,
+    asset::{RenderAssetUsages, embedded_asset, load_embedded_asset},
     input::mouse::{AccumulatedMouseScroll, MouseScrollUnit},
     prelude::*,
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
@@ -363,6 +363,12 @@ impl Action {
 struct SetupPanel;
 
 #[derive(Component)]
+struct TitleBackdrop;
+
+#[derive(Component)]
+struct SetupHeading;
+
+#[derive(Component)]
 struct PlotPreview;
 
 #[derive(Component)]
@@ -382,6 +388,7 @@ pub struct WorldSetupPlugin;
 
 impl Plugin for WorldSetupPlugin {
     fn build(&self, app: &mut App) {
+        embedded_asset!(app, "title-art.png");
         app.init_resource::<WorldSetup>()
             .add_systems(Startup, spawn_panel)
             .add_systems(
@@ -389,6 +396,7 @@ impl Plugin for WorldSetupPlugin {
                 (
                     setup_input,
                     refresh_panel,
+                    refresh_title,
                     scroll_setup_panel,
                     refresh_preview,
                     refresh_story_resume,
@@ -399,6 +407,44 @@ impl Plugin for WorldSetupPlugin {
 }
 
 fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<AssetServer>) {
+    commands
+        .spawn((
+            TitleBackdrop,
+            Node {
+                display: Display::None,
+                position_type: PositionType::Absolute,
+                width: percent(100),
+                height: percent(100),
+                ..default()
+            },
+            BackgroundColor(Color::srgb_u8(233, 224, 200)),
+            GlobalZIndex(-1),
+        ))
+        .with_children(|backdrop| {
+            backdrop.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    top: px(25),
+                    left: px(25),
+                    right: px(25),
+                    bottom: px(25),
+                    border: UiRect::all(px(1)),
+                    ..default()
+                },
+                BorderColor::all(Color::srgb_u8(139, 152, 117)),
+            ));
+            backdrop.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    top: vh(7),
+                    right: vw(6),
+                    height: vh(37),
+                    aspect_ratio: Some(0.9),
+                    ..default()
+                },
+                ImageNode::new(load_embedded_asset!(&*assets, "title-art.png")),
+            ));
+        });
     commands
         .spawn((
             SetupPanel,
@@ -419,7 +465,11 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
             ScrollPosition::default(),
         ))
         .with_children(|panel| {
-            panel.spawn((Text::new("Solar Friends"), ui_font(&assets, 30.0)));
+            panel.spawn((
+                SetupHeading,
+                Text::new("Solar Friends"),
+                ui_font(&assets, 30.0),
+            ));
             for action in [
                 Action::Resume,
                 Action::Continue(Mode::Story),
@@ -510,6 +560,49 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
                 ui_font(&assets, 15.0),
             ));
         });
+}
+
+type SetupPanelStyle<'w, 's> = Single<
+    'w,
+    's,
+    (&'static mut Node, &'static mut BackgroundColor),
+    (With<SetupPanel>, Without<TitleBackdrop>),
+>;
+
+fn refresh_title(
+    setup: Res<WorldSetup>,
+    saves: Res<SaveMenu>,
+    sound: Res<crate::audio::SoundSettings>,
+    mut backdrop: Single<&mut Node, With<TitleBackdrop>>,
+    mut panel: SetupPanelStyle,
+    mut heading: Single<(&mut Text, &mut TextFont, &mut TextColor), With<SetupHeading>>,
+) {
+    if !setup.is_changed() && !saves.is_changed() && !sound.is_changed() {
+        return;
+    }
+    let title = !setup.choosing_land;
+    backdrop.display = if title && setup.open && !saves.open && !sound.open {
+        Display::Flex
+    } else {
+        Display::None
+    };
+    let (panel, background) = &mut *panel;
+    let (text, font, color) = &mut *heading;
+    if title {
+        panel.left = vw(8);
+        panel.top = vh(6);
+        background.0 = Color::NONE;
+        text.0 = "Solar\nFriends".into();
+        font.font_size = 66.;
+        color.0 = Color::srgb_u8(54, 82, 63);
+    } else {
+        panel.left = px(32);
+        panel.top = px(32);
+        background.0 = Color::srgb_u8(31, 45, 35);
+        text.0 = "Choose the land".into();
+        font.font_size = 30.;
+        color.0 = Color::WHITE;
+    }
 }
 
 fn scroll_setup_panel(
