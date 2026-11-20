@@ -2251,6 +2251,15 @@ impl Construction {
             let shared_trip = (!self.supplier_construction)
                 .then(|| self.sale_trip_for_return_purchase())
                 .flatten();
+            let protected_cash = if self.supplier_construction
+                && !stock.sandbox
+                && self.trade.pantry_check_due(clock.seconds)
+            {
+                self.protected_freight_cash(catalog, clock)
+                    .unwrap_or(u64::MAX)
+            } else {
+                0
+            };
             let purchase = self.trade.maintain_pantry(
                 catalog,
                 stock,
@@ -2261,6 +2270,7 @@ impl Construction {
                     space,
                     self.supplier_construction,
                     shared_trip.is_some(),
+                    protected_cash,
                 ),
             );
             if let Some((slot, order)) = shared_trip.zip(purchase) {

@@ -500,26 +500,31 @@ impl Construction {
             self.market
                 .quote_pack(catalog, stock, material, (clock.day(), fare, freight))?;
         if self.supplier_construction {
-            let (loads, replaced) = self
-                .construction_freight_budget(catalog, BTreeMap::new())
+            let protected = self
+                .protected_freight_cash(catalog, clock)
                 .ok_or("Queued construction supplies exceed supplier freight capacity.")?;
-            let committed = self.market.committed_fares();
-            let freight_commitment = committed.saturating_sub(replaced)
-                + u64::from(loads) * freight_cents(clock.round_trip_km)
-                + if loads > 0 {
-                    self.market.expansion_reserve()
-                } else {
-                    0
-                };
-            if stock
-                .balance()
-                .saturating_sub(committed.max(freight_commitment))
-                < price + fare
-            {
+            if stock.balance().saturating_sub(protected) < price + fare {
                 return Err("Shared savings are committed to queued construction freight.");
             }
         }
         Ok(())
+    }
+
+    pub(super) fn protected_freight_cash(
+        &self,
+        catalog: &Catalog,
+        clock: TownClock,
+    ) -> Option<u64> {
+        let (loads, replaced) = self.construction_freight_budget(catalog, BTreeMap::new())?;
+        let committed = self.market.committed_fares();
+        let freight_commitment = committed.saturating_sub(replaced)
+            + u64::from(loads) * freight_cents(clock.round_trip_km)
+            + if loads > 0 {
+                self.market.expansion_reserve()
+            } else {
+                0
+            };
+        Some(committed.max(freight_commitment))
     }
 
     pub(super) fn buy_from_town(
