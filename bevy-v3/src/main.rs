@@ -1229,6 +1229,24 @@ mod tests {
         press_button(&mut app, "Connect grid");
         press_button(&mut app, "Manage");
         press_button(&mut app, "Residents");
+        {
+            let world = app.world_mut();
+            let mut images = world.query::<&ImageNode>();
+            let assets = world.resource::<AssetServer>();
+            let portraits = images
+                .iter(world)
+                .filter_map(|node| {
+                    assets.get_path(node.image.id()).and_then(|asset| {
+                        asset
+                            .path()
+                            .to_str()
+                            .filter(|path| path.contains("/resident_portraits/"))
+                            .map(str::to_owned)
+                    })
+                })
+                .collect::<std::collections::BTreeSet<_>>();
+            assert_eq!(portraits.len(), village::NAMES.len());
+        }
         assert!(
             app.world_mut()
                 .query::<&Text>()
@@ -1446,6 +1464,30 @@ mod tests {
                         && text.0.contains("Reserve 16 kg")
                         && text.0.contains("Trigger 16 kg · Y Daily cap 32 kg")
                 })
+        );
+        press_button(&mut app, "Close panel");
+        press_button(&mut app, "Manage");
+        press_button(&mut app, "Crafting");
+        assert!(
+            app.world_mut()
+                .query::<&Text>()
+                .iter(app.world())
+                .any(|text| text.0.contains("Crafting & repairs"))
+        );
+        press_button(&mut app, "Craft harvest basket");
+        assert!(
+            app.world_mut()
+                .query::<&Text>()
+                .iter(app.world())
+                .any(|text| text.0.contains("Build a suitable workspace first."))
+        );
+        press_button(&mut app, "Repair");
+        press_button(&mut app, "Jobs");
+        assert!(
+            app.world_mut()
+                .query::<&Text>()
+                .iter(app.world())
+                .any(|text| text.0.contains("No crafting jobs underway."))
         );
         press_button(&mut app, "Close panel");
         press_button(&mut app, "Manage");

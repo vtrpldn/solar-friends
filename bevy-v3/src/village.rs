@@ -264,6 +264,14 @@ pub struct Village {
     #[serde(skip)]
     inventory_view: InventoryView,
     #[serde(skip)]
+    craft_view: crate::construction::CraftView,
+    #[serde(skip)]
+    craft_recipe: Option<String>,
+    #[serde(skip)]
+    craft_workspace: Option<usize>,
+    #[serde(skip)]
+    craft_job_site: Option<usize>,
+    #[serde(skip)]
     inventory_search: String,
     #[serde(skip)]
     numeric_entry: Option<(NumericTarget, String)>,
@@ -473,9 +481,54 @@ enum UtilityPanel {
     Events,
     Inventory,
     Projects,
+    Crafting,
 }
 
 impl Village {
+    fn craft_workspace_choices(&self, catalog: &Catalog) -> Vec<usize> {
+        if let Some(site) = self.craft_job_site {
+            self.construction.craft_job_workspaces(catalog, site)
+        } else if let Some(recipe) = &self.craft_recipe {
+            self.construction.craft_workspaces(catalog, recipe)
+        } else {
+            Vec::new()
+        }
+    }
+
+    fn craft_move_target(&self, catalog: &Catalog) -> Option<usize> {
+        let site = self.craft_job_site?;
+        let destinations = self.construction.craft_job_workspaces(catalog, site);
+        self.craft_workspace
+            .filter(|choice| destinations.contains(choice))
+            .or_else(|| destinations.first().copied())
+    }
+    fn producer_view(&self) -> bool {
+        self.utility_panel == Some(UtilityPanel::Crafting)
+            || (self.utility_panel == Some(UtilityPanel::Inventory)
+                && self.inventory_view == InventoryView::Production)
+    }
+
+    fn producer_rows<'a>(
+        &self,
+        catalog: &'a Catalog,
+    ) -> (usize, Vec<(crate::construction::Producer<'a>, String)>) {
+        if self.utility_panel == Some(UtilityPanel::Crafting) {
+            self.construction.crafting_rows(
+                catalog,
+                &self.stock,
+                self.inventory_page,
+                self.craft_view,
+            )
+        } else {
+            self.construction.inventory_producers(
+                catalog,
+                self.inventory_page,
+                &self.inventory_search,
+                self.stock.sandbox,
+            )
+        }
+    }
+
     pub fn camp_focus(&self, setup: &WorldSetup) -> Option<Vec3> {
         let camp = self.camp?;
         let Vec2 { x, y: z } = world_position(camp.x as f32, camp.y as f32);
@@ -884,17 +937,9 @@ impl Village {
                     .0,
                 &mut self.projects_page,
             ),
-            Some(UtilityPanel::Inventory) if self.inventory_view == InventoryView::Production => (
-                self.construction
-                    .inventory_producers(
-                        catalog,
-                        self.inventory_page,
-                        &self.inventory_search,
-                        self.stock.sandbox,
-                    )
-                    .0,
-                &mut self.inventory_page,
-            ),
+            Some(UtilityPanel::Inventory | UtilityPanel::Crafting) if self.producer_view() => {
+                (self.producer_rows(catalog).0, &mut self.inventory_page)
+            }
             Some(UtilityPanel::Inventory) => (
                 self.construction
                     .inventory_panel(
@@ -2091,8 +2136,13 @@ fn village_input(
             };
             town.inventory_page = 0;
         }
-        if town.utility_panel == Some(UtilityPanel::Inventory) {
-            if keyboard.just_pressed(KeyCode::Tab) {
+        if matches!(
+            town.utility_panel,
+            Some(UtilityPanel::Inventory | UtilityPanel::Crafting)
+        ) {
+            if town.utility_panel == Some(UtilityPanel::Inventory)
+                && keyboard.just_pressed(KeyCode::Tab)
+            {
                 town.toggle_inventory_view();
             }
             if keyboard.any_just_pressed([KeyCode::PageUp, KeyCode::PageDown]) {
@@ -2928,6 +2978,79 @@ fn show_hud(
             }
             label.push('\n');
             label.push_str(&village.stock.processing_summary(&catalog));
+        }
+        Some(UtilityPanel::Crafting) => {
+            use std::fmt::Write;
+            let (pages, rows) = village.producer_rows(&catalog);
+            let page = village.inventory_page.min(pages - 1) + 1;
+            let _ = write!(
+                label,
+                "\nCrafting & repairs · {} · {page}/{pages}",
+                village.craft_view.label()
+            );
+            if rows.is_empty() {
+                label.push_str(match village.craft_view {
+                    crate::construction::CraftView::Make => "\nNo craft recipes available.",
+                    crate::construction::CraftView::Repair => "\nNo owned equipment to repair.",
+                    crate::construction::CraftView::Jobs => "\nNo crafting jobs underway.",
+                });
+            }
+            if let Some(id) = &village.craft_recipe {
+                label.push('\n');
+                label.push_str(&village.construction.craft_recipe_summary(
+                    &catalog,
+                    &village.stock,
+                    id,
+                ));
+                match village.construction.crafting_plan(
+                    &catalog,
+                    &village.stock,
+                    id,
+                    village.craft_workspace,
+                ) {
+                    Ok(site) => {
+                        let name = village.construction.craft_workspace_name(&catalog, site);
+                        let _ = write!(label, "\n{name} · Ready to start");
+                    }
+                    Err(reason) => {
+                        if let Some(site) = village.craft_workspace
+                            && village
+                                .construction
+                                .craft_workspaces(&catalog, id)
+                                .contains(&site)
+                        {
+                            let name = village.construction.craft_workspace_name(&catalog, site);
+                            let _ = write!(label, "\n{name}");
+                        }
+                        let _ = write!(label, "\n{reason}");
+                    }
+                }
+            } else if village.craft_view == crate::construction::CraftView::Jobs {
+                for (target, name) in rows {
+                    if let crate::construction::Producer::Site(site) = target {
+                        let status = village.construction.production_site_status(
+                            &catalog,
+                            &village.stock,
+                            site,
+                            village.clock,
+                        );
+                        let worker = village.construction.craft_job_worker(site);
+                        let _ = write!(label, "\n{name} · {worker}{status}");
+                    }
+                }
+                if let Some(site) = village.craft_job_site {
+                    let name = village.construction.craft_workspace_name(&catalog, site);
+                    let _ = write!(label, "\nSelected workspace · {name}");
+                    if let Some(destination) = village.craft_move_target(&catalog) {
+                        let target = village
+                            .construction
+                            .craft_workspace_name(&catalog, destination);
+                        let _ = write!(label, "\nMove unfinished job to {target}");
+                    } else {
+                        label.push_str("\nNo eligible destination for this job.");
+                    }
+                }
+            }
         }
         Some(UtilityPanel::Events) => {
             label.push('\n');

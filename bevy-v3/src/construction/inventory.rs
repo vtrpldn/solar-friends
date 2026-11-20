@@ -47,6 +47,25 @@ pub(crate) const INVENTORY_ROWS: usize = 9;
 pub(crate) enum Producer<'a> {
     Site(usize),
     Blueprint(&'a str),
+    CraftRecipe(&'a str),
+}
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub(crate) enum CraftView {
+    #[default]
+    Make,
+    Repair,
+    Jobs,
+}
+
+impl CraftView {
+    pub(crate) fn label(self) -> &'static str {
+        match self {
+            Self::Make => "Make",
+            Self::Repair => "Repair",
+            Self::Jobs => "Jobs",
+        }
+    }
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq)]
@@ -107,6 +126,206 @@ pub(crate) fn inventory_rows<'a>(
 }
 
 impl Construction {
+    pub(crate) fn crafting_rows<'a>(
+        &self,
+        catalog: &'a Catalog,
+        stock: &Stock,
+        page: usize,
+        view: CraftView,
+    ) -> (usize, Vec<(Producer<'a>, String)>) {
+        let rows: Vec<_> = if view == CraftView::Jobs {
+            self.production
+                .jobs
+                .iter()
+                .filter_map(|job| {
+                    let recipe = &catalog.production[&job.recipe];
+                    recipe.craft.as_ref()?;
+                    Some((
+                        Producer::Site(job.site),
+                        format!("{} · Workspace #{}", recipe.name, job.site + 1),
+                    ))
+                })
+                .collect()
+        } else {
+            catalog
+                .production
+                .iter()
+                .filter_map(|(id, recipe)| {
+                    recipe.craft.as_ref()?;
+                    let relevant = match &recipe.repair {
+                        Some(tool) => view == CraftView::Repair && stock.available(tool) > 0,
+                        None => view == CraftView::Make,
+                    };
+                    relevant.then(|| (Producer::CraftRecipe(id), recipe.name.clone()))
+                })
+                .collect()
+        };
+        let pages = rows.len().div_ceil(INVENTORY_ROWS).max(1);
+        let offset = page.min(pages - 1) * INVENTORY_ROWS;
+        (
+            pages,
+            rows.into_iter().skip(offset).take(INVENTORY_ROWS).collect(),
+        )
+    }
+
+    pub(crate) fn craft_workspaces(&self, catalog: &Catalog, recipe: &str) -> Vec<usize> {
+        self.plans
+            .iter()
+            .enumerate()
+            .filter_map(|(site, _)| {
+                self.recipes(catalog, site)
+                    .iter()
+                    .any(|(id, _)| id.as_str() == recipe)
+                    .then_some(site)
+            })
+            .collect()
+    }
+
+    pub(crate) fn craft_workspace_name(&self, catalog: &Catalog, site: usize) -> String {
+        format!(
+            "{} #{}",
+            catalog.projects[&self.plans[site].key].name,
+            site + 1
+        )
+    }
+
+    pub(crate) fn craft_job_workspaces(&self, catalog: &Catalog, site: usize) -> Vec<usize> {
+        self.craft_destinations(catalog, site).1
+    }
+
+    pub(crate) fn move_crafting_from_site(
+        &mut self,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        source: usize,
+        destination: usize,
+    ) -> bool {
+        let (job, destinations) = self.craft_destinations(catalog, source);
+        if let Some(job) = job
+            && destinations.contains(&destination)
+        {
+            self.move_craft_job(catalog, stock, job, destination);
+            true
+        } else {
+            false
+        }
+    }
+
+    pub(crate) fn craft_recipe_summary(
+        &self,
+        catalog: &Catalog,
+        stock: &Stock,
+        id: &str,
+    ) -> String {
+        use std::fmt::Write;
+        let recipe = &catalog.production[id];
+        let mut text = recipe.name.clone();
+        if let Some(craft) = &recipe.craft {
+            let qualified = self
+                .residents
+                .iter()
+                .enumerate()
+                .filter_map(|(index, resident)| {
+                    (resident.craft.level(index, craft.skill) >= craft.level)
+                        .then_some(crate::village::NAMES[index])
+                })
+                .collect::<Vec<_>>();
+            let minutes = (recipe.work * 0.45 / (0.75 + craft.level as f64 * 0.15)).ceil();
+            let _ = write!(
+                text,
+                "\n{} level {} · About {minutes:.0} game minutes of work",
+                craft.skill.label(),
+                craft.level
+            );
+            let _ = write!(
+                text,
+                "\nQualified residents · {}",
+                if qualified.is_empty() {
+                    "None yet".into()
+                } else {
+                    qualified.join(", ")
+                }
+            );
+            if let Some(tool) = &craft.tool {
+                let _ = write!(text, "\nRequires {}", catalog.materials[tool].name);
+            }
+            let _ = write!(text, "\n{}", craft.stages.join(" → "));
+        }
+        if let Some(tool) = &recipe.repair {
+            let owned = stock.available(tool);
+            let equipment = &stock.equipment;
+            if let Some(condition) = equipment.condition_percent(tool, owned) {
+                let broken = equipment.broken(tool).min(owned);
+                let _ = write!(
+                    text,
+                    "\n{owned} owned · {broken} broken · {condition:.0}% condition"
+                );
+            }
+        }
+        for (material, quantity) in &recipe.input {
+            let _ = write!(
+                text,
+                "\n{} · {quantity} needed · {} available",
+                catalog.materials[material].name,
+                stock.available(material)
+            );
+        }
+        text
+    }
+
+    pub(crate) fn craft_job_worker(&self, site: usize) -> &'static str {
+        self.production
+            .jobs
+            .iter()
+            .find(|job| job.site == site)
+            .and_then(|job| job.worker)
+            .map_or("Waiting for an available resident", |resident| {
+                crate::village::NAMES[resident]
+            })
+    }
+
+    pub(crate) fn crafting_plan(
+        &self,
+        catalog: &Catalog,
+        stock: &Stock,
+        recipe: &str,
+        preferred: Option<usize>,
+    ) -> Result<usize, String> {
+        let workspaces = self.craft_workspaces(catalog, recipe);
+        let mut reason = "Build a suitable workspace first.".to_string();
+        if let Some(site) = preferred
+            && !workspaces.contains(&site)
+        {
+            return Err("The selected workspace is unavailable.".into());
+        }
+        for site in workspaces
+            .into_iter()
+            .filter(|site| preferred.is_none_or(|choice| choice == *site))
+        {
+            if !self.utilities.enabled(site) {
+                reason = "Switch on the workspace first.".into();
+                continue;
+            }
+            match self.batch_inputs(catalog, stock, site, recipe) {
+                Ok(_) => return Ok(site),
+                Err(blocker) => reason = blocker,
+            }
+        }
+        Err(reason)
+    }
+
+    pub(crate) fn start_crafting(
+        &mut self,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        recipe: &str,
+        preferred: Option<usize>,
+    ) -> Option<usize> {
+        let site = self.crafting_plan(catalog, stock, recipe, preferred).ok()?;
+        self.queue_batch(catalog, stock, site, recipe);
+        Some(site)
+    }
+
     pub(crate) fn inventory_producers<'a>(
         &self,
         catalog: &'a Catalog,
@@ -517,6 +736,54 @@ impl Construction {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn village_crafting_reserves_inputs_at_the_chosen_workspace() {
+        let catalog = Catalog::default();
+        let key = "supply-5";
+        let id = "craft_harvest-basket";
+        let mut construction = Construction::default();
+        for x in [42, 45] {
+            let mut plan = construction.proposed_site(&catalog, key, IVec2::new(x, 36));
+            plan.work = catalog.projects[key].work;
+            construction.plans.push(plan);
+        }
+        let mut stock = Stock::default();
+        stock.receive(&BTreeMap::from([
+            ("bamboo".into(), 4),
+            ("carpentry-tools".into(), 1),
+        ]));
+        assert_eq!(
+            construction.crafting_plan(&catalog, &stock, id, None),
+            Ok(0)
+        );
+        assert_eq!(
+            construction.start_crafting(&catalog, &mut stock, id, Some(1)),
+            Some(1)
+        );
+        assert_eq!(stock.available("bamboo"), 2);
+        assert_eq!(
+            construction.start_crafting(&catalog, &mut stock, id, Some(1)),
+            None
+        );
+        assert_eq!(stock.available("bamboo"), 2);
+        assert_eq!(
+            construction
+                .crafting_rows(&catalog, &stock, 0, CraftView::Jobs)
+                .1[0]
+                .0,
+            Producer::Site(1)
+        );
+        assert!(construction.move_crafting_from_site(&catalog, &mut stock, 1, 0));
+        assert_eq!(stock.available("bamboo"), 2);
+        assert_eq!(
+            construction
+                .crafting_rows(&catalog, &stock, 0, CraftView::Jobs)
+                .1[0]
+                .0,
+            Producer::Site(0)
+        );
+    }
 
     #[test]
     fn producer_search_finds_recipe_outputs_at_completed_sites() {

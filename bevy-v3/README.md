@@ -28,6 +28,8 @@ Click a completed workbench, workshop, or kitchen and press C to open its recipe
 
 Press F10 for Stores and cycle views to **Production sites**. Search by building, recipe, output, or crop. Select a site to find it on the map and open its recipes or beds. Select **Build producer** to place a matching blueprint.
 
+Open **Manage → Crafting** to browse items to make, owned equipment to repair, and active crafting jobs. Select an item to review its requirements and choose a workspace. Select a job to find it in the village or move unfinished work to a free, compatible workspace.
+
 Select a completed field, garden, or greenhouse and press K to manage the whole plot. Choose **Inspect one bed** or press Tab to switch to individual beds. Prepare the soil, sow a crop, and return to harvest when it is ripe. Bed settings cover crop, density, irrigation, and residues.
 
 A completed coop or goat pen can store feed and drinking water, then produce eggs or milk. Residents take fodder to the animals when supplies are available. Select a pen and press C to see its care and collection options.

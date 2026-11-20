@@ -5,6 +5,7 @@ use crate::{
     terrain::Brush,
     time_advance::AdvanceAction,
 };
+use bevy::asset::{embedded_asset, load_embedded_asset};
 
 pub(super) const PANEL_WIDTH: f32 = 240.0;
 
@@ -78,6 +79,11 @@ enum Action {
     SaleQuantity(SaleSetting),
     InventoryItem(usize),
     InventorySearch,
+    CraftTab(crate::construction::CraftView),
+    NextCraftWorkspace,
+    LocateCraftJob,
+    MoveCraftJob,
+    StartCraft,
     Resident(usize),
     ResidentProfile(ResidentProfile),
     FocusResident,
@@ -115,10 +121,11 @@ enum Action {
 }
 
 impl Action {
-    const PANELS: [(UtilityPanel, &'static str); 10] = [
+    const PANELS: [(UtilityPanel, &'static str); 11] = [
         (UtilityPanel::Residents, "Residents"),
         (UtilityPanel::Projects, "Projects"),
         (UtilityPanel::Inventory, "Stores"),
+        (UtilityPanel::Crafting, "Crafting"),
         (UtilityPanel::Power, "Power"),
         (UtilityPanel::Water, "Water"),
         (UtilityPanel::Upkeep, "Maintenance"),
@@ -138,7 +145,8 @@ impl Action {
                 && (matches!(self, Self::Lenses) || village.lenses.open);
         }
         if matches!(self, Self::InventorySearch | Self::InventoryItem(_)) {
-            return village.utility_panel == Some(UtilityPanel::Inventory)
+            return (village.utility_panel == Some(UtilityPanel::Inventory)
+                || matches!(self, Self::InventoryItem(_)) && village.producer_view())
                 && !village.guide.open()
                 && !village.lenses.open
                 && !village.advance_open()
@@ -331,6 +339,19 @@ impl Action {
             | Self::SaleQuantity(_) => village.trade_open(),
             Self::InventorySearch | Self::InventoryItem(_) => false,
             Self::InventoryView => village.utility_panel == Some(UtilityPanel::Inventory),
+            Self::CraftTab(_) => village.utility_panel == Some(UtilityPanel::Crafting),
+            Self::LocateCraftJob | Self::MoveCraftJob => {
+                village.utility_panel == Some(UtilityPanel::Crafting)
+                    && village.craft_job_site.is_some()
+            }
+            Self::NextCraftWorkspace => {
+                village.utility_panel == Some(UtilityPanel::Crafting)
+                    && (village.craft_recipe.is_some() || village.craft_job_site.is_some())
+            }
+            Self::StartCraft => {
+                village.utility_panel == Some(UtilityPanel::Crafting)
+                    && village.craft_recipe.is_some()
+            }
             Self::Project(_) | Self::ProjectFilter => {
                 village.utility_panel == Some(UtilityPanel::Projects)
             }
@@ -391,6 +412,7 @@ impl Action {
                 Some(
                     UtilityPanel::Projects
                         | UtilityPanel::Inventory
+                        | UtilityPanel::Crafting
                         | UtilityPanel::Events
                         | UtilityPanel::Residents
                         | UtilityPanel::Trade
@@ -520,6 +542,14 @@ impl Action {
                 "Find producer".into()
             }
             Self::InventorySearch => "Find material".into(),
+            Self::CraftTab(view) => view.label().into(),
+            Self::NextCraftWorkspace => "Choose next workspace".into(),
+            Self::LocateCraftJob => "Find job in village".into(),
+            Self::MoveCraftJob => "Move unfinished job".into(),
+            Self::StartCraft if village.craft_view == crate::construction::CraftView::Repair => {
+                "Start repair".into()
+            }
+            Self::StartCraft => "Make this item".into(),
             Self::InventoryView => match village.inventory_view.next() {
                 InventoryView::Resources => "Show resources",
                 InventoryView::Equipment => "Show items and equipment",
@@ -807,6 +837,11 @@ impl PanelPicker {
 }
 
 pub(super) fn install(app: &mut App) {
+    embedded_asset!(app, "resident_portraits/iara.png");
+    embedded_asset!(app, "resident_portraits/bento.png");
+    embedded_asset!(app, "resident_portraits/luz.png");
+    embedded_asset!(app, "resident_portraits/caua.png");
+    embedded_asset!(app, "resident_portraits/nina.png");
     app.init_resource::<PanelPicker>()
         .add_systems(Startup, spawn)
         .add_systems(
@@ -874,6 +909,13 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 Action::ClosePanel,
                 Action::InventoryView,
                 Action::InventorySearch,
+                Action::CraftTab(crate::construction::CraftView::Make),
+                Action::CraftTab(crate::construction::CraftView::Repair),
+                Action::CraftTab(crate::construction::CraftView::Jobs),
+                Action::NextCraftWorkspace,
+                Action::LocateCraftJob,
+                Action::MoveCraftJob,
+                Action::StartCraft,
                 Action::PantryFromStores,
                 Action::Pause,
                 Action::Speed,
@@ -1175,6 +1217,33 @@ fn spawn_button(parent: &mut ChildSpawnerCommands, assets: &AssetServer, action:
         button.insert(crate::audio::DisclosureSound);
     }
     button.with_child((Text::default(), ui_font(assets, font_size)));
+    if let Action::Resident(index) = action {
+        let image = match index {
+            0 => load_embedded_asset!(assets, "resident_portraits/iara.png"),
+            1 => load_embedded_asset!(assets, "resident_portraits/bento.png"),
+            2 => load_embedded_asset!(assets, "resident_portraits/luz.png"),
+            3 => load_embedded_asset!(assets, "resident_portraits/caua.png"),
+            4 => load_embedded_asset!(assets, "resident_portraits/nina.png"),
+            _ => unreachable!("the roster has five residents"),
+        };
+        button.insert(Node {
+            padding: UiRect::axes(px(10), px(3)),
+            flex_direction: FlexDirection::RowReverse,
+            justify_content: JustifyContent::FlexEnd,
+            align_items: AlignItems::Center,
+            column_gap: px(6),
+            ..default()
+        });
+        button.with_child((
+            ImageNode::new(image),
+            Node {
+                width: px(48),
+                height: px(36),
+                flex_shrink: 0.,
+                ..default()
+            },
+        ));
+    }
 }
 
 fn fit_and_scroll_menu(
@@ -1379,9 +1448,17 @@ fn handle_buttons(
                     if picker.open || matches!(action, Action::ResourcePanel(_)) =>
                 {
                     village.utility_panel = Some(panel);
+                    if panel == UtilityPanel::Crafting {
+                        village.craft_view = crate::construction::CraftView::Make;
+                        village.craft_recipe = None;
+                        village.craft_workspace = None;
+                        village.craft_job_site = None;
+                    }
                     match panel {
                         UtilityPanel::Projects => village.projects_page = 0,
-                        UtilityPanel::Inventory => village.inventory_page = 0,
+                        UtilityPanel::Inventory | UtilityPanel::Crafting => {
+                            village.inventory_page = 0
+                        }
                         UtilityPanel::Events => village.event_page = 0,
                         UtilityPanel::Upkeep => village.upkeep_page = 0,
                         UtilityPanel::Residents => picker.home_page = 0,
@@ -1436,16 +1513,21 @@ fn handle_buttons(
                 Action::Project(row) if !picker.open => {
                     village.focus_project_row(&catalog, &setup, camera, row);
                 }
-                Action::InventoryItem(row)
-                    if !picker.open && village.inventory_view == InventoryView::Production =>
-                {
-                    let (_, rows) = village.construction.inventory_producers(
-                        &catalog,
-                        village.inventory_page,
-                        &village.inventory_search,
-                        village.stock.sandbox,
-                    );
+                Action::InventoryItem(row) if !picker.open && village.producer_view() => {
+                    let (_, rows) = village.producer_rows(&catalog);
                     if let Some(&(producer, _)) = rows.get(row) {
+                        if let crate::construction::Producer::CraftRecipe(id) = producer {
+                            village.craft_recipe = Some(id.to_owned());
+                            village.craft_workspace = None;
+                            continue;
+                        }
+                        if let crate::construction::Producer::Site(site) = producer
+                            && village.utility_panel == Some(UtilityPanel::Crafting)
+                        {
+                            village.craft_job_site = Some(site);
+                            village.craft_workspace = None;
+                            continue;
+                        }
                         village.utility_panel = None;
                         village.editing_inventory = false;
                         match producer {
@@ -1461,6 +1543,7 @@ fn handle_buttons(
                                     );
                                 }
                             }
+                            crate::construction::Producer::CraftRecipe(_) => unreachable!(),
                             crate::construction::Producer::Blueprint(key) => {
                                 let sandbox = village.stock.sandbox;
                                 village.construction.place_inventory_producer(key, sandbox);
@@ -1484,6 +1567,78 @@ fn handle_buttons(
                 }
                 Action::InventorySearch => village.editing_inventory = !village.editing_inventory,
                 Action::InventoryView => village.toggle_inventory_view(),
+                Action::CraftTab(view) => {
+                    village.craft_view = view;
+                    village.craft_recipe = None;
+                    village.craft_workspace = None;
+                    village.craft_job_site = None;
+                    village.inventory_page = 0;
+                }
+                Action::NextCraftWorkspace => {
+                    let town = &mut *village;
+                    let workspaces = town.craft_workspace_choices(&catalog);
+                    if !workspaces.is_empty() {
+                        let current = town
+                            .craft_workspace
+                            .or_else(|| town.craft_move_target(&catalog))
+                            .or_else(|| {
+                                town.craft_recipe.as_ref().and_then(|recipe| {
+                                    town.construction
+                                        .crafting_plan(&catalog, &town.stock, recipe, None)
+                                        .ok()
+                                })
+                            });
+                        let next = current
+                            .and_then(|site| {
+                                workspaces.iter().position(|&candidate| candidate == site)
+                            })
+                            .map_or(0, |index| index + 1);
+                        town.craft_workspace = Some(workspaces[next % workspaces.len()]);
+                    }
+                }
+                Action::LocateCraftJob => {
+                    if let Some(site) = village.craft_job_site
+                        && let Some(point) =
+                            village.construction.open_inventory_producer(&catalog, site)
+                    {
+                        village.utility_panel = None;
+                        let terrain = village.terrain(&setup);
+                        camera.target =
+                            Vec3::new(point.x, terrain.height_at(point.x, point.y), point.y);
+                    }
+                }
+                Action::MoveCraftJob => {
+                    let town = &mut *village;
+                    if let (Some(source), Some(destination)) =
+                        (town.craft_job_site, town.craft_move_target(&catalog))
+                        && town.construction.move_crafting_from_site(
+                            &catalog,
+                            &mut town.stock,
+                            source,
+                            destination,
+                        )
+                    {
+                        town.craft_job_site = Some(destination);
+                        town.craft_workspace = None;
+                    }
+                }
+                Action::StartCraft => {
+                    let town = &mut *village;
+                    if let Some(id) = &town.craft_recipe
+                        && let Some(site) = town.construction.start_crafting(
+                            &catalog,
+                            &mut town.stock,
+                            id,
+                            town.craft_workspace,
+                        )
+                    {
+                        town.craft_view = crate::construction::CraftView::Jobs;
+                        town.craft_job_site = Some(site);
+                        town.craft_recipe = None;
+                        town.craft_workspace = None;
+                        town.inventory_page = 0;
+                    }
+                }
                 Action::ProjectFilter if !picker.open => {
                     village.open_projects_only = !village.open_projects_only;
                     village.projects_page = 0;
@@ -1865,15 +2020,9 @@ fn refresh(
         Vec::new()
     };
     let inventory_items: Vec<_> = if !picker.open && Action::InventoryItem(0).available(&village) {
-        if village.inventory_view == InventoryView::Production {
+        if village.producer_view() {
             village
-                .construction
-                .inventory_producers(
-                    &catalog,
-                    village.inventory_page,
-                    &village.inventory_search,
-                    village.stock.sandbox,
-                )
+                .producer_rows(&catalog)
                 .1
                 .into_iter()
                 .map(|(_, name)| Some(name))
@@ -1973,11 +2122,28 @@ fn refresh(
             Action::Page(_)
             | Action::InventorySearch
             | Action::InventoryView
+            | Action::CraftTab(_)
             | Action::ClosePanel
             | Action::RotatePlacement
             | Action::CancelPlacement
             | Action::ConnectRoad
             | Action::FinishRoad => action.available(&village),
+            Action::NextCraftWorkspace => {
+                action.available(&village) && village.craft_workspace_choices(&catalog).len() > 1
+            }
+            Action::LocateCraftJob => action.available(&village),
+            Action::MoveCraftJob => {
+                action.available(&village) && village.craft_move_target(&catalog).is_some()
+            }
+            Action::StartCraft => {
+                action.available(&village)
+                    && village.craft_recipe.as_ref().is_some_and(|id| {
+                        village
+                            .construction
+                            .crafting_plan(&catalog, &village.stock, id, village.craft_workspace)
+                            .is_ok()
+                    })
+            }
             Action::UndoRoad => Action::FinishRoad.available(&village),
             Action::ResizeField(_) => !picker.open && show_field_size,
             Action::FieldDimensions => !picker.open && action.available(&village),
