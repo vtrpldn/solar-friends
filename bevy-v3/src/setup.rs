@@ -111,7 +111,6 @@ impl WorldSetup {
         self.seed
     }
 
-    pub(crate) fn with_seed(mut self, seed: std::num::NonZeroU32) -> Self {
     fn reroll_seed(&mut self) {
         let time = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
@@ -126,6 +125,7 @@ impl WorldSetup {
         self.seed_entry = None;
     }
 
+    pub(crate) fn with_seed(mut self, seed: std::num::NonZeroU32) -> Self {
         self.seed = seed.get();
         self
     }
@@ -553,12 +553,12 @@ fn setup_input(
         match action {
             Action::New(mode) => {
                 setup.mode = *mode;
+                setup.reroll_seed();
                 setup.choosing_land = true;
             }
             Action::Back => setup.choosing_land = false,
             Action::Preset => setup.cycle_preset(),
             Action::Biome
-                setup.reroll_seed();
             | Action::Landscape
             | Action::Water
             | Action::Resources
