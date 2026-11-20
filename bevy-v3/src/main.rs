@@ -773,9 +773,22 @@ mod tests {
         let sandbox_seed = app.world().resource::<WorldSetup>().seed();
         assert_ne!(sandbox_seed, 42);
         assert_ne!(sandbox_seed, 0);
+        let disabled_world_options = |app: &mut App| {
+            let world = app.world_mut();
+            world
+                .query_filtered::<&setup::Action, With<bevy::ui::InteractionDisabled>>()
+                .iter(world)
+                .filter(|action| matches!(action, setup::Action::Savings | setup::Action::Supplies))
+                .count()
+        };
+        assert_eq!(disabled_world_options(&mut app), 2);
         press_button(&mut app, "Back to main menu");
         press_button(&mut app, "New game");
         assert!(app.world().resource::<WorldSetup>().mode == setup::Mode::Story);
+        assert_eq!(disabled_world_options(&mut app), 0);
+        let story_seed = app.world().resource::<WorldSetup>().seed();
+        assert_ne!(story_seed, sandbox_seed);
+        assert_ne!(story_seed, 0);
         press_button(&mut app, "Town   ·   Drive");
         assert!(
             app.world_mut()
@@ -785,9 +798,6 @@ mod tests {
         );
         press_button(&mut app, "Town   ·   Remote");
         press_button(&mut app, "Town   ·   Nearby");
-        let story_seed = app.world().resource::<WorldSetup>().seed();
-        assert_ne!(story_seed, sandbox_seed);
-        assert_ne!(story_seed, 0);
 
         press_button(&mut app, &format!("Land seed   ·   {story_seed}"));
         press_button(&mut app, "Start new village");

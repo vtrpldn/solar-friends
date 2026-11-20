@@ -1,7 +1,9 @@
 use bevy::{
     asset::RenderAssetUsages,
+    input::mouse::{AccumulatedMouseScroll, MouseScrollUnit},
     prelude::*,
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
+    ui::InteractionDisabled,
     window::PrimaryWindow,
 };
 use serde::{Deserialize, Serialize};
@@ -345,6 +347,10 @@ pub(crate) enum Action {
 }
 
 impl Action {
+    fn enabled(self, mode: Mode) -> bool {
+        mode == Mode::Story || !matches!(self, Self::Savings | Self::Supplies)
+    }
+
     fn is_title_action(self) -> bool {
         matches!(
             self,
@@ -383,6 +389,7 @@ impl Plugin for WorldSetupPlugin {
                 (
                     setup_input,
                     refresh_panel,
+                    scroll_setup_panel,
                     refresh_preview,
                     refresh_story_resume,
                 )
@@ -401,11 +408,15 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
                 top: px(32),
                 padding: UiRect::all(px(24)),
                 width: px(340),
+                max_height: vh(90),
                 flex_direction: FlexDirection::Column,
                 row_gap: px(6),
+                overflow: Overflow::scroll_y(),
                 ..default()
             },
             BackgroundColor(Color::srgb_u8(31, 45, 35)),
+            Interaction::default(),
+            ScrollPosition::default(),
         ))
         .with_children(|panel| {
             panel.spawn((Text::new("Solar Friends"), ui_font(&assets, 30.0)));
@@ -445,6 +456,7 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
                             Display::Flex
                         },
                         padding: UiRect::axes(px(14), px(6)),
+                        flex_shrink: 0.,
                         flex_direction: FlexDirection::Column,
                         ..default()
                     },
@@ -500,6 +512,23 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
         });
 }
 
+fn scroll_setup_panel(
+    setup: Res<WorldSetup>,
+    mut panel: Single<(&Node, &Interaction, &mut ScrollPosition), With<SetupPanel>>,
+    scroll: Res<AccumulatedMouseScroll>,
+) {
+    let (node, interaction, position) = &mut *panel;
+    if !setup.choosing_land || node.display == Display::None {
+        position.y = 0.;
+    } else if **interaction != Interaction::None && scroll.delta.y != 0. {
+        let step = match scroll.unit {
+            MouseScrollUnit::Line => 34.,
+            MouseScrollUnit::Pixel => 1.,
+        };
+        position.y = (position.y - scroll.delta.y * step).max(0.);
+    }
+}
+
 fn setup_input(
     mut setup: ResMut<WorldSetup>,
     keyboard: Res<ButtonInput<KeyCode>>,
@@ -544,7 +573,7 @@ fn setup_input(
         return;
     }
     for (interaction, action) in &buttons {
-        if *interaction != Interaction::Pressed {
+        if *interaction != Interaction::Pressed || !action.enabled(setup.mode) {
             continue;
         }
         if !matches!(action, Action::Explore) {
@@ -607,10 +636,25 @@ fn setup_input(
     }
 }
 
+type SetupButtons<'w, 's> = Query<
+    'w,
+    's,
+    (
+        Entity,
+        &'static Action,
+        &'static Children,
+        &'static mut Node,
+        &'static mut BackgroundColor,
+        Has<InteractionDisabled>,
+    ),
+    Without<SetupPanel>,
+>;
+
 fn refresh_panel(
+    mut commands: Commands,
     setup: Res<WorldSetup>,
     mut panel: Single<&mut Node, With<SetupPanel>>,
-    mut buttons: Query<(&Action, &Children, &mut Node), Without<SetupPanel>>,
+    mut buttons: SetupButtons,
     (village, saves, sound): (
         Res<crate::village::Village>,
         Res<SaveMenu>,
@@ -630,7 +674,20 @@ fn refresh_panel(
     let autosave_exists = saves
         .continue_path(setup.mode)
         .is_ok_and(|path| path.is_file());
-    for (action, children, mut button) in &mut buttons {
+    for (entity, action, children, mut button, mut background, disabled) in &mut buttons {
+        let enabled = action.enabled(setup.mode);
+        if enabled == disabled {
+            if enabled {
+                commands.entity(entity).remove::<InteractionDisabled>();
+            } else {
+                commands.entity(entity).insert(InteractionDisabled);
+            }
+            background.0 = if enabled {
+                Color::srgb_u8(62, 83, 65)
+            } else {
+                Color::srgb_u8(43, 54, 45)
+            };
+        }
         let visible = match action {
             Action::Resume => !setup.choosing_land && has_village,
             Action::Continue(mode) => {
@@ -769,4 +826,41 @@ fn refresh_preview(
         RenderAssetUsages::RENDER_WORLD,
     ));
     *drawn = Some(key);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn land_setup_scrolls_under_the_pointer_and_resets_on_back() {
+        let mut app = App::new();
+        app.insert_resource(WorldSetup {
+            choosing_land: true,
+            ..default()
+        })
+        .insert_resource(AccumulatedMouseScroll {
+            unit: MouseScrollUnit::Line,
+            delta: Vec2::new(0., -1.),
+        })
+        .add_systems(Update, scroll_setup_panel);
+        let panel = app
+            .world_mut()
+            .spawn((
+                SetupPanel,
+                Node::default(),
+                Interaction::None,
+                ScrollPosition::default(),
+            ))
+            .id();
+
+        app.update();
+        assert_eq!(app.world().get::<ScrollPosition>(panel).unwrap().y, 0.);
+        *app.world_mut().get_mut::<Interaction>(panel).unwrap() = Interaction::Hovered;
+        app.update();
+        assert_eq!(app.world().get::<ScrollPosition>(panel).unwrap().y, 34.);
+        app.world_mut().resource_mut::<WorldSetup>().choosing_land = false;
+        app.update();
+        assert_eq!(app.world().get::<ScrollPosition>(panel).unwrap().y, 0.);
+    }
 }
