@@ -1097,10 +1097,19 @@ mod tests {
         assert!(trade.receive_goods(&mut stock, 10, eta).is_none());
         assert_eq!(stock.available("wood"), wood);
         assert!(trade.delivery.is_some());
-        let delivered = trade.receive_goods(&mut stock, 12, eta).unwrap();
+        let saved = serde_json::to_vec(&trade).unwrap();
+        let mut trade: Trade = serde_json::from_slice(&saved).unwrap();
+        let unload_time = eta + 30.0;
+        assert!(trade.receive_goods(&mut stock, 11, unload_time).is_none());
+        assert_eq!(stock.balance(), before - 43_200 - 4_460);
+        let delivered = trade.receive_goods(&mut stock, 12, unload_time).unwrap();
         assert_eq!(delivered.material, "wood");
         assert_eq!(delivered.quantity, 12);
-        assert!(trade.receive_goods(&mut stock, 12, eta + 1.0).is_none());
+        assert!(
+            trade
+                .receive_goods(&mut stock, 12, unload_time + 1.0)
+                .is_none()
+        );
         assert_eq!(trade.purchases, 1);
         assert_eq!(stock.available("wood"), wood + 12);
         assert!(
