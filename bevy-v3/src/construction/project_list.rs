@@ -124,6 +124,10 @@ impl Construction {
             if staged > 0 {
                 use std::fmt::Write;
                 let _ = write!(status, " · {staged} at nearby storage");
+                if let Some(depot) = plan.depot {
+                    let name = &catalog.projects[&self.plans[depot].key].name;
+                    let _ = write!(status, " ({name} #{})", depot + 1);
+                }
             }
             status
         } else {
