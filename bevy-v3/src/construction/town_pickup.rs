@@ -75,23 +75,18 @@ impl Construction {
             if plan.removed {
                 continue;
             }
-            if let Some(pending) = Self::pending_construction_cargo(plan) {
-                let booked = self.booked_construction_trip(site);
-                let shipment = self.construction_freight_cargo(site).or_else(|| {
-                    booked.and_then(|trip| self.pickup_manifests[trip.vehicle].get(&site))
-                });
-                if booked.is_some() && shipment.is_none() {
-                    continue;
-                }
-                for (id, &quantity) in pending {
-                    let shipped = shipment.and_then(|load| load.get(id)).copied().unwrap_or(0);
-                    let quantity = quantity.saturating_sub(shipped);
-                    if quantity == 0 {
-                        continue;
-                    }
-                    let amount = goods.entry(id.clone()).or_default();
-                    *amount = amount.saturating_add(quantity);
-                }
+            let pending = if let Some(shipment) = self.construction_freight_cargo(site) {
+                let mut units = Self::pending_construction_cargo(plan)
+                    .cloned()
+                    .unwrap_or_default();
+                crate::market::subtract_cargo(&mut units, shipment);
+                Some(units)
+            } else {
+                self.unshipped_pickup_cargo(site, None, false)
+            };
+            for (id, quantity) in pending.into_iter().flatten() {
+                let amount = goods.entry(id).or_default();
+                *amount = amount.saturating_add(quantity);
             }
         }
         for (index, order) in self.trade.orders.iter().enumerate() {
@@ -402,23 +397,16 @@ impl Construction {
         let mut reserved = 0;
         for index in self.construction_dispatch_order() {
             let plan = &self.plans[index];
-            let Some(mut pending) = Self::pending_construction_cargo(plan).cloned() else {
-                continue;
-            };
-            let booked = self.booked_construction_trip(index);
-            let shipment = self.construction_freight_cargo(index).or_else(|| {
-                booked.and_then(|trip| self.pickup_manifests[trip.vehicle].get(&index))
-            });
-            if booked.is_some() && shipment.is_none() {
-                continue;
-            }
-            let trips = if let Some(shipment) = shipment {
-                let trips = Self::pickups_after_load(catalog, plan, shipment)?;
-                crate::market::subtract_cargo(&mut pending, shipment);
-                trips
+            let pending = if let Some(shipment) = self.construction_freight_cargo(index) {
+                let mut units = Self::pending_construction_cargo(plan)?.clone();
+                crate::market::subtract_cargo(&mut units, shipment);
+                units
+            } else if let Some(units) = self.unshipped_pickup_cargo(index, None, false) {
+                units
             } else {
-                plan.pickups
+                continue;
             };
+            let trips = crate::market::cargo_trips(catalog, pending.clone()).ok()?;
             reserved += plan.fare * u64::from(trips);
             orders.push(pending);
         }
@@ -531,8 +519,8 @@ impl Construction {
         );
     }
 
-    pub(super) fn booked_construction_trip(&self, site: usize) -> Option<&TownTrip> {
-        self.active_trips().find(|trip| {
+    fn construction_trips(&self, site: usize) -> impl Iterator<Item = &TownTrip> {
+        self.active_trips().filter(move |trip| {
             !trip.market_order
                 && trip.farm_bed.is_none()
                 && (trip.project == site
@@ -543,23 +531,53 @@ impl Construction {
         })
     }
 
-    pub(super) fn construction_pickup_cargo(&self, site: usize) -> Option<&BTreeMap<String, u32>> {
-        let trip = self
-            .booked_construction_trip(site)
-            .filter(|trip| trip.boarded)?;
-        self.pickup_manifests.get(trip.vehicle)?.get(&site)
+    pub(super) fn booked_construction_trip(&self, site: usize) -> Option<&TownTrip> {
+        self.construction_trips(site)
+            .max_by_key(|trip| trip.boarded)
+    }
+
+    pub(super) fn construction_pickup_cargo(&self, site: usize) -> Option<BTreeMap<String, u32>> {
+        let mut combined = BTreeMap::<String, u32>::new();
+        for load in self
+            .construction_trips(site)
+            .filter(|trip| trip.boarded)
+            .filter_map(|trip| self.pickup_manifests.get(trip.vehicle)?.get(&site))
+        {
+            for (id, &units) in load {
+                let quantity = combined.entry(id.clone()).or_default();
+                *quantity = quantity.saturating_add(units);
+            }
+        }
+        (!combined.is_empty()).then_some(combined)
+    }
+
+    fn unshipped_pickup_cargo(
+        &self,
+        site: usize,
+        excluded_vehicle: Option<usize>,
+        boarded_only: bool,
+    ) -> Option<BTreeMap<String, u32>> {
+        let mut units = Self::pending_construction_cargo(&self.plans[site])?.clone();
+        for trip in self.construction_trips(site) {
+            if Some(trip.vehicle) == excluded_vehicle || (boarded_only && !trip.boarded) {
+                continue;
+            }
+            let load = self.pickup_manifests.get(trip.vehicle)?.get(&site)?;
+            crate::market::subtract_cargo(&mut units, load);
+        }
+        Some(units)
     }
 
     pub(super) fn remaining_boarded_pickups(&self, catalog: &Catalog, site: usize) -> Option<u32> {
-        let trip = self
-            .booked_construction_trip(site)
-            .filter(|trip| trip.boarded)?;
-        let plan = &self.plans[site];
-        if let Some(load) = self.pickup_manifests.get(trip.vehicle)?.get(&site) {
-            Self::pickups_after_load(catalog, plan, load)
-        } else {
-            Some(plan.pickups.saturating_sub(1))
-        }
+        self.construction_trips(site).find(|trip| trip.boarded)?;
+        self.unshipped_pickup_cargo(site, None, true)
+            .filter(|goods| {
+                goods
+                    .iter()
+                    .all(|(id, &units)| units <= 100_000 && catalog.materials.contains_key(id))
+            })
+            .and_then(|goods| crate::market::cargo_trips(catalog, goods).ok())
+            .or_else(|| Some(self.plans[site].pickups.saturating_sub(1)))
     }
 
     fn fill_construction_pickup(&mut self, catalog: &Catalog, trip: &mut TownTrip) {
@@ -577,24 +595,32 @@ impl Construction {
                 || plan.pickups == 0
                 || self.construction_delivery_at(index)
                 || self
-                    .booked_construction_trip(index)
-                    .is_some_and(|booked| booked.vehicle != trip.vehicle)
+                    .construction_trips(index)
+                    .any(|other| other.vehicle != trip.vehicle && !other.boarded)
             {
                 continue;
             }
-            let Some(pending) = Self::pending_construction_cargo(plan) else {
+            let Some(mut pending) = self.unshipped_pickup_cargo(index, Some(trip.vehicle), false)
+            else {
                 continue;
             };
             let mut proposed = capacity;
-            let load = crate::market::pack_cargo(catalog, pending, &mut proposed);
-            if !load.is_empty()
-                && Self::pickups_after_load(catalog, plan, &load)
-                    .is_some_and(|remaining| first.is_some() || remaining < plan.pickups)
-            {
-                first.get_or_insert(index);
-                manifest.insert(index, load);
-                capacity = proposed;
+            let load = crate::market::pack_cargo(catalog, &pending, &mut proposed);
+            if load.is_empty() {
+                continue;
             }
+            if first.is_none() {
+                let Ok(before) = crate::market::cargo_trips(catalog, pending.clone()) else {
+                    continue;
+                };
+                crate::market::subtract_cargo(&mut pending, &load);
+                if !crate::market::cargo_trips(catalog, pending).is_ok_and(|after| after < before) {
+                    continue;
+                }
+            }
+            first.get_or_insert(index);
+            manifest.insert(index, load);
+            capacity = proposed;
         }
         if let Some(first) = first {
             trip.project = first;
@@ -603,7 +629,7 @@ impl Construction {
     }
 
     pub(super) fn valid_pickup_manifests(&self, catalog: &Catalog) -> bool {
-        let mut sites = BTreeSet::new();
+        let mut shipped = BTreeMap::<usize, BTreeMap<String, u32>>::new();
         self.pickup_manifests
             .iter()
             .enumerate()
@@ -633,19 +659,17 @@ impl Construction {
                     !plan.removed
                         && !load.is_empty()
                         && load.values().all(|&quantity| quantity > 0)
-                        && sites.insert(site)
-                        && !self.active_trips().any(|other| {
-                            other.vehicle != vehicle
-                                && !other.market_order
-                                && other.farm_bed.is_none()
-                                && other.project == site
-                        })
-                        && self
-                            .booked_construction_trip(site)
-                            .is_some_and(|booked| booked.vehicle == vehicle)
                         && !self.construction_delivery_at(site)
-                        && Self::pickups_after_load(catalog, plan, load).is_some_and(|remaining| {
-                            site != trip.project || remaining < plan.pickups
+                        && load.iter().all(|(id, &units)| {
+                            let quantity = shipped
+                                .entry(site)
+                                .or_default()
+                                .entry(id.clone())
+                                .or_default();
+                            *quantity = quantity.saturating_add(units);
+                            Self::pending_construction_cargo(plan)
+                                .and_then(|pending| pending.get(id))
+                                .is_some_and(|&pending| *quantity <= pending)
                         })
                         && capacity.0 >= -1e-8
                         && capacity.1 >= -1e-8
@@ -869,9 +893,15 @@ impl Construction {
                     .iter()
                     .map(|(&site, load)| {
                         let plan = &self.plans[site];
-                        let remaining = Self::pickups_after_load(catalog, plan, load)
+                        let mut pending = self
+                            .unshipped_pickup_cargo(site, Some(trip.vehicle), true)
                             .expect("valid pickup manifest");
-                        plan.fare * u64::from(plan.pickups - remaining)
+                        let before = crate::market::cargo_trips(catalog, pending.clone())
+                            .expect("cargo fits resident pickup");
+                        crate::market::subtract_cargo(&mut pending, load);
+                        let after = crate::market::cargo_trips(catalog, pending)
+                            .expect("remaining cargo fits resident pickup");
+                        plan.fare * u64::from(before.saturating_sub(after))
                     })
                     .sum();
                 if reserved_pickup_fares > fare {
@@ -987,7 +1017,11 @@ impl Construction {
     fn can_collect_construction(&self, index: usize, plan: &Blueprint) -> bool {
         !plan.removed
             && plan.pickups > 0
-            && self.booked_construction_trip(index).is_none()
+            && !self.construction_trips(index).any(|trip| !trip.boarded)
+            && self.unshipped_pickup_cargo(index, None, false).map_or_else(
+                || self.booked_construction_trip(index).is_none(),
+                |units| !units.is_empty(),
+            )
             && !self.construction_delivery_at(index)
             && !self.supplier_construction
     }
@@ -1535,6 +1569,77 @@ mod tests {
             restored.plans[0].purchase.as_ref().unwrap().units["stone"],
             200 - first_load
         );
+    }
+
+    #[test]
+    fn two_resident_vehicles_can_collect_disjoint_loads_for_one_project() {
+        let mut catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let terrain = setup.terrain();
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp: IVec2::splat(36),
+        };
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let local = stock.available("stone");
+        stock.reserve_available(&BTreeMap::from([("stone".into(), local)]));
+        let mut capacity = crate::market::PICKUP_CAPACITY;
+        let first_load = crate::market::pack_cargo(
+            &catalog,
+            &BTreeMap::from([("stone".into(), 1000)]),
+            &mut capacity,
+        )["stone"];
+        let quantity = first_load + 1;
+        catalog.projects.get_mut("well").unwrap().materials =
+            BTreeMap::from([("stone".into(), quantity)]);
+        let mut village = Construction::default();
+        let mut plan = village.proposed_site(&catalog, "well", IVec2::new(45, 36));
+        Construction::reserve_project(&mut village.market, &mut stock, &catalog, &mut plan, clock)
+            .unwrap();
+        village.plans.push(plan);
+        let balance = stock.balance();
+        village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
+        let first = village.trip.unwrap();
+        village.residents[first.driver].path.clear();
+        village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
+        assert!(village.trip.unwrap().boarded);
+        let second = village
+            .second_trip
+            .expect("remaining supplies booked for a second vehicle");
+        assert_eq!(second.project, 0);
+        assert_eq!(village.pickup_manifests[second.vehicle][&0]["stone"], 1);
+        village.residents[second.driver].path.clear();
+        village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
+        assert!(village.second_trip.unwrap().boarded);
+        assert_eq!(
+            village.construction_pickup_cargo(0).unwrap()["stone"],
+            quantity
+        );
+        assert_eq!(village.market.committed_fares(), 0);
+        assert!(village.valid_save(&catalog, &stock));
+        assert_eq!(balance - stock.balance(), 2 * crate::market::fare_cents(12));
+
+        let saved = serde_json::to_vec(&village).unwrap();
+        let mut village: Construction = serde_json::from_slice(&saved).unwrap();
+        village.second_trip.as_mut().unwrap().elapsed = second.duration;
+        village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
+        assert_eq!(
+            village.plans[0].purchase.as_ref().unwrap().units["stone"],
+            first_load
+        );
+        assert!(village.valid_save(&catalog, &stock));
+        village.trip.as_mut().unwrap().elapsed = first.duration;
+        village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
+        assert!(village.plans[0].purchase.is_none());
+        assert_eq!(village.plans[0].pickups, 0);
+        assert_eq!(balance - stock.balance(), 2 * crate::market::fare_cents(12));
+        assert!(village.valid_save(&catalog, &stock));
     }
 
     #[test]

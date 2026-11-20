@@ -1959,6 +1959,9 @@ impl Construction {
                     a.market_order != b.market_order || a.project != b.project
                 } else {
                     (a.project, a.farm_bed) != (b.project, b.farm_bed)
+                        || (a.farm_bed.is_none()
+                            && self.pickup_manifests[a.vehicle].contains_key(&a.project)
+                            && self.pickup_manifests[b.vehicle].contains_key(&b.project))
                 }
         });
         let services_valid = self.utilities.valid_save(|index, kind| {
