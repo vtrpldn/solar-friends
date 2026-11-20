@@ -373,6 +373,41 @@ impl Construction {
         self.trade.purchase_slot(freight)
     }
 
+    pub(crate) fn selected_purchase_issue(
+        &self,
+        catalog: &Catalog,
+        stock: &Stock,
+        clock: TownClock,
+        freight: bool,
+    ) -> Option<&'static str> {
+        let options = Trade::tradable(catalog);
+        let item = options.get(self.trade.selected)?;
+        let fare = if freight {
+            freight_cents(clock.round_trip_km)
+        } else if self.sale_trip_for_return_purchase().is_some() {
+            0
+        } else {
+            fare_cents(clock.round_trip_km)
+        };
+        self.purchase_quote(catalog, stock, clock, item.id, freight, fare)
+            .err()
+    }
+
+    fn purchase_quote(
+        &self,
+        catalog: &Catalog,
+        stock: &Stock,
+        clock: TownClock,
+        material: &str,
+        freight: bool,
+        fare: u64,
+    ) -> Result<(), &'static str> {
+        self.check_town_purchase(catalog, stock, clock, material, freight)?;
+        self.market
+            .quote_pack(catalog, stock, material, (clock.day(), fare, freight))?;
+        Ok(())
+    }
+
     pub(super) fn buy_from_town(
         &mut self,
         catalog: &Catalog,
@@ -611,12 +646,7 @@ impl Construction {
             display
                 .push_str("Supplier stock renews tomorrow. Paid orders keep their allocation.\n");
         }
-        let issue = |fare, freight| {
-            self.check_town_purchase(catalog, stock, clock, id, freight)?;
-            self.market
-                .quote_pack(catalog, stock, id, (day, fare, freight))?;
-            Ok::<_, &'static str>(())
-        };
+        let issue = |fare, freight| self.purchase_quote(catalog, stock, clock, id, freight, fare);
         match (issue(pickup, false), issue(freight, true)) {
             (Err(pickup), Err(freight)) if pickup == freight => {
                 display.push_str(&format!("Purchases unavailable · {pickup}\n"));
@@ -894,6 +924,14 @@ mod tests {
         village
             .buy_from_town(&catalog, &mut stock, clock, "wood", true)
             .unwrap();
+        assert_eq!(
+            village.selected_purchase_issue(&catalog, &stock, clock, true),
+            Some("A freight order is already on the way.")
+        );
+        assert_eq!(
+            village.selected_purchase_issue(&catalog, &stock, clock, false),
+            None
+        );
         assert!(
             village
                 .trade_status(&catalog, &stock, clock)

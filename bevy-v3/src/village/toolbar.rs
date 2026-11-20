@@ -1422,16 +1422,21 @@ fn handle_buttons(
                         .pantry_controls(reserve, budget, toggle);
                 }
                 Action::Trade(order) if !picker.open => {
+                    let clock = TownClock {
+                        seconds: village.clock,
+                        round_trip_km: setup.round_trip_km(),
+                    };
+                    if let TradeOrder::Buy { freight } = order
+                        && village
+                            .construction
+                            .selected_purchase_issue(&catalog, &village.stock, clock, freight)
+                            .is_some()
+                    {
+                        continue;
+                    }
                     let town = &mut *village;
-                    town.construction.place_trade_order(
-                        &catalog,
-                        &mut town.stock,
-                        TownClock {
-                            seconds: town.clock,
-                            round_trip_km: setup.round_trip_km(),
-                        },
-                        order,
-                    );
+                    town.construction
+                        .place_trade_order(&catalog, &mut town.stock, clock, order);
                 }
                 Action::TradePolicy(policy) if !picker.open => {
                     village.construction.adjust_trade_policy(&catalog, policy);
@@ -1696,6 +1701,19 @@ fn refresh(
     if saves.open || sound.open {
         menu.display = Display::None;
     }
+    let purchase_issues = if show_trade && !show_trade_queue {
+        let clock = TownClock {
+            seconds: village.clock,
+            round_trip_km: setup.round_trip_km(),
+        };
+        [false, true].map(|freight| {
+            village
+                .construction
+                .selected_purchase_issue(&catalog, &village.stock, clock, freight)
+        })
+    } else {
+        [None, None]
+    };
     let mut action_details = String::new();
     for (&action, &interaction, children, parent, mut background, mut node) in &mut buttons {
         let show = match action {
@@ -1823,8 +1841,13 @@ fn refresh(
         if !show {
             continue;
         }
+        let purchase_issue = match action {
+            Action::Trade(TradeOrder::Buy { freight }) => purchase_issues[usize::from(freight)],
+            _ => None,
+        };
         if interaction != Interaction::None {
             let description = match action {
+                Action::Trade(TradeOrder::Buy { .. }) => purchase_issue.map(str::to_owned),
                 Action::CampPreset(index) => Some(
                     [
                         "Cool afternoons, but a longer walk from the unloading point.",
@@ -1853,11 +1876,12 @@ fn refresh(
                 action_details = description;
             }
         }
-        background.0 = if !action.available(&village)
-            && !matches!(
-                action,
-                Action::Volume { .. } | Action::Library | Action::Sound
-            ) {
+        background.0 = if purchase_issue.is_some()
+            || !action.available(&village)
+                && !matches!(
+                    action,
+                    Action::Volume { .. } | Action::Library | Action::Sound
+                ) {
             Color::srgb_u8(40, 53, 43)
         } else if interaction == Interaction::None {
             Color::srgb_u8(58, 78, 61)
