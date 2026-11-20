@@ -249,6 +249,28 @@ impl Construction {
     }
 
     pub fn queue_water(&mut self, target: usize, action: WaterAction) -> Result<(), &'static str> {
+        self.check_water_job(target, action)?;
+        self.water_jobs.insert(
+            target,
+            WaterJob {
+                action,
+                phase: WaterPhase::Approach,
+                worker: None,
+                carried: 0.0,
+                work: 0.0,
+                retry: 0.0,
+                waiting_for_access: false,
+                automatic: false,
+            },
+        );
+        Ok(())
+    }
+
+    pub(crate) fn check_water_job(
+        &self,
+        target: usize,
+        action: WaterAction,
+    ) -> Result<(), &'static str> {
         if self.water_jobs.contains_key(&target) {
             return Err("A water job is already queued here.");
         }
@@ -306,20 +328,12 @@ impl Construction {
             | WaterAction::InstallPipe { .. }
             | WaterAction::InstallCable { .. } => {}
         }
-        self.water_jobs.insert(
-            target,
-            WaterJob {
-                action,
-                phase: WaterPhase::Approach,
-                worker: None,
-                carried: 0.0,
-                work: 0.0,
-                retry: 0.0,
-                waiting_for_access: false,
-                automatic: false,
-            },
-        );
         Ok(())
+    }
+
+    pub(crate) fn queued_water_status(&self, id: usize, clock: f64) -> Option<&'static str> {
+        let job = self.water_jobs.get(&id)?;
+        Some(self.water_job_status(id, job, clock))
     }
 
     pub(super) fn valid_water_jobs(&self) -> bool {
@@ -578,7 +592,11 @@ impl Construction {
         )
     }
 
-    fn connection_site_name(&self, catalog: &Catalog, id: usize) -> String {
+    pub(crate) fn expansion_reserve_cents(&self) -> u64 {
+        self.market.expansion_reserve()
+    }
+
+    pub(crate) fn connection_site_name(&self, catalog: &Catalog, id: usize) -> String {
         match id.checked_sub(1).and_then(|index| self.plans.get(index)) {
             Some(plan) => format!("{} #{id}", catalog.projects[&plan.key].name),
             None if id == 0 => "Camp".into(),

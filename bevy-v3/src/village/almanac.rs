@@ -1,6 +1,8 @@
 //! The heading and headline numbers of an open panel, after V2's "Village almanac"
 //! sheets: a small caption, a title, then big number tiles above the details.
 
+pub(super) mod sites;
+
 use super::*;
 use crate::{
     theme,
@@ -95,6 +97,7 @@ pub(super) fn spawn(card: &mut ChildSpawnerCommands, assets: &AssetServer) {
             });
         }
     });
+    sites::spawn_list(card);
 }
 
 /// Caption and title for a panel, in V2's words where V2 had the screen.
@@ -112,6 +115,22 @@ pub(super) fn heading(panel: UtilityPanel) -> (&'static str, &'static str) {
         UtilityPanel::Trade => ("VILLAGE ALMANAC", "Town trade"),
         UtilityPanel::Pantry => ("VILLAGE ALMANAC", "Food & pantry"),
     }
+}
+
+fn visible_panel(
+    village: &Village,
+    setup: &WorldSetup,
+    saves: &SaveMenu,
+    sound: &SoundSettings,
+) -> Option<UtilityPanel> {
+    village.utility_panel.filter(|_| {
+        !village.guide.open()
+            && !village.lenses.open
+            && !setup.open
+            && !saves.open
+            && !sound.open
+            && !build_menu::visible(setup, village, saves, sound)
+    })
 }
 
 /// Headline tiles as (label, value, note), or none for panels without them.
@@ -155,6 +174,77 @@ fn tiles(village: &Village) -> Option<[(String, String, String); TILES]> {
                 ("GRID".into(), format!("{grid:.2} kW"), grid_state.into()),
             ])
         }
+        UtilityPanel::Finances if !village.finance_history_open && !village.stock.sandbox => {
+            let (_, expenses, _) = village.stock.finance_totals();
+            Some([
+                (
+                    "SHARED SAVINGS".into(),
+                    format!("R${:.2}", village.stock.balance() as f64 / 100.0),
+                    String::new(),
+                ),
+                (
+                    "RECORDED SPEND".into(),
+                    format!("R${:.2}", expenses as f64 / 100.0),
+                    "Since records began".into(),
+                ),
+                (
+                    "EXPANSION RESERVE".into(),
+                    format!(
+                        "R${:.2}",
+                        village.construction.expansion_reserve_cents() as f64 / 100.0
+                    ),
+                    "Protected for expansion".into(),
+                ),
+                (
+                    "GRID ELECTRICITY".into(),
+                    format!("R${:.2}/h", utilities.grid_cost_per_hour()),
+                    "At current use".into(),
+                ),
+            ])
+        }
+        UtilityPanel::Pantry if village.pantry_batch_page.is_none() => {
+            let stock = &village.stock;
+            let (portions, days, risk) = if stock.sandbox {
+                (
+                    ("EDIBLE PORTIONS".into(), "Unlimited".into(), String::new()),
+                    ("RESERVE COVERAGE".into(), "Unlimited".into(), String::new()),
+                    ("SPOILAGE RISK".into(), "Inactive".into(), String::new()),
+                )
+            } else {
+                let portions = stock.food_portions();
+                let forecast = stock
+                    .pantry
+                    .forecast(village.clock, 2, |id| stock.available(id));
+                let days = f64::from(portions) / f64::from(forecast.target);
+                (
+                    (
+                        "EDIBLE PORTIONS".into(),
+                        portions.to_string(),
+                        "Ready to eat".into(),
+                    ),
+                    (
+                        "RESERVE COVERAGE".into(),
+                        format!("{days:.1} days"),
+                        format!("At {} portions per day", forecast.target),
+                    ),
+                    (
+                        "SPOILAGE RISK".into(),
+                        format!("{:.1} portions", forecast.at_risk),
+                        "Over the next game day".into(),
+                    ),
+                )
+            };
+            Some([
+                portions,
+                days,
+                risk,
+                (
+                    "POWERED COLD STORAGE".into(),
+                    format!("{:.0} L", utilities.powered_cold_storage()),
+                    format!("of {:.0} L installed", utilities.installed_cold_storage()),
+                ),
+            ])
+        }
         _ => None,
     }
 }
@@ -166,13 +256,12 @@ type SheetNodes<'w, 's> = (
 
 pub(super) fn refresh(
     village: Res<Village>,
+    (setup, saves, sound): (Res<WorldSetup>, Res<SaveMenu>, Res<SoundSettings>),
     (mut header, mut row): SheetNodes,
     mut sheet_texts: Query<(&SheetText, &mut Text), Without<TileText>>,
     mut tile_texts: Query<(&TileText, &mut Text), Without<SheetText>>,
 ) {
-    let panel = village
-        .utility_panel
-        .filter(|_| !village.guide.open() && !village.lenses.open);
+    let panel = visible_panel(&village, &setup, &saves, &sound);
     let display = if panel.is_some() {
         Display::Flex
     } else {
@@ -193,7 +282,7 @@ pub(super) fn refresh(
             }
         }
     }
-    let tiles = panel.and(tiles(&village));
+    let tiles = panel.and_then(|_| tiles(&village));
     let display = if tiles.is_some() {
         Display::Flex
     } else {
