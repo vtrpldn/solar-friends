@@ -199,6 +199,7 @@ fn main() {
             ..default()
         }),
     )
+    .insert_resource(UiScale(theme::UI_SCALE))
     .add_plugins((
         WorldSetupPlugin,
         workshop::navigation::ArtToolsPlugin,

@@ -244,7 +244,6 @@ fn stat_card(
                 padding: UiRect::new(px(8), px(12), px(7), px(7)),
                 column_gap: px(8),
                 align_items: AlignItems::Center,
-                min_width: px(150),
                 ..default()
             }),
             theme::button(),

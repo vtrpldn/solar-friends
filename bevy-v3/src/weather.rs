@@ -279,7 +279,7 @@ fn sunlight(
         0.82 + 0.18 * daylight,
         0.86 + 0.14 * daylight,
     );
-    ambient.brightness = 280.0 + 220.0 * daylight * (0.8 + cloud * 0.35);
+    ambient.brightness = 420.0 + 120.0 * daylight * (0.8 + cloud * 0.35);
     sky.0 = Color::srgb(
         0.08 + daylight * (0.63 - cloud * 0.12),
         0.12 + daylight * (0.68 - cloud * 0.15),

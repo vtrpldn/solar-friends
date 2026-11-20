@@ -32,6 +32,9 @@ pub const TRACK: Color = Color::srgb_u8(0xe6, 0xdc, 0xbd);
 /// Keyboard hint chips on buttons.
 pub const KEY: Color = Color::srgb_u8(0xf7, 0xec, 0xcb);
 
+/// V3's layout values were tuned large; V2's 14px CSS proportions are this fraction.
+pub const UI_SCALE: f32 = 0.82;
+
 pub const PANEL_RADIUS: f32 = 20.0;
 pub const BUTTON_RADIUS: f32 = 12.0;
 
