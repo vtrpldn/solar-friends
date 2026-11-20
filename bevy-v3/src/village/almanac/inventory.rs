@@ -75,13 +75,20 @@ pub(super) fn refresh(village: &Village, catalog: &Catalog, setup: &WorldSetup) 
         } else {
             (stock.available(id), 0, 0, false)
         };
+        // Name and amount on the left, the trade action on the right, so the list
+        // stays compact; empty stores read quieter than stocked ones.
+        let amount = if stock.sandbox {
+            "Unlimited".into()
+        } else {
+            format!("{} available", item.quantity_text(u64::from(available)))
+        };
         let mut card = vec![
             Widget::title(&item.name),
-            Widget::body(if stock.sandbox {
-                "Unlimited".into()
+            if available == 0 && !stock.sandbox {
+                Widget::note(amount)
             } else {
-                format!("{} available", item.quantity_text(u64::from(available)))
-            }),
+                Widget::body(amount)
+            },
         ];
         if item.equipment {
             card.push(Widget::note(format!(
@@ -91,15 +98,16 @@ pub(super) fn refresh(village: &Village, catalog: &Catalog, setup: &WorldSetup) 
                 card.push(Widget::note("Repair queued"));
             }
         }
+        let mut row = vec![Widget::illustrated(id, card)];
         if item.pack > 0 && item.price > 0. {
-            card.push(Widget::Button(
+            row.push(Widget::Button(
                 Action::Trade(id.into()),
-                "Trade in town".into(),
+                "Trade".into(),
                 true,
                 false,
             ));
         }
-        list.push(Widget::Card(vec![Widget::illustrated(id, card)]));
+        list.push(Widget::Card(vec![Widget::Inline(row)]));
     }
     if group.is_none() {
         list.push(Widget::note("No items match this search."));

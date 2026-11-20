@@ -1625,9 +1625,9 @@ mod tests {
         }
         app.world_mut().run_schedule(Update);
         assert!(visible_button(&mut app, "TIMBER|   Enter to finish").is_some());
-        assert!(visible_button(&mut app, "Trade in town").is_some());
+        assert!(visible_button(&mut app, "Trade").is_some());
         assert!(visible_button(&mut app, "Trade · fastener packs").is_none());
-        press_button(&mut app, "Trade in town");
+        press_button(&mut app, "Trade");
         assert!(visible_button(&mut app, "Fetch timber pieces incl. transport").is_some());
         press_button(&mut app, "Town trade");
         assert!(app.world().resource::<village::Village>().trade_open());

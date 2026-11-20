@@ -308,28 +308,6 @@ fn stat_card(
 }
 
 /// Card values and statuses, in [`CARDS`] order.
-/// Savings with thousands separators; cents are dropped from R$10,000 up so the value
-/// fits its card.
-fn savings_label(balance: f64) -> String {
-    let negative = balance < 0.0;
-    let cents = (balance.abs() * 100.0).round() as u64;
-    let (whole, fraction) = (cents / 100, cents % 100);
-    let digits = whole.to_string();
-    let mut grouped = String::new();
-    for (index, digit) in digits.chars().enumerate() {
-        if index > 0 && (digits.len() - index) % 3 == 0 {
-            grouped.push(',');
-        }
-        grouped.push(digit);
-    }
-    let sign = if negative { "-" } else { "" };
-    if whole >= 10_000 {
-        format!("{sign}R${grouped}")
-    } else {
-        format!("{sign}R${grouped}.{fraction:02}")
-    }
-}
-
 fn card_text(
     village: &Village,
     rates: Option<[f64; 4]>,
@@ -344,7 +322,7 @@ fn card_text(
         ("Unlimited".into(), "Sandbox".into(), false)
     } else {
         let balance = stock.balance() as f64 / 100.0;
-        (savings_label(balance), rate(0, "R$"), balance < 0.0)
+        (super::super::money(balance), rate(0, "R$"), balance < 0.0)
     };
     let portions = if stock.sandbox {
         "Unlimited".into()
@@ -480,18 +458,5 @@ fn refresh(
     let wanted = conditions.summary(village.clock);
     if weather.0 != wanted {
         weather.0 = wanted;
-    }
-}
-
-#[cfg(test)]
-mod savings_tests {
-    use super::savings_label;
-
-    #[test]
-    fn savings_group_thousands_and_drop_cents_when_large() {
-        assert_eq!(savings_label(2999.99), "R$2,999.99");
-        assert_eq!(savings_label(10000.0), "R$10,000");
-        assert_eq!(savings_label(-12.5), "-R$12.50");
-        assert_eq!(savings_label(123456.78), "R$123,456");
     }
 }

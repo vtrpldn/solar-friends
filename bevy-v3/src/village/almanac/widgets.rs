@@ -217,7 +217,7 @@ impl<A: Clone + Send + Sync + 'static> Widget<A> {
                         FlexWrap::NoWrap
                     },
                     flex_grow: f32::from(
-                        card && in_row || matches!(self, Self::Column(_)) && in_row,
+                        (card || matches!(self, Self::Column(_) | Self::Inline(_))) && in_row,
                     ),
                     flex_shrink: f32::from(in_row),
                     flex_basis: if card && in_row { px(170) } else { Val::Auto },

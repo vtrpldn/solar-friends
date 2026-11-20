@@ -178,7 +178,7 @@ fn tiles(village: &Village, catalog: &Catalog) -> Option<[(String, String, Strin
                     if stock.sandbox {
                         unlimited.into()
                     } else {
-                        format!("R${:.2}", stock.balance() as f64 / 100.)
+                        money(stock.balance() as f64 / 100.)
                     },
                     String::new(),
                 ),
@@ -267,11 +267,10 @@ fn tiles(village: &Village, catalog: &Catalog) -> Option<[(String, String, Strin
                     labels[index].into(),
                     if stock.sandbox {
                         if index == 0 { "Unlimited" } else { "Inactive" }.into()
-                    } else if index == 3 {
-                        let sign = if values[index] < 0 { "-" } else { "+" };
-                        format!("{sign}R${:.2}", values[index].abs() as f64 / 100.)
+                    } else if index == 3 && values[index] >= 0 {
+                        format!("+{}", money(values[index] as f64 / 100.))
                     } else {
-                        format!("R${:.2}", values[index] as f64 / 100.)
+                        money(values[index] as f64 / 100.)
                     },
                     String::new(),
                 )

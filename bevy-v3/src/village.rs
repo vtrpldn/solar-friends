@@ -4624,3 +4624,38 @@ mod tests {
         );
     }
 }
+
+/// Money in reais with thousands separators; cents are dropped from R$10,000 up so the
+/// value fits a stat card or tile.
+pub(super) fn money(balance: f64) -> String {
+    let negative = balance < 0.0;
+    let cents = (balance.abs() * 100.0).round() as u64;
+    let (whole, fraction) = (cents / 100, cents % 100);
+    let digits = whole.to_string();
+    let mut grouped = String::new();
+    for (index, digit) in digits.chars().enumerate() {
+        if index > 0 && (digits.len() - index) % 3 == 0 {
+            grouped.push(',');
+        }
+        grouped.push(digit);
+    }
+    let sign = if negative { "-" } else { "" };
+    if whole >= 10_000 {
+        format!("{sign}R${grouped}")
+    } else {
+        format!("{sign}R${grouped}.{fraction:02}")
+    }
+}
+
+#[cfg(test)]
+mod money_tests {
+    use super::money as savings_label;
+
+    #[test]
+    fn savings_group_thousands_and_drop_cents_when_large() {
+        assert_eq!(savings_label(2999.99), "R$2,999.99");
+        assert_eq!(savings_label(10000.0), "R$10,000");
+        assert_eq!(savings_label(-12.5), "-R$12.50");
+        assert_eq!(savings_label(123456.78), "R$123,456");
+    }
+}
