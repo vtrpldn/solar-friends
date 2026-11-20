@@ -20,6 +20,10 @@ Open http://127.0.0.1:4173/v2/. The local server and production use `/v1/` and `
 
 For changes to the v1 Rust engine, install the pinned Rust toolchain and `wasm-bindgen-cli` 0.2.100, then run `bash scripts/build.sh`. Serving v2's JavaScript does not require rebuilding v1. `npm run build:site` packages the web files into `dist/v1` and `dist/v2`; the Netlify build also compiles the Rust engine.
 
+## V3 desktop preview
+
+V3 is a standalone Bevy port of V2. See the [V3 desktop guide](bevy-v3/README.md) for the macOS package, local launch commands, and how to open Balance Lab and the art tools.
+
 ## Current v2
 
 - Story uses resources, money for purchases and utility bills, resident labor and autonomous needs. Sandbox has separate saves, replenishing supplies and optional instant construction.
