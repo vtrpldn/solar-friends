@@ -3251,8 +3251,10 @@ fn show_hud(
         None => {}
     }
     // A selected building is described by its card beside the action buttons.
-    // So is a building whose recipes are open, by the recipes card.
-    let card = village.selected_project_focus().is_some() || village.construction.production.open;
+    // So is a building whose recipes or cultivation are open, by their cards.
+    let card = village.selected_project_focus().is_some()
+        || village.construction.production.open
+        || village.construction.farming.open;
     if !card
         && let Some(production) =
             village

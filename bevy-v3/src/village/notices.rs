@@ -378,6 +378,9 @@ fn show_goals(
                 && !village.terrain_editor.open
                 && village.utility_panel.is_none()
                 && !village.guide.open()
+                // The placement and road summary takes this corner meanwhile.
+                && !village.construction.is_placing()
+                && !village.planning_roads()
         });
     let display = if goals.is_some() {
         Display::Flex

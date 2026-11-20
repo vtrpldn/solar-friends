@@ -2000,8 +2000,10 @@ fn refresh(
             Display::None
         };
     }
-    // The column shows exactly when one of its buttons does.
-    menu.display = if menu_has_items && !saves.open && !sound.open {
+    // The column shows when one of its buttons does, or when it holds a card that
+    // carries its own controls: cultivation, recipes or a natural site.
+    let card_shown = show_beds || show_recipes || Action::Gather.available(&village);
+    menu.display = if (menu_has_items || card_shown) && !saves.open && !sound.open {
         Display::Flex
     } else {
         Display::None
