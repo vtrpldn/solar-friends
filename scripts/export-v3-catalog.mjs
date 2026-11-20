@@ -4,6 +4,8 @@ import { DEFAULT_SETTINGS, OPTIONS, PRESETS, applySettings } from "../web/v02/we
 import { MATERIALS, PROCESSES, PROJECTS, createWeekend } from "../web/v02/weekend/simulation.js";
 import { buildingCategory, inBuildCategory } from "../web/v02/weekend/build-categories.js";
 import { productionSearchText } from "../web/v02/weekend/project-ui.js";
+import { buildingBenefit } from "../web/v02/weekend/session-ui.js";
+import { COMMUNITY } from "../web/v02/library/community-defs.js";
 import { buyerFor, supplierFor } from "../web/v02/weekend/local-market.js";
 import { materialMeasure, physicalUnit } from "../web/v02/weekend/material-measures.js";
 import { PROFILES } from "../web/v02/weekend/resident-personality.js";
@@ -49,6 +51,7 @@ const projects = Object.fromEntries(buildOptions
     {
       name: definition.name,
       description: definition.description,
+      benefit: buildingBenefit(definition, PROCESSES, COMMUNITY),
       searchText: `${productionSearchText(definition, PROCESSES, MATERIALS)} ${buildingCategory(definition)}`.toLowerCase(),
       model: buildingScenes.indexOf(definition.asset),
       ...(constructionScene(definition.asset, 0) ? {

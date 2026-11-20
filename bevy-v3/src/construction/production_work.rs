@@ -755,20 +755,7 @@ impl Construction {
                         .count();
                     let _ = write!(text, "\nHousing · {assigned}/{capacity} beds assigned");
                 }
-                "warehouse" | "covered-storage" if !stock.sandbox => {
-                    let _ = write!(text, "\nStorage · Adds {STORAGE_EXPANSION} supply spaces");
-                }
-                "warehouse" | "covered-storage" => {
-                    text.push_str("\nStorage · Unlimited in Sandbox");
-                }
-                kind => {
-                    if let Some(activity) = super::leisure::recreation_benefit(kind) {
-                        let _ = write!(
-                            text,
-                            "\nRecreation · {activity} · Helps residents recover fun"
-                        );
-                    }
-                }
+                _ => {}
             }
         }
         if let Some(job) = active_job {
@@ -870,6 +857,18 @@ impl Construction {
                 text.push('\n');
                 text.push_str(&tools);
             }
+        }
+        if !definition.benefit.is_empty() {
+            text.push('\n');
+            text.push_str(&definition.benefit);
+        } else if site.work >= definition.work
+            && let Some(activity) = super::leisure::recreation_benefit(&definition.kind)
+        {
+            use std::fmt::Write;
+            let _ = write!(
+                text,
+                "\nRecreation · {activity} · Helps residents recover fun"
+            );
         }
         definition.append_assembly_estimate(&mut text);
         if !self.production.notice.is_empty() {
@@ -1860,6 +1859,7 @@ mod upgrade_tests {
         assert!(text.contains("Foundation and level floor · 96.0 h"));
         assert!(text.contains("Materials for this plan"));
         assert!(text.contains("Building · 50%"));
+        assert!(text.contains("Housing: 1 resting places for residents."));
     }
 
     #[test]
