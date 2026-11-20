@@ -733,8 +733,39 @@ impl Construction {
                 .iter()
                 .filter(|job| job.site == site)
                 .count();
+            let area: f64 = plot.beds.iter().map(crate::farming::Bed::area).sum();
+            let mut stages = [0; 7];
+            for bed in &plot.beds {
+                let stage = if bed.harvest_expired(clock) {
+                    6
+                } else {
+                    bed.stage as usize
+                };
+                stages[stage] += 1;
+            }
+            let summary = [
+                "Unworked soil",
+                "Ready to plant",
+                "Growing",
+                "Ready to harvest",
+                "Harvest complete",
+                "Crop failed",
+                "Harvest expired",
+            ]
+            .into_iter()
+            .zip(stages)
+            .filter(|(_, beds)| *beds > 0)
+            .map(|(stage, beds)| format!("{stage} {beds}"))
+            .collect::<Vec<_>>()
+            .join(" · ");
+            let name = match self.plans[site].key.as_str() {
+                "field" => "field",
+                "garden" => "garden",
+                "greenhouse" => "greenhouse",
+                _ => "plot",
+            };
             return Some(format!(
-                "Whole plot · {count} beds · {busy} queued\n1 Prepare · 2 Plant · 3 Harvest · 4 Clear · 5 Amend · 6 Collect\nX Crop · Y Density · T Irrigation · Z Residues · Tab Inspect bed\n{}",
+                "Whole {name} · {count} beds · {area:.1} m² · {busy} queued\n{summary}\n1 Prepare · 2 Plant · 3 Harvest · 4 Clear · 5 Amend · 6 Collect\nX Crop · Y Density · T Irrigation · Z Residues · Tab Inspect bed\n{}",
                 self.farming.notice,
             ));
         }
@@ -1191,6 +1222,12 @@ mod resize_tests {
             seconds: 0.,
             round_trip_km: 12,
         };
+        let overview = village
+            .farm_status(&catalog, &stock, clock.seconds)
+            .unwrap();
+        assert!(overview.contains("Whole garden"));
+        assert!(overview.contains("Growing 1"));
+        assert!(overview.contains("Unworked soil"));
         let clear = FarmControl::Work(FarmAction::Clear);
         village.apply_farm_control(&catalog, &mut stock, clear, clock);
         assert!(village.farming.jobs.is_empty());
