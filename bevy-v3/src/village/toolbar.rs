@@ -794,7 +794,8 @@ pub(super) fn install(app: &mut App) {
                 .after(read_camp_pointer)
                 .before(village_input),
         )
-        .add_systems(Update, refresh.after(village_input));
+        .add_systems(Update, refresh.after(village_input))
+        .add_systems(Update, fit_and_scroll_menu.after(refresh));
 }
 
 fn visible(village: &Village, setup: &WorldSetup, saves: &SaveMenu, sound: &SoundSettings) -> bool {
@@ -886,8 +887,11 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                     padding: UiRect::all(px(6)),
                     row_gap: px(5),
                     column_gap: px(5),
+                    overflow: Overflow::scroll_y(),
+                    align_content: AlignContent::Start,
                     ..default()
                 },
+                ScrollPosition::default(),
                 BackgroundColor(Color::srgb_u8(31, 45, 35)),
             ))
             .with_children(|menu| {
@@ -1151,6 +1155,41 @@ fn spawn_button(parent: &mut ChildSpawnerCommands, assets: &AssetServer, action:
     }
     button.with_child((Text::default(), ui_font(assets, font_size)));
 }
+
+fn fit_and_scroll_menu(
+    window: Single<&Window, With<PrimaryWindow>>,
+    toolbar: Single<(&Node, &ComputedNode), With<Toolbar>>,
+    mut menu: ScrollablePanelMenu,
+    scroll: Res<bevy::input::mouse::AccumulatedMouseScroll>,
+) {
+    let (toolbar, computed) = *toolbar;
+    let (node, position, interaction) = &mut *menu;
+    let toolbar_height = computed.size().y * computed.inverse_scale_factor();
+    let max_height = px((window.height() - 40. - toolbar_height).max(0.));
+    if node.max_height != max_height {
+        node.max_height = max_height;
+    }
+    if toolbar.display == Display::None || node.display == Display::None {
+        position.y = 0.;
+    } else if **interaction != Interaction::None && scroll.delta.y != 0. {
+        let step = match scroll.unit {
+            bevy::input::mouse::MouseScrollUnit::Line => 34.,
+            bevy::input::mouse::MouseScrollUnit::Pixel => 1.,
+        };
+        position.y = (position.y - scroll.delta.y * step).max(0.);
+    }
+}
+
+type ScrollablePanelMenu<'w, 's> = Single<
+    'w,
+    's,
+    (
+        &'static mut Node,
+        &'static mut ScrollPosition,
+        &'static Interaction,
+    ),
+    (With<PanelMenu>, Without<Toolbar>),
+>;
 
 fn handle_buttons(
     (mut setup, mut saves, mut sound): (
