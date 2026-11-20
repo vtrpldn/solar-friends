@@ -1077,7 +1077,16 @@ impl Construction {
             format!("{} built.", definition.name)
         } else if stock.sandbox {
             format!("{} planned.", definition.name)
-        } else if self.supplier_construction && Self::fits_construction_freight(catalog, &blueprint)
+        } else if let Some(order) = &blueprint.purchase
+            && self
+                .construction_freight_cost(catalog, order.units.clone(), clock.round_trip_km)
+                .is_some_and(|(_, freight)| {
+                    self.market.can_replace_fares_with_freight(
+                        stock,
+                        blueprint.fare * u64::from(blueprint.pickups),
+                        freight,
+                    )
+                })
         {
             format!(
                 "{} planned. Missing materials queued for supplier freight.",
@@ -1291,11 +1300,10 @@ impl Construction {
             "R${:.2} including {trips} town pickup(s)",
             pickup_cost as f64 / 100.0
         );
-        if self.supplier_construction
-            && let Some(trips) = Self::construction_freight_trips(catalog, quote.units)
+        if let Some((trips, freight)) =
+            self.construction_freight_cost(catalog, quote.units, clock.round_trip_km)
         {
-            let freight_cost =
-                quote.price + crate::market::freight_cents(clock.round_trip_km) * u64::from(trips);
+            let freight_cost = quote.price + freight;
             if self
                 .market
                 .can_replace_fares_with_freight(stock, 0, freight_cost)
@@ -1310,6 +1318,22 @@ impl Construction {
             ));
         }
         Ok(pickup)
+    }
+
+    fn construction_freight_cost(
+        &self,
+        catalog: &Catalog,
+        units: BTreeMap<String, u32>,
+        distance: u32,
+    ) -> Option<(u32, u64)> {
+        if !self.supplier_construction {
+            return None;
+        }
+        let trips = Self::construction_freight_trips(catalog, units)?;
+        Some((
+            trips,
+            crate::market::freight_cents(distance) * u64::from(trips),
+        ))
     }
 
     pub fn draw_project_site(
@@ -3974,6 +3998,56 @@ mod tests {
         assert_eq!(interrupted.finished_models(&catalog).count(), 1);
         assert_eq!(interrupted.plans[1].delivered, interrupted.plans[1].loads);
         assert_eq!(stock.available("wood"), 28);
+    }
+
+    #[test]
+    fn placement_reports_pickup_when_the_quote_cannot_cover_freight() {
+        let setup = WorldSetup::default();
+        let catalog = Catalog::default();
+        let camp = IVec2::splat(36);
+        let terrain = setup.terrain().with_camp(camp);
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut construction = Construction::default();
+        construction.toggle_supplier_construction();
+        construction.choose_blueprint("well");
+        let definition = &catalog.projects["well"];
+        let quote = construction
+            .market
+            .quote(
+                &catalog,
+                &definition.materials,
+                &stock,
+                clock.seconds,
+                clock.round_trip_km,
+            )
+            .unwrap();
+        assert_eq!(quote.trips, 1);
+        let pickup_budget = quote.price + quote.fare + construction.market.expansion_reserve();
+        stock.debit(
+            stock.balance() - pickup_budget,
+            crate::stock::CashKind::Materials,
+        );
+        assert!(
+            construction
+                .blueprint_supply_quote(&catalog, &stock, clock, definition)
+                .unwrap()
+                .contains("Freight exceeds available expansion funds")
+        );
+
+        construction.plan(&catalog, &mut stock, site, IVec2::new(44, 36), clock);
+
+        assert_eq!(construction.plans.len(), 1);
+        assert!(construction.status.contains("ordered for town pickup"));
     }
 
     #[test]
