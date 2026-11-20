@@ -76,6 +76,7 @@ struct Report<'a> {
     partial: bool,
     stop_reason: Option<&'static str>,
     samples: &'a [Sample],
+    trends: &'a TrendHistory,
     orders: &'a [Outcome],
     village: &'a Village,
 }
@@ -139,7 +140,7 @@ fn prepare_replay(
     mut expected: serde_json::Value,
     catalog: &Catalog,
 ) -> io::Result<(Runner, Replay)> {
-    let Some(version @ 1..=6) = expected.get("version").and_then(serde_json::Value::as_u64) else {
+    let Some(version @ 1..=7) = expected.get("version").and_then(serde_json::Value::as_u64) else {
         return Err(io::Error::new(
             io::ErrorKind::InvalidData,
             "Unsupported lab report version.",
@@ -185,17 +186,22 @@ fn compare_replay(runner: &Runner, expected: serde_json::Value, version: u64) ->
         serde_json::from_slice(&serde_json::to_vec(&runner.report())?)?;
     actual["initial"] = serde_json::Value::Null;
     actual["scenario"] = serde_json::Value::Null;
-    if version < 6 {
+    if version < 7 {
         actual["version"] = version.into();
-        if let Some(jobs) = actual
+        actual
+            .as_object_mut()
+            .expect("report object")
+            .remove("trends");
+    }
+    if version < 6
+        && let Some(jobs) = actual
             .pointer_mut("/village/construction/production/jobs")
             .and_then(serde_json::Value::as_array_mut)
-        {
-            for job in jobs {
-                job.as_object_mut()
-                    .expect("production job")
-                    .remove("waiting_for_access");
-            }
+    {
+        for job in jobs {
+            job.as_object_mut()
+                .expect("production job")
+                .remove("waiting_for_access");
         }
     }
     if version < 5
@@ -279,6 +285,7 @@ const RUN_INTERVALS: [(f64, &str); 6] = [
     (365.0, "365 days"),
 ];
 
+#[derive(Serialize)]
 struct TrendSample {
     step: u64,
     cash_centavos: u64,
@@ -287,8 +294,9 @@ struct TrendSample {
     food_units: u32,
 }
 
-#[derive(Default)]
+#[derive(Default, Serialize)]
 struct TrendHistory {
+    #[serde(skip)]
     hour: Option<u64>,
     omitted: u64,
     samples: std::collections::VecDeque<TrendSample>,
@@ -298,7 +306,10 @@ impl TrendHistory {
     fn record(&mut self, step: u64, village: &Village) {
         let hour = (village.clock / crate::weather::HOUR) as u64;
         if self.hour == Some(hour) {
-            return;
+            if self.samples.back().is_none_or(|sample| sample.step != step) {
+                return;
+            }
+            self.samples.pop_back();
         }
         self.hour = Some(hour);
         if self.samples.len() == SAMPLE_LIMIT {
@@ -580,7 +591,7 @@ impl Runner {
 
     fn report(&self) -> Report<'_> {
         Report {
-            version: 6,
+            version: 7,
             scenario: &self.scenario,
             initial: &self.initial,
             step_seconds: STEP,
@@ -588,6 +599,7 @@ impl Runner {
             partial: !self.done(),
             stop_reason: self.reason,
             samples: &self.samples,
+            trends: &self.trends,
             orders: &self.outcomes,
             village: &self.village,
         }
@@ -1074,7 +1086,7 @@ fn lab_environment(village: &Village, setup: &WorldSetup) -> String {
     )
 }
 
-fn lab_trends(history: &TrendHistory, catalog: &Catalog) -> String {
+fn lab_trends(history: &TrendHistory, catalog: &Catalog, orders: usize) -> String {
     use std::fmt::Write as _;
     const DISPLAY_HOURS: usize = 240;
     let retained = history.samples.len();
@@ -1084,7 +1096,7 @@ fn lab_trends(history: &TrendHistory, catalog: &Catalog) -> String {
         return "Simulation trends\nNo samples yet.".into();
     };
     let mut text = format!(
-        "Simulation trends · {retained} hourly samples retained · {} older omitted\nCharts · Latest {charts} samples · Steps {}–{} · Tab Switch view",
+        "Simulation trends · {retained} hourly samples retained · {} older omitted · {orders} recorded orders\nCharts · Latest {charts} samples · Steps {}–{} · Tab Switch view",
         history.omitted, first.step, last.step
     );
     let food_mass = catalog.materials["food"].mass;
@@ -2496,7 +2508,7 @@ fn update_lab_window(
         } else if playback.view == LabView::Residents {
             lab_resident_view(&mut runner, &catalog, &keys, playback)
         } else if playback.view == LabView::Trends {
-            lab_trends(&runner.trends, &catalog)
+            lab_trends(&runner.trends, &catalog, runner.outcomes.len())
         } else if playback.view == LabView::Events {
             let (pages, text) = village
                 .construction
@@ -2767,9 +2779,10 @@ mod tests {
         for balance in [100, 300, 200] {
             record(&mut history, &mut runner.village, balance);
         }
-        let trends = lab_trends(&history, &catalog);
+        let trends = lab_trends(&history, &catalog, 2);
         assert!(trends.contains("3 hourly samples retained"));
         assert!(trends.contains("Steps 0–2"));
+        assert!(trends.contains("2 recorded orders"));
         assert!(trends.contains("Savings · 2.0 R$ · range 1.0–3.0\n-+-\n--+\n---\n+--"));
         assert!(trends.contains("Clean water"));
         assert!(trends.contains("Lowest hydration"));
@@ -2779,7 +2792,7 @@ mod tests {
         }
         assert_eq!(history.samples.len(), SAMPLE_LIMIT);
         assert_eq!(history.omitted, 3);
-        let trends = lab_trends(&history, &catalog);
+        let trends = lab_trends(&history, &catalog, 2);
         assert!(trends.contains("Latest 240 samples"));
         assert!(trends.contains("3 older omitted"));
     }
@@ -3897,7 +3910,15 @@ mod tests {
         assert_eq!(verify_report(report.clone(), &catalog).unwrap(), 10);
         assert!(report["samples"].as_array().unwrap().last().unwrap()["watershed"]
             ["river_flow_liters_per_day"].as_f64().unwrap() > 0.0);
+        assert_eq!(report["trends"]["omitted"], 0);
+        assert_eq!(report["trends"]["samples"].as_array().unwrap().len(), 1);
+        let mut changed_trend = report.clone();
+        changed_trend["trends"]["samples"][0]["food_units"] = 0.into();
+        assert!(verify_report(changed_trend, &catalog).is_err());
         let mut legacy = report.clone();
+        legacy.as_object_mut().unwrap().remove("trends");
+        legacy["version"] = 6.into();
+        assert_eq!(verify_report(legacy.clone(), &catalog).unwrap(), 10);
         legacy["version"] = 3.into();
         for sample in legacy["samples"].as_array_mut().unwrap() {
             let fields = sample.as_object_mut().unwrap();
