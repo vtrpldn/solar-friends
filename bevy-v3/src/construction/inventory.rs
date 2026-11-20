@@ -233,11 +233,10 @@ impl Construction {
         let ledger = self.inventory(catalog, stock, land);
         let mut rows: Vec<_> = ledger
             .into_iter()
-            .filter(|(id, amounts)| {
+            .filter(|(id, _)| {
                 catalog.materials[*id].equipment == equipment
                     && (search.is_empty()
                         || catalog.materials[*id].name.to_lowercase().contains(&search))
-                    && amounts.iter().any(|&amount| amount > 0)
             })
             .collect();
         rows.sort_by(|(a, _), (b, _)| catalog.materials[*a].name.cmp(&catalog.materials[*b].name));
@@ -259,10 +258,16 @@ impl Construction {
         }
         for (id, row) in rows.iter().skip(page * ROWS).take(ROWS) {
             let item = &catalog.materials[*id];
-            let _ = write!(text, "\n{}", item.name);
+            let _ = write!(
+                text,
+                "\n{} · {} available",
+                item.name,
+                item.quantity_text(row[Location::Stores as usize])
+            );
             for (&amount, label) in
-                row.iter()
-                    .zip(["stored", "reserved", "in work", "in transit", "installed"])
+                row[1..]
+                    .iter()
+                    .zip(["reserved", "in work", "in transit", "installed"])
             {
                 if amount > 0 {
                     let _ = write!(text, " · {} {label}", item.quantity_text(amount));
@@ -301,6 +306,24 @@ impl Construction {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn inventory_search_keeps_depleted_supplies_visible() {
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);
+        let village = Construction::default();
+        let item = &catalog.materials["plumbing"];
+        let available = stock.available("plumbing");
+        stock.reserve_available(&BTreeMap::from([("plumbing".into(), available)]));
+        assert_eq!(stock.available("plumbing"), 0);
+        let (_, text) =
+            village.inventory_panel(&catalog, &stock, &Land::default(), 0, false, &item.name);
+        assert!(text.contains(&format!(
+            "{} · {} available",
+            item.name,
+            item.quantity_text(0)
+        )));
+    }
 
     #[test]
     fn pantry_commitments_show_food_freight_before_it_reaches_stores() {
