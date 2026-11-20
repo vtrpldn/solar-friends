@@ -1511,10 +1511,13 @@ mod tests {
         press_button(&mut app, "Channel · Drinking");
         press_button(&mut app, "Close panel");
         press_button(&mut app, "Projects");
-        press_button(&mut app, "Show underway");
-        press_button(&mut app, "Next page");
-        press_button(&mut app, "Previous page");
-        press_button(&mut app, "Show all projects");
+        assert!(
+            ui_texts(&mut app)
+                .iter()
+                .any(|text| text.0.contains("Around the village ·"))
+        );
+        press_button(&mut app, "Recent events");
+        press_button(&mut app, "Recent events");
         press_button(&mut app, "Close panel");
         press_button(&mut app, "Maintenance");
         press_button(&mut app, "Manage service supplies");

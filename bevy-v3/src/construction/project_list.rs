@@ -1,5 +1,23 @@
 use super::*;
 
+pub(crate) struct ProjectRow {
+    pub name: String,
+    pub done: bool,
+    pub priority: bool,
+    pub badge: String,
+    pub progress: Option<f32>,
+    pub detail: String,
+}
+
+pub(crate) struct ProjectsView {
+    pub underway_count: usize,
+    pub built_count: usize,
+    pub roads: (usize, usize),
+    pub page: usize,
+    pub pages: usize,
+    pub rows: Vec<ProjectRow>,
+}
+
 impl Construction {
     pub(crate) fn selected_construction_progress(
         &self,
@@ -42,13 +60,114 @@ impl Construction {
             })
             .collect();
         rows.sort_by_key(|(index, plan)| {
-            (
-                self.priority != Some(*index),
-                plan.work >= catalog.projects[&plan.key].work,
-                *index,
-            )
+            let done =
+                plan.work >= catalog.projects[&plan.key].work && !self.changes.contains_key(index);
+            (done, self.priority != Some(*index), *index)
         });
         rows
+    }
+
+    pub(crate) fn project_page_models(
+        &self,
+        catalog: &Catalog,
+        page: usize,
+        underway: bool,
+        roads_expanded: bool,
+    ) -> Vec<usize> {
+        let rows = self.visible_projects(catalog, underway, roads_expanded);
+        let page = page.min(rows.len().div_ceil(PAGE_KEYS.len()).saturating_sub(1));
+        rows.iter()
+            .skip(page * PAGE_KEYS.len())
+            .take(PAGE_KEYS.len())
+            .map(|(_, plan)| catalog.projects[&plan.key].model)
+            .collect()
+    }
+
+    pub(crate) fn project_list_view(
+        &self,
+        catalog: &Catalog,
+        stock: &Stock,
+        page: usize,
+        underway: bool,
+        roads_expanded: bool,
+        clock: f64,
+    ) -> ProjectsView {
+        let all = self.visible_projects(catalog, false, roads_expanded);
+        let mut underway_count = 0;
+        let mut built_count = 0;
+        for &(index, plan) in &all {
+            let done =
+                plan.work >= catalog.projects[&plan.key].work && !self.changes.contains_key(&index);
+            if done {
+                built_count += 1;
+            } else {
+                underway_count += 1;
+            }
+        }
+        let visible = if underway {
+            self.visible_projects(catalog, true, roads_expanded)
+        } else {
+            all
+        };
+        let pages = visible.len().div_ceil(PAGE_KEYS.len()).max(1);
+        let page = page.min(pages - 1);
+        let rows = visible
+            .iter()
+            .skip(page * PAGE_KEYS.len())
+            .take(PAGE_KEYS.len())
+            .map(|&(index, plan)| {
+                let def = &catalog.projects[&plan.key];
+                let done = plan.work >= def.work && !self.changes.contains_key(&index);
+                let priority = self.priority == Some(index);
+                let (badge, progress, detail) = if done {
+                    let blocker = self.utilities.operational_blocker(index);
+                    (blocker.unwrap_or("✓").to_owned(), None, String::new())
+                } else if let Some(job) = self.changes.get(&index) {
+                    let status = self
+                        .change_status(catalog, stock, index)
+                        .unwrap_or_else(|| job.status());
+                    (job.status(), None, status)
+                } else {
+                    let (phase, frac) = if plan.pickups > 0 {
+                        ("Collecting", 0.0)
+                    } else if plan.delivered < plan.loads {
+                        (
+                            "Delivering",
+                            (f64::from(plan.delivered) / f64::from(plan.loads.max(1))) as f32,
+                        )
+                    } else {
+                        ("Building", (plan.work / def.work).clamp(0.0, 1.0) as f32)
+                    };
+                    let mut detail = self.project_status(catalog, index);
+                    if let Some(minutes) = self.construction_delivery_minutes(index, clock) {
+                        use std::fmt::Write;
+                        let _ = write!(detail, " · {minutes} min");
+                    }
+                    let crew = self.construction_crew(index);
+                    if !crew.is_empty() {
+                        detail.push_str(" · ");
+                        detail.push_str(&crew);
+                    }
+                    (phase.to_owned(), Some(frac), detail)
+                };
+                ProjectRow {
+                    name: format!("{} #{}", def.name, index + 1),
+                    done,
+                    priority,
+                    badge,
+                    progress,
+                    detail,
+                }
+            })
+            .collect();
+        ProjectsView {
+            underway_count,
+            built_count,
+            roads: self.road_project_counts(catalog),
+            page,
+            pages,
+            rows,
+        }
     }
 
     pub(crate) fn road_project_counts(&self, catalog: &Catalog) -> (usize, usize) {
@@ -361,6 +480,7 @@ impl Construction {
         legend
     }
 
+    #[cfg(test)]
     pub fn project_page_labels(
         &self,
         catalog: &Catalog,

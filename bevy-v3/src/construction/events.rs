@@ -60,6 +60,29 @@ impl Construction {
         (pages, text)
     }
 
+    pub(crate) fn recent_event_lines(&self, limit: usize) -> Vec<String> {
+        self.events
+            .0
+            .iter()
+            .take(limit)
+            .map(|event| {
+                let minute = (540.0 + event.clock * 0.45).floor() as u64;
+                let mut line = format!(
+                    "Day {} · {:02}:{:02} · {}",
+                    minute / 1440 + 1,
+                    minute / 60 % 24,
+                    minute % 60,
+                    event.text
+                );
+                if event.count > 1 {
+                    use std::fmt::Write;
+                    let _ = write!(line, " ×{}", event.count);
+                }
+                line
+            })
+            .collect()
+    }
+
     pub(crate) fn append_recent_events(&self, text: &mut String, start: usize, limit: usize) {
         use std::fmt::Write;
         if self.events.0.is_empty() {

@@ -51,7 +51,6 @@ enum Action {
     PantryFromStores,
     ClosePanel,
     Page(bool),
-    Project(usize),
     Recipes,
     Gather,
     Beds,
@@ -71,9 +70,6 @@ enum Action {
     HoldTradeQueued(usize),
     Trade(TradeOrder),
     TradePolicy(TradePolicy),
-    ProjectFilter,
-    ProjectRoads,
-    ProjectEvents,
     InventoryView,
     SaleQuantity(SaleSetting),
     InventoryItem(usize),
@@ -279,7 +275,9 @@ impl Action {
                 !village.stock.sandbox
             }
             Self::Panel(_) => true,
-            Self::ClosePanel => village.utility_panel.is_some(),
+            Self::ClosePanel => village
+                .utility_panel
+                .is_some_and(|panel| panel != UtilityPanel::Projects),
             Self::Grid => village.utility_panel == Some(UtilityPanel::Power),
             Self::BuildingPower | Self::Cooling => {
                 matches!(village.utility_panel, None | Some(UtilityPanel::Power))
@@ -345,9 +343,6 @@ impl Action {
                 village.utility_panel == Some(UtilityPanel::Crafting)
                     && village.craft_recipe.is_some()
             }
-            Self::Project(_) | Self::ProjectFilter | Self::ProjectRoads | Self::ProjectEvents => {
-                village.utility_panel == Some(UtilityPanel::Projects)
-            }
             Self::WorkPriority(_) | Self::WorkerReservation(_) => {
                 village.utility_panel == Some(UtilityPanel::Residents)
             }
@@ -409,8 +404,7 @@ impl Action {
             Self::Page(_) => matches!(
                 village.utility_panel,
                 Some(
-                    UtilityPanel::Projects
-                        | UtilityPanel::Inventory
+                    UtilityPanel::Inventory
                         | UtilityPanel::Crafting
                         | UtilityPanel::Events
                         | UtilityPanel::Residents
@@ -539,14 +533,7 @@ impl Action {
                 InventoryView::Production => "Show production sites",
             }
             .into(),
-            Self::ProjectFilter if village.open_projects_only => "Show all projects".into(),
-            Self::ProjectFilter => "Show underway".into(),
-            Self::ProjectRoads if village.project_roads_expanded => "Hide road tiles".into(),
-            Self::ProjectRoads => "Show road tiles".into(),
-            Self::ProjectEvents if village.project_events_expanded => "Hide recent events".into(),
-            Self::ProjectEvents => "Show recent events".into(),
-            Self::Project(_)
-            | Self::TradeItem(_)
+            Self::TradeItem(_)
             | Self::InventoryItem(_)
             | Self::Recipe(_)
             | Self::FacilityIrrigation => String::new(),
@@ -1154,9 +1141,6 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 for row in 0..HOME_ROWS {
                     spawn_button(menu, &assets, Action::ListedHome(row));
                 }
-                spawn_button(menu, &assets, Action::ProjectFilter);
-                spawn_button(menu, &assets, Action::ProjectRoads);
-                spawn_button(menu, &assets, Action::ProjectEvents);
                 spawn_button(menu, &assets, Action::TradeQueue);
                 for order in [
                     TradeOrder::Buy { freight: false },
@@ -1198,7 +1182,6 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                     spawn_button(menu, &assets, Action::InventoryItem(row));
                 }
                 for row in 0..crate::construction::PAGE_KEYS.len() {
-                    spawn_button(menu, &assets, Action::Project(row));
                     spawn_button(menu, &assets, Action::Recipe(row));
                     spawn_button(menu, &assets, Action::TradeItem(row));
                     spawn_button(menu, &assets, Action::TradeQueued(row));
@@ -1645,9 +1628,6 @@ fn handle_buttons(
                 Action::TradeItem(row) if !picker.open => {
                     village.construction.select_trade_row(&catalog, row)
                 }
-                Action::Project(row) if !picker.open => {
-                    village.focus_project_row(&catalog, &setup, camera, row);
-                }
                 Action::InventoryItem(row) if !picker.open && village.producer_view() => {
                     let (_, rows) = village.producer_rows(&catalog);
                     if let Some(&(producer, _)) = rows.get(row) {
@@ -1773,14 +1753,6 @@ fn handle_buttons(
                         town.craft_workspace = None;
                         town.inventory_page = 0;
                     }
-                }
-                Action::ProjectRoads if !picker.open => village.toggle_project_roads(),
-                Action::ProjectEvents if !picker.open => {
-                    village.project_events_expanded = !village.project_events_expanded;
-                }
-                Action::ProjectFilter if !picker.open => {
-                    village.open_projects_only = !village.open_projects_only;
-                    village.projects_page = 0;
                 }
                 Action::Resident(index) if !picker.open => village.select_resident(index),
                 Action::FocusResidentProject if !picker.open => {
@@ -2021,7 +1993,6 @@ fn handle_buttons(
                 }
                 Action::Panel(_)
                 | Action::ResourcePanel(_)
-                | Action::Project(_)
                 | Action::Recipe(_)
                 | Action::RecipePage(_)
                 | Action::CraftWorkspace
@@ -2040,9 +2011,6 @@ fn handle_buttons(
                 | Action::Trade(_)
                 | Action::TradePolicy(_)
                 | Action::SaleQuantity(_)
-                | Action::ProjectFilter
-                | Action::ProjectRoads
-                | Action::ProjectEvents
                 | Action::Resident(_)
                 | Action::ResidentProfile(_)
                 | Action::FocusResident
@@ -2145,7 +2113,6 @@ fn refresh(
     let show_advance = Action::Advance(AdvanceAction::Adjust(1)).available(&village);
     let show_terrain = Action::TerrainBrush(Brush::Raise).available(&village);
     let show_field_size = Action::ResizeField(IVec2::ZERO).available(&village);
-    let show_projects = !picker.open && Action::ProjectFilter.available(&village);
     let show_trade = !picker.open && Action::TradeItem(0).available(&village);
     let show_trade_queue = show_trade && village.construction.trade.queue_page.is_some();
     let trade_clock = TownClock {
@@ -2204,16 +2171,6 @@ fn refresh(
     };
     let show_residents = !picker.open && village.utility_panel == Some(UtilityPanel::Residents);
     let show_homes = !picker.open && village.resident_overview_open();
-    let projects = if show_projects {
-        village.construction.project_page_labels(
-            &catalog,
-            village.projects_page,
-            village.open_projects_only,
-            village.project_roads_expanded,
-        )
-    } else {
-        Vec::new()
-    };
     let homes: Vec<_> = if show_homes {
         village
             .construction
@@ -2233,7 +2190,6 @@ fn refresh(
         || show_advance
         || show_terrain
         || show_field_size
-        || show_projects
         || show_residents
         || show_finances
         || show_pantry
@@ -2300,7 +2256,6 @@ fn refresh(
             | Action::TerrainRadius(_)
             | Action::UndoTerrain
             | Action::RedoTerrain => show_terrain,
-            Action::Project(row) => projects.get(row).is_some(),
             Action::Recipes => {
                 action.available(&village) && village.construction.has_recipes(&catalog)
             }
@@ -2347,10 +2302,6 @@ fn refresh(
             }
             Action::Trade(_) | Action::TradePolicy(_) | Action::SaleQuantity(_) => {
                 show_trade && !show_trade_queue
-            }
-            Action::ProjectFilter | Action::ProjectEvents => show_projects,
-            Action::ProjectRoads => {
-                show_projects && village.construction.road_project_counts(&catalog).0 > 0
             }
             Action::ListedHome(row) => homes.get(row).is_some(),
             Action::Resident(_) => !picker.open && action.available(&village),
@@ -2547,7 +2498,6 @@ fn refresh(
                     NAMES[index],
                     village.construction.resident_roster_line(&catalog, index)
                 ),
-                Action::Project(row) => projects[row].clone(),
                 Action::UpkeepJob(row) => upkeep_jobs[row].clone(),
                 Action::Recipe(row) => recipes[row].clone(),
                 Action::MoveCraft => craft_workspace

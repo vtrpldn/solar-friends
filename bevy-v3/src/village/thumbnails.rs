@@ -156,6 +156,21 @@ fn wanted_models(
         {
             wanted[slot] = Some(project.model);
         }
+    } else if projects_card::visible(village, setup, saves, sound) {
+        for (slot, model) in village
+            .construction
+            .project_page_models(
+                catalog,
+                village.projects_page,
+                village.open_projects_only,
+                village.project_roads_expanded,
+            )
+            .into_iter()
+            .enumerate()
+            .take(SELECTED_SLOT)
+        {
+            wanted[slot] = Some(model);
+        }
     }
     if !picker.open {
         wanted[SELECTED_SLOT] = village.selected_building_model(catalog);
