@@ -2242,6 +2242,33 @@ mod tests {
     }
 
     #[test]
+    fn rainy_hour_matches_v2_solar_and_catchment_readings() {
+        let setup = WorldSetup::default();
+        let mut stock = Stock::for_start(&setup, &Catalog::default());
+        let mut utilities = Utilities::default();
+        utilities.sync(
+            [(1, "solar_farm", 2), (2, "rain-barrel", 0)]
+                .into_iter()
+                .map(|(id, kind, panels)| Facility {
+                    id,
+                    kind,
+                    location: IVec2::new(40 + id as i32 * 8, 36),
+                    size: IVec2::ONE,
+                    batteries: 0,
+                    panels,
+                    working: false,
+                }),
+        );
+        utilities.tick(&setup, &mut stock, 0, 0.0, crate::weather::HOUR);
+
+        // V2's seed-42 weather at 09:00, two 0.6 kW panels and a 1 m² catchment.
+        assert!((utilities.nodes[&1].generation_kw - 0.30759144981614817).abs() < 1e-9);
+        assert!((utilities.nodes[&2].water[1] - 1.1128037436752385).abs() < 1e-9);
+        let account = utilities.ground.as_ref().unwrap().account.as_ref().unwrap();
+        assert!((account.catchment_overflow - 0.2782009359188096).abs() < 1e-9);
+    }
+
+    #[test]
     fn a_roof_feeds_one_collector_and_reassigns_when_the_well_switches_off() {
         let mut utilities = Utilities::default();
         let facility = |id, kind, x| Facility {
