@@ -145,9 +145,15 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
         ))
         .with_children(|bar| {
             // V2 centres the stat cards in the space left of the clock card.
+            // Equal columns, as many as fit: four in a row when there is room, a tidy
+            // two-by-two grid in narrower windows.
             bar.spawn(Node {
+                display: Display::Grid,
+                grid_template_columns: vec![RepeatedGridTrack::px(
+                    GridTrackRepetition::AutoFill,
+                    168.,
+                )],
                 column_gap: px(8),
-                flex_wrap: FlexWrap::Wrap,
                 row_gap: px(8),
                 flex_grow: 1.,
                 flex_shrink: 1.,
@@ -261,8 +267,6 @@ fn stat_card(
                 padding: UiRect::new(px(8), px(12), px(7), px(7)),
                 column_gap: px(8),
                 align_items: AlignItems::Center,
-                // One width for every card, so they wrap into a tidy grid as in V2.
-                min_width: px(172),
                 ..default()
             }),
             theme::button(),

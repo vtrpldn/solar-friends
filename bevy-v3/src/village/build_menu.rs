@@ -152,7 +152,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                     body.spawn(Node {
                         flex_direction: FlexDirection::Column,
                         row_gap: px(4),
-                        width: px(190),
+                        width: px(168),
                         flex_shrink: 0.,
                         ..default()
                     })
@@ -215,20 +215,20 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                             ));
                             button(pager, &assets, BuildButton::NextPage, "Next →");
                         });
+                        // Details sit under the cards, so the cards get the full row as
+                        // in V2.
+                        main.spawn((
+                            BlueprintDetails,
+                            Text::new(DETAILS_HINT),
+                            ui_font(&assets, 14.0),
+                            Node {
+                                padding: UiRect::all(px(12)),
+                                border_radius: BorderRadius::all(px(14)),
+                                ..default()
+                            },
+                            BackgroundColor(theme::BUTTON),
+                        ));
                     });
-                    body.spawn((
-                        BlueprintDetails,
-                        Text::new(DETAILS_HINT),
-                        ui_font(&assets, 14.0),
-                        Node {
-                            width: px(300),
-                            flex_shrink: 0.,
-                            padding: UiRect::all(px(12)),
-                            border_radius: BorderRadius::all(px(14)),
-                            ..default()
-                        },
-                        BackgroundColor(theme::BUTTON),
-                    ));
                 });
         });
 }
