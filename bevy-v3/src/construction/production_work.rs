@@ -559,30 +559,30 @@ impl Construction {
                 .is_some_and(|worker| self.residents[worker].waiting_for_route())
     }
 
-    pub(super) fn batch_status(
+    pub(super) fn batch_blocker(
         &self,
         job: &Batch,
         catalog: &Catalog,
         stock: &Stock,
         clock: f64,
-    ) -> String {
+    ) -> Option<String> {
         let recipe = &catalog.production[&job.recipe];
         if !matches!(job.phase, Phase::Return | Phase::Growing) && !self.utilities.enabled(job.site)
         {
-            return "Building switched off".into();
+            return Some("Building switched off".into());
         }
         if self.production_route_blocked(job, clock) {
-            return "Waiting for access".into();
+            return Some("Waiting for access".into());
         }
         if matches!(job.phase, Phase::Pickup | Phase::Work)
             && let Some(reason) = self.craft_blocker(catalog, stock, recipe, job.worker)
         {
-            return reason;
+            return Some(reason);
         }
         if (job.phase == Phase::Work || (job.phase == Phase::Return && !job.returning_to_site))
             && self.batch_storage_full(catalog, stock, job, clock)
         {
-            return "Waiting for storage space".into();
+            return Some("Waiting for storage space".into());
         }
         match job.phase {
             Phase::Pickup | Phase::Approach | Phase::Work
@@ -590,7 +590,7 @@ impl Construction {
                     && !job.watered
                     && self.utilities.potable_at(job.site + 1) < recipe.water =>
             {
-                "Waiting for drinking water".into()
+                Some("Waiting for drinking water".into())
             }
             Phase::Pickup | Phase::Approach | Phase::Work
                 if recipe.kind == "kitchen"
@@ -598,8 +598,31 @@ impl Construction {
                     && !job.watered
                     && !self.utilities.greywater_space(job.site + 1, recipe.water) =>
             {
-                "Waiting for greywater storage".into()
+                Some("Waiting for greywater storage".into())
             }
+            Phase::Work
+                if !job.using_biogas
+                    && needs_power(&job.recipe, recipe)
+                    && !self.utilities.powered(job.site) =>
+            {
+                Some("Waiting for power".into())
+            }
+            _ => None,
+        }
+    }
+
+    pub(super) fn batch_status(
+        &self,
+        job: &Batch,
+        catalog: &Catalog,
+        stock: &Stock,
+        clock: f64,
+    ) -> String {
+        if let Some(blocker) = self.batch_blocker(job, catalog, stock, clock) {
+            return blocker;
+        }
+        let recipe = &catalog.production[&job.recipe];
+        match job.phase {
             Phase::Pickup if job.recipe == "stock-goats" => "Collecting goats from supplies".into(),
             Phase::Approach if job.recipe == "stock-goats" => "Leading goats to the pen".into(),
             Phase::Work if job.recipe == "stock-goats" => "Settling goats in the pen".into(),
@@ -607,11 +630,6 @@ impl Construction {
             Phase::Approach => "Bringing ingredients".into(),
             Phase::Work if job.using_biogas => {
                 format!("{:.0}% worked · Biogas", job.work / recipe.work * 100.0)
-            }
-            Phase::Work
-                if needs_power(&job.recipe, recipe) && !self.utilities.powered(job.site) =>
-            {
-                "Waiting for power".into()
             }
             Phase::Work if recipe.craft.is_some() => {
                 let fraction = job.work / recipe.work;

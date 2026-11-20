@@ -18,9 +18,10 @@ impl Construction {
         let blue = Color::srgb_u8(109, 220, 255);
         let green = Color::srgb_u8(136, 220, 148);
         let gold = Color::srgb_u8(243, 200, 108);
+        let red = Color::srgb_u8(222, 112, 96);
         let gray = Color::srgb_u8(147, 146, 140);
         let mut label =
-            "Food · Blue shared supplies · Green producing or ready · Gold pending · Gray idle"
+            "Food · Blue shared supplies · Green producing or ready · Gold pending · Red blocked · Gray idle or off"
                 .to_owned();
         draw_lens_marker(terrain, STOCKPILE, IVec2::ONE, blue, gizmos);
         if hovered == Some(STOCKPILE) {
@@ -73,8 +74,15 @@ impl Construction {
                 .get(&index)
                 .map_or(0, |animals| animals.available());
             let finished = plan.work >= def.work;
+            let switched_off = finished && !self.utilities.enabled(index);
             let color = if !finished {
                 gold
+            } else if switched_off {
+                gray
+            } else if batch
+                .is_some_and(|(job, _)| self.batch_blocker(job, catalog, stock, clock).is_some())
+            {
+                red
             } else if ready > 0 || growing > 0 || animal_output > 0 {
                 green
             } else if let Some((job, _)) = batch {
@@ -93,6 +101,8 @@ impl Construction {
                 let _ = write!(label, "\n{} #{}", def.name, index + 1);
                 if !finished {
                     let _ = write!(label, " · {}", self.project_status(catalog, index));
+                } else if switched_off {
+                    label.push_str(" · Building switched off");
                 } else if let Some((job, recipe)) = batch {
                     let _ = write!(
                         label,

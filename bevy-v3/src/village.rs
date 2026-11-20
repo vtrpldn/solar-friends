@@ -3199,6 +3199,7 @@ fn draw_blueprints(
             Some(MapLens::Work) => Some(village.construction.draw_work_lens(
                 &catalog,
                 &terrain,
+                (&village.stock, village.clock),
                 pointer.hovered.map(|hit| hit.cell),
                 &mut gizmos,
             )),
