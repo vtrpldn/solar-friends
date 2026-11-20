@@ -1271,6 +1271,40 @@ mod tests {
                 .any(|text| text.0.contains("timber pieces · Pack")
                     && text.0.contains("Freight total"))
         );
+        for (label, input, displayed) in [
+            ("Set minimum load", "37", "37% (0–100)"),
+            ("Set maximum wait", "3.5", "3.5h (0–24)"),
+        ] {
+            press_button(&mut app, label);
+            app.world_mut().write_message(KeyboardInput {
+                key_code: KeyCode::Unidentified(bevy::input::keyboard::NativeKeyCode::Unidentified),
+                logical_key: Key::Character(input.into()),
+                state: ButtonState::Pressed,
+                text: Some(input.into()),
+                repeat: false,
+                window,
+            });
+            app.world_mut().run_schedule(Update);
+            assert!(
+                app.world_mut()
+                    .query::<&Text>()
+                    .iter(app.world())
+                    .any(|text| text.0.contains(displayed))
+            );
+            app.world_mut()
+                .resource_mut::<ButtonInput<KeyCode>>()
+                .press(KeyCode::Enter);
+            app.world_mut().run_schedule(Update);
+            app.world_mut()
+                .resource_mut::<ButtonInput<KeyCode>>()
+                .reset(KeyCode::Enter);
+        }
+        assert!(
+            app.world_mut()
+                .query::<&Text>()
+                .iter(app.world())
+                .any(|text| { text.0.contains("Minimum load 37% · J Wait up to 3.5h") })
+        );
         press_button(&mut app, "Close panel");
         press_button(&mut app, "Manage");
         press_button(&mut app, "Stores");
