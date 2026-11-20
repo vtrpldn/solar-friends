@@ -231,6 +231,42 @@ mod tests {
     }
 
     #[test]
+    fn wild_forage_claims_an_available_resident_before_new_construction() {
+        let catalog = Catalog::default();
+        let mut setup = WorldSetup::default();
+        setup.mode = Mode::Sandbox;
+        let camp = IVec2::new(36, 36);
+        let terrain = setup.terrain().with_camp(camp);
+        let land = Land::generate(&setup);
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut village = Construction::default();
+        let clock = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
+        village.gathering.queue_forage(&land, camp, clock.seconds);
+        let (&forage, _) = village.gathering.orders.first_key_value().unwrap();
+        let target = land.site(forage).unwrap().position;
+        for (index, resident) in village.residents.iter_mut().enumerate() {
+            resident.position = SUPPLY_SPOTS[index].as_vec2();
+            resident.health.energy = if index == 0 { 100.0 } else { 0.0 };
+        }
+        village.residents[0].position = (target - IVec2::X).as_vec2();
+        let well = village.proposed_site(&catalog, "well", IVec2::new(53, 36));
+        village.plans.push(well);
+        village.work_policy.set_reservations(0, 0).unwrap();
+        village.set_work_priority(WorkGroup::Construction, 3);
+        village.tick(&catalog, &mut stock, site, clock, 0.1, false);
+        assert_eq!(village.gathering.orders[&forage].worker, Some(0));
+        assert!(village.residents[0].assignment.is_none());
+    }
+
+    #[test]
     fn higher_priority_changes_the_job_a_free_resident_accepts() {
         let catalog = Catalog::default();
         let mut setup = WorldSetup::default();

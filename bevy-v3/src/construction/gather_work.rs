@@ -21,16 +21,42 @@ impl Construction {
         dt: f32,
         group: WorkGroup,
     ) {
+        self.tick_gathering_matching(catalog, stock, site, clock, dt, |recipe| {
+            WorkGroup::for_output(&catalog.gathering[recipe].output) == group
+        });
+    }
+
+    pub(super) fn reserve_forage_workers(
+        &mut self,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        site: ConstructionSite,
+        clock: f64,
+    ) {
+        self.tick_gathering_matching(catalog, stock, site, clock, 0.0, |recipe| {
+            recipe == "gather-wild-forage"
+        });
+    }
+
+    fn tick_gathering_matching(
+        &mut self,
+        catalog: &Catalog,
+        stock: &mut Stock,
+        site: ConstructionSite,
+        clock: f64,
+        dt: f32,
+        matches_recipe: impl Fn(&str) -> bool,
+    ) {
         let land = site.land;
         let queued: Vec<_> = self.gathering.orders.keys().copied().collect();
         for index in queued {
             let Some(resource) = land.site(index) else {
                 continue;
             };
-            let recipe = &catalog.gathering[resource.recipe()];
-            if WorkGroup::for_output(&recipe.output) != group {
+            if !matches_recipe(resource.recipe()) {
                 continue;
             }
+            let recipe = &catalog.gathering[resource.recipe()];
             if self.reservation_pass.is_none()
                 && !stock.sandbox
                 && self.expire_gathered_food(catalog, stock, index, &recipe.output, clock)

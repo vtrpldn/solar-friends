@@ -2337,6 +2337,7 @@ impl Construction {
         self.reserve_animal_care_workers(catalog, stock, site, clock.seconds);
         self.tick_farm_jobs(catalog, stock, site, clock.seconds, dt);
         self.reserve_farm_batch_workers(catalog, stock, site, clock.seconds);
+        self.reserve_forage_workers(catalog, stock, site, clock.seconds);
         self.reservation_pass = None;
         let (essential, production) = self.reserved_workers();
         // Reserve assignments first. The normal pass advances jobs and assigns any
