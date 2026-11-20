@@ -371,6 +371,51 @@ mod tests {
     fn forecasts_match_the_source_climate_model() {
         assert_eq!(calendar_label(0.0), "1 Nov · Year 1 · Spring");
         assert_eq!(calendar_label(61.0 * DAY), "1 Jan · Year 2 · Summer");
+        // Expected rows from V2's forecast at midnight and for all three biomes.
+        for (time, biome, seed, rows) in [
+            (
+                1999.0,
+                0,
+                42,
+                [
+                    "Day 1 · Light rain · 15–25 °C",
+                    "Day 2 · Rainy · 15–25 °C",
+                    "Day 3 · Rainy · 15–30 °C",
+                ],
+            ),
+            (
+                2000.0,
+                0,
+                42,
+                [
+                    "Day 2 · Rainy · 15–25 °C",
+                    "Day 3 · Rainy · 15–30 °C",
+                    "Day 4 · Rainy · 15–30 °C",
+                ],
+            ),
+            (
+                23000.0,
+                1,
+                10,
+                [
+                    "Day 8 · Dry / trace rain · 15–25 °C",
+                    "Day 9 · Dry / trace rain · 15–30 °C",
+                    "Day 10 · Rainy · 15–30 °C",
+                ],
+            ),
+            (
+                29000.0,
+                2,
+                42,
+                [
+                    "Day 10 · Dry / trace rain · 25–35 °C",
+                    "Day 11 · Dry / trace rain · 20–35 °C",
+                    "Day 12 · Dry / trace rain · 25–35 °C",
+                ],
+            ),
+        ] {
+            assert_eq!(forecast(time, biome, seed), rows.join("\n"));
+        }
         for (time, biome, seed, rain, cloud, temperature) in [
             (0.0, 0, 42, 1.391004679594048, 0.85, 19.39254175107926),
             (23000.0, 1, 10, 0.0, 0.2303803928894922, 23.58614738320908),
