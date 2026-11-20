@@ -272,9 +272,10 @@ impl Construction {
             return;
         }
         self.upkeep.next_restock = clock.seconds + 10.0;
-        let local_forage = self.gathering.orders.keys().any(|&id| {
+        let local_forage = self.gathering.orders.iter().any(|(&id, job)| {
             land.site(id)
                 .is_some_and(|site| site.recipe() == "gather-wild-forage")
+                && !self.gathering_route_blocked(job, clock.seconds)
         });
         let mut supplies = Vec::new();
         if !local_forage {
@@ -334,11 +335,10 @@ impl Construction {
                     .delivery
                     .as_ref()
                     .is_some_and(|order| order.material == id)
-                || self
-                    .production
-                    .jobs
-                    .iter()
-                    .any(|job| catalog.production[&job.recipe].output.contains_key(&id))
+                || self.production.jobs.iter().any(|job| {
+                    catalog.production[&job.recipe].output.contains_key(&id)
+                        && !self.production_route_blocked(job, clock.seconds)
+                })
             {
                 continue;
             }
@@ -885,6 +885,38 @@ mod tests {
         assert!(village.trade.orders.is_empty());
         assert_eq!(village.upkeep.restock_used, cost);
         assert_eq!(village.market.committed_fares(), 0);
+    }
+
+    #[test]
+    fn upkeep_restock_orders_fodder_when_local_forage_cannot_be_reached() {
+        let setup = WorldSetup::default();
+        let catalog = Catalog::default();
+        let land = Land::generate(&setup);
+        let mut stock = Stock::for_start(&setup, &catalog);
+        stock.reserve_available(&BTreeMap::from([(
+            "fodder".into(),
+            stock.available("fodder"),
+        )]));
+        let mut village = Construction::default();
+        let mut coop = village.proposed_site(&catalog, "coop", IVec2::new(41, 36));
+        coop.work = catalog.projects["coop"].work;
+        village.plans.push(coop);
+        village.toggle_supplier_construction();
+        village.upkeep.restock_budget = 100_000;
+        village.tick_animals(&catalog, &mut stock, &land, 0.0, 0.1);
+
+        let clock = |seconds| TownClock {
+            seconds,
+            round_trip_km: 12,
+        };
+        village.restock_upkeep(&catalog, &mut stock, &land, clock(0.0));
+        assert!(village.trade.delivery.is_none());
+
+        let forage = village.gathering.orders.values_mut().next().unwrap();
+        forage.waiting_for_access = true;
+        forage.retry_at = 15.0;
+        village.restock_upkeep(&catalog, &mut stock, &land, clock(10.0));
+        assert_eq!(village.trade.delivery.as_ref().unwrap().material, "fodder");
     }
 
     #[test]
