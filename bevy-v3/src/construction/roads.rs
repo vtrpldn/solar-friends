@@ -122,22 +122,7 @@ impl Construction {
             if self.has_road(position) {
                 continue;
             }
-            let mut tile = Blueprint {
-                key: "road".into(),
-                position,
-                size: IVec2::ONE,
-                rotation: 0,
-                loads: catalog.loads(definition),
-                delivered: 0,
-                staged: 0,
-                depot: None,
-                work: 0.0,
-                pickups: 0,
-                fare: 0,
-                removed: false,
-                purchase: None,
-                materials_paid: None,
-            };
+            let mut tile = Self::proposal(catalog, "road", position, IVec2::ONE, 0);
             if let Some(reason) = self.placement_error(
                 site.terrain,
                 site.land,
@@ -206,25 +191,46 @@ impl Construction {
 
     pub fn draw_road_route(
         &self,
-        terrain: &Terrain,
+        site: ConstructionSite,
+        catalog: &Catalog,
+        sandbox: bool,
         end: IVec2,
         extend: bool,
         gizmos: &mut Gizmos,
-    ) {
+    ) -> Option<&'static str> {
         let start = self.road_planning.anchor.filter(|_| extend).unwrap_or(end);
         let Some(cells) = Self::road_cells(start, end) else {
-            return;
+            return Some("Choose a shorter road route (up to 128 cells).");
         };
+        let definition = &catalog.projects["road"];
+        let mut issue = None;
         let mut previous: Option<Vec2> = None;
         for cell in cells {
             let point = world_position(cell.x as f32, cell.y as f32);
             let color = if self.has_road(cell) {
                 Color::srgb_u8(155, 162, 148)
             } else {
-                Color::srgb_u8(217, 237, 165)
+                let tile = Self::proposal(catalog, "road", cell, IVec2::ONE, 0);
+                if let Some(reason) = self.placement_error(
+                    site.terrain,
+                    site.land,
+                    site.camp,
+                    &tile,
+                    definition,
+                    (catalog, sandbox, None),
+                ) {
+                    issue.get_or_insert(reason);
+                    Color::srgb_u8(222, 112, 96)
+                } else {
+                    Color::srgb_u8(217, 237, 165)
+                }
             };
             let on_ground = |point: Vec2| {
-                Vec3::new(point.x, terrain.height_at(point.x, point.y) + 0.08, point.y)
+                Vec3::new(
+                    point.x,
+                    site.terrain.height_at(point.x, point.y) + 0.08,
+                    point.y,
+                )
             };
             if let Some(start) = previous {
                 gizmos.linestrip(
@@ -246,6 +252,7 @@ impl Construction {
             );
             previous = Some(point);
         }
+        issue
     }
 }
 

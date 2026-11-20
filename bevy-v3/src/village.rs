@@ -3092,9 +3092,21 @@ fn draw_blueprints(
                 );
             } else if village.planning_roads() {
                 let extend = village.extend_road(&keyboard);
-                village
-                    .construction
-                    .draw_road_route(&terrain, hit.cell, extend, &mut gizmos);
+                if let Some(issue) = village.construction.draw_road_route(
+                    ConstructionSite {
+                        terrain: &terrain,
+                        land: &land,
+                        camp,
+                    },
+                    &catalog,
+                    village.stock.sandbox,
+                    hit.cell,
+                    extend,
+                    &mut gizmos,
+                ) {
+                    notice = Some(issue.into());
+                    available = Some(false);
+                }
             } else if village.construction.placing_project()
                 && let Some((label, valid)) = village.construction.draw_project_site(
                     ConstructionSite {
