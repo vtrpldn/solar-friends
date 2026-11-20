@@ -109,9 +109,6 @@ enum Action {
     Grid,
     BuildingPower,
     Cooling,
-    Water(WaterCommand),
-    NextWasteTank,
-    InstallWaterLink,
     InstallPowerLink,
     NextPowerShortage,
     UtilityLinkPage(bool),
@@ -308,18 +305,6 @@ impl Action {
                         .construction
                         .utilities
                         .power_shortages()
-                        .next()
-                        .is_some()
-            }
-            Self::Water(_) | Self::InstallWaterLink => {
-                village.utility_panel == Some(UtilityPanel::Water)
-            }
-            Self::NextWasteTank => {
-                village.utility_panel == Some(UtilityPanel::Water)
-                    && village
-                        .construction
-                        .utilities
-                        .waste_tanks_needing_attention()
                         .next()
                         .is_some()
             }
@@ -751,8 +736,6 @@ impl Action {
             Self::BuildingPower => "Switch building on".into(),
             Self::Cooling if self.facility_switch(village) == Some(true) => "Pause cooling".into(),
             Self::Cooling => "Resume cooling".into(),
-            Self::NextWasteTank => "Next waste tank".into(),
-            Self::InstallWaterLink => "Install water connection".into(),
             Self::InstallPowerLink => "Install power connection".into(),
             Self::NextPowerShortage => "Next building without power".into(),
             Self::UtilityLinkPage(false) => "Previous connection".into(),
@@ -761,19 +744,6 @@ impl Action {
             Self::RemoveUtilityLink => "Remove manual connection".into(),
             Self::CancelUtilityInstallation => "Cancel installation".into(),
             Self::NextUtilityInstallation => "Next installation".into(),
-            Self::Water(command) => match command {
-                WaterCommand::Camp { source: true } => "Camp source".into(),
-                WaterCommand::Camp { source: false } => "Camp destination".into(),
-                WaterCommand::NextChannel => {
-                    format!("Channel · {}", WATER_CHANNELS[village.water_panel.channel])
-                }
-                WaterCommand::Policy(true) => "Auto drinking reserve".into(),
-                WaterCommand::Policy(false) => "Auto sanitation".into(),
-                WaterCommand::River => "Collect river water".into(),
-                WaterCommand::Carry => "Carry from source".into(),
-                WaterCommand::Purify => "Purify water".into(),
-                WaterCommand::Sanitation => "Service waste".into(),
-            },
             Self::AutomaticUpkeep => format!(
                 "Automatic maintenance {}",
                 if village.construction.automatic_upkeep() {
@@ -1165,21 +1135,6 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 spawn_button(menu, &assets, Action::NextUtilityInstallation);
                 spawn_button(menu, &assets, Action::BuildingPower);
                 spawn_button(menu, &assets, Action::Cooling);
-                for command in [
-                    WaterCommand::Camp { source: true },
-                    WaterCommand::Camp { source: false },
-                    WaterCommand::NextChannel,
-                    WaterCommand::River,
-                    WaterCommand::Carry,
-                    WaterCommand::Purify,
-                    WaterCommand::Sanitation,
-                    WaterCommand::Policy(true),
-                    WaterCommand::Policy(false),
-                ] {
-                    spawn_button(menu, &assets, Action::Water(command));
-                }
-                spawn_button(menu, &assets, Action::NextWasteTank);
-                spawn_button(menu, &assets, Action::InstallWaterLink);
                 spawn_button(menu, &assets, Action::AutomaticUpkeep);
                 spawn_button(menu, &assets, Action::StoresFromUpkeep);
                 for row in 0..Construction::UPKEEP_ROWS {
@@ -1948,16 +1903,6 @@ fn handle_buttons(
                 Action::InstallPowerLink if !picker.open => {
                     village.queue_selected_power_connection()
                 }
-                Action::InstallWaterLink if !picker.open => {
-                    village.queue_selected_water_connection()
-                }
-                Action::NextWasteTank if !picker.open => {
-                    village.focus_next_waste_tank(&setup, camera)
-                }
-                Action::Water(command) if !picker.open => {
-                    let town = &mut *village;
-                    town.water_panel.apply(command, &mut town.construction);
-                }
                 Action::PantryBatches if !picker.open => {
                     village.pantry_batch_page = village.pantry_batch_page.is_none().then_some(0);
                 }
@@ -2126,9 +2071,6 @@ fn handle_buttons(
                 | Action::Grid
                 | Action::BuildingPower
                 | Action::Cooling
-                | Action::Water(_)
-                | Action::NextWasteTank
-                | Action::InstallWaterLink
                 | Action::InstallPowerLink
                 | Action::NextPowerShortage
                 | Action::UtilityLinkPage(_)
@@ -2256,7 +2198,6 @@ fn refresh(
     let show_facility_switches = !picker.open
         && (Action::BuildingPower.available(&village) || Action::Cooling.available(&village));
     let show_power = !picker.open && Action::Grid.available(&village);
-    let show_water = !picker.open && Action::Water(WaterCommand::River).available(&village);
     let show_upkeep = !picker.open && Action::AutomaticUpkeep.available(&village);
     let upkeep_jobs = if show_upkeep {
         village
@@ -2306,7 +2247,6 @@ fn refresh(
         || show_power
         || show_facility_switches
         || show_upkeep
-        || show_water
         || (picker.open && Action::Manage.available(&village))
     {
         Display::Flex
@@ -2444,14 +2384,10 @@ fn refresh(
             | Action::ToggleUtilityLink
             | Action::RemoveUtilityLink
             | Action::CancelUtilityInstallation
-            | Action::NextUtilityInstallation => {
-                (show_power || show_water) && action.available(&village)
-            }
+            | Action::NextUtilityInstallation => show_power && action.available(&village),
             Action::BuildingPower | Action::Cooling => {
                 show_facility_switches && action.available(&village)
             }
-            Action::Water(_) | Action::InstallWaterLink => show_water,
-            Action::NextWasteTank => show_water && action.available(&village),
             Action::AutomaticUpkeep | Action::UpkeepBudget { .. } | Action::StoresFromUpkeep => {
                 show_upkeep
             }

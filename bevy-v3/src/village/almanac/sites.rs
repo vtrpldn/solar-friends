@@ -1,6 +1,7 @@
 //! Building cards share the almanac sheet's wheel scrolling.
 
 mod actions;
+pub(in crate::village) mod connections;
 
 pub(in crate::village) use actions::{input, paint};
 
@@ -13,6 +14,7 @@ pub(in crate::village) struct SiteList;
 #[derive(Component)]
 pub(in crate::village) enum Reading {
     Status(usize),
+    ActionNote(usize),
     Meter(usize, usize),
 }
 
@@ -24,14 +26,20 @@ struct Meter {
     unit: &'static str,
     level: f64,
     capacity: f64,
+    warning: Option<&'static str>,
 }
 
 impl Meter {
     fn label(&self) -> String {
-        format!(
+        let mut label = format!(
             "{} · {:.1} / {:.1} {}",
             self.label, self.level, self.capacity, self.unit
-        )
+        );
+        if let Some(warning) = self.warning {
+            label.push_str(" · Tank ");
+            label.push_str(warning);
+        }
+        label
     }
 
     fn width(&self) -> Val {
@@ -42,6 +50,7 @@ impl Meter {
 struct Site {
     id: usize,
     status: String,
+    action_note: String,
     meters: Vec<Meter>,
 }
 
@@ -56,6 +65,7 @@ impl Site {
                     unit: "kWh",
                     level,
                     capacity,
+                    warning: None,
                 })
                 .into_iter()
                 .collect();
@@ -71,16 +81,44 @@ impl Site {
                     unit: "L",
                     level: site.levels[channel],
                     capacity: site.capacity[channel],
+                    warning: (channel >= 2)
+                        .then(|| {
+                            crate::utilities::waste_tank_warning(
+                                site.levels[channel],
+                                site.capacity[channel],
+                            )
+                        })
+                        .flatten(),
                 })
                 .collect();
-            let status = if site.enabled { "Open" } else { "Switched off" };
-            let status = village
+            let mut status = String::from(if site.enabled { "Open" } else { "Switched off" });
+            if let Some(job) = village
                 .construction
-                .queued_water_status(id, village.clock)
-                .map_or_else(|| status.to_owned(), |job| format!("{status} · {job}"));
+                .water_card_job_status(id, village.clock)
+            {
+                use std::fmt::Write;
+                let _ = write!(status, " · {job}");
+            }
+            if let Some((area, roof)) = utilities.rain_catchment(id) {
+                use std::fmt::Write;
+                let _ = write!(status, " · Rain catchment {area:.0} m²");
+                if let Some(roof) = roof {
+                    let _ = write!(status, " · Includes roof #{roof}");
+                }
+            }
             (status, meters)
         };
-        Some(Self { id, status, meters })
+        let action_note = if panel == UtilityPanel::Water {
+            actions::water_blockers(&village.construction, id)
+        } else {
+            String::new()
+        };
+        Some(Self {
+            id,
+            status,
+            action_note,
+            meters,
+        })
     }
 }
 
@@ -182,6 +220,14 @@ fn spawn_site(
             ));
         }
         actions::spawn(card, assets, construction, panel, site.id);
+        if panel == UtilityPanel::Water {
+            card.spawn((
+                FocusPolicy::Pass,
+                Reading::ActionNote(index),
+                Text::new(&site.action_note),
+                ui_font_styled(assets, 13., 400, theme::MUTED),
+            ));
+        }
     });
 }
 
@@ -265,6 +311,7 @@ pub(in crate::village) fn refresh(
     for (reading, mut text) in &mut readings {
         let wanted = match *reading {
             Reading::Status(index) => sites[index].status.clone(),
+            Reading::ActionNote(index) => sites[index].action_note.clone(),
             Reading::Meter(index, channel) => sites[index].meters[channel].label(),
         };
         if text.0 != wanted {

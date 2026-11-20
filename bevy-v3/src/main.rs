@@ -1502,13 +1502,11 @@ mod tests {
         press_button(&mut app, "Back to food");
         press_button(&mut app, "Close panel");
         press_button(&mut app, "Water");
-        press_button(&mut app, "Camp source");
-        press_button(&mut app, "Camp destination");
-        press_button(&mut app, "Channel · Drinking");
-        press_button(&mut app, "Channel · Irrigation");
-        press_button(&mut app, "Channel · Greywater");
-        press_button(&mut app, "Channel · Sewage");
-        press_button(&mut app, "Channel · Drinking");
+        assert_eq!(press_stepper(&mut app, "SOURCE", true), "Camp");
+        for channel in ["Irrigation", "Greywater", "Sewage", "Drinking"] {
+            assert_eq!(press_stepper(&mut app, "CHANNEL", true), channel);
+        }
+        assert_eq!(press_stepper(&mut app, "SOURCE", false), "Choose a source");
         press_button(&mut app, "Close panel");
         press_button(&mut app, "Projects");
         press_button(&mut app, "Show underway");

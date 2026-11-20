@@ -208,6 +208,7 @@ impl Plugin for VillagePlugin {
                         almanac::widgets::input::<almanac::crafting::Screen>,
                         almanac::widgets::input::<almanac::pantry::Screen>,
                         almanac::widgets::input::<almanac::finances::Screen>,
+                        almanac::widgets::input::<almanac::sites::connections::Water>,
                         village_input,
                         almanac::sites::input,
                     )
@@ -225,6 +226,7 @@ impl Plugin for VillagePlugin {
                         almanac::widgets::refresh::<almanac::crafting::Screen>,
                         almanac::widgets::refresh::<almanac::pantry::Screen>,
                         almanac::widgets::refresh::<almanac::finances::Screen>,
+                        almanac::widgets::refresh::<almanac::sites::connections::Water>,
                     )
                         .chain(),
                     fit_and_scroll_hud,
@@ -371,7 +373,6 @@ const WATER_CHANNELS: [&str; 4] = ["Drinking", "Irrigation", "Greywater", "Sewag
 #[derive(Clone, Copy)]
 enum WaterCommand {
     Camp { source: bool },
-    NextChannel,
     River,
     Carry,
     Purify,
@@ -435,10 +436,6 @@ impl WaterControls {
                 self.select_facility(0, source);
                 return;
             }
-            WaterCommand::NextChannel => {
-                self.channel = (self.channel + 1) % WATER_CHANNELS.len();
-                return;
-            }
             WaterCommand::Policy(drinking) => {
                 self.message = if construction
                     .utilities
@@ -457,7 +454,7 @@ impl WaterControls {
             },
             WaterCommand::Carry => {
                 let Some(source) = self.source else {
-                    self.message = "Shift-click a water source first.".into();
+                    self.message = "Choose a water source first.".into();
                     return;
                 };
                 WaterAction::Carry {
@@ -731,7 +728,7 @@ impl Village {
                 Ok(()) => "Water connection queued.".into(),
                 Err(error) => error.into(),
             },
-            None => "Shift-click a water source first.".into(),
+            None => "Choose a water source first.".into(),
         };
     }
 
@@ -935,7 +932,8 @@ impl Village {
                     UtilityPanel::Crafting
                     | UtilityPanel::Pantry
                     | UtilityPanel::Finances
-                    | UtilityPanel::Residents,
+                    | UtilityPanel::Residents
+                    | UtilityPanel::Water,
                 ) => true,
                 _ => false,
             }
@@ -3331,37 +3329,7 @@ fn show_hud(
                     .upkeep_status(&catalog, village.upkeep_page),
             );
         }
-        Some(UtilityPanel::Water) => {
-            label.push('\n');
-            label.push_str(&village.construction.utilities.water_details());
-            label.push_str("\nSanitation · ");
-            label.push_str(
-                &village
-                    .construction
-                    .utilities
-                    .sanitation_status(village.construction.residents_needing_sanitation()),
-            );
-            label.push_str(&village.construction.waste_tank_summary(&catalog));
-            label.push_str(&village.construction.queued_installation_hint(false));
-            label.push_str(&village.construction.connection_summary(
-                &catalog,
-                village.water_link,
-                false,
-            ));
-            label.push_str("\nBlue Drinking · Green Irrigation\nPurple Greywater · Amber Sewage");
-            let panel = &village.water_panel;
-            label.push('\n');
-            label.push_str(&village.construction.water_panel(
-                panel.target,
-                panel.source,
-                panel.channel,
-                village.clock,
-            ));
-            if !panel.message.is_empty() {
-                label.push('\n');
-                label.push_str(&panel.message);
-            }
-        }
+        Some(UtilityPanel::Water) => {}
         Some(UtilityPanel::Residents) => {}
         Some(UtilityPanel::Finances) => {}
         Some(UtilityPanel::Trade) => {
@@ -3379,12 +3347,15 @@ fn show_hud(
         Some(UtilityPanel::Pantry) => {}
         None => {}
     }
-    if let Some(endpoints) = village.selected_installation() {
-        label.push_str(
-            &village
+    if village.utility_panel == Some(UtilityPanel::Power)
+        && let Some(endpoints) = village.selected_installation()
+        && let Ok(quote) =
+            village
                 .construction
-                .connection_quote(&catalog, &village.stock, endpoints),
-        );
+                .connection_quote(&catalog, &village.stock, endpoints)
+    {
+        label.push('\n');
+        label.push_str(&quote);
     }
     // A selected building is described by its card beside the action buttons.
     let card = village.selected_project_focus().is_some();
