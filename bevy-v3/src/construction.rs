@@ -1893,10 +1893,15 @@ impl Construction {
         let committed = if self.supplier_construction
             && !self.utilities.grid_off
             && !stock.sandbox
-            && self
+            && (self
                 .plans
                 .iter()
                 .any(|plan| !plan.removed && plan.pickups > 0)
+                || self
+                    .farming
+                    .jobs
+                    .iter()
+                    .any(|job| self.queued_seed_freight(job)))
         {
             self.protected_freight_cash(
                 catalog,

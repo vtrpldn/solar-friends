@@ -177,6 +177,14 @@ impl Construction {
             .any(|job| job.seed_freight_eta.is_some())
     }
 
+    pub(super) fn queued_seed_freight(&self, job: &crate::farming::FarmJob) -> bool {
+        job.pickups > 0
+            && job.seed_freight_eta.is_none()
+            && !self.active_trips().any(|trip| {
+                !trip.market_order && trip.project == job.site && trip.farm_bed == Some(job.bed)
+            })
+    }
+
     fn tick_seed_freight(&mut self, stock: &mut Stock, clock: TownClock) {
         if let Some(job) = self
             .farming
@@ -201,12 +209,12 @@ impl Construction {
         {
             return;
         }
-        let Some(index) = self.farming.jobs.iter().position(|job| {
-            job.pickups > 0
-                && !self.active_trips().any(|trip| {
-                    !trip.market_order && trip.project == job.site && trip.farm_bed == Some(job.bed)
-                })
-        }) else {
+        let Some(index) = self
+            .farming
+            .jobs
+            .iter()
+            .position(|job| self.queued_seed_freight(job))
+        else {
             return;
         };
         let job = &mut self.farming.jobs[index];
@@ -1242,6 +1250,10 @@ mod tests {
             seed_freight_eta: None,
         });
         village.toggle_supplier_construction();
+        assert_eq!(
+            village.protected_freight_cash(&catalog, clock),
+            Some(freight)
+        );
         let mut short_on_cash = stock.clone();
         short_on_cash.debit(balance - fare, crate::stock::CashKind::Food);
         let terrain = setup.terrain();

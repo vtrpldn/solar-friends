@@ -517,8 +517,16 @@ impl Construction {
     ) -> Option<u64> {
         let (loads, replaced) = self.construction_freight_budget(catalog, BTreeMap::new())?;
         let committed = self.market.committed_fares();
-        let freight_commitment = committed.saturating_sub(replaced)
-            + u64::from(loads) * freight_cents(clock.round_trip_km);
+        let freight = freight_cents(clock.round_trip_km);
+        let seeds = self
+            .farming
+            .jobs
+            .iter()
+            .filter(|job| self.queued_seed_freight(job))
+            .map(|job| freight.saturating_sub(job.fare) * u64::from(job.pickups))
+            .sum::<u64>();
+        let freight_commitment = committed.saturating_sub(replaced) + u64::from(loads) * freight;
+        let freight_commitment = freight_commitment + seeds;
         Some(committed.max(freight_commitment))
     }
 
