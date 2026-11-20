@@ -362,8 +362,12 @@ impl Construction {
                         channel < CHANNELS.len()
                             && site.capacity[channel] > 0.0
                             && source != Some(target)
-                            && source
-                                .map_or(channel == 1, |id| self.utilities.water_site(id).is_some())
+                            && source.map_or(
+                                channel == 1
+                                    || (job.carried > EPSILON
+                                        && !matches!(job.phase, WaterPhase::Approach)),
+                                |id| self.utilities.water_site(id).is_some(),
+                            )
                     }
                     WaterAction::InstallPipe {
                         to,
@@ -411,14 +415,42 @@ impl Construction {
             })
     }
 
-    pub(super) fn water_job_at(&self, index: usize) -> bool {
+    pub(super) fn water_job_at(&self, index: usize, include_carry_sources: bool) -> bool {
         let id = index + 1;
         self.pending_connections.iter().any(|&(from, action)| {
             from == id || action.installation().is_some_and(|(to, _)| to == id)
         }) || self.water_jobs.contains_key(&id) || self.water_jobs.values().any(|job| {
-            matches!(job.action, WaterAction::Carry { source: Some(source), .. } if source == id)
+            (include_carry_sources
+                && matches!(job.action, WaterAction::Carry { source: Some(source), .. } if source == id))
                 || job.action.installation().is_some_and(|(to, _)| to == id)
         })
+    }
+
+    pub(super) fn disconnect_water_source(&mut self, index: usize) {
+        let id = index + 1;
+        self.water_jobs.retain(|_, job| {
+            let WaterAction::Carry {
+                source: Some(source),
+                channel,
+            } = job.action
+            else {
+                return true;
+            };
+            if source != id {
+                return true;
+            }
+            if matches!(job.phase, WaterPhase::Approach) {
+                if let Some(worker) = job.worker {
+                    self.residents[worker].path.clear();
+                }
+                return false;
+            }
+            job.action = WaterAction::Carry {
+                source: None,
+                channel,
+            };
+            true
+        });
     }
 
     pub(super) fn working_water(&self, worker: usize) -> bool {
@@ -1669,6 +1701,13 @@ mod tests {
                 .starts_with("Destination full")
         );
         assert!(!town.working_water(0));
+        let source = town.proposed_site(&catalog, "rain-barrel", IVec2::new(42, -13));
+        assert!(town.plans.is_empty());
+        town.plans.push(source);
+        assert_eq!(town.can_change(0), None);
+        town.remove_project(0);
+        assert!(town.utilities.water_site(1).is_none());
+        assert_eq!(town.water_jobs[&0].carried, 10.0);
         let json = serde_json::to_string(&town).unwrap();
         let mut town: Construction = serde_json::from_str(&json).unwrap();
         assert!(town.valid_water_jobs());
@@ -1679,7 +1718,6 @@ mod tests {
         }
         assert!(town.water_jobs.is_empty());
         assert_eq!(amount(&town, 0), 59.0);
-        assert_eq!(amount(&town, 1), 8.0);
 
         assert!(town.utilities.drink(0, 12.0));
         town.queue_water(0, WaterAction::Purify).unwrap();

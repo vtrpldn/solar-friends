@@ -739,7 +739,7 @@ impl Construction {
         ) {
             return Err(reason);
         }
-        if self.farming.jobs.iter().any(|job| job.site == index) || self.water_job_at(index) {
+        if self.farming.jobs.iter().any(|job| job.site == index) || self.water_job_at(index, true) {
             return Err("Finish this field’s jobs before resizing.");
         }
         let change = plan.size - old_size;

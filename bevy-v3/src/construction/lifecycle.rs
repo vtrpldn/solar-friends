@@ -333,7 +333,7 @@ impl Construction {
         if self.upkeep.servicing(index) {
             return Some("Wait for the resident to finish servicing this asset.");
         }
-        if self.water_job_at(index) {
+        if self.water_job_at(index, false) {
             return Some("Wait for the queued water job to finish.");
         }
         if self.production.jobs.iter().any(|job| job.site == index)
@@ -371,7 +371,10 @@ impl Construction {
         if self.utilities.has_manual_link(index) {
             return Some("Disconnect utility lines before relocating this building.");
         }
-        self.can_change(index)
+        self.can_change(index).or_else(|| {
+            self.water_job_at(index, true)
+                .then_some("Wait for the queued water job to finish.")
+        })
     }
 
     pub(super) fn queue_move(
@@ -545,6 +548,7 @@ impl Construction {
         self.upkeep.remove(index);
         self.production.growing_sites.remove(&index);
         self.livestock.animals.remove(&index);
+        self.disconnect_water_source(index);
         self.utilities.remove_facility(index);
         self.changes.remove(&index);
         self.release_construction(index);
