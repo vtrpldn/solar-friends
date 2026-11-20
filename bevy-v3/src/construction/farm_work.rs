@@ -8,6 +8,7 @@ use crate::{
 #[derive(Clone, Copy)]
 pub(crate) enum FarmControl {
     NextBed,
+    WholePlot,
     Irrigation,
     Residues,
     Crop,
@@ -338,6 +339,36 @@ impl Construction {
         let Some(site) = self.production.selected else {
             return;
         };
+        if matches!(action, FarmControl::WholePlot) {
+            self.farming.whole_plot = !self.farming.whole_plot;
+            self.farming.notice.clear();
+            return;
+        }
+        if self.farming.whole_plot
+            && let FarmControl::Work(action) = action
+        {
+            let count = self.farming.plots[&site].beds.len();
+            let mut queued = 0;
+            let mut first_error = None;
+            for bed in 0..count {
+                match self.queue_bed_job(catalog, stock, (site, bed, action), clock) {
+                    Ok(()) => queued += 1,
+                    Err(error) => {
+                        first_error.get_or_insert(error);
+                    }
+                }
+            }
+            let skipped = count - queued;
+            self.farming.notice = format!("{queued} beds queued · {skipped} skipped.");
+            if let Some(error) = first_error {
+                self.farming.notice.push(' ');
+                self.farming.notice.push_str(&error);
+            }
+            return;
+        }
+        if self.farming.whole_plot && !matches!(action, FarmControl::NextBed) {
+            return;
+        }
         let plot = self.farming.plots.get_mut(&site).expect("selected plot");
         let index = self.farming.bed.min(plot.beds.len() - 1);
         let bed = &mut plot.beds[index];
@@ -352,6 +383,7 @@ impl Construction {
         }
         match action {
             FarmControl::NextBed => {
+                self.farming.whole_plot = false;
                 self.farming.bed = (self.farming.bed + 1) % plot.beds.len();
                 self.farming.notice.clear();
             }
@@ -617,6 +649,19 @@ impl Construction {
         let plot = self.farming.plots.get(&site)?;
         if !self.farming.open {
             return Some("K Cultivation".into());
+        }
+        if self.farming.whole_plot {
+            let count = plot.beds.len();
+            let busy = self
+                .farming
+                .jobs
+                .iter()
+                .filter(|job| job.site == site)
+                .count();
+            return Some(format!(
+                "Whole plot · {count} beds · {busy} queued\n1 Prepare · 2 Plant · 3 Harvest · 4 Clear · 5 Amend · 6 Collect\n{}",
+                self.farming.notice,
+            ));
         }
         let index = self.farming.bed.min(plot.beds.len() - 1);
         let mut label = self.bed_status(site, index, clock)?;
@@ -1084,6 +1129,18 @@ mod resize_tests {
 
         village.apply_farm_control(&catalog, &mut stock, FarmControl::NextBed, clock);
         assert_eq!(village.farming.bed, 1);
+
+        village.apply_farm_control(&catalog, &mut stock, FarmControl::WholePlot, clock);
+        village.apply_farm_control(
+            &catalog,
+            &mut stock,
+            FarmControl::Work(FarmAction::Prepare),
+            clock,
+        );
+        let count = village.farming.plots[&0].beds.len();
+        assert!(count > 1);
+        assert_eq!(village.farming.jobs.len(), count);
+        assert!(village.farming.notice.contains("1 skipped"));
     }
 
     #[test]

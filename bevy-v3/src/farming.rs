@@ -14,6 +14,8 @@ pub struct Farming {
     #[serde(skip)]
     pub bed: usize,
     #[serde(skip)]
+    pub whole_plot: bool,
+    #[serde(skip)]
     pub notice: String,
 }
 

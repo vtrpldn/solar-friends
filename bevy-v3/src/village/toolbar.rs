@@ -520,6 +520,10 @@ impl Action {
             Self::Beds => "Beds".into(),
             Self::Farm(action) => match action {
                 FarmControl::NextBed => "Next bed",
+                FarmControl::WholePlot if village.construction.farming.whole_plot => {
+                    "Inspect one bed"
+                }
+                FarmControl::WholePlot => "Whole plot",
                 FarmControl::Irrigation => "Toggle irrigation",
                 FarmControl::Residues => "Toggle residue collection",
                 FarmControl::Crop => "Change crop",
@@ -895,6 +899,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 }
                 for action in [
                     FarmControl::NextBed,
+                    FarmControl::WholePlot,
                     FarmControl::Irrigation,
                     FarmControl::Residues,
                     FarmControl::Crop,
@@ -1829,6 +1834,12 @@ fn refresh(
             Action::MoveCraft => craft_workspace.is_some(),
             Action::FacilityIrrigation => irrigation.is_some(),
             Action::Beds | Action::Gather => action.available(&village),
+            Action::Farm(
+                FarmControl::Irrigation
+                | FarmControl::Residues
+                | FarmControl::Crop
+                | FarmControl::Density,
+            ) => show_beds && !village.construction.farming.whole_plot,
             Action::Farm(_) => show_beds,
             Action::Recipe(row) => recipes.get(row).is_some(),
             Action::FocusSelectedProject | Action::DeselectProject => {
