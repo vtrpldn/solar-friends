@@ -1489,6 +1489,30 @@ impl Construction {
         line
     }
 
+    pub(crate) fn resident_story(catalog: &Catalog, selected: usize) -> String {
+        use std::fmt::Write;
+
+        let profile = &catalog.residents[selected];
+        let mut story = format!(
+            "{} · {}\n{}",
+            NAMES[selected],
+            profile.role,
+            profile.traits.join(" · ")
+        );
+        for (label, text) in [
+            ("Before the village", &profile.backstory),
+            ("What I want", &profile.desire),
+            ("What drives me", &profile.motivation),
+            ("What I fear", &profile.fear),
+            ("Where I struggle", &profile.flaw),
+            ("What I need from others", &profile.boundary),
+            ("Room to grow", &profile.growth),
+        ] {
+            let _ = write!(story, "\n\n{label}\n{text}");
+        }
+        story
+    }
+
     pub fn resident_status(&self, catalog: &Catalog, stock: &Stock, selected: usize) -> String {
         let mut rows = self
             .residents
@@ -1589,7 +1613,7 @@ impl Construction {
         if !ties.is_empty() {
             let _ = write!(rows, "\n{}", ties.join("  |  "));
         }
-        for memory in mind.memories.iter().take(2) {
+        for memory in mind.memories.iter().take(3) {
             let _ = write!(rows, "\n{}", memory.text);
         }
         rows

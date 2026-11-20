@@ -172,6 +172,8 @@ pub struct Village {
     #[serde(skip)]
     selected_resident: usize,
     #[serde(skip)]
+    resident_story_open: bool,
+    #[serde(skip)]
     finance_history_open: bool,
     #[serde(skip)]
     finance_history_page: usize,
@@ -1976,6 +1978,9 @@ fn village_input(
             town.construction.utilities.toggle_cooling(index);
         }
         if town.utility_panel == Some(UtilityPanel::Residents) {
+            if keyboard.just_pressed(KeyCode::Tab) {
+                town.resident_story_open = !town.resident_story_open;
+            }
             if let Some(index) = [
                 KeyCode::Digit1,
                 KeyCode::Digit2,
@@ -2676,17 +2681,26 @@ fn show_hud(
             }
         }
         Some(UtilityPanel::Residents) => {
-            label.push('\n');
-            label.push_str("1–5 Select resident · Click home · T Assign · Y Clear\n");
-            if !village.housing_notice.is_empty() {
-                label.push_str(&village.housing_notice);
+            label.push_str("\n1–5 Select resident · Tab Overview / Story");
+            if village.resident_story_open {
+                label.push_str("\n\n");
+                label.push_str(&Construction::resident_story(
+                    &catalog,
+                    village.selected_resident,
+                ));
+            } else {
                 label.push('\n');
+                label.push_str("Click home · T Assign · Y Clear\n");
+                if !village.housing_notice.is_empty() {
+                    label.push_str(&village.housing_notice);
+                    label.push('\n');
+                }
+                label.push_str(&village.construction.resident_status(
+                    &catalog,
+                    &village.stock,
+                    village.selected_resident,
+                ));
             }
-            label.push_str(&village.construction.resident_status(
-                &catalog,
-                &village.stock,
-                village.selected_resident,
-            ));
         }
         Some(UtilityPanel::Finances) => {
             label.push('\n');

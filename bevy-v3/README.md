@@ -52,7 +52,7 @@ Press P or V to see the automatic power and water networks. Dark lines indicate 
 
 Choose Village road in the build menu to pause for road planning. Click the first tile, then Shift-click to preview and place a connected route. Press Z to undo the last stroke or Esc to finish planning and let residents build the road.
 
-Press N to view residents and assign beds. Pick a resident with 1–5, click a completed home, then press T to assign it or Y to clear the assignment. Residents prefer their assigned home and can use spare beds or the camp tents when needed. The selected resident shows recent memories, friendships, and their building aspiration. Idle residents use outdoor walks, sheltered reading, exercise spaces, and fireside gatherings as the village grows.
+Press N to view residents and assign beds. Pick a resident with 1–5, click a completed home, then press T to assign it or Y to clear the assignment. Residents prefer their assigned home and can use spare beds or the camp tents when needed. The selected resident shows recent memories, friendships, and their building aspiration. Choose **Story** or press Tab to read their backstory, motivations, and boundaries. Idle residents use outdoor walks, sheltered reading, exercise spaces, and fireside gatherings as the village grows.
 
 Press F4 after pitching camp to edit terrain. Use 1–4 for Raise, Lower, Flatten, or Smooth. Use brackets to change the brush radius, then click the terrain. Flatten keeps the height of the first click until you reselect it. Press Z to undo an edit. Your edits are saved with the village. New building plans and completed moves grade their footprint. Foundations stay in the terrain after a project moves or is removed.
 
