@@ -671,17 +671,28 @@ impl Trade {
             .collect();
         for id in keys {
             let (reserve, offer) = self.automatic_sale_offer(catalog, stock, &id, day);
-            if offer.is_ok()
-                && let Ok(quantity) =
-                    self.reserve(catalog, stock, market, &id, (day, fare, reserve))
-            {
+            if offer.is_err() {
+                continue;
+            }
+            let policy = self.policies.get_mut(&id).expect("active sale policy");
+            if policy.day != day {
+                policy.day = day;
+                policy.sold = 0;
+            }
+            let pack = catalog.materials[&id].pack;
+            let surplus = stock.available(&id).saturating_sub(reserve);
+            let available = if policy.limit == 0 {
+                surplus
+            } else {
+                surplus.min(policy.limit.saturating_sub(policy.sold))
+            };
+            for _ in 0..available / pack {
+                let Ok(quantity) = self.reserve(catalog, stock, market, &id, (day, fare, reserve))
+                else {
+                    break;
+                };
                 self.note_sale_queued(clock);
-                let policy = self.policies.get_mut(&id).expect("active sale policy");
-                if policy.day != day {
-                    policy.day = day;
-                    policy.sold = 0;
-                }
-                policy.sold += quantity;
+                self.policies.get_mut(&id).expect("active sale policy").sold += quantity;
             }
         }
     }
@@ -1086,6 +1097,27 @@ mod tests {
                 .contains("Supplier freight")
         );
         assert!(trade.delivery.is_none());
+    }
+
+    #[test]
+    fn automatic_sale_queues_all_eligible_packs_when_the_trigger_is_crossed() {
+        let catalog = Catalog::default();
+        let start = Stock::for_start(&WorldSetup::default(), &catalog);
+        assert_eq!(start.available("wood"), 36);
+        for (limit, batches, remaining) in [(0, 2, 12), (12, 1, 24)] {
+            let mut stock = start.clone();
+            let mut market = Market::default();
+            let mut trade = Trade::default();
+            let policy = trade.sale_policy("wood");
+            policy.enabled = true;
+            policy.trigger = 30;
+            policy.limit = limit;
+            trade.auto_sell(&catalog, &mut stock, &mut market, 0., 776);
+            assert_eq!(trade.orders.len(), batches);
+            assert_eq!(stock.available("wood"), remaining);
+            assert_eq!(trade.policies["wood"].sold, 36 - remaining);
+            assert_eq!(trade.sale_dispatch_wait(0.), Some(40.));
+        }
     }
 
     #[test]
