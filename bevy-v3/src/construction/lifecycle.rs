@@ -55,6 +55,8 @@ pub(super) struct ChangeJob {
     retry: f64,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     blocked_destination: Option<String>,
+    #[serde(default)]
+    inaccessible_worksite: bool,
 }
 
 impl ChangeJob {
@@ -70,6 +72,8 @@ impl ChangeJob {
         let action = self.action_label();
         if let Some(reason) = self.blocked_destination.as_deref() {
             format!("{action} · {reason}")
+        } else if self.inaccessible_worksite {
+            format!("{action} · Needs an accessible work position")
         } else {
             format!("{action} · {:.0}%", self.work / self.required * 100.0)
         }
@@ -501,6 +505,7 @@ impl Construction {
                 required,
                 retry: 0.0,
                 blocked_destination: None,
+                inaccessible_worksite: false,
             },
         );
         self.release_construction(index);
@@ -725,6 +730,7 @@ impl Construction {
             }
             let parcel = &self.plans[index];
             self.changes.get_mut(&index).expect("pending change").retry = 2.0;
+            let mut inaccessible_worksite = false;
             for (worker_index, resident) in self.residents.iter().enumerate() {
                 if resident.health.energy < MIN_DISMANTLING_ENERGY
                     || resident.assignment.is_some()
@@ -760,9 +766,15 @@ impl Construction {
                     let job = self.changes.get_mut(&index).expect("assigned change");
                     job.worker = Some(worker_index);
                     job.retry = 0.0;
+                    inaccessible_worksite = false;
                     break;
                 }
+                inaccessible_worksite = true;
             }
+            self.changes
+                .get_mut(&index)
+                .expect("active change")
+                .inaccessible_worksite = inaccessible_worksite;
         }
     }
 }
@@ -811,6 +823,45 @@ mod tests {
         assert_eq!(construction.changes[&0].worker, Some(0));
         let destination = construction.residents[0].path.back().unwrap();
         assert_ne!(*destination, entrance.as_vec2());
+    }
+
+    #[test]
+    fn inaccessible_dismantling_reports_its_blocker_and_retries() {
+        let setup = WorldSetup::default();
+        let catalog = Catalog::default();
+        let camp = IVec2::splat(36);
+        let terrain = setup.terrain().with_camp(camp);
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut village = Construction::default();
+        let kitchen = village.proposed_site(&catalog, "kitchen", IVec2::new(44, 36));
+        let approaches = project_access_points(&kitchen, &catalog, Vec2::ZERO);
+        village.plans.push(kitchen);
+        for cell in approaches {
+            village.plans.push(Construction::proposal(
+                &catalog,
+                "wash-station",
+                cell,
+                IVec2::ONE,
+                0,
+            ));
+        }
+        village.begin_change(&catalog, 0, Change::Salvage, None);
+        village.tick_changes(&catalog, &mut stock, site, 0.0, 0.1);
+
+        assert!(village.changes[&0].worker.is_none());
+        let (_, projects) = village.projects_panel(&catalog, &stock, 0, true, 0.0);
+        assert!(projects.contains("Salvaging · Needs an accessible work position"));
+
+        village.plans.truncate(1);
+        village.tick_changes(&catalog, &mut stock, site, 2.0, 2.0);
+        assert!(village.changes[&0].worker.is_some());
+        assert!(!village.changes[&0].inaccessible_worksite);
     }
 
     #[test]
