@@ -750,6 +750,7 @@ fn setup_lab_window(mut commands: Commands, assets: Res<AssetServer>) {
             (LabControl::OpenFile, "Open lab file"),
             (LabControl::View(LabView::Trade), "Trade"),
             (LabControl::View(LabView::Residents), "Residents"),
+            (LabControl::View(LabView::Jobs), "Jobs"),
         ],
         &[
             (CycleSpeed, "Cycle speed"),

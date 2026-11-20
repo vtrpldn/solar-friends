@@ -234,7 +234,18 @@ impl Construction {
                             .is_some_and(|job| job.worker.is_some()),
                     );
                 if waiting_only && assigned > 0 && plan.pickups == 0 {
-                    continue;
+                    let blocked = self
+                        .residents
+                        .iter()
+                        .any(|worker| worker.blocked_construction_project() == Some(index))
+                        || self
+                            .changes
+                            .get(&index)
+                            .and_then(|job| job.worker)
+                            .is_some_and(|worker| self.residents[worker].waiting_for_route());
+                    if !blocked {
+                        continue;
+                    }
                 }
                 jobs.push(format!(
                     "{} · {} · {assigned} assigned",
@@ -248,13 +259,14 @@ impl Construction {
                 continue;
             }
             let recipe = &catalog.production[&batch.recipe];
-            let status = self.batch_status(batch, catalog, stock, clock);
             if waiting_only
                 && (batch.phase == crate::production::Phase::Growing
-                    || (batch.worker.is_some() && !status.starts_with("Waiting")))
+                    || (batch.worker.is_some()
+                        && self.batch_blocker(batch, catalog, stock, clock).is_none()))
             {
                 continue;
             }
+            let status = self.batch_status(batch, catalog, stock, clock);
             jobs.push(format!(
                 "{} · {} · {} · {}",
                 site_name(batch.site),
@@ -310,7 +322,8 @@ impl Construction {
             }
             let destination = site.checked_sub(1).map_or_else(|| "Camp".into(), site_name);
             let worker = (0..self.residents.len()).find(|&index| job.assigned_to(index));
-            let blocked = self.water_route_blocked(site, job, clock);
+            let blocked = self.water_job_wait(site, job).is_some()
+                || self.water_route_blocked(site, job, clock);
             if waiting_only && worker.is_some() && !blocked {
                 continue;
             }

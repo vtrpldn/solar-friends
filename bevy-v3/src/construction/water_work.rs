@@ -478,7 +478,7 @@ impl Construction {
             .map(WaterJob::label)
     }
 
-    fn water_job_wait(&self, target: usize, job: &WaterJob) -> Option<&'static str> {
+    pub(super) fn water_job_wait(&self, target: usize, job: &WaterJob) -> Option<&'static str> {
         if let WaterAction::Carry { channel, .. } = job.action
             && !matches!(job.phase, WaterPhase::Deliver)
             && self
