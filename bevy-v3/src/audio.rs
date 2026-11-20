@@ -87,7 +87,8 @@ struct Soundscape {
     started: bool,
 }
 
-#[derive(Resource, Deserialize, Serialize)]
+/// Defaults to silence: every session starts muted.
+#[derive(Resource, Default, Deserialize, Serialize)]
 pub struct SoundSettings {
     music: u8,
     effects: u8,
@@ -97,18 +98,6 @@ pub struct SoundSettings {
     effects_selected: bool,
     #[serde(skip)]
     save_failed: bool,
-}
-
-impl Default for SoundSettings {
-    fn default() -> Self {
-        Self {
-            music: 0,
-            effects: 0,
-            open: false,
-            effects_selected: false,
-            save_failed: false,
-        }
-    }
 }
 
 impl SoundSettings {
