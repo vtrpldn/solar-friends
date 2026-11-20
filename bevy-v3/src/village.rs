@@ -1,4 +1,5 @@
 use crate::{audio::SoundSettings, utilities::NetworkView};
+mod almanac;
 mod build_menu;
 mod building_lighting;
 mod building_preview;
@@ -196,6 +197,7 @@ impl Plugin for VillagePlugin {
                     animate_arrival,
                     draw_blueprints,
                     show_hud,
+                    almanac::refresh,
                     fit_and_scroll_hud,
                     show_construction,
                     construction_models::show_in_progress,
@@ -1415,6 +1417,7 @@ fn spawn_hud(mut commands: Commands, assets: Res<AssetServer>) {
             crate::theme::panel(),
         ))
         .with_children(|hud| {
+            almanac::spawn(hud, &assets);
             resident_meters::spawn(hud, &assets);
             hud.spawn((
                 VillageHudText,
@@ -1701,13 +1704,17 @@ fn strip_key_hints(line: &str) -> String {
                 && word.chars().any(|c| c.is_ascii_uppercase()))
     };
     line.split(" · ")
-        .filter(|segment| {
-            let mut words = segment.split_whitespace();
-            !matches!(
-                (words.next(), words.next()),
-                (Some(key), Some(action)) if is_key(key)
-                    && action.chars().next().is_some_and(char::is_uppercase)
-            )
+        .filter_map(|segment| {
+            let mut words = segment.splitn(2, ' ');
+            match (words.next(), words.next()) {
+                (Some(key), Some(rest))
+                    if is_key(key) && rest.chars().next().is_some_and(char::is_uppercase) =>
+                {
+                    // "J Wait up to 3.5h" keeps its value; "J Switch" is only a shortcut.
+                    rest.chars().any(|c| c.is_ascii_digit()).then_some(rest)
+                }
+                _ => Some(segment),
+            }
         })
         .collect::<Vec<_>>()
         .join(" · ")
@@ -2931,11 +2938,16 @@ fn show_hud(
     // short status notes shown while playing.
     node.top = px(TOP_BAR_CLEARANCE);
     node.bottom = Val::Auto;
-    node.max_width = if village.utility_panel.is_some()
-        || village.guide.open()
-        || village.lenses.open
-        || village.lenses.active.is_some()
-    {
+    // An open panel becomes a wide almanac sheet beside its action column.
+    let sheet = village.utility_panel.is_some() && !village.guide.open() && !village.lenses.open;
+    node.right = if sheet {
+        px(toolbar::PANEL_WIDTH + 60.0)
+    } else {
+        Val::Auto
+    };
+    node.max_width = if sheet {
+        Val::Auto
+    } else if village.guide.open() || village.lenses.open || village.lenses.active.is_some() {
         Val::Vw(46.0)
     } else {
         px(520)
@@ -2999,13 +3011,14 @@ fn show_hud(
         label.push_str(&village.terrain_editor.label());
     }
     if village.camp.is_some()
+        && !sheet
         && !village.stock.sandbox
         && let Some(status) = village.construction.opening_milestones_status(&catalog)
     {
         label.push('\n');
         label.push_str(&status);
     }
-    if let Some(progress) = village.construction.latest_progress(&catalog) {
+    if !sheet && let Some(progress) = village.construction.latest_progress(&catalog) {
         label.push('\n');
         label.push_str(&progress);
     }
@@ -3037,7 +3050,7 @@ fn show_hud(
                 &village
                     .construction
                     .utilities
-                    .power_summary(village.stock.sandbox),
+                    .power_details(village.stock.sandbox),
             );
             label.push_str(&village.construction.connection_summary(
                 &catalog,
@@ -3217,7 +3230,7 @@ fn show_hud(
         }
         Some(UtilityPanel::Water) => {
             label.push('\n');
-            label.push_str(&village.construction.utilities.water_summary());
+            label.push_str(&village.construction.utilities.water_details());
             label.push_str("\nSanitation · ");
             label.push_str(
                 &village
@@ -3479,8 +3492,18 @@ fn show_hud(
         label.push('\n');
         label.push_str(&village.save_notice);
     }
-    let label = label.trim_start_matches('\n').to_owned();
-    let meters = village.resident_overview_open();
+    // Panel buttons already offer the keyboard actions their text used to list.
+    let label = if sheet {
+        label
+            .lines()
+            .map(strip_key_hints)
+            .filter(|line| !line.is_empty())
+            .collect::<Vec<_>>()
+            .join("\n")
+    } else {
+        label.trim_start_matches('\n').to_owned()
+    };
+    let meters = village.resident_overview_open() || sheet;
     node.display = if label.is_empty() && !meters {
         Display::None
     } else {
@@ -3861,6 +3884,10 @@ mod tests {
             ""
         );
         assert_eq!(strip_key_hints("Powered · J Switch"), "Powered");
+        assert_eq!(
+            strip_key_hints("Trigger 16 kg · Y Daily cap 32 kg"),
+            "Trigger 16 kg · Daily cap 32 kg"
+        );
         assert_eq!(strip_key_hints("100 m² basic shell"), "100 m² basic shell");
         assert_eq!(
             strip_key_hints("Drinking water · 0.0/8.0 L"),

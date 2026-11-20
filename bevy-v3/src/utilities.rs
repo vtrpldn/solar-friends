@@ -1174,6 +1174,53 @@ impl Utilities {
         })
     }
 
+    /// Stored liters and capacity per channel: drinking, irrigation, greywater, sewage.
+    pub fn water_totals(&self) -> ([f64; 4], [f64; 4]) {
+        let mut water = [0.0; 4];
+        let mut capacity = [0.0; 4];
+        for node in self.nodes.values() {
+            for channel in 0..4 {
+                water[channel] += node.water[channel];
+                capacity[channel] += node.capacity[channel];
+            }
+        }
+        (water, capacity)
+    }
+
+    /// Generation and demand in kW, battery charge and capacity in kWh, grid import in kW.
+    pub fn power_figures(&self) -> (f64, f64, f64, f64, f64) {
+        let capacity = self.nodes.values().map(|node| node.battery).sum();
+        (
+            self.generation_kw,
+            self.demand_kw,
+            self.stored_energy(),
+            capacity,
+            self.grid_import_kw,
+        )
+    }
+
+    /// Power details besides the figures the panel shows as tiles: local share, grid
+    /// switch and billing.
+    pub fn power_details(&self, sandbox: bool) -> String {
+        let summary = self.power_summary(sandbox);
+        summary
+            .lines()
+            .enumerate()
+            .filter(|(index, _)| matches!(index, 1 | 3 | 4))
+            .map(|(_, line)| line)
+            .collect::<Vec<_>>()
+            .join("\n")
+    }
+
+    /// Water details below the stored totals that the panel shows as tiles.
+    pub fn water_details(&self) -> String {
+        self.water_summary()
+            .lines()
+            .skip(3)
+            .collect::<Vec<_>>()
+            .join("\n")
+    }
+
     pub fn water_summary(&self) -> String {
         let mut water = [0.0; 4];
         let mut capacity = [0.0; 4];

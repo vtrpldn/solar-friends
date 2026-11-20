@@ -914,7 +914,7 @@ mod tests {
             (KeyCode::KeyM, "Shared savings"),
             (KeyCode::KeyJ, "Projects ·"),
             (KeyCode::KeyI, "Resources · Stores"),
-            (KeyCode::KeyU, "Water stored / capacity"),
+            (KeyCode::KeyU, "DRINKING WATER"),
         ] {
             app.world_mut()
                 .resource_mut::<ButtonInput<KeyCode>>()
@@ -1524,9 +1524,9 @@ mod tests {
                 .query::<&Text>()
                 .iter(app.world())
                 .any(|text| {
-                    text.0.contains("Minimum load 37% · J Wait up to 3.5h")
+                    text.0.contains("Minimum load 37% · Wait up to 3.5h")
                         && text.0.contains("Reserve 16 kg")
-                        && text.0.contains("Trigger 16 kg · Y Daily cap 32 kg")
+                        && text.0.contains("Trigger 16 kg · Daily cap 32 kg")
                 })
         );
         press_button(&mut app, "Close panel");
@@ -1695,7 +1695,7 @@ mod tests {
             app.world_mut()
                 .query::<&Text>()
                 .iter(app.world())
-                .any(|text| text.0.contains("Click home · T Assign · Y Clear"))
+                .any(|text| text.0.contains("Click home"))
         );
         let before = app
             .world_mut()
