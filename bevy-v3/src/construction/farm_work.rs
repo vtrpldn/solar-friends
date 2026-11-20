@@ -333,6 +333,24 @@ impl Construction {
         }
     }
 
+    pub(crate) fn select_bed_number(&mut self, number: usize) {
+        let Some(plot) = self
+            .production
+            .selected
+            .and_then(|site| self.farming.plots.get(&site))
+        else {
+            return;
+        };
+        if (1..=plot.beds.len()).contains(&number) {
+            self.farming.bed = number - 1;
+            self.farming.whole_plot = false;
+            self.farming.pending_plot_clear = None;
+            self.farming.notice.clear();
+        } else {
+            self.farming.notice = format!("Choose a bed from 1 to {}.", plot.beds.len());
+        }
+    }
+
     pub fn apply_farm_control(
         &mut self,
         catalog: &Catalog,
@@ -1240,6 +1258,12 @@ mod resize_tests {
         village.apply_farm_control(&catalog, &mut stock, FarmControl::NextBed, clock);
         assert!(!village.farming.whole_plot);
         assert_eq!(village.farming.bed, 0);
+        let last = village.farming.plots[&0].beds.len();
+        village.select_bed_number(last);
+        assert_eq!(village.farming.bed, last - 1);
+        village.select_bed_number(last + 1);
+        assert_eq!(village.farming.bed, last - 1);
+        assert!(village.farming.notice.contains("Choose a bed"));
         village.apply_farm_control(&catalog, &mut stock, FarmControl::WholePlot, clock);
         let clear = FarmControl::Work(FarmAction::Clear);
         village.apply_farm_control(&catalog, &mut stock, clear, clock);

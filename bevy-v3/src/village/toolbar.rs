@@ -57,6 +57,7 @@ enum Action {
     Gather,
     Beds,
     Farm(FarmControl),
+    SelectBed,
     Recipe(usize),
     RecipePage(bool),
     CraftWorkspace,
@@ -198,7 +199,7 @@ impl Action {
                     && !village.construction.production.open
                     && village.construction.has_selected_plot()
             }
-            Self::Farm(_) => {
+            Self::Farm(_) | Self::SelectBed => {
                 village.utility_panel.is_none()
                     && village.construction.farming.open
                     && !village.construction.menu
@@ -518,6 +519,7 @@ impl Action {
             Self::Gather => "Gather resource".into(),
             Self::Beds if village.construction.farming.open => "Close beds".into(),
             Self::Beds => "Beds".into(),
+            Self::SelectBed => numeric_label(village, NumericTarget::Bed, "Go to bed number"),
             Self::Farm(action) => match action {
                 FarmControl::NextBed => "Next bed",
                 FarmControl::WholePlot if village.construction.farming.whole_plot => {
@@ -720,6 +722,7 @@ fn numeric_label(village: &Village, target: NumericTarget, label: &str) -> Strin
             let value = match target {
                 NumericTarget::MinimumLoad => format!("{entry}% (0–100)"),
                 NumericTarget::DispatchWait => format!("{entry}h (0–24)"),
+                NumericTarget::Bed => format!("Bed {entry}"),
                 _ => format!("R${entry}"),
             };
             format!("{value} · Enter to set · Esc to cancel")
@@ -905,6 +908,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 ] {
                     spawn_button(menu, &assets, Action::SelectedProject(action));
                 }
+                spawn_button(menu, &assets, Action::SelectBed);
                 for action in [
                     FarmControl::NextBed,
                     FarmControl::WholePlot,
@@ -1579,6 +1583,9 @@ fn handle_buttons(
                     village.construction.toggle_beds();
                     picker.open = false;
                 }
+                Action::SelectBed if !picker.open => {
+                    village.numeric_entry = Some((NumericTarget::Bed, String::new()));
+                }
                 Action::Farm(action) if !picker.open => {
                     let town = &mut *village;
                     town.construction.apply_farm_control(
@@ -1600,6 +1607,7 @@ fn handle_buttons(
                 | Action::MoveCraft
                 | Action::FacilityIrrigation
                 | Action::Farm(_)
+                | Action::SelectBed
                 | Action::SelectedProject(_)
                 | Action::FocusSelectedProject
                 | Action::DeselectProject
@@ -1842,7 +1850,7 @@ fn refresh(
             Action::MoveCraft => craft_workspace.is_some(),
             Action::FacilityIrrigation => irrigation.is_some(),
             Action::Beds | Action::Gather => action.available(&village),
-            Action::Farm(_) => show_beds,
+            Action::Farm(_) | Action::SelectBed => show_beds,
             Action::Recipe(row) => recipes.get(row).is_some(),
             Action::FocusSelectedProject | Action::DeselectProject => {
                 show_selected_project && action.available(&village)

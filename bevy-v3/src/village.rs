@@ -1426,6 +1426,7 @@ enum NumericTarget {
     MinimumLoad,
     DispatchWait,
     Sale(SaleSetting),
+    Bed,
 }
 
 fn apply_numeric_entry(
@@ -1435,6 +1436,11 @@ fn apply_numeric_entry(
     catalog: &Catalog,
 ) {
     match target {
+        NumericTarget::Bed => {
+            if let Ok(number) = entry.parse::<usize>() {
+                construction.select_bed_number(number);
+            }
+        }
         NumericTarget::MinimumLoad => {
             if let Ok(percent) = entry.parse::<u32>() {
                 construction.set_minimum_dispatch_fill(percent.min(100) as u8);
@@ -1468,7 +1474,8 @@ fn apply_numeric_entry(
                 }
                 NumericTarget::MinimumLoad
                 | NumericTarget::DispatchWait
-                | NumericTarget::Sale(_) => unreachable!(),
+                | NumericTarget::Sale(_)
+                | NumericTarget::Bed => unreachable!(),
             }
         }
     }
@@ -1565,8 +1572,14 @@ fn village_input(
     }
 
     if village.numeric_entry.as_ref().is_some_and(|(target, _)| {
+        if *target == NumericTarget::Bed {
+            return village.utility_panel.is_some()
+                || !village.construction.farming.open
+                || !village.construction.has_selected_plot();
+        }
         village.utility_panel
             != Some(match target {
+                NumericTarget::Bed => unreachable!(),
                 NumericTarget::Food => UtilityPanel::Pantry,
                 NumericTarget::ExpansionReserve => UtilityPanel::Finances,
                 NumericTarget::MinimumLoad
