@@ -1420,6 +1420,40 @@ mod tests {
         assert_eq!(sandbox.camp, Some(IVec2::new(36, 36)));
         assert!(matches!(sandbox.mode(), Some(setup::Mode::Sandbox)));
 
+        press_button(&mut app, "Manage");
+        press_button(&mut app, "Residents");
+        press_button(&mut app, "Story");
+        assert!(
+            app.world_mut()
+                .query::<&Text>()
+                .iter(app.world())
+                .any(|text| text.0.contains("Iara grew up tending a small garden"))
+        );
+        press_button(&mut app, "Skills");
+        assert!(
+            app.world_mut()
+                .query::<&Text>()
+                .iter(app.world())
+                .any(|text| text.0.contains("Specialties · 25% faster"))
+        );
+        press_button(&mut app, "Relationships");
+        assert!(
+            app.world_mut()
+                .query::<&Text>()
+                .iter(app.world())
+                .any(|text| text
+                    .0
+                    .contains("Bento · Getting to know each other · 0/100"))
+        );
+        press_button(&mut app, "Overview");
+        assert!(
+            app.world_mut()
+                .query::<&Text>()
+                .iter(app.world())
+                .any(|text| text.0.contains("Click home · T Assign · Y Clear"))
+        );
+        press_button(&mut app, "Close panel");
+
         press_button(&mut app, "Food portions");
         assert!(
             app.world_mut()
