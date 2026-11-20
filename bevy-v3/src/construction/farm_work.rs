@@ -11,7 +11,7 @@ pub(crate) enum FarmControl {
     WholePlot,
     Balances,
     Irrigation,
-    Residues,
+    Residues(Option<bool>),
     Crop(Option<Crop>),
     Density(Option<f64>),
     Work(FarmAction),
@@ -257,7 +257,7 @@ impl Construction {
         let actions = [
             (KeyCode::Tab, FarmControl::NextBed),
             (KeyCode::KeyT, FarmControl::Irrigation),
-            (KeyCode::KeyZ, FarmControl::Residues),
+            (KeyCode::KeyZ, FarmControl::Residues(None)),
             (KeyCode::KeyX, FarmControl::Crop(None)),
             (KeyCode::KeyY, FarmControl::Density(None)),
         ];
@@ -463,7 +463,9 @@ impl Construction {
                 self.farming.notice.clear();
             }
             FarmControl::Irrigation => bed.irrigation = !bed.irrigation,
-            FarmControl::Residues => bed.collect_residues = !bed.collect_residues,
+            FarmControl::Residues(choice) => {
+                bed.collect_residues = choice.unwrap_or(!bed.collect_residues);
+            }
             FarmControl::Crop(choice) if bed.editable() => {
                 bed.crop = choice.unwrap_or_else(|| bed.crop.next());
             }
@@ -523,14 +525,17 @@ impl Construction {
             _ => beds[first].next_density(),
         };
         let irrigation = !eligible.iter().all(|&index| beds[index].irrigation);
-        let residues = !eligible.iter().all(|&index| beds[index].collect_residues);
+        let residues = match action {
+            FarmControl::Residues(Some(collect)) => collect,
+            _ => !eligible.iter().all(|&index| beds[index].collect_residues),
+        };
         for &index in &eligible {
             let bed = &mut beds[index];
             match action {
                 FarmControl::Crop(_) => bed.crop = crop,
                 FarmControl::Density(_) => bed.density = density,
                 FarmControl::Irrigation => bed.irrigation = irrigation,
-                FarmControl::Residues => bed.collect_residues = residues,
+                FarmControl::Residues(_) => bed.collect_residues = residues,
                 _ => return,
             }
         }
@@ -543,7 +548,7 @@ impl Construction {
                 "Irrigation off"
             }
             .into(),
-            FarmControl::Residues => if residues {
+            FarmControl::Residues(_) => if residues {
                 "Collect residues"
             } else {
                 "Leave residues as cover"
@@ -1455,7 +1460,7 @@ mod resize_tests {
         let bed = &village.farming.plots[&0].beds[0];
         let original = (bed.irrigation, bed.collect_residues);
 
-        for action in [FarmControl::Irrigation, FarmControl::Residues] {
+        for action in [FarmControl::Irrigation, FarmControl::Residues(Some(true))] {
             village.apply_farm_control(&catalog, &mut stock, action, clock);
         }
         let bed = &village.farming.plots[&0].beds[0];
@@ -1472,6 +1477,19 @@ mod resize_tests {
             village.farming.plots[&0].beds.len() - 1
         );
         assert_eq!(available[FarmAction::Harvest as usize], 0);
+        let plot = village.farming.plots.get_mut(&0).unwrap();
+        plot.beds[0].collect_residues = true;
+        plot.beds[1].collect_residues = true;
+        village.apply_farm_control(
+            &catalog,
+            &mut stock,
+            FarmControl::Residues(Some(false)),
+            clock,
+        );
+        let beds = &village.farming.plots[&0].beds;
+        assert!(beds[0].collect_residues);
+        assert!(beds[1..].iter().all(|bed| !bed.collect_residues));
+
         let initial_crop = village.farming.plots[&0].beds[0].crop;
         village.apply_farm_control(
             &catalog,

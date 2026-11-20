@@ -540,7 +540,9 @@ impl Action {
                 }
                 FarmControl::Balances => "Show water & material balances",
                 FarmControl::Irrigation => "Toggle irrigation",
-                FarmControl::Residues => "Toggle residue collection",
+                FarmControl::Residues(Some(false)) => "Leave residues as cover",
+                FarmControl::Residues(Some(true)) => "Collect residues after harvest",
+                FarmControl::Residues(None) => "Toggle residue collection",
                 FarmControl::Crop(Some(crop)) => crop.label(),
                 FarmControl::Crop(None) => "Change crop",
                 FarmControl::Density(Some(0.5)) => "Wide spacing",
@@ -936,7 +938,8 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                     FarmControl::WholePlot,
                     FarmControl::Balances,
                     FarmControl::Irrigation,
-                    FarmControl::Residues,
+                    FarmControl::Residues(Some(false)),
+                    FarmControl::Residues(Some(true)),
                 ]
                 .into_iter()
                 .chain(Crop::ALL.map(|crop| FarmControl::Crop(Some(crop))))
