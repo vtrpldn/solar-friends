@@ -33,11 +33,14 @@ struct Toast {
     age: f32,
 }
 
+/// Latest progress, latest event, save notice, advance result and action feedback.
+type Snapshot = (Option<String>, Option<String>, String, String, String);
+
 #[derive(Resource, Default)]
 struct News {
     toasts: VecDeque<Toast>,
     /// What was last seen, so only changes become toasts.
-    seen: Option<(Option<String>, Option<String>, String, String)>,
+    seen: Option<Snapshot>,
 }
 
 #[derive(Component)]
@@ -224,6 +227,7 @@ fn collect_news(
         village.construction.latest_event().map(str::to_owned),
         village.save_notice.clone(),
         village.advance.result().to_owned(),
+        village.construction.construction_notice().to_owned(),
     );
     let Some(seen) = news.seen.replace(now.clone()) else {
         // A newly opened village announces only how it is being kept.
@@ -250,6 +254,10 @@ fn collect_news(
     }
     if now.3 != seen.3 && !now.3.is_empty() {
         fresh.push(toast(&now.3));
+    }
+    // Feedback on what the player just did, such as a wage or a refused order.
+    if now.4 != seen.4 && !now.4.is_empty() && Some(&now.4) != now.1.as_ref() {
+        fresh.push(toast(&strip_key_hints_block(&now.4)));
     }
     for toast in fresh {
         news.toasts.push_back(toast);

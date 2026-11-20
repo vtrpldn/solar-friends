@@ -228,7 +228,9 @@ impl Construction {
                             let paid = gross - if shift.fare_due { RETURN_FARE } else { 0 };
                             stock.credit(paid, CashKind::TownWages);
                             self.status = format!(
-                                "Returned from {job_name}; wages R${:.2}.",
+                                "{} is back from work as a {}; R${:.2} in wages.",
+                                NAMES[index],
+                                job_name.to_lowercase(),
                                 paid as f64 / 100.0
                             );
                             continue;

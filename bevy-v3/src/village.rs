@@ -3284,11 +3284,6 @@ fn show_hud(
         label.push('\n');
         label.push_str(&status);
     }
-    let notice = village.construction.construction_notice();
-    if !notice.is_empty() && !village.construction.menu {
-        label.push('\n');
-        label.push_str(notice);
-    }
     if !card
         && let Some(index) = village.construction.production.selected
         && let Some(service) = village.construction.utilities.facility_status(index)

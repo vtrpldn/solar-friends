@@ -3,6 +3,7 @@ use super::{
     *,
 };
 use crate::town_work::{JOBS, RETURN_FARE};
+use crate::village::money;
 
 #[derive(Clone, Copy, PartialEq)]
 pub(in crate::village) enum Action {
@@ -107,19 +108,19 @@ pub(super) fn refresh(
             Widget::title("Village records"),
             Widget::note(match (opening, start) {
                 (Some(cents), Some(day)) => format!(
-                    "Records begin on day {} with R${:.2}.",
+                    "Records begin on day {} with {}.",
                     day + 1,
-                    cents as f64 / 100.
+                    money(cents as f64 / 100.)
                 ),
                 _ => "The ledger shows the transactions recorded for this village.".into(),
             }),
             Widget::body(format!(
-                "R${:.2} available to spend",
-                available as f64 / 100.
+                "{} available to spend",
+                money(available as f64 / 100.)
             )),
             Widget::note(format!(
-                "R${:.2} committed to town transport",
-                committed as f64 / 100.
+                "{} committed to town transport",
+                money(committed as f64 / 100.)
             )),
             Widget::Row(vec![
                 button(Action::Records, "View records", true, false),
@@ -131,7 +132,11 @@ pub(super) fn refresh(
     ];
     let outlook = stock.cash_forecast(committed).map_or_else(
         || "A cash forecast needs one complete recorded day.".into(),
-        |(days, low, high, mean)| format!("R${low:.2} to R${high:.2} available in seven days. Based on {days} completed days with an average change of R${mean:+.2} per day. Excludes new construction."),
+        |(days, low, high, mean)| {
+            let change = if mean < 0. { money(mean) } else { format!("+{}", money(mean)) };
+            let days = if days == 1 { "1 completed day".to_owned() } else { format!("{days} completed days") };
+            format!("{} to {} available in seven days. Based on {days} with an average change of {change} per day. Excludes new construction.", money(low), money(high))
+        },
     );
     let (income, expenses, _) = stock.finance_totals();
     let investment = stock.construction_investment();
@@ -141,9 +146,9 @@ pub(super) fn refresh(
             Widget::caption("OPERATING CASH"),
             Widget::body(outlook),
             Widget::caption("CONSTRUCTION & SUPPLIES"),
-            Widget::body(format!("R${:.2} invested in construction / R${:.2} in other expenses",
-                investment as f64 / 100., (expenses - investment).max(0) as f64 / 100.)),
-            Widget::note(format!("R${:.2} recorded income. Unpaid exports become available after settlement.", income as f64 / 100.)),
+            Widget::body(format!("{} invested in construction / {} in other expenses",
+                money(investment as f64 / 100.), money((expenses - investment).max(0) as f64 / 100.))),
+            Widget::note(format!("{} recorded income. Unpaid exports become available after settlement.", money(income as f64 / 100.))),
         ]),
         Widget::Card(vec![
             Widget::title("Where our supplies are"),
@@ -152,8 +157,8 @@ pub(super) fn refresh(
         ]),
         Widget::Card(vec![
             Widget::title("Protect everyday supplies"),
-            Widget::body(format!("R${:.2} protected when auto-buying construction materials",
-                town.expansion_reserve_cents() as f64 / 100.)),
+            Widget::body(format!("{} protected when auto-buying construction materials",
+                money(town.expansion_reserve_cents() as f64 / 100.))),
             button(Action::Reserve, match &village.numeric_entry {
                 Some((NumericTarget::ExpansionReserve, entry)) => format!("R${entry}   Enter to set"),
                 _ => "Set expansion reserve".into(),
@@ -201,7 +206,7 @@ fn paid_work(village: &Village) -> Widget<Action> {
             .map(|(label, cents)| {
                 Widget::Column(vec![
                     Widget::caption(label),
-                    Widget::body(format!("R${:.2}", cents as f64 / 100.)),
+                    Widget::body(money(cents as f64 / 100.)),
                 ])
             })
             .collect(),
