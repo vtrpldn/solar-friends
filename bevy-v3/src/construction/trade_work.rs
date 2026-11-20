@@ -1024,6 +1024,37 @@ mod tests {
     }
 
     #[test]
+    fn canceling_yesterdays_sale_preserves_todays_buyer_reservation() {
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);
+        let mut village = Construction::default();
+        let before = stock.available("wood");
+        let yesterday = TownClock {
+            seconds: 0.0,
+            round_trip_km: 12,
+        };
+        let today = TownClock {
+            seconds: crate::weather::DAY,
+            ..yesterday
+        };
+        village
+            .reserve_town_sale(&catalog, &mut stock, yesterday, "wood", true)
+            .unwrap();
+        let current = village
+            .reserve_town_sale(&catalog, &mut stock, today, "wood", false)
+            .unwrap();
+        let committed = village.market.committed_fares();
+
+        village.cancel_queued_trade(&catalog, &mut stock, 0);
+
+        assert_eq!(stock.available("wood"), before - current);
+        assert_eq!(village.trade.buyer_reserved("wood", today.day()), current);
+        assert_eq!(village.market.committed_fares(), committed);
+        assert_eq!(village.trade.orders.len(), 1);
+        assert_eq!(village.trade.orders[0].day, today.day());
+    }
+
+    #[test]
     fn sale_quote_shows_a_loss_after_dedicated_fuel() {
         let catalog = Catalog::default();
         let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);
