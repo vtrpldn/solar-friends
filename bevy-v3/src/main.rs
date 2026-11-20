@@ -38,6 +38,7 @@ mod utilities;
 mod village;
 mod wall_clock;
 mod weather;
+mod web_loading;
 mod wildlife;
 mod workshop;
 use setup::{WorldSetup, WorldSetupPlugin};
@@ -216,6 +217,7 @@ fn main() {
     if performance {
         app.add_plugins(performance::PerformancePlugin);
     }
+    app.add_plugins(web_loading::WebLoadingPlugin);
     app.add_systems(
         PostUpdate,
         (update_land, animate_river)

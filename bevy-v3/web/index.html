@@ -4,30 +4,167 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Solar Friends V3</title>
+    <link rel="preload" href="./solar-friends-v3_bg.wasm" as="fetch" crossorigin />
     <style>
-      html, body { margin: 0; height: 100%; background: #c9d4a4; overflow: hidden; }
+      :root {
+        --paper: #e9e1c9;
+        --frame: #c8b98f;
+        --ink: #40503c;
+        --muted: #7b7a5f;
+        --track: #d9cfae;
+        --leaf: #789554;
+        --sun: #c8a85c;
+      }
+      html, body { margin: 0; height: 100%; background: var(--paper); overflow: hidden; }
       #solar-friends { display: block; width: 100%; height: 100%; outline: none; }
-      #status { position: fixed; inset: auto 0 24px 0; text-align: center;
-        font: 600 15px system-ui, sans-serif; color: #40503c; }
+
+      /* The loading screen sits over the canvas until the game has drawn steady frames. */
+      #loading {
+        position: fixed; inset: 0; display: grid; place-items: center;
+        background: var(--paper); color: var(--ink);
+        font-family: "Outfit", system-ui, sans-serif;
+        transition: opacity 600ms ease;
+        z-index: 10;
+      }
+      #loading.done { opacity: 0; pointer-events: none; }
+      #loading .frame {
+        position: absolute; inset: 18px; border: 1px solid var(--frame); border-radius: 4px;
+        pointer-events: none;
+      }
+      #loading .stack { display: grid; justify-items: center; gap: 18px; width: min(420px, 80vw); }
+      #loading .art { width: 150px; height: 170px; position: relative; }
+      #loading .sun {
+        position: absolute; left: 38px; top: 6px; width: 92px; height: 92px; border-radius: 50%;
+        background: var(--sun); animation: glow 3.2s ease-in-out infinite;
+      }
+      #loading .plant {
+        position: absolute; inset: 0; transform-origin: 70px 170px;
+        animation: sway 3.2s ease-in-out infinite;
+      }
+      #loading .caption {
+        font-size: 11px; font-weight: 750; letter-spacing: 0.14em; color: var(--muted);
+        text-transform: uppercase; margin: 0;
+      }
+      #loading h1 { margin: 0; font-size: 40px; line-height: 0.95; font-weight: 800; text-align: center; }
+      #loading .bar {
+        width: 100%; height: 10px; border-radius: 5px; background: var(--track); overflow: hidden;
+        box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.06);
+      }
+      #loading .fill {
+        height: 100%; width: 0%; border-radius: 5px; background: var(--leaf);
+        transition: width 200ms ease;
+      }
+      #loading .fill.waiting { width: 30%; animation: shuttle 1.4s ease-in-out infinite; }
+      #loading .line { margin: 0; font-size: 15px; font-weight: 600; min-height: 1.4em; text-align: center; }
+      #loading .detail { margin: -10px 0 0; font-size: 12px; color: var(--muted); min-height: 1.2em; }
+      #loading.failed .bar { display: none; }
+
+      @keyframes sway { 0%, 100% { transform: rotate(-2.5deg); } 50% { transform: rotate(2.5deg); } }
+      @keyframes glow { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+      @keyframes shuttle { 0% { margin-left: 0%; } 50% { margin-left: 70%; } 100% { margin-left: 0%; } }
+      @media (prefers-reduced-motion: reduce) {
+        #loading .sun, #loading .plant, #loading .fill.waiting { animation: none; }
+      }
     </style>
   </head>
   <body>
     <canvas id="solar-friends" tabindex="0"></canvas>
-    <p id="status">Loading Solar Friends…</p>
+    <div id="loading" role="status" aria-live="polite">
+      <div class="frame"></div>
+      <div class="stack">
+        <div class="art" aria-hidden="true">
+          <div class="sun"></div>
+          <svg class="plant" viewBox="0 0 150 170" width="150" height="170">
+            <path d="M74 60 C 72 100, 70 130, 70 170" stroke="#5f7448" stroke-width="3" fill="none" />
+            <path d="M72 96 C 52 84, 30 88, 18 96 C 34 104, 56 104, 72 96 Z" fill="#62784a" />
+            <path d="M73 78 C 86 60, 100 56, 108 44 C 106 62, 94 76, 73 78 Z" fill="#62784a" />
+            <path d="M71 128 C 88 112, 108 110, 122 104 C 112 122, 92 130, 71 128 Z" fill="#6c8452" />
+          </svg>
+        </div>
+        <p class="caption">A little land. A life together.</p>
+        <h1>Solar<br />Friends</h1>
+        <div class="bar"><div class="fill waiting" id="fill"></div></div>
+        <p class="line" id="line">Packing the cars…</p>
+        <p class="detail" id="detail"></p>
+      </div>
+    </div>
     <script type="module">
       import init from "./solar-friends-v3.js";
-      const status = document.getElementById("status");
-      if (!navigator.gpu) status.textContent = "This browser has no WebGPU support.";
-      try {
-        await init();
-        status.remove();
-      } catch (error) {
-        // Bevy hands control to the browser's event loop by throwing; that is not a failure.
-        if (!String(error).includes("Using exceptions for control flow")) {
-          status.textContent = `Could not start: ${error}`;
-          throw error;
+
+      const screen = document.getElementById("loading");
+      const fill = document.getElementById("fill");
+      const line = document.getElementById("line");
+      const detail = document.getElementById("detail");
+
+      // A few lines to read while the village comes together.
+      const lines = [
+        "Packing the cars…",
+        "Counting the bamboo poles…",
+        "Watering the seedlings…",
+        "Teaching the hens their names…",
+        "Folding the tents…",
+        "Warming up the sun…",
+        "Filling the water jugs…",
+        "Sweeping the gathering place…",
+      ];
+      let next = 1;
+      const rotate = setInterval(() => {
+        line.textContent = lines[next % lines.length];
+        next += 1;
+      }, 2400);
+
+      const fail = (message) => {
+        clearInterval(rotate);
+        screen.classList.add("failed");
+        line.textContent = message;
+        detail.textContent = "";
+      };
+
+      // The game removes this screen itself once its first frames are steady
+      // (see src/web_loading.rs); this is only a fallback.
+      window.solarFriendsReady = () => {
+        clearInterval(rotate);
+        fill.classList.remove("waiting");
+        fill.style.width = "100%";
+        screen.classList.add("done");
+        setTimeout(() => screen.remove(), 700);
+      };
+
+      async function download(url) {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+        const total = Number(response.headers.get("Content-Length")) || 0;
+        if (!response.body || !total) return response.arrayBuffer();
+        fill.classList.remove("waiting");
+        const reader = response.body.getReader();
+        const bytes = new Uint8Array(total);
+        let received = 0;
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          bytes.set(value, received);
+          received += value.length;
+          fill.style.width = `${Math.round((received / total) * 92)}%`;
+          detail.textContent = `${Math.round(received / 1048576)} of ${Math.round(total / 1048576)} MB`;
         }
-        status.remove();
+        return bytes;
+      }
+
+      if (!navigator.gpu) {
+        fail("This browser has no WebGPU support. Try a recent Chrome, Edge or Safari.");
+      } else {
+        try {
+          const wasm = await download("./solar-friends-v3_bg.wasm");
+          detail.textContent = "Setting up the village…";
+          fill.classList.add("waiting");
+          await init({ module_or_path: wasm });
+        } catch (error) {
+          // Bevy hands control to the browser's event loop by throwing; that is not a failure.
+          if (!String(error).includes("Using exceptions for control flow")) {
+            fail(`Could not start: ${error}`);
+            throw error;
+          }
+        }
       }
     </script>
   </body>

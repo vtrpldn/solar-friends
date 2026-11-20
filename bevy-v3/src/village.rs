@@ -16,6 +16,7 @@ pub(crate) mod lab;
 mod land_lens;
 mod lens_card;
 mod lens_picker;
+mod loading_screen;
 mod map_cursor;
 mod notices;
 mod rich_text;
@@ -119,6 +120,7 @@ impl Plugin for VillagePlugin {
         selection_card::install(app);
         keyboard_focus::install(app);
         notices::install(app);
+        loading_screen::install(app);
         livestock_motion::install(app);
         vehicle_motion::install(app);
         app.add_systems(PostUpdate, cultivation_surface::show_beds)
