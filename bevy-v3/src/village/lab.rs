@@ -3483,6 +3483,46 @@ mod tests {
     }
 
     #[test]
+    fn interactive_single_bed_clear_requires_confirmation_for_the_same_bed() {
+        use crate::{
+            construction::FarmControl,
+            farming::{FarmAction, Stage},
+        };
+
+        let catalog = Catalog::default();
+        let scenario = serde_json::from_str(
+            r#"{
+            "steps":1,
+            "orders":[{"step":0,"order":{"type":"build","key":"field","x":40,"z":36,"size":[2,2]}}]
+        }"#,
+        )
+        .unwrap();
+        let mut runner = Runner::new(scenario, None, &catalog).unwrap();
+        let clock = TownClock {
+            seconds: runner.village.clock,
+            round_trip_km: runner.setup.round_trip_km(),
+        };
+        let village = &mut runner.village;
+        let construction = &mut village.construction;
+        construction.production.selected = Some(0);
+        construction.farming.open = true;
+        for bed in &mut construction.farming.plots.get_mut(&0).unwrap().beds {
+            bed.stage = Stage::Growing;
+        }
+        let clear = FarmControl::Work(FarmAction::Clear);
+        construction.apply_farm_control(&catalog, &mut village.stock, clear, clock);
+        assert!(construction.farming.jobs.is_empty());
+        assert_eq!(construction.farming.pending_crop_clear, Some((0, Some(0))));
+
+        construction.select_bed_number(2);
+        construction.apply_farm_control(&catalog, &mut village.stock, clear, clock);
+        assert!(construction.farming.jobs.is_empty());
+        construction.apply_farm_control(&catalog, &mut village.stock, clear, clock);
+        assert_eq!(construction.farming.jobs.len(), 1);
+        assert_eq!(construction.farming.jobs[0].bed, 1);
+    }
+
+    #[test]
     fn bulk_clear_waits_for_confirmation_and_records_only_confirmed_orders() {
         let catalog = Catalog::default();
         let scenario = serde_json::from_str(

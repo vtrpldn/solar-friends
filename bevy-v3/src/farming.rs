@@ -18,7 +18,7 @@ pub struct Farming {
     #[serde(skip)]
     pub show_balances: bool,
     #[serde(skip)]
-    pub pending_plot_clear: Option<usize>,
+    pub pending_crop_clear: Option<(usize, Option<usize>)>,
     #[serde(skip)]
     pub notice: String,
 }
@@ -724,7 +724,7 @@ pub struct CropClimate {
 impl Farming {
     pub fn close(&mut self) {
         self.open = false;
-        self.pending_plot_clear = None;
+        self.pending_crop_clear = None;
     }
 
     pub fn has_worker(&self, worker: usize) -> bool {

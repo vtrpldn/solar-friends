@@ -547,9 +547,13 @@ impl Action {
                 FarmControl::Work(FarmAction::Plant) => "Sow",
                 FarmControl::Work(FarmAction::Harvest) => "Harvest",
                 FarmControl::Work(FarmAction::Clear)
-                    if village.construction.farming.pending_plot_clear.is_some() =>
+                    if village.construction.farming.pending_crop_clear.is_some() =>
                 {
-                    "Confirm clear crops"
+                    if village.construction.farming.whole_plot {
+                        "Confirm clear crops"
+                    } else {
+                        "Confirm clear crop"
+                    }
                 }
                 FarmControl::Work(FarmAction::Clear) if village.construction.farming.whole_plot => {
                     "Clear crops"

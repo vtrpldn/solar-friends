@@ -29,7 +29,7 @@ impl Construction {
 
     pub(super) fn select_project(&mut self, index: Option<usize>) {
         if self.production.selected != index {
-            self.farming.pending_plot_clear = None;
+            self.farming.pending_crop_clear = None;
         }
         self.production.selected = index;
         self.production.open = false;

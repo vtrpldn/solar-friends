@@ -376,7 +376,7 @@ impl Construction {
         if (1..=plot.beds.len()).contains(&number) {
             self.farming.bed = number - 1;
             self.farming.whole_plot = false;
-            self.farming.pending_plot_clear = None;
+            self.farming.pending_crop_clear = None;
             self.farming.notice.clear();
         } else {
             self.farming.notice = format!("Choose a bed from 1 to {}.", plot.beds.len());
@@ -396,16 +396,16 @@ impl Construction {
         let Some(site) = self.production.selected else {
             return;
         };
-        let confirmed = self.farming.pending_plot_clear.take() == Some(site);
+        let confirmation = self.farming.pending_crop_clear.take();
         if matches!(action, FarmControl::Balances) {
             self.farming.show_balances = !self.farming.show_balances;
             return;
         }
         if self.farming.whole_plot
             && matches!(action, FarmControl::Work(FarmAction::Clear))
-            && !confirmed
+            && confirmation != Some((site, None))
         {
-            self.farming.pending_plot_clear = Some(site);
+            self.farming.pending_crop_clear = Some((site, None));
             self.farming.notice =
                 "Clear crops across this plot? Confirm with Clear crops again or press 4. Only recoverable residues will remain.".into();
             return;
@@ -467,6 +467,15 @@ impl Construction {
             FarmControl::Crop if bed.editable() => bed.crop = bed.crop.next(),
             FarmControl::Density if bed.editable() => {
                 bed.density = bed.next_density();
+            }
+            FarmControl::Work(FarmAction::Clear)
+                if confirmation != Some((site, Some(index)))
+                    && bed.allows(FarmAction::Clear, clock.seconds)
+                    && self.utilities.enabled(site) =>
+            {
+                self.farming.pending_crop_clear = Some((site, Some(index)));
+                self.farming.notice =
+                    "Clear this crop? Choose Confirm clear crop or press 4 again. Only recoverable residues will remain.".into();
             }
             FarmControl::Work(action) => {
                 match self.queue_bed_job(catalog, stock, (site, index, action), clock) {
@@ -705,6 +714,7 @@ impl Construction {
             .get_mut(&index)
             .ok_or("Select a cultivated field.")?;
         plot.resize_field(size, shift)?;
+        self.farming.pending_crop_clear = None;
         self.plans[index].size = plan.size;
         self.farming.bed = self.farming.bed.min(plot.beds.len() - 1);
         Ok(())
