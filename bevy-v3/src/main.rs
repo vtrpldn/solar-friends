@@ -684,9 +684,9 @@ mod tests {
             .get_mut::<Interaction>(button)
             .expect("button interaction") = input;
         world.run_schedule(Update);
-        *app.world_mut()
-            .get_mut::<Interaction>(button)
-            .expect("button interaction") = Interaction::None;
+        if let Some(mut interaction) = app.world_mut().get_mut::<Interaction>(button) {
+            *interaction = Interaction::None;
+        }
     }
 
     fn river_vertex_colors(app: &mut App) -> Vec<[f32; 4]> {
@@ -922,9 +922,9 @@ mod tests {
         );
         press_button(&mut app, "Camp in clearing");
         for (key, heading) in [
-            (KeyCode::KeyM, "Shared savings"),
+            (KeyCode::KeyM, "SHARED SAVINGS"),
             (KeyCode::KeyJ, "Projects ·"),
-            (KeyCode::KeyI, "Resources · Stores"),
+            (KeyCode::KeyI, "STORAGE USED"),
             (KeyCode::KeyU, "DRINKING WATER"),
         ] {
             app.world_mut()
@@ -1304,10 +1304,10 @@ mod tests {
         press_button(&mut app, "Bento");
         press_button(&mut app, "Book one day shift");
         press_button(&mut app, "Repeat weekday shifts");
-        press_button(&mut app, "Open ledger");
+        press_button(&mut app, "View records");
         press_button(&mut app, "Next page");
-        press_button(&mut app, "Close ledger");
-        press_button(&mut app, "Manage grid power");
+        press_button(&mut app, "Close records");
+        press_button(&mut app, "Power costs");
         press_button(&mut app, "Disconnect grid");
         press_button(&mut app, "Connect grid");
         press_button(&mut app, "Residents");
@@ -1429,13 +1429,13 @@ mod tests {
                 .iter(app.world())
                 .any(|text| text.0.contains("Daily limit R$37\n"))
         );
-        press_button(&mut app, "Automatic cooking off");
+        press_button(&mut app, "Manage food automatically");
         press_button(&mut app, "Fresh target 1.0d +");
         press_button(&mut app, "Fresh target 1.5d −");
         press_button(&mut app, "Dried target 2.0d +");
         press_button(&mut app, "Dried target 2.5d −");
-        press_button(&mut app, "Automatic cooking on");
-        press_button(&mut app, "Food batches");
+        press_button(&mut app, "Automatic food management: on");
+        press_button(&mut app, "Inspect food batches");
         assert!(
             app.world_mut()
                 .query::<&Text>()
@@ -1452,7 +1452,7 @@ mod tests {
                 .any(|text| text.0.contains("Food batches · 1/"))
         );
         press_button(&mut app, "Previous page");
-        press_button(&mut app, "Close food batches");
+        press_button(&mut app, "Back to food");
         press_button(&mut app, "Close panel");
         press_button(&mut app, "Water");
         press_button(&mut app, "Camp source");
@@ -1490,14 +1490,11 @@ mod tests {
             });
         }
         app.world_mut().run_schedule(Update);
-        let hud = app
-            .world_mut()
-            .query::<&Text>()
-            .iter(app.world())
-            .find(|text| text.0.contains("Find material · TIMBER"))
-            .unwrap();
-        assert!(hud.0.contains("timber pieces"));
-        assert!(!hud.0.contains("fastener packs"));
+        assert!(visible_button(&mut app, "TIMBER|   Enter to finish").is_some());
+        assert!(visible_button(&mut app, "Trade in town").is_some());
+        assert!(visible_button(&mut app, "Trade · fastener packs").is_none());
+        press_button(&mut app, "Trade in town");
+        assert!(visible_button(&mut app, "Fetch timber pieces incl. transport").is_some());
         press_button(&mut app, "Trade · timber pieces");
         assert!(app.world().resource::<village::Village>().trade_open());
         assert!(
@@ -1579,7 +1576,7 @@ mod tests {
             app.world_mut()
                 .query::<&Text>()
                 .iter(app.world())
-                .any(|text| text.0.contains("Food from town & the village"))
+                .any(|text| text.0 == "FOOD FROM TOWN & THE VILLAGE")
         );
         press_button(&mut app, "Show production sites");
         press_button(&mut app, "Show resources");
@@ -1736,7 +1733,7 @@ mod tests {
             app.world_mut()
                 .query::<&Text>()
                 .iter(app.world())
-                .any(|text| text.0.contains("Unlimited food · No spoilage"))
+                .any(|text| text.0.contains("Food is unlimited in sandbox"))
         );
         press_button(&mut app, "Chill first · Earliest expiry");
         press_button(&mut app, "Food batches");

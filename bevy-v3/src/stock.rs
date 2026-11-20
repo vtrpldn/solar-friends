@@ -469,7 +469,7 @@ impl Stock {
                 .all(|&day| (flow.day.saturating_sub(90)..=flow.day).contains(&day))
     }
 
-    fn cash_forecast(&self, committed: u64) -> Option<(u64, f64, f64, f64)> {
+    pub(crate) fn cash_forecast(&self, committed: u64) -> Option<(u64, f64, f64, f64)> {
         let flow = &self.cash_flow;
         let start = (flow.started_day?.saturating_add(1)).max(flow.day.saturating_sub(7));
         if start >= flow.day {
@@ -535,6 +535,19 @@ impl Stock {
             display.push_str("\nNo recent transactions recorded.");
         }
         (pages, display)
+    }
+
+    pub(crate) fn finance_opening(&self) -> (Option<u64>, Option<u64>) {
+        (self.cash_flow.opening_cents, self.cash_flow.started_day)
+    }
+
+    pub(crate) fn construction_investment(&self) -> i128 {
+        -i128::from(
+            self.ledger
+                .get(&CashKind::Construction)
+                .copied()
+                .unwrap_or_default(),
+        )
     }
 
     pub(crate) fn finance_totals(&self) -> (i128, i128, i128) {
