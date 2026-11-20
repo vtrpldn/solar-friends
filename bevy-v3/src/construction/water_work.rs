@@ -1364,6 +1364,30 @@ mod tests {
         let mut town: Construction =
             serde_json::from_str(&serde_json::to_string(&town).unwrap()).unwrap();
         assert!(town.valid_water_jobs());
+        let clock = TownClock {
+            seconds: 0.1,
+            round_trip_km: 12,
+        };
+        for id in [1, 2] {
+            let result = town.lab_order(
+                &catalog,
+                &mut stock,
+                site,
+                clock,
+                &LabOrder::Move {
+                    site: id,
+                    x: 52,
+                    z: 36,
+                    rotation: 0,
+                },
+                setup.richness(),
+            );
+            assert_eq!(
+                result.unwrap_err(),
+                "Wait for the queued water job to finish."
+            );
+        }
+        assert!(town.changes.is_empty());
         for step in 1..4_000 {
             let clock = f64::from(step) * 0.1;
             town.tick_water_work(&catalog, &mut stock, site, clock, 0.1);
