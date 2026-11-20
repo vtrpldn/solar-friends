@@ -1219,8 +1219,8 @@ mod tests {
         press_button(&mut app, "Manage");
         press_button(&mut app, "Finances");
         press_button(&mut app, "Bento");
-        press_button(&mut app, "Toggle day shift");
-        press_button(&mut app, "Toggle weekday shifts");
+        press_button(&mut app, "Book one day shift");
+        press_button(&mut app, "Repeat weekday shifts");
         press_button(&mut app, "Open ledger");
         press_button(&mut app, "Next page");
         press_button(&mut app, "Close ledger");
@@ -1254,7 +1254,7 @@ mod tests {
                 .any(|text| text.0.contains("Booked for")
                     && text.0.contains("Repeat 4h shifts on weekdays · on"))
         );
-        press_button(&mut app, "Toggle day shift");
+        press_button(&mut app, "Cancel day shift");
         assert!(
             app.world_mut()
                 .query::<&Text>()
@@ -1262,7 +1262,7 @@ mod tests {
                 .any(|text| text.0.contains("Book for")
                     && text.0.contains("Repeat 4h shifts on weekdays · on"))
         );
-        press_button(&mut app, "Toggle day shift");
+        press_button(&mut app, "Book one day shift");
         press_button(&mut app, "Manage");
         press_button(&mut app, "Trade");
         assert!(app.world().resource::<village::Village>().trade_open());

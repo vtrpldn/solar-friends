@@ -2021,10 +2021,10 @@ fn village_input(
             {
                 town.selected_resident = index;
             }
-            if keyboard.just_pressed(KeyCode::KeyT) {
+            if !town.stock.sandbox && keyboard.just_pressed(KeyCode::KeyT) {
                 town.construction.toggle_shift(town.selected_resident);
             }
-            if keyboard.just_pressed(KeyCode::KeyY) {
+            if !town.stock.sandbox && keyboard.just_pressed(KeyCode::KeyY) {
                 town.construction
                     .toggle_weekday_shift(town.selected_resident);
             }

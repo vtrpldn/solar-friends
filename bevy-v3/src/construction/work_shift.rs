@@ -57,6 +57,23 @@ impl Construction {
         finishing_work.then_some("Finishing village work")
     }
 
+    pub(crate) fn shift_action(&self, index: usize, repeat: bool) -> Option<&'static str> {
+        let work = &self.residents[index].town_work;
+        if repeat {
+            Some(if work.repeating {
+                "Stop weekday shifts"
+            } else {
+                "Repeat weekday shifts"
+            })
+        } else if work.active() {
+            None
+        } else if work.booked {
+            Some("Cancel day shift")
+        } else {
+            Some("Book one day shift")
+        }
+    }
+
     pub fn toggle_shift(&mut self, index: usize) {
         let resident = &mut self.residents[index];
         if !resident.town_work.active() {
@@ -97,11 +114,16 @@ impl Construction {
                 (count + 1, cents.saturating_add(order.cents))
             });
         let receipts = self.trade.receipts;
-        let shift = self.resident_shift_summary(selected, clock.seconds);
-        format!(
-            "{status}\nTown sales · {receipts} paid · {pending_sales} pending (R${:.2} before fuel)\n\n{shift}\n1–5 Resident · T Book/cancel day shift · Y Toggle weekdays",
+        let mut summary = format!(
+            "{status}\nTown sales · {receipts} paid · {pending_sales} pending (R${:.2} before fuel)",
             expected_cents as f64 / 100.0,
-        )
+        );
+        if !stock.sandbox {
+            summary.push_str("\n\n");
+            summary.push_str(&self.resident_shift_summary(selected, clock.seconds));
+            summary.push_str("\n1–5 Resident · T Book/cancel day shift · Y Toggle weekdays");
+        }
+        summary
     }
 
     pub(crate) fn resident_shift_summary(&self, selected: usize, seconds: f64) -> String {
@@ -319,7 +341,15 @@ mod tests {
             round_trip_km: setup.round_trip_km(),
         };
         stock.cash = 0;
+        assert_eq!(
+            construction.shift_action(0, false),
+            Some("Book one day shift")
+        );
         construction.toggle_shift(0);
+        assert_eq!(
+            construction.shift_action(0, false),
+            Some("Cancel day shift")
+        );
         assert!(
             construction
                 .finance_summary(&catalog, &stock, 0, clock(0.0))

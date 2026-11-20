@@ -372,10 +372,11 @@ impl Action {
                     && !village.construction.driver_away(resident)
             }
             Self::ResidentProfile(_) => village.utility_panel == Some(UtilityPanel::Residents),
-            Self::Resident(_) => matches!(
-                village.utility_panel,
-                Some(UtilityPanel::Residents | UtilityPanel::Finances)
-            ),
+            Self::Resident(_) => {
+                village.utility_panel == Some(UtilityPanel::Residents)
+                    || (!village.stock.sandbox
+                        && village.utility_panel == Some(UtilityPanel::Finances))
+            }
             Self::PantryBatches => village.utility_panel == Some(UtilityPanel::Pantry),
             Self::AutoCook | Self::CookingTarget { .. } if village.stock.sandbox => false,
             Self::PantryTransport if village.trade_open() => true,
@@ -391,9 +392,14 @@ impl Action {
             Self::Page(_) if village.utility_panel == Some(UtilityPanel::Pantry) => {
                 village.pantry_batch_page.is_some()
             }
-            Self::Shift(_) => {
-                village.utility_panel == Some(UtilityPanel::Finances)
-                    || (!village.stock.sandbox && village.resident_overview_open())
+            Self::Shift(repeat) => {
+                !village.stock.sandbox
+                    && (village.utility_panel == Some(UtilityPanel::Finances)
+                        || village.resident_overview_open())
+                    && village
+                        .construction
+                        .shift_action(village.selected_resident, repeat)
+                        .is_some()
             }
             Self::Ledger => village.utility_panel == Some(UtilityPanel::Finances),
             Self::ExpansionReserve => {
@@ -680,8 +686,11 @@ impl Action {
             Self::Home(true) => "Assign selected home".into(),
             Self::Home(false) => "Clear home assignment".into(),
             Self::ListedHome(_) => String::new(),
-            Self::Shift(false) => "Toggle day shift".into(),
-            Self::Shift(true) => "Toggle weekday shifts".into(),
+            Self::Shift(repeat) => village
+                .construction
+                .shift_action(village.selected_resident, repeat)
+                .unwrap_or_default()
+                .into(),
             Self::Ledger if village.finance_history_open => "Close ledger".into(),
             Self::Ledger => "Open ledger".into(),
             Self::ExpansionReserve => numeric_label(
@@ -2199,7 +2208,7 @@ fn refresh(
             }
             Action::ProjectFilter => show_projects,
             Action::ListedHome(row) => homes.get(row).is_some(),
-            Action::Resident(_) => show_residents || show_finances,
+            Action::Resident(_) => !picker.open && action.available(&village),
             Action::ResidentProfile(_) => show_residents,
             Action::FocusResident | Action::FocusResidentProject => {
                 show_residents && action.available(&village)
