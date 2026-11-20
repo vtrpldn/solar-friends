@@ -2667,6 +2667,41 @@ mod tests {
     }
 
     #[test]
+    fn field_resize_checks_placement_before_queued_bed_work() {
+        let catalog = Catalog::default();
+        let scenario = serde_json::from_str(
+            r#"{
+            "steps": 1,
+            "orders": [
+                {"step":0,"order":{"type":"build","key":"field","x":44,"z":36,"size":[2,2]}},
+                {"step":0,"order":{"type":"build","key":"field","x":48,"z":36,"size":[2,2]}},
+                {"step":0,"order":{"type":"bed","site":1,"bed":1,"action":"Prepare"}},
+                {"step":0,"order":{"type":"resize-field","site":1,"size":[6,2]}},
+                {"step":0,"order":{"type":"resize-field","site":1,"size":[3,2]}}
+            ]
+        }"#,
+        )
+        .unwrap();
+        let runner = run(scenario, None, &catalog).unwrap();
+        for outcome in &runner.outcomes[..3] {
+            assert!(outcome.error.is_none(), "{:?}", outcome.error);
+        }
+        assert_eq!(
+            runner.outcomes[3].error.as_deref(),
+            Some("Another project occupies that space.")
+        );
+        assert_eq!(
+            runner.outcomes[4].error.as_deref(),
+            Some("Finish this field’s jobs before resizing.")
+        );
+        let report = serde_json::to_value(runner.report()).unwrap();
+        assert_eq!(
+            report["village"]["construction"]["plans"][0]["size"],
+            serde_json::json!([2, 2])
+        );
+    }
+
+    #[test]
     fn resized_field_copies_replay_with_the_new_dimensions_and_rotation() {
         let catalog = Catalog::default();
         let scenario = serde_json::from_str(r#"{

@@ -676,9 +676,6 @@ impl Construction {
         if !Plot::field_size_valid(size) {
             return Err("Fields must be 2–32 cells on each side.");
         }
-        if self.farming.jobs.iter().any(|job| job.site == index) || self.water_job_at(index) {
-            return Err("Finish this field’s jobs before resizing.");
-        }
         let mut plan = self.plans[index].clone();
         let old_size = plan.size;
         plan.size = rotated_size(size, plan.rotation);
@@ -691,6 +688,9 @@ impl Construction {
             (catalog, sandbox, Some(index)),
         ) {
             return Err(reason);
+        }
+        if self.farming.jobs.iter().any(|job| job.site == index) || self.water_job_at(index) {
+            return Err("Finish this field’s jobs before resizing.");
         }
         let change = plan.size - old_size;
         let shift = match plan.rotation {
