@@ -1,5 +1,7 @@
+#[cfg(not(target_arch = "wasm32"))]
+use std::fs;
 use std::{
-    fs, io,
+    io,
     path::{Path, PathBuf},
 };
 
@@ -124,10 +126,14 @@ impl SaveMenu {
                 lines.push(label);
             }
             lines.push("↑ / ↓ Select · Enter Load · N New · R Rename".into());
-            lines.push("E Export · P Recover · Delete Remove".into());
+            if cfg!(target_arch = "wasm32") {
+                lines.push("P Recover · Delete Remove".into());
+            } else {
+                lines.push("E Export · P Recover · Delete Remove".into());
+            }
             lines.push("Tab Switch mode · F6 Close".into());
         }
-        if self.entry.is_none() {
+        if self.entry.is_none() && !cfg!(target_arch = "wasm32") {
             lines.push("Drop a V3 save file here to import a copy.".into());
         }
         if let Some(slot) = self.delete_request
@@ -155,25 +161,35 @@ pub fn directory(mode: Mode) -> io::Result<PathBuf> {
 }
 
 pub fn list(directory: &Path, mode: Mode) -> io::Result<Vec<SlotInfo>> {
-    let entries = match fs::read_dir(directory) {
-        Ok(entries) => entries,
-        Err(error) if error.kind() == io::ErrorKind::NotFound => return Ok(Vec::new()),
-        Err(error) => return Err(error),
-    };
-    let mut rows = Vec::new();
-    for entry in entries {
-        let path = entry?.path();
-        let Some(id) = path
-            .file_stem()
-            .and_then(|stem| stem.to_str())
-            .and_then(|stem| stem.strip_prefix("slot-"))
-            .and_then(|digits| digits.parse::<u64>().ok())
-        else {
-            continue;
+    #[cfg(target_arch = "wasm32")]
+    let ids = save::list_slot_ids(directory)?;
+    #[cfg(not(target_arch = "wasm32"))]
+    let ids = {
+        let entries = match fs::read_dir(directory) {
+            Ok(entries) => entries,
+            Err(error) if error.kind() == io::ErrorKind::NotFound => return Ok(Vec::new()),
+            Err(error) => return Err(error),
         };
-        if path.extension().and_then(|extension| extension.to_str()) != Some("json") {
-            continue;
+        let mut ids = Vec::new();
+        for entry in entries {
+            let path = entry?.path();
+            let Some(id) = path
+                .file_stem()
+                .and_then(|stem| stem.to_str())
+                .and_then(|stem| stem.strip_prefix("slot-"))
+                .and_then(|digits| digits.parse::<u64>().ok())
+            else {
+                continue;
+            };
+            if path.extension().and_then(|extension| extension.to_str()) != Some("json") {
+                continue;
+            }
+            ids.push(id);
         }
+        ids
+    };
+    let mut rows = Vec::with_capacity(ids.len());
+    for id in ids {
         rows.push(match read_slot(directory, id, mode) {
             Ok(slot) => SlotInfo {
                 id,
@@ -262,7 +278,7 @@ pub fn recover(
 }
 
 pub fn remove(directory: &Path, id: u64) -> io::Result<()> {
-    fs::remove_file(path(directory, id))
+    save::remove_file(&path(directory, id))
 }
 
 pub fn export(
@@ -283,6 +299,7 @@ pub fn export(
     let Some(export) = choose_destination(&file_name) else {
         return Ok(None);
     };
+    #[cfg(not(target_arch = "wasm32"))]
     if let Ok(existing) = fs::canonicalize(&export)
         && existing == fs::canonicalize(&source)?
     {

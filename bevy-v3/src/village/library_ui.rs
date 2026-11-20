@@ -200,8 +200,8 @@ fn library_label(action: LibraryAction, menu: &SaveMenu, may_create: bool) -> Op
         {
             "Recover previous save".into()
         }
-        Export if !menu.rows.is_empty() => "Export".into(),
-        Import => "Import village".into(),
+        Export if !menu.rows.is_empty() && !cfg!(target_arch = "wasm32") => "Export".into(),
+        Import if !cfg!(target_arch = "wasm32") => "Import village".into(),
         Remove if menu.delete_request.is_some() => "Confirm removal".into(),
         Remove if !menu.rows.is_empty() => "Remove save".into(),
         _ => return None,

@@ -480,8 +480,6 @@ struct PlotSummary;
 #[derive(Component)]
 struct StoryResumeSummary;
 
-type StoryResumeSnapshot = (std::path::PathBuf, std::time::SystemTime, u64);
-
 const PREVIEW_SIZE: u32 = 128;
 
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
@@ -1192,7 +1190,7 @@ fn setup_input(
                 }
                 let autosave_exists = saves
                     .continue_path(setup.mode)
-                    .is_ok_and(|path| path.is_file());
+                    .is_ok_and(|path| crate::save::exists(&path));
                 if (village.session_setup().is_some() || autosave_exists) && !setup.confirming_new {
                     setup.confirming_new = true;
                 } else {
@@ -1266,7 +1264,7 @@ fn refresh_panel(
     let has_village = village.session_setup().is_some();
     let autosave_exists = saves
         .continue_path(setup.mode)
-        .is_ok_and(|path| path.is_file());
+        .is_ok_and(|path| crate::save::exists(&path));
     for (entity, &PickerStep(action, _), disabled) in &step_buttons {
         let enabled = action.enabled(setup.mode);
         if enabled == disabled {
@@ -1294,7 +1292,9 @@ fn refresh_panel(
             Action::Continue(mode) => {
                 !setup.choosing_land
                     && !has_village
-                    && saves.continue_path(*mode).is_ok_and(|path| path.is_file())
+                    && saves
+                        .continue_path(*mode)
+                        .is_ok_and(|path| crate::save::exists(&path))
             }
             Action::CancelNew => setup.choosing_land && setup.confirming_new,
             Action::Library => !setup.choosing_land && !saves.preview,
@@ -1405,7 +1405,7 @@ fn refresh_story_resume(
     village: Res<crate::village::Village>,
     catalog: Res<crate::catalog::Catalog>,
     mut label: Single<&mut Text, With<StoryResumeSummary>>,
-    mut preview: Local<Option<StoryResumeSnapshot>>,
+    mut preview: Local<Option<crate::save::SaveSnapshot>>,
 ) {
     if !setup.open
         || village.session_setup().is_some()
@@ -1413,11 +1413,10 @@ fn refresh_story_resume(
     {
         return;
     }
-    let snapshot = saves.continue_path(Mode::Story).ok().and_then(|path| {
-        let metadata = path.metadata().ok()?;
-        metadata.is_file().then_some(())?;
-        Some((path, metadata.modified().ok()?, metadata.len()))
-    });
+    let snapshot = saves
+        .continue_path(Mode::Story)
+        .ok()
+        .and_then(|path| crate::save::snapshot(&path));
     if *preview != snapshot {
         label.0 = if snapshot.is_some() {
             crate::village::restore_continuation(&saves, Mode::Story, &catalog)
