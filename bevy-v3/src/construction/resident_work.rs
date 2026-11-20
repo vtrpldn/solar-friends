@@ -76,6 +76,18 @@ struct RestPose {
 }
 
 impl Construction {
+    pub(crate) fn resident_need_meters(&self, resident: usize) -> [(&'static str, f64); 8] {
+        let health = &self.residents[resident].health;
+        std::array::from_fn(|index| {
+            if index == 0 {
+                ("Energy", health.energy)
+            } else {
+                let (label, need) = NEED_METERS[index - 1];
+                (label, health.levels[need as usize])
+            }
+        })
+    }
+
     fn resident_working(&self, index: usize) -> bool {
         self.residents[index]
             .assignment

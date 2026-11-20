@@ -14,6 +14,7 @@ mod lens_picker;
 use lens_picker::{LensPicker, MapLens};
 mod library_ui;
 mod livestock_motion;
+mod resident_meters;
 mod resource_lens;
 mod resource_trends;
 mod road_surface;
@@ -163,6 +164,7 @@ impl Plugin for VillagePlugin {
         toolbar::install(app);
         guide::install(app);
         library_ui::install(app);
+        resident_meters::install(app);
         building_lighting::install(app);
         livestock_motion::install(app);
         vehicle_motion::install(app);
@@ -1361,6 +1363,7 @@ fn spawn_hud(mut commands: Commands, assets: Res<AssetServer>) {
             BackgroundColor(Color::srgb_u8(31, 45, 35)),
         ))
         .with_children(|hud| {
+            resident_meters::spawn(hud, &assets);
             hud.spawn((
                 ConstructionProgressTrack,
                 Node {
