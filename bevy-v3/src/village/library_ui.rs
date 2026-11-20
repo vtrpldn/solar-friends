@@ -17,7 +17,7 @@ fn refresh_library(menu: &mut SaveMenu, directory: &std::path::Path, mode: Mode)
     }
 }
 
-pub(super) fn toggle_library(menu: &mut SaveMenu, mode: Mode) {
+pub(crate) fn toggle_library(menu: &mut SaveMenu, mode: Mode) {
     if menu.preview {
         return;
     }

@@ -946,13 +946,13 @@ mod tests {
                 .iter()
                 .any(|text| text.0 == "Solar\nFriends")
         );
-        press_button(&mut app, "Continue Story");
+        press_button(&mut app, "Continue");
         assert!(app.world().resource::<WorldSetup>().open);
         assert!(ui_texts(&mut app).iter().any(|text| {
             text.0
-                .contains("The autosave was preserved. Open Saved villages")
+                .contains("The autosave was preserved. Open Load village")
         }));
-        press_button(&mut app, "Saved villages");
+        press_button(&mut app, "Load village");
         press_button(&mut app, "Close saved villages");
         press_button(&mut app, "Sound settings");
         assert!(app.world().resource::<audio::SoundSettings>().open);
@@ -1747,7 +1747,7 @@ mod tests {
         press_button(&mut app, "Main menu");
         app.world_mut().run_schedule(Update);
         assert!(app.world().resource::<WorldSetup>().open);
-        press_button(&mut app, "Saved villages");
+        press_button(&mut app, "Load village");
         press_button(&mut app, "› Renamed test village");
         press_button(&mut app, "Load village");
         assert!(!app.world().resource::<save_library::SaveMenu>().open);
@@ -1860,7 +1860,7 @@ mod tests {
         press_button(&mut app, "Main menu");
         app.world_mut().resource_mut::<WorldSetup>().mode = setup::Mode::Story;
         app.update();
-        press_button(&mut app, "Saved villages");
+        press_button(&mut app, "Load village");
         assert!(
             app.world()
                 .resource::<save_library::SaveMenu>()

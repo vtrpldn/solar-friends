@@ -3,10 +3,20 @@ use bevy::prelude::*;
 
 pub struct ArtToolsPlugin;
 
+#[derive(Resource, Default)]
+struct ArtToolsOpen(bool);
+
+#[derive(Component)]
+struct ArtToolsToggle;
+
+#[derive(Component)]
+struct ArtToolsDrawer;
+
 impl Plugin for ArtToolsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_tools)
-            .add_systems(Update, (show_tools, open_tool).chain());
+        app.init_resource::<ArtToolsOpen>()
+            .add_systems(Startup, spawn_tools)
+            .add_systems(Update, (toggle_tools, show_tools, open_tool).chain());
     }
 }
 
@@ -71,7 +81,7 @@ pub(super) struct ArtTools;
 struct LaunchStatus;
 
 #[derive(Component, Clone, Copy, PartialEq, Eq)]
-pub(super) enum ArtTool {
+pub(crate) enum ArtTool {
     Game,
     Collection,
     Workshop,
@@ -90,7 +100,7 @@ impl ArtTool {
         Self::Residents,
     ];
 
-    pub(super) fn label(self) -> &'static str {
+    pub(crate) fn label(self) -> &'static str {
         match self {
             Self::Game => "Game menu",
             Self::Collection => "Collection",
@@ -114,12 +124,34 @@ impl ArtTool {
         }
     }
 
-    pub(super) fn launch(self) -> std::io::Result<std::process::Child> {
+    pub(crate) fn launch(self) -> std::io::Result<std::process::Child> {
         std::env::current_exe().and_then(|exe| {
             std::process::Command::new(exe)
                 .args(self.arguments())
                 .spawn()
         })
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    pub(crate) fn open_in_browser(self) -> Result<(), String> {
+        let window =
+            web_sys::window().ok_or_else(|| "browser window is unavailable".to_string())?;
+        let location = window.location();
+        let path = location
+            .pathname()
+            .map_err(|_| "could not read page location".to_string())?;
+        let query = match self {
+            Self::Game => "",
+            Self::Collection => "?collection",
+            Self::Workshop => "?workshop",
+            Self::Garden => "?asset-garden",
+            Self::Biomes => "?biome-landscapes",
+            Self::Residents => "?residents",
+            Self::BalanceLab => "?lab-ui",
+        };
+        location
+            .set_href(&format!("{path}{query}"))
+            .map_err(|_| "could not open page".to_string())
     }
 }
 
@@ -127,52 +159,121 @@ fn spawn_tools(mut commands: Commands, assets: Res<AssetServer>) {
     commands
         .spawn((
             ArtTools,
-            crate::theme::panel_node(Node {
+            Node {
                 display: Display::None,
                 position_type: PositionType::Absolute,
-                right: px(32),
-                bottom: px(32),
-                width: px(280),
+                right: px(46),
+                bottom: px(46),
                 flex_direction: FlexDirection::Column,
-                row_gap: px(6),
-                padding: UiRect::all(px(16)),
+                align_items: AlignItems::FlexEnd,
+                row_gap: px(10),
                 ..default()
-            }),
-            crate::theme::panel(),
+            },
         ))
-        .with_children(|panel| {
-            panel.spawn((
+        .with_children(|root| {
+            root.spawn((
+                ArtToolsDrawer,
+                crate::theme::panel_node(Node {
+                    display: Display::None,
+                    width: px(260),
+                    flex_direction: FlexDirection::Column,
+                    row_gap: px(6),
+                    padding: UiRect::all(px(16)),
+                    ..default()
+                }),
+                crate::theme::panel(),
+            ))
+            .with_children(|panel| {
+                panel.spawn((
+                    Text::new("ART TOOLS"),
+                    crate::ui_font::ui_font_styled(&assets, 10.5, 750, crate::theme::CAPTION),
+                ));
+                for tool in ArtTool::ALL.into_iter().chain([ArtTool::BalanceLab]) {
+                    panel
+                        .spawn((
+                            tool,
+                            Button,
+                            crate::theme::button_node(Node {
+                                padding: UiRect::axes(px(12), px(6)),
+                                ..default()
+                            }),
+                            crate::theme::button(),
+                        ))
+                        .with_child((
+                            Text::new(tool.label()),
+                            crate::ui_font::ui_font_weight(&assets, 14., 600),
+                        ));
+                }
+                panel.spawn((LaunchStatus, Text::default(), ui_font(&assets, 13.)));
+            });
+
+            root.spawn((
+                ArtToolsToggle,
+                Button,
+                crate::theme::button_node(Node {
+                    padding: UiRect::axes(px(14), px(7)),
+                    ..default()
+                }),
+                crate::theme::button(),
+            ))
+            .with_child((
                 Text::new("Art tools"),
-                crate::ui_font::ui_font_weight(&assets, 18., 750),
+                crate::ui_font::ui_font_weight(&assets, 14., 600),
             ));
-            for tool in ArtTool::ALL.into_iter().chain([ArtTool::BalanceLab]) {
-                panel
-                    .spawn((
-                        tool,
-                        Button,
-                        crate::theme::button_node(Node {
-                            padding: UiRect::axes(px(12), px(6)),
-                            ..default()
-                        }),
-                        crate::theme::button(),
-                    ))
-                    .with_child((
-                        Text::new(tool.label()),
-                        crate::ui_font::ui_font_weight(&assets, 14., 600),
-                    ));
-            }
-            panel.spawn((LaunchStatus, Text::default(), ui_font(&assets, 14.)));
         });
+}
+
+fn toggle_tools(
+    mut open: ResMut<ArtToolsOpen>,
+    setup: Res<WorldSetup>,
+    saves: Res<SaveMenu>,
+    sound: Res<SoundSettings>,
+    mut toggle: Single<
+        (
+            Ref<'static, Interaction>,
+            &mut BackgroundColor,
+            &mut BorderColor,
+            &mut BoxShadow,
+        ),
+        With<ArtToolsToggle>,
+    >,
+) {
+    let available = setup.open
+        && !setup.choosing_land()
+        && !sound.open
+        && !saves.open
+        && !cfg!(target_arch = "wasm32");
+    if !available {
+        open.0 = false;
+        return;
+    }
+    let (interaction, background, border, shadow) = &mut *toggle;
+    if interaction.is_changed() && **interaction == Interaction::Pressed {
+        open.0 = !open.0;
+    }
+    crate::theme::paint_button(**interaction, true, open.0, background, border, shadow);
 }
 
 fn show_tools(
     setup: Res<WorldSetup>,
     saves: Res<SaveMenu>,
     sound: Res<SoundSettings>,
-    mut panel: Single<&mut Node, With<ArtTools>>,
+    open: Res<ArtToolsOpen>,
+    mut panel: Single<&mut Node, (With<ArtTools>, Without<ArtToolsDrawer>)>,
+    mut drawer: Single<&mut Node, (With<ArtToolsDrawer>, Without<ArtTools>)>,
 ) {
     // The tools launch separate programs, which the web build cannot do.
-    panel.display = if setup.open && !sound.open && !saves.open && !cfg!(target_arch = "wasm32") {
+    let visible = setup.open
+        && !setup.choosing_land()
+        && !sound.open
+        && !saves.open
+        && !cfg!(target_arch = "wasm32");
+    panel.display = if visible {
+        Display::Flex
+    } else {
+        Display::None
+    };
+    drawer.display = if visible && open.0 {
         Display::Flex
     } else {
         Display::None
