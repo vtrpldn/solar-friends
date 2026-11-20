@@ -772,18 +772,29 @@ impl Construction {
             }
         }
         if let Some(job) = active_job {
+            use std::fmt::Write;
             let recipe = &catalog.production[&job.recipe];
             let state = self.batch_status(job, catalog, stock, clock);
             text.push_str(&format!(" · {} · {state}", recipe.name));
-            if recipe.craft.is_some() {
-                use std::fmt::Write;
+            if job.phase == Phase::Growing {
+                text.push_str("\nNo resident needs to wait here");
+            } else {
+                let crafting = recipe.craft.is_some();
+                let waiting = if crafting {
+                    "Waiting for a qualified resident"
+                } else {
+                    "Waiting for a resident"
+                };
                 let resident = job
                     .worker
-                    .map_or("Waiting for a qualified resident", |worker| {
-                        super::resident_work::NAMES[worker]
-                    });
-                let progress = (100.0 * job.work / recipe.work).floor();
-                let _ = write!(text, "\nCraft progress {progress:.0}% · {resident}");
+                    .map_or(waiting, |worker| super::resident_work::NAMES[worker]);
+                let label = if crafting {
+                    "Craft progress"
+                } else {
+                    "Batch progress"
+                };
+                let progress = (100.0 * job.work / recipe.work).floor().clamp(0.0, 100.0);
+                let _ = write!(text, "\n{label} {progress:.0}% · {resident}");
             }
         } else if definition.kind == "kitchen"
             && site.work >= definition.work
@@ -2367,6 +2378,10 @@ mod upgrade_tests {
         village.utilities.take_water(Some(1), 0, 6.0);
         village.tick_production(&catalog, &mut stock, site, 0.0, 0.1);
         assert!(village.production.jobs[0].worker.is_none());
+        village.production.selected = Some(0);
+        let details = village.selected_production(&catalog, &stock, 0.0).unwrap();
+        assert!(details.contains("Waiting for drinking water"));
+        assert!(details.contains("Batch progress 0% · Waiting for a resident"));
         assert_eq!(
             village.utilities.deliver_water(1, 0, recipe.water),
             recipe.water
