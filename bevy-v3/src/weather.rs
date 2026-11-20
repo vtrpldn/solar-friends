@@ -272,9 +272,14 @@ fn sunlight(
             .mix(&sunset_color, warmth)
             .mix(&overcast, cloud),
     );
-    ambient.color = Color::srgb(0.56 + 0.44 * daylight, 0.67 + 0.33 * daylight, 1.0);
-    // After sunset V2 keeps its sky light near 45% of midday, so dusk stays readable.
-    ambient.brightness = 170.0 + 300.0 * daylight * (0.8 + cloud * 0.35);
+    // V2's sky light is a warm hemisphere (#e4eff6 over #777455) that stays near 45% of
+    // midday after sunset, so the ground still reads olive at dusk rather than blue-black.
+    ambient.color = Color::srgb(
+        0.78 + 0.22 * daylight,
+        0.82 + 0.18 * daylight,
+        0.86 + 0.14 * daylight,
+    );
+    ambient.brightness = 280.0 + 220.0 * daylight * (0.8 + cloud * 0.35);
     sky.0 = Color::srgb(
         0.08 + daylight * (0.63 - cloud * 0.12),
         0.12 + daylight * (0.68 - cloud * 0.15),
