@@ -4,6 +4,9 @@ use super::*;
 struct BuildPanel;
 
 #[derive(Component)]
+struct BuildHeading;
+
+#[derive(Component)]
 struct BlueprintDetails;
 
 #[derive(Component)]
@@ -61,7 +64,8 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
         ))
         .with_children(|panel| {
             panel.spawn((
-                Text::new("Blueprints"),
+                BuildHeading,
+                Text::default(),
                 ui_font(&assets, 20.0),
                 Node {
                     flex_shrink: 0.,
@@ -198,7 +202,7 @@ fn refresh(
         ),
         Without<BuildPanel>,
     >,
-    mut labels: Query<&mut Text, Without<BlueprintDetails>>,
+    mut labels: Query<(&mut Text, Has<BuildHeading>), Without<BlueprintDetails>>,
     mut details: Single<(&mut Node, &mut Text), BlueprintDetailsFilter>,
 ) {
     let (detail_node, detail_text) = &mut *details;
@@ -214,6 +218,12 @@ fn refresh(
         return;
     }
     panel.display = Display::Flex;
+    for (mut label, heading) in &mut labels {
+        if heading {
+            label.set_if_neq(Text::new(village.construction.build_heading(&catalog)));
+            break;
+        }
+    }
     let projects = village.construction.build_rows(&catalog);
     let mut hovered = **interaction != Interaction::None;
     for (button, children, interaction, mut node, mut color) in &mut buttons {
@@ -286,7 +296,7 @@ fn refresh(
         };
         if let Some(label) = label
             && let Some(child) = children.first()
-            && let Ok(mut text) = labels.get_mut(*child)
+            && let Ok((mut text, _)) = labels.get_mut(*child)
         {
             text.set_if_neq(Text::new(label));
         }

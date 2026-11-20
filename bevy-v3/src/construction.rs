@@ -727,6 +727,21 @@ impl Construction {
         self.menu && !self.placing_project() && !self.editing_search
     }
 
+    pub(crate) fn build_heading(&self, catalog: &Catalog) -> String {
+        let count = self.options(catalog).len();
+        self.build_result_heading(count)
+    }
+
+    fn build_result_heading(&self, count: usize) -> String {
+        let title = if self.build_query.trim().is_empty() {
+            CATEGORIES[self.category.unwrap_or_default()].to_owned()
+        } else {
+            format!("Search results · {}", self.build_query)
+        };
+        let unit = if count == 1 { "building" } else { "buildings" };
+        format!("{title} · {count} {unit}")
+    }
+
     pub fn build_rows<'a>(&self, catalog: &'a Catalog) -> Vec<(&'a String, &'a Project)> {
         self.options(catalog)
             .into_iter()
@@ -957,14 +972,9 @@ impl Construction {
                 format!("Search {}▏", self.build_query),
                 "Type to filter · Enter Apply",
             )
-        } else if !self.build_query.trim().is_empty() {
-            (
-                format!("Search results · {}", self.build_query),
-                "/ Search · Tab Category · Page Up/Down · B Close",
-            )
         } else {
             (
-                CATEGORIES[self.category.unwrap_or_default()].to_owned(),
+                self.build_result_heading(options.len()),
                 "/ Search · Tab Category · Page Up/Down · B Close",
             )
         };
