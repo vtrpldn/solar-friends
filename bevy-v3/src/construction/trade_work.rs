@@ -518,12 +518,7 @@ impl Construction {
         let (loads, replaced) = self.construction_freight_budget(catalog, BTreeMap::new())?;
         let committed = self.market.committed_fares();
         let freight_commitment = committed.saturating_sub(replaced)
-            + u64::from(loads) * freight_cents(clock.round_trip_km)
-            + if loads > 0 {
-                self.market.expansion_reserve()
-            } else {
-                0
-            };
+            + u64::from(loads) * freight_cents(clock.round_trip_km);
         Some(committed.max(freight_commitment))
     }
 
@@ -1249,7 +1244,7 @@ mod tests {
         );
         assert_eq!(stock.balance(), short_balance);
         assert!(village.trade.delivery.is_none());
-        let protected = fee + village.market.expansion_reserve();
+        let protected = fee;
         stock.credit(
             protected - village.market.committed_fares(),
             crate::stock::CashKind::Materials,
@@ -1267,7 +1262,7 @@ mod tests {
             )
         );
         assert!(summary.contains(&format!(
-            "Protected for freight and reserves R${:.2}",
+            "Reserved for town trips and freight R${:.2}",
             protected as f64 / 100.0
         )));
     }

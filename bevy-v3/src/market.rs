@@ -254,11 +254,7 @@ impl Market {
 
     pub fn can_replace_fares_with_freight(&self, stock: &Stock, reserved: u64, cost: u64) -> bool {
         let other_fares = self.committed_fares.saturating_sub(reserved);
-        stock
-            .balance()
-            .saturating_sub(other_fares)
-            .saturating_sub(self.expansion_reserve)
-            >= cost
+        stock.balance().saturating_sub(other_fares) >= cost
     }
 
     pub fn can_hold_fare(&self, stock: &Stock, fare: u64) -> bool {

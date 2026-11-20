@@ -1320,10 +1320,11 @@ impl Construction {
                 .ok_or("Missing materials exceed supplier freight capacity.")?;
             let freight = crate::market::freight_cents(clock.round_trip_km) * u64::from(trips);
             let freight_cost = quote.price + freight;
-            if self
-                .market
-                .can_replace_fares_with_freight(stock, reserved, freight_cost)
-            {
+            if self.market.can_replace_fares_with_freight(
+                stock,
+                reserved,
+                freight_cost + self.market.expansion_reserve(),
+            ) {
                 return Ok(format!(
                     "R${:.2} including {trips} supplier load(s)",
                     freight_cost as f64 / 100.0

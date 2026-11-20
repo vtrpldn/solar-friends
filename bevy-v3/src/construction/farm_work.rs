@@ -630,7 +630,9 @@ impl Construction {
                 && !self.market.can_replace_fares_with_freight(
                     stock,
                     0,
-                    quote.price + crate::market::freight_cents(clock.round_trip_km),
+                    quote.price
+                        + crate::market::freight_cents(clock.round_trip_km)
+                        + self.market.expansion_reserve(),
                 )
             {
                 return Err("Freight exceeds available expansion funds".into());
@@ -985,7 +987,11 @@ impl Construction {
                             cost as f64 / 100.0
                         );
                         if self.supplier_construction
-                            && !self.market.can_replace_fares_with_freight(stock, 0, cost)
+                            && !self.market.can_replace_fares_with_freight(
+                                stock,
+                                0,
+                                cost + self.market.expansion_reserve(),
+                            )
                         {
                             let _ = write!(label, " · Freight needs more available savings");
                         }

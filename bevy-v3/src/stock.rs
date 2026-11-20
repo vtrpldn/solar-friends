@@ -548,7 +548,7 @@ impl Stock {
         let (available, reserved, charged) = if freight {
             (
                 "Available after commitments",
-                "Protected for freight and reserves",
+                "Reserved for town trips and freight",
                 "Includes queued construction freight",
             )
         } else {

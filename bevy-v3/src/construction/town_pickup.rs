@@ -2101,14 +2101,14 @@ mod tests {
 
         let reserved = village.market.committed_fares();
         assert!(reserved < crate::market::freight_cents(12));
-        let freight = crate::market::freight_cents(12);
-        stock.debit(stock.balance() - freight, crate::stock::CashKind::Food);
-        assert_eq!(stock.balance(), freight);
+        let balance = crate::market::freight_cents(12) - 1;
+        stock.debit(stock.balance() - balance, crate::stock::CashKind::Food);
+        assert_eq!(stock.balance(), balance);
         village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
 
         assert!(village.construction_delivery.is_none());
         assert!(village.active_trips().next().is_none());
-        assert_eq!(stock.balance(), freight);
+        assert_eq!(stock.balance(), balance);
         assert_eq!(village.market.committed_fares(), reserved);
         village.toggle_supplier_construction();
         village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
