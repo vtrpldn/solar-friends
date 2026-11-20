@@ -577,9 +577,12 @@ impl Stock {
                 .copied()
                 .unwrap_or_default(),
         );
-        let (_, expenses, _) = self.finance_totals();
+        let (income, expenses, _) = self.finance_totals();
         display.push_str(&format!(
-            "\nConstruction investment R${:.2} · Other cash spending R${:.2}",
+            "\nRecorded income R${:.2} · Expenses R${:.2} · Net change R${:+.2}\nConstruction investment R${:.2} · Other cash spending R${:.2}",
+            income as f64 / 100.0,
+            expenses as f64 / 100.0,
+            (income - expenses) as f64 / 100.0,
             construction.max(0) as f64 / 100.0,
             (expenses - construction).max(0) as f64 / 100.0,
         ));

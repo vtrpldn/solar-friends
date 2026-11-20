@@ -98,6 +98,9 @@ impl Construction {
         selected: usize,
         clock: TownClock,
     ) -> String {
+        if stock.sandbox {
+            return "Sandbox supplies and funds are unlimited. Purchases are not tracked.".into();
+        }
         let cash = if self.supplier_construction {
             self.protected_freight_cash(catalog, clock)
                 .unwrap_or(stock.balance())
@@ -118,11 +121,9 @@ impl Construction {
             "{status}\nTown sales · {receipts} paid · {pending_sales} pending (R${:.2} before fuel)",
             expected_cents as f64 / 100.0,
         );
-        if !stock.sandbox {
-            summary.push_str("\n\n");
-            summary.push_str(&self.resident_shift_summary(selected, clock.seconds));
-            summary.push_str("\n1–5 Resident · T Book/cancel day shift · Y Toggle weekdays");
-        }
+        summary.push_str("\n\n");
+        summary.push_str(&self.resident_shift_summary(selected, clock.seconds));
+        summary.push_str("\n1–5 Resident · T Book/cancel day shift · Y Toggle weekdays");
         summary
     }
 
