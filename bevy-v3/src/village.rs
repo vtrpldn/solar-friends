@@ -1809,6 +1809,24 @@ fn strip_key_hints(line: &str) -> String {
         .join(" · ")
 }
 
+/// Reads a Projects line the way V2's list does: "1 Solar farm #1 · Complete" becomes
+/// "✓ Solar farm #1", other rows drop their number, and the header names the list.
+fn project_row(line: &str) -> String {
+    if let Some(rest) = line.strip_prefix("Projects · ") {
+        return format!("Around the village · {rest}");
+    }
+    let Some((number, rest)) = line.split_once(' ') else {
+        return line.to_owned();
+    };
+    if number.is_empty() || !number.chars().all(|c| c.is_ascii_digit()) || !rest.contains(" · ") {
+        return line.to_owned();
+    }
+    match rest.strip_suffix(" · Complete") {
+        Some(name) => format!("✓ {name}"),
+        None => format!("· {rest}"),
+    }
+}
+
 /// Top of right-hand panels, below the clock card and its Guide and Lenses buttons.
 const RIGHT_PANEL_TOP: f32 = 176.0;
 
@@ -3222,7 +3240,11 @@ fn show_hud(
                         village.project_roads_expanded,
                         village.clock,
                     )
-                    .1,
+                    .1
+                    .lines()
+                    .map(project_row)
+                    .collect::<Vec<_>>()
+                    .join("\n"),
             );
             if let Some(freight) = village.construction.reserved_freight_status(village.clock) {
                 label.push('\n');
@@ -4025,6 +4047,20 @@ fn outdoor_animation_time(seconds: f64) -> f32 {
 mod tests {
     use super::*;
     use bevy::ecs::system::RunSystemOnce;
+
+    #[test]
+    fn project_rows_read_like_v2s_list() {
+        assert_eq!(project_row("1 Solar farm #1 · Complete"), "✓ Solar farm #1");
+        assert_eq!(
+            project_row("3 Workshop #3 · Building 40%"),
+            "· Workshop #3 · Building 40%"
+        );
+        assert_eq!(
+            project_row("Projects · All · 1/2"),
+            "Around the village · All · 1/2"
+        );
+        assert_eq!(project_row("100 m² basic shell"), "100 m² basic shell");
+    }
 
     #[test]
     fn cards_drop_keyboard_hints_their_buttons_already_offer() {

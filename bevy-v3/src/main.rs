@@ -923,7 +923,7 @@ mod tests {
         press_button(&mut app, "Camp in clearing");
         for (key, heading) in [
             (KeyCode::KeyM, "Shared savings"),
-            (KeyCode::KeyJ, "Projects ·"),
+            (KeyCode::KeyJ, "Around the village ·"),
             (KeyCode::KeyI, "Resources · Stores"),
             (KeyCode::KeyU, "DRINKING WATER"),
         ] {
