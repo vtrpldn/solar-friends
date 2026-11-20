@@ -11,6 +11,7 @@ pub(crate) enum Preview {
     Utilities(UtilitiesPreview),
     Arrival,
     Needs(UtilitiesPreview),
+    Rest,
 }
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
@@ -43,6 +44,7 @@ impl Preview {
                 "--utilities-preview" => Self::Utilities(UtilitiesPreview::default()),
                 "--arrival-preview" => Self::Arrival,
                 "--needs-preview" => Self::Needs(UtilitiesPreview::default()),
+                "--rest-preview" => Self::Rest,
                 "--interactions" | "--land-seed" | "--lighting-hour" | "--lighting-rain" => {
                     utilities_option = Some(flag);
                     match flag {
@@ -109,6 +111,7 @@ impl Preview {
             Self::Utilities(_) => "Utilities preview",
             Self::Arrival => "Arrival preview",
             Self::Needs(_) => "Needs preview",
+            Self::Rest => "Rest preview",
         }
     }
 
@@ -117,7 +120,7 @@ impl Preview {
             Self::Downtime => (Mode::Story, None, 1300.0),
             Self::Utilities(options) => (Mode::Story, Some(options.seed), options.clock()),
             Self::Needs(options) => (Mode::Story, Some(options.seed), 200.0),
-            Self::Arrival => (Mode::Story, Some(0), 0.0),
+            Self::Arrival | Self::Rest => (Mode::Story, Some(0), 0.0),
         };
         let mut scene = PreviewVillage::new(self.title(), mode, seed, clock);
         match self {
@@ -135,6 +138,7 @@ impl Preview {
                 prepare_needs(&mut scene, home);
                 scene.village.paused = options.hour.is_some();
             }
+            Self::Rest => prepare_rest(&mut scene),
         }
         scene.village.stock.sandbox = mode == Mode::Sandbox;
         app.insert_resource(scene.setup)
@@ -404,6 +408,12 @@ fn prepare_needs(scene: &mut PreviewVillage, house: usize) {
         .deliver_water(house, 0, 5.0);
 }
 
+fn prepare_rest(scene: &mut PreviewVillage) {
+    scene.village.camp = None;
+    scene.village.construction.prepare_rest_preview();
+    scene.focus(crate::construction::STOCKPILE + IVec2::new(0, 2), 1.0);
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -541,5 +551,19 @@ mod tests {
             village.construction.utilities.water_site(9).unwrap().levels[0],
             5.0
         );
+    }
+
+    #[test]
+    fn rest_preview_starts_with_five_tired_residents_at_the_stockpile() {
+        let app = start(&["--rest-preview"]);
+        let village = app.world().resource::<Village>();
+        assert!(village.camp.is_none());
+        assert_eq!(village.arrival_time, ARRIVAL_DURATION);
+        for index in 0..NAMES.len() {
+            assert_eq!(
+                village.construction.resident_need_meters(index)[0],
+                ("Energy", 10.0)
+            );
+        }
     }
 }

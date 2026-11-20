@@ -105,6 +105,12 @@ impl Construction {
         }
     }
 
+    pub(crate) fn prepare_rest_preview(&mut self) {
+        for worker in &mut self.residents {
+            worker.health.energy = 10.0;
+        }
+    }
+
     pub(crate) fn resident_need_meters(&self, resident: usize) -> [(&'static str, f64); 8] {
         let health = &self.residents[resident].health;
         std::array::from_fn(|index| {
