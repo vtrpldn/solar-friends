@@ -798,6 +798,13 @@ impl Construction {
         if job.pickups > 0 {
             return seed_delivery_status(job, clock);
         }
+        if matches!(
+            job.phase,
+            FarmPhase::Pickup | FarmPhase::Walk | FarmPhase::Work
+        ) && !self.utilities.enabled(job.site)
+        {
+            return "Growing site switched off".into();
+        }
         if job.action == FarmAction::Harvest
             && matches!(
                 job.phase,
@@ -1159,7 +1166,8 @@ impl Construction {
                 job.phase,
                 FarmPhase::Pickup | FarmPhase::Walk | FarmPhase::Work
             ) && let Some(worker) = job.worker
-                && self.residents[worker].health.energy < 25.0
+                && (self.residents[worker].health.energy < 25.0
+                    || !self.utilities.enabled(job.site))
             {
                 self.residents[worker].clear_work_route();
                 let job = &mut self.farming.jobs[job_index];
@@ -1309,7 +1317,12 @@ impl Construction {
             .jobs
             .iter()
             .enumerate()
-            .filter(|(_, job)| job.worker.is_none() && job.pickups == 0 && job.retry <= clock)
+            .filter(|(_, job)| {
+                job.worker.is_none()
+                    && job.pickups == 0
+                    && job.retry <= clock
+                    && self.utilities.enabled(job.site)
+            })
             .map(|(index, job)| (work_priority(job.action), index))
             .collect();
         waiting.sort_unstable();
