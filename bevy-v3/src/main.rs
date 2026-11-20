@@ -892,6 +892,34 @@ mod tests {
         press_button(&mut app, "Build");
         press_button(&mut app, "Auto-buy on");
         press_button(&mut app, "Auto-buy off");
+        press_button(&mut app, "Search");
+        let build_window = app
+            .world_mut()
+            .query_filtered::<Entity, With<PrimaryWindow>>()
+            .single(app.world())
+            .unwrap();
+        for (text, expected) in [
+            ("milk", "Search milk▏ · 1 building"),
+            ("xyz", "Search milkxyz▏ · 0 buildings"),
+        ] {
+            app.world_mut()
+                .write_message(bevy::input::keyboard::KeyboardInput {
+                    key_code: KeyCode::KeyM,
+                    logical_key: bevy::input::keyboard::Key::Character(text.into()),
+                    state: bevy::input::ButtonState::Pressed,
+                    text: Some(text.into()),
+                    repeat: false,
+                    window: build_window,
+                });
+            app.world_mut().run_schedule(Update);
+            assert!(
+                app.world_mut()
+                    .query::<&Text>()
+                    .iter(app.world())
+                    .any(|label| label.0 == expected)
+            );
+        }
+        press_button(&mut app, "Category");
         press_button(&mut app, "Close build");
 
         press_button(&mut app, "Pause");

@@ -25,7 +25,9 @@ fn visible(setup: &WorldSetup, village: &Village, saves: &SaveMenu, sound: &Soun
     !setup.open
         && !saves.open
         && !sound.open
-        && !village.map_input_blocked()
+        && !village.guide.open()
+        && !village.lenses.open
+        && !village.editing_inventory
         && !village.terrain_editor.open
         && !village.advance_open()
         && !village.trade_open()

@@ -703,12 +703,15 @@ impl Construction {
         self.menu = !self.menu;
         if self.menu {
             self.category.get_or_insert(usize::from(sandbox));
+        } else {
+            self.editing_search = false;
         }
         self.selection = None;
         self.status.clear();
     }
 
     pub fn change_build_category(&mut self, reverse: bool) {
+        self.editing_search = false;
         self.build_query.clear();
         let step = if reverse { CATEGORIES.len() - 1 } else { 1 };
         self.category = Some((self.category.unwrap_or_default() + step) % CATEGORIES.len());
@@ -724,7 +727,7 @@ impl Construction {
     }
 
     pub fn browsing_blueprints(&self) -> bool {
-        self.menu && !self.placing_project() && !self.editing_search
+        self.menu && !self.placing_project()
     }
 
     pub(crate) fn build_heading(&self, catalog: &Catalog) -> String {
@@ -733,7 +736,9 @@ impl Construction {
     }
 
     fn build_result_heading(&self, count: usize) -> String {
-        let title = if self.build_query.trim().is_empty() {
+        let title = if self.editing_search {
+            format!("Search {}▏", self.build_query)
+        } else if self.build_query.trim().is_empty() {
             CATEGORIES[self.category.unwrap_or_default()].to_owned()
         } else {
             format!("Search results · {}", self.build_query)
@@ -776,6 +781,7 @@ impl Construction {
     }
 
     fn choose_blueprint(&mut self, id: &str) {
+        self.editing_search = false;
         self.selection = Some(id.to_owned());
         self.rotation = 0;
         self.field_size = default_field_size();
