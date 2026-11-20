@@ -1329,6 +1329,7 @@
     "gathering": {
       "name": "Gathering place",
       "description": "Assemble a table and benches from pre-cut boards. About 1 person-hour of assembly, plus carrying.",
+      "searchText": "gathering place assemble a table and benches from pre-cut boards. about 1 person-hour of assembly, plus carrying. community & leisure",
       "model": 45,
       "unpackingModel": 170,
       "kind": "square",
@@ -1348,6 +1349,7 @@
     "shelter": {
       "name": "Basic shelter",
       "description": "Raise a small open timber shelter with a sheet roof. About 8 person-hours with pre-cut timber, plus carrying. The frame gives shade halfway through.",
+      "searchText": "basic shelter raise a small open timber shelter with a sheet roof. about 8 person-hours with pre-cut timber, plus carrying. the frame gives shade halfway through. homes & shelter",
       "model": 50,
       "constructionModels": [
         150,
@@ -1371,6 +1373,7 @@
     "toilet": {
       "name": "Private toilet",
       "description": "Assemble a temporary screened toilet around a purchased dry-toilet kit. About 4 person-hours, plus carrying; permanent sanitation comes later.",
+      "searchText": "private toilet assemble a temporary screened toilet around a purchased dry-toilet kit. about 4 person-hours, plus carrying; permanent sanitation comes later. water & sanitation",
       "model": 12,
       "constructionModels": [
         88,
@@ -1395,6 +1398,7 @@
     "home-studio": {
       "name": "Little limewash studio",
       "description": "Little limewash studio. 3 × 4 cells. Build with physical supplies and resident labor. Reserved site: 6 × 8 m (3 × 4 cells). 4.4 × 6 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "little limewash studio little limewash studio. 3 × 4 cells. build with physical supplies and resident labor. reserved site: 6 × 8 m (3 × 4 cells). 4.4 × 6 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
       "model": 38,
       "constructionModels": [
         132,
@@ -1423,6 +1427,7 @@
     "home-lane": {
       "name": "Narrow lane house",
       "description": "Narrow lane house. 3 × 5 cells. Build with physical supplies and resident labor. Reserved site: 6 × 10 m (3 × 5 cells). 4.4 × 8 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "narrow lane house narrow lane house. 3 × 5 cells. build with physical supplies and resident labor. reserved site: 6 × 10 m (3 × 5 cells). 4.4 × 8 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
       "model": 31,
       "constructionModels": [
         118,
@@ -1451,6 +1456,7 @@
     "home-garden": {
       "name": "Garden cottage",
       "description": "Garden cottage. 4 × 3 cells. Build with physical supplies and resident labor. Reserved site: 8 × 6 m (4 × 3 cells). 6 × 4 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "garden cottage garden cottage. 4 × 3 cells. build with physical supplies and resident labor. reserved site: 8 × 6 m (4 × 3 cells). 6 × 4 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
       "model": 30,
       "constructionModels": [
         116,
@@ -1479,6 +1485,7 @@
     "home-ochre": {
       "name": "Ochre gable house",
       "description": "Ochre gable house. 4 × 5 cells. Build with physical supplies and resident labor. Reserved site: 8 × 10 m (4 × 5 cells). 6 × 8 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "ochre gable house ochre gable house. 4 × 5 cells. build with physical supplies and resident labor. reserved site: 8 × 10 m (4 × 5 cells). 6 × 8 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
       "model": 33,
       "constructionModels": [
         122,
@@ -1507,6 +1514,7 @@
     "home-deep-porch": {
       "name": "Deep porch house",
       "description": "Deep porch house. 4 × 6 cells. Build with physical supplies and resident labor. Reserved site: 8 × 12 m (4 × 6 cells). 6 × 8 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "deep porch house deep porch house. 4 × 6 cells. build with physical supplies and resident labor. reserved site: 8 × 12 m (4 × 6 cells). 6 × 8 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
       "model": 27,
       "constructionModels": [
         110,
@@ -1535,6 +1543,7 @@
     "home-blue-gallery": {
       "name": "Sage terrace house",
       "description": "Sage terrace house. 5 × 4 cells. Build with physical supplies and resident labor. Reserved site: 10 × 8 m (5 × 4 cells). 6 × 6 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "sage terrace house sage terrace house. 5 × 4 cells. build with physical supplies and resident labor. reserved site: 10 × 8 m (5 × 4 cells). 6 × 6 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
       "model": 23,
       "constructionModels": [
         102,
@@ -1563,6 +1572,7 @@
     "home-paired": {
       "name": "Paired roof house",
       "description": "Paired roof house. 6 × 4 cells. Build with physical supplies and resident labor. Reserved site: 12 × 8 m (6 × 4 cells). 10 × 6 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "paired roof house paired roof house. 6 × 4 cells. build with physical supplies and resident labor. reserved site: 12 × 8 m (6 × 4 cells). 10 × 6 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
       "model": 34,
       "constructionModels": [
         124,
@@ -1591,6 +1601,7 @@
     "home-broad-veranda": {
       "name": "Broad veranda house",
       "description": "Broad veranda house. 7 × 5 cells. Build with physical supplies and resident labor. Reserved site: 14 × 10 m (7 × 5 cells). 12 × 6 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "broad veranda house broad veranda house. 7 × 5 cells. build with physical supplies and resident labor. reserved site: 14 × 10 m (7 × 5 cells). 12 × 6 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
       "model": 24,
       "constructionModels": [
         104,
@@ -1619,6 +1630,7 @@
     "home-shaded-retreat": {
       "name": "Shaded terrace home",
       "description": "Shaded terrace home. 6 × 7 cells. Build with physical supplies and resident labor. Reserved site: 12 × 14 m (6 × 7 cells). 8 × 10 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "shaded terrace home shaded terrace home. 6 × 7 cells. build with physical supplies and resident labor. reserved site: 12 × 14 m (6 × 7 cells). 8 × 10 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
       "model": 36,
       "constructionModels": [
         128,
@@ -1647,6 +1659,7 @@
     "home-ranch": {
       "name": "Long clay-roof house",
       "description": "Long clay-roof house. 8 × 4 cells. Build with physical supplies and resident labor. Reserved site: 16 × 8 m (8 × 4 cells). 14 × 6 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "long clay-roof house long clay-roof house. 8 × 4 cells. build with physical supplies and resident labor. reserved site: 16 × 8 m (8 × 4 cells). 14 × 6 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
       "model": 35,
       "constructionModels": [
         126,
@@ -1675,6 +1688,7 @@
     "home-cottage": {
       "name": "Small cottage",
       "description": "Small cottage. 4 × 4 cells. Build with physical supplies and resident labor. Reserved site: 8 × 8 m (4 × 4 cells). 6 × 6 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "small cottage small cottage. 4 × 4 cells. build with physical supplies and resident labor. reserved site: 8 × 8 m (4 × 4 cells). 6 × 6 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
       "model": 25,
       "constructionModels": [
         106,
@@ -1703,6 +1717,7 @@
     "home-longhouse": {
       "name": "Long veranda house",
       "description": "Long veranda house. 7 × 4 cells. Build with physical supplies and resident labor. Reserved site: 14 × 8 m (7 × 4 cells). 12 × 6 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "long veranda house long veranda house. 7 × 4 cells. build with physical supplies and resident labor. reserved site: 14 × 8 m (7 × 4 cells). 12 × 6 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
       "model": 32,
       "constructionModels": [
         120,
@@ -1731,6 +1746,7 @@
     "groundwater-well": {
       "name": "Water well",
       "description": "A covered groundwater well. Recharges up to 8 untreated water per hour (less in dry conditions), storing 40. Residents can carry it to a cistern for filtering; no electricity needed. Reserved site: 4 × 4 m (2 × 2 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "water well a covered groundwater well. recharges up to 8 untreated water per hour (less in dry conditions), storing 40. residents can carry it to a cistern for filtering; no electricity needed. reserved site: 4 × 4 m (2 × 2 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. water & sanitation",
       "model": 20,
       "constructionModels": [
         98,
@@ -1756,6 +1772,7 @@
     "water-pump": {
       "name": "Water pump",
       "description": "An electric intake beside a river or within 6 cells of a completed water well. Draws up to 600 liters of untreated water per hour and feeds cisterns and irrigation. Requires power; well recharge can limit supply. Reserved site: 2 × 2 m (1 × 1 cells). 1.5 × 1.4 m physical footprint. Pump pad with service space inside the reserved site. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "water pump an electric intake beside a river or within 6 cells of a completed water well. draws up to 600 liters of untreated water per hour and feeds cisterns and irrigation. requires power; well recharge can limit supply. reserved site: 2 × 2 m (1 × 1 cells). 1.5 × 1.4 m physical footprint. pump pad with service space inside the reserved site. access uses reachable neighbouring cells; it is not extra productive land. water & sanitation",
       "model": 62,
       "constructionModels": [
         162,
@@ -1781,6 +1798,7 @@
     "home-family": {
       "name": "Family house",
       "description": "Family house. 6 × 5 cells. Build with physical supplies and resident labor. Reserved site: 12 × 10 m (6 × 5 cells). 10 × 8 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "family house family house. 6 × 5 cells. build with physical supplies and resident labor. reserved site: 12 × 10 m (6 × 5 cells). 10 × 8 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
       "model": 28,
       "constructionModels": [
         112,
@@ -1809,6 +1827,7 @@
     "home-shared": {
       "name": "Shared adobe house",
       "description": "Shared adobe house. 6 × 6 cells. Build with physical supplies and resident labor. Reserved site: 12 × 12 m (6 × 6 cells). 10.5 × 9.5 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "shared adobe house shared adobe house. 6 × 6 cells. build with physical supplies and resident labor. reserved site: 12 × 12 m (6 × 6 cells). 10.5 × 9.5 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
       "model": 37,
       "constructionModels": [
         130,
@@ -1836,6 +1855,7 @@
     "road": {
       "name": "Village road",
       "description": "Village road. 1 × 1 cells. Build with physical supplies and resident labor. Reserved site: 2 × 2 m (1 × 1 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "village road village road. 1 × 1 cells. build with physical supplies and resident labor. reserved site: 2 × 2 m (1 × 1 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. paths & boundaries",
       "model": 48,
       "constructionModels": [
         148,
@@ -1858,6 +1878,7 @@
     "bridge": {
       "name": "Timber footbridge",
       "description": "Timber footbridge. 8 × 1 cells. Build with physical supplies and resident labor. Reserved site: 16 × 2 m (8 × 1 cells). 16 × 1.96 m physical footprint. 1.75 m walking deck. Both ends must remain reachable on dry land. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "timber footbridge timber footbridge. 8 × 1 cells. build with physical supplies and resident labor. reserved site: 16 × 2 m (8 × 1 cells). 16 × 1.96 m physical footprint. 1.75 m walking deck. both ends must remain reachable on dry land. access uses reachable neighbouring cells; it is not extra productive land. paths & boundaries",
       "model": 5,
       "constructionModels": [
         78,
@@ -1881,6 +1902,7 @@
     "house": {
       "name": "Limewashed house",
       "description": "Limewashed house. 5 × 5 cells. Build with physical supplies and resident labor. Reserved site: 10 × 10 m (5 × 5 cells). 8 × 8 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "limewashed house limewashed house. 5 × 5 cells. build with physical supplies and resident labor. reserved site: 10 × 10 m (5 × 5 cells). 8 × 8 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
       "model": 40,
       "constructionModels": [
         136,
@@ -1908,6 +1930,7 @@
     "shed": {
       "name": "Open timber shed",
       "description": "Open timber shed. 3 × 3 cells. Build with physical supplies and resident labor. Reserved site: 6 × 6 m (3 × 3 cells). 5 × 4 m structure. Open timber work shelter with a dry bench and space to move around it. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "open timber shed open timber shed. 3 × 3 cells. build with physical supplies and resident labor. reserved site: 6 × 6 m (3 × 3 cells). 5 × 4 m structure. open timber work shelter with a dry bench and space to move around it. access uses reachable neighbouring cells; it is not extra productive land. homes & shelter",
       "model": 50,
       "constructionModels": [
         150,
@@ -1933,6 +1956,7 @@
     "orchard": {
       "name": "Fruit orchard",
       "description": "Fruit orchard. 5 × 5 cells. Build with physical supplies and resident labor. Reserved site: 10 × 10 m (5 × 5 cells). 10 × 10 m plot. Four compact fruit trees on 4 m centres. Mature size and yield remain species-dependent. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "fruit orchard fruit orchard. 5 × 5 cells. build with physical supplies and resident labor. reserved site: 10 × 10 m (5 × 5 cells). 10 × 10 m plot. four compact fruit trees on 4 m centres. mature size and yield remain species-dependent. access uses reachable neighbouring cells; it is not extra productive land. harvest orchard fruit ingredients organic residues food & farming",
       "model": 43,
       "constructionModels": [
         142,
@@ -1956,6 +1980,7 @@
     "goat_pasture": {
       "name": "Goat pen",
       "description": "Goat pen. 6 × 5 cells. Build with physical supplies and resident labor. Reserved site: 12 × 10 m (6 × 5 cells). 11 × 9 m physical footprint. Two-goat pen with a 9 m² shelter and 90 m² outdoor area. Supplied feed or separate grazing is needed. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "goat pen goat pen. 6 × 5 cells. build with physical supplies and resident labor. reserved site: 12 × 10 m (6 × 5 cells). 11 × 9 m physical footprint. two-goat pen with a 9 m² shelter and 90 m² outdoor area. supplied feed or separate grazing is needed. access uses reachable neighbouring cells; it is not extra productive land. feed and milk goats fresh milk animals",
       "model": 18,
       "constructionModels": [
         94,
@@ -1981,6 +2006,7 @@
     "apiary": {
       "name": "Stingless bee apiary",
       "description": "Stingless bee apiary. 2 × 2 cells. Build with physical supplies and resident labor. Reserved site: 4 × 4 m (2 × 2 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "stingless bee apiary stingless bee apiary. 2 × 2 cells. build with physical supplies and resident labor. reserved site: 4 × 4 m (2 × 2 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. tend hives and collect honey honey animals",
       "model": 2,
       "constructionModels": [
         72,
@@ -2005,6 +2031,7 @@
     "hydro": {
       "name": "River generator",
       "description": "River generator. 3 × 3 cells. Build with physical supplies and resident labor. Reserved site: 6 × 6 m (3 × 3 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "river generator river generator. 3 × 3 cells. build with physical supplies and resident labor. reserved site: 6 × 6 m (3 × 3 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. power",
       "model": 41,
       "constructionModels": [
         138,
@@ -2031,6 +2058,7 @@
     "eco_toilet": {
       "name": "Ecological toilet",
       "description": "Ecological toilet. 2 × 2 cells. Build with physical supplies and resident labor. Reserved site: 4 × 4 m (2 × 2 cells). 1.8 × 2.2 m structure. Single dry-toilet building with a human-sized doorway, ventilation and rear service access. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "ecological toilet ecological toilet. 2 × 2 cells. build with physical supplies and resident labor. reserved site: 4 × 4 m (2 × 2 cells). 1.8 × 2.2 m structure. single dry-toilet building with a human-sized doorway, ventilation and rear service access. access uses reachable neighbouring cells; it is not extra productive land. water & sanitation",
       "model": 12,
       "constructionModels": [
         88,
@@ -2057,6 +2085,7 @@
     "banana_treatment": {
       "name": "Banana treatment bed",
       "description": "Banana treatment bed. 3 × 4 cells. Build with physical supplies and resident labor. Reserved site: 6 × 8 m (3 × 4 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "banana treatment bed banana treatment bed. 3 × 4 cells. build with physical supplies and resident labor. reserved site: 6 × 8 m (3 × 4 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. water & sanitation",
       "model": 3,
       "constructionModels": [
         74,
@@ -2083,6 +2112,7 @@
     "wetland": {
       "name": "Reed bed",
       "description": "Reed bed. 3 × 5 cells. Build with physical supplies and resident labor. Reserved site: 6 × 10 m (3 × 5 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "reed bed reed bed. 3 × 5 cells. build with physical supplies and resident labor. reserved site: 6 × 10 m (3 × 5 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. water & sanitation",
       "model": 65,
       "constructionModels": [
         166,
@@ -2108,6 +2138,7 @@
     "biodigester": {
       "name": "Biodigester",
       "description": "Biodigester. 4 × 4 cells. Build with physical supplies and resident labor. Reserved site: 8 × 8 m (4 × 4 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "biodigester biodigester. 4 × 4 cells. build with physical supplies and resident labor. reserved site: 8 × 8 m (4 × 4 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. water & sanitation",
       "model": 4,
       "constructionModels": [
         76,
@@ -2133,6 +2164,7 @@
     "warehouse": {
       "name": "Storage house",
       "description": "Storage house. 5 × 4 cells. Build with physical supplies and resident labor. Nearby construction can stage bundled deliveries here to reduce hauling trips. Reserved site: 10 × 8 m (5 × 4 cells). 8 × 6 m structure. Community storehouse with four shelving units, a receiving space and a central aisle. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "storage house storage house. 5 × 4 cells. build with physical supplies and resident labor. nearby construction can stage bundled deliveries here to reduce hauling trips. reserved site: 10 × 8 m (5 × 4 cells). 8 × 6 m structure. community storehouse with four shelving units, a receiving space and a central aisle. access uses reachable neighbouring cells; it is not extra productive land. storage & production",
       "model": 60,
       "constructionModels": [
         160,
@@ -2161,6 +2193,7 @@
     "solar_farm": {
       "name": "Solar farm",
       "description": "Solar farm. 4 × 4 cells. Build with physical supplies and resident labor. Reserved site: 8 × 8 m (4 × 4 cells). 5.2 × 5.4 m physical footprint. Six 1.1 × 1.8 m panels: 11.88 m² panel surface, with row and service access. Rated output is separate. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "solar farm solar farm. 4 × 4 cells. build with physical supplies and resident labor. reserved site: 8 × 8 m (4 × 4 cells). 5.2 × 5.4 m physical footprint. six 1.1 × 1.8 m panels: 11.88 m² panel surface, with row and service access. rated output is separate. access uses reachable neighbouring cells; it is not extra productive land. power",
       "model": 51,
       "constructionModels": [
         152,
@@ -2186,6 +2219,7 @@
     "streetlight": {
       "name": "Street light",
       "description": "Street light. 1 × 1 cells. Build with physical supplies and resident labor. Reserved site: 2 × 2 m (1 × 1 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "street light street light. 1 × 1 cells. build with physical supplies and resident labor. reserved site: 2 × 2 m (1 × 1 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. power",
       "model": 53,
       "constructionModels": [
         156,
@@ -2210,6 +2244,7 @@
     "kitchen": {
       "name": "Community kitchen",
       "description": "Community kitchen. 6 × 5 cells. Build with physical supplies and resident labor. Reserved site: 12 × 10 m (6 × 5 cells). 10 × 8 m structure. Community kitchen with two cooking positions, washing and pantry space, and dining for eight. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "community kitchen community kitchen. 6 × 5 cells. build with physical supplies and resident labor. reserved site: 12 × 10 m (6 × 5 cells). 10 × 8 m structure. community kitchen with two cooking positions, washing and pantry space, and dining for eight. access uses reachable neighbouring cells; it is not extra productive land. cook a meal batch prepared meals organic residues prepare dried provisions prepared meals organic residues install kitchen cold storage cook leafy greens prepared meals cook bush beans prepared meals cook sweet corn prepared meals food & farming",
       "model": 42,
       "constructionModels": [
         140,
@@ -2238,6 +2273,7 @@
     "grove": {
       "name": "Banana grove",
       "description": "Banana grove. 4 × 4 cells. Build with physical supplies and resident labor. Reserved site: 8 × 8 m (4 × 4 cells). 8 × 8 m plot. Four banana clumps on 3 m centres, with harvesting access. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "banana grove banana grove. 4 × 4 cells. build with physical supplies and resident labor. reserved site: 8 × 8 m (4 × 4 cells). 8 × 8 m plot. four banana clumps on 3 m centres, with harvesting access. access uses reachable neighbouring cells; it is not extra productive land. harvest bananas ingredients organic residues food & farming",
       "model": 21,
       "constructionModels": [
         100,
@@ -2261,6 +2297,7 @@
     "garden": {
       "name": "Vegetable garden",
       "description": "Vegetable garden. 4 × 6 cells. Build with physical supplies and resident labor. Reserved site: 8 × 12 m (4 × 6 cells). 4.28 × 9.36 m physical footprint. Four 1.2 × 4 m beds; 19.2 m² planted. Central and end aisles remain clear. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "vegetable garden vegetable garden. 4 × 6 cells. build with physical supplies and resident labor. reserved site: 8 × 12 m (4 × 6 cells). 4.28 × 9.36 m physical footprint. four 1.2 × 4 m beds; 19.2 m² planted. central and end aisles remain clear. access uses reachable neighbouring cells; it is not extra productive land. grow baby salad greens ingredients organic residues plant and harvest vegetables ingredients organic residues food & farming",
       "model": 16,
       "constructionModels": [
         92,
@@ -2284,6 +2321,7 @@
     "greenhouse": {
       "name": "Greenhouse",
       "description": "Greenhouse. 4 × 6 cells. Build with physical supplies and resident labor. Reserved site: 8 × 12 m (4 × 6 cells). 6 × 10 m physical footprint. Two 1.2 × 8 m beds; 19.2 m² planted, a 1 m central aisle and 1 m end access. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "greenhouse greenhouse. 4 × 6 cells. build with physical supplies and resident labor. reserved site: 8 × 12 m (4 × 6 cells). 6 × 10 m physical footprint. two 1.2 × 8 m beds; 19.2 m² planted, a 1 m central aisle and 1 m end access. access uses reachable neighbouring cells; it is not extra productive land. grow greenhouse vegetables ingredients organic residues food & farming",
       "model": 19,
       "constructionModels": [
         96,
@@ -2311,6 +2349,7 @@
     "well": {
       "name": "Cistern",
       "description": "A cistern storing 1,000 liters of clean and 1,000 liters of untreated water. Collects rainwater and filters supplied untreated water at 25 per hour while powered. Reserved site: 6 × 6 m (3 × 3 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "cistern a cistern storing 1,000 liters of clean and 1,000 liters of untreated water. collects rainwater and filters supplied untreated water at 25 per hour while powered. reserved site: 6 × 6 m (3 × 3 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. water & sanitation",
       "model": 64,
       "constructionModels": [
         164,
@@ -2337,6 +2376,7 @@
     "compost": {
       "name": "Compost station",
       "description": "Compost station. 3 × 2 cells. Build with physical supplies and resident labor. Reserved site: 6 × 4 m (3 × 2 cells). 3.9 × 1.1 m physical footprint. Three 1 m³ bays plus front working access. Actual output depends on feedstock. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "compost station compost station. 3 × 2 cells. build with physical supplies and resident labor. reserved site: 6 × 4 m (3 × 2 cells). 3.9 × 1.1 m physical footprint. three 1 m³ bays plus front working access. actual output depends on feedstock. access uses reachable neighbouring cells; it is not extra productive land. turn compost mature compost food & farming",
       "model": 10,
       "constructionModels": [
         84,
@@ -2360,6 +2400,7 @@
     "square": {
       "name": "Community square",
       "description": "Community square. 5 × 5 cells. Build with physical supplies and resident labor. Reserved site: 10 × 10 m (5 × 5 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "community square community square. 5 × 5 cells. build with physical supplies and resident labor. reserved site: 10 × 10 m (5 × 5 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. community & leisure",
       "model": 52,
       "constructionModels": [
         154,
@@ -2385,6 +2426,7 @@
     "workshop": {
       "name": "Workshop",
       "description": "Workshop. 5 × 4 cells. Build with physical supplies and resident labor. Reserved site: 10 × 8 m (5 × 4 cells). 8 × 6 m structure. Two-person repair workshop with separate benches, an assembly table and stock racks. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "workshop workshop. 5 × 4 cells. build with physical supplies and resident labor. reserved site: 10 × 8 m (5 × 4 cells). 8 × 6 m structure. two-person repair workshop with separate benches, an assembly table and stock racks. access uses reachable neighbouring cells; it is not extra productive land. prepare frames frames make earth walls wall material fire roof tiles roof tiles craft wheelbarrow wheelbarrow storage & production",
       "model": 67,
       "constructionModels": [
         168,
@@ -2412,6 +2454,7 @@
     "coop": {
       "name": "Chicken coop",
       "description": "Chicken coop. 4 × 4 cells. Build with physical supplies and resident labor. Reserved site: 8 × 8 m (4 × 4 cells). 2 × 2 m structure. Six-hen coop with perches, nesting boxes, feed, water and an enclosed outdoor run. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "chicken coop chicken coop. 4 × 4 cells. build with physical supplies and resident labor. reserved site: 8 × 8 m (4 × 4 cells). 2 × 2 m structure. six-hen coop with perches, nesting boxes, feed, water and an enclosed outdoor run. access uses reachable neighbouring cells; it is not extra productive land. feed hens and collect eggs eggs animals",
       "model": 11,
       "constructionModels": [
         86,
@@ -2437,6 +2480,7 @@
     "home-veranda": {
       "name": "Veranda house",
       "description": "Veranda house. 5 × 6 cells. Build with physical supplies and resident labor. Reserved site: 10 × 12 m (5 × 6 cells). 8 × 8 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "veranda house veranda house. 5 × 6 cells. build with physical supplies and resident labor. reserved site: 10 × 12 m (5 × 6 cells). 8 × 8 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
       "model": 39,
       "constructionModels": [
         134,
@@ -2464,6 +2508,7 @@
     "home-gable": {
       "name": "Gabled house",
       "description": "Gabled house. 5 × 5 cells. Build with physical supplies and resident labor. Reserved site: 10 × 10 m (5 × 5 cells). 8 × 8 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "gabled house gabled house. 5 × 5 cells. build with physical supplies and resident labor. reserved site: 10 × 10 m (5 × 5 cells). 8 × 8 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
       "model": 29,
       "constructionModels": [
         114,
@@ -2491,6 +2536,7 @@
     "home-courtyard": {
       "name": "Terrace house",
       "description": "Terrace house. 6 × 5 cells. Build with physical supplies and resident labor. Reserved site: 12 × 10 m (6 × 5 cells). 8 × 8 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "terrace house terrace house. 6 × 5 cells. build with physical supplies and resident labor. reserved site: 12 × 10 m (6 × 5 cells). 8 × 8 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
       "model": 26,
       "constructionModels": [
         108,
@@ -2518,6 +2564,7 @@
     "adobe-gable": {
       "name": "Adobe gabled house",
       "description": "Adobe gabled house. 5 × 5 cells. Build with physical supplies and resident labor. Reserved site: 10 × 10 m (5 × 5 cells). 8 × 8 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "adobe gabled house adobe gabled house. 5 × 5 cells. build with physical supplies and resident labor. reserved site: 10 × 10 m (5 × 5 cells). 8 × 8 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
       "model": 0,
       "constructionModels": [
         68,
@@ -2544,6 +2591,7 @@
     "adobe-veranda": {
       "name": "Adobe veranda house",
       "description": "Adobe veranda house. 5 × 6 cells. Build with physical supplies and resident labor. Reserved site: 10 × 12 m (5 × 6 cells). 8 × 8 m external wall shell. Exterior shell only; rooms and furnishings are not modeled. Reserved outdoor clearance is separate from the house. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "adobe veranda house adobe veranda house. 5 × 6 cells. build with physical supplies and resident labor. reserved site: 10 × 12 m (5 × 6 cells). 8 × 8 m external wall shell. exterior shell only; rooms and furnishings are not modeled. reserved outdoor clearance is separate from the house. access uses reachable neighbouring cells; it is not extra productive land. install rooftop solar and battery homes & shelter",
       "model": 1,
       "constructionModels": [
         70,
@@ -2570,6 +2618,7 @@
     "supply-0": {
       "name": "Managed timber",
       "description": "Managed timber. 6 × 6 cells. Build with physical supplies and resident labor. Reserved site: 12 × 12 m (6 × 6 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "managed timber managed timber. 6 × 6 cells. build with physical supplies and resident labor. reserved site: 12 × 12 m (6 × 6 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. grow and harvest timber raw wood storage & production",
       "model": 54,
       "kind": "supply-0",
       "size": [
@@ -2587,6 +2636,7 @@
     "supply-1": {
       "name": "Bamboo stand",
       "description": "Bamboo stand. 3 × 3 cells. Build with physical supplies and resident labor. Reserved site: 6 × 6 m (3 × 3 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "bamboo stand bamboo stand. 3 × 3 cells. build with physical supplies and resident labor. reserved site: 6 × 6 m (3 × 3 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. cut mature bamboo bamboo poles storage & production",
       "model": 55,
       "kind": "supply-1",
       "size": [
@@ -2604,6 +2654,7 @@
     "supply-5": {
       "name": "Timber workbench",
       "description": "A hand-saw workbench. Residents turn felled raw wood into timber, then saw timber into planks. They also weave baskets, fit garden-tool handles, make crates, assemble wheelbarrows with purchased parts, and repair shared equipment. No electricity required. Reserved site: 2 × 2 m (1 × 1 cells). 2 × 0.85 m physical footprint. A 2 × 0.85 m bench; the rest of the site is working space. Keep one neighbouring side reachable. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "timber workbench a hand-saw workbench. residents turn felled raw wood into timber, then saw timber into planks. they also weave baskets, fit garden-tool handles, make crates, assemble wheelbarrows with purchased parts, and repair shared equipment. no electricity required. reserved site: 2 × 2 m (1 × 1 cells). 2 × 0.85 m physical footprint. a 2 × 0.85 m bench; the rest of the site is working space. keep one neighbouring side reachable. access uses reachable neighbouring cells; it is not extra productive land. saw raw wood into timber timber pieces saw timber into planks planks craft garden tools garden tools craft harvest basket harvest basket craft produce crate produce crate repair bucket repair garden tools repair carpentry tools repair harvest basket repair cleaning kit prepare corn feed supplement dry fodder organic residues storage & production",
       "model": 56,
       "kind": "supply-5",
       "size": [
@@ -2621,6 +2672,7 @@
     "supply-6": {
       "name": "Battery station",
       "description": "Battery station. 1 × 1 cells. Build with physical supplies and resident labor. Reserved site: 2 × 2 m (1 × 1 cells). 0.78 × 0.57 m physical footprint. A compact battery unit with a whole-cell service reservation. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "battery station battery station. 1 × 1 cells. build with physical supplies and resident labor. reserved site: 2 × 2 m (1 × 1 cells). 0.78 × 0.57 m physical footprint. a compact battery unit with a whole-cell service reservation. access uses reachable neighbouring cells; it is not extra productive land. power",
       "model": 57,
       "kind": "supply-6",
       "size": [
@@ -2639,6 +2691,7 @@
     "rain-barrel": {
       "name": "Rainwater barrel",
       "description": "Rainwater barrel. 1 × 1 cells. Build with physical supplies and resident labor. Reserved site: 2 × 2 m (1 × 1 cells). 0.96 × 0.86 m physical footprint. The reserved site includes room to reach the tap; the barrel itself is about 0.74 m across. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "rainwater barrel rainwater barrel. 1 × 1 cells. build with physical supplies and resident labor. reserved site: 2 × 2 m (1 × 1 cells). 0.96 × 0.86 m physical footprint. the reserved site includes room to reach the tap; the barrel itself is about 0.74 m across. access uses reachable neighbouring cells; it is not extra productive land. water & sanitation",
       "model": 46,
       "kind": "rain-barrel",
       "size": [
@@ -2657,6 +2710,7 @@
     "tool-rack": {
       "name": "Garden tool rack",
       "description": "Garden tool rack. 1 × 1 cells. Build with physical supplies and resident labor. Reserved site: 2 × 2 m (1 × 1 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "garden tool rack garden tool rack. 1 × 1 cells. build with physical supplies and resident labor. reserved site: 2 × 2 m (1 × 1 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. storage & production",
       "model": 58,
       "kind": "tool-rack",
       "size": [
@@ -2675,6 +2729,7 @@
     "seedling-bench": {
       "name": "Seedling bench",
       "description": "Seedling bench. 1 × 1 cells. Build with physical supplies and resident labor. Reserved site: 2 × 2 m (1 × 1 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "seedling bench seedling bench. 1 × 1 cells. build with physical supplies and resident labor. reserved site: 2 × 2 m (1 × 1 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. food & farming",
       "model": 49,
       "kind": "seedling-bench",
       "size": [
@@ -2693,6 +2748,7 @@
     "woodpile": {
       "name": "Seasoned firewood",
       "description": "Seasoned firewood. 1 × 1 cells. Build with physical supplies and resident labor. Reserved site: 2 × 2 m (1 × 1 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "seasoned firewood seasoned firewood. 1 × 1 cells. build with physical supplies and resident labor. reserved site: 2 × 2 m (1 × 1 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. storage & production",
       "model": 66,
       "kind": "woodpile",
       "size": [
@@ -2711,6 +2767,7 @@
     "picnic-table": {
       "name": "Picnic table",
       "description": "Picnic table. 2 × 2 cells. Build with physical supplies and resident labor. Reserved site: 4 × 4 m (2 × 2 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "picnic table picnic table. 2 × 2 cells. build with physical supplies and resident labor. reserved site: 4 × 4 m (2 × 2 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. community & leisure",
       "model": 45,
       "kind": "picnic-table",
       "size": [
@@ -2729,6 +2786,7 @@
     "garden-bench": {
       "name": "Garden bench",
       "description": "Garden bench. 1 × 1 cells. Build with physical supplies and resident labor. Reserved site: 2 × 2 m (1 × 1 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "garden bench garden bench. 1 × 1 cells. build with physical supplies and resident labor. reserved site: 2 × 2 m (1 × 1 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. community & leisure",
       "model": 17,
       "kind": "garden-bench",
       "size": [
@@ -2747,6 +2805,7 @@
     "clothesline": {
       "name": "Clothesline",
       "description": "Clothesline. 2 × 1 cells. Build with physical supplies and resident labor. Reserved site: 4 × 2 m (2 × 1 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "clothesline clothesline. 2 × 1 cells. build with physical supplies and resident labor. reserved site: 4 × 2 m (2 × 1 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. water & sanitation",
       "model": 8,
       "kind": "clothesline",
       "size": [
@@ -2765,6 +2824,7 @@
     "hammock": {
       "name": "Hammock",
       "description": "Hammock. 2 × 1 cells. Build with physical supplies and resident labor. Reserved site: 4 × 2 m (2 × 1 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "hammock hammock. 2 × 1 cells. build with physical supplies and resident labor. reserved site: 4 × 2 m (2 × 1 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. community & leisure",
       "model": 22,
       "kind": "hammock",
       "size": [
@@ -2783,6 +2843,7 @@
     "wayfinding-sign": {
       "name": "Wayfinding sign",
       "description": "Wayfinding sign. 1 × 1 cells. Build with physical supplies and resident labor. Reserved site: 2 × 2 m (1 × 1 cells). 1.2 × 0.15 m physical footprint. A small sign, with a whole-cell placement reservation. Keep a walking route beside it. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "wayfinding sign wayfinding sign. 1 × 1 cells. build with physical supplies and resident labor. reserved site: 2 × 2 m (1 × 1 cells). 1.2 × 0.15 m physical footprint. a small sign, with a whole-cell placement reservation. keep a walking route beside it. access uses reachable neighbouring cells; it is not extra productive land. paths & boundaries",
       "model": 63,
       "kind": "wayfinding-sign",
       "size": [
@@ -2801,6 +2862,7 @@
     "wash-station": {
       "name": "Outdoor wash station",
       "description": "Outdoor wash station. 1 × 1 cells. Build with physical supplies and resident labor. Reserved site: 2 × 2 m (1 × 1 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "outdoor wash station outdoor wash station. 1 × 1 cells. build with physical supplies and resident labor. reserved site: 2 × 2 m (1 × 1 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. water & sanitation",
       "model": 61,
       "kind": "wash-station",
       "size": [
@@ -2819,6 +2881,7 @@
     "farm-gate": {
       "name": "Farm gate",
       "description": "Farm gate. 1 × 1 cells. Build with physical supplies and resident labor. Reserved site: 2 × 2 m (1 × 1 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "farm gate farm gate. 1 × 1 cells. build with physical supplies and resident labor. reserved site: 2 × 2 m (1 × 1 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. paths & boundaries",
       "model": 14,
       "kind": "farm-gate",
       "size": [
@@ -2837,6 +2900,7 @@
     "fire-circle": {
       "name": "Fire circle",
       "description": "Fire circle. 1 × 1 cells. Build with physical supplies and resident labor. Reserved site: 2 × 2 m (1 × 1 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "fire circle fire circle. 1 × 1 cells. build with physical supplies and resident labor. reserved site: 2 × 2 m (1 × 1 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. community & leisure",
       "model": 15,
       "kind": "fire-circle",
       "size": [
@@ -2855,6 +2919,7 @@
     "canvas-tent-teal": {
       "name": "Sage canvas tent",
       "description": "Sage canvas tent. 2 × 2 cells. Build with physical supplies and resident labor. Reserved site: 4 × 4 m (2 × 2 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "sage canvas tent sage canvas tent. 2 × 2 cells. build with physical supplies and resident labor. reserved site: 4 × 4 m (2 × 2 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. homes & shelter",
       "model": 7,
       "kind": "canvas-tent-teal",
       "size": [
@@ -2873,6 +2938,7 @@
     "canvas-tent-ochre": {
       "name": "Ochre canvas tent",
       "description": "Ochre canvas tent. 2 × 2 cells. Build with physical supplies and resident labor. Reserved site: 4 × 4 m (2 × 2 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "ochre canvas tent ochre canvas tent. 2 × 2 cells. build with physical supplies and resident labor. reserved site: 4 × 4 m (2 × 2 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. homes & shelter",
       "model": 6,
       "constructionModels": [
         80,
@@ -2895,6 +2961,7 @@
     "reading-room": {
       "name": "Village reading room",
       "description": "A quiet book room with shaded reading benches. Residents visit to unwind and share stories. Reserved site: 10 × 8 m (5 × 4 cells). 8 × 6 m structure. Quiet reading room with shelves, two shared tables and eight seats. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "village reading room a quiet book room with shaded reading benches. residents visit to unwind and share stories. reserved site: 10 × 8 m (5 × 4 cells). 8 × 6 m structure. quiet reading room with shelves, two shared tables and eight seats. access uses reachable neighbouring cells; it is not extra productive land. community & leisure",
       "model": 47,
       "constructionModels": [
         146,
@@ -2920,6 +2987,7 @@
     "outdoor-classroom": {
       "name": "Outdoor classroom",
       "description": "A roofed learning space with a chalkboard and work tables. Friends exchange practical knowledge during free time. Reserved site: 10 × 10 m (5 × 5 cells). 8 × 8 m structure. Covered classroom with twelve seats, tables and a clear teaching area. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "outdoor classroom a roofed learning space with a chalkboard and work tables. friends exchange practical knowledge during free time. reserved site: 10 × 10 m (5 × 5 cells). 8 × 8 m structure. covered classroom with twelve seats, tables and a clear teaching area. access uses reachable neighbouring cells; it is not extra productive land. community & leisure",
       "model": 44,
       "constructionModels": [
         144,
@@ -2944,6 +3012,7 @@
     "community-hall": {
       "name": "Community hall",
       "description": "An open-front hall for conversation and village gatherings, with a long table and noticeboard. Reserved site: 14 × 12 m (7 × 6 cells). 12 × 10 m structure. Open-front community hall with six tables and seating for twenty-four. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "community hall an open-front hall for conversation and village gatherings, with a long table and noticeboard. reserved site: 14 × 12 m (7 × 6 cells). 12 × 10 m structure. open-front community hall with six tables and seating for twenty-four. access uses reachable neighbouring cells; it is not extra productive land. community & leisure",
       "model": 9,
       "constructionModels": [
         82,
@@ -2969,6 +3038,7 @@
     "exercise-garden": {
       "name": "Exercise garden",
       "description": "Timber parallel bars, stepping logs and a stretching deck. A gentle outdoor break between projects. Reserved site: 10 × 10 m (5 × 5 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "exercise garden timber parallel bars, stepping logs and a stretching deck. a gentle outdoor break between projects. reserved site: 10 × 10 m (5 × 5 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. community & leisure",
       "model": 13,
       "constructionModels": [
         90,
@@ -2992,6 +3062,7 @@
     "volleyball-court": {
       "name": "Volleyball court",
       "description": "A sand court with a net and spectator benches. A recreation destination; organized matches are not simulated yet. Reserved site: 22 × 14 m (11 × 7 cells). Includes the object and placement clearance. Access uses reachable neighbouring cells; it is not extra productive land.",
+      "searchText": "volleyball court a sand court with a net and spectator benches. a recreation destination; organized matches are not simulated yet. reserved site: 22 × 14 m (11 × 7 cells). includes the object and placement clearance. access uses reachable neighbouring cells; it is not extra productive land. community & leisure",
       "model": 59,
       "constructionModels": [
         158,
@@ -3016,6 +3087,7 @@
     "field": {
       "name": "Cultivated field",
       "description": "Cultivate ground in beds with working aisles. Each bed requires resident preparation and planting.",
+      "searchText": "cultivated field cultivate ground in beds with working aisles. each bed requires resident preparation and planting. grow baby salad greens ingredients organic residues plant and harvest vegetables ingredients organic residues food & farming",
       "model": 16,
       "constructionModels": [
         92,
@@ -3035,6 +3107,7 @@
     "goat-pasture-empty": {
       "name": "Empty goat pen",
       "description": "Build the pen first. Stock it later with two goats from village supplies.",
+      "searchText": "goat pen goat pen. 6 × 5 cells. build with physical supplies and resident labor. reserved site: 12 × 10 m (6 × 5 cells). 11 × 9 m physical footprint. two-goat pen with a 9 m² shelter and 90 m² outdoor area. supplied feed or separate grazing is needed. access uses reachable neighbouring cells; it is not extra productive land. feed and milk goats fresh milk animals",
       "model": 171,
       "constructionModels": [
         94,

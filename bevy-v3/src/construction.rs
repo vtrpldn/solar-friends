@@ -650,27 +650,17 @@ impl Construction {
     fn options<'a>(&self, catalog: &'a Catalog) -> Vec<(&'a String, &'a Project)> {
         let category = CATEGORIES[self.category];
         let query = self.build_query.trim().to_lowercase();
-        let matches = |text: &str| text.to_lowercase().contains(&query);
         catalog
             .build_options()
-            .filter(|(id, project)| {
-                if query.is_empty() {
-                    return match category {
-                        "All" => true,
-                        "Camp essentials" => project.camp_essential,
-                        _ => project.category == category,
-                    };
+            .filter(|(_, project)| {
+                if !query.is_empty() {
+                    return project.search_text.contains(&query);
                 }
-                let material_matches = |id: &String| matches(&catalog.materials[id].name);
-                matches(id)
-                    || matches(&project.name)
-                    || matches(&project.description)
-                    || matches(&project.category)
-                    || project.materials.keys().any(material_matches)
-                    || catalog.production.values().any(|recipe| {
-                        recipe.kind == project.kind
-                            && (matches(&recipe.name) || recipe.output.keys().any(material_matches))
-                    })
+                match category {
+                    "All" => true,
+                    "Camp essentials" => project.camp_essential,
+                    _ => project.category == category,
+                }
             })
             .collect()
     }

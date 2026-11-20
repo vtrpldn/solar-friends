@@ -93,6 +93,7 @@ pub struct Project {
     pub name: String,
     #[serde(default)]
     pub description: String,
+    pub search_text: String,
     pub size: [i32; 2],
     pub model: usize,
     #[serde(default)]
