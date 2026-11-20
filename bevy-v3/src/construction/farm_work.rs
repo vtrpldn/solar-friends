@@ -1,6 +1,6 @@
 use super::*;
 use crate::{
-    farming::{CropClimate, FarmAction, FarmJob, FarmPhase, Plot, Stage},
+    farming::{Crop, CropClimate, FarmAction, FarmJob, FarmPhase, Plot, Stage},
     setup::WorldSetup,
     weather::{HOUR, growing_season, step_weather},
 };
@@ -12,8 +12,8 @@ pub(crate) enum FarmControl {
     Balances,
     Irrigation,
     Residues,
-    Crop,
-    Density,
+    Crop(Option<Crop>),
+    Density(Option<f64>),
     Work(FarmAction),
 }
 
@@ -258,8 +258,8 @@ impl Construction {
             (KeyCode::Tab, FarmControl::NextBed),
             (KeyCode::KeyT, FarmControl::Irrigation),
             (KeyCode::KeyZ, FarmControl::Residues),
-            (KeyCode::KeyX, FarmControl::Crop),
-            (KeyCode::KeyY, FarmControl::Density),
+            (KeyCode::KeyX, FarmControl::Crop(None)),
+            (KeyCode::KeyY, FarmControl::Density(None)),
         ];
         for (key, action) in actions {
             if keyboard.just_pressed(key) {
@@ -464,9 +464,11 @@ impl Construction {
             }
             FarmControl::Irrigation => bed.irrigation = !bed.irrigation,
             FarmControl::Residues => bed.collect_residues = !bed.collect_residues,
-            FarmControl::Crop if bed.editable() => bed.crop = bed.crop.next(),
-            FarmControl::Density if bed.editable() => {
-                bed.density = bed.next_density();
+            FarmControl::Crop(choice) if bed.editable() => {
+                bed.crop = choice.unwrap_or_else(|| bed.crop.next());
+            }
+            FarmControl::Density(choice) if bed.editable() => {
+                bed.density = choice.unwrap_or_else(|| bed.next_density());
             }
             FarmControl::Work(FarmAction::Clear)
                 if confirmation != Some((site, Some(index)))
@@ -501,7 +503,7 @@ impl Construction {
             .filter(|job| job.site == site)
             .map(|job| job.bed)
             .collect();
-        let planting = matches!(action, FarmControl::Crop | FarmControl::Density);
+        let planting = matches!(action, FarmControl::Crop(_) | FarmControl::Density(_));
         let eligible: Vec<_> = beds
             .iter()
             .enumerate()
@@ -512,23 +514,29 @@ impl Construction {
             self.farming.notice = "No beds are available for this setting.".into();
             return;
         };
-        let crop = beds[first].crop.next();
-        let density = beds[first].next_density();
+        let crop = match action {
+            FarmControl::Crop(Some(choice)) => choice,
+            _ => beds[first].crop.next(),
+        };
+        let density = match action {
+            FarmControl::Density(Some(choice)) => choice,
+            _ => beds[first].next_density(),
+        };
         let irrigation = !eligible.iter().all(|&index| beds[index].irrigation);
         let residues = !eligible.iter().all(|&index| beds[index].collect_residues);
         for &index in &eligible {
             let bed = &mut beds[index];
             match action {
-                FarmControl::Crop => bed.crop = crop,
-                FarmControl::Density => bed.density = density,
+                FarmControl::Crop(_) => bed.crop = crop,
+                FarmControl::Density(_) => bed.density = density,
                 FarmControl::Irrigation => bed.irrigation = irrigation,
                 FarmControl::Residues => bed.collect_residues = residues,
                 _ => return,
             }
         }
         let applied = match action {
-            FarmControl::Crop => crop.label().to_owned(),
-            FarmControl::Density => format!("Density {density:.1}×"),
+            FarmControl::Crop(_) => crop.label().to_owned(),
+            FarmControl::Density(_) => format!("Density {density:.1}×"),
             FarmControl::Irrigation => if irrigation {
                 "Irrigation on"
             } else {
@@ -1454,10 +1462,21 @@ mod resize_tests {
         );
         assert_eq!(available[FarmAction::Harvest as usize], 0);
         let initial_crop = village.farming.plots[&0].beds[0].crop;
-        village.apply_farm_control(&catalog, &mut stock, FarmControl::Crop, clock);
+        village.apply_farm_control(
+            &catalog,
+            &mut stock,
+            FarmControl::Crop(Some(Crop::Corn)),
+            clock,
+        );
+        village.apply_farm_control(&catalog, &mut stock, FarmControl::Density(Some(0.5)), clock);
         let beds = &village.farming.plots[&0].beds;
         assert!(beds[0].crop == initial_crop);
-        assert!(beds[1..].iter().all(|bed| bed.crop == initial_crop.next()));
+        assert_eq!(beds[0].density, 1.0);
+        assert!(
+            beds[1..]
+                .iter()
+                .all(|bed| bed.crop == Crop::Corn && bed.density == 0.5)
+        );
         village.apply_farm_control(&catalog, &mut stock, FarmControl::Irrigation, clock);
         let beds = &village.farming.plots[&0].beds;
         assert_eq!(beds[0].irrigation, original.0);

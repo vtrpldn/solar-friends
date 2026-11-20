@@ -1,7 +1,7 @@
 use super::*;
 use crate::{
     construction::{FarmControl, ProjectAction, TradeOrder, TradePolicy, WorkGroup},
-    farming::FarmAction,
+    farming::{Crop, FarmAction},
     terrain::Brush,
     time_advance::AdvanceAction,
 };
@@ -541,8 +541,12 @@ impl Action {
                 FarmControl::Balances => "Show water & material balances",
                 FarmControl::Irrigation => "Toggle irrigation",
                 FarmControl::Residues => "Toggle residue collection",
-                FarmControl::Crop => "Change crop",
-                FarmControl::Density => "Change density",
+                FarmControl::Crop(Some(crop)) => crop.label(),
+                FarmControl::Crop(None) => "Change crop",
+                FarmControl::Density(Some(0.5)) => "Wide spacing",
+                FarmControl::Density(Some(1.0)) => "Standard spacing",
+                FarmControl::Density(Some(1.5)) => "Dense spacing",
+                FarmControl::Density(_) => "Change spacing",
                 FarmControl::Work(FarmAction::Prepare) => "Prepare soil",
                 FarmControl::Work(FarmAction::Plant) => "Sow",
                 FarmControl::Work(FarmAction::Harvest) => "Harvest",
@@ -933,10 +937,10 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                     FarmControl::Balances,
                     FarmControl::Irrigation,
                     FarmControl::Residues,
-                    FarmControl::Crop,
-                    FarmControl::Density,
                 ]
                 .into_iter()
+                .chain(Crop::ALL.map(|crop| FarmControl::Crop(Some(crop))))
+                .chain([0.5, 1.0, 1.5].map(|spacing| FarmControl::Density(Some(spacing))))
                 .chain(
                     [
                         FarmAction::Prepare,
