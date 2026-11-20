@@ -1311,23 +1311,20 @@ mod tests {
             }
         }
         assert!(!app.world().resource::<village::Village>().show_forecast);
-        for (button, legend, second_page) in [
-            ("Land & slope", "Land & slope · Green", false),
-            ("Resources", "Resources · Green", false),
-            ("Ecology", "Ecology · Green", false),
-            ("Access & hauling", "Access & hauling · White", false),
-            ("Construction", "Construction · Gold", false),
-            ("Water", "Water · Drinking water", false),
-            ("Sanitation", "Sanitation · Purple", false),
-            ("Work", "Work · Green assigned", false),
-            ("Food", "Food · Blue shared supplies", true),
-            ("Residents", "Residents · Green residents", true),
-            ("Comfort", "Comfort · Green open facility", true),
+        for (button, legend) in [
+            ("Land & slope", "Land & slope · Green"),
+            ("Resources", "Resources · Green"),
+            ("Ecology", "Ecology · Green"),
+            ("Access & hauling", "Access & hauling · White"),
+            ("Construction", "Construction · Gold"),
+            ("Water", "Water · Drinking water"),
+            ("Sanitation", "Sanitation · Purple"),
+            ("Work", "Work · Green assigned"),
+            ("Food", "Food · Blue shared supplies"),
+            ("Residents", "Residents · Green residents"),
+            ("Comfort", "Comfort · Green open facility"),
         ] {
             press_button(&mut app, "Map lenses");
-            if second_page {
-                press_button(&mut app, "Other lenses");
-            }
             press_button(&mut app, button);
             assert!(
                 ui_texts(&mut app)
@@ -1337,7 +1334,6 @@ mod tests {
             );
         }
         press_button(&mut app, "Map lenses");
-        press_button(&mut app, "Other lenses");
         press_button(&mut app, "Production chains");
         press_button(&mut app, "Next filter");
         press_button(&mut app, "Previous filter");
@@ -1622,8 +1618,8 @@ mod tests {
         press_button(&mut app, "Close panel");
 
         press_button(&mut app, "Advance days");
-        press_button(&mut app, "+7 day(s)");
-        press_button(&mut app, "Start advance");
+        press_button(&mut app, "+7");
+        press_button(&mut app, "Advance time");
         press_button(&mut app, "Stop advance");
         assert!(app.world().resource::<village::Village>().is_paused());
         assert!(!app.world().resource::<village::Village>().advance_open());

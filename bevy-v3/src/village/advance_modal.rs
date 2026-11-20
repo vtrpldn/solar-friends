@@ -43,11 +43,16 @@ enum AdvanceModalButton {
 
 pub(super) fn install(app: &mut App) {
     app.add_systems(Startup, spawn)
-        .add_systems(Update, input.after(village_input).before(show_hud))
+        .add_systems(Update, input.after(read_camp_pointer).before(village_input))
         .add_systems(Update, (refresh, scroll_dialog).chain().after(show_hud));
 }
 
-fn visible(village: &Village, setup: &WorldSetup, saves: &SaveMenu, sound: &SoundSettings) -> bool {
+pub(super) fn visible(
+    village: &Village,
+    setup: &WorldSetup,
+    saves: &SaveMenu,
+    sound: &SoundSettings,
+) -> bool {
     village.advance.open && !setup.open && !saves.open && !sound.open
 }
 

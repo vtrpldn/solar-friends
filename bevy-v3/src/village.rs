@@ -913,6 +913,9 @@ impl Village {
 
     /// Opens a panel on its first page, as from the dock or the dialog sidebar.
     fn open_panel(&mut self, panel: UtilityPanel) {
+        if self.terrain_editor.open {
+            self.terrain_editor.toggle();
+        }
         self.utility_panel = Some(panel);
         if panel == UtilityPanel::Crafting {
             self.craft_view = crate::construction::CraftView::Make;
@@ -3121,9 +3124,10 @@ fn show_hud(
         text.0.clone_from(&village.save_notice);
         return;
     }
-    // The catalog and projects card carry their own headings and controls.
+    // The catalog, projects card, lens picker, and advance modal carry their own UI.
     if build_menu::visible(&setup, &village, &saves, &sound)
         || projects_card::visible(&village, &setup, &saves, &sound)
+        || advance_modal::visible(&village, &setup, &saves, &sound)
     {
         node.display = Display::None;
         text.0.clear();
@@ -3191,9 +3195,9 @@ fn show_hud(
         label.push('\n');
         label.push_str(&forecast(village.clock, setup.biome(), setup.seed()));
     }
-    if village.camp.is_some() && !village.advance.open && village.advance.has_status() {
+    if village.camp.is_some() && !village.advance.open && !village.advance.result().is_empty() {
         label.push('\n');
-        label.push_str(&village.advance.status(village.utility_owns_advance_key()));
+        label.push_str(village.advance.result());
     }
     if village.terrain_editor.open && !sheet && !village.guide.open() && !village.lenses.open {
         node.left = px(316);

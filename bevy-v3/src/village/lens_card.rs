@@ -23,7 +23,7 @@ enum LensCardAction {
 
 pub(super) fn install(app: &mut App) {
     app.add_systems(Startup, spawn)
-        .add_systems(Update, input.after(village_input).before(show_hud))
+        .add_systems(Update, input.after(read_camp_pointer).before(village_input))
         .add_systems(Update, refresh.after(show_hud));
 }
 
