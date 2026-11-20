@@ -429,6 +429,62 @@ mod tests {
     }
 
     #[test]
+    fn road_preview_rejects_a_budget_that_only_covers_a_combined_pickup() {
+        let catalog = Catalog::default();
+        let setup = WorldSetup::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let camp = IVec2::new(36, 36);
+        let terrain = setup.terrain().with_camp(camp);
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let clock = TownClock {
+            seconds: 0.,
+            round_trip_km: 12,
+        };
+        let mut construction = Construction::default();
+        construction.market.set_expansion_reserve(0);
+        stock.reserve_materials(
+            &BTreeMap::from([("stone".into(), stock.available("stone"))]),
+            crate::stock::MaterialReason::ConstructionReservation,
+        );
+        let combined = catalog.projects["road"]
+            .materials
+            .iter()
+            .map(|(id, units)| (id.clone(), units * 2))
+            .collect();
+        let quote = construction
+            .market
+            .quote(
+                &catalog,
+                &combined,
+                &stock,
+                clock.seconds,
+                clock.round_trip_km,
+            )
+            .unwrap();
+        assert_eq!(quote.trips, 1);
+        let budget = quote.price + quote.fare;
+        stock.debit(stock.balance() - budget, crate::stock::CashKind::Materials);
+        let start = IVec2::new(44, 36);
+        let end = IVec2::new(45, 36);
+        let mut tiles =
+            [start, end].map(|cell| Construction::proposal(&catalog, "road", cell, IVec2::ONE, 0));
+        let Err(issue) = construction.road_supply_draft(&catalog, &stock, clock, &mut tiles) else {
+            panic!("one pickup budget must not cover two reservations");
+        };
+        assert!(issue.contains("Shared savings"));
+        construction.plan_road_stroke(&catalog, &mut stock, site, clock, start, end);
+        assert_eq!(construction.status, format!("Road not placed. {issue}"));
+        assert!(construction.plans.is_empty());
+        assert_eq!(stock.balance(), budget);
+        assert_eq!(construction.market.committed_fares(), 0);
+    }
+
+    #[test]
     fn a_road_stroke_is_atomic_and_undo_restores_receipts_and_the_anchor() {
         let catalog = Catalog::default();
         let setup = WorldSetup::default();
