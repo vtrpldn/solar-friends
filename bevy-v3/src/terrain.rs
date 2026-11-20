@@ -103,7 +103,7 @@ impl Foundation {
     }
 }
 
-#[derive(Clone, Copy, Default, Deserialize, Serialize)]
+#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub(crate) enum Brush {
     #[default]
@@ -111,6 +111,19 @@ pub(crate) enum Brush {
     Lower,
     Flatten,
     Smooth,
+}
+
+impl Brush {
+    pub(crate) const ALL: [Self; 4] = [Self::Raise, Self::Lower, Self::Flatten, Self::Smooth];
+
+    pub(crate) fn label(self) -> &'static str {
+        match self {
+            Self::Raise => "Raise",
+            Self::Lower => "Lower",
+            Self::Flatten => "Flatten",
+            Self::Smooth => "Smooth",
+        }
+    }
 }
 
 type TerrainVertices = Arc<BTreeMap<u16, f64>>;
@@ -143,6 +156,22 @@ impl TerrainEditor {
         self.vertices.iter().all(|(&index, height)| {
             u32::from(index) < (CELLS + 1).pow(2) && (0.0..=12.0).contains(height)
         })
+    }
+
+    pub(crate) fn brush(&self) -> Brush {
+        self.brush
+    }
+
+    pub(crate) fn radius(&self) -> f64 {
+        Self::RADII[self.radius_index]
+    }
+
+    pub(crate) fn flatten_level(&self) -> Option<f64> {
+        self.level
+    }
+
+    pub(crate) fn status(&self) -> &'static str {
+        self.status
     }
 
     pub fn toggle(&mut self) {
@@ -271,32 +300,6 @@ impl TerrainEditor {
             Vec3::new(x, terrain.height_at(x, z) + 0.08, z)
         });
         gizmos.linestrip(outline, Color::srgb_u8(255, 225, 160));
-    }
-
-    pub fn label(&self) -> String {
-        let tool = match self.brush {
-            Brush::Raise => "Raise",
-            Brush::Lower => "Lower",
-            Brush::Flatten => "Flatten",
-            Brush::Smooth => "Smooth",
-        };
-        let level = self
-            .level
-            .map_or_else(String::new, |h| format!(" · Grade {h:.2} m"));
-        let instruction = match (self.brush, self.level) {
-            (Brush::Flatten, None) => "Click to sample a grade",
-            (Brush::Flatten, Some(_)) => "Click or drag to flatten · P Pick new height",
-            _ => "Click or drag to shape the ground",
-        };
-        format!(
-            "Terrain · {tool} · {} m radius{level}
-1 Raise · 2 Lower · 3 Flatten · 4 Smooth
-{instruction} · [ ] Radius · Z Undo · Shift+Z Redo · Shift+Backspace Reset · Esc Close
-Terrain edits use no money, materials or resident work.
-{}",
-            Self::RADII[self.radius_index],
-            self.status
-        )
     }
 
     pub fn terrain(&self, mut terrain: Terrain) -> Terrain {

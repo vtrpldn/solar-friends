@@ -21,6 +21,7 @@ pub(crate) mod resident_motion;
 mod resource_lens;
 mod resource_trends;
 mod road_surface;
+mod terrain_card;
 mod toolbar;
 pub(crate) use toolbar::PanelPicker;
 mod vehicle_motion;
@@ -169,6 +170,7 @@ impl Plugin for VillagePlugin {
         guide::install(app);
         library_ui::install(app);
         resident_meters::install(app);
+        terrain_card::install(app);
         building_lighting::install(app);
         livestock_motion::install(app);
         vehicle_motion::install(app);
@@ -3115,9 +3117,8 @@ fn show_hud(
             ));
         }
     }
-    if village.terrain_editor.open {
-        label.push('\n');
-        label.push_str(&village.terrain_editor.label());
+    if village.terrain_editor.open && !sheet && !village.guide.open() && !village.lenses.open {
+        node.left = px(316);
     }
     if village.camp.is_some()
         && !sheet
