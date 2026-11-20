@@ -1491,14 +1491,17 @@ impl Construction {
             ignore != Some(index)
                 && !other.removed
                 && overlaps(other.position, other.position + other.size)
-        }) || self.changes.iter().any(|(index, job)| {
+        }) {
+            return Some("Another project occupies that space.");
+        }
+        if self.changes.iter().any(|(index, job)| {
             ignore != Some(*index)
                 && job
                     .target
                     .as_ref()
                     .is_some_and(|target| overlaps(target.position, target.position + target.size))
         }) {
-            return Some("Another project occupies that space.");
+            return Some("That space is reserved for a building relocation.");
         }
         for column in start.x..end.x {
             for row in start.y..end.y {

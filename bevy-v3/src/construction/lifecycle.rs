@@ -986,6 +986,18 @@ mod tests {
         let destination = IVec2::new(54, 36);
         construction.queue_move(&catalog, &stock, site, destination, 0);
         let original = construction.plans[0].position;
+        let candidate = construction.proposed_site(&catalog, "wash-station", destination);
+        assert_eq!(
+            construction.placement_error(
+                site.terrain,
+                site.land,
+                site.camp,
+                &candidate,
+                &catalog.projects["wash-station"],
+                (&catalog, stock.sandbox, None),
+            ),
+            Some("That space is reserved for a building relocation.")
+        );
         let mut obstacle = construction.plans[0].clone();
         obstacle.position = destination;
         construction.plans.push(obstacle);
