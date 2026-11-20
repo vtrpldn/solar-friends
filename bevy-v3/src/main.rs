@@ -1441,6 +1441,13 @@ mod tests {
                     && text.0.contains("game minutes remaining"))
         );
         press_button(&mut app, "Browse materials");
+        assert!(press_stepper(&mut app, "MATERIALS PAGE", true).starts_with("2 of "));
+        press_button(&mut app, "Raw wood");
+        assert!(
+            ui_texts(&mut app)
+                .iter()
+                .any(|text| text.0 == "Buy Raw wood")
+        );
 
         press_button(&mut app, "Close panel");
         assert!(!app.world().resource::<village::Village>().trade_open());
@@ -1542,15 +1549,19 @@ mod tests {
         assert!(visible_button(&mut app, "Fetch timber pieces incl. transport").is_some());
         press_button(&mut app, "Town trade");
         assert!(app.world().resource::<village::Village>().trade_open());
-        assert!(ui_texts(&mut app).iter().any(
-            |text| text.0.contains("timber pieces · Pack") && text.0.contains("Freight total")
-        ));
+        let texts = ui_texts(&mut app);
+        assert!(
+            texts
+                .iter()
+                .any(|text| text.0.contains("timber pieces · Pack"))
+        );
+        assert!(texts.iter().any(|text| text.0.contains("Freight total")));
         for (label, input, displayed) in [
             ("Set minimum load", "37", "37% (0–100)"),
             ("Set maximum wait", "3.5", "3.5h (0–24)"),
-            ("Keep at least (kg)", "19.5", "19.5 kg · Enter to set"),
-            ("Sell when above (kg)", "4", "4 kg · Enter to set"),
-            ("Maximum per day (kg)", "32", "32 kg · Enter to set"),
+            ("Keep at least (kg)", "19.5", "19.5 kg"),
+            ("Sell when above (kg)", "4", "4 kg"),
+            ("Maximum per day (kg)", "32", "32 kg"),
         ] {
             press_button(&mut app, label);
             app.world_mut().write_message(KeyboardInput {
@@ -1562,24 +1573,22 @@ mod tests {
                 window,
             });
             app.world_mut().run_schedule(Update);
-            assert!(
-                ui_texts(&mut app)
-                    .iter()
-                    .any(|text| text.0.contains(displayed))
-            );
-            app.world_mut()
-                .resource_mut::<ButtonInput<KeyCode>>()
-                .press(KeyCode::Enter);
-            app.world_mut().run_schedule(Update);
-            app.world_mut()
-                .resource_mut::<ButtonInput<KeyCode>>()
-                .reset(KeyCode::Enter);
+            assert!(visible_button(&mut app, displayed).is_some());
+            press_button(&mut app, "Apply");
         }
-        assert!(ui_texts(&mut app).iter().any(|text| {
-            text.0.contains("Minimum load 37% · Wait up to 3.5h")
-                && text.0.contains("Reserve 16 kg")
-                && text.0.contains("Trigger 16 kg · Daily cap 32 kg")
-        }));
+        let texts = ui_texts(&mut app);
+        for value in [
+            "Minimum load · 37%",
+            "Maximum wait · 3.5h",
+            "Keep at least · 16 kg",
+            "Sell when above · 16 kg",
+            "Maximum per day · 32 kg",
+        ] {
+            assert!(
+                texts.iter().any(|text| text.0 == value),
+                "missing saved trade setting {value}"
+            );
+        }
         press_button(&mut app, "Close panel");
         press_button(&mut app, "Crafting");
         assert!(

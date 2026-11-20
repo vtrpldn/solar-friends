@@ -8,6 +8,7 @@ pub(super) mod inventory;
 pub(super) mod pantry;
 pub(super) mod sites;
 mod town_trip;
+pub(super) mod trade;
 pub(super) mod widgets;
 
 use super::*;
@@ -111,6 +112,7 @@ pub(super) fn spawn(card: &mut ChildSpawnerCommands, assets: &AssetServer) {
     crafting::spawn(card, assets);
     pantry::spawn(card, assets);
     finances::spawn(card, assets);
+    widgets::spawn::<trade::Screen>(card);
 }
 
 /// Caption and title for a panel, in V2's words where V2 had the screen.

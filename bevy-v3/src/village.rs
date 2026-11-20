@@ -210,6 +210,7 @@ impl Plugin for VillagePlugin {
                         almanac::widgets::input::<almanac::finances::Screen>,
                         almanac::widgets::input::<almanac::sites::connections::Water>,
                         almanac::widgets::input::<almanac::sites::connections::Power>,
+                        almanac::widgets::input::<almanac::trade::Screen>,
                         village_input,
                         almanac::sites::input,
                     )
@@ -229,6 +230,7 @@ impl Plugin for VillagePlugin {
                         almanac::widgets::refresh::<almanac::finances::Screen>,
                         almanac::widgets::refresh::<almanac::sites::connections::Water>,
                         almanac::widgets::refresh::<almanac::sites::connections::Power>,
+                        almanac::widgets::refresh::<almanac::trade::Screen>,
                     )
                         .chain(),
                     fit_and_scroll_hud,
@@ -925,7 +927,8 @@ impl Village {
                     | UtilityPanel::Finances
                     | UtilityPanel::Residents
                     | UtilityPanel::Water
-                    | UtilityPanel::Power,
+                    | UtilityPanel::Power
+                    | UtilityPanel::Trade,
                 ) => true,
                 _ => false,
             }
@@ -3153,9 +3156,7 @@ fn show_hud(
     } else {
         px(520)
     };
-    if village.trade_open()
-        || (village.utility_panel.is_none() && village.construction.production.open)
-    {
+    if village.utility_panel.is_none() && village.construction.production.open {
         node.right = px(toolbar::PANEL_WIDTH + 40.0);
     }
     if let Some(page) = village.guide.text(&catalog) {
@@ -3299,18 +3300,7 @@ fn show_hud(
         Some(UtilityPanel::Water | UtilityPanel::Power) => {}
         Some(UtilityPanel::Residents) => {}
         Some(UtilityPanel::Finances) => {}
-        Some(UtilityPanel::Trade) => {
-            label.push('\n');
-            label.push_str(&village.construction.trade_status(
-                &catalog,
-                &village.stock,
-                TownClock {
-                    seconds: village.clock,
-                    round_trip_km: setup.round_trip_km(),
-                },
-            ));
-            label.push_str("\nTab Pantry");
-        }
+        Some(UtilityPanel::Trade) => {}
         Some(UtilityPanel::Pantry) => {}
         None => {}
     }
@@ -3947,12 +3937,7 @@ mod tests {
     #[test]
     fn dispatch_policy_accepts_exact_fill_and_half_hour_wait() {
         let catalog = Catalog::default();
-        let stock = Stock::for_start(&WorldSetup::default(), &catalog);
         let mut construction = Construction::default();
-        let clock = TownClock {
-            seconds: 0.,
-            round_trip_km: 12,
-        };
         apply_numeric_entry(
             NumericTarget::MinimumLoad,
             "37",
@@ -3965,11 +3950,7 @@ mod tests {
             &mut construction,
             &catalog,
         );
-        assert!(
-            construction
-                .trade_status(&catalog, &stock, clock)
-                .contains("Minimum load 37% · J Wait up to 3.5h")
-        );
+        assert_eq!(construction.dispatch_settings(), (37, 3.5, false));
         apply_numeric_entry(
             NumericTarget::MinimumLoad,
             "999",
@@ -3982,11 +3963,7 @@ mod tests {
             &mut construction,
             &catalog,
         );
-        assert!(
-            construction
-                .trade_status(&catalog, &stock, clock)
-                .contains("Minimum load 100% · J Wait up to 24.0h")
-        );
+        assert_eq!(construction.dispatch_settings(), (100, 24.0, false));
     }
 
     #[test]

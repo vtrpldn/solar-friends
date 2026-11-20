@@ -1,6 +1,6 @@
 use super::*;
 use crate::{
-    construction::{FarmControl, ProjectAction, TradeOrder, TradePolicy, WorkGroup},
+    construction::{FarmControl, ProjectAction, WorkGroup},
     farming::{Crop, FarmAction},
     terrain::Brush,
     time_advance::AdvanceAction,
@@ -70,17 +70,10 @@ enum Action {
     SelectedProject(ProjectAction),
     FocusSelectedProject,
     DeselectProject,
-    TradeItem(usize),
-    TradeQueue,
-    TradeQueued(usize),
-    HoldTradeQueued(usize),
-    Trade(TradeOrder),
-    TradePolicy(TradePolicy),
     ProjectFilter,
     ProjectRoads,
     ProjectEvents,
     InventoryView,
-    SaleQuantity(SaleSetting),
     InventoryItem(usize),
     InventorySearch,
     CraftTab(crate::construction::CraftView),
@@ -292,16 +285,6 @@ impl Action {
             Self::FocusSelectedProject | Self::DeselectProject => {
                 village.selected_project_focus().is_some()
             }
-            Self::Trade(TradeOrder::Buy { freight }) => {
-                village.trade_open() && freight == village.construction.supplier_construction()
-            }
-            Self::TradeItem(_)
-            | Self::TradeQueue
-            | Self::TradeQueued(_)
-            | Self::HoldTradeQueued(_)
-            | Self::Trade(_)
-            | Self::TradePolicy(_)
-            | Self::SaleQuantity(_) => village.trade_open(),
             Self::InventorySearch | Self::InventoryItem(_) => false,
             Self::InventoryView => village.utility_panel == Some(UtilityPanel::Inventory),
             Self::CraftTab(_) => village.utility_panel == Some(UtilityPanel::Crafting),
@@ -344,7 +327,6 @@ impl Action {
             }
             Self::PantryBatches => village.utility_panel == Some(UtilityPanel::Pantry),
             Self::AutoCook | Self::CookingTarget { .. } if village.stock.sandbox => false,
-            Self::PantryTransport if village.trade_open() => true,
             Self::PantryPriority
             | Self::PantryTransport
             | Self::PantryBudget
@@ -386,7 +368,6 @@ impl Action {
                         | UtilityPanel::Crafting
                         | UtilityPanel::Events
                         | UtilityPanel::Residents
-                        | UtilityPanel::Trade
                 )
             ),
         }
@@ -534,7 +515,6 @@ impl Action {
             Self::ProjectEvents if village.project_events_expanded => "Hide recent events".into(),
             Self::ProjectEvents => "Show recent events".into(),
             Self::Project(_)
-            | Self::TradeItem(_)
             | Self::InventoryItem(_)
             | Self::Recipe(_)
             | Self::FacilityIrrigation => String::new(),
@@ -599,36 +579,6 @@ impl Action {
                 ProjectAction::Cancel => "Cancel plan",
                 ProjectAction::Salvage => "Salvage building",
                 ProjectAction::Demolish => "Demolish",
-            }
-            .into(),
-            Self::TradeQueue if village.construction.trade.queue_page.is_some() => {
-                "Browse materials".into()
-            }
-            Self::TradeQueue => "View orders".into(),
-            Self::TradeQueued(_) | Self::HoldTradeQueued(_) => String::new(),
-            Self::Trade(TradeOrder::Buy { freight: false }) => "Buy for pickup".into(),
-            Self::Trade(TradeOrder::Buy { freight: true }) => "Buy for delivery".into(),
-            Self::Trade(TradeOrder::Sell {
-                hold_for_pickup: false,
-            }) => "Reserve sale".into(),
-            Self::Trade(TradeOrder::Sell {
-                hold_for_pickup: true,
-            }) => "Sell on shared trip".into(),
-            Self::Trade(TradeOrder::Cancel) => "Cancel last order".into(),
-            Self::SaleQuantity(_) => String::new(),
-            Self::TradePolicy(policy) => match policy {
-                TradePolicy::HouseholdRestock => "Toggle household restock",
-                TradePolicy::AutomaticSale => "Toggle auto sale",
-                TradePolicy::Reserve(false) => "Keep one pack less",
-                TradePolicy::Reserve(true) => "Keep one pack more",
-                TradePolicy::Limit | TradePolicy::Trigger => "",
-                TradePolicy::MinimumLoad => {
-                    return numeric_label(village, NumericTarget::MinimumLoad, "Set minimum load");
-                }
-                TradePolicy::DispatchWait => {
-                    return numeric_label(village, NumericTarget::DispatchWait, "Set maximum wait");
-                }
-                TradePolicy::DispatchNow => "Send waiting loads now",
             }
             .into(),
             Self::Resident(index) => NAMES[index].into(),
@@ -738,8 +688,6 @@ fn numeric_label(village: &Village, target: NumericTarget, label: &str) -> Strin
     match &village.numeric_entry {
         Some((active, entry)) if *active == target => {
             let value = match target {
-                NumericTarget::MinimumLoad => format!("{entry}% (0–100)"),
-                NumericTarget::DispatchWait => format!("{entry}h (0–24)"),
                 NumericTarget::WorkPriority(_) => {
                     format!("Priority {entry} (0 Low · 1 Normal · 2 High · 3 Highest)")
                 }
@@ -1109,38 +1057,6 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 spawn_button(menu, &assets, Action::ProjectFilter);
                 spawn_button(menu, &assets, Action::ProjectRoads);
                 spawn_button(menu, &assets, Action::ProjectEvents);
-                spawn_button(menu, &assets, Action::TradeQueue);
-                for order in [
-                    TradeOrder::Buy { freight: false },
-                    TradeOrder::Buy { freight: true },
-                    TradeOrder::Sell {
-                        hold_for_pickup: false,
-                    },
-                    TradeOrder::Sell {
-                        hold_for_pickup: true,
-                    },
-                    TradeOrder::Cancel,
-                ] {
-                    spawn_button(menu, &assets, Action::Trade(order));
-                }
-                for policy in [
-                    TradePolicy::HouseholdRestock,
-                    TradePolicy::AutomaticSale,
-                    TradePolicy::Reserve(false),
-                    TradePolicy::Reserve(true),
-                    TradePolicy::MinimumLoad,
-                    TradePolicy::DispatchWait,
-                    TradePolicy::DispatchNow,
-                ] {
-                    spawn_button(menu, &assets, Action::TradePolicy(policy));
-                }
-                for setting in [
-                    SaleSetting::Reserve,
-                    SaleSetting::Trigger,
-                    SaleSetting::Limit,
-                ] {
-                    spawn_button(menu, &assets, Action::SaleQuantity(setting));
-                }
                 spawn_button(menu, &assets, Action::FacilityIrrigation);
                 spawn_button(menu, &assets, Action::RecipePage(false));
                 spawn_button(menu, &assets, Action::RecipePage(true));
@@ -1152,9 +1068,6 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 for row in 0..crate::construction::PAGE_KEYS.len() {
                     spawn_button(menu, &assets, Action::Project(row));
                     spawn_button(menu, &assets, Action::Recipe(row));
-                    spawn_button(menu, &assets, Action::TradeItem(row));
-                    spawn_button(menu, &assets, Action::TradeQueued(row));
-                    spawn_button(menu, &assets, Action::HoldTradeQueued(row));
                 }
                 for action in [Action::Page(false), Action::Page(true), Action::ClosePanel] {
                     spawn_button(menu, &assets, action);
@@ -1179,21 +1092,11 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
 }
 
 fn spawn_button(parent: &mut ChildSpawnerCommands, assets: &AssetServer, action: Action) -> Entity {
-    let trade_button = matches!(
-        action,
-        Action::TradeItem(_)
-            | Action::TradeQueue
-            | Action::TradeQueued(_)
-            | Action::HoldTradeQueued(_)
-            | Action::Trade(_)
-            | Action::TradePolicy(_)
-    );
-    let (vertical_padding, font_size) = if trade_button { (4, 13.0) } else { (6, 14.0) };
     let mut button = parent.spawn((
         action,
         Button,
         crate::theme::button_node(Node {
-            padding: UiRect::axes(px(12), px(vertical_padding)),
+            padding: UiRect::axes(px(12), px(6)),
             column_gap: px(6),
             align_items: AlignItems::Center,
             ..default()
@@ -1205,7 +1108,7 @@ fn spawn_button(parent: &mut ChildSpawnerCommands, assets: &AssetServer, action:
     }
     button.with_child((
         Text::default(),
-        crate::ui_font::ui_font_weight(assets, font_size, 600),
+        crate::ui_font::ui_font_weight(assets, 14.0, 600),
     ));
     if let Action::Resident(index) = action {
         let image = match index {
@@ -1599,27 +1502,7 @@ fn handle_buttons(
                     let page = picker.home_page.min(pages - 1);
                     picker.home_page = (page + if forward { 1 } else { pages - 1 }) % pages;
                 }
-                Action::Page(forward) if village.trade_open() => {
-                    village.construction.page_trade(&catalog, forward)
-                }
                 Action::Page(forward) => village.change_panel_page(&catalog, &land, forward),
-                Action::TradeQueue if !picker.open => village.construction.toggle_trade_queue(),
-                Action::HoldTradeQueued(row) if !picker.open => {
-                    let town = &mut *village;
-                    town.construction.toggle_trade_queue_hold(
-                        &town.stock,
-                        row,
-                        setup.round_trip_km(),
-                    );
-                }
-                Action::TradeQueued(row) if !picker.open => {
-                    let town = &mut *village;
-                    town.construction
-                        .cancel_trade_queue_row(&catalog, &mut town.stock, row);
-                }
-                Action::TradeItem(row) if !picker.open => {
-                    village.construction.select_trade_row(&catalog, row)
-                }
                 Action::Project(row) if !picker.open => {
                     village.focus_project_row(&catalog, &setup, camera, row);
                 }
@@ -1871,34 +1754,6 @@ fn handle_buttons(
                         .trade
                         .pantry_controls(reserve, budget, toggle);
                 }
-                Action::Trade(order) if !picker.open => {
-                    let clock = TownClock {
-                        seconds: village.clock,
-                        round_trip_km: setup.round_trip_km(),
-                    };
-                    if village
-                        .construction
-                        .selected_trade_issue(&catalog, &village.stock, clock, order)
-                        .is_some()
-                    {
-                        continue;
-                    }
-                    let town = &mut *village;
-                    town.construction
-                        .place_trade_order(&catalog, &mut town.stock, clock, order);
-                }
-                Action::SaleQuantity(setting) if !picker.open => {
-                    village.numeric_entry = Some((NumericTarget::Sale(setting), String::new()));
-                }
-                Action::TradePolicy(TradePolicy::MinimumLoad) if !picker.open => {
-                    village.numeric_entry = Some((NumericTarget::MinimumLoad, String::new()));
-                }
-                Action::TradePolicy(TradePolicy::DispatchWait) if !picker.open => {
-                    village.numeric_entry = Some((NumericTarget::DispatchWait, String::new()));
-                }
-                Action::TradePolicy(policy) if !picker.open => {
-                    village.construction.adjust_trade_policy(&catalog, policy);
-                }
                 Action::FocusSelectedProject if !picker.open => {
                     village.focus_selected_project(&setup, camera);
                 }
@@ -1976,14 +1831,7 @@ fn handle_buttons(
                 | Action::SelectedProject(_)
                 | Action::FocusSelectedProject
                 | Action::DeselectProject
-                | Action::TradeItem(_)
                 | Action::InventoryItem(_)
-                | Action::TradeQueue
-                | Action::TradeQueued(_)
-                | Action::HoldTradeQueued(_)
-                | Action::Trade(_)
-                | Action::TradePolicy(_)
-                | Action::SaleQuantity(_)
                 | Action::ProjectFilter
                 | Action::ProjectRoads
                 | Action::ProjectEvents
@@ -2080,24 +1928,6 @@ fn refresh(
     let show_terrain = Action::TerrainBrush(Brush::Raise).available(&village);
     let show_field_size = Action::ResizeField(IVec2::ZERO).available(&village);
     let show_projects = !picker.open && Action::ProjectFilter.available(&village);
-    let show_trade = !picker.open && Action::TradeItem(0).available(&village);
-    let show_trade_queue = show_trade && village.construction.trade.queue_page.is_some();
-    let trade_clock = TownClock {
-        seconds: village.clock,
-        round_trip_km: setup.round_trip_km(),
-    };
-    let trade_queue = if show_trade_queue {
-        village
-            .construction
-            .trade_queue_labels(&catalog, trade_clock)
-    } else {
-        Vec::new()
-    };
-    let trade_items = if show_trade && !show_trade_queue {
-        village.construction.trade_page_labels(&catalog)
-    } else {
-        Vec::new()
-    };
     let inventory_items: Vec<_> = if !picker.open && Action::InventoryItem(0).available(&village) {
         if village.producer_view() {
             village
@@ -2170,7 +2000,6 @@ fn refresh(
         || show_residents
         || show_finances
         || show_pantry
-        || show_trade
         || inventory_items.iter().any(Option::is_some)
         || show_facility_switches
         || show_upkeep
@@ -2264,21 +2093,7 @@ fn refresh(
                         .project_action_issue(&catalog, action, village.stock.sandbox)
                         .is_some())
             }
-            Action::TradeItem(row) => trade_items.get(row).is_some(),
             Action::InventoryItem(row) => inventory_items.get(row).is_some_and(Option::is_some),
-            Action::TradeQueue => show_trade,
-            Action::TradeQueued(row) => trade_queue.get(row).is_some_and(|entry| entry.can_cancel),
-            Action::HoldTradeQueued(row) => trade_queue
-                .get(row)
-                .is_some_and(|entry| entry.held.is_some()),
-            Action::Trade(TradeOrder::Buy { freight }) => {
-                show_trade
-                    && !show_trade_queue
-                    && freight == village.construction.supplier_construction()
-            }
-            Action::Trade(_) | Action::TradePolicy(_) | Action::SaleQuantity(_) => {
-                show_trade && !show_trade_queue
-            }
             Action::ProjectFilter | Action::ProjectEvents => show_projects,
             Action::ProjectRoads => {
                 show_projects && village.construction.road_project_counts(&catalog).0 > 0
@@ -2295,10 +2110,8 @@ fn refresh(
             Action::ExpansionReserve | Action::GridFromFinances => {
                 show_finances && !village.finance_history_open
             }
-            Action::PantryTransport => {
-                (show_trade && !show_trade_queue) || (show_pantry && action.available(&village))
-            }
-            Action::PantryBatches
+            Action::PantryTransport
+            | Action::PantryBatches
             | Action::PantryPriority
             | Action::PantryBudget
             | Action::PantryPolicy(..)
@@ -2369,12 +2182,6 @@ fn refresh(
                 Action::SelectedProject(project_action) => village
                     .construction
                     .project_action_issue(&catalog, project_action, village.stock.sandbox),
-                Action::Trade(order) => village.construction.selected_trade_issue(
-                    &catalog,
-                    &village.stock,
-                    trade_clock,
-                    order,
-                ),
                 Action::ListedHome(row) if !homes[row].open => {
                     Some("Reopen this home before assigning residents.")
                 }
@@ -2392,7 +2199,7 @@ fn refresh(
                         .unwrap_or("Remove this unstarted plan and return reserved supplies.")
                         .into(),
                 ),
-                Action::Trade(_) | Action::ListedHome(_) | Action::SelectedProject(_) => {
+                Action::ListedHome(_) | Action::SelectedProject(_) => {
                     action_issue.map(str::to_owned)
                 }
                 Action::CampPreset(index) => Some(
@@ -2487,28 +2294,7 @@ fn refresh(
                 Action::FacilityIrrigation => irrigation.map_or_else(String::new, |policy| {
                     format!("Irrigation · {}", policy.label())
                 }),
-                Action::TradeItem(row) => trade_items[row].clone(),
-                Action::SaleQuantity(setting) => {
-                    let unit = village.construction.sale_quantity_unit(&catalog);
-                    let label = match setting {
-                        SaleSetting::Reserve => "Keep at least",
-                        SaleSetting::Trigger => "Sell when above",
-                        SaleSetting::Limit => "Maximum per day",
-                    };
-                    if let Some((NumericTarget::Sale(active), entry)) = &village.numeric_entry
-                        && *active == setting
-                    {
-                        format!("{entry} {unit} · Enter to set · Esc to cancel")
-                    } else {
-                        format!("{label} ({unit})")
-                    }
-                }
                 Action::InventoryItem(row) => inventory_items[row].clone().unwrap(),
-                Action::TradeQueued(row) => format!("Cancel {}", trade_queue[row].label),
-                Action::HoldTradeQueued(row) if trade_queue[row].held == Some(true) => {
-                    format!("Order {} · Allow own trip", row + 1)
-                }
-                Action::HoldTradeQueued(row) => format!("Order {} · Hold for pickup", row + 1),
                 Action::ListedHome(row) => {
                     let home = &homes[row];
                     let state = if home.assigned {
