@@ -3092,21 +3092,26 @@ fn draw_blueprints(
                 );
             } else if village.planning_roads() {
                 let extend = village.extend_road(&keyboard);
-                if let Some(issue) = village.construction.draw_road_route(
+                let (label, valid) = village.construction.draw_road_route(
                     ConstructionSite {
                         terrain: &terrain,
                         land: &land,
                         camp,
                     },
                     &catalog,
-                    village.stock.sandbox,
+                    (
+                        &village.stock,
+                        TownClock {
+                            seconds: village.clock,
+                            round_trip_km: setup.round_trip_km(),
+                        },
+                    ),
                     hit.cell,
                     extend,
                     &mut gizmos,
-                ) {
-                    notice = Some(issue.into());
-                    available = Some(false);
-                }
+                );
+                notice = Some(label);
+                available = Some(valid);
             } else if village.construction.placing_project()
                 && let Some((label, valid)) = village.construction.draw_project_site(
                     ConstructionSite {

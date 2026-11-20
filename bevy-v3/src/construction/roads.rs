@@ -214,23 +214,28 @@ impl Construction {
         &self,
         site: ConstructionSite,
         catalog: &Catalog,
-        sandbox: bool,
+        (stock, clock): (&Stock, TownClock),
         end: IVec2,
         extend: bool,
         gizmos: &mut Gizmos,
-    ) -> Option<&'static str> {
+    ) -> (String, bool) {
         let start = self.road_planning.anchor.filter(|_| extend).unwrap_or(end);
         let Some(cells) = Self::road_cells(start, end) else {
-            return Some("Choose a shorter road route (up to 128 cells).");
+            return (
+                "Choose a shorter road route (up to 128 cells).".into(),
+                false,
+            );
         };
         let definition = &catalog.projects["road"];
         let mut issue = None;
+        let mut sections = 0;
         let mut previous: Option<Vec2> = None;
         for cell in cells {
             let point = world_position(cell.x as f32, cell.y as f32);
             let color = if self.has_road(cell) {
                 Color::srgb_u8(155, 162, 148)
             } else {
+                sections += 1;
                 let tile = Self::proposal(catalog, "road", cell, IVec2::ONE, 0);
                 if let Some(reason) = self.placement_error(
                     site.terrain,
@@ -238,7 +243,7 @@ impl Construction {
                     site.camp,
                     &tile,
                     definition,
-                    (catalog, sandbox, None),
+                    (catalog, stock.sandbox, None),
                 ) {
                     issue.get_or_insert(reason);
                     Color::srgb_u8(222, 112, 96)
@@ -273,7 +278,24 @@ impl Construction {
             );
             previous = Some(point);
         }
-        issue
+        if let Some(issue) = issue {
+            return (issue.into(), false);
+        }
+        if sections == 0 {
+            return ("These road tiles are already planned.".into(), false);
+        }
+        let materials = definition
+            .materials
+            .iter()
+            .map(|(id, amount)| (id.clone(), amount * sections))
+            .collect();
+        match self.construction_supply_quote(catalog, stock, clock, &materials) {
+            Ok(quote) => {
+                let unit = if sections == 1 { "section" } else { "sections" };
+                (format!("{sections} road {unit} · {quote}"), true)
+            }
+            Err(reason) => (reason, false),
+        }
     }
 }
 

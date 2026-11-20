@@ -1262,12 +1262,22 @@ impl Construction {
         clock: TownClock,
         definition: &Project,
     ) -> Result<String, String> {
+        self.construction_supply_quote(catalog, stock, clock, &definition.materials)
+    }
+
+    fn construction_supply_quote(
+        &self,
+        catalog: &Catalog,
+        stock: &Stock,
+        clock: TownClock,
+        materials: &BTreeMap<String, u32>,
+    ) -> Result<String, String> {
         if stock.sandbox {
             return Ok("Free in Sandbox".into());
         }
         let quote = self.market.quote(
             catalog,
-            &definition.materials,
+            materials,
             stock,
             clock.seconds,
             clock.round_trip_km,
