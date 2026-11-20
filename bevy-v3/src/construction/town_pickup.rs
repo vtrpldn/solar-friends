@@ -93,6 +93,18 @@ impl Construction {
         })
     }
 
+    fn reset_sale_dispatch_if_booked(&mut self) {
+        let has_queued_sale = self.trade.orders.iter().enumerate().any(|(index, order)| {
+            !order.buying
+                && !order.settled
+                && order.quantity > 0
+                && !self.active_trips().any(|trip| trip.covers_order(index))
+        });
+        if !has_queued_sale {
+            self.trade.clear_sale_dispatch();
+        }
+    }
+
     pub(super) fn tick_trip(
         &mut self,
         catalog: &Catalog,
@@ -121,6 +133,7 @@ impl Construction {
             }
         }
 
+        self.reset_sale_dispatch_if_booked();
         let cargo = self.pending_dispatch_cargo(catalog);
         if cargo.is_some() {
             self.logistics_policy
@@ -157,6 +170,7 @@ impl Construction {
             self.set_trip(slot, Some(trip));
             self.upkeep.dispatch_vehicle(vehicle);
         }
+        self.reset_sale_dispatch_if_booked();
     }
 
     pub(super) fn seed_freight_active(&self) -> bool {
@@ -972,7 +986,10 @@ impl Construction {
             .iter()
             .enumerate()
             .find_map(|(index, order)| {
-                ((order.buying || (ready && !order.hold_for_pickup))
+                ((order.buying
+                    || (ready
+                        && !order.hold_for_pickup
+                        && self.trade.sale_dispatch_ready(clock.seconds)))
                     && !self.active_trips().any(|trip| trip.covers_order(index)))
                 .then_some(index)
             });
@@ -1248,6 +1265,14 @@ mod tests {
             .reserve_town_sale(&catalog, &mut stock, clock, "wood", false)
             .unwrap();
         let sale_cents = village.trade.orders[0].cents;
+        village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
+        assert!(village.trip.is_none());
+        let queued = serde_json::to_vec(&village).unwrap();
+        let mut village: Construction = serde_json::from_slice(&queued).unwrap();
+        let clock = TownClock {
+            seconds: 40.0,
+            ..clock
+        };
         village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
         let outgoing = village.trip.unwrap();
         village.residents[outgoing.driver].path.clear();

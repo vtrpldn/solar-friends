@@ -178,6 +178,7 @@ impl Construction {
             .back_mut()
             .expect("reserved sale")
             .hold_for_pickup = hold_for_pickup;
+        self.trade.note_sale_queued(clock.seconds);
         Ok(quantity)
     }
 

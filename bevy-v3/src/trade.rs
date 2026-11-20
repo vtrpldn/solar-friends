@@ -28,6 +28,8 @@ pub struct Trade {
     #[serde(skip)]
     pub notice: String,
     next_scan: f64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    dispatch_at: Option<f64>,
     #[serde(default)]
     next_pantry_check: f64,
     #[serde(default)]
@@ -116,6 +118,19 @@ impl Trade {
                 material,
             })
             .collect()
+    }
+
+    pub(crate) fn note_sale_queued(&mut self, clock: f64) {
+        self.dispatch_at
+            .get_or_insert(clock + crate::economy_reference::SALE_DISPATCH_DELAY);
+    }
+
+    pub(crate) fn clear_sale_dispatch(&mut self) {
+        self.dispatch_at = None;
+    }
+
+    pub(crate) fn sale_dispatch_ready(&self, clock: f64) -> bool {
+        self.dispatch_at.is_none_or(|at| clock >= at)
     }
 
     pub fn buyer_reserved(&self, id: &str, day: u64) -> u32 {
@@ -634,6 +649,7 @@ impl Trade {
                 && let Ok(quantity) =
                     self.reserve(catalog, stock, market, &id, (day, fare, reserve))
             {
+                self.note_sale_queued(clock);
                 let policy = self.policies.get_mut(&id).expect("active sale policy");
                 if policy.day != day {
                     policy.day = day;
@@ -706,6 +722,12 @@ impl Trade {
     }
 
     pub fn valid(&self, catalog: &Catalog) -> bool {
+        if self
+            .dispatch_at
+            .is_some_and(|at| !at.is_finite() || at < 0.)
+        {
+            return false;
+        }
         self.pantry_purchase.reserve_half_days <= 14
             && self.pantry_purchase.allowance_cents <= 10_000_000
             && self.pantry_purchase.reserved_cents <= 10_000_000
