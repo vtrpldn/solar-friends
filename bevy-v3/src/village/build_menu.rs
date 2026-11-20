@@ -237,13 +237,32 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
             GlobalZIndex(32),
             Pickable::IGNORE,
         ))
-        .with_child((
-            BlueprintDetails,
-            Text::new(DETAILS_HINT),
-            ui_font(&assets, 14.0),
-            bevy::text::LineHeight::RelativeToFont(1.35),
-        ));
+        .with_children(|card| {
+            // The plain text is the source; the styled copy beside it is what shows.
+            card.spawn((
+                BlueprintDetails,
+                Text::new(DETAILS_HINT),
+                ui_font(&assets, 14.0),
+                Node {
+                    display: Display::None,
+                    ..default()
+                },
+            ));
+            card.spawn((
+                DetailsShown,
+                super::rich_text::RichSource::default(),
+                Text::default(),
+                ui_font(&assets, 14.0),
+                Node {
+                    max_width: px(312),
+                    ..default()
+                },
+            ));
+        });
 }
+
+#[derive(Component)]
+struct DetailsShown;
 
 #[derive(Component)]
 struct DetailsCard;
@@ -252,6 +271,7 @@ struct DetailsCard;
 fn float_details(
     window: Single<&Window, With<PrimaryWindow>>,
     text: Single<&Text, With<BlueprintDetails>>,
+    mut shown_text: Single<&mut super::rich_text::RichSource, With<DetailsShown>>,
     mut card: Single<&mut Node, With<DetailsCard>>,
     (setup, village, saves, sound): (
         Res<WorldSetup>,
@@ -268,6 +288,9 @@ fn float_details(
         return;
     };
     card.display = Display::Flex;
+    if shown_text.0 != text.0 {
+        shown_text.0.clone_from(&text.0);
+    }
     let scale = theme::UI_SCALE;
     card.left = px(((cursor.x + 16.) / scale)
         .min(window.width() / scale - 360.)
@@ -652,24 +675,39 @@ fn blueprint_details(
 ) -> String {
     use std::fmt::Write;
     let [width, depth] = project.size;
+    // The catalog description repeats the name, size and build rules; keep what tells
+    // the player what the building is for.
+    let about: Vec<&str> = project
+        .description
+        .split_inclusive(". ")
+        .map(str::trim)
+        .filter(|sentence| {
+            !sentence.is_empty()
+                && !sentence.starts_with(&project.name)
+                && !sentence.contains(" cells")
+                && !sentence.starts_with("Build with")
+                && !sentence.starts_with("Reserved site")
+        })
+        .take(2)
+        .collect();
     let mut details = format!(
-        "{}\n{}\n{} × {} m · {:.1} person-hours · {} loads",
+        "{}\n{}\n{} × {} m · {:.0} person-hours · {} loads",
         project.name,
-        project.description,
+        about.join(" "),
         width * 2,
         depth * 2,
         project.work * 0.45 / 60.0,
         catalog.loads(project),
     );
-    project.append_assembly_estimate(&mut details);
+    details.push_str("\n\nMaterials");
     for (id, amount) in &project.materials {
         let missing = amount.saturating_sub(stock.available(id));
         let material = &catalog.materials[id];
         let _ = write!(
             details,
-            "\n{} {}",
-            material.quantity_text(u64::from(*amount)),
-            material.name
+            "\n{} · {}",
+            material.name,
+            material.quantity_text(u64::from(*amount))
         );
         if missing > 0 && !stock.sandbox {
             let _ = write!(
@@ -679,6 +717,6 @@ fn blueprint_details(
             );
         }
     }
-    let _ = write!(details, "\n{supply_detail}");
+    let _ = write!(details, "\n\n{supply_detail}");
     details
 }
