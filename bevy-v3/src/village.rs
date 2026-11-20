@@ -2358,27 +2358,33 @@ fn advance_clock(
     setup: Res<WorldSetup>,
     mut village: ResMut<Village>,
     (catalog, land, saves): (Res<Catalog>, Res<Land>, Res<SaveMenu>),
+    mut budget: Local<u8>,
 ) {
     if setup.open || saves.open || village.is_paused() {
+        *budget = 0;
         return;
     }
-    let Some(camp) = village.camp else { return };
+    let Some(camp) = village.camp else {
+        *budget = 0;
+        return;
+    };
     let terrain = village.terrain(&setup);
     let site = ConstructionSite {
         terrain: &terrain,
         land: &land,
         camp,
     };
-    let mut budget = UNAVAILABLE_SPEED;
+    *budget += UNAVAILABLE_SPEED;
     let started = std::time::Instant::now();
     loop {
         let cost = UNAVAILABLE_SPEED / village.effective_speed();
-        if budget < cost {
+        if *budget < cost {
             break;
         }
-        budget -= cost;
+        *budget -= cost;
         step(&mut village, &catalog, &setup, site, time.delta_secs_f64());
         if started.elapsed() >= LIVE_STEP_BUDGET {
+            *budget = 0;
             break;
         }
     }
