@@ -23,7 +23,7 @@ const LENSES: [(KeyCode, MapLens, &str); 9] = [
     (KeyCode::Digit1, MapLens::Land, "Land & slope"),
     (KeyCode::Digit2, MapLens::Resources, "Resources"),
     (KeyCode::Digit3, MapLens::Ecology, "Ecology"),
-    (KeyCode::Digit4, MapLens::Access, "Access"),
+    (KeyCode::Digit4, MapLens::Access, "Access & hauling"),
     (KeyCode::Digit5, MapLens::Construction, "Construction"),
     (KeyCode::Digit6, MapLens::Power, "Power"),
     (KeyCode::Digit7, MapLens::Water, "Water"),

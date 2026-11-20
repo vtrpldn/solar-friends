@@ -215,13 +215,15 @@ impl Construction {
         }
 
         let mut legend =
-            "Access · White shared supplies · Blue within 25 cells · Gold farther away".to_owned();
+            "Access & hauling · White shared supplies · Blue within 25 cells · Gold farther away"
+                .to_owned();
         for (index, plan) in self.plans.iter().enumerate() {
             if plan.removed || matches!(plan.key.as_str(), "road" | "bridge") {
                 continue;
             }
-            let center = plan.position.as_vec2() + (plan.size.as_vec2() - Vec2::ONE) * 0.5;
-            let distance = center.distance(supplies);
+            let origin = plan.position.as_vec2();
+            let center = origin + (plan.size.as_vec2() - Vec2::ONE) * 0.5;
+            let distance = origin.distance(supplies);
             let color = if distance > FAR_THRESHOLD {
                 Color::srgb_u8(243, 200, 108)
             } else {
@@ -255,16 +257,9 @@ impl Construction {
                         self.project_status(catalog, index)
                     );
                 }
-                let steps = distance.ceil().max(1.0) as usize;
-                gizmos.linestrip(
-                    (0..=steps).map(|step| {
-                        point_at(supplies.lerp(center, step as f32 / steps as f32), 0.4)
-                    }),
-                    color,
-                );
             }
         }
-        legend.push_str("\nRoutes · Cyan walking · Orange carrying");
+        legend.push_str("\nQueued routes · Cyan walking · Orange carrying");
         let mut closest = None;
         let mut closest_distance = 2.25;
         for (index, worker) in self.residents.iter().enumerate() {
