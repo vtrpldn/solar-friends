@@ -674,7 +674,63 @@ mod tests {
             })
     }
 
+    /// Presses the ‹ or › of the stepper captioned `caption` on a dialog screen.
+    fn press_stepper(app: &mut App, caption: &str, forward: bool) -> String {
+        let world = app.world_mut();
+        let column = world
+            .query::<(&Text, &ChildOf)>()
+            .iter(world)
+            .find(|(text, _)| text.0 == caption)
+            .map(|(_, parent)| parent.parent())
+            .unwrap_or_else(|| panic!("missing stepper: {caption}"));
+        let buttons: Vec<Entity> = world
+            .get::<Children>(column)
+            .into_iter()
+            .flatten()
+            .filter_map(|row| world.get::<Children>(*row))
+            .flat_map(|cells| cells.iter())
+            .filter(|cell| world.get::<Button>(*cell).is_some())
+            .collect();
+        let button = if forward {
+            buttons[buttons.len() - 1]
+        } else {
+            buttons[0]
+        };
+        *world
+            .get_mut::<Interaction>(button)
+            .expect("stepper interaction") = Interaction::Pressed;
+        world.run_schedule(Update);
+        if let Some(mut interaction) = app.world_mut().get_mut::<Interaction>(button) {
+            *interaction = Interaction::None;
+        }
+        app.world_mut().run_schedule(Update);
+        let world = app.world_mut();
+        let column = world
+            .query::<(&Text, &ChildOf)>()
+            .iter(world)
+            .find(|(text, _)| text.0 == caption)
+            .map(|(_, parent)| parent.parent())
+            .expect("stepper after press");
+        world
+            .get::<Children>(column)
+            .into_iter()
+            .flatten()
+            .filter_map(|row| world.get::<Children>(*row))
+            .flat_map(|cells| cells.iter())
+            .find_map(|cell| world.get::<Text>(cell).map(|text| text.0.clone()))
+            .expect("stepper value")
+    }
+
     fn interact_with_button(app: &mut App, label: &str, input: Interaction) {
+        // Dialog screens close with their × instead of a Close panel button.
+        let label = if label == "Close panel"
+            && visible_button(app, label).is_none()
+            && visible_button(app, "×").is_some()
+        {
+            "×"
+        } else {
+            label
+        };
         // Setup, saved villages, sound and camera tools live in the View & options menu.
         if visible_button(app, label).is_none() && visible_button(app, "View & options").is_some() {
             interact_with_button(app, "View & options", Interaction::Pressed);
@@ -1303,11 +1359,12 @@ mod tests {
         press_button(&mut app, "Resume");
         assert!(!app.world().resource::<village::Village>().is_paused());
         press_button(&mut app, "Finances");
-        press_button(&mut app, "Bento");
+        // Finances picks the resident with a stepper: Iara, then Bento.
+        press_button(&mut app, "›");
         press_button(&mut app, "Book one day shift");
         press_button(&mut app, "Repeat weekday shifts");
         press_button(&mut app, "View records");
-        press_button(&mut app, "Next page");
+        press_button(&mut app, "Next records");
         press_button(&mut app, "Close records");
         press_button(&mut app, "Power costs");
         press_button(&mut app, "Disconnect grid");
@@ -1390,11 +1447,12 @@ mod tests {
         assert!(!app.world().resource::<village::Village>().is_paused());
 
         press_button(&mut app, "Food portions");
-        press_button(&mut app, "Purchases: supplier freight");
-        press_button(&mut app, "Purchases: resident pickup");
-        press_button(&mut app, "Automatic food purchases on");
-        press_button(&mut app, "Automatic food purchases off");
-        press_button(&mut app, "Set daily food budget");
+        // The Food dialog's own supply controls.
+        press_button(&mut app, "Supplier freight");
+        press_button(&mut app, "Resident pickup");
+        press_button(&mut app, "Automatic shopping on");
+        press_button(&mut app, "Enable automatic shopping");
+        press_button(&mut app, "Set food budget");
         let window = app
             .world_mut()
             .query_filtered::<Entity, With<PrimaryWindow>>()
@@ -1428,22 +1486,21 @@ mod tests {
                 .any(|text| text.0.contains("Daily limit R$37\n"))
         );
         press_button(&mut app, "Manage food automatically");
-        press_button(&mut app, "Fresh target 1.0d +");
-        press_button(&mut app, "Fresh target 1.5d −");
-        press_button(&mut app, "Dried target 2.0d +");
-        press_button(&mut app, "Dried target 2.5d −");
+        for caption in ["FRESH-MEAL TARGET", "DRIED-PROVISION TARGET"] {
+            let raised = press_stepper(&mut app, caption, true);
+            let lowered = press_stepper(&mut app, caption, false);
+            assert_ne!(raised, lowered, "{caption} stepper changes the target");
+        }
         press_button(&mut app, "Automatic food management: on");
         press_button(&mut app, "Inspect food batches");
         assert!(ui_texts(&mut app).iter().any(|text| {
             text.0.contains("On the shelves") && text.0.contains("Dried provisions")
         }));
-        press_button(&mut app, "Next page");
-        assert!(
-            ui_texts(&mut app)
-                .iter()
-                .any(|text| text.0.contains("Food batches · 1/"))
+        assert!(press_stepper(&mut app, "SHELVES & BATCHES", true).starts_with("Batch page 1 of "));
+        assert_eq!(
+            press_stepper(&mut app, "SHELVES & BATCHES", false),
+            "On the shelves"
         );
-        press_button(&mut app, "Previous page");
         press_button(&mut app, "Back to food");
         press_button(&mut app, "Close panel");
         press_button(&mut app, "Water");
@@ -1463,7 +1520,7 @@ mod tests {
         press_button(&mut app, "Close panel");
         press_button(&mut app, "Maintenance");
         press_button(&mut app, "Manage service supplies");
-        press_button(&mut app, "Find material");
+        press_button(&mut app, "Search the stores   /");
         for (key_code, letter) in [
             (KeyCode::KeyT, "T"),
             (KeyCode::KeyI, "I"),
@@ -1487,7 +1544,7 @@ mod tests {
         assert!(visible_button(&mut app, "Trade · fastener packs").is_none());
         press_button(&mut app, "Trade in town");
         assert!(visible_button(&mut app, "Fetch timber pieces incl. transport").is_some());
-        press_button(&mut app, "Trade · timber pieces");
+        press_button(&mut app, "Town trade");
         assert!(app.world().resource::<village::Village>().trade_open());
         assert!(ui_texts(&mut app).iter().any(
             |text| text.0.contains("timber pieces · Pack") && text.0.contains("Freight total")
@@ -1549,19 +1606,18 @@ mod tests {
         );
         press_button(&mut app, "Close panel");
         press_button(&mut app, "Stores");
-        press_button(&mut app, "Show items and equipment");
-        press_button(&mut app, "Show food");
-        assert!(
-            ui_texts(&mut app)
-                .iter()
-                .any(|text| text.0 == "FOOD FROM TOWN & THE VILLAGE")
-        );
-        press_button(&mut app, "Show production sites");
+        press_button(&mut app, "Items & equipment");
+        press_button(&mut app, "Food stores");
+        // The Food tab of the stores screen, not the Food screen in the sidebar.
+        assert!(visible_button(&mut app, "Manage food automatically").is_none());
+        press_button(&mut app, "Production sites");
         press_button(&mut app, "Show resources");
-        press_button(&mut app, "Manage food");
-        press_button(&mut app, "Chill first · Earliest expiry");
-        press_button(&mut app, "Chill first · Meals first");
-        press_button(&mut app, "Chill first · Ingredients first");
+        press_button(&mut app, "Food");
+        let mut seen = std::collections::HashSet::new();
+        for _ in 0..3 {
+            seen.insert(press_stepper(&mut app, "CHILL FIRST", true));
+        }
+        assert_eq!(seen.len(), 3, "chill order cycles through three choices");
         press_button(&mut app, "Close panel");
 
         press_button(&mut app, "Advance days");
@@ -1689,7 +1745,7 @@ mod tests {
             .single(app.world())
             .unwrap()
             .target;
-        press_button(&mut app, "Find resident in village");
+        press_button(&mut app, "Find in village");
         let after = app
             .world_mut()
             .query::<&VillageCamera>()
@@ -1704,8 +1760,8 @@ mod tests {
                 .iter()
                 .any(|text| text.0.contains("Food is unlimited in sandbox"))
         );
-        press_button(&mut app, "Chill first · Earliest expiry");
-        press_button(&mut app, "Food batches");
+        press_stepper(&mut app, "CHILL FIRST", true);
+        press_button(&mut app, "Inspect food batches");
         press_button(&mut app, "Close panel");
 
         press_button(&mut app, "Saved villages");

@@ -2497,6 +2497,8 @@ fn refresh(
         };
         // Top-bar controls stay put while panels and menus come and go, as in V2.
         let show = if top { top_bar_visible } else { show };
+        // Screens rebuilt as V2 dialogs hold their own controls.
+        let show = show && !(village.widget_screen() && parent.parent() == *menu_id);
         menu_has_items |= show && parent.parent() == *menu_id;
         node.display = if show { Display::Flex } else { Display::None };
         if !show {

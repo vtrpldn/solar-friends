@@ -10,7 +10,7 @@ use crate::{theme, ui_font::ui_font_styled, ui_font::ui_font_weight};
 /// Margin between the dialog and the window edges.
 const MARGIN: f32 = 24.0;
 /// Width of the screen list on the left of the dialog.
-const SIDEBAR: f32 = 196.0;
+const SIDEBAR: f32 = 176.0;
 const GAP: f32 = 12.0;
 /// Draw order above the village UI, so the dimming covers the top bar and dock.
 const BACKDROP_Z: i32 = 10;
@@ -213,8 +213,13 @@ fn frame(
     if !open {
         return;
     }
-    // The sheet fills the dialog between the sidebar and the action column.
-    let right = MARGIN + toolbar::PANEL_WIDTH + GAP;
+    // The sheet fills the dialog between the sidebar and the action column, or to the
+    // edge when the screen carries its own controls.
+    let right = if village.widget_screen() {
+        MARGIN
+    } else {
+        MARGIN + toolbar::PANEL_WIDTH + GAP
+    };
     let wanted = (
         px(MARGIN + SIDEBAR + GAP),
         px(right),

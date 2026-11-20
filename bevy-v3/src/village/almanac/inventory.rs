@@ -117,12 +117,18 @@ pub(super) fn refresh(village: &Village, catalog: &Catalog, setup: &WorldSetup) 
                 InventoryView::Resources,
                 InventoryView::Equipment,
                 InventoryView::Food,
+                InventoryView::Production,
             ]
             .into_iter()
             .map(|choice| {
                 Widget::Button(
                     Action::View(choice),
-                    choice.label().into(),
+                    // The sidebar's Food is the kitchen screen; this tab lists stored food.
+                    if choice == InventoryView::Food {
+                        "Food stores".into()
+                    } else {
+                        choice.label().into()
+                    },
                     true,
                     choice == view,
                 )

@@ -925,6 +925,22 @@ impl Village {
         }
     }
 
+    /// Screens whose dialog carries its own controls, so the old action column stays away.
+    fn widget_screen(&self) -> bool {
+        self.modal_panel()
+            && match self.utility_panel {
+                // Production sites still use the text sheet and its column.
+                Some(UtilityPanel::Inventory) => self.inventory_view != InventoryView::Production,
+                Some(
+                    UtilityPanel::Crafting
+                    | UtilityPanel::Pantry
+                    | UtilityPanel::Finances
+                    | UtilityPanel::Residents,
+                ) => true,
+                _ => false,
+            }
+    }
+
     /// Whether an open panel shows as V2's centred almanac dialog over a dimmed village.
     fn modal_panel(&self) -> bool {
         self.utility_panel
