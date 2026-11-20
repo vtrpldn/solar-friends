@@ -739,17 +739,17 @@ enum LabToolbar {
 
 fn setup_lab_window(mut commands: Commands, assets: Res<AssetServer>) {
     commands.spawn(Camera2d);
-    commands.spawn((
-        Text::default(),
-        ui_font(&assets, 18.0),
-        Node {
-            margin: UiRect {
-                top: px(96),
-                ..UiRect::all(px(24))
-            },
+    let layout = commands
+        .spawn(Node {
+            position_type: PositionType::Absolute,
+            top: px(10),
+            left: px(24),
+            right: px(24),
+            flex_direction: FlexDirection::Column,
+            row_gap: px(12),
             ..default()
-        },
-    ));
+        })
+        .id();
     use LabControl::{AdvanceHour, CycleSpeed, SetInterval, Shortcut};
 
     let rows: [&[(LabControl, &str)]; 4] = [
@@ -806,16 +806,15 @@ fn setup_lab_window(mut commands: Commands, assets: Res<AssetServer>) {
         commands
             .spawn((
                 toolbar,
+                ChildOf(layout),
                 Node {
                     display: if toolbar == LabToolbar::Main {
                         Display::Flex
                     } else {
                         Display::None
                     },
-                    position_type: PositionType::Absolute,
                     flex_direction: FlexDirection::Column,
-                    top: px(10),
-                    left: px(24),
+                    flex_shrink: 0.0,
                     row_gap: px(6),
                     ..default()
                 },
@@ -825,6 +824,8 @@ fn setup_lab_window(mut commands: Commands, assets: Res<AssetServer>) {
                     toolbar
                         .spawn(Node {
                             column_gap: px(6),
+                            row_gap: px(6),
+                            flex_wrap: FlexWrap::Wrap,
                             ..default()
                         })
                         .with_children(|group| {
@@ -849,6 +850,7 @@ fn setup_lab_window(mut commands: Commands, assets: Res<AssetServer>) {
                 }
             });
     }
+    commands.spawn((Text::default(), ui_font(&assets, 18.0), ChildOf(layout)));
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq)]

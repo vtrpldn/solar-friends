@@ -327,6 +327,11 @@ fn clip_line(a: Vec2, b: Vec2, min: Vec2, max: Vec2) -> Option<(Vec2, Vec2)> {
     (start <= end).then(|| (a + start * delta, a + end * delta))
 }
 
+type LabMapUi<'w, 's> = (
+    Query<'w, 's, &'static Interaction, With<super::LabControl>>,
+    Query<'w, 's, (&'static Node, &'static ComputedNode), With<super::LabToolbar>>,
+);
+
 pub(super) fn draw(
     mut map: ResMut<MapState>,
     (mouse, keys, scroll): (
@@ -337,7 +342,7 @@ pub(super) fn draw(
     runner: Res<Runner>,
     catalog: Res<Catalog>,
     window: Single<&Window, With<PrimaryWindow>>,
-    controls: Query<&Interaction, With<super::LabControl>>,
+    (controls, toolbars): LabMapUi,
     mut gizmos: Gizmos,
 ) {
     if !map.visible {
@@ -346,10 +351,17 @@ pub(super) fn draw(
         }
         return;
     }
-    let side = (window.height() - 230.0)
+    let toolbar_height = toolbars
+        .iter()
+        .find(|(node, _)| node.display != Display::None)
+        .map_or(0.0, |(_, layout)| {
+            layout.size().y * layout.inverse_scale_factor()
+        });
+    let top = (toolbar_height + 152.0).min(window.height() * 0.75);
+    let side = (window.height() - top - 24.0)
         .min(window.width() - 48.0)
         .max(1.0);
-    let center = Vec2::new(0.0, -75.0);
+    let center = Vec2::new(0.0, (24.0 - top) * 0.5);
     let half = Vec2::splat(side * 0.5);
     let contains =
         |screen: Vec2, margin: Vec2| ((screen - center).abs() + margin).cmple(half).all();
