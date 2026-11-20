@@ -345,14 +345,7 @@ fn blueprint_details(
         project.work * 0.45 / 60.0,
         catalog.loads(project),
     );
-    if let Some(estimate) = &project.construction {
-        if let Some(area) = estimate.area {
-            let _ = write!(details, "\n{area:.0} m² basic shell");
-        }
-        for phase in &estimate.phases {
-            let _ = write!(details, "\n{} · {:.1} h", phase.name, phase.hours);
-        }
-    }
+    project.append_assembly_estimate(&mut details);
     for (id, amount) in &project.materials {
         let missing = amount.saturating_sub(stock.available(id));
         let material = &catalog.materials[id];

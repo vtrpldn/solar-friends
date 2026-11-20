@@ -122,6 +122,19 @@ pub struct ConstructionPhase {
 }
 
 impl Project {
+    pub(crate) fn append_assembly_estimate(&self, text: &mut String) {
+        use std::fmt::Write;
+        let Some(estimate) = &self.construction else {
+            return;
+        };
+        if let Some(area) = estimate.area {
+            let _ = write!(text, "\n{area:.0} m² basic shell");
+        }
+        for phase in &estimate.phases {
+            let _ = write!(text, "\n{} · {:.1} h", phase.name, phase.hours);
+        }
+    }
+
     pub fn construction_model(&self, work: f64) -> Option<usize> {
         if work >= self.work {
             return None;

@@ -146,7 +146,19 @@ impl Construction {
                     })
                     .count();
             if builders == 0 {
-                format!("{progress:.0}% built · Waiting for builders")
+                let needs_take_precedence =
+                    self.residents.iter().enumerate().all(|(worker, resident)| {
+                        resident.health.energy < 25.0
+                            || resident.health.task.is_some()
+                            || self.away_for_work(worker)
+                            || self.driver_away(worker)
+                    });
+                let reason = if needs_take_precedence {
+                    "Supplies ready · residents resting, meeting needs, or away"
+                } else {
+                    "Supplies ready · waiting for builders"
+                };
+                format!("{progress:.0}% built · {reason}")
             } else {
                 let limit = construction_crew_limit(def, plan.size);
                 let hours = (def.work - plan.work)

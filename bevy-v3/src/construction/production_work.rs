@@ -857,6 +857,7 @@ impl Construction {
                 text.push_str(&tools);
             }
         }
+        definition.append_assembly_estimate(&mut text);
         if !self.production.notice.is_empty() {
             text.push('\n');
             text.push_str(&self.production.notice);
@@ -1809,6 +1810,26 @@ mod upgrade_tests {
         assert_eq!(job.delivered_output.as_ref().unwrap()["greens"], 2);
         assert_eq!(job.food_output.as_ref().unwrap()["greens"][0].expires, 10.0);
         assert_eq!(village.residents[0].path.front(), Some(&waypoint));
+    }
+
+    #[test]
+    fn selected_house_shows_assembly_estimates_and_why_builders_are_waiting() {
+        let catalog = Catalog::default();
+        let mut village = Construction::default();
+        let mut house = village.proposed_site(&catalog, "home-cottage", IVec2::new(44, 36));
+        house.delivered = house.loads;
+        village.plans.push(house);
+        village.production.selected = Some(0);
+        for resident in &mut village.residents {
+            resident.health.energy = 20.0;
+        }
+        let text = village
+            .selected_production(&catalog, &Stock::default(), 0.0)
+            .unwrap();
+        assert!(text.contains("Supplies ready · residents resting, meeting needs, or away"));
+        assert!(text.contains("64 m² basic shell"));
+        assert!(text.contains("Foundation and level floor · 96.0 h"));
+        assert!(text.contains("Materials for this plan"));
     }
 
     #[test]
