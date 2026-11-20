@@ -1398,7 +1398,7 @@ impl Construction {
         let direct = job.inputs.is_empty();
         let mut attempted = false;
         for (worker, resident) in self.residents.iter().enumerate() {
-            if !self.work_candidate(worker) {
+            if !self.work_candidate(worker) || resident.health.energy < 25.0 {
                 continue;
             }
             attempted = true;
@@ -1669,6 +1669,19 @@ mod resize_tests {
         village.farm_input(&catalog, &mut stock, &input, ground, clock);
         assert_eq!(village.farming.jobs.len(), 1);
         village.residents[0].position = (corner - IVec2::X).as_vec2();
+        let energy = village
+            .residents
+            .each_ref()
+            .map(|resident| resident.health.energy);
+        for resident in &mut village.residents {
+            resident.health.energy = 24.0;
+        }
+        village.try_farm_worker(0, &catalog, ground, 0.0);
+        assert!(village.farming.jobs[0].worker.is_none());
+        assert!(!village.farming.jobs[0].waiting_for_access);
+        for (resident, energy) in village.residents.iter_mut().zip(energy) {
+            resident.health.energy = energy;
+        }
         assert!(
             village
                 .lab_stop_reason(super::super::LabStop::Blocked, 0.0)
