@@ -1191,7 +1191,8 @@ fn handle_buttons(
                     picker.open = false;
                 }
                 Action::Build => {
-                    village.construction.toggle_build_menu();
+                    let sandbox = village.stock.sandbox;
+                    village.construction.toggle_build_menu(sandbox);
                     picker.open = false;
                 }
                 Action::RotatePlacement => village.construction.rotate_placement(),

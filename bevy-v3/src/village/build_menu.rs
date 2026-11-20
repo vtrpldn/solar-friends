@@ -149,7 +149,7 @@ fn select(
                     }
                     BuildButton::SupplierConstruction => {}
                     BuildButton::Search => build.toggle_build_search(),
-                    BuildButton::Close => build.toggle_build_menu(),
+                    BuildButton::Close => build.toggle_build_menu(sandbox),
                 }
                 break;
             }

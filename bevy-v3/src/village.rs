@@ -477,7 +477,7 @@ impl Village {
         } else if self.utility_panel.take().is_some() {
             self.pantry_batch_page = None;
         } else if self.construction.menu {
-            self.construction.toggle_build_menu();
+            self.construction.toggle_build_menu(self.stock.sandbox);
         } else {
             return false;
         }

@@ -172,7 +172,7 @@ pub struct Construction {
     #[serde(skip)]
     selection: Option<String>,
     #[serde(skip)]
-    category: usize,
+    category: Option<usize>,
     #[serde(skip)]
     page: usize,
     #[serde(skip)]
@@ -357,7 +357,7 @@ impl Default for Construction {
             editing_search: false,
             road_planning: roads::RoadPlanning::default(),
             selection: None,
-            category: 0,
+            category: None,
             page: 0,
             rotation: 0,
             field_size: default_field_size(),
@@ -648,7 +648,7 @@ impl Construction {
     }
 
     fn options<'a>(&self, catalog: &'a Catalog) -> Vec<(&'a String, &'a Project)> {
-        let category = CATEGORIES[self.category];
+        let category = CATEGORIES[self.category.unwrap_or_default()];
         let query = self.build_query.trim().to_lowercase();
         catalog
             .build_options()
@@ -699,16 +699,19 @@ impl Construction {
         self.status.clear();
     }
 
-    pub fn toggle_build_menu(&mut self) {
+    pub fn toggle_build_menu(&mut self, sandbox: bool) {
         self.menu = !self.menu;
+        if self.menu {
+            self.category.get_or_insert(usize::from(sandbox));
+        }
         self.selection = None;
         self.status.clear();
     }
 
     pub fn change_build_category(&mut self, reverse: bool) {
         self.build_query.clear();
-        self.category =
-            (self.category + if reverse { CATEGORIES.len() - 1 } else { 1 }) % CATEGORIES.len();
+        let step = if reverse { CATEGORIES.len() - 1 } else { 1 };
+        self.category = Some((self.category.unwrap_or_default() + step) % CATEGORIES.len());
         self.page = 0;
         self.selection = None;
         self.status.clear();
@@ -793,7 +796,7 @@ impl Construction {
             return;
         }
         if keyboard.just_pressed(KeyCode::KeyB) {
-            self.toggle_build_menu();
+            self.toggle_build_menu(sandbox);
         }
         if !self.menu {
             return;
@@ -961,7 +964,7 @@ impl Construction {
             )
         } else {
             (
-                CATEGORIES[self.category].to_owned(),
+                CATEGORIES[self.category.unwrap_or_default()].to_owned(),
                 "/ Search · Tab Category · Page Up/Down · B Close",
             )
         };
@@ -3405,6 +3408,23 @@ mod tests {
         village.place_blueprint(&catalog, &mut stock, site, IVec2::new(45, 36), clock, false);
         assert_eq!(village.plans.len(), 2);
         assert!(village.selection.is_none());
+    }
+
+    #[test]
+    fn build_menu_opens_in_the_v2_category_for_each_mode() {
+        let catalog = Catalog::default();
+        for (sandbox, initial, next) in [
+            (false, "gathering", "shelter"),
+            (true, "shelter", "orchard"),
+        ] {
+            let mut construction = Construction::default();
+            construction.toggle_build_menu(sandbox);
+            assert_eq!(construction.build_rows(&catalog)[0].0, initial);
+            construction.change_build_category(false);
+            construction.toggle_build_menu(sandbox);
+            construction.toggle_build_menu(sandbox);
+            assert_eq!(construction.build_rows(&catalog)[0].0, next);
+        }
     }
 
     #[test]
