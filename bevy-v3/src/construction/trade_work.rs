@@ -451,7 +451,8 @@ impl Construction {
         let item = &catalog.materials[&order.material];
         let arrival = order.eta - clock;
         let status = if arrival > 0.0 {
-            format!("{:.1}h remaining", arrival / crate::weather::HOUR)
+            let minutes = (arrival * (60.0 / crate::weather::HOUR)).ceil();
+            format!("{minutes:.0} game minutes remaining")
         } else if u64::from(order.quantity) > space {
             "Arrived · Waiting for storage space".into()
         } else {
@@ -491,6 +492,10 @@ impl Construction {
         ) {
             status.push('\n');
             status.push_str(&delivery);
+        }
+        if let Some(freight) = self.reserved_freight_status(clock.seconds) {
+            status.push('\n');
+            status.push_str(&freight);
         }
         status
     }
@@ -818,7 +823,7 @@ mod tests {
         assert!(
             village
                 .trade_status(&catalog, &stock, clock)
-                .contains("h remaining")
+                .contains("390 game minutes remaining")
         );
         assert!(
             village
@@ -834,7 +839,7 @@ mod tests {
         village.toggle_supplier_construction();
         let pantry = village.pantry_purchase_status(&catalog, &stock, clock);
         assert!(pantry.contains("Supplier freight · R$44.60"));
-        assert!(pantry.contains("h remaining"));
+        assert!(pantry.contains("390 game minutes remaining"));
 
         clock.seconds = village.trade.delivery.as_ref().unwrap().eta;
         assert!(

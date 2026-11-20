@@ -1091,6 +1091,11 @@ mod tests {
             village.reserved_freight_status(clock.seconds).as_deref(),
             Some("Seed freight · 6.5h remaining · Site 1 · Bed 1")
         );
+        assert!(
+            village
+                .pantry_purchase_status(&catalog, &stock, clock)
+                .contains("Seed freight · 6.5h remaining · Site 1 · Bed 1")
+        );
         assert_eq!(village.market.committed_fares(), 0);
         assert_eq!(stock.balance(), balance - freight);
 
