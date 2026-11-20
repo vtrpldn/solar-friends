@@ -491,6 +491,11 @@ impl Village {
             || self.editing_inventory
     }
 
+    fn resident_overview_open(&self) -> bool {
+        self.utility_panel == Some(UtilityPanel::Residents)
+            && self.resident_profile == ResidentProfile::Overview
+    }
+
     fn select_resident(&mut self, index: usize) {
         self.selected_resident = index;
         self.housing_notice.clear();
@@ -1206,12 +1211,18 @@ fn spawn_hud(mut commands: Commands, assets: Res<AssetServer>) {
         ));
 }
 
+#[derive(Default, PartialEq)]
+struct HudScrollContext {
+    panel: Option<UtilityPanel>,
+    resident_view: Option<(ResidentProfile, usize)>,
+}
+
 fn fit_and_scroll_hud(
     window: Single<&Window, With<PrimaryWindow>>,
     toolbar: Single<&ComputedNode, With<toolbar::Toolbar>>,
     mut hud: Single<(&mut Node, &mut ScrollPosition, &Interaction), With<VillageHud>>,
     village: Res<Village>,
-    mut previous_panel: Local<Option<UtilityPanel>>,
+    mut previous_panel: Local<HudScrollContext>,
     scroll: Res<bevy::input::mouse::AccumulatedMouseScroll>,
 ) {
     let (node, position, interaction) = &mut *hud;
@@ -1221,9 +1232,15 @@ fn fit_and_scroll_hud(
     if node.max_height != max_height {
         node.max_height = max_height;
     }
-    if *previous_panel != village.utility_panel || node.display == Display::None {
+    let resident_view = (village.utility_panel == Some(UtilityPanel::Residents))
+        .then_some((village.resident_profile, village.selected_resident));
+    let panel = HudScrollContext {
+        panel: village.utility_panel,
+        resident_view,
+    };
+    if *previous_panel != panel || node.display == Display::None {
         position.y = 0.;
-        *previous_panel = village.utility_panel;
+        *previous_panel = panel;
     }
     if **interaction != Interaction::None && scroll.delta.y != 0. {
         let step = match scroll.unit {
@@ -2023,6 +2040,9 @@ fn village_input(
             .position(|key| keyboard.just_pressed(*key))
             {
                 town.select_resident(index);
+            }
+            if !town.resident_overview_open() {
+                return;
             }
             if let Some(hit) = pointer.clicked {
                 town.construction.select_facility(hit.cell);

@@ -360,18 +360,14 @@ impl Action {
             }
             Self::Shift(_) => {
                 village.utility_panel == Some(UtilityPanel::Finances)
-                    || (!village.stock.sandbox
-                        && village.utility_panel == Some(UtilityPanel::Residents)
-                        && village.resident_profile == ResidentProfile::Overview)
+                    || (!village.stock.sandbox && village.resident_overview_open())
             }
             Self::Ledger => village.utility_panel == Some(UtilityPanel::Finances),
             Self::ExpansionReserve => {
                 village.utility_panel == Some(UtilityPanel::Finances)
                     && !village.finance_history_open
             }
-            Self::Home(_) | Self::ListedHome(_) => {
-                village.utility_panel == Some(UtilityPanel::Residents)
-            }
+            Self::Home(_) | Self::ListedHome(_) => village.resident_overview_open(),
             Self::Page(_) if village.utility_panel == Some(UtilityPanel::Finances) => {
                 village.finance_history_open
             }
@@ -1742,7 +1738,8 @@ fn refresh(
     } else {
         Vec::new()
     };
-    let show_residents = !picker.open && Action::Home(true).available(&village);
+    let show_residents = !picker.open && village.utility_panel == Some(UtilityPanel::Residents);
+    let show_homes = !picker.open && village.resident_overview_open();
     let projects = if show_projects {
         village.construction.project_page_labels(
             &catalog,
@@ -1752,7 +1749,7 @@ fn refresh(
     } else {
         Vec::new()
     };
-    let homes: Vec<_> = if show_residents {
+    let homes: Vec<_> = if show_homes {
         village
             .construction
             .home_options(&catalog, village.selected_resident)
@@ -1801,7 +1798,7 @@ fn refresh(
             Action::Volume { .. } => false,
             Action::Advance(_) => show_advance,
             Action::Page(_) if village.utility_panel == Some(UtilityPanel::Residents) => {
-                show_residents && home_pages > 1
+                show_homes && home_pages > 1
             }
             Action::Page(_)
             | Action::InventorySearch
@@ -1872,7 +1869,7 @@ fn refresh(
             | Action::PantryPolicy(..)
             | Action::AutoCook
             | Action::CookingTarget { .. } => show_pantry && action.available(&village),
-            Action::Home(_) => show_residents,
+            Action::Home(_) => show_homes,
             Action::Grid | Action::InstallPowerLink => show_power,
             Action::NextPowerShortage => show_power && action.available(&village),
             Action::UtilityLinkPage(_)
