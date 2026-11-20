@@ -17,6 +17,7 @@ use lens_picker::{LensPicker, MapLens};
 mod library_ui;
 mod livestock_motion;
 mod resident_meters;
+pub(crate) mod resident_motion;
 mod resource_lens;
 mod resource_trends;
 mod road_surface;
@@ -2726,57 +2727,102 @@ fn spawn_tents(
 }
 
 fn animate_arrival(
-    time: Res<Time>,
+    (mut commands, time): (Commands, Res<Time>),
     setup: Res<WorldSetup>,
     saves: Res<SaveMenu>,
     catalog: Res<Catalog>,
     mut village: ResMut<Village>,
-    mut actors: Query<(&ArrivalActor, &mut Transform, &mut Visibility)>,
+    mut actors: Query<(
+        Entity,
+        &ArrivalActor,
+        &mut Transform,
+        &mut Visibility,
+        Option<&mut resident_motion::ResidentMotion>,
+    )>,
     mut tents: Query<&mut Visibility, (With<VillageEntity>, Without<ArrivalActor>)>,
 ) {
     if setup.open {
         return;
     }
-    if village.arrival_time >= ARRIVAL_DURATION && !setup.is_changed() && !village.is_changed() {
-        return;
-    }
-    if village.arrival_time < ARRIVAL_DURATION && !village.is_paused() && !saves.open {
+    let update_arrival =
+        village.arrival_time < ARRIVAL_DURATION || setup.is_changed() || village.is_changed();
+    let paused = village.is_paused() || saves.open;
+    if village.arrival_time < ARRIVAL_DURATION && !paused {
         village.arrival_time = (village.arrival_time + time.delta_secs()).min(ARRIVAL_DURATION);
     }
     let terrain = village.terrain(&setup);
-    for (actor, mut transform, mut visibility) in &mut actors {
-        let pose = match *actor {
-            ArrivalActor::Resident(index) if village.camp.is_some() => {
-                let (position, visible) = village
-                    .construction
-                    .resident_visual_position(index, &catalog);
-                crate::arrival::Pose {
-                    position: world_position(position.x, position.y),
-                    yaw: village.construction.resident_visual_yaw(index, &catalog),
-                    step_height: 0.0,
-                    visible: visible
-                        && !village.construction.driver_away(index)
-                        && !village.construction.away_for_work(index),
-                }
+    let game_speed = f32::from(village.effective_speed());
+    for (entity, actor, mut transform, mut visibility, motion) in &mut actors {
+        if let ArrivalActor::Resident(index) = *actor
+            && village.camp.is_some()
+        {
+            let worker = village.construction.worker(index);
+            let (position, visible) = village
+                .construction
+                .resident_visual_position(index, &catalog);
+            let visible = visible
+                && !village.construction.driver_away(index)
+                && !village.construction.away_for_work(index);
+            // Entering or leaving a visual anchor changes the resident's placement
+            // independently of path movement (doorways, work stations, and rest poses).
+            let anchor_offset = position - worker.position;
+            let anchored = !anchor_offset.abs_diff_eq(Vec2::ZERO, 0.0001);
+            let yaw =
+                Quat::from_rotation_y(village.construction.resident_visual_yaw(index, &catalog));
+            let target = world_position(position.x, position.y);
+            let first_frame = motion.is_none();
+            let mut initial = resident_motion::ResidentMotion::new(target, visible, anchored);
+            let mut existing = motion;
+            let motion = existing.as_deref_mut().unwrap_or(&mut initial);
+            motion.game_speed = game_speed;
+            motion.paused = paused;
+            let rendered = motion.step(target, visible, anchored, time.delta_secs());
+            let cell = position + (rendered - target) * 0.5 - anchor_offset;
+            let height = village
+                .construction
+                .bridge_walk_height(&catalog, &terrain, cell)
+                .unwrap_or_else(|| terrain.height_at(rendered.x, rendered.y));
+            let rotation = if first_frame || *visibility == Visibility::Hidden {
+                yaw
+            } else if paused {
+                transform.rotation
+            } else {
+                resident_motion::turn(transform.rotation, yaw, game_speed, time.delta_secs())
+            };
+            transform.set_if_neq(Transform {
+                translation: Vec3::new(rendered.x, height, rendered.y),
+                rotation,
+                ..*transform
+            });
+            visibility.set_if_neq(if visible {
+                Visibility::Inherited
+            } else {
+                Visibility::Hidden
+            });
+            if first_frame {
+                commands.entity(entity).insert(initial);
             }
-            ArrivalActor::Resident(index) => resident_pose(village.arrival_time, index),
+            continue;
+        }
+        if !update_arrival {
+            continue;
+        }
+        let pose = match *actor {
+            ArrivalActor::Resident(index) => {
+                if motion.is_some() {
+                    commands
+                        .entity(entity)
+                        .remove::<resident_motion::ResidentMotion>();
+                }
+                resident_pose(village.arrival_time, index)
+            }
             ArrivalActor::Car(index) => village.construction.car_trip(index).map_or_else(
                 || vehicle_pose(village.arrival_time, index),
                 |(elapsed, duration)| town_vehicle_pose(elapsed, duration, index),
             ),
         };
         let Vec2 { x, y: z } = pose.position;
-        let deck = match *actor {
-            ArrivalActor::Resident(index) if village.camp.is_some() => {
-                let position = village.construction.worker(index).position;
-                village
-                    .construction
-                    .bridge_walk_height(&catalog, &terrain, position)
-            }
-            _ => None,
-        };
-        let height = deck.unwrap_or_else(|| terrain.height_at(x, z));
-        transform.translation = Vec3::new(x, height + pose.step_height, z);
+        transform.translation = Vec3::new(x, terrain.height_at(x, z) + pose.step_height, z);
         transform.rotation = if matches!(actor, ArrivalActor::Car(_)) {
             vehicle_motion::terrain_rotation(pose.position, pose.yaw, |point| {
                 terrain.height_at(point.x, point.y)
@@ -2790,8 +2836,10 @@ fn animate_arrival(
             Visibility::Hidden
         };
     }
-    for mut visibility in &mut tents {
-        *visibility = Visibility::Inherited;
+    if update_arrival {
+        for mut visibility in &mut tents {
+            *visibility = Visibility::Inherited;
+        }
     }
 }
 
