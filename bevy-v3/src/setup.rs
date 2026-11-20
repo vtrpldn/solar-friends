@@ -63,6 +63,8 @@ fn balanced_resources() -> usize {
 
 impl Default for WorldSetup {
     fn default() -> Self {
+        let [biome, landscape, water, resources, savings, supplies, town] =
+            crate::economy_reference::WORLD_DEFAULTS;
         Self {
             open: true,
             restart: 0,
@@ -70,13 +72,13 @@ impl Default for WorldSetup {
             seed_entry: None,
             mode: Mode::Story,
             seed: 42,
-            biome: 0,
-            landscape: 1,
-            water: 1,
-            resources: 1,
-            savings: 1,
-            supplies: 1,
-            town: 1,
+            biome,
+            landscape,
+            water,
+            resources,
+            savings,
+            supplies,
+            town,
         }
     }
 }
