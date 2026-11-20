@@ -845,7 +845,8 @@ mod tests {
     fn filtered_store_material_opens_its_trade_page() {
         let catalog = Catalog::default();
         let name = &catalog.materials["plumbing"].name;
-        let (_, mut rows) = crate::construction::inventory_rows(&catalog, 0, false, name);
+        let (_, mut rows) =
+            crate::construction::inventory_rows(&catalog, 0, InventoryView::Resources, name);
         let (_, id, _) = rows.next().unwrap();
         assert_eq!(id, "plumbing");
         let mut village = Construction::default();

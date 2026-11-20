@@ -1238,6 +1238,19 @@
       ]
     }
   ],
+  "foodResources": {
+    "name": "Food from town & the village",
+    "ids": [
+      "food",
+      "greens",
+      "beans",
+      "corn",
+      "meals",
+      "eggs",
+      "milk",
+      "honey"
+    ]
+  },
   "projects": {
     "gathering": {
       "name": "Gathering place",

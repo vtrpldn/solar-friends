@@ -39,7 +39,7 @@ use crate::{
         town_vehicle_pose, vehicle_pose, world_position,
     },
     catalog::Catalog,
-    construction::{Construction, ConstructionSite, TownClock, WaterAction},
+    construction::{Construction, ConstructionSite, InventoryView, TownClock, WaterAction},
     land::Land,
     resident_animation::{Motion, ResidentAnimation},
     save,
@@ -180,7 +180,7 @@ pub struct Village {
     #[serde(skip)]
     inventory_page: usize,
     #[serde(skip)]
-    inventory_equipment: bool,
+    inventory_view: InventoryView,
     #[serde(skip)]
     inventory_search: String,
     #[serde(skip)]
@@ -731,7 +731,7 @@ impl Village {
     }
 
     fn toggle_inventory_view(&mut self) {
-        self.inventory_equipment = !self.inventory_equipment;
+        self.inventory_view = self.inventory_view.next();
         self.inventory_search.clear();
         self.inventory_page = 0;
     }
@@ -763,7 +763,7 @@ impl Village {
                         &self.stock,
                         land,
                         self.inventory_page,
-                        self.inventory_equipment,
+                        self.inventory_view,
                         &self.inventory_search,
                     )
                     .0,
@@ -2581,7 +2581,7 @@ fn show_hud(
                         &village.stock,
                         &land,
                         village.inventory_page,
-                        village.inventory_equipment,
+                        village.inventory_view,
                         &village.inventory_search,
                     )
                     .1,

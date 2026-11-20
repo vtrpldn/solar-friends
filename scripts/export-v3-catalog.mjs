@@ -8,7 +8,7 @@ import { PROFILES } from "../web/v02/weekend/resident-personality.js";
 import { ANIMAL_RATIONS } from "../web/v02/weekend/animal-care.js";
 import { CROPS } from "../web/v02/weekend/cultivation.js";
 import { BIOLOGY, CROP_CARE } from "../web/v02/weekend/biological-production.js";
-import { EQUIPMENT_IDS, RESOURCE_GROUPS } from "../web/v02/weekend/resource-groups.js";
+import { EQUIPMENT_IDS, RESOURCE_GROUPS, inventoryGroups } from "../web/v02/weekend/resource-groups.js";
 import { supplierLimit } from "../web/v02/weekend/supplier-stock.js";
 
 import { ECONOMY_REFERENCE, GRID_TARIFF, STARTING_CAPITAL, tripEstimate } from "../web/v02/weekend/economy-reference.js";
@@ -131,7 +131,7 @@ const landscapes = Object.fromEntries(
   Object.keys(BIOMES).filter(id => id !== "flat").map(id => [id, biomeLandscape(id)]),
 );
 const exports = {
-  "data/construction.json": json({ materials, resourceGroups: RESOURCE_GROUPS, projects, gathering, production, residents: Object.values(PROFILES), animalRations: ANIMAL_RATIONS, workshopComparison: buildingScenes.indexOf("workshop-comparison") }),
+  "data/construction.json": json({ materials, resourceGroups: RESOURCE_GROUPS, foodResources: inventoryGroups("food")[0], projects, gathering, production, residents: Object.values(PROFILES), animalRations: ANIMAL_RATIONS, workshopComparison: buildingScenes.indexOf("workshop-comparison") }),
   "data/crops.json": json(CROPS),
   "data/workshop.json": json(workshopModels),
   "data/asset-garden.json": encode(gallery()) + "\n",

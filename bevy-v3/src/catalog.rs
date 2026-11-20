@@ -8,6 +8,7 @@ use serde::Deserialize;
 pub struct Catalog {
     pub materials: BTreeMap<String, Material>,
     pub resource_groups: Vec<ResourceGroup>,
+    pub food_resources: ResourceGroup,
     pub projects: BTreeMap<String, Project>,
     pub gathering: BTreeMap<String, GatherRecipe>,
     pub production: BTreeMap<String, ProductionRecipe>,
@@ -220,12 +221,19 @@ impl Default for Catalog {
 
 impl Catalog {
     pub(crate) fn resource_entries(&self) -> impl Iterator<Item = (&str, &str, &Material)> {
-        self.resource_groups.iter().flat_map(|group| {
-            group
-                .ids
-                .iter()
-                .map(|id| (group.name.as_str(), id.as_str(), &self.materials[id]))
-        })
+        self.resource_groups
+            .iter()
+            .flat_map(|group| self.resource_group_entries(group))
+    }
+
+    pub(crate) fn resource_group_entries<'a>(
+        &'a self,
+        group: &'a ResourceGroup,
+    ) -> impl Iterator<Item = (&'a str, &'a str, &'a Material)> {
+        group
+            .ids
+            .iter()
+            .map(|id| (group.name.as_str(), id.as_str(), &self.materials[id]))
     }
 
     pub fn loads(&self, project: &Project) -> u32 {

@@ -258,7 +258,7 @@ impl Action {
             Self::StoresFromUpkeep => village.utility_panel == Some(UtilityPanel::Upkeep),
             Self::PantryFromStores => {
                 village.utility_panel == Some(UtilityPanel::Inventory)
-                    && !village.inventory_equipment
+                    && village.inventory_view != InventoryView::Equipment
                     && !village.editing_inventory
                     && Self::Panel(UtilityPanel::Pantry).available(village)
             }
@@ -480,8 +480,12 @@ impl Action {
             Self::Page(true) => "Next page".into(),
             Self::InventorySearch if village.editing_inventory => "Done searching".into(),
             Self::InventorySearch => "Find material".into(),
-            Self::InventoryView if village.inventory_equipment => "Show resources".into(),
-            Self::InventoryView => "Show items and equipment".into(),
+            Self::InventoryView => match village.inventory_view.next() {
+                InventoryView::Resources => "Show resources",
+                InventoryView::Equipment => "Show items and equipment",
+                InventoryView::Food => "Show food",
+            }
+            .into(),
             Self::ProjectFilter if village.open_projects_only => "Show all projects".into(),
             Self::ProjectFilter => "Show underway".into(),
             Self::Project(_)
@@ -1278,7 +1282,7 @@ fn handle_buttons(
                     let (_, mut rows) = crate::construction::inventory_rows(
                         &catalog,
                         village.inventory_page,
-                        village.inventory_equipment,
+                        village.inventory_view,
                         &village.inventory_search,
                     );
                     if let Some((_, id, _)) = rows.nth(row)
@@ -1624,7 +1628,7 @@ fn refresh(
         crate::construction::inventory_rows(
             &catalog,
             village.inventory_page,
-            village.inventory_equipment,
+            village.inventory_view,
             &village.inventory_search,
         )
         .1

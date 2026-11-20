@@ -1621,8 +1621,14 @@ mod tests {
                 .unwrap()
                 .contains("2 project(s) · 390 game minutes remaining")
         );
-        let (_, stores) =
-            village.inventory_panel(&catalog, &stock, &Land::default(), 0, false, "pipe");
+        let (_, stores) = village.inventory_panel(
+            &catalog,
+            &stock,
+            &Land::default(),
+            0,
+            InventoryView::Resources,
+            "pipe",
+        );
         assert!(stores.contains("in transit"));
         assert_eq!(village.market.committed_fares(), 0);
         assert_eq!(stock.balance(), before - crate::market::freight_cents(12));

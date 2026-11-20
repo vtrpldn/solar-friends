@@ -43,20 +43,52 @@ fn record_output(
 
 pub(crate) const INVENTORY_ROWS: usize = 9;
 
+#[derive(Clone, Copy, Default, PartialEq, Eq)]
+pub(crate) enum InventoryView {
+    #[default]
+    Resources,
+    Equipment,
+    Food,
+}
+
+impl InventoryView {
+    pub(crate) fn next(self) -> Self {
+        match self {
+            Self::Resources => Self::Equipment,
+            Self::Equipment => Self::Food,
+            Self::Food => Self::Resources,
+        }
+    }
+
+    pub(crate) fn label(self) -> &'static str {
+        match self {
+            Self::Resources => "Resources",
+            Self::Equipment => "Items & equipment",
+            Self::Food => "Food",
+        }
+    }
+}
+
 pub(crate) fn inventory_rows<'a>(
     catalog: &'a Catalog,
     page: usize,
-    equipment: bool,
+    view: InventoryView,
     search: &str,
 ) -> (
     usize,
     impl Iterator<Item = (&'a str, &'a str, &'a crate::catalog::Material)> + use<'a>,
 ) {
     let search = search.trim().to_lowercase();
-    let rows: Vec<_> = catalog
-        .resource_entries()
+    let groups = if view == InventoryView::Food {
+        std::slice::from_ref(&catalog.food_resources)
+    } else {
+        catalog.resource_groups.as_slice()
+    };
+    let rows: Vec<_> = groups
+        .iter()
+        .flat_map(|group| catalog.resource_group_entries(group))
         .filter(|(_, _, material)| {
-            material.equipment == equipment
+            material.equipment == (view == InventoryView::Equipment)
                 && (search.is_empty() || material.name.to_lowercase().contains(&search))
         })
         .collect();
@@ -248,19 +280,15 @@ impl Construction {
         stock: &Stock,
         land: &Land,
         page: usize,
-        equipment: bool,
+        view: InventoryView,
         search: &str,
     ) -> (usize, String) {
         use std::fmt::Write;
         let ledger = self.inventory(catalog, stock, land);
-        let (pages, rows) = inventory_rows(catalog, page, equipment, search);
+        let (pages, rows) = inventory_rows(catalog, page, view, search);
         let page = page.min(pages - 1);
         let (used, capacity) = self.storage(catalog, stock);
-        let heading = if equipment {
-            "Items & equipment"
-        } else {
-            "Resources"
-        };
+        let heading = view.label();
         let mut text = format!(
             "{heading} · Stores {used}/{capacity} units · {}/{} · Tab Switch view · Page Up/Down · F10 Close",
             page + 1,
@@ -272,7 +300,7 @@ impl Construction {
         }
         let mut previous_group = "";
         for (group, id, item) in rows {
-            if group != previous_group && !equipment {
+            if group != previous_group && view != InventoryView::Equipment {
                 let _ = write!(text, "\n{group}");
                 previous_group = group;
             }
@@ -327,6 +355,19 @@ mod tests {
     use super::*;
 
     #[test]
+    fn food_view_lists_v2_foods_and_excludes_farm_supplies() {
+        let catalog = Catalog::default();
+        let (_, rows) = inventory_rows(&catalog, 0, InventoryView::Food, "");
+        let ids: Vec<_> = rows.map(|(_, id, _)| id).collect();
+        assert_eq!(
+            ids,
+            [
+                "food", "greens", "beans", "corn", "meals", "eggs", "milk", "honey"
+            ]
+        );
+    }
+
+    #[test]
     fn resource_groups_cover_every_material_and_label_filtered_rows() {
         let catalog = Catalog::default();
         let ids: Vec<_> = catalog
@@ -344,7 +385,7 @@ mod tests {
             &stock,
             &Land::default(),
             0,
-            false,
+            InventoryView::Resources,
             &material.name,
         );
         assert!(text.contains(&format!(
@@ -362,8 +403,14 @@ mod tests {
         let available = stock.available("plumbing");
         stock.reserve_available(&BTreeMap::from([("plumbing".into(), available)]));
         assert_eq!(stock.available("plumbing"), 0);
-        let (_, text) =
-            village.inventory_panel(&catalog, &stock, &Land::default(), 0, false, &item.name);
+        let (_, text) = village.inventory_panel(
+            &catalog,
+            &stock,
+            &Land::default(),
+            0,
+            InventoryView::Resources,
+            &item.name,
+        );
         assert!(text.contains(&format!(
             "{} · {} available",
             item.name,

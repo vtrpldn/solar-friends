@@ -1264,6 +1264,13 @@ mod tests {
         assert!(!hud.0.contains("fastener packs"));
         press_button(&mut app, "Done searching");
         press_button(&mut app, "Show items and equipment");
+        press_button(&mut app, "Show food");
+        assert!(
+            app.world_mut()
+                .query::<&Text>()
+                .iter(app.world())
+                .any(|text| text.0.contains("Food from town & the village"))
+        );
         press_button(&mut app, "Show resources");
         press_button(&mut app, "Manage food");
         press_button(&mut app, "Chill first · Earliest expiry");
