@@ -834,15 +834,25 @@ impl Construction {
         }
         if self.farming.whole_plot {
             let count = plot.beds.len();
-            let busy = self
+            let busy: std::collections::BTreeSet<_> = self
                 .farming
                 .jobs
                 .iter()
                 .filter(|job| job.site == site)
-                .count();
+                .map(|job| job.bed)
+                .collect();
+            let care = count - busy.len();
+            let mut planting = 0;
+            let mut irrigated = 0;
+            let mut collect = 0;
             let area: f64 = plot.beds.iter().map(crate::farming::Bed::area).sum();
             let mut stages = [0; 7];
-            for bed in &plot.beds {
+            for (index, bed) in plot.beds.iter().enumerate() {
+                if !busy.contains(&index) {
+                    planting += usize::from(bed.editable());
+                    irrigated += usize::from(bed.irrigation);
+                    collect += usize::from(bed.collect_residues);
+                }
                 let stage = if bed.harvest_expired(clock) {
                     6
                 } else {
@@ -872,7 +882,8 @@ impl Construction {
                 _ => "plot",
             };
             return Some(format!(
-                "Whole {name} · {count} beds · {area:.1} m² · {busy} queued\n{summary}\n1 Prepare · 2 Plant · 3 Harvest · 4 Clear · 5 Amend · 6 Collect\nX Crop · Y Density · T Irrigation · Z Residues · Tab Inspect bed\n{}",
+                "Whole {name} · {count} beds · {area:.1} m² · {} queued\n{summary}\nCrop and spacing apply to {planting} available beds\nCare applies to {care} beds · Irrigation on {irrigated}/{care} · Collect residues {collect}/{care}\n1 Prepare · 2 Plant · 3 Harvest · 4 Clear · 5 Amend · 6 Collect\nX Crop · Y Density · T Irrigation · Z Residues · Tab Inspect bed\n{}",
+                busy.len(),
                 self.farming.notice,
             ));
         }
