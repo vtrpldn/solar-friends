@@ -707,6 +707,8 @@ enum LabControl {
     AdvanceHour,
     FocusCamp,
     FindBuilding,
+    OpenFile,
+    ExportCheckpoint,
     View(LabView),
     Confirm,
     Cancel,
@@ -746,6 +748,7 @@ fn setup_lab_window(mut commands: Commands, assets: Res<AssetServer>) {
             (Shortcut(KeyCode::F6), "Save lab"),
             (Shortcut(KeyCode::F9), "Load lab"),
             (Shortcut(KeyCode::F5), "Export report"),
+            (LabControl::OpenFile, "Open lab file"),
             (LabControl::View(LabView::Trade), "Trade"),
             (LabControl::View(LabView::Residents), "Residents"),
         ],
@@ -757,6 +760,7 @@ fn setup_lab_window(mut commands: Commands, assets: Res<AssetServer>) {
             (Shortcut(KeyCode::F4), "Cycle stop condition"),
             (LabControl::FocusCamp, "Focus camp"),
             (LabControl::FindBuilding, "Find building"),
+            (LabControl::ExportCheckpoint, "Export checkpoint"),
         ],
         &[
             (LabControl::Confirm, "Confirm"),
@@ -1897,7 +1901,11 @@ type LabToolbarNodes<'w, 's> = Query<'w, 's, (&'static LabToolbar, &'static mut 
 fn update_lab_window(
     mut runner: ResMut<Runner>,
     catalog: Res<Catalog>,
-    (mut commands, time): (Commands, Res<Time<bevy::time::Real>>),
+    (mut commands, time, _main_thread): (
+        Commands,
+        Res<Time<bevy::time::Real>>,
+        bevy::ecs::system::NonSendMarker,
+    ),
     (keys, mut events, mut files): (
         Res<ButtonInput<KeyCode>>,
         MessageReader<bevy::input::keyboard::KeyboardInput>,
@@ -2040,8 +2048,18 @@ fn update_lab_window(
         }
     }
     if playback.order.is_none() && playback.build_search.is_none() {
-        let replacement = if let Some(path) = dropped {
-            Some(LabReplacement::File(path.clone()))
+        let file = dropped.cloned().or_else(|| {
+            if playback.replacement.is_none() && clicked(LabControl::OpenFile) {
+                rfd::FileDialog::new()
+                    .set_title("Open Balance Lab checkpoint or replay")
+                    .add_filter("Lab JSON", &["json"])
+                    .pick_file()
+            } else {
+                None
+            }
+        });
+        let replacement = if let Some(path) = file {
+            Some(LabReplacement::File(path))
         } else if cancel {
             playback.replacement = None;
             None
@@ -2206,8 +2224,9 @@ fn update_lab_window(
             playback.clear_confirmation = None;
             playback.order = Some(String::new());
         }
-        if pressed(KeyCode::F6) {
-            let export = keys.just_pressed(KeyCode::F6) && shift;
+        let export =
+            clicked(LabControl::ExportCheckpoint) || (keys.just_pressed(KeyCode::F6) && shift);
+        if export || pressed(KeyCode::F6) {
             let path = if export {
                 runner.output_path("checkpoint")
             } else {
