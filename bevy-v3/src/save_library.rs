@@ -56,7 +56,7 @@ impl SaveMenu {
     fn require_saved_villages(&self) -> io::Result<()> {
         if self.preview {
             return Err(io::Error::other(
-                "Saved villages are unavailable in the downtime preview",
+                "Saved villages are unavailable in developer previews",
             ));
         }
         Ok(())

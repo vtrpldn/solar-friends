@@ -135,6 +135,11 @@ impl WorldSetup {
         self
     }
 
+    pub(crate) fn with_preview_seed(mut self, seed: u32) -> Self {
+        self.seed = seed;
+        self
+    }
+
     pub fn biome(&self) -> usize {
         self.biome
     }

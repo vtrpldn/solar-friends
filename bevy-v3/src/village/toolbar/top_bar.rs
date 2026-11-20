@@ -397,7 +397,7 @@ fn refresh(
             utilities.stored_drinking_water(),
         ],
     );
-    let conditions = weather_at(village.clock, setup.biome(), setup.seed());
+    let conditions = village.weather(&setup);
     let cards = card_text(&village, rates, conditions.temperature);
     let index = |panel: UtilityPanel| {
         CARDS

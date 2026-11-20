@@ -1888,14 +1888,45 @@ impl Construction {
         capacity.saturating_sub(used)
     }
 
-    pub fn tick_services(
+    pub(crate) fn prepare_utility_preview_batteries(
         &mut self,
         catalog: &Catalog,
-        setup: &crate::setup::WorldSetup,
-        stock: &mut Stock,
-        clock: f64,
-        dt: f64,
+        solar_farm: usize,
+        house: usize,
     ) {
+        let plan = &mut self.plans[solar_farm - 1];
+        let mut materials = plan.materials(catalog).clone();
+        materials.insert("batteries".into(), 6);
+        plan.loads = catalog.loads_for(&materials);
+        plan.delivered = plan.loads;
+        plan.materials_paid = Some(materials);
+
+        self.sync_utility_facilities(catalog);
+        self.utilities.install_rooftop_solar(house - 1);
+        self.utilities.seed_preview_battery(solar_farm, 24.0);
+        self.utilities.seed_preview_battery(house, 3.0);
+    }
+
+    pub(crate) fn prepare_utility_preview_interactions(
+        &mut self,
+        catalog: &Catalog,
+        clock: f64,
+        animal_sites: [usize; 2],
+    ) {
+        self.residents[0].health.energy = 10.0;
+        self.residents[1].health.energy = 10.0;
+        self.residents[2].experience = 60.0;
+        for site in animal_sites {
+            let index = site - 1;
+            let kind = &catalog.projects[&self.plans[index].key].kind;
+            let ration = &catalog.animal_rations[kind];
+            let pen = self.livestock.animals.entry(index).or_default();
+            pen.feed(ration, ration.water);
+            pen.tick(ration, clock, crate::weather::DAY * ration.days);
+        }
+    }
+
+    pub(crate) fn sync_utility_facilities(&mut self, catalog: &Catalog) {
         self.utilities.sync(
             self.plans
                 .iter()
@@ -1931,6 +1962,17 @@ impl Construction {
                     })
                 }),
         );
+    }
+
+    pub fn tick_services(
+        &mut self,
+        catalog: &Catalog,
+        setup: &crate::setup::WorldSetup,
+        stock: &mut Stock,
+        clock: f64,
+        dt: f64,
+    ) {
+        self.sync_utility_facilities(catalog);
         if !stock.sandbox {
             self.age_assets(catalog, clock, dt);
         }

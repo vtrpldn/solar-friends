@@ -704,6 +704,12 @@ impl Utilities {
             .is_some_and(|node| node.solar_upgrade)
     }
 
+    pub(crate) fn seed_preview_battery(&mut self, id: usize, charge: f64) {
+        let node = self.nodes.get_mut(&id).expect("preview utility node");
+        debug_assert!((0.0..=node.battery).contains(&charge));
+        node.charge = charge;
+    }
+
     pub fn install_cold_storage(&mut self, building: usize) {
         if let Some(node) = self.nodes.get_mut(&(building + 1)) {
             node.cold_storage = true;
