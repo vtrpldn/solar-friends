@@ -1432,7 +1432,7 @@ mod tests {
         let planning_water = river_vertex_colors(&mut app);
         simulate_river_frame(&mut app);
         assert_eq!(river_vertex_colors(&mut app), planning_water);
-        press_button(&mut app, "Keep paused");
+        press_button(&mut app, "Stay paused");
         press_button(&mut app, "Close panel");
         assert!(app.world().resource::<village::Village>().is_paused());
         press_button(&mut app, "Resume");

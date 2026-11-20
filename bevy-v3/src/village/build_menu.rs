@@ -67,7 +67,10 @@ pub(super) fn install(app: &mut App) {
             Update,
             select.after(read_camp_pointer).before(village_input),
         )
-        .add_systems(Update, refresh.after(village_input));
+        .add_systems(
+            Update,
+            (refresh, float_details).chain().after(village_input),
+        );
 }
 
 fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
@@ -215,22 +218,62 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                             ));
                             button(pager, &assets, BuildButton::NextPage, "Next →");
                         });
-                        // Details sit under the cards, so the cards get the full row as
-                        // in V2.
-                        main.spawn((
-                            BlueprintDetails,
-                            Text::new(DETAILS_HINT),
-                            ui_font(&assets, 14.0),
-                            Node {
-                                padding: UiRect::all(px(12)),
-                                border_radius: BorderRadius::all(px(14)),
-                                ..default()
-                            },
-                            BackgroundColor(theme::BUTTON),
-                        ));
                     });
                 });
         });
+    // A building's needs float beside the pointed card, so the catalog keeps its room
+    // for pictures.
+    commands
+        .spawn((
+            DetailsCard,
+            theme::panel_node(Node {
+                display: Display::None,
+                position_type: PositionType::Absolute,
+                width: px(340),
+                padding: UiRect::axes(px(14), px(10)),
+                ..default()
+            }),
+            theme::panel(),
+            GlobalZIndex(32),
+            Pickable::IGNORE,
+        ))
+        .with_child((
+            BlueprintDetails,
+            Text::new(DETAILS_HINT),
+            ui_font(&assets, 14.0),
+            bevy::text::LineHeight::RelativeToFont(1.35),
+        ));
+}
+
+#[derive(Component)]
+struct DetailsCard;
+
+/// Shows the pointed building's needs just above the pointer.
+fn float_details(
+    window: Single<&Window, With<PrimaryWindow>>,
+    text: Single<&Text, With<BlueprintDetails>>,
+    mut card: Single<&mut Node, With<DetailsCard>>,
+    (setup, village, saves, sound): (
+        Res<WorldSetup>,
+        Res<Village>,
+        Res<SaveMenu>,
+        Res<SoundSettings>,
+    ),
+) {
+    let shown = visible(&setup, &village, &saves, &sound) && text.0 != DETAILS_HINT;
+    let Some(cursor) = window.cursor_position().filter(|_| shown) else {
+        if card.display != Display::None {
+            card.display = Display::None;
+        }
+        return;
+    };
+    card.display = Display::Flex;
+    let scale = theme::UI_SCALE;
+    card.left = px(((cursor.x + 16.) / scale)
+        .min(window.width() / scale - 360.)
+        .max(8.));
+    card.top = Val::Auto;
+    card.bottom = px(((window.height() - cursor.y + 16.) / scale).max(8.));
 }
 
 fn chip(parent: &mut ChildSpawnerCommands, assets: &AssetServer, key: &str) {
