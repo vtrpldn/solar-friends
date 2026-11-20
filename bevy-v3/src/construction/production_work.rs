@@ -733,23 +733,7 @@ impl Construction {
                     let _ = write!(text, "{quantity} {}", material.name);
                 }
             }
-            let crew: Vec<_> = self
-                .residents
-                .iter()
-                .enumerate()
-                .filter(|(_, worker)| {
-                    worker
-                        .assignment
-                        .as_ref()
-                        .is_some_and(|job| job.project == index)
-                })
-                .map(|(index, _)| super::resident_work::NAMES[index])
-                .collect();
-            if crew.is_empty() {
-                text.push_str("\nNo crew assigned yet");
-            } else {
-                let _ = write!(text, "\nAssigned · {}", crew.join(", "));
-            }
+            let _ = write!(text, "\n{}", self.construction_crew(index));
         }
         let active_job = self.production.jobs.iter().find(|job| job.site == index);
         if site.work >= definition.work {

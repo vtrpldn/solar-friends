@@ -115,8 +115,31 @@ impl Construction {
             if let Some(minutes) = self.construction_delivery_minutes(*index, clock) {
                 let _ = write!(text, " · {minutes} game minutes remaining");
             }
+            if plan.work < def.work {
+                let _ = write!(text, "\n   {}", self.construction_crew(*index));
+            }
         }
         (pages, text)
+    }
+
+    pub(super) fn construction_crew(&self, project: usize) -> String {
+        let crew: Vec<_> = self
+            .residents
+            .iter()
+            .enumerate()
+            .filter(|(_, resident)| {
+                resident
+                    .assignment
+                    .as_ref()
+                    .is_some_and(|job| job.project == project)
+            })
+            .map(|(index, _)| super::resident_work::NAMES[index])
+            .collect();
+        if crew.is_empty() {
+            "No crew assigned yet".into()
+        } else {
+            format!("Assigned · {}", crew.join(", "))
+        }
     }
 
     pub(super) fn project_status(&self, catalog: &Catalog, index: usize) -> String {
