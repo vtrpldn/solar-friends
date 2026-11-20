@@ -1798,7 +1798,7 @@ impl Utilities {
         self.draw_network(terrain, view, gizmos);
         let mut label = match view {
             NetworkView::Power => {
-                "Power · Green available · Red unmet demand · Gray off or idle".into()
+                "Power · Green available · Red unmet demand · Gray switched off".into()
             }
             NetworkView::Water => {
                 "Water · Blue fresh · Green irrigation · Purple greywater · Orange sewage".into()
@@ -1811,7 +1811,7 @@ impl Utilities {
                 "Sanitation · Purple greywater · Orange sewage pipes · Red storage full".into()
             }
         };
-        label.push_str("\nCtrl+Page Up/Down Find facility");
+        label.push_str("\nDashed links under construction · Ctrl+Page Up/Down Find facility");
         let displayed_hover = hovered.and_then(|cell| {
             self.nodes.iter().find_map(|(&id, node)| {
                 (node.matches_view(view)
@@ -1829,14 +1829,13 @@ impl Utilities {
             let channels = view.channels();
             let (color, detail) = match view {
                 NetworkView::Power => {
-                    let (state, color) = if !node.enabled {
-                        ("Switched off", Color::srgb_u8(147, 146, 140))
-                    } else if node.powered {
-                        ("Powered", Color::srgb_u8(136, 220, 148))
+                    if !node.enabled {
+                        (Color::srgb_u8(147, 146, 140), "Switched off")
+                    } else if node.demand_kw > 0.0 && !node.powered {
+                        (Color::srgb_u8(222, 112, 96), "Waiting for power")
                     } else {
-                        ("Waiting for power", Color::srgb_u8(222, 112, 96))
-                    };
-                    (color, state)
+                        (Color::srgb_u8(136, 220, 148), "Enabled")
+                    }
                 }
                 NetworkView::Water | NetworkView::Liquid(_) | NetworkView::Sanitation => {
                     if !node.enabled {
@@ -1865,10 +1864,13 @@ impl Utilities {
                 gizmos.line(tip - axis * 0.6, tip + axis * 0.6, color);
             }
             if inspected == Some(id) {
-                let _ = write!(label, "\n{} · {detail}", node.kind.replace('-', " "));
-                if view == NetworkView::Power && node.battery > 0.0 {
-                    let _ = write!(label, " · {:.2}/{:.2} kWh", node.charge, node.battery);
-                } else if view != NetworkView::Power {
+                let _ = write!(label, "\n{}", node.kind.replace('-', " "));
+                if view == NetworkView::Power {
+                    if let Some(status) = self.power_site_summary(id) {
+                        let _ = write!(label, " · {status}");
+                    }
+                } else {
+                    let _ = write!(label, " · {detail}");
                     for channel in channels.filter(|&channel| node.capacity[channel] > 0.0) {
                         let _ = write!(
                             label,
