@@ -1115,6 +1115,32 @@ mod tests {
                 .any(|text| text.0.contains("Day 3 ·"))
         );
         press_button(&mut app, "Hide forecast");
+        for (button, legend, second_page) in [
+            ("Land & slope", "Land & slope · Green", false),
+            ("Resources", "Resources · Green", false),
+            ("Ecology", "Ecology · Green", false),
+            ("Access & hauling", "Access & hauling · White", false),
+            ("Construction", "Construction · Gold", false),
+            ("Water", "Water · Drinking water", false),
+            ("Sanitation", "Sanitation · Purple", false),
+            ("Work", "Work · Green assigned", false),
+            ("Food", "Food · Blue shared supplies", true),
+            ("Residents", "Residents · Green residents", true),
+            ("Comfort", "Comfort · Green open facility", true),
+        ] {
+            press_button(&mut app, "Map lenses");
+            if second_page {
+                press_button(&mut app, "Other lenses");
+            }
+            press_button(&mut app, button);
+            assert!(
+                app.world_mut()
+                    .query::<&Text>()
+                    .iter(app.world())
+                    .any(|text| text.0.contains(legend)),
+                "missing legend for {button}"
+            );
+        }
         press_button(&mut app, "Map lenses");
         press_button(&mut app, "Other lenses");
         press_button(&mut app, "Production chains");
