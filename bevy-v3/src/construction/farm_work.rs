@@ -654,6 +654,8 @@ impl Construction {
                 .filter(|job| {
                     job.pickups == 0
                         && !matches!(job.phase, FarmPhase::Return | FarmPhase::CollectOutput)
+                        && self.utilities.enabled(job.site)
+                        && !self.farm_route_blocked(job, clock.seconds)
                 })
                 .count(),
         );
@@ -2029,6 +2031,28 @@ mod resize_tests {
             0.1,
         );
         assert_eq!(village.farming.jobs[0].worker, Some(0));
+        let blocked = &mut village.farming.jobs[1];
+        let blocked_bed = blocked.bed;
+        blocked.waiting_for_access = true;
+        blocked.retry = 5.0;
+        village.schedule_crop_work(
+            &catalog,
+            &mut stock,
+            TownClock {
+                seconds: 0.1,
+                round_trip_km: 12,
+            },
+        );
+        assert_eq!(village.farming.jobs.len(), village.residents.len() + 1);
+        assert_eq!(
+            village
+                .farming
+                .jobs
+                .iter()
+                .filter(|job| job.bed == blocked_bed)
+                .count(),
+            1
+        );
     }
 
     #[test]
