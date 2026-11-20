@@ -227,6 +227,10 @@ fn refresh(
         }
     }
     let projects = village.construction.build_rows(&catalog);
+    let clock = TownClock {
+        seconds: village.clock,
+        round_trip_km: setup.round_trip_km(),
+    };
     let mut hovered = **interaction != Interaction::None;
     for (button, children, interaction, mut node, mut color) in &mut buttons {
         hovered |= *interaction != Interaction::None && node.display != Display::None;
@@ -250,8 +254,20 @@ fn refresh(
                     if already_planned {
                         color.0 = Color::srgb_u8(40, 53, 43);
                     }
+                    let missing = !village.stock.sandbox
+                        && village.stock.missing(&project.materials).is_some();
+                    let quote = missing.then(|| {
+                        village.construction.blueprint_supply_quote(
+                            &catalog, &village.stock, clock, project,
+                        )
+                    });
                     if *interaction == Interaction::Hovered {
-                        let mut text = blueprint_details(&village, &setup, &catalog, project);
+                        let supply_detail = match &quote {
+                            Some(Ok(text) | Err(text)) => text,
+                            None if village.stock.sandbox => "Free in Sandbox",
+                            None => "Supplies available locally",
+                        };
+                        let mut text = blueprint_details(&village.stock, &catalog, project, supply_detail);
                         if already_planned {
                             text.push_str("\nAlready planned or built. Select the existing project to manage it.");
                         }
@@ -261,12 +277,12 @@ fn refresh(
                     let [width, depth] = project.size;
                     let supplies = if village.stock.sandbox {
                         "Free".into()
+                    } else if let Some(Ok(quote)) = quote {
+                        quote
+                    } else if missing {
+                        "Missing materials".into()
                     } else {
-                        let total = project.materials.values().sum::<u32>();
-                        let missing = project.materials.iter()
-                            .any(|(id, amount)| village.stock.available(id) < *amount);
-                        let notice = if missing { " · Short on stock" } else { "" };
-                        format!("{total} materials{notice}")
+                        format!("{} materials", project.materials.values().sum::<u32>())
                     };
                     format!("{}  {}\n{supplies} · {width}×{depth} cells", index + 1, project.name)
                 })
@@ -313,10 +329,10 @@ fn refresh(
 }
 
 fn blueprint_details(
-    village: &Village,
-    setup: &WorldSetup,
+    stock: &Stock,
     catalog: &Catalog,
     project: &crate::catalog::Project,
+    supply_detail: &str,
 ) -> String {
     use std::fmt::Write;
     let [width, depth] = project.size;
@@ -330,22 +346,22 @@ fn blueprint_details(
         catalog.loads(project),
     );
     for (id, amount) in &project.materials {
-        let missing = amount.saturating_sub(village.stock.available(id));
-        let _ = write!(details, "\n{amount} {}", catalog.materials[id].name);
-        if missing > 0 && !village.stock.sandbox {
-            let _ = write!(details, " · {missing} missing");
+        let missing = amount.saturating_sub(stock.available(id));
+        let material = &catalog.materials[id];
+        let _ = write!(
+            details,
+            "\n{} {}",
+            material.quantity_text(u64::from(*amount)),
+            material.name
+        );
+        if missing > 0 && !stock.sandbox {
+            let _ = write!(
+                details,
+                " · {} missing",
+                material.quantity_text(u64::from(missing))
+            );
         }
     }
-    let quote = village.construction.blueprint_supply_quote(
-        catalog,
-        &village.stock,
-        TownClock {
-            seconds: village.clock,
-            round_trip_km: setup.round_trip_km(),
-        },
-        project,
-    );
-    let quote = quote.unwrap_or_else(|reason| reason);
-    let _ = write!(details, "\n{quote}");
+    let _ = write!(details, "\n{supply_detail}");
     details
 }
