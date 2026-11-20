@@ -719,6 +719,7 @@ struct LabControlLabel;
 #[derive(Clone, Copy, Component, PartialEq, Eq)]
 enum LabToolbar {
     Main,
+    Jobs,
     Prompt,
     StorySettings,
 }
@@ -773,8 +774,17 @@ fn setup_lab_window(mut commands: Commands, assets: Res<AssetServer>) {
             (Shortcut(KeyCode::ArrowRight), "Next value"),
         ],
     ];
+    let job_controls = [
+        (Shortcut(KeyCode::KeyW), "All / waiting jobs"),
+        (Shortcut(KeyCode::BracketLeft), "Previous site"),
+        (Shortcut(KeyCode::BracketRight), "Next site"),
+        (Shortcut(KeyCode::PageUp), "Previous page"),
+        (Shortcut(KeyCode::PageDown), "Next page"),
+    ];
+    let job_rows = [rows[0], &job_controls];
     for (toolbar, rows) in [
         (LabToolbar::Main, &rows[..2]),
+        (LabToolbar::Jobs, job_rows.as_slice()),
         (LabToolbar::Prompt, &rows[2..3]),
         (LabToolbar::StorySettings, &rows[2..]),
     ] {
@@ -1941,10 +1951,15 @@ fn update_lab_window(
         LabToolbar::StorySettings
     } else if playback.interval_entry.is_some() || playback.replacement.is_some() {
         LabToolbar::Prompt
+    } else if playback.view == LabView::Jobs {
+        LabToolbar::Jobs
     } else {
         LabToolbar::Main
     };
-    let prompt = active_toolbar != LabToolbar::Main;
+    let prompt = matches!(
+        active_toolbar,
+        LabToolbar::Prompt | LabToolbar::StorySettings
+    );
     for (toolbar, mut node) in &mut toolbars {
         let display = if *toolbar == active_toolbar {
             Display::Flex
@@ -2312,9 +2327,9 @@ fn update_lab_window(
     if playback.view == LabView::Map && keys.any_just_pressed([KeyCode::PageDown, KeyCode::PageUp])
     {
         map.browse_sites(&runner, &catalog, keys.just_pressed(KeyCode::PageDown));
-    } else if keys.just_pressed(KeyCode::PageDown) {
+    } else if pressed(KeyCode::PageDown) {
         playback.inventory_page = playback.inventory_page.saturating_add(1);
-    } else if keys.just_pressed(KeyCode::PageUp) {
+    } else if pressed(KeyCode::PageUp) {
         playback.inventory_page = playback.inventory_page.saturating_sub(1);
     }
     for (index, (key, _)) in SPEEDS.into_iter().enumerate() {
@@ -2420,7 +2435,7 @@ fn update_lab_window(
         let playback = &mut *playback;
         let details = if playback.view == LabView::Jobs {
             let construction = &village.construction;
-            if keys.just_pressed(KeyCode::KeyW) {
+            if pressed(KeyCode::KeyW) {
                 playback.waiting_only = !playback.waiting_only;
                 playback.inventory_page = 0;
             }
@@ -2431,8 +2446,8 @@ fn update_lab_window(
                 playback.job_focus = None;
                 playback.inventory_page = 0;
             }
-            let forward = keys.just_pressed(KeyCode::BracketRight);
-            if forward || keys.just_pressed(KeyCode::BracketLeft) {
+            let forward = pressed(KeyCode::BracketRight);
+            if forward || pressed(KeyCode::BracketLeft) {
                 let mut sites = construction.lab_job_sites();
                 playback.job_focus = if forward {
                     sites.find(|&index| playback.job_focus.is_none_or(|focus| index > focus))
@@ -3384,6 +3399,14 @@ mod tests {
             .world_mut()
             .spawn((Interaction::None, LabControl::View(LabView::Trade)))
             .id();
+        let jobs = app
+            .world_mut()
+            .spawn((Interaction::None, LabControl::View(LabView::Jobs)))
+            .id();
+        let waiting = app
+            .world_mut()
+            .spawn((Interaction::None, LabControl::Shortcut(KeyCode::KeyW)))
+            .id();
         let faster = app
             .world_mut()
             .spawn((Interaction::None, LabControl::CycleSpeed))
@@ -3404,6 +3427,25 @@ mod tests {
         *app.world_mut().get_mut::<Interaction>(trade).unwrap() = Interaction::Pressed;
         app.update();
         assert!(!app.world().resource::<map::MapState>().visible);
+        assert_eq!(app.world().resource::<Runner>().index, 0);
+        *app.world_mut().get_mut::<Interaction>(jobs).unwrap() = Interaction::Pressed;
+        app.update();
+        assert!(
+            app.world()
+                .get::<Text>(panel)
+                .unwrap()
+                .0
+                .contains("Active jobs")
+        );
+        *app.world_mut().get_mut::<Interaction>(waiting).unwrap() = Interaction::Pressed;
+        app.update();
+        assert!(
+            app.world()
+                .get::<Text>(panel)
+                .unwrap()
+                .0
+                .contains("Waiting jobs")
+        );
         assert_eq!(app.world().resource::<Runner>().index, 0);
         *app.world_mut().get_mut::<Interaction>(faster).unwrap() = Interaction::Pressed;
         app.update();
