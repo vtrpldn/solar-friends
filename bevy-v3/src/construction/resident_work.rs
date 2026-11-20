@@ -1,7 +1,7 @@
 use crate::{
     resident_animation::Motion,
     residents::{
-        NeedTask,
+        NeedBlockage, NeedTask,
         mind::{Conversation, MemoryKind},
     },
     setup::WorldSetup,
@@ -268,7 +268,7 @@ impl Construction {
         } else if !urgent && health.energy < 25.0 {
             options.insert(0, Need::Rest);
         }
-        let mut selected = options.into_iter().find_map(|kind| {
+        let mut selected = options.iter().copied().find_map(|kind| {
             if kind == Need::Social {
                 if health.mind.quiet_until > clock
                     || health.energy < 35.0
@@ -313,6 +313,19 @@ impl Construction {
                     .map(|(facility, path)| (kind, facility, path, None));
             }
         }
+        let blockage = if selected.is_some() {
+            None
+        } else if options.contains(&Need::Hydration) {
+            Some(NeedBlockage::DrinkingWater)
+        } else if !stock.has_meal() && health.levels[Need::Hunger as usize] < 30.0 {
+            Some(NeedBlockage::Food)
+        } else {
+            options.first().map(|kind| match kind {
+                Need::Social => NeedBlockage::Company,
+                _ => NeedBlockage::ReachableService,
+            })
+        };
+        self.residents[index].health.blockage = blockage;
         let Some((kind, facility, path, partner_route)) = selected else {
             return;
         };
@@ -320,6 +333,7 @@ impl Construction {
             self.start_conversation(catalog, stock, [(index, path), (partner, their_path)]);
             return;
         }
+        let health = &self.residents[index].health;
         let task = NeedTask {
             kind,
             facility,
@@ -983,6 +997,8 @@ impl Construction {
                 {
                     levels[Need::Hydration as usize] =
                         (levels[Need::Hydration as usize] + 20.0).min(100.0);
+                } else {
+                    health.blockage = Some(NeedBlockage::DrinkingWater);
                 }
             }
             Need::Hunger => {
@@ -1478,6 +1494,11 @@ impl Construction {
                 NAMES[index],
                 self.resident_action(catalog, index)
             );
+            if health.task.is_none()
+                && let Some(blockage) = health.blockage
+            {
+                let _ = write!(label, " · {}", blockage.label());
+            }
             if health.energy >= 30.0 && health.levels.iter().all(|level| *level >= 30.0) {
                 label.push_str(" · No needs below 30%");
             }
@@ -1845,6 +1866,33 @@ mod tests {
         assert!(!village.all_residents_unavailable());
         village.residents[0].health.task = None;
         assert!(!village.all_residents_unavailable());
+    }
+
+    #[test]
+    fn unmet_drinking_need_records_and_clears_the_blockage() {
+        let setup = WorldSetup::default();
+        let catalog = Catalog::default();
+        let stock = Stock::for_start(&setup, &catalog);
+        let camp = IVec2::new(36, 36);
+        let terrain = setup.terrain().with_camp(camp);
+        let land = Land::default();
+        let site = ConstructionSite {
+            terrain: &terrain,
+            land: &land,
+            camp,
+        };
+        let mut village = Construction::default();
+        village.residents[0].health.levels = [100.0; 7];
+        village.residents[0].health.levels[Need::Hydration as usize] = 20.0;
+        village.choose_need(0, &catalog, &stock, site, 0.0);
+        assert_eq!(
+            village.residents[0].health.blockage,
+            Some(NeedBlockage::DrinkingWater)
+        );
+
+        village.residents[0].health.levels[Need::Hydration as usize] = 100.0;
+        village.choose_need(0, &catalog, &stock, site, 0.0);
+        assert_eq!(village.residents[0].health.blockage, None);
     }
 
     #[test]

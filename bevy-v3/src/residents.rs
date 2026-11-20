@@ -12,6 +12,8 @@ pub struct Health {
     pub energy: f64,
     pub levels: [f64; 7],
     pub task: Option<NeedTask>,
+    #[serde(skip)]
+    pub blockage: Option<NeedBlockage>,
     pub last_meal: Option<f64>,
     pub last_night: Option<u64>,
     pub retry_at: f64,
@@ -36,6 +38,25 @@ pub enum Need {
     Sleep,
     FetchWater,
     FilterWater,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum NeedBlockage {
+    DrinkingWater,
+    Food,
+    Company,
+    ReachableService,
+}
+
+impl NeedBlockage {
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::DrinkingWater => "Needs reachable potable water",
+            Self::Food => "Hungry: no food in stores",
+            Self::Company => "Waiting for a friend to have a break",
+            Self::ReachableService => "Looking for somewhere to meet this need",
+        }
+    }
 }
 
 #[derive(Deserialize, Serialize)]
@@ -84,6 +105,7 @@ impl Health {
                 100.0,
             ],
             task: None,
+            blockage: None,
             last_meal: None,
             last_night: None,
             retry_at: 0.0,
