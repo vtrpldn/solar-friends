@@ -4,6 +4,7 @@ use super::*;
 enum Action {
     Find,
     Switch,
+    Cooling,
     Water(WaterCommand),
 }
 
@@ -15,16 +16,31 @@ pub(in crate::village) struct SiteButton {
 }
 
 impl SiteButton {
-    fn state(&self, construction: &Construction) -> Option<(&'static str, bool, bool)> {
+    fn state(
+        &self,
+        construction: &Construction,
+    ) -> Option<(&'static str, Result<(), &'static str>, bool)> {
         let utilities = &construction.utilities;
         let state = match self.action {
-            Action::Find => ("Find in village", true, false),
+            Action::Find => ("Find in village", Ok(()), false),
             Action::Switch => {
                 let enabled = utilities.building_switch(self.id.checked_sub(1)?)?;
                 (
                     if enabled { "Switch off" } else { "Switch on" },
-                    true,
-                    false,
+                    Ok(()),
+                    enabled,
+                )
+            }
+            Action::Cooling => {
+                let active = utilities.cooling_switch(self.id.checked_sub(1)?)?;
+                (
+                    if active {
+                        "Pause cooling"
+                    } else {
+                        "Resume cooling"
+                    },
+                    Ok(()),
+                    active,
                 )
             }
             Action::Water(command) => {
@@ -44,22 +60,40 @@ impl SiteButton {
                         ("Service waste tanks", WaterAction::Sanitation)
                     }
                     WaterCommand::Policy(true) if site.supports_water_policy(true) => {
-                        return Some(("Maintain drinking reserve", true, site.maintain_fresh));
+                        return Some(("Maintain drinking reserve", Ok(()), site.maintain_fresh));
                     }
                     WaterCommand::Policy(false) if site.supports_water_policy(false) => {
-                        return Some(("Maintain sanitation", true, site.maintain_sanitation));
+                        return Some(("Maintain sanitation", Ok(()), site.maintain_sanitation));
                     }
                     _ => return None,
                 };
-                (
-                    label,
-                    construction.check_water_job(self.id, action).is_ok(),
-                    false,
-                )
+                (label, construction.check_water_job(self.id, action), false)
             }
         };
         Some(state)
     }
+}
+
+pub(super) fn water_blockers(construction: &Construction, id: usize) -> String {
+    let mut notes = Vec::new();
+    for command in [
+        WaterCommand::River,
+        WaterCommand::Purify,
+        WaterCommand::Sanitation,
+    ] {
+        let button = SiteButton {
+            id,
+            panel: UtilityPanel::Water,
+            action: Action::Water(command),
+        };
+        if let Some((label, Err(reason), _)) = button.state(construction) {
+            if reason == "A water job is already queued here." {
+                return "Wait for the current water job to finish.".into();
+            }
+            notes.push(format!("{label} · {reason}"));
+        }
+    }
+    notes.join("\n")
 }
 
 pub(super) fn spawn(
@@ -72,6 +106,7 @@ pub(super) fn spawn(
     let commands = [
         Action::Find,
         Action::Switch,
+        Action::Cooling,
         Action::Water(WaterCommand::River),
         Action::Water(WaterCommand::Purify),
         Action::Water(WaterCommand::Sanitation),
@@ -90,11 +125,16 @@ pub(super) fn spawn(
     ))
     .with_children(|row| {
         for action in commands {
-            if panel != UtilityPanel::Water && matches!(action, Action::Water(_)) {
+            if matches!(action, Action::Water(_)) && panel != UtilityPanel::Water
+                || matches!(action, Action::Cooling) && panel != UtilityPanel::Power
+            {
                 continue;
             }
             let button = SiteButton { id, panel, action };
-            let (label, _, _) = button.state(construction).unwrap_or(("", false, false));
+            let (label, _, _) =
+                button
+                    .state(construction)
+                    .unwrap_or(("", Err("Unavailable"), false));
             row.spawn((
                 button,
                 Button,
@@ -146,7 +186,7 @@ pub(in crate::village) fn paint(
         if let Some((label, enabled, active)) = state {
             theme::paint_button(
                 *interaction,
-                enabled,
+                enabled.is_ok(),
                 active,
                 &mut fill,
                 &mut edge,
@@ -177,7 +217,7 @@ pub(in crate::village) fn input(
             || Some(button.panel) != panel
             || !button
                 .state(&village.construction)
-                .is_some_and(|(_, enabled, _)| enabled)
+                .is_some_and(|(_, enabled, _)| enabled.is_ok())
         {
             continue;
         }
@@ -206,6 +246,11 @@ pub(in crate::village) fn input(
             Action::Switch => {
                 if let Some(index) = button.id.checked_sub(1) {
                     town.construction.utilities.toggle(index);
+                }
+            }
+            Action::Cooling => {
+                if let Some(index) = button.id.checked_sub(1) {
+                    town.construction.utilities.toggle_cooling(index);
                 }
             }
             Action::Water(command) => {
@@ -264,7 +309,7 @@ mod tests {
         assert!(
             village
                 .construction
-                .queued_water_status(0, village.clock)
+                .water_card_job_status(0, village.clock)
                 .is_some()
         );
 

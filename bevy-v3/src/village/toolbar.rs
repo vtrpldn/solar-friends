@@ -1,6 +1,6 @@
 use super::*;
 use crate::{
-    construction::{FarmControl, ProjectAction, TradeOrder, TradePolicy, WorkGroup},
+    construction::{FarmControl, ProjectAction, WorkGroup},
     farming::{Crop, FarmAction},
     terrain::Brush,
     time_advance::AdvanceAction,
@@ -52,7 +52,6 @@ enum Action {
     Panel(UtilityPanel),
     ResourcePanel(UtilityPanel),
     GridFromFinances,
-    StoresFromUpkeep,
     PantryFromStores,
     ClosePanel,
     Page(bool),
@@ -70,17 +69,10 @@ enum Action {
     SelectedProject(ProjectAction),
     FocusSelectedProject,
     DeselectProject,
-    TradeItem(usize),
-    TradeQueue,
-    TradeQueued(usize),
-    HoldTradeQueued(usize),
-    Trade(TradeOrder),
-    TradePolicy(TradePolicy),
     ProjectFilter,
     ProjectRoads,
     ProjectEvents,
     InventoryView,
-    SaleQuantity(SaleSetting),
     InventoryItem(usize),
     InventorySearch,
     CraftTab(crate::construction::CraftView),
@@ -106,22 +98,8 @@ enum Action {
     AutoCook,
     CookingTarget { preserved: bool, increase: bool },
     PantryPolicy(i8, i64, bool),
-    Grid,
     BuildingPower,
     Cooling,
-    Water(WaterCommand),
-    NextWasteTank,
-    InstallWaterLink,
-    InstallPowerLink,
-    NextPowerShortage,
-    UtilityLinkPage(bool),
-    ToggleUtilityLink,
-    RemoveUtilityLink,
-    CancelUtilityInstallation,
-    NextUtilityInstallation,
-    AutomaticUpkeep,
-    UpkeepJob(usize),
-    UpkeepBudget { restock: bool },
 }
 
 impl Action {
@@ -275,7 +253,6 @@ impl Action {
                 village.utility_panel == Some(UtilityPanel::Finances)
                     && !village.finance_history_open
             }
-            Self::StoresFromUpkeep => village.utility_panel == Some(UtilityPanel::Upkeep),
             Self::PantryFromStores => {
                 village.utility_panel == Some(UtilityPanel::Inventory)
                     && matches!(
@@ -290,56 +267,16 @@ impl Action {
             }
             Self::Panel(_) => true,
             Self::ClosePanel => village.utility_panel.is_some(),
-            Self::Grid => village.utility_panel == Some(UtilityPanel::Power),
             Self::BuildingPower | Self::Cooling => {
-                matches!(village.utility_panel, None | Some(UtilityPanel::Power))
+                village.utility_panel.is_none()
                     && !village.construction.menu
                     && !village.construction.is_placing()
                     && self.facility_switch(village).is_some()
-            }
-            Self::UtilityLinkPage(_) | Self::ToggleUtilityLink => village.utility_link_count() > 0,
-            Self::RemoveUtilityLink => village.can_remove_selected_utility_link(),
-            Self::NextUtilityInstallation => village.has_queued_utility_installation(),
-            Self::CancelUtilityInstallation => village.can_cancel_selected_installation(),
-            Self::InstallPowerLink => village.utility_panel == Some(UtilityPanel::Power),
-            Self::NextPowerShortage => {
-                village.utility_panel == Some(UtilityPanel::Power)
-                    && village
-                        .construction
-                        .utilities
-                        .power_shortages()
-                        .next()
-                        .is_some()
-            }
-            Self::Water(_) | Self::InstallWaterLink => {
-                village.utility_panel == Some(UtilityPanel::Water)
-            }
-            Self::NextWasteTank => {
-                village.utility_panel == Some(UtilityPanel::Water)
-                    && village
-                        .construction
-                        .utilities
-                        .waste_tanks_needing_attention()
-                        .next()
-                        .is_some()
-            }
-            Self::AutomaticUpkeep | Self::UpkeepBudget { .. } | Self::UpkeepJob(_) => {
-                village.utility_panel == Some(UtilityPanel::Upkeep)
             }
             Self::SelectedProject(_) => village.utility_panel.is_none(),
             Self::FocusSelectedProject | Self::DeselectProject => {
                 village.selected_project_focus().is_some()
             }
-            Self::Trade(TradeOrder::Buy { freight }) => {
-                village.trade_open() && freight == village.construction.supplier_construction()
-            }
-            Self::TradeItem(_)
-            | Self::TradeQueue
-            | Self::TradeQueued(_)
-            | Self::HoldTradeQueued(_)
-            | Self::Trade(_)
-            | Self::TradePolicy(_)
-            | Self::SaleQuantity(_) => village.trade_open(),
             Self::InventorySearch | Self::InventoryItem(_) => false,
             Self::InventoryView => village.utility_panel == Some(UtilityPanel::Inventory),
             Self::CraftTab(_) => village.utility_panel == Some(UtilityPanel::Crafting),
@@ -382,7 +319,6 @@ impl Action {
             }
             Self::PantryBatches => village.utility_panel == Some(UtilityPanel::Pantry),
             Self::AutoCook | Self::CookingTarget { .. } if village.stock.sandbox => false,
-            Self::PantryTransport if village.trade_open() => true,
             Self::PantryPriority
             | Self::PantryTransport
             | Self::PantryBudget
@@ -413,18 +349,13 @@ impl Action {
             Self::Page(_) if village.utility_panel == Some(UtilityPanel::Finances) => {
                 village.finance_history_open
             }
-            Self::Page(_) if village.utility_panel == Some(UtilityPanel::Upkeep) => {
-                village.construction.upkeep_pages() > 1
-            }
             Self::Page(_) => matches!(
                 village.utility_panel,
                 Some(
                     UtilityPanel::Projects
                         | UtilityPanel::Inventory
                         | UtilityPanel::Crafting
-                        | UtilityPanel::Events
                         | UtilityPanel::Residents
-                        | UtilityPanel::Trade
                 )
             ),
         }
@@ -535,7 +466,6 @@ impl Action {
             Self::Manage if picker.open => "Close menu".into(),
             Self::Manage => "Manage".into(),
             Self::GridFromFinances => "Manage grid power".into(),
-            Self::StoresFromUpkeep => "Manage service supplies".into(),
             Self::PantryFromStores => "Manage food".into(),
             Self::Panel(panel) | Self::ResourcePanel(panel) => Self::PANELS
                 .iter()
@@ -572,7 +502,6 @@ impl Action {
             Self::ProjectEvents if village.project_events_expanded => "Hide recent events".into(),
             Self::ProjectEvents => "Show recent events".into(),
             Self::Project(_)
-            | Self::TradeItem(_)
             | Self::InventoryItem(_)
             | Self::Recipe(_)
             | Self::FacilityIrrigation => String::new(),
@@ -637,36 +566,6 @@ impl Action {
                 ProjectAction::Cancel => "Cancel plan",
                 ProjectAction::Salvage => "Salvage building",
                 ProjectAction::Demolish => "Demolish",
-            }
-            .into(),
-            Self::TradeQueue if village.construction.trade.queue_page.is_some() => {
-                "Browse materials".into()
-            }
-            Self::TradeQueue => "View orders".into(),
-            Self::TradeQueued(_) | Self::HoldTradeQueued(_) => String::new(),
-            Self::Trade(TradeOrder::Buy { freight: false }) => "Buy for pickup".into(),
-            Self::Trade(TradeOrder::Buy { freight: true }) => "Buy for delivery".into(),
-            Self::Trade(TradeOrder::Sell {
-                hold_for_pickup: false,
-            }) => "Reserve sale".into(),
-            Self::Trade(TradeOrder::Sell {
-                hold_for_pickup: true,
-            }) => "Sell on shared trip".into(),
-            Self::Trade(TradeOrder::Cancel) => "Cancel last order".into(),
-            Self::SaleQuantity(_) => String::new(),
-            Self::TradePolicy(policy) => match policy {
-                TradePolicy::HouseholdRestock => "Toggle household restock",
-                TradePolicy::AutomaticSale => "Toggle auto sale",
-                TradePolicy::Reserve(false) => "Keep one pack less",
-                TradePolicy::Reserve(true) => "Keep one pack more",
-                TradePolicy::Limit | TradePolicy::Trigger => "",
-                TradePolicy::MinimumLoad => {
-                    return numeric_label(village, NumericTarget::MinimumLoad, "Set minimum load");
-                }
-                TradePolicy::DispatchWait => {
-                    return numeric_label(village, NumericTarget::DispatchWait, "Set maximum wait");
-                }
-                TradePolicy::DispatchNow => "Send waiting loads now",
             }
             .into(),
             Self::Resident(index) => NAMES[index].into(),
@@ -743,56 +642,12 @@ impl Action {
             Self::PantryPolicy(1, _, false) => "Reserve +0.5d".into(),
             Self::PantryPolicy(_, budget, false) if budget < 0 => "Budget −R$25".into(),
             Self::PantryPolicy(_, _, false) => "Budget +R$25".into(),
-            Self::Grid if village.construction.utilities.grid_off => "Connect grid".into(),
-            Self::Grid => "Disconnect grid".into(),
             Self::BuildingPower if self.facility_switch(village) == Some(true) => {
                 "Switch building off".into()
             }
             Self::BuildingPower => "Switch building on".into(),
             Self::Cooling if self.facility_switch(village) == Some(true) => "Pause cooling".into(),
             Self::Cooling => "Resume cooling".into(),
-            Self::NextWasteTank => "Next waste tank".into(),
-            Self::InstallWaterLink => "Install water connection".into(),
-            Self::InstallPowerLink => "Install power connection".into(),
-            Self::NextPowerShortage => "Next building without power".into(),
-            Self::UtilityLinkPage(false) => "Previous connection".into(),
-            Self::UtilityLinkPage(true) => "Next connection".into(),
-            Self::ToggleUtilityLink => "Switch connection".into(),
-            Self::RemoveUtilityLink => "Remove manual connection".into(),
-            Self::CancelUtilityInstallation => "Cancel installation".into(),
-            Self::NextUtilityInstallation => "Next installation".into(),
-            Self::Water(command) => match command {
-                WaterCommand::Camp { source: true } => "Camp source".into(),
-                WaterCommand::Camp { source: false } => "Camp destination".into(),
-                WaterCommand::NextChannel => {
-                    format!("Channel · {}", WATER_CHANNELS[village.water_panel.channel])
-                }
-                WaterCommand::Policy(true) => "Auto drinking reserve".into(),
-                WaterCommand::Policy(false) => "Auto sanitation".into(),
-                WaterCommand::River => "Collect river water".into(),
-                WaterCommand::Carry => "Carry from source".into(),
-                WaterCommand::Purify => "Purify water".into(),
-                WaterCommand::Sanitation => "Service waste".into(),
-            },
-            Self::AutomaticUpkeep => format!(
-                "Automatic maintenance {}",
-                if village.construction.automatic_upkeep() {
-                    "on"
-                } else {
-                    "off"
-                }
-            ),
-            Self::UpkeepJob(_) => String::new(),
-            Self::UpkeepBudget { restock: false } => numeric_label(
-                village,
-                NumericTarget::MaintenanceParts,
-                "Set parts allowance",
-            ),
-            Self::UpkeepBudget { restock: true } => numeric_label(
-                village,
-                NumericTarget::MaintenanceShopping,
-                "Set feed and repair budget",
-            ),
         }
     }
 }
@@ -801,8 +656,6 @@ fn numeric_label(village: &Village, target: NumericTarget, label: &str) -> Strin
     match &village.numeric_entry {
         Some((active, entry)) if *active == target => {
             let value = match target {
-                NumericTarget::MinimumLoad => format!("{entry}% (0–100)"),
-                NumericTarget::DispatchWait => format!("{entry}h (0–24)"),
                 NumericTarget::WorkPriority(_) => {
                     format!("Priority {entry} (0 Low · 1 Normal · 2 High · 3 Highest)")
                 }
@@ -1151,40 +1004,8 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 ] {
                     spawn_button(menu, &assets, Action::PantryPolicy(reserve, budget, toggle));
                 }
-                spawn_button(menu, &assets, Action::Grid);
-                spawn_button(menu, &assets, Action::InstallPowerLink);
-                spawn_button(menu, &assets, Action::NextPowerShortage);
-                spawn_button(menu, &assets, Action::UtilityLinkPage(false));
-                spawn_button(menu, &assets, Action::UtilityLinkPage(true));
-                spawn_button(menu, &assets, Action::ToggleUtilityLink);
-                spawn_button(menu, &assets, Action::RemoveUtilityLink);
-                spawn_button(menu, &assets, Action::CancelUtilityInstallation);
-                spawn_button(menu, &assets, Action::NextUtilityInstallation);
                 spawn_button(menu, &assets, Action::BuildingPower);
                 spawn_button(menu, &assets, Action::Cooling);
-                for command in [
-                    WaterCommand::Camp { source: true },
-                    WaterCommand::Camp { source: false },
-                    WaterCommand::NextChannel,
-                    WaterCommand::River,
-                    WaterCommand::Carry,
-                    WaterCommand::Purify,
-                    WaterCommand::Sanitation,
-                    WaterCommand::Policy(true),
-                    WaterCommand::Policy(false),
-                ] {
-                    spawn_button(menu, &assets, Action::Water(command));
-                }
-                spawn_button(menu, &assets, Action::NextWasteTank);
-                spawn_button(menu, &assets, Action::InstallWaterLink);
-                spawn_button(menu, &assets, Action::AutomaticUpkeep);
-                spawn_button(menu, &assets, Action::StoresFromUpkeep);
-                for row in 0..Construction::UPKEEP_ROWS {
-                    spawn_button(menu, &assets, Action::UpkeepJob(row));
-                }
-                for restock in [false, true] {
-                    spawn_button(menu, &assets, Action::UpkeepBudget { restock });
-                }
                 spawn_button(menu, &assets, Action::Home(true));
                 spawn_button(menu, &assets, Action::Home(false));
                 for row in 0..HOME_ROWS {
@@ -1193,38 +1014,6 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 spawn_button(menu, &assets, Action::ProjectFilter);
                 spawn_button(menu, &assets, Action::ProjectRoads);
                 spawn_button(menu, &assets, Action::ProjectEvents);
-                spawn_button(menu, &assets, Action::TradeQueue);
-                for order in [
-                    TradeOrder::Buy { freight: false },
-                    TradeOrder::Buy { freight: true },
-                    TradeOrder::Sell {
-                        hold_for_pickup: false,
-                    },
-                    TradeOrder::Sell {
-                        hold_for_pickup: true,
-                    },
-                    TradeOrder::Cancel,
-                ] {
-                    spawn_button(menu, &assets, Action::Trade(order));
-                }
-                for policy in [
-                    TradePolicy::HouseholdRestock,
-                    TradePolicy::AutomaticSale,
-                    TradePolicy::Reserve(false),
-                    TradePolicy::Reserve(true),
-                    TradePolicy::MinimumLoad,
-                    TradePolicy::DispatchWait,
-                    TradePolicy::DispatchNow,
-                ] {
-                    spawn_button(menu, &assets, Action::TradePolicy(policy));
-                }
-                for setting in [
-                    SaleSetting::Reserve,
-                    SaleSetting::Trigger,
-                    SaleSetting::Limit,
-                ] {
-                    spawn_button(menu, &assets, Action::SaleQuantity(setting));
-                }
                 spawn_button(menu, &assets, Action::FacilityIrrigation);
                 spawn_button(menu, &assets, Action::RecipePage(false));
                 spawn_button(menu, &assets, Action::RecipePage(true));
@@ -1236,9 +1025,6 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 for row in 0..crate::construction::PAGE_KEYS.len() {
                     spawn_button(menu, &assets, Action::Project(row));
                     spawn_button(menu, &assets, Action::Recipe(row));
-                    spawn_button(menu, &assets, Action::TradeItem(row));
-                    spawn_button(menu, &assets, Action::TradeQueued(row));
-                    spawn_button(menu, &assets, Action::HoldTradeQueued(row));
                 }
                 for action in [Action::Page(false), Action::Page(true), Action::ClosePanel] {
                     spawn_button(menu, &assets, action);
@@ -1263,22 +1049,9 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
 }
 
 fn spawn_button(parent: &mut ChildSpawnerCommands, assets: &AssetServer, action: Action) -> Entity {
-    let trade_button = matches!(
-        action,
-        Action::TradeItem(_)
-            | Action::TradeQueue
-            | Action::TradeQueued(_)
-            | Action::HoldTradeQueued(_)
-            | Action::Trade(_)
-            | Action::TradePolicy(_)
-    );
     // A selected building's upkeep and removal actions are quieter than its main ones.
     let secondary = matches!(action, Action::SelectedProject(_) | Action::BuildingPower);
-    let (vertical_padding, font_size) = if trade_button || secondary {
-        (4, 13.0)
-    } else {
-        (6, 14.0)
-    };
+    let (vertical_padding, font_size) = if secondary { (4, 13.0) } else { (6, 14.0) };
     let mut button = parent.spawn((
         action,
         Button,
@@ -1314,7 +1087,7 @@ fn spawn_button(parent: &mut ChildSpawnerCommands, assets: &AssetServer, action:
     };
     button.with_child((
         Text::default(),
-        crate::ui_font::ui_font_weight(assets, font_size, 600),
+        crate::ui_font::ui_font_weight(assets, 14.0, 600),
     ));
     if let Action::Resident(index) = action {
         let image = match index {
@@ -1578,10 +1351,6 @@ fn handle_buttons(
                     picker.open = false;
                 }
                 Action::GridFromFinances => village.utility_panel = Some(UtilityPanel::Power),
-                Action::StoresFromUpkeep => {
-                    village.utility_panel = Some(UtilityPanel::Inventory);
-                    village.inventory_page = 0;
-                }
                 Action::PantryFromStores => {
                     village.utility_panel = Some(UtilityPanel::Pantry);
                     village.pantry_batch_page = None;
@@ -1596,27 +1365,7 @@ fn handle_buttons(
                     let page = picker.home_page.min(pages - 1);
                     picker.home_page = (page + if forward { 1 } else { pages - 1 }) % pages;
                 }
-                Action::Page(forward) if village.trade_open() => {
-                    village.construction.page_trade(&catalog, forward)
-                }
                 Action::Page(forward) => village.change_panel_page(&catalog, &land, forward),
-                Action::TradeQueue if !picker.open => village.construction.toggle_trade_queue(),
-                Action::HoldTradeQueued(row) if !picker.open => {
-                    let town = &mut *village;
-                    town.construction.toggle_trade_queue_hold(
-                        &town.stock,
-                        row,
-                        setup.round_trip_km(),
-                    );
-                }
-                Action::TradeQueued(row) if !picker.open => {
-                    let town = &mut *village;
-                    town.construction
-                        .cancel_trade_queue_row(&catalog, &mut town.stock, row);
-                }
-                Action::TradeItem(row) if !picker.open => {
-                    village.construction.select_trade_row(&catalog, row)
-                }
                 Action::Project(row) if !picker.open => {
                     village.focus_project_row(&catalog, &setup, camera, row);
                 }
@@ -1817,57 +1566,6 @@ fn handle_buttons(
                         }
                     }
                 }
-                Action::Grid if !picker.open => {
-                    let utilities = &mut village.construction.utilities;
-                    utilities.grid_off = !utilities.grid_off;
-                }
-                Action::AutomaticUpkeep if !picker.open => {
-                    village.construction.toggle_automatic_upkeep()
-                }
-                Action::UpkeepJob(row) if !picker.open => {
-                    let page = village.upkeep_page;
-                    if let Some(point) = village.construction.focus_upkeep_job(page, row) {
-                        let terrain = village.terrain(&setup);
-                        camera.target =
-                            Vec3::new(point.x, terrain.height_at(point.x, point.y), point.y);
-                        village.utility_panel = None;
-                    }
-                }
-                Action::UpkeepBudget { restock } if !picker.open => {
-                    let target = if restock {
-                        NumericTarget::MaintenanceShopping
-                    } else {
-                        NumericTarget::MaintenanceParts
-                    };
-                    village.numeric_entry = Some((target, String::new()));
-                }
-                Action::UtilityLinkPage(forward) if !picker.open => {
-                    village.move_utility_link(forward)
-                }
-                Action::ToggleUtilityLink if !picker.open => village.toggle_selected_utility_link(),
-                Action::NextUtilityInstallation if !picker.open => {
-                    village.focus_next_utility_installation(&setup, camera)
-                }
-                Action::CancelUtilityInstallation if !picker.open => {
-                    village.cancel_selected_installation()
-                }
-                Action::RemoveUtilityLink if !picker.open => village.remove_selected_utility_link(),
-                Action::NextPowerShortage if !picker.open => {
-                    village.focus_next_power_shortage(&setup, camera)
-                }
-                Action::InstallPowerLink if !picker.open => {
-                    village.queue_selected_power_connection()
-                }
-                Action::InstallWaterLink if !picker.open => {
-                    village.queue_selected_water_connection()
-                }
-                Action::NextWasteTank if !picker.open => {
-                    village.focus_next_waste_tank(&setup, camera)
-                }
-                Action::Water(command) if !picker.open => {
-                    let town = &mut *village;
-                    town.water_panel.apply(command, &mut town.construction);
-                }
                 Action::PantryBatches if !picker.open => {
                     village.pantry_batch_page = village.pantry_batch_page.is_none().then_some(0);
                 }
@@ -1898,34 +1596,6 @@ fn handle_buttons(
                         .construction
                         .trade
                         .pantry_controls(reserve, budget, toggle);
-                }
-                Action::Trade(order) if !picker.open => {
-                    let clock = TownClock {
-                        seconds: village.clock,
-                        round_trip_km: setup.round_trip_km(),
-                    };
-                    if village
-                        .construction
-                        .selected_trade_issue(&catalog, &village.stock, clock, order)
-                        .is_some()
-                    {
-                        continue;
-                    }
-                    let town = &mut *village;
-                    town.construction
-                        .place_trade_order(&catalog, &mut town.stock, clock, order);
-                }
-                Action::SaleQuantity(setting) if !picker.open => {
-                    village.numeric_entry = Some((NumericTarget::Sale(setting), String::new()));
-                }
-                Action::TradePolicy(TradePolicy::MinimumLoad) if !picker.open => {
-                    village.numeric_entry = Some((NumericTarget::MinimumLoad, String::new()));
-                }
-                Action::TradePolicy(TradePolicy::DispatchWait) if !picker.open => {
-                    village.numeric_entry = Some((NumericTarget::DispatchWait, String::new()));
-                }
-                Action::TradePolicy(policy) if !picker.open => {
-                    village.construction.adjust_trade_policy(&catalog, policy);
                 }
                 Action::FocusSelectedProject if !picker.open => {
                     village.focus_selected_project(&setup, camera);
@@ -2004,14 +1674,7 @@ fn handle_buttons(
                 | Action::SelectedProject(_)
                 | Action::FocusSelectedProject
                 | Action::DeselectProject
-                | Action::TradeItem(_)
                 | Action::InventoryItem(_)
-                | Action::TradeQueue
-                | Action::TradeQueued(_)
-                | Action::HoldTradeQueued(_)
-                | Action::Trade(_)
-                | Action::TradePolicy(_)
-                | Action::SaleQuantity(_)
                 | Action::ProjectFilter
                 | Action::ProjectRoads
                 | Action::ProjectEvents
@@ -2033,22 +1696,8 @@ fn handle_buttons(
                 | Action::AutoCook
                 | Action::CookingTarget { .. }
                 | Action::PantryPolicy(..)
-                | Action::Grid
                 | Action::BuildingPower
-                | Action::Cooling
-                | Action::Water(_)
-                | Action::NextWasteTank
-                | Action::InstallWaterLink
-                | Action::InstallPowerLink
-                | Action::NextPowerShortage
-                | Action::UtilityLinkPage(_)
-                | Action::ToggleUtilityLink
-                | Action::RemoveUtilityLink
-                | Action::CancelUtilityInstallation
-                | Action::NextUtilityInstallation
-                | Action::AutomaticUpkeep
-                | Action::UpkeepJob(_)
-                | Action::UpkeepBudget { .. } => {}
+                | Action::Cooling => {}
             }
         }
     }
@@ -2119,24 +1768,6 @@ fn refresh(
     let show_terrain = Action::TerrainBrush(Brush::Raise).available(&village);
     let show_field_size = Action::ResizeField(IVec2::ZERO).available(&village);
     let show_projects = !picker.open && Action::ProjectFilter.available(&village);
-    let show_trade = !picker.open && Action::TradeItem(0).available(&village);
-    let show_trade_queue = show_trade && village.construction.trade.queue_page.is_some();
-    let trade_clock = TownClock {
-        seconds: village.clock,
-        round_trip_km: setup.round_trip_km(),
-    };
-    let trade_queue = if show_trade_queue {
-        village
-            .construction
-            .trade_queue_labels(&catalog, trade_clock)
-    } else {
-        Vec::new()
-    };
-    let trade_items = if show_trade && !show_trade_queue {
-        village.construction.trade_page_labels(&catalog)
-    } else {
-        Vec::new()
-    };
     let inventory_items: Vec<_> = if !picker.open && Action::InventoryItem(0).available(&village) {
         if village.producer_view() {
             village
@@ -2165,16 +1796,6 @@ fn refresh(
     let show_finances = !picker.open && Action::Ledger.available(&village);
     let show_facility_switches = !picker.open
         && (Action::BuildingPower.available(&village) || Action::Cooling.available(&village));
-    let show_power = !picker.open && Action::Grid.available(&village);
-    let show_water = !picker.open && Action::Water(WaterCommand::River).available(&village);
-    let show_upkeep = !picker.open && Action::AutomaticUpkeep.available(&village);
-    let upkeep_jobs = if show_upkeep {
-        village
-            .construction
-            .upkeep_job_labels(&catalog, village.upkeep_page)
-    } else {
-        Vec::new()
-    };
     let show_residents = !picker.open && village.utility_panel == Some(UtilityPanel::Residents);
     let show_homes = !picker.open && village.resident_overview_open();
     let projects = if show_projects {
@@ -2211,12 +1832,8 @@ fn refresh(
         || show_residents
         || show_finances
         || show_pantry
-        || show_trade
         || inventory_items.iter().any(Option::is_some)
-        || show_power
         || show_facility_switches
-        || show_upkeep
-        || show_water
         || (picker.open && Action::Manage.available(&village))
     {
         Display::Flex
@@ -2307,21 +1924,7 @@ fn refresh(
                         .project_action_issue(&catalog, action, village.stock.sandbox)
                         .is_some())
             }
-            Action::TradeItem(row) => trade_items.get(row).is_some(),
             Action::InventoryItem(row) => inventory_items.get(row).is_some_and(Option::is_some),
-            Action::TradeQueue => show_trade,
-            Action::TradeQueued(row) => trade_queue.get(row).is_some_and(|entry| entry.can_cancel),
-            Action::HoldTradeQueued(row) => trade_queue
-                .get(row)
-                .is_some_and(|entry| entry.held.is_some()),
-            Action::Trade(TradeOrder::Buy { freight }) => {
-                show_trade
-                    && !show_trade_queue
-                    && freight == village.construction.supplier_construction()
-            }
-            Action::Trade(_) | Action::TradePolicy(_) | Action::SaleQuantity(_) => {
-                show_trade && !show_trade_queue
-            }
             Action::ProjectFilter | Action::ProjectEvents => show_projects,
             Action::ProjectRoads => {
                 show_projects && village.construction.road_project_counts(&catalog).0 > 0
@@ -2338,34 +1941,17 @@ fn refresh(
             Action::ExpansionReserve | Action::GridFromFinances => {
                 show_finances && !village.finance_history_open
             }
-            Action::PantryTransport => {
-                (show_trade && !show_trade_queue) || (show_pantry && action.available(&village))
-            }
-            Action::PantryBatches
+            Action::PantryTransport
+            | Action::PantryBatches
             | Action::PantryPriority
             | Action::PantryBudget
             | Action::PantryPolicy(..)
             | Action::AutoCook
             | Action::CookingTarget { .. } => show_pantry && action.available(&village),
             Action::Home(_) => show_homes,
-            Action::Grid | Action::InstallPowerLink => show_power,
-            Action::NextPowerShortage => show_power && action.available(&village),
-            Action::UtilityLinkPage(_)
-            | Action::ToggleUtilityLink
-            | Action::RemoveUtilityLink
-            | Action::CancelUtilityInstallation
-            | Action::NextUtilityInstallation => {
-                (show_power || show_water) && action.available(&village)
-            }
             Action::BuildingPower | Action::Cooling => {
                 show_facility_switches && action.available(&village)
             }
-            Action::Water(_) | Action::InstallWaterLink => show_water,
-            Action::NextWasteTank => show_water && action.available(&village),
-            Action::AutomaticUpkeep | Action::UpkeepBudget { .. } | Action::StoresFromUpkeep => {
-                show_upkeep
-            }
-            Action::UpkeepJob(row) => upkeep_jobs.get(row).is_some(),
             Action::Panel(_) => picker.open,
             Action::ResourcePanel(_) => !picker.open && !show_view && action.available(&village),
             Action::PantryFromStores => !picker.open && !show_view && action.available(&village),
@@ -2423,12 +2009,6 @@ fn refresh(
                 Action::SelectedProject(project_action) => village
                     .construction
                     .project_action_issue(&catalog, project_action, village.stock.sandbox),
-                Action::Trade(order) => village.construction.selected_trade_issue(
-                    &catalog,
-                    &village.stock,
-                    trade_clock,
-                    order,
-                ),
                 Action::ListedHome(row) if !homes[row].open => {
                     Some("Reopen this home before assigning residents.")
                 }
@@ -2446,7 +2026,7 @@ fn refresh(
                         .unwrap_or("Remove this unstarted plan and return reserved supplies.")
                         .into(),
                 ),
-                Action::Trade(_) | Action::ListedHome(_) | Action::SelectedProject(_) => {
+                Action::ListedHome(_) | Action::SelectedProject(_) => {
                     action_issue.map(str::to_owned)
                 }
                 Action::CampPreset(index) => Some(
@@ -2531,7 +2111,6 @@ fn refresh(
                     village.construction.resident_roster_line(&catalog, index)
                 ),
                 Action::Project(row) => projects[row].clone(),
-                Action::UpkeepJob(row) => upkeep_jobs[row].clone(),
                 Action::Recipe(row) => recipes[row].clone(),
                 Action::MoveCraft => craft_workspace
                     .as_ref()
@@ -2541,28 +2120,7 @@ fn refresh(
                 Action::FacilityIrrigation => irrigation.map_or_else(String::new, |policy| {
                     format!("Irrigation · {}", policy.label())
                 }),
-                Action::TradeItem(row) => trade_items[row].clone(),
-                Action::SaleQuantity(setting) => {
-                    let unit = village.construction.sale_quantity_unit(&catalog);
-                    let label = match setting {
-                        SaleSetting::Reserve => "Keep at least",
-                        SaleSetting::Trigger => "Sell when above",
-                        SaleSetting::Limit => "Maximum per day",
-                    };
-                    if let Some((NumericTarget::Sale(active), entry)) = &village.numeric_entry
-                        && *active == setting
-                    {
-                        format!("{entry} {unit} · Enter to set · Esc to cancel")
-                    } else {
-                        format!("{label} ({unit})")
-                    }
-                }
                 Action::InventoryItem(row) => inventory_items[row].clone().unwrap(),
-                Action::TradeQueued(row) => format!("Cancel {}", trade_queue[row].label),
-                Action::HoldTradeQueued(row) if trade_queue[row].held == Some(true) => {
-                    format!("Order {} · Allow own trip", row + 1)
-                }
-                Action::HoldTradeQueued(row) => format!("Order {} · Hold for pickup", row + 1),
                 Action::ListedHome(row) => {
                     let home = &homes[row];
                     let state = if home.assigned {

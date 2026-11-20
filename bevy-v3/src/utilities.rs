@@ -961,6 +961,11 @@ impl Utilities {
         self.topology_valid = false;
     }
 
+    /// Completed sites can relay a cable even when they generate and draw no power.
+    pub(crate) fn power_endpoints(&self) -> impl Iterator<Item = usize> + '_ {
+        self.nodes.keys().copied()
+    }
+
     pub fn power_at(&self, cell: IVec2) -> Option<usize> {
         self.nodes.iter().find_map(|(&id, node)| {
             (cell.cmpge(node.location).all() && cell.cmplt(node.location + node.size).all())
@@ -1128,16 +1133,25 @@ impl Utilities {
         self.grid_import_kw * GRID_TARIFF_CENTS / 100.0
     }
 
+    pub(crate) fn local_energy_share(&self) -> Option<f64> {
+        (self.used_kwh > 0.0)
+            .then(|| (1.0 - self.grid_import_total / self.used_kwh).clamp(0.0, 1.0) * 100.0)
+    }
+
+    /// Lifetime grid purchases in kWh and reais.
+    pub(crate) fn grid_purchase_totals(&self) -> (f64, f64) {
+        (self.grid_import_total, self.grid_spent / 100.0)
+    }
+
+    #[cfg(test)]
     pub fn power_summary(&self, sandbox: bool) -> String {
         let stored = self.stored_energy();
         let capacity: f64 = self.nodes.values().map(|node| node.battery).sum();
         let grid = if self.grid_off { "off" } else { "on" };
-        let local_share = if self.used_kwh > 0.0 {
-            let percent = (1.0 - self.grid_import_total / self.used_kwh).clamp(0.0, 1.0) * 100.0;
-            format!("{percent:.0}% since arrival")
-        } else {
-            "No usage yet".into()
-        };
+        let local_share = self.local_energy_share().map_or_else(
+            || "No usage yet".into(),
+            |percent| format!("{percent:.0}% since arrival"),
+        );
         let shortages = self.power_shortages().count();
         let billing = if sandbox {
             String::from("Free in Sandbox")
@@ -1150,7 +1164,7 @@ impl Utilities {
             )
         };
         format!(
-            "Power · {:.2} kW solar/hydro · {:.2} kW demand\nLocal energy share · {local_share} · Buildings without power {shortages}\nBattery {stored:.2}/{capacity:.2} kWh · 90% charging efficiency · {:.2} kW grid\nGrid {grid} · {GRID_CAPACITY:.0} kW backup · O Switch grid\n{billing}",
+            "Power · {:.2} kW solar/hydro · {:.2} kW demand\nLocal energy share · {local_share} · Buildings without power {shortages}\nBattery {stored:.2}/{capacity:.2} kWh · 90% charging efficiency · {:.2} kW grid\nGrid {grid} · {GRID_CAPACITY:.0} kW backup\n{billing}",
             self.generation_kw, self.demand_kw, self.grid_import_kw
         )
     }
@@ -1203,19 +1217,6 @@ impl Utilities {
             capacity,
             self.grid_import_kw,
         )
-    }
-
-    /// Power details besides the figures the panel shows as tiles: local share, grid
-    /// switch and billing.
-    pub fn power_details(&self, sandbox: bool) -> String {
-        let summary = self.power_summary(sandbox);
-        summary
-            .lines()
-            .enumerate()
-            .filter(|(index, _)| matches!(index, 1 | 3 | 4))
-            .map(|(_, line)| line)
-            .collect::<Vec<_>>()
-            .join("\n")
     }
 
     /// Water details below the stored totals that the panel shows as tiles.

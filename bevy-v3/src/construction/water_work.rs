@@ -187,33 +187,32 @@ impl Construction {
         catalog: &Catalog,
         stock: &Stock,
         (from, to, channel): (usize, usize, Option<usize>),
-    ) -> String {
+    ) -> Result<String, String> {
         use std::fmt::Write;
-        if from == to || self.queued_connection(from, to, channel).is_some() {
-            return String::new();
-        }
-        let (action, bill, distance) = match self.connection_plan(from, to, channel) {
-            Ok(plan) => plan,
-            Err(reason) => return format!("\n{reason}"),
-        };
+        let (action, bill, distance) = self
+            .connection_plan(from, to, channel)
+            .map_err(str::to_owned)?;
         let (_, required) = action.installation().expect("connection installation");
         let mut text = format!(
-            "\n{:.0} m · {:.0} person-minutes",
+            "{:.0} m · {:.0} person-minutes",
             distance * 2.0,
             required * 0.45
         );
         if stock.sandbox {
             text.push_str(" · Free in Sandbox");
         } else {
-            for (id, amount) in bill {
-                let missing = amount.saturating_sub(stock.available(&id));
-                let _ = write!(text, " · {amount} {}", catalog.materials[&id].name);
+            for (id, amount) in &bill {
+                let missing = amount.saturating_sub(stock.available(id));
+                let _ = write!(text, " · {amount} {}", catalog.materials[id].name);
                 if missing > 0 {
                     let _ = write!(text, " ({missing} missing)");
                 }
             }
+            if stock.missing(&bill).is_some() {
+                return Err(format!("Gather the missing materials. {text}"));
+            }
         }
-        text
+        Ok(text)
     }
 
     fn queue_installation(&mut self, from: usize, action: WaterAction) -> Result<(), &'static str> {
@@ -331,9 +330,32 @@ impl Construction {
         Ok(())
     }
 
-    pub(crate) fn queued_water_status(&self, id: usize, clock: f64) -> Option<&'static str> {
-        let job = self.water_jobs.get(&id)?;
-        Some(self.water_job_status(id, job, clock))
+    pub(crate) fn water_card_job_status(&self, target: usize, clock: f64) -> Option<String> {
+        use std::fmt::Write;
+        let (source, job) = self.water_jobs.get_key_value(&target).or_else(|| {
+            self.water_jobs.iter().find(|(_, job)| {
+                matches!(job.action, WaterAction::InstallPipe { to, .. } if to == target)
+            })
+        })?;
+        let mut status = self.water_job_status(*source, job, clock).to_owned();
+        match job.action {
+            WaterAction::Purify | WaterAction::Sanitation => {
+                let work = if matches!(job.action, WaterAction::Purify) {
+                    30.0
+                } else {
+                    45.0
+                };
+                let _ = write!(status, " · {:.0}% complete", 100.0 * job.work / work);
+            }
+            WaterAction::Carry { .. } if job.carried > EPSILON => {
+                let _ = write!(status, " · {:.1} L carried", job.carried);
+            }
+            _ => {}
+        }
+        if let Some(worker) = job.worker {
+            let _ = write!(status, " · {}", super::resident_work::NAMES[worker]);
+        }
+        Some(status)
     }
 
     pub(super) fn valid_water_jobs(&self) -> bool {
@@ -562,36 +584,6 @@ impl Construction {
         }
     }
 
-    pub fn connection_summary(&self, catalog: &Catalog, selected: usize, power: bool) -> String {
-        let (connection, count, shortcut, arrow) = if power {
-            (
-                self.utilities
-                    .power_link(selected)
-                    .map(|(from, to, enabled)| (from, to, "Power", enabled)),
-                self.utilities.power_link_count(),
-                "T",
-                "–",
-            )
-        } else {
-            (
-                self.utilities.water_link(selected),
-                self.utilities.water_link_count(),
-                "G",
-                "→",
-            )
-        };
-        let Some((from, to, kind, enabled)) = connection else {
-            return String::new();
-        };
-        let status = if enabled { "on" } else { "off" };
-        format!(
-            "\nConnection {}/{count} · {kind} · {} {arrow} {} · {status}\n[ / ] Select connection · {shortcut} Switch connection",
-            selected.saturating_add(1).min(count),
-            self.connection_site_name(catalog, from),
-            self.connection_site_name(catalog, to),
-        )
-    }
-
     pub(crate) fn expansion_reserve_cents(&self) -> u64 {
         self.market.expansion_reserve()
     }
@@ -644,21 +636,6 @@ impl Construction {
             self.utilities
                 .draw_queued_connection(terrain, (from, to), channel, progress, gizmos);
         }
-    }
-
-    pub fn queued_installation_hint(&self, power: bool) -> String {
-        let count = self.queued_utility_connections(power).count();
-        if count == 0 {
-            return String::new();
-        }
-        let noun = if count == 1 {
-            "installation"
-        } else {
-            "installations"
-        };
-        format!(
-            "\n{count} queued {noun} · Page Up Next installation · Dashed lines under construction"
-        )
     }
 
     fn active_connection(
@@ -715,33 +692,6 @@ impl Construction {
         true
     }
 
-    pub fn power_installation_summary(&self, catalog: &Catalog, from: usize, to: usize) -> String {
-        use std::fmt::Write;
-        let mut text = format!(
-            "\nNew line · {} – {}\nShift-click source · Click destination · C Camp · U Install line",
-            self.connection_site_name(catalog, from),
-            self.connection_site_name(catalog, to),
-        );
-        if let Some(status) = self.utilities.power_site_summary(to) {
-            let _ = write!(
-                text,
-                "\n{} · {status}",
-                self.connection_site_name(catalog, to)
-            );
-        }
-        if let Some(job) = self.active_connection(from, to, None)
-            && let WaterAction::InstallCable { required, .. } = job.action
-        {
-            let _ = write!(
-                text,
-                "\n{} · {:.0}% installed",
-                job.label(),
-                100.0 * job.work / required
-            );
-        }
-        text
-    }
-
     /// One line per power or water building, like V2's network cards.
     pub fn utility_site_list(&self, catalog: &Catalog, power: bool) -> String {
         use std::fmt::Write;
@@ -793,30 +743,8 @@ impl Construction {
         text
     }
 
-    pub fn power_shortage_summary(&self, catalog: &Catalog) -> String {
-        use std::fmt::Write;
-        const VISIBLE_SHORTAGES: usize = 4;
-        let mut shortages = self.utilities.power_shortages().peekable();
-        if shortages.peek().is_none() {
-            return String::new();
-        }
-        let mut text = String::from("\nWaiting for power · Page Down Next building");
-        for id in shortages.by_ref().take(VISIBLE_SHORTAGES) {
-            if let Some(plan) = id.checked_sub(1).and_then(|index| self.plans.get(index)) {
-                let name = &catalog.projects[&plan.key].name;
-                let _ = write!(text, "\n{name} #{id}");
-            } else {
-                text.push_str("\nCamp");
-            }
-        }
-        let remaining = shortages.count();
-        if remaining > 0 {
-            let _ = write!(text, "\n{remaining} more");
-        }
-        text
-    }
-
-    pub fn waste_tank_summary(&self, catalog: &Catalog) -> String {
+    #[cfg(test)]
+    fn waste_tank_summary(&self, catalog: &Catalog) -> String {
         use std::fmt::Write;
         const VISIBLE_WARNINGS: usize = 4;
         let mut details = String::new();
@@ -852,102 +780,24 @@ impl Construction {
         } else {
             "tanks need"
         };
-        format!("\n{count} waste {subject} attention · Page Down Next tank{details}")
+        format!("\n{count} waste {subject} attention{details}")
     }
 
-    pub fn water_panel(
+    pub fn connection_installation_status(
         &self,
-        target: usize,
-        source: Option<usize>,
-        channel: usize,
+        (from, to, channel): (usize, usize, Option<usize>),
         clock: f64,
-    ) -> String {
-        let utilities = &self.utilities;
-        let name = |id| {
-            utilities
-                .water_site(id)
-                .map_or("Unavailable", |site| site.kind)
+    ) -> Option<String> {
+        let (source, _, _) = self.queued_connection(from, to, channel)?;
+        let Some(job) = self.active_connection(from, to, channel) else {
+            return Some("Installation queued · Waiting for other work at the source".into());
         };
-        let Some(site) = utilities.water_site(target) else {
-            return "Click a water facility to select it.".into();
-        };
-        let mut text = format!(
-            "Target · {} #{target} · {}\nClick target · Shift-click source · C Camp\n1 Drinking · 2 Irrigation · 3 Greywater · 4 Sewage\nR River · T Carry from {} · Y Purify · K Service waste · U Install connection\nM Drinking reserve {} · L Sanitation {}",
-            site.kind,
-            CHANNELS[channel],
-            source.map_or("selected source", name),
-            if site.maintain_fresh { "on" } else { "off" },
-            if site.maintain_sanitation {
-                "on"
-            } else {
-                "off"
-            },
-        );
-        use std::fmt::Write;
-        for (channel, label) in CHANNELS.iter().enumerate() {
-            if site.capacity[channel] > 0.0 {
-                let _ = write!(
-                    text,
-                    "\n{label} {:.1}/{:.0} L",
-                    site.levels[channel], site.capacity[channel]
-                );
-                if channel >= 2
-                    && let Some(warning) = crate::utilities::waste_tank_warning(
-                        site.levels[channel],
-                        site.capacity[channel],
-                    )
-                {
-                    let _ = write!(text, " · Tank {warning}");
-                }
-            }
-        }
-        if let Some((area, roof)) = utilities.rain_catchment(target) {
-            let _ = write!(text, "\nRain catchment · {area:.0} m²");
-            if let Some(roof) = roof {
-                let _ = write!(text, " · Includes roof #{roof}");
-            }
-        }
-        let selected_job =
-            source.and_then(|from| self.active_connection(from, target, Some(channel)));
-        let selected_waiting = selected_job.is_none()
-            && source.is_some_and(|from| {
-                self.queued_connection(from, target, Some(channel))
-                    .is_some()
-            });
-        if selected_waiting {
-            text.push_str("\nInstallation queued · Waiting for other work at the source");
-        } else if let Some(job) = selected_job
-            .or_else(|| self.water_jobs.get(&target))
-            .or_else(|| {
-                self.water_jobs.values().find(
-                    |job| matches!(job.action, WaterAction::InstallPipe { to, .. } if to == target),
-                )
-            })
-        {
-            let status = self.water_job_status(target, job, clock);
-            let _ = write!(text, "\n{status}");
-            match job.action {
-                WaterAction::InstallPipe { required, .. } => {
-                    let _ = write!(text, " · {:.0}% installed", 100.0 * job.work / required);
-                }
-                WaterAction::Purify | WaterAction::Sanitation => {
-                    let required = if matches!(job.action, WaterAction::Purify) {
-                        30.0
-                    } else {
-                        45.0
-                    };
-                    let _ = write!(text, " · {:.0}% complete", 100.0 * job.work / required);
-                }
-                WaterAction::Carry { .. } if job.carried > EPSILON => {
-                    let _ = write!(text, " · {:.1} L carried", job.carried);
-                }
-                _ => {}
-            }
-            if let Some(worker) = job.worker {
-                let _ = write!(text, " · {}", super::resident_work::NAMES[worker]);
-            }
-        }
-        text
+        let (_, required) = job.action.installation()?;
+        let status = self.water_job_status(source, job, clock);
+        Some(format!(
+            "{status} · {:.0}% installed",
+            100.0 * job.work / required
+        ))
     }
 
     pub(super) fn water_route(
@@ -1860,8 +1710,8 @@ mod tests {
                 .is_some()
         );
         assert!(
-            town.water_panel(0, Some(1), 1, 0.0)
-                .contains("Waiting for access")
+            town.water_card_job_status(0, 0.0)
+                .is_some_and(|status| status.contains("Waiting for access"))
         );
         town.plans.clear();
         town.tick_water_work(&catalog, &mut stock, site, 3.0, 0.1);

@@ -1462,7 +1462,10 @@ mod tests {
         let selected = Trade::tradable(&catalog)[village.trade.selected].id;
         let price = (catalog.materials[selected].price * 100.0).round() as u64;
         let freight = crate::market::freight_cents(clock.round_trip_km);
-        let quote = village.trade_status(&catalog, &stock, clock);
+        let quote = village
+            .trade_market(&catalog, &stock, clock)
+            .unwrap()
+            .purchase_totals;
         assert!(quote.contains(&format!(
             "Pickup total R${:.2} (return trip, no extra fuel) · Freight total R${:.2}",
             price as f64 / 100.0,
@@ -2220,7 +2223,10 @@ mod tests {
         assert_eq!(village.market.committed_fares(), reserved);
         assert!(
             village
-                .trade_status(&catalog, &stock, clock)
+                .trade_market(&catalog, &stock, clock)
+                .unwrap()
+                .freight_shortfall
+                .unwrap()
                 .contains("Queued supplier freight needs R$0.01 more")
         );
         village.toggle_supplier_construction();

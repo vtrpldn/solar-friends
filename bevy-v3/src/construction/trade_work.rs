@@ -16,7 +16,7 @@ pub(crate) enum SaleSetting {
     Limit,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq)]
 pub(crate) enum TradePolicy {
     HouseholdRestock,
     AutomaticSale,
@@ -36,6 +36,19 @@ pub(crate) struct TradeQueueRow {
     pub held: Option<bool>,
 }
 
+pub(crate) struct TradeMarket<'a> {
+    pub item: crate::trade::TradeItem<'a>,
+    pub supplier: String,
+    pub purchase_totals: String,
+    pub freight_eta: Option<String>,
+    pub supplier_renewal: bool,
+    pub buyer: String,
+    pub sale_quote: Result<String, &'static str>,
+    pub automatic_sale: String,
+    pub transport: String,
+    pub freight_shortfall: Option<String>,
+}
+
 fn sale_proceeds(cents: u64, fare: u64) -> String {
     let net = (cents as f64 - fare as f64) / 100.0;
     let after_fuel = if net < 0.0 {
@@ -50,18 +63,27 @@ fn sale_proceeds(cents: u64, fare: u64) -> String {
 }
 
 impl Construction {
+    pub(crate) fn trade_page(&self, catalog: &Catalog) -> (usize, usize) {
+        let (page, pages) = if let Some(page) = self.trade.queue_page {
+            (page, self.trade_queue_pages())
+        } else {
+            let pages = Trade::tradable(catalog)
+                .len()
+                .div_ceil(PAGE_KEYS.len())
+                .max(1);
+            (self.trade.page, pages)
+        };
+        (page.min(pages - 1), pages)
+    }
+
     pub fn page_trade(&mut self, catalog: &Catalog, forward: bool) {
-        if let Some(page) = self.trade.queue_page {
-            let pages = self.trade_queue_pages();
-            self.trade.queue_page =
-                Some((page.min(pages - 1) + if forward { 1 } else { pages - 1 }) % pages);
-            return;
+        let (page, pages) = self.trade_page(catalog);
+        let next = (page + if forward { 1 } else { pages - 1 }) % pages;
+        if let Some(queue_page) = &mut self.trade.queue_page {
+            *queue_page = next;
+        } else {
+            self.trade.page = next;
         }
-        let pages = Trade::tradable(catalog)
-            .len()
-            .div_ceil(PAGE_KEYS.len())
-            .max(1);
-        self.trade.page = (self.trade.page + if forward { 1 } else { pages - 1 }) % pages;
     }
 
     fn trade_queue_pages(&self) -> usize {
@@ -229,20 +251,14 @@ impl Construction {
         }
     }
 
-    pub fn trade_page_labels(&self, catalog: &Catalog) -> Vec<String> {
+    pub(crate) fn trade_page_items<'a>(
+        &self,
+        catalog: &'a Catalog,
+    ) -> impl Iterator<Item = crate::trade::TradeItem<'a>> + use<'a> {
         Trade::tradable(catalog)
-            .iter()
-            .enumerate()
+            .into_iter()
             .skip(self.trade.page * PAGE_KEYS.len())
             .take(PAGE_KEYS.len())
-            .map(|(index, item)| {
-                if index == self.trade.selected {
-                    format!("› {}", item.material.name)
-                } else {
-                    item.material.name.clone()
-                }
-            })
-            .collect()
     }
 
     pub(crate) fn select_trade_material(&mut self, catalog: &Catalog, id: &str) -> bool {
@@ -337,12 +353,6 @@ impl Construction {
                 self.adjust_trade_policy(catalog, action);
             }
         }
-    }
-
-    pub(crate) fn sale_quantity_unit(&self, catalog: &Catalog) -> &'static str {
-        Trade::tradable(catalog)[self.trade.selected]
-            .material
-            .quantity_unit()
     }
 
     pub(crate) fn set_sale_quantity(
@@ -735,173 +745,101 @@ impl Construction {
         status
     }
 
-    pub fn trade_status(&self, catalog: &Catalog, stock: &Stock, clock: TownClock) -> String {
-        if let Some(offset) = self.trade_queue_offset() {
-            let mut display = format!(
-                "Town trade orders · {}/{} · Page Up/Down · O Browse materials",
-                offset / ORDER_ROWS + 1,
-                self.trade_queue_pages(),
-            );
-            let rows = self.trade_queue_labels(catalog, clock);
-            if rows.is_empty() {
-                display.push_str("\nNo pickup or sale orders.");
-            }
-            for (index, row) in rows.into_iter().enumerate() {
-                let hint = match (row.can_cancel, row.held) {
-                    (true, Some(true)) => {
-                        format!("{} Cancel · Shift {} Allow own trip", index + 1, index + 1)
-                    }
-                    (true, Some(false)) => {
-                        format!("{} Cancel · Shift {} Hold", index + 1, index + 1)
-                    }
-                    (true, None) => format!("{} Cancel", index + 1),
-                    _ => String::new(),
-                };
-                display.push_str(&format!("\n{} {hint}", row.label));
-            }
-            if let Some(delivery) = self.supplier_delivery_status(
+    pub(crate) fn dispatch_settings(&self) -> (u8, f64, bool) {
+        let policy = &self.logistics_policy;
+        (
+            policy.minimum_fill,
+            f64::from(policy.wait_half_hours) * 0.5,
+            policy.urgent,
+        )
+    }
+
+    pub(crate) fn trade_freight_status(
+        &self,
+        catalog: &Catalog,
+        stock: &Stock,
+        clock: TownClock,
+    ) -> impl Iterator<Item = String> {
+        [
+            self.supplier_delivery_status(
                 catalog,
                 self.storage_space(catalog, stock),
                 clock.seconds,
-            ) {
-                display.push('\n');
-                display.push_str(&delivery);
-            }
-            if let Some(freight) = self.reserved_freight_status(clock.seconds) {
-                display.push('\n');
-                display.push_str(&freight);
-            }
-            if !self.trade.notice.is_empty() {
-                display.push_str(&format!("\n{}", self.trade.notice));
-            }
-            return display;
-        }
-        let options = Trade::tradable(catalog);
-        let mut display = String::from("Town trade · Page Up/Down · 1–8 Select · O Orders\n");
-        let mut previous_group = "";
-        for (index, option) in options
-            .iter()
-            .skip(self.trade.page * PAGE_KEYS.len())
-            .take(PAGE_KEYS.len())
-            .enumerate()
-        {
-            if option.group != previous_group {
-                display.push_str(option.group);
-                display.push('\n');
-                previous_group = option.group;
-            }
-            let item = option.material;
-            if option.id == options[self.trade.selected].id {
-                display.push_str("› ");
-            }
-            display.push_str(&format!(
-                "{} {} · {} in stock\n",
-                index + 1,
-                item.name,
-                item.quantity_text(u64::from(stock.available(option.id)))
-            ));
-        }
+            ),
+            self.reserved_freight_status(clock.seconds),
+        ]
+        .into_iter()
+        .flatten()
+    }
+
+    pub(crate) fn trade_market<'a>(
+        &self,
+        catalog: &'a Catalog,
+        stock: &Stock,
+        clock: TownClock,
+    ) -> Option<TradeMarket<'a>> {
+        let option = Trade::tradable(catalog).get(self.trade.selected).copied()?;
         let crate::trade::TradeItem {
             id, material: item, ..
-        } = options[self.trade.selected];
-        let buyer = &item.buyer.name;
+        } = option;
         let day = clock.day();
-        let supplier = self.market.supplier_available(catalog, id, day);
+        let supply = self.market.supplier_available(catalog, id, day);
         let pack = item.quantity_text(u64::from(item.pack));
-        let available = item.quantity_text(u64::from(supplier));
+        let available = item.quantity_text(u64::from(supply));
         let price = (item.price * 100.0).round() as u64;
         let shared_pickup = self.sale_trip_for_return_purchase().is_some();
-        let pickup = if shared_pickup {
-            0
-        } else {
-            fare_cents(clock.round_trip_km)
-        };
+        let fare = fare_cents(clock.round_trip_km);
+        let pickup = if shared_pickup { 0 } else { fare };
         let freight = freight_cents(clock.round_trip_km);
         let pickup_note = if shared_pickup {
             " (return trip, no extra fuel)"
         } else {
             ""
         };
-        display.push_str(&format!(
-            "{} · Pack {pack} at R${:.2} · {} has {available} today\nPickup total R${:.2}{pickup_note} · Freight total R${:.2}\n",
+        let supplier = format!(
+            "{} · Pack {pack} at R${:.2} · {} has {available} today",
             item.name,
             price as f64 / 100.0,
             item.supplier_name,
+        );
+        let purchase_totals = format!(
+            "Pickup total R${:.2}{pickup_note} · Freight total R${:.2}",
             (price + pickup) as f64 / 100.0,
             (price + freight) as f64 / 100.0,
-        ));
-        if supplier < item.pack {
-            display
-                .push_str("Supplier stock renews tomorrow. Paid orders keep their allocation.\n");
-        }
-        let issue = |fare, freight| self.purchase_quote(catalog, stock, clock, id, freight, fare);
-        let freight_quote = issue(freight, true);
-        if freight_quote.is_ok() {
-            let minutes =
-                crate::weather::remaining_game_minutes(freight_seconds(clock.round_trip_km));
-            display.push_str(&format!(
-                "Supplier freight arrives in about {minutes} game minutes · No driver needed\n"
-            ));
-        }
-        match (issue(pickup, false), freight_quote) {
-            (Err(pickup), Err(freight)) if pickup == freight => {
-                display.push_str(&format!("Purchases unavailable · {pickup}\n"));
-            }
-            (pickup, freight) => {
-                for (method, result) in [("Pickup", pickup), ("Freight", freight)] {
-                    if let Err(reason) = result {
-                        display.push_str(&format!("{method} unavailable · {reason}\n"));
-                    }
-                }
-            }
-        }
-        let fare = fare_cents(clock.round_trip_km);
-        let quote = match self.trade.quote_sale_order(catalog, stock, id, day, 0) {
-            Ok((qty, cents)) => {
-                let mut quote = format!(
-                    "{} · {}",
-                    item.quantity_text(u64::from(qty)),
-                    sale_proceeds(cents, fare),
-                );
-                if self.market.can_hold_fare(stock, fare) {
-                    quote.push_str("\nEnter Queue sale");
-                } else {
-                    quote.push_str("\nShared savings cannot cover a dedicated trip.");
-                }
-                quote.push_str(" · Shift+Enter Hold for shared trip");
-                quote
-            }
-            Err(error) => error.into(),
-        };
-        let daily_demand = item.buyer.batches * item.pack;
-        let remaining = daily_demand.saturating_sub(self.trade.buyer_reserved(id, day));
-        let remaining = item.quantity_text(u64::from(remaining));
-        display.push_str(&format!(
-            "{buyer} · {remaining} of demand left today\n{quote}\nBackspace Cancel last queued\n"
-        ));
-        let policy = self.trade.policies.get(id);
-        let on = if policy.is_some_and(|policy| policy.enabled) {
-            "on"
+        );
+        let freight_eta = self
+            .purchase_quote(catalog, stock, clock, id, true, freight)
+            .is_ok()
+            .then(|| {
+                let minutes =
+                    crate::weather::remaining_game_minutes(freight_seconds(clock.round_trip_km));
+                format!(
+                    "Supplier freight arrives in about {minutes} game minutes. No driver needed."
+                )
+            });
+        let sale_quote =
+            self.trade
+                .quote_sale_order(catalog, stock, id, day, 0)
+                .map(|(quantity, cents)| {
+                    format!(
+                        "{} · {}",
+                        item.quantity_text(u64::from(quantity)),
+                        sale_proceeds(cents, fare),
+                    )
+                });
+        let remaining =
+            (item.buyer.batches * item.pack).saturating_sub(self.trade.buyer_reserved(id, day));
+        let buyer = format!(
+            "{} · {} of demand left today",
+            item.buyer.name,
+            item.quantity_text(u64::from(remaining)),
+        );
+        let automatic_sale = if stock.sandbox {
+            "Automatic sales are disabled in Sandbox.".into()
         } else {
-            "off"
-        };
-        let default_reserve = Trade::default_sale_reserve(id);
-        let reserve = item.quantity_text(u64::from(
-            policy.map_or(default_reserve, |policy| policy.reserve),
-        ));
-        let trigger = item.quantity_text(u64::from(
-            policy.map_or(default_reserve, |policy| policy.trigger),
-        ));
-        let limit = item.quantity_text(u64::from(policy.map_or(0, |policy| policy.limit)));
-        display.push_str(&format!("T Auto-sale {on} · [ / ] Reserve {reserve}\nR Trigger {trigger} · Y Daily cap {limit} (0 unlimited)\n{} queued · {} delivered",
-            self.trade.orders.len(), self.trade.receipts));
-        if stock.sandbox {
-            display.push_str("\nAutomatic sales are disabled in Sandbox.");
-        } else {
-            let (protected, automatic_offer) =
-                self.trade.automatic_sale_offer(catalog, stock, id, day);
+            let (protected, offer) = self.trade.automatic_sale_offer(catalog, stock, id, day);
             let protected = item.quantity_text(u64::from(protected));
-            let result = match automatic_offer {
+            let result = match offer {
                 Ok((quantity, cents)) => format!(
                     "{} eligible for R${:.2} before fuel",
                     item.quantity_text(u64::from(quantity)),
@@ -909,70 +847,39 @@ impl Construction {
                 ),
                 Err(reason) => reason.into(),
             };
-            display.push_str(&format!(
-                "\nAutomatic sale · {protected} protected · {result}"
-            ));
-        }
-        let (used, maximum) = self.storage(catalog, stock);
-        let committed = if self.supplier_construction {
-            self.protected_freight_cash(catalog, clock)
-                .unwrap_or(stock.balance())
-        } else {
-            self.market.committed_fares()
+            format!("{protected} protected · {result}")
         };
-        let spendable = stock.balance().saturating_sub(committed);
-        let (transport, fare) = if self.supplier_construction {
+        let (spendable, committed) = self.finance_commitments(catalog, stock, clock);
+        let (method, fare) = if self.supplier_construction {
             ("Supplier freight", freight)
         } else {
             ("Resident pickup", pickup)
         };
-        display.push_str(&format!(
-            "\n{transport} · R${:.2} transport · R${:.2} available after commitments\nI Buy · D Change purchase transport\nStorage {used}/{maximum} units · {} fulfilled purchases",
+        let transport = format!(
+            "{method} · R${:.2} transport · R${:.2} available after commitments",
             fare as f64 / 100.0,
             spendable as f64 / 100.0,
-            self.trade.purchases,
-        ));
+        );
         let freight_shortfall = committed.saturating_sub(stock.balance());
-        if self.supplier_construction && !stock.sandbox && freight_shortfall > 0 {
-            use std::fmt::Write;
-            let _ = write!(
-                display,
-                "\nQueued supplier freight needs R${:.2} more. Choose resident pickup to use the existing pickup fares.",
-                freight_shortfall as f64 / 100.0,
-            );
-        }
-        if let Some(status) =
-            self.supplier_delivery_status(catalog, maximum.saturating_sub(used), clock.seconds)
-        {
-            display.push('\n');
-            display.push_str(&status);
-        }
-        if let Some(freight) = self.reserved_freight_status(clock.seconds) {
-            display.push('\n');
-            display.push_str(&freight);
-        }
-        let policy = &self.logistics_policy;
-        display.push_str(&format!(
-            "\nAuto dispatch · G Minimum load {}% · J Wait up to {:.1}h · U {}",
-            policy.minimum_fill,
-            f64::from(policy.wait_half_hours) * 0.5,
-            if policy.urgent {
-                "Marked urgent"
-            } else {
-                "Send now"
-            },
-        ));
-        let restock = if self.trade.household_restock_off {
-            "off"
-        } else {
-            "on"
-        };
-        display.push_str(&format!("\n0 Household restock {restock}"));
-        if !self.trade.notice.is_empty() {
-            display.push('\n');
-            display.push_str(&self.trade.notice);
-        }
-        display
+        let freight_shortfall = (self.supplier_construction && !stock.sandbox && freight_shortfall > 0)
+            .then(|| {
+                format!(
+                    "Queued supplier freight needs R${:.2} more. Choose resident pickup to use the existing pickup fares.",
+                    freight_shortfall as f64 / 100.0,
+                )
+            });
+        Some(TradeMarket {
+            item: option,
+            supplier,
+            purchase_totals,
+            freight_eta,
+            supplier_renewal: supply < item.pack,
+            buyer,
+            sale_quote,
+            automatic_sale,
+            transport,
+            freight_shortfall,
+        })
     }
 }
 
@@ -1084,7 +991,7 @@ mod tests {
         village.set_sale_quantity(&catalog, SaleSetting::Trigger, 4.);
         village.set_sale_quantity(&catalog, SaleSetting::Limit, 32.);
         let policy = &village.trade.policies["wood"];
-        assert_eq!(village.sale_quantity_unit(&catalog), "kg");
+        assert_eq!(catalog.materials["wood"].quantity_unit(), "kg");
         assert_eq!((policy.reserve, policy.trigger, policy.limit), (4, 4, 8));
         village.set_sale_quantity(&catalog, SaleSetting::Limit, 0.);
         assert_eq!(village.trade.policies["wood"].limit, 0);
@@ -1101,7 +1008,10 @@ mod tests {
             seconds: 0.0,
             round_trip_km: 12,
         };
-        let status = village.trade_status(&catalog, &stock, clock);
+        let status = village
+            .trade_market(&catalog, &stock, clock)
+            .unwrap()
+            .automatic_sale;
         assert!(status.contains("Automatic sales are disabled in Sandbox."));
         assert!(!status.contains("before fuel"));
     }
@@ -1203,16 +1113,16 @@ mod tests {
         let loss = fare_cents(clock.round_trip_km) - gross;
         assert!(
             village
-                .trade_status(&catalog, &stock, clock)
+                .trade_market(&catalog, &stock, clock)
+                .unwrap()
+                .sale_quote
+                .unwrap()
                 .contains(&format!(
                     "R${:.2} gross · -R${:.2} after dedicated fuel",
                     gross as f64 / 100.0,
                     loss as f64 / 100.0,
                 ))
         );
-        assert!(village.trade_status(&catalog, &stock, clock).contains(
-            "Shared savings cannot cover a dedicated trip. · Shift+Enter Hold for shared trip"
-        ));
         assert!(
             village
                 .reserve_town_sale(&catalog, &mut stock, clock, "wood", false)
@@ -1238,32 +1148,24 @@ mod tests {
         assert!(village.select_trade_material(&catalog, id));
         assert!(village.trade.queue_page.is_none());
         assert_eq!(Trade::tradable(&catalog)[village.trade.selected].id, id);
-        assert!(
-            village
-                .trade_page_labels(&catalog)
-                .contains(&format!("› {name}"))
-        );
+        assert!(village.trade_page_items(&catalog).any(|item| item.id == id));
     }
 
     #[test]
-    fn trade_page_labels_groups_and_selects_the_same_item() {
+    fn trade_page_groups_and_selects_the_same_item() {
         let catalog = Catalog::default();
-        let stock = Stock::for_start(&WorldSetup::default(), &catalog);
         let mut village = Construction::default();
-        let clock = TownClock {
-            seconds: 0.,
-            round_trip_km: 12,
-        };
         let items = Trade::tradable(&catalog);
         let logs = items.iter().position(|item| item.id == "logs").unwrap();
         village.trade.page = logs / PAGE_KEYS.len();
         village.select_trade_row(&catalog, logs % PAGE_KEYS.len());
-        let text = village.trade_status(&catalog, &stock, clock);
-        assert!(text.contains(&format!(
-            "Raw materials\n› {} {}",
-            logs % PAGE_KEYS.len() + 1,
-            items[logs].material.name
-        )));
+        let item = village
+            .trade_page_items(&catalog)
+            .nth(logs % PAGE_KEYS.len())
+            .unwrap();
+        assert_eq!(item.group, "Raw materials");
+        assert_eq!(item.id, items[logs].id);
+        assert_eq!(village.trade.selected, logs);
     }
 
     #[test]
@@ -1317,9 +1219,13 @@ mod tests {
         let summary = village.finance_summary(&catalog, &stock, 0, clock);
         assert!(summary.contains("Available after commitments R$0.00"));
         assert!(
-            village.trade_status(&catalog, &stock, clock).contains(
-                "Supplier freight · R$44.60 transport · R$0.00 available after commitments"
-            )
+            village
+                .trade_market(&catalog, &stock, clock)
+                .unwrap()
+                .transport
+                .contains(
+                    "Supplier freight · R$44.60 transport · R$0.00 available after commitments"
+                )
         );
         assert!(summary.contains(&format!(
             "Reserved for town trips and freight R${:.2}",
@@ -1360,13 +1266,15 @@ mod tests {
         );
         assert!(
             village
-                .trade_status(&catalog, &stock, clock)
-                .contains("390 game minutes remaining")
+                .trade_freight_status(&catalog, &stock, clock)
+                .any(|status| status.contains("390 game minutes remaining"))
         );
         assert!(
             village
-                .trade_status(&catalog, &stock, clock)
-                .contains("Freight unavailable · A freight order is already on the way.")
+                .trade_market(&catalog, &stock, clock)
+                .unwrap()
+                .freight_eta
+                .is_none()
         );
 
         assert!(
@@ -1381,23 +1289,23 @@ mod tests {
         village.toggle_trade_queue();
         assert!(
             village
-                .trade_status(&catalog, &stock, clock)
-                .contains("390 game minutes remaining")
+                .trade_freight_status(&catalog, &stock, clock)
+                .any(|status| status.contains("390 game minutes remaining"))
         );
         village.toggle_trade_queue();
 
         clock.seconds = village.trade.delivery.as_ref().unwrap().eta;
         assert!(
             village
-                .trade_status(&catalog, &stock, clock)
-                .contains("Ready to unload")
+                .trade_freight_status(&catalog, &stock, clock)
+                .any(|status| status.contains("Ready to unload"))
         );
         let space = village.storage_space(&catalog, &stock) as u32;
         stock.receive(&BTreeMap::from([("stone".into(), space)]));
         assert!(
             village
-                .trade_status(&catalog, &stock, clock)
-                .contains("Waiting for storage space")
+                .trade_freight_status(&catalog, &stock, clock)
+                .any(|status| status.contains("Waiting for storage space"))
         );
         let terrain = setup.terrain();
         let land = Land::default();

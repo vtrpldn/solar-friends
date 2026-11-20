@@ -3,11 +3,14 @@
 
 pub(super) mod art;
 pub(super) mod crafting;
+pub(super) mod events;
 pub(super) mod finances;
 pub(super) mod inventory;
 pub(super) mod pantry;
 pub(super) mod sites;
 mod town_trip;
+pub(super) mod trade;
+pub(super) mod upkeep;
 pub(super) mod widgets;
 
 use super::*;
@@ -104,11 +107,16 @@ pub(super) fn spawn(card: &mut ChildSpawnerCommands, assets: &AssetServer) {
             });
         }
     });
+    widgets::spawn::<sites::connections::Water>(card);
+    widgets::spawn::<sites::connections::Power>(card);
     sites::spawn_list(card);
     inventory::spawn(card, assets);
     crafting::spawn(card, assets);
     pantry::spawn(card, assets);
     finances::spawn(card, assets);
+    widgets::spawn::<events::Screen>(card);
+    widgets::spawn::<upkeep::Screen>(card);
+    widgets::spawn::<trade::Screen>(card);
 }
 
 /// Caption and title for a panel, in V2's words where V2 had the screen.

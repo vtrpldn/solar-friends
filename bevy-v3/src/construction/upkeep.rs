@@ -121,6 +121,10 @@ struct Service {
 }
 
 impl Service {
+    fn progress(&self) -> f32 {
+        (self.work / self.kind.duration()) as f32
+    }
+
     fn supplies_status(&self, definition: Option<&Project>, catalog: &Catalog) -> String {
         let supplies = parts(self.kind, definition, catalog)
             .iter()
@@ -150,10 +154,10 @@ impl Upkeep {
                             && job.worker.is_none_or(|id| id < 5)
                     })
             })
-            && self.budget <= 10_000_000
-            && self.used <= 10_000_000
-            && self.restock_budget <= 10_000_000
-            && self.restock_used <= 10_000_000
+            && self.budget <= Construction::UPKEEP_BUDGET_LIMIT
+            && self.used <= Construction::UPKEEP_BUDGET_LIMIT
+            && self.restock_budget <= Construction::UPKEEP_BUDGET_LIMIT
+            && self.restock_used <= Construction::UPKEEP_BUDGET_LIMIT
             && self.assets.iter().all(|(&id, asset)| {
                 id < count
                     && (0.0..=100.0).contains(&asset.condition)
@@ -215,7 +219,40 @@ impl Upkeep {
     }
 }
 
+pub(crate) struct BuildingUpkeep<'a> {
+    pub index: usize,
+    pub name: &'a str,
+    pub work: &'static str,
+    pub progress: Option<f32>,
+    pub supplies: String,
+}
+
+pub(crate) struct VehicleUpkeep {
+    pub condition: f64,
+    pub kilometers: u64,
+    pub service: Option<(Option<f32>, String)>,
+}
+
+pub(crate) struct SelectedUpkeep<'a> {
+    pub index: usize,
+    pub name: &'a str,
+    pub condition: f64,
+    pub years: f64,
+    pub battery_years: f64,
+}
+
 impl Construction {
+    pub const UPKEEP_BUDGET_LIMIT: u64 = 10_000_000;
+    pub const UPKEEP_BUDGET_STEP: u64 = 2_500;
+
+    pub(crate) fn upkeep_budget(&self, restock: bool) -> (u64, u64) {
+        if restock {
+            (self.upkeep.restock_used, self.upkeep.restock_budget)
+        } else {
+            (self.upkeep.used, self.upkeep.budget)
+        }
+    }
+
     pub fn automatic_upkeep(&self) -> bool {
         self.upkeep.automatic
     }
@@ -226,9 +263,9 @@ impl Construction {
 
     pub fn set_upkeep_budget(&mut self, restock: bool, cents: u64) {
         if restock {
-            self.upkeep.restock_budget = cents.min(10_000_000);
+            self.upkeep.restock_budget = cents.min(Self::UPKEEP_BUDGET_LIMIT);
         } else {
-            self.upkeep.budget = cents.min(10_000_000);
+            self.upkeep.budget = cents.min(Self::UPKEEP_BUDGET_LIMIT);
         }
     }
 
@@ -239,9 +276,9 @@ impl Construction {
             &mut self.upkeep.budget
         };
         *budget = if increase {
-            (*budget + 2_500).min(10_000_000)
+            (*budget + Self::UPKEEP_BUDGET_STEP).min(Self::UPKEEP_BUDGET_LIMIT)
         } else {
-            budget.saturating_sub(2_500)
+            budget.saturating_sub(Self::UPKEEP_BUDGET_STEP)
         };
     }
 
@@ -377,103 +414,70 @@ impl Construction {
             }))
     }
 
-    pub const UPKEEP_ROWS: usize = 4;
+    const UPKEEP_ROWS: usize = 4;
 
-    pub fn upkeep_pages(&self) -> usize {
-        self.upkeep.jobs.len().div_ceil(Self::UPKEEP_ROWS).max(1)
+    pub(crate) fn upkeep_job_count(&self) -> usize {
+        self.upkeep.jobs.len()
     }
 
-    fn upkeep_page_jobs(&self, page: usize) -> impl Iterator<Item = (&usize, &Service)> {
+    pub fn upkeep_pages(&self) -> usize {
+        self.upkeep_job_count().div_ceil(Self::UPKEEP_ROWS).max(1)
+    }
+
+    pub(crate) fn upkeep_building_jobs<'a>(
+        &'a self,
+        catalog: &'a Catalog,
+        page: usize,
+    ) -> impl Iterator<Item = BuildingUpkeep<'a>> {
         self.upkeep
             .jobs
             .iter()
             .skip(page.min(self.upkeep_pages() - 1) * Self::UPKEEP_ROWS)
             .take(Self::UPKEEP_ROWS)
-    }
-
-    pub fn upkeep_job_labels(&self, catalog: &Catalog, page: usize) -> Vec<String> {
-        self.upkeep_page_jobs(page)
-            .map(|(&index, _)| {
-                format!(
-                    "Find {} #{}",
-                    catalog.projects[&self.plans[index].key].name,
-                    index + 1
-                )
+            .map(|(&index, job)| {
+                let project = &catalog.projects[&self.plans[index].key];
+                BuildingUpkeep {
+                    index,
+                    name: &project.name,
+                    work: job.kind.label(),
+                    progress: job.worker.map(|_| job.progress()),
+                    supplies: job.supplies_status(Some(project), catalog),
+                }
             })
-            .collect()
     }
 
-    pub fn focus_upkeep_job(&mut self, page: usize, row: usize) -> Option<Vec2> {
-        let index = *self.upkeep_page_jobs(page).nth(row)?.0;
+    pub(crate) fn upkeep_vehicles(&self, catalog: &Catalog) -> impl Iterator<Item = VehicleUpkeep> {
+        self.upkeep.vehicles.iter().map(|car| VehicleUpkeep {
+            condition: car.condition,
+            kilometers: car.kilometers,
+            service: car.service.as_ref().map(|job| {
+                (
+                    job.parts_paid.then(|| job.progress()),
+                    job.supplies_status(None, catalog),
+                )
+            }),
+        })
+    }
+
+    pub(crate) fn upkeep_selected_asset<'a>(
+        &self,
+        catalog: &'a Catalog,
+    ) -> Option<SelectedUpkeep<'a>> {
+        let index = self.production.selected?;
+        let asset = self.upkeep.assets.get(&index)?;
+        Some(SelectedUpkeep {
+            index,
+            name: &catalog.projects[&self.plans[index].key].name,
+            condition: asset.condition,
+            years: asset.age / 365.0,
+            battery_years: asset.battery_age / 365.0,
+        })
+    }
+
+    pub fn focus_upkeep_job(&mut self, index: usize) -> Option<Vec2> {
+        self.upkeep.jobs.get(&index)?;
         self.select_project(Some(index));
         self.selected_project_center()
-    }
-
-    pub fn upkeep_status(&self, catalog: &Catalog, page: usize) -> String {
-        let u = &self.upkeep;
-        let setting = if u.automatic { "on" } else { "off" };
-        let mut text = format!(
-            "Maintenance · Automatic {setting} · T Switch\nR${:.0} / R${:.0} parts today · [ ] Budget\nR${:.0} / R${:.0} restocking today · Shift+[ ] Budget",
-            u.used as f64 / 100.0,
-            u.budget as f64 / 100.0,
-            u.restock_used as f64 / 100.0,
-            u.restock_budget as f64 / 100.0,
-        );
-        for (index, car) in u.vehicles.iter().enumerate() {
-            let service = car.service.as_ref().map_or_else(String::new, |job| {
-                if job.parts_paid {
-                    format!(" · service {:.0}%", job.work / job.kind.duration() * 100.0)
-                } else {
-                    " · service queued".into()
-                }
-            });
-            text.push_str(&format!(
-                "\nVehicle {} · {:.0}% condition · {} km{service}",
-                index + 1,
-                car.condition,
-                car.kilometers
-            ));
-            if let Some(job) = &car.service {
-                text.push('\n');
-                text.push_str(&job.supplies_status(None, catalog));
-            }
-        }
-        let page = page.min(self.upkeep_pages() - 1);
-        if !u.jobs.is_empty() {
-            text.push_str(&format!(
-                "\n{} building jobs · Page {}/{}",
-                u.jobs.len(),
-                page + 1,
-                self.upkeep_pages()
-            ));
-        }
-        for (&index, job) in self.upkeep_page_jobs(page) {
-            let definition = &catalog.projects[&self.plans[index].key];
-            let name = &definition.name;
-            let status = if job.worker.is_some() {
-                format!("{:.0}% complete", job.work / job.kind.duration() * 100.0)
-            } else {
-                "Awaiting worker, parts, or budget".into()
-            };
-            text.push_str(&format!(
-                "\n{name} #{} · {} · {status}",
-                index + 1,
-                job.kind.label()
-            ));
-            text.push('\n');
-            text.push_str(&job.supplies_status(Some(definition), catalog));
-        }
-        if let Some(index) = self.production.selected
-            && let Some(asset) = u.assets.get(&index)
-        {
-            text.push_str(&format!(
-                "\nSelected · Condition {:.0}% · Age {:.1} years · Battery {:.1} years",
-                asset.condition,
-                asset.age / 365.0,
-                asset.battery_age / 365.0
-            ));
-        }
-        text
     }
 
     pub(super) fn working_upkeep(&self, worker: usize) -> bool {
@@ -966,8 +970,10 @@ mod tests {
 
         village.upkeep.budget = 20_000;
         village.age_assets(&catalog, 0.1, 0.1);
-        let queued = village.upkeep_status(&catalog, 0);
-        assert!(queued.contains("km · service queued\nRequired ·"));
+        let queued = village.upkeep_vehicles(&catalog).nth(1).unwrap();
+        let (progress, supplies) = queued.service.unwrap();
+        assert!(progress.is_none());
+        assert!(supplies.starts_with("Required ·"));
         let mut reserved_seen = false;
         for _ in 0..6_000 {
             village.tick_upkeep(&catalog, &mut stock, site, 0.1);
@@ -977,7 +983,10 @@ mod tests {
                     .as_ref()
                     .is_some_and(|job| job.parts_paid)
             {
-                assert!(village.upkeep_status(&catalog, 0).contains("\nReserved ·"));
+                let vehicle = village.upkeep_vehicles(&catalog).nth(1).unwrap();
+                let (progress, supplies) = vehicle.service.unwrap();
+                assert!(progress.is_some());
+                assert!(supplies.starts_with("Reserved ·"));
                 reserved_seen = true;
             }
             if village.upkeep.vehicles[1].service.is_none() {
@@ -1037,9 +1046,11 @@ mod tests {
         assert!(village.upkeep.jobs[&0].worker.is_none());
         assert_eq!(stock.available("tools"), tools);
         assert_eq!(village.upkeep_pages(), 1);
-        assert_eq!(village.upkeep_job_labels(&catalog, 0).len(), 1);
-        assert!(village.upkeep_status(&catalog, 0).contains("Required ·"));
-        assert!(village.focus_upkeep_job(0, 0).is_some());
+        let jobs: Vec<_> = village.upkeep_building_jobs(&catalog, 0).collect();
+        assert_eq!(jobs.len(), 1);
+        assert!(jobs[0].supplies.starts_with("Required ·"));
+        let index = jobs[0].index;
+        assert!(village.focus_upkeep_job(index).is_some());
 
         village.upkeep.budget = 20_000;
         for _ in 0..6_000 {

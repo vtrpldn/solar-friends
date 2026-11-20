@@ -209,7 +209,12 @@ impl Plugin for VillagePlugin {
                         almanac::widgets::input::<almanac::inventory::Screen>,
                         almanac::widgets::input::<almanac::crafting::Screen>,
                         almanac::widgets::input::<almanac::pantry::Screen>,
+                        almanac::widgets::input::<almanac::upkeep::Screen>,
+                        almanac::widgets::input::<almanac::events::Screen>,
                         almanac::widgets::input::<almanac::finances::Screen>,
+                        almanac::widgets::input::<almanac::sites::connections::Water>,
+                        almanac::widgets::input::<almanac::sites::connections::Power>,
+                        almanac::widgets::input::<almanac::trade::Screen>,
                         village_input,
                         almanac::sites::input,
                     )
@@ -226,7 +231,12 @@ impl Plugin for VillagePlugin {
                         almanac::widgets::refresh::<almanac::inventory::Screen>,
                         almanac::widgets::refresh::<almanac::crafting::Screen>,
                         almanac::widgets::refresh::<almanac::pantry::Screen>,
+                        almanac::widgets::refresh::<almanac::upkeep::Screen>,
+                        almanac::widgets::refresh::<almanac::events::Screen>,
                         almanac::widgets::refresh::<almanac::finances::Screen>,
+                        almanac::widgets::refresh::<almanac::sites::connections::Water>,
+                        almanac::widgets::refresh::<almanac::sites::connections::Power>,
+                        almanac::widgets::refresh::<almanac::trade::Screen>,
                     )
                         .chain(),
                     fit_and_scroll_hud,
@@ -373,7 +383,6 @@ const WATER_CHANNELS: [&str; 4] = ["Drinking", "Irrigation", "Greywater", "Sewag
 #[derive(Clone, Copy)]
 enum WaterCommand {
     Camp { source: bool },
-    NextChannel,
     River,
     Carry,
     Purify,
@@ -437,10 +446,6 @@ impl WaterControls {
                 self.select_facility(0, source);
                 return;
             }
-            WaterCommand::NextChannel => {
-                self.channel = (self.channel + 1) % WATER_CHANNELS.len();
-                return;
-            }
             WaterCommand::Policy(drinking) => {
                 self.message = if construction
                     .utilities
@@ -459,7 +464,7 @@ impl WaterControls {
             },
             WaterCommand::Carry => {
                 let Some(source) = self.source else {
-                    self.message = "Shift-click a water source first.".into();
+                    self.message = "Choose a water source first.".into();
                     return;
                 };
                 WaterAction::Carry {
@@ -733,7 +738,7 @@ impl Village {
                 Ok(()) => "Water connection queued.".into(),
                 Err(error) => error.into(),
             },
-            None => "Shift-click a water source first.".into(),
+            None => "Choose a water source first.".into(),
         };
     }
 
@@ -767,17 +772,6 @@ impl Village {
                 Some(self.water_panel.channel),
             )),
             _ => None,
-        }
-    }
-
-    fn has_queued_utility_installation(&self) -> bool {
-        match self.utility_panel {
-            Some(UtilityPanel::Power | UtilityPanel::Water) => self
-                .construction
-                .queued_utility_connections(self.utility_panel == Some(UtilityPanel::Power))
-                .next()
-                .is_some(),
-            _ => false,
         }
     }
 
@@ -936,8 +930,13 @@ impl Village {
                 Some(
                     UtilityPanel::Crafting
                     | UtilityPanel::Pantry
+                    | UtilityPanel::Events
+                    | UtilityPanel::Upkeep
                     | UtilityPanel::Finances
-                    | UtilityPanel::Residents,
+                    | UtilityPanel::Residents
+                    | UtilityPanel::Water
+                    | UtilityPanel::Power
+                    | UtilityPanel::Trade,
                 ) => true,
                 _ => false,
             }
@@ -1102,10 +1101,7 @@ impl Village {
                     .0,
                 &mut self.inventory_page,
             ),
-            Some(UtilityPanel::Events) => (
-                self.construction.event_log(self.event_page, "F8 Close").0,
-                &mut self.event_page,
-            ),
+            Some(UtilityPanel::Events) => (self.construction.event_pages(), &mut self.event_page),
             Some(UtilityPanel::Upkeep) => (self.construction.upkeep_pages(), &mut self.upkeep_page),
             _ => return,
         };
@@ -3169,9 +3165,7 @@ fn show_hud(
     } else {
         px(520)
     };
-    if village.trade_open()
-        || (village.utility_panel.is_none() && village.construction.production.open)
-    {
+    if village.utility_panel.is_none() && village.construction.production.open {
         node.right = px(toolbar::PANEL_WIDTH + 40.0);
     }
     if let Some(page) = village.guide.text(&catalog) {
@@ -3253,31 +3247,6 @@ fn show_hud(
         label.push_str(&natural);
     }
     match village.utility_panel {
-        Some(UtilityPanel::Power) => {
-            label.push('\n');
-            label.push_str(
-                &village
-                    .construction
-                    .utilities
-                    .power_details(village.stock.sandbox),
-            );
-            label.push_str(&village.construction.connection_summary(
-                &catalog,
-                village.power_link,
-                true,
-            ));
-            label.push_str(&village.construction.power_installation_summary(
-                &catalog,
-                village.power_source,
-                village.power_target,
-            ));
-            if !village.power_notice.is_empty() {
-                label.push('\n');
-                label.push_str(&village.power_notice);
-            }
-            label.push_str(&village.construction.power_shortage_summary(&catalog));
-            label.push_str(&village.construction.queued_installation_hint(true));
-        }
         Some(UtilityPanel::Projects) => {
             label.push('\n');
             label.push_str(
@@ -3320,77 +3289,14 @@ fn show_hud(
         }
         Some(UtilityPanel::Inventory) => {}
         Some(UtilityPanel::Crafting) => {}
-        Some(UtilityPanel::Events) => {
-            label.push('\n');
-            label.push_str(
-                &village
-                    .construction
-                    .event_log(village.event_page, "F8 Close")
-                    .1,
-            );
-        }
-        Some(UtilityPanel::Upkeep) => {
-            label.push('\n');
-            label.push_str(
-                &village
-                    .construction
-                    .upkeep_status(&catalog, village.upkeep_page),
-            );
-        }
-        Some(UtilityPanel::Water) => {
-            label.push('\n');
-            label.push_str(&village.construction.utilities.water_details());
-            label.push_str("\nSanitation · ");
-            label.push_str(
-                &village
-                    .construction
-                    .utilities
-                    .sanitation_status(village.construction.residents_needing_sanitation()),
-            );
-            label.push_str(&village.construction.waste_tank_summary(&catalog));
-            label.push_str(&village.construction.queued_installation_hint(false));
-            label.push_str(&village.construction.connection_summary(
-                &catalog,
-                village.water_link,
-                false,
-            ));
-            label.push_str("\nBlue Drinking · Green Irrigation\nPurple Greywater · Amber Sewage");
-            let panel = &village.water_panel;
-            label.push('\n');
-            label.push_str(&village.construction.water_panel(
-                panel.target,
-                panel.source,
-                panel.channel,
-                village.clock,
-            ));
-            if !panel.message.is_empty() {
-                label.push('\n');
-                label.push_str(&panel.message);
-            }
-        }
+        Some(UtilityPanel::Events) => {}
+        Some(UtilityPanel::Upkeep) => {}
+        Some(UtilityPanel::Water | UtilityPanel::Power) => {}
         Some(UtilityPanel::Residents) => {}
         Some(UtilityPanel::Finances) => {}
-        Some(UtilityPanel::Trade) => {
-            label.push('\n');
-            label.push_str(&village.construction.trade_status(
-                &catalog,
-                &village.stock,
-                TownClock {
-                    seconds: village.clock,
-                    round_trip_km: setup.round_trip_km(),
-                },
-            ));
-            label.push_str("\nTab Pantry");
-        }
+        Some(UtilityPanel::Trade) => {}
         Some(UtilityPanel::Pantry) => {}
         None => {}
-    }
-    if let Some(endpoints) = village.selected_installation() {
-        label.push_str(
-            &village
-                .construction
-                .connection_quote(&catalog, &village.stock, endpoints),
-        );
     }
     // A selected building is described by its card beside the action buttons.
     let card = village.selected_project_focus().is_some();
@@ -4025,12 +3931,7 @@ mod tests {
     #[test]
     fn dispatch_policy_accepts_exact_fill_and_half_hour_wait() {
         let catalog = Catalog::default();
-        let stock = Stock::for_start(&WorldSetup::default(), &catalog);
         let mut construction = Construction::default();
-        let clock = TownClock {
-            seconds: 0.,
-            round_trip_km: 12,
-        };
         apply_numeric_entry(
             NumericTarget::MinimumLoad,
             "37",
@@ -4043,11 +3944,7 @@ mod tests {
             &mut construction,
             &catalog,
         );
-        assert!(
-            construction
-                .trade_status(&catalog, &stock, clock)
-                .contains("Minimum load 37% · J Wait up to 3.5h")
-        );
+        assert_eq!(construction.dispatch_settings(), (37, 3.5, false));
         apply_numeric_entry(
             NumericTarget::MinimumLoad,
             "999",
@@ -4060,11 +3957,7 @@ mod tests {
             &mut construction,
             &catalog,
         );
-        assert!(
-            construction
-                .trade_status(&catalog, &stock, clock)
-                .contains("Minimum load 100% · J Wait up to 24.0h")
-        );
+        assert_eq!(construction.dispatch_settings(), (100, 24.0, false));
     }
 
     #[test]
