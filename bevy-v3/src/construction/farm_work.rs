@@ -675,9 +675,7 @@ impl Construction {
                     continue;
                 }
                 let action = match bed.stage {
-                    Stage::Harvestable
-                        if bed.requirements(FarmAction::Harvest, clock.seconds).is_ok() =>
-                    {
+                    Stage::Harvestable if !bed.harvest_expired(clock.seconds) => {
                         FarmAction::Harvest
                     }
                     Stage::Prepared => FarmAction::Plant,
@@ -1982,7 +1980,7 @@ mod resize_tests {
     }
 
     #[test]
-    fn autonomous_crop_work_prioritizes_planting_and_limits_pending_jobs() {
+    fn autonomous_crop_work_matches_v2_priorities_and_limits_pending_jobs() {
         let catalog = Catalog::default();
         let setup = WorldSetup::default();
         let mut stock = Stock::for_start(&setup, &catalog);
@@ -1998,6 +1996,7 @@ mod resize_tests {
         plot.beds[0].stage = Stage::Unprepared;
         plot.beds[1].stage = Stage::Prepared;
         plot.beds[2].stage = Stage::Failed;
+        plot.beds[3].stage = Stage::Harvestable;
         village.farming.plots.insert(0, plot);
         for _ in 0..2 {
             village.schedule_crop_work(
@@ -2010,9 +2009,14 @@ mod resize_tests {
             );
         }
         assert_eq!(village.farming.jobs.len(), village.residents.len());
-        assert_eq!(village.farming.jobs[0].bed, 1);
-        assert_eq!(village.farming.jobs[1].bed, 2);
-        assert_eq!(village.farming.jobs[2].bed, 0);
+        assert_eq!(village.farming.jobs[0].bed, 3);
+        assert!(village.farming.jobs[0].action == FarmAction::Harvest);
+        assert_eq!(village.farming.jobs[1].bed, 1);
+        assert!(village.farming.jobs[1].action == FarmAction::Plant);
+        assert_eq!(village.farming.jobs[2].bed, 2);
+        assert!(village.farming.jobs[2].action == FarmAction::Clear);
+        assert_eq!(village.farming.jobs[3].bed, 0);
+        assert!(village.farming.jobs[3].action == FarmAction::Prepare);
         let camp = IVec2::new(36, 36);
         let terrain = setup.terrain().with_camp(camp);
         let land = Land::default();
