@@ -1714,7 +1714,9 @@ mod tests {
             app.world_mut()
                 .query::<&Text>()
                 .iter(app.world())
-                .any(|text| text.0.contains("Click home"))
+                .any(|text| text
+                    .0
+                    .contains("Complete a house to assign a permanent home."))
         );
         let before = app
             .world_mut()

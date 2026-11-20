@@ -3367,42 +3367,7 @@ fn show_hud(
                 label.push_str(&panel.message);
             }
         }
-        Some(UtilityPanel::Residents) => {
-            if !label.is_empty() {
-                label.push_str("\n\n");
-            }
-            let selected = village.selected_resident;
-            match village.resident_profile {
-                ResidentProfile::Overview => {
-                    if !village.stock.sandbox {
-                        label.push_str("Paid town work\n");
-                        label.push_str(
-                            &village
-                                .construction
-                                .resident_shift_summary(selected, village.clock),
-                        );
-                        label.push_str("\n\n");
-                    }
-                    label.push_str(&village.construction.resident_overview(
-                        &catalog,
-                        &village.stock,
-                        selected,
-                        false,
-                        &village.housing_notice,
-                    ));
-                }
-                ResidentProfile::Story => {
-                    label.push_str(&Construction::resident_story(&catalog, selected));
-                }
-                ResidentProfile::Skills => {
-                    label.push_str(&village.construction.resident_skills(&catalog, selected));
-                }
-                ResidentProfile::Relationships => {
-                    label.push_str(&village.construction.resident_relationships(selected));
-                }
-            }
-            label.push_str("\n\n1–5 Select resident · Tab Change profile view");
-        }
+        Some(UtilityPanel::Residents) => {}
         Some(UtilityPanel::Finances) => {
             label.push('\n');
             if village.finance_history_open {
