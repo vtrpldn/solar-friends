@@ -619,6 +619,10 @@ impl Bed {
         (self.residue_kg / (self.area() * 0.5)).min(1.0)
     }
 
+    pub(crate) fn organic_matter_index(&self) -> f64 {
+        (self.soil_organic_kg / (self.area() * 2.0)).min(1.0)
+    }
+
     pub fn tick(&mut self, climate: CropClimate, mut use_water: impl FnMut(f64) -> bool) {
         let CropClimate {
             clock,
@@ -799,6 +803,7 @@ mod tests {
         let decomposed = 9.0 - bed.residue_kg - bed.amendment_kg;
         assert!(decomposed > 0.0);
         assert!((bed.soil_organic_kg - decomposed * 0.2).abs() < 1e-9);
+        assert!((bed.organic_matter_index() - decomposed * 0.1 / bed.area()).abs() < 1e-9);
         assert!((bed.decomposed_gas_kg - decomposed * 0.8).abs() < 1e-9);
     }
 
