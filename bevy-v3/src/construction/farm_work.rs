@@ -405,9 +405,16 @@ impl Construction {
             && matches!(action, FarmControl::Work(FarmAction::Clear))
             && confirmation != Some((site, None))
         {
+            let count = self.whole_plot_action_counts(clock.seconds)[FarmAction::Clear as usize];
+            if count == 0 {
+                self.farming.notice = "No available standing crops to clear.".into();
+                return;
+            }
             self.farming.pending_crop_clear = Some((site, None));
-            self.farming.notice =
-                "Clear crops across this plot? Confirm with Clear crops again or press 4. Only recoverable residues will remain.".into();
+            let unit = if count == 1 { "bed" } else { "beds" };
+            self.farming.notice = format!(
+                "Clear crops in {count} {unit}? Choose Confirm clear crops or press 4 again. Only recoverable residues will remain."
+            );
             return;
         }
         if matches!(action, FarmControl::WholePlot) {
@@ -902,8 +909,15 @@ impl Construction {
                 "greenhouse" => "greenhouse",
                 _ => "plot",
             };
+            let seed_policy = if stock.sandbox {
+                "Seeds are unlimited in Sandbox."
+            } else if self.market.auto_buy_off {
+                "Auto-buy is off. Planting needs seeds in stores."
+            } else {
+                "Missing seeds are bought automatically with transport costs. Planting starts after they arrive."
+            };
             return Some(format!(
-                "Whole {name} · {count} beds · {area:.1} m² · {} queued\n{summary}\nCrop and spacing apply to {planting} available beds\nCare applies to {care} beds · Irrigation on {irrigated}/{care} · Collect residues {collect}/{care}\n1 Prepare · 2 Plant · 3 Harvest · 4 Clear · 5 Amend · 6 Collect\nX Crop · Y Density · T Irrigation · Z Residues · Tab Inspect bed\n{}",
+                "Whole {name} · {count} beds · {area:.1} m² · {} queued\n{summary}\n{seed_policy}\nCrop and spacing apply to {planting} available beds\nCare applies to {care} beds · Irrigation on {irrigated}/{care} · Collect residues {collect}/{care}\n1 Prepare · 2 Plant · 3 Harvest · 4 Clear · 5 Amend · 6 Collect\nX Crop · Y Density · T Irrigation · Z Residues · Tab Inspect bed\n{}",
                 busy.len(),
                 self.farming.notice,
             ));
