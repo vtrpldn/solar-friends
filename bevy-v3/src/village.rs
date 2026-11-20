@@ -3222,10 +3222,6 @@ fn show_hud(
         label.push('\n');
         label.push_str(&forecast(village.clock, setup.biome(), setup.seed()));
     }
-    if village.camp.is_some() && !village.advance.open && !village.advance.result().is_empty() {
-        label.push('\n');
-        label.push_str(village.advance.result());
-    }
     if village.terrain_editor.open && !sheet && !village.guide.open() && !village.lenses.open {
         node.left = px(316);
     }

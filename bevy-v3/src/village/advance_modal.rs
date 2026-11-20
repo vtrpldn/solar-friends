@@ -603,9 +603,10 @@ fn refresh(
         if progress_fill.width != width {
             progress_fill.width = width;
         }
+        let days = village.advance.target_days();
         format!(
-            "Advancing {} day(s){} · {:.0}%",
-            village.advance.target_days(),
+            "Advancing {days} {}{} · {:.0}%",
+            if days == 1 { "day" } else { "days" },
             if fast { " (fast)" } else { "" },
             fraction * 100.0
         )

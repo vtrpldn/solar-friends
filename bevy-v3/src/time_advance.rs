@@ -136,7 +136,8 @@ impl Advance {
     pub fn done(&mut self) {
         self.running = None;
         self.open = false;
-        self.result = format!("Advanced {} day(s). The village is paused.", self.days);
+        let days = if self.days == 1 { "day" } else { "days" };
+        self.result = format!("Advanced {} {days}. The village is paused.", self.days);
     }
 
     fn selected_days(&self) -> u16 {

@@ -37,7 +37,7 @@ struct Toast {
 struct News {
     toasts: VecDeque<Toast>,
     /// What was last seen, so only changes become toasts.
-    seen: Option<(Option<String>, Option<String>, String)>,
+    seen: Option<(Option<String>, Option<String>, String, String)>,
 }
 
 #[derive(Component)]
@@ -223,6 +223,7 @@ fn collect_news(
         village.construction.latest_progress(&catalog),
         village.construction.latest_event().map(str::to_owned),
         village.save_notice.clone(),
+        village.advance.result().to_owned(),
     );
     let Some(seen) = news.seen.replace(now.clone()) else {
         // A newly opened village announces only how it is being kept.
@@ -246,6 +247,9 @@ fn collect_news(
     }
     if now.2 != seen.2 && !now.2.is_empty() {
         fresh.push(toast(&now.2));
+    }
+    if now.3 != seen.3 && !now.3.is_empty() {
+        fresh.push(toast(&now.3));
     }
     for toast in fresh {
         news.toasts.push_back(toast);
