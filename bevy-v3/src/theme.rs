@@ -134,3 +134,16 @@ pub fn paint_button(
         *shadow = wanted;
     }
 }
+
+/// Soft sage-cream fill for inset notes such as resident activity and guide tips.
+pub const INSET: Color = Color::srgb_u8(0xee, 0xec, 0xd7);
+/// Lighter cream fill for inner cards, diagram frames, and picker rows on a paper sheet.
+pub const CARD: Color = Color::srgb_u8(0xff, 0xfa, 0xf0);
+/// Soft sage sidebar tint for the village guide topic list (`guide.css`).
+pub const GUIDE_NAV: Color = Color::srgb_u8(0xe9, 0xed, 0xdc);
+/// Soft inner border used for dividers and inset boxes.
+pub const SUBTLE_BORDER: Color = Color::srgb_u8(0xd8, 0xc7, 0x9e);
+/// Need meter colours matching V2's `.need-low`, `.need-warn`, and `.need-good`.
+pub const NEED_LOW: Color = Color::srgb_u8(0xb5, 0x66, 0x4e);
+pub const NEED_WARN: Color = Color::srgb_u8(0xbb, 0x9b, 0x4e);
+pub const NEED_GOOD: Color = Color::srgb_u8(0x81, 0x99, 0x5e);

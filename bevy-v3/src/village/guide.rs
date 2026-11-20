@@ -1,4 +1,8 @@
 use super::*;
+use crate::{
+    theme,
+    ui_font::{ui_font, ui_font_styled, ui_font_weight},
+};
 
 use bevy::prelude::*;
 
@@ -122,7 +126,7 @@ fn chapters() -> &'static [Chapter] {
     })
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 enum Screen {
     Quick(usize),
     Index(usize),
@@ -199,6 +203,7 @@ fn turn_page(page: usize, pages: usize, forward: bool) -> usize {
 
 #[derive(Component, Clone, Copy)]
 enum GuideAction {
+    Close,
     Previous,
     Next,
     SwitchView,
@@ -216,6 +221,13 @@ impl GuideAction {
         match (self, screen) {
             (Self::Search, _) => Screen::Search,
             (Self::Index, Screen::Search) => Screen::Index(0),
+            (Self::Chapter(row), Screen::Quick(_)) => {
+                if row < TOPICS.len() {
+                    Screen::Quick(row)
+                } else {
+                    screen
+                }
+            }
             (Self::Chapter(row), Screen::Search) => search_results(query)
                 .get(row)
                 .map_or(screen, |&chapter| Screen::Chapter(chapter)),
@@ -230,6 +242,22 @@ impl GuideAction {
                 let chapter = page * CHAPTER_KEYS.len() + row;
                 if chapter < chapters().len() {
                     Screen::Chapter(chapter)
+                } else {
+                    screen
+                }
+            }
+            (Self::Chapter(row), Screen::Chapter(current)) => {
+                let chapter = (current / CHAPTER_KEYS.len()) * CHAPTER_KEYS.len() + row;
+                if chapter < chapters().len() {
+                    Screen::Chapter(chapter)
+                } else {
+                    screen
+                }
+            }
+            (Self::Chapter(row), Screen::Diagram(current)) => {
+                let chapter = (current / CHAPTER_KEYS.len()) * CHAPTER_KEYS.len() + row;
+                if chapter < chapters().len() {
+                    Screen::Diagram(chapter)
                 } else {
                     screen
                 }
@@ -252,78 +280,491 @@ impl GuideAction {
         }
     }
 
-    fn label(self, screen: Screen, query: &str) -> Option<&'static str> {
-        match (self, screen) {
-            (Self::Search, Screen::Search) | (Self::Previous | Self::Next, Screen::Search) => None,
-            (Self::ZoomIn, Screen::Diagram(_)) => Some("Zoom in"),
-            (Self::ZoomOut, Screen::Diagram(_)) => Some("Zoom out"),
-            (Self::Fit, Screen::Diagram(_)) => Some("Fit to window"),
-            (Self::ZoomIn | Self::ZoomOut | Self::Fit, _) => None,
-            (Self::Search, _) => Some("Find a topic"),
-            (Self::Index, Screen::Search) => Some("Chapter index"),
-            (Self::Chapter(row), Screen::Search) => search_results(query)
-                .get(row)
-                .map(|&chapter| chapters()[chapter].title.as_str()),
-            (Self::Previous, _) => Some("Previous"),
-            (Self::Next, _) => Some("Next"),
-            (Self::SwitchView, Screen::Quick(_)) => Some("Reference"),
-            (Self::SwitchView, _) => Some("Quick guide"),
-            (Self::Index, Screen::Chapter(_) | Screen::Diagram(_)) => Some("Chapter index"),
-            (Self::Diagram, Screen::Chapter(_)) => Some("Show diagram"),
-            (Self::Diagram, Screen::Diagram(_)) => Some("Chapter text"),
+    fn label(self, screen: Screen, query: &str) -> Option<String> {
+        Some(match (self, screen) {
+            (Self::Close, _) => "×".into(),
+            (Self::Previous | Self::Next, Screen::Search) => return None,
+            (Self::ZoomIn, Screen::Diagram(_)) => "Zoom in".into(),
+            (Self::ZoomOut, Screen::Diagram(_)) => "Zoom out".into(),
+            (Self::Fit, Screen::Diagram(_)) => "Fit to window".into(),
+            (Self::ZoomIn | Self::ZoomOut | Self::Fit, _) => return None,
+            (Self::Search, Screen::Search) => format!("Search: {query}|"),
+            (Self::Search, _) => "Find a topic".into(),
+            (Self::Index, Screen::Search) => "Chapter index".into(),
+            (Self::Chapter(row), Screen::Quick(_)) => TOPICS.get(row)?.0.into(),
+            (Self::Chapter(row), Screen::Search) => {
+                let &chapter = search_results(query).get(row)?;
+                chapters()[chapter].title.clone()
+            }
+            (Self::Previous, _) => "Previous".into(),
+            (Self::Next, _) => "Next".into(),
+            (Self::SwitchView, Screen::Quick(_)) => "Reference".into(),
+            (Self::SwitchView, _) => "Quick guide".into(),
+            (Self::Index, Screen::Chapter(_) | Screen::Diagram(_)) => "Chapter index".into(),
+            (Self::Diagram, Screen::Chapter(_)) => "Show diagram".into(),
+            (Self::Diagram, Screen::Diagram(_)) => "Chapter text".into(),
             (Self::Chapter(row), Screen::Index(page)) => chapters()
-                .get(page * CHAPTER_KEYS.len() + row)
-                .map(|chapter| chapter.title.as_str()),
-            _ => None,
+                .get(page * CHAPTER_KEYS.len() + row)?
+                .title
+                .clone(),
+            (Self::Chapter(row), Screen::Chapter(current) | Screen::Diagram(current)) => {
+                let page = current / CHAPTER_KEYS.len();
+                chapters()
+                    .get(page * CHAPTER_KEYS.len() + row)?
+                    .title
+                    .clone()
+            }
+            _ => return None,
+        })
+    }
+
+    fn active(self, screen: Screen) -> bool {
+        match (self, screen) {
+            (Self::Search, Screen::Search) => true,
+            (Self::Chapter(row), Screen::Quick(page)) => row == page,
+            (Self::Chapter(row), Screen::Chapter(current) | Screen::Diagram(current)) => {
+                row == current % CHAPTER_KEYS.len()
+            }
+            _ => false,
         }
     }
 }
 
 #[derive(Component)]
-struct GuideNavigation;
+struct GuideSheet;
+
+#[derive(Component)]
+struct GuideArticleScroll;
 
 #[derive(Component)]
 struct GuideDiagram;
 
+#[derive(Component)]
+struct GuideDiagramImage;
+
+#[derive(Component)]
+struct GuideDiagramBar;
+
+#[derive(Component)]
+struct GuideTipBlock;
+
+#[derive(Component)]
+struct GuideFactsBlock;
+
+#[derive(Component)]
+enum GuideText {
+    NavHeading,
+    Caption,
+    Title,
+    Body,
+    Tip,
+    Facts,
+    Boundary,
+    Footer,
+    ZoomReadout,
+}
+
 pub(super) fn install(app: &mut App) {
     guide_diagrams::install(app);
-    app.add_systems(Startup, (spawn_navigation, spawn_diagram))
+    app.add_systems(Startup, spawn_guide)
         .add_systems(
             Update,
             select_navigation
                 .after(read_camp_pointer)
                 .before(village_input),
         )
-        .add_systems(Update, (show_navigation, show_diagram).after(village_input));
+        .add_systems(
+            Update,
+            (show_guide, show_diagram, scroll_article)
+                .chain()
+                .after(show_hud),
+        );
 }
 
-#[derive(Component)]
-struct GuideDiagramImage;
+fn spawn_action_button(
+    parent: &mut ChildSpawnerCommands,
+    assets: &AssetServer,
+    action: GuideAction,
+    font_size: f32,
+    node: Node,
+) {
+    parent
+        .spawn((action, Button, theme::button_node(node), theme::button()))
+        .with_child((Text::default(), ui_font_weight(assets, font_size, 600)));
+}
 
-fn spawn_diagram(mut commands: Commands) {
+fn spawn_guide(mut commands: Commands, assets: Res<AssetServer>) {
     commands
         .spawn((
-            GuideDiagram,
+            GuideSheet,
             Interaction::None,
-            Node {
+            bevy::ui::FocusPolicy::Block,
+            GlobalZIndex(20),
+            theme::panel_node(Node {
                 display: Display::None,
                 position_type: PositionType::Absolute,
-                left: px(20),
-                top: px(108),
-                overflow: Overflow::scroll(),
+                left: px(28),
+                right: px(28),
+                top: px(super::TOP_BAR_CLEARANCE),
+                bottom: px(88),
+                flex_direction: FlexDirection::Column,
+                overflow: Overflow::clip(),
                 ..default()
-            },
-            ScrollPosition::default(),
-            BackgroundColor(crate::theme::PAPER),
+            }),
+            theme::panel(),
         ))
-        .with_child((
-            GuideDiagramImage,
-            ImageNode::default(),
-            Node {
-                flex_shrink: 0.,
-                ..default()
-            },
-        ));
+        .with_children(|sheet| {
+            // Header bar after V2's `.guide-heading`.
+            sheet
+                .spawn((
+                    Node {
+                        align_items: AlignItems::Center,
+                        justify_content: JustifyContent::SpaceBetween,
+                        column_gap: px(16),
+                        padding: UiRect::axes(px(22), px(14)),
+                        border: UiRect::bottom(px(1)),
+                        flex_shrink: 0.,
+                        ..default()
+                    },
+                    BorderColor::all(theme::EDGE),
+                ))
+                .with_children(|header| {
+                    header
+                        .spawn(Node {
+                            flex_direction: FlexDirection::Column,
+                            row_gap: px(2),
+                            ..default()
+                        })
+                        .with_children(|left| {
+                            left.spawn((
+                                Text::new("LEARN THE VILLAGE"),
+                                ui_font_styled(&assets, 11., 750, theme::CAPTION),
+                            ));
+                            left.spawn((
+                                Text::new("Village guide"),
+                                ui_font_weight(&assets, 26., 750),
+                            ));
+                        });
+                    header
+                        .spawn(Node {
+                            align_items: AlignItems::Center,
+                            column_gap: px(10),
+                            ..default()
+                        })
+                        .with_children(|right| {
+                            right.spawn((
+                                Text::new("Paused while you read"),
+                                ui_font_styled(&assets, 12., 500, theme::MUTED),
+                            ));
+                            spawn_action_button(
+                                right,
+                                &assets,
+                                GuideAction::SwitchView,
+                                14.,
+                                Node {
+                                    padding: UiRect::axes(px(14), px(6)),
+                                    ..default()
+                                },
+                            );
+                            spawn_action_button(
+                                right,
+                                &assets,
+                                GuideAction::Close,
+                                20.,
+                                Node {
+                                    width: px(36),
+                                    height: px(36),
+                                    justify_content: JustifyContent::Center,
+                                    align_items: AlignItems::Center,
+                                    ..default()
+                                },
+                            );
+                        });
+                });
+
+            // Two-column body: topic sidebar on the left, article & diagram on the right.
+            sheet
+                .spawn(Node {
+                    flex_grow: 1.,
+                    min_height: px(0),
+                    ..default()
+                })
+                .with_children(|layout| {
+                    layout
+                        .spawn((
+                            Node {
+                                width: px(268),
+                                flex_shrink: 0.,
+                                flex_direction: FlexDirection::Column,
+                                row_gap: px(8),
+                                padding: UiRect::axes(px(14), px(16)),
+                                border: UiRect::right(px(1)),
+                                overflow: Overflow::scroll_y(),
+                                ..default()
+                            },
+                            BackgroundColor(theme::GUIDE_NAV),
+                            BorderColor::all(theme::EDGE),
+                        ))
+                        .with_children(|nav| {
+                            nav.spawn((
+                                GuideText::NavHeading,
+                                Text::default(),
+                                ui_font_styled(&assets, 11., 750, theme::CAPTION),
+                            ));
+                            spawn_action_button(
+                                nav,
+                                &assets,
+                                GuideAction::Search,
+                                14.,
+                                Node {
+                                    width: percent(100),
+                                    padding: UiRect::axes(px(12), px(7)),
+                                    ..default()
+                                },
+                            );
+                            spawn_action_button(
+                                nav,
+                                &assets,
+                                GuideAction::Index,
+                                13.,
+                                Node {
+                                    width: percent(100),
+                                    padding: UiRect::axes(px(12), px(6)),
+                                    ..default()
+                                },
+                            );
+                            nav.spawn(Node {
+                                column_gap: px(8),
+                                ..default()
+                            })
+                            .with_children(|pager| {
+                                for action in [GuideAction::Previous, GuideAction::Next] {
+                                    spawn_action_button(
+                                        pager,
+                                        &assets,
+                                        action,
+                                        13.,
+                                        Node {
+                                            flex_grow: 1.,
+                                            justify_content: JustifyContent::Center,
+                                            padding: UiRect::axes(px(10), px(5)),
+                                            ..default()
+                                        },
+                                    );
+                                }
+                            });
+                            nav.spawn(Node {
+                                flex_direction: FlexDirection::Column,
+                                row_gap: px(5),
+                                margin: UiRect::top(px(4)),
+                                ..default()
+                            })
+                            .with_children(|topics| {
+                                for row in 0..CHAPTER_KEYS.len() {
+                                    spawn_action_button(
+                                        topics,
+                                        &assets,
+                                        GuideAction::Chapter(row),
+                                        14.,
+                                        Node {
+                                            width: percent(100),
+                                            padding: UiRect::axes(px(12), px(8)),
+                                            ..default()
+                                        },
+                                    );
+                                }
+                            });
+                        });
+
+                    layout
+                        .spawn((
+                            GuideArticleScroll,
+                            Interaction::None,
+                            ScrollPosition::default(),
+                            Node {
+                                flex_grow: 1.,
+                                min_width: px(0),
+                                min_height: px(0),
+                                flex_direction: FlexDirection::Column,
+                                row_gap: px(12),
+                                padding: UiRect::axes(px(28), px(22)),
+                                overflow: Overflow::scroll_y(),
+                                ..default()
+                            },
+                        ))
+                        .with_children(|article| {
+                            article
+                                .spawn(Node {
+                                    flex_direction: FlexDirection::Column,
+                                    row_gap: px(2),
+                                    flex_shrink: 0.,
+                                    ..default()
+                                })
+                                .with_children(|heading| {
+                                    heading.spawn((
+                                        GuideText::Caption,
+                                        Text::default(),
+                                        ui_font_styled(&assets, 11., 750, theme::CAPTION),
+                                    ));
+                                    heading.spawn((
+                                        GuideText::Title,
+                                        Text::default(),
+                                        ui_font_weight(&assets, 24., 750),
+                                    ));
+                                });
+
+                            article
+                                .spawn((
+                                    GuideDiagramBar,
+                                    Node {
+                                        display: Display::None,
+                                        align_items: AlignItems::Center,
+                                        column_gap: px(8),
+                                        flex_wrap: FlexWrap::Wrap,
+                                        flex_shrink: 0.,
+                                        ..default()
+                                    },
+                                ))
+                                .with_children(|bar| {
+                                    for action in [
+                                        GuideAction::Diagram,
+                                        GuideAction::Fit,
+                                        GuideAction::ZoomIn,
+                                        GuideAction::ZoomOut,
+                                    ] {
+                                        spawn_action_button(
+                                            bar,
+                                            &assets,
+                                            action,
+                                            13.,
+                                            Node {
+                                                padding: UiRect::axes(px(12), px(5)),
+                                                ..default()
+                                            },
+                                        );
+                                    }
+                                    bar.spawn((
+                                        GuideText::ZoomReadout,
+                                        Text::default(),
+                                        ui_font_styled(&assets, 12., 600, theme::MUTED),
+                                    ));
+                                });
+
+                            article
+                                .spawn((
+                                    GuideDiagram,
+                                    Interaction::None,
+                                    ScrollPosition::default(),
+                                    Node {
+                                        display: Display::None,
+                                        flex_shrink: 0.,
+                                        padding: UiRect::all(px(16)),
+                                        border: UiRect::all(px(1)),
+                                        border_radius: BorderRadius::all(px(14)),
+                                        overflow: Overflow::scroll(),
+                                        ..default()
+                                    },
+                                    BackgroundColor(theme::CARD),
+                                    BorderColor::all(theme::SUBTLE_BORDER),
+                                ))
+                                .with_child((
+                                    GuideDiagramImage,
+                                    ImageNode::default(),
+                                    Node {
+                                        flex_shrink: 0.,
+                                        ..default()
+                                    },
+                                ));
+
+                            article.spawn((
+                                GuideText::Body,
+                                Text::default(),
+                                ui_font(&assets, 15.),
+                                Node {
+                                    flex_shrink: 0.,
+                                    ..default()
+                                },
+                            ));
+
+                            article
+                                .spawn((
+                                    GuideTipBlock,
+                                    Node {
+                                        display: Display::None,
+                                        flex_direction: FlexDirection::Column,
+                                        row_gap: px(4),
+                                        flex_shrink: 0.,
+                                        padding: UiRect::axes(px(16), px(12)),
+                                        border: UiRect::left(px(4)),
+                                        border_radius: BorderRadius::all(px(8)),
+                                        ..default()
+                                    },
+                                    BackgroundColor(theme::INSET),
+                                    BorderColor::all(theme::LEAF),
+                                ))
+                                .with_children(|tip| {
+                                    tip.spawn((
+                                        Text::new("MORE AUTONOMY"),
+                                        ui_font_styled(&assets, 11., 750, theme::CAPTION),
+                                    ));
+                                    tip.spawn((
+                                        GuideText::Tip,
+                                        Text::default(),
+                                        ui_font(&assets, 14.),
+                                    ));
+                                });
+
+                            article
+                                .spawn((
+                                    GuideFactsBlock,
+                                    Node {
+                                        display: Display::None,
+                                        flex_direction: FlexDirection::Column,
+                                        row_gap: px(4),
+                                        flex_shrink: 0.,
+                                        padding: UiRect::axes(px(14), px(10)),
+                                        border: UiRect::all(px(1)),
+                                        border_radius: BorderRadius::all(px(10)),
+                                        ..default()
+                                    },
+                                    BackgroundColor(theme::CARD),
+                                    BorderColor::all(theme::SUBTLE_BORDER),
+                                ))
+                                .with_children(|facts| {
+                                    facts.spawn((
+                                        Text::new("REFERENCE FIGURES"),
+                                        ui_font_styled(&assets, 10., 750, theme::CAPTION),
+                                    ));
+                                    facts.spawn((
+                                        GuideText::Facts,
+                                        Text::default(),
+                                        ui_font_weight(&assets, 13., 500),
+                                    ));
+                                });
+
+                            article.spawn((
+                                GuideText::Boundary,
+                                Text::default(),
+                                ui_font_styled(&assets, 13., 400, theme::MUTED),
+                                Node {
+                                    flex_shrink: 0.,
+                                    ..default()
+                                },
+                            ));
+
+                            article.spawn((
+                                GuideText::Footer,
+                                Text::default(),
+                                ui_font_styled(&assets, 12., 500, theme::MUTED),
+                                Node {
+                                    flex_shrink: 0.,
+                                    margin: UiRect::top(px(6)),
+                                    ..default()
+                                },
+                            ));
+                        });
+                });
+        });
 }
 
 /// Pixels the diagram pans per second while an arrow key is held.
@@ -369,14 +810,15 @@ fn show_diagram(
         return;
     };
     let size = texture.size().as_vec2();
-    let available = Vec2::new(window.width() - 276.0, window.height() - 188.0).max(Vec2::ONE);
+    let available =
+        Vec2::new(window.width() - 420.0, window.height() - 360.0).max(Vec2::splat(160.));
     let fit = (available / size).min_element().clamp(0.0, 1.0);
     let shown = size * fit * village.guide.diagram_zoom();
     node.width = px(shown.x);
     node.height = px(shown.y);
     let visible = shown.min(available);
-    frame.width = px(visible.x);
-    frame.height = px(visible.y);
+    frame.width = px(visible.x + 32.0);
+    frame.height = px(visible.y + 32.0);
     frame.display = Display::Flex;
     let mut pan = Vec2::ZERO;
     for (key, direction) in [
@@ -397,56 +839,28 @@ fn show_diagram(
     scroll.0 = (scroll.0 + pan).clamp(Vec2::ZERO, (shown - visible).max(Vec2::ZERO));
 }
 
-fn spawn_navigation(mut commands: Commands, assets: Res<AssetServer>) {
-    commands
-        .spawn((
-            GuideNavigation,
-            Interaction::None,
-            bevy::ui::FocusPolicy::Block,
-            crate::theme::panel_node(Node {
-                display: Display::None,
-                position_type: PositionType::Absolute,
-                right: px(22),
-                top: px(super::RIGHT_PANEL_TOP),
-                width: px(240),
-                padding: UiRect::all(px(12)),
-                row_gap: px(8),
-                flex_direction: FlexDirection::Column,
-                ..default()
-            }),
-            crate::theme::panel(),
-        ))
-        .with_children(|panel| {
-            for action in [
-                GuideAction::Search,
-                GuideAction::SwitchView,
-                GuideAction::Index,
-                GuideAction::Diagram,
-                GuideAction::ZoomIn,
-                GuideAction::ZoomOut,
-                GuideAction::Fit,
-                GuideAction::Previous,
-                GuideAction::Next,
-            ]
-            .into_iter()
-            .chain((0..CHAPTER_KEYS.len()).map(GuideAction::Chapter))
-            {
-                panel
-                    .spawn((
-                        action,
-                        Button,
-                        crate::theme::button_node(Node {
-                            padding: UiRect::axes(px(12), px(6)),
-                            ..default()
-                        }),
-                        crate::theme::button(),
-                    ))
-                    .with_child((
-                        Text::default(),
-                        crate::ui_font::ui_font_weight(&assets, 15.0, 600),
-                    ));
-            }
-        });
+fn scroll_article(
+    (setup, saves, sound): (Res<WorldSetup>, Res<SaveMenu>, Res<SoundSettings>),
+    village: Res<Village>,
+    mut article: Single<(&Interaction, &mut ScrollPosition), With<GuideArticleScroll>>,
+    scroll: Res<bevy::input::mouse::AccumulatedMouseScroll>,
+    mut previous: Local<Option<Screen>>,
+) {
+    let screen = active_screen(&village, &setup, &saves, &sound);
+    if *previous != screen {
+        article.1.y = 0.;
+        *previous = screen;
+    }
+    if screen.is_none() || matches!(screen, Some(Screen::Diagram(_))) {
+        return;
+    }
+    if *article.0 != Interaction::None && scroll.delta.y != 0. {
+        let step = match scroll.unit {
+            bevy::input::mouse::MouseScrollUnit::Line => 34.,
+            bevy::input::mouse::MouseScrollUnit::Pixel => 1.,
+        };
+        article.1.y = (article.1.y - scroll.delta.y * step).max(0.);
+    }
 }
 
 fn active_screen(
@@ -472,39 +886,266 @@ fn select_navigation(
                 && action.label(screen, &village.guide.query).is_some()
         })
     {
-        village.guide.act(*action, screen);
+        if matches!(action, GuideAction::Close) {
+            village.guide.toggle();
+        } else {
+            village.guide.act(*action, screen);
+        }
     }
 }
 
-fn show_navigation(
+type GuideContainers<'w, 's> = (
+    Single<
+        'w,
+        's,
+        &'static mut Node,
+        (
+            With<GuideSheet>,
+            Without<GuideAction>,
+            Without<GuideDiagramBar>,
+            Without<GuideTipBlock>,
+            Without<GuideFactsBlock>,
+            Without<VillageHud>,
+        ),
+    >,
+    Single<
+        'w,
+        's,
+        &'static mut Node,
+        (
+            With<GuideDiagramBar>,
+            Without<GuideSheet>,
+            Without<GuideAction>,
+            Without<GuideTipBlock>,
+            Without<GuideFactsBlock>,
+            Without<VillageHud>,
+        ),
+    >,
+    Single<
+        'w,
+        's,
+        &'static mut Node,
+        (
+            With<GuideTipBlock>,
+            Without<GuideSheet>,
+            Without<GuideAction>,
+            Without<GuideDiagramBar>,
+            Without<GuideFactsBlock>,
+            Without<VillageHud>,
+        ),
+    >,
+    Single<
+        'w,
+        's,
+        &'static mut Node,
+        (
+            With<GuideFactsBlock>,
+            Without<GuideSheet>,
+            Without<GuideAction>,
+            Without<GuideDiagramBar>,
+            Without<GuideTipBlock>,
+            Without<VillageHud>,
+        ),
+    >,
+    Single<
+        'w,
+        's,
+        &'static mut Node,
+        (
+            With<VillageHud>,
+            Without<GuideSheet>,
+            Without<GuideAction>,
+            Without<GuideDiagramBar>,
+            Without<GuideTipBlock>,
+            Without<GuideFactsBlock>,
+        ),
+    >,
+);
+
+type GuideButtons<'w, 's> = Query<
+    'w,
+    's,
+    (
+        &'static GuideAction,
+        &'static Children,
+        &'static Interaction,
+        &'static mut Node,
+        &'static mut BackgroundColor,
+        &'static mut BorderColor,
+        &'static mut BoxShadow,
+    ),
+    (
+        Without<GuideSheet>,
+        Without<GuideDiagramBar>,
+        Without<GuideTipBlock>,
+        Without<GuideFactsBlock>,
+        Without<VillageHud>,
+    ),
+>;
+
+fn show_guide(
     (setup, saves, sound): (Res<WorldSetup>, Res<SaveMenu>, Res<SoundSettings>),
-    village: Res<Village>,
-    mut panel: Single<&mut Node, (With<GuideNavigation>, Without<GuideAction>)>,
-    mut buttons: Query<(
-        &GuideAction,
-        &Children,
-        &Interaction,
-        &mut Node,
-        &mut BackgroundColor,
-    )>,
-    mut labels: Query<&mut Text>,
+    (village, catalog): (Res<Village>, Res<Catalog>),
+    (mut sheet, mut diagram_bar, mut tip_block, mut facts_block, mut hud): GuideContainers,
+    mut buttons: GuideButtons,
+    mut button_labels: Query<&mut Text, Without<GuideText>>,
+    mut content: Query<(&GuideText, &mut Text)>,
 ) {
     let Some(screen) = active_screen(&village, &setup, &saves, &sound) else {
-        panel.display = Display::None;
+        if sheet.display != Display::None {
+            sheet.display = Display::None;
+        }
         return;
     };
-    panel.display = Display::Flex;
-    for (action, children, interaction, mut node, mut background) in &mut buttons {
+    // The guide renders its own V2-style sheet instead of sharing the status card.
+    hud.display = Display::None;
+    sheet.display = Display::Flex;
+
+    for (action, children, interaction, mut node, mut background, mut border, mut shadow) in
+        &mut buttons
+    {
         let Some(label) = action.label(screen, &village.guide.query) else {
             node.display = Display::None;
             continue;
         };
         node.display = Display::Flex;
-        background.0 = crate::theme::button_fill(*interaction, true);
-        if let Ok(mut text) = labels.get_mut(children[0])
+        theme::paint_button(
+            *interaction,
+            true,
+            action.active(screen),
+            &mut background,
+            &mut border,
+            &mut shadow,
+        );
+        if let Ok(mut text) = button_labels.get_mut(children[0])
             && text.0 != label
         {
-            text.0 = label.into();
+            text.0 = label;
+        }
+    }
+
+    let (nav_heading, caption, title, body, tip, facts, boundary, footer, zoom_readout) =
+        match screen {
+            Screen::Quick(page) => {
+                let (topic, text) = TOPICS[page];
+                (
+                    "QUICK TOPICS".to_owned(),
+                    format!("QUICK GUIDE · {} OF {}", page + 1, TOPICS.len()),
+                    format!("Village guide · {topic}"),
+                    text.to_owned(),
+                    String::new(),
+                    String::new(),
+                    String::new(),
+                    "1–7 Topic · Page Up/Down · Tab Reference · / Search · F1 Close".to_owned(),
+                    String::new(),
+                )
+            }
+            Screen::Index(page) => (
+                format!("SYSTEMS · PAGE {}/{}", page + 1, index_pages()),
+                format!("VILLAGE REFERENCE · PAGE {}/{}", page + 1, index_pages()),
+                "Choose a system".to_owned(),
+                "Select a chapter on the left to read how it works, see its flow diagram, and check reference figures. Press / to search by keyword.".to_owned(),
+                String::new(),
+                String::new(),
+                String::new(),
+                "1–9 Open chapter · / Find · Page Up/Down · Tab Quick guide · F1 Close".to_owned(),
+                String::new(),
+            ),
+            Screen::Chapter(index) => {
+                let chapter = &chapters()[index];
+                let page = index / CHAPTER_KEYS.len();
+                let facts_text = chapter
+                    .facts
+                    .as_ref()
+                    .map(|facts| facts.text(&catalog).join("\n"))
+                    .unwrap_or_default();
+                (
+                    format!("SYSTEMS · PAGE {}/{}", page + 1, index_pages()),
+                    format!("CHAPTER {} OF {}", index + 1, chapters().len()),
+                    chapter.title.clone(),
+                    chapter.description.clone(),
+                    chapter.tip.clone(),
+                    facts_text,
+                    chapter.boundary.clone(),
+                    "Page Up/Down · D Diagram · Backspace Index · / Search · F1 Close".to_owned(),
+                    String::new(),
+                )
+            }
+            Screen::Diagram(index) => {
+                let chapter = &chapters()[index];
+                let page = index / CHAPTER_KEYS.len();
+                let zoom_pct = (village.guide.diagram_zoom() * 100.0).round() as i32;
+                (
+                    format!("SYSTEMS · PAGE {}/{}", page + 1, index_pages()),
+                    format!("FLOW DIAGRAM · CHAPTER {} OF {}", index + 1, chapters().len()),
+                    chapter.title.clone(),
+                    String::new(),
+                    String::new(),
+                    String::new(),
+                    String::new(),
+                    "Arrows or wheel Pan · + / − Zoom · 0 Fit · D Chapter text · Backspace Index · F1 Close".to_owned(),
+                    format!("{zoom_pct}%"),
+                )
+            }
+            Screen::Search => {
+                let results = search_results(&village.guide.query);
+                let body = if village.guide.query.trim().is_empty() {
+                    "Type a word such as water, compost, crops, tools or grid to filter chapters."
+                        .to_owned()
+                } else if results.is_empty() {
+                    "No chapter mentions that yet. Try another word or return to the chapter index."
+                        .to_owned()
+                } else {
+                    format!(
+                        "{} matching chapters — pick one on the left or press 1–{}.",
+                        results.len(),
+                        results.len()
+                    )
+                };
+                (
+                    "MATCHING CHAPTERS".to_owned(),
+                    "SEARCH THE GUIDE".to_owned(),
+                    format!("Find a topic · {}|", village.guide.query),
+                    body,
+                    String::new(),
+                    String::new(),
+                    String::new(),
+                    "Type to search · 1–9 or Enter Open · Tab Index · Esc Close".to_owned(),
+                    String::new(),
+                )
+            }
+        };
+
+    diagram_bar.display = if matches!(screen, Screen::Chapter(_) | Screen::Diagram(_)) {
+        Display::Flex
+    } else {
+        Display::None
+    };
+    tip_block.display = if tip.is_empty() {
+        Display::None
+    } else {
+        Display::Flex
+    };
+    facts_block.display = if facts.is_empty() {
+        Display::None
+    } else {
+        Display::Flex
+    };
+
+    for (part, mut text) in &mut content {
+        let wanted = match part {
+            GuideText::NavHeading => &nav_heading,
+            GuideText::Caption => &caption,
+            GuideText::Title => &title,
+            GuideText::Body => &body,
+            GuideText::Tip => &tip,
+            GuideText::Facts => &facts,
+            GuideText::Boundary => &boundary,
+            GuideText::Footer => &footer,
+            GuideText::ZoomReadout => &zoom_readout,
+        };
+        if text.0 != *wanted {
+            text.0.clone_from(wanted);
         }
     }
 }
@@ -529,6 +1170,7 @@ impl Guide {
     fn act(&mut self, action: GuideAction, screen: Screen) {
         let zoom = self.zoom.unwrap_or(1.0);
         match action {
+            GuideAction::Close => self.screen = None,
             GuideAction::ZoomIn => {
                 self.zoom = Some((zoom + ZOOM_STEP).min(ZOOM_RANGE.1));
             }
@@ -673,19 +1315,7 @@ impl Guide {
                 );
                 for paragraph in [&chapter.description, &chapter.tip, &chapter.boundary] {
                     if !paragraph.is_empty() {
-                        label.push('\n');
-                        let mut width = 0;
-                        for word in paragraph.split_whitespace() {
-                            let length = word.chars().count();
-                            if width == 0 || width + 1 + length > 78 {
-                                label.push('\n');
-                                width = length;
-                            } else {
-                                label.push(' ');
-                                width += length + 1;
-                            }
-                            label.push_str(word);
-                        }
+                        let _ = write!(label, "\n\n{paragraph}");
                     }
                 }
                 if let Some(facts) = &chapter.facts {

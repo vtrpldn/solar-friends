@@ -864,17 +864,17 @@ mod tests {
         let story_seed = app.world().resource::<WorldSetup>().seed();
         assert_ne!(story_seed, sandbox_seed);
         assert_ne!(story_seed, 0);
-        press_button(&mut app, "Town   ·   Drive");
+        press_button(&mut app, "Drive");
         assert!(
             app.world_mut()
                 .query::<&Text>()
                 .iter(app.world())
                 .any(|text| text.0.contains("36 km") && text.0.contains("66 game minutes"))
         );
-        press_button(&mut app, "Town   ·   Remote");
-        press_button(&mut app, "Town   ·   Nearby");
+        press_button(&mut app, "Remote");
+        press_button(&mut app, "Nearby");
 
-        press_button(&mut app, &format!("Land seed   ·   {story_seed}"));
+        press_button(&mut app, &story_seed.to_string());
         press_button(&mut app, "Start new village");
         assert!(app.world().resource::<WorldSetup>().open);
         for key in [KeyCode::Digit4, KeyCode::Digit2] {

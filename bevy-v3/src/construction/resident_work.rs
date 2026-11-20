@@ -1595,13 +1595,8 @@ impl Construction {
         use std::fmt::Write;
 
         let profile = &catalog.residents[selected];
-        let mut story = format!(
-            "{} · {}\n{}",
-            NAMES[selected],
-            profile.role,
-            profile.traits.join(" · ")
-        );
-        for (label, text) in [
+        let mut story = String::new();
+        for (index, (label, text)) in [
             ("Before the village", &profile.backstory),
             ("What I want", &profile.desire),
             ("What drives me", &profile.motivation),
@@ -1609,8 +1604,14 @@ impl Construction {
             ("Where I struggle", &profile.flaw),
             ("What I need from others", &profile.boundary),
             ("Room to grow", &profile.growth),
-        ] {
-            let _ = write!(story, "\n\n{label}\n{text}");
+        ]
+        .into_iter()
+        .enumerate()
+        {
+            if index > 0 {
+                story.push_str("\n\n");
+            }
+            let _ = write!(story, "{label}\n{text}");
         }
         story
     }
@@ -1633,8 +1634,7 @@ impl Construction {
             .join(" · ");
         let bonus = (100.0 * worker.experience_bonus()).floor();
         let mut skills = format!(
-            "{} · Skills\n\nSpecialties · 25% faster\n{specialties}\n\nLearning by doing\n+{bonus}% work speed from experience (up to 15%)\n\nCraft skills",
-            NAMES[selected]
+            "Specialties · 25% faster\n{specialties}\n\nLearning by doing\n+{bonus}% speed on all work\nHands-on work gradually improves efficiency, up to a 15% bonus.\n\nCraft skills",
         );
         for skill in [Skill::Woodworking, Skill::Basketry, Skill::Repair] {
             let _ = write!(
@@ -1651,7 +1651,9 @@ impl Construction {
         use std::fmt::Write;
 
         let health = &self.residents[selected].health;
-        let mut relationships = format!("{} · Relationships", NAMES[selected]);
+        let mut relationships = String::from(
+            "Growing together\nResidents make time for willing friends, shared interests, and listening. Sleep, urgent needs, and quiet time come first.",
+        );
         for (id, &name) in NAMES.iter().enumerate().filter(|(id, _)| *id != selected) {
             let score = health.friendships[id];
             let label = friendship_label(score);
@@ -1668,33 +1670,39 @@ impl Construction {
         relationships
     }
 
-    pub fn resident_status(&self, catalog: &Catalog, stock: &Stock, selected: usize) -> String {
-        let mut rows = self
-            .residents
-            .iter()
-            .enumerate()
-            .map(|(index, worker)| {
-                let action = self.resident_action(catalog, index);
-                let health = &worker.health;
-                let profile = &catalog.residents[index];
-                let home = worker.home.map_or_else(
-                    || "Any free bed".to_owned(),
-                    |id| format!("{} #{}", catalog.projects[&self.plans[id].key].name, id + 1),
-                );
-                let marker = if index == selected { "› " } else { "" };
-                let (need, value) = std::iter::once(("Energy", health.energy))
-                    .chain(NEED_METERS.map(|(label, need)| (label, health.levels[need as usize])))
-                    .min_by(|left, right| left.1.total_cmp(&right.1))
-                    .expect("energy is always tracked");
-                format!(
-                    "{marker}{} · {} · {home}\n{action} · {need} {value:.0}%",
-                    NAMES[index], profile.role,
-                )
-            })
-            .collect::<Vec<_>>()
-            .join("\n");
-
+    pub(crate) fn resident_activity_summary(&self, catalog: &Catalog, selected: usize) -> String {
         use std::fmt::Write;
+
+        let mut activity = self.resident_action(catalog, selected).into_owned();
+        if let Some(site) = self.resident_project(selected)
+            && let Some(project) = self
+                .plans
+                .get(site)
+                .and_then(|plan| catalog.projects.get(&plan.key))
+            && !activity.contains(&project.name)
+        {
+            let _ = write!(activity, " · {} #{}", project.name, site + 1);
+        }
+        let health = &self.residents[selected].health;
+        if health.task.is_none()
+            && let Some(blockage) = health.blockage
+        {
+            let _ = write!(activity, " · {}", blockage.label());
+        }
+        activity
+    }
+
+    pub(crate) fn resident_overview(
+        &self,
+        catalog: &Catalog,
+        stock: &Stock,
+        selected: usize,
+        include_header_and_needs: bool,
+        housing_notice: &str,
+    ) -> String {
+        use crate::production::crafting::Skill;
+        use std::fmt::Write;
+
         let worker = &self.residents[selected];
         let profile = &catalog.residents[selected];
         let mind = &worker.health.mind;
@@ -1735,40 +1743,60 @@ impl Construction {
                     }
                 }),
         };
-        let _ = write!(
-            rows,
-            "\n\n{} · {}\n{}\n\nHome\n{}\n\nNeeds · Energy {:.0}%",
-            NAMES[selected],
-            profile.role,
-            profile.traits.join(" · "),
-            self.resident_home_summary(selected, catalog),
-            worker.health.energy,
-        );
-        for (label, need) in NEED_METERS {
+        let mut overview = String::new();
+        if include_header_and_needs {
             let _ = write!(
-                rows,
-                " · {label} {:.0}%",
-                worker.health.levels[need as usize]
+                overview,
+                "{} · {}\n{}\n{}\n\n",
+                NAMES[selected],
+                profile.role,
+                profile.traits.join(" · "),
+                self.resident_activity_summary(catalog, selected),
             );
         }
         let _ = write!(
-            rows,
-            "\n\nOn my mind\n{thought}\n\nA personal hope\n{} · {stage}\n{}\n\n{}\n{}\nEnjoys {}.",
+            overview,
+            "Home\n{}",
+            self.resident_home_summary(selected, catalog),
+        );
+        if !housing_notice.is_empty() {
+            let _ = write!(overview, "\n{housing_notice}");
+        }
+        if !include_header_and_needs {
+            overview.push_str("\nClick home on map · T Assign · Y Clear");
+        }
+        if include_header_and_needs {
+            let _ = write!(overview, "\n\nNeeds\nEnergy {:.0}%", worker.health.energy);
+            for (label, need) in NEED_METERS {
+                let _ = write!(
+                    overview,
+                    " · {label} {:.0}%",
+                    worker.health.levels[need as usize]
+                );
+            }
+        }
+        let _ = write!(
+            overview,
+            "\n\nOn my mind\n{thought}\n\nA personal hope\n{} · {stage}\n{}\n\nAbout {}\n{}\n{}\nEnjoys {}.",
             wish.label,
             wish.reason,
+            NAMES[selected],
             profile.bio,
             profile.effect,
             profile.hobby.to_lowercase(),
         );
-        use crate::production::crafting::Skill;
-        for skill in [Skill::Woodworking, Skill::Basketry, Skill::Repair] {
-            let _ = write!(
-                rows,
-                "\n{} · Level {}",
-                skill.label(),
-                worker.craft.level(selected, skill)
-            );
-        }
+        let craft = [Skill::Woodworking, Skill::Basketry, Skill::Repair]
+            .into_iter()
+            .map(|skill| {
+                format!(
+                    "{} · Level {}",
+                    skill.label(),
+                    worker.craft.level(selected, skill)
+                )
+            })
+            .collect::<Vec<_>>()
+            .join(" · ");
+        let _ = write!(overview, "\n\nCraft skills\n{craft}");
         let ties = worker
             .health
             .friendships
@@ -1781,15 +1809,48 @@ impl Construction {
             })
             .collect::<Vec<_>>();
         if !ties.is_empty() {
-            let _ = write!(rows, "\n{}", ties.join("  |  "));
+            let _ = write!(overview, "\n\nFriendships\n{}", ties.join(" · "));
         }
-        rows.push_str("\n\nRecent memories");
+        overview.push_str("\n\nRecent memories");
         if mind.memories.is_empty() {
-            rows.push_str("\nMemories will appear after conversations, personal time, and meaningful village milestones.");
+            overview.push_str(
+                "\nMemories will appear after conversations, personal time, and meaningful village milestones.",
+            );
         }
         for memory in mind.memories.iter().take(3) {
-            let _ = write!(rows, "\n{}", memory.text);
+            let _ = write!(overview, "\n{}", memory.text);
         }
+        overview
+    }
+
+    pub fn resident_status(&self, catalog: &Catalog, stock: &Stock, selected: usize) -> String {
+        let mut rows = self
+            .residents
+            .iter()
+            .enumerate()
+            .map(|(index, worker)| {
+                let action = self.resident_action(catalog, index);
+                let health = &worker.health;
+                let profile = &catalog.residents[index];
+                let home = worker.home.map_or_else(
+                    || "Any free bed".to_owned(),
+                    |id| format!("{} #{}", catalog.projects[&self.plans[id].key].name, id + 1),
+                );
+                let marker = if index == selected { "› " } else { "" };
+                let (need, value) = std::iter::once(("Energy", health.energy))
+                    .chain(NEED_METERS.map(|(label, need)| (label, health.levels[need as usize])))
+                    .min_by(|left, right| left.1.total_cmp(&right.1))
+                    .expect("energy is always tracked");
+                format!(
+                    "{marker}{} · {} · {home}\n{action} · {need} {value:.0}%",
+                    NAMES[index], profile.role,
+                )
+            })
+            .collect::<Vec<_>>()
+            .join("\n");
+
+        rows.push_str("\n\n");
+        rows.push_str(&self.resident_overview(catalog, stock, selected, true, ""));
         rows
     }
 }
@@ -1846,6 +1907,12 @@ mod tests {
         assert!(rows.next().unwrap().ends_with("Social 7%"));
         assert!(rows.next().unwrap().starts_with("Bento"));
         assert!(rows.next().unwrap().ends_with("Energy 12%"));
+        assert!(summary.contains("\nNeeds\nEnergy "));
+        let sheet = village.resident_overview(&catalog, &Stock::default(), 0, false, "");
+        assert!(!sheet.contains("\nNeeds\n"));
+        assert!(sheet.contains("Home\n"));
+        assert!(sheet.contains("On my mind\n"));
+        assert!(sheet.contains("About Iara\n"));
     }
 
     #[test]
