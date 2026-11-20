@@ -92,7 +92,7 @@ pub(crate) const PAGE_KEYS: [KeyCode; BUILD_ROWS] = [
     KeyCode::Digit8,
 ];
 
-const STOCKPILE: IVec2 = IVec2::new(32, -13);
+pub(crate) const STOCKPILE: IVec2 = IVec2::new(32, -13);
 const SUPPLY_SPOTS: [IVec2; 5] = [
     IVec2::new(31, -13),
     IVec2::new(33, -13),
@@ -2727,6 +2727,18 @@ impl Construction {
         cell: IVec2,
     ) -> bool {
         self.blocked_ignoring(catalog, terrain, land, camp, cell, None)
+    }
+
+    pub(crate) fn wildlife_clear(&self, point: Vec2) -> bool {
+        let cell = point * 0.5 + Vec2::splat(32.0);
+        let buffer = Vec2::splat(0.7);
+        !self.plans.iter().any(|plan| {
+            !plan.removed
+                && cell.cmpgt(plan.position.as_vec2() - buffer).all()
+                && cell
+                    .cmplt((plan.position + plan.size).as_vec2() + buffer)
+                    .all()
+        })
     }
 
     fn blocked_ignoring(

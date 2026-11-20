@@ -2,6 +2,8 @@ use bevy::prelude::*;
 
 use crate::{setup::WorldSetup, terrain::land_random, village::Village};
 
+mod capybaras;
+
 const PALETTES: [[u32; 3]; 3] = [
     [0x79954a, 0x456d43, 0x6c9fc0],
     [0xa18b62, 0x6b7350, 0xe0b057],
@@ -13,13 +15,15 @@ pub struct WildlifePlugin;
 impl Plugin for WildlifePlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, prepare_models)
-            .add_systems(PostUpdate, update_visitors);
+            .add_systems(PostUpdate, (update_visitors, capybaras::update));
     }
 }
 
 #[derive(Resource)]
 struct Models {
     shape: Handle<Mesh>,
+    cube: Handle<Mesh>,
+    capybara: [Handle<StandardMaterial>; 2],
     palettes: [[Handle<StandardMaterial>; 3]; 3],
     butterfly_body: Handle<StandardMaterial>,
     beak: Handle<StandardMaterial>,
@@ -39,6 +43,8 @@ fn prepare_models(
     };
     commands.insert_resource(Models {
         shape: meshes.add(Sphere::new(1.0).mesh().ico(0).expect("icosahedron")),
+        cube: meshes.add(Cuboid::from_size(Vec3::ONE)),
+        capybara: [material(0xa38653), material(0x342e25)],
         palettes: PALETTES.map(|palette| palette.map(&mut material)),
         butterfly_body: material(0x534b38),
         beak: material(0xb9a36d),

@@ -413,6 +413,10 @@ impl Village {
         )
     }
 
+    pub(crate) fn wildlife_clear(&self, point: Vec2) -> bool {
+        self.construction.wildlife_clear(point)
+    }
+
     pub fn terrain(&self, setup: &WorldSetup) -> Terrain {
         let terrain = setup.terrain();
         match self.camp.filter(|_| !setup.open) {
