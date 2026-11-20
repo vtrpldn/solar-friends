@@ -45,7 +45,7 @@ pub(super) fn spawn(parent: &mut ChildSpawnerCommands, assets: &AssetServer) {
                                     height: px(5),
                                     ..default()
                                 },
-                                BackgroundColor(Color::srgb_u8(57, 76, 60)),
+                                BackgroundColor(crate::theme::TRACK),
                             ))
                             .with_child((
                                 MeterFill(index),

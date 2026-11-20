@@ -155,6 +155,11 @@ impl Advance {
             })
     }
 
+    /// Whether the panel is open, a run is under way, or the last run left a result.
+    pub fn has_status(&self) -> bool {
+        self.open || self.running.is_some() || !self.result.is_empty()
+    }
+
     pub fn status(&self, contextual_shortcut: bool) -> String {
         if let Some(run) = &self.running {
             return format!(

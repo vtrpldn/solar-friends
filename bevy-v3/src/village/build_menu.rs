@@ -54,26 +54,26 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
             BuildPanel,
             Interaction::None,
             bevy::ui::FocusPolicy::Block,
-            Node {
+            crate::theme::panel_node(Node {
                 display: Display::None,
                 position_type: PositionType::Absolute,
-                right: px(20),
-                top: px(20),
-                width: px(290),
-                padding: UiRect::all(px(14)),
+                right: px(22),
+                top: px(super::RIGHT_PANEL_TOP),
+                width: px(310),
+                padding: UiRect::all(px(16)),
                 flex_direction: FlexDirection::Column,
-                row_gap: px(5),
+                row_gap: px(8),
                 overflow: Overflow::scroll_y(),
                 ..default()
-            },
+            }),
             ScrollPosition::default(),
-            BackgroundColor(Color::srgb_u8(31, 45, 35)),
+            crate::theme::panel(),
         ))
         .with_children(|panel| {
             panel.spawn((
                 BuildHeading,
                 Text::default(),
-                ui_font(&assets, 20.0),
+                crate::ui_font::ui_font_weight(&assets, 22.0, 750),
                 Node {
                     flex_shrink: 0.,
                     ..default()
@@ -110,16 +110,16 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
         BlueprintDetails,
         Text::default(),
         ui_font(&assets, 16.0),
-        Node {
+        crate::theme::panel_node(Node {
             display: Display::None,
             position_type: PositionType::Absolute,
-            right: px(320),
-            top: px(20),
+            right: px(346),
+            top: px(super::RIGHT_PANEL_TOP),
             width: px(350),
-            padding: UiRect::all(px(14)),
+            padding: UiRect::all(px(16)),
             ..default()
-        },
-        BackgroundColor(Color::srgb_u8(31, 45, 35)),
+        }),
+        crate::theme::panel(),
     ));
 }
 
@@ -133,14 +133,17 @@ fn button(
         .spawn((
             action,
             Button,
-            Node {
-                padding: UiRect::axes(px(10), px(7)),
+            crate::theme::button_node(Node {
+                padding: UiRect::axes(px(12), px(7)),
                 flex_shrink: 0.,
                 ..default()
-            },
-            BackgroundColor(Color::srgb_u8(58, 78, 61)),
+            }),
+            crate::theme::button(),
         ))
-        .with_child((Text::new(label), ui_font(assets, 17.0)));
+        .with_child((
+            Text::new(label),
+            crate::ui_font::ui_font_weight(assets, 16.0, 600),
+        ));
 }
 
 /// A catalog row: text first (refresh writes to the first child), drawn after its picture.
@@ -149,18 +152,18 @@ fn blueprint_row(parent: &mut ChildSpawnerCommands, assets: &AssetServer, index:
         .spawn((
             BuildButton::Blueprint(index),
             Button,
-            Node {
-                padding: UiRect::axes(px(8), px(5)),
+            crate::theme::button_node(Node {
+                padding: UiRect::axes(px(8), px(6)),
                 flex_shrink: 0.,
                 flex_direction: FlexDirection::RowReverse,
                 justify_content: JustifyContent::FlexEnd,
                 align_items: AlignItems::Center,
-                column_gap: px(8),
+                column_gap: px(10),
                 ..default()
-            },
-            BackgroundColor(Color::srgb_u8(58, 78, 61)),
+            }),
+            crate::theme::button(),
         ))
-        .with_child((Text::default(), ui_font(assets, 17.0)))
+        .with_child((Text::default(), ui_font(assets, 16.0)))
         .with_child((
             super::thumbnails::ThumbnailImage(index),
             ImageNode::default(),
@@ -269,11 +272,7 @@ fn refresh(
     let mut hovered = **interaction != Interaction::None;
     for (button, children, interaction, mut node, mut color) in &mut buttons {
         hovered |= *interaction != Interaction::None && node.display != Display::None;
-        color.0 = match interaction {
-            Interaction::None => Color::srgb_u8(58, 78, 61),
-            Interaction::Hovered => Color::srgb_u8(83, 110, 76),
-            Interaction::Pressed => Color::srgb_u8(101, 126, 84),
-        };
+        color.0 = crate::theme::button_fill(*interaction, true);
         let label = match *button {
             BuildButton::Blueprint(index) => {
                 let project = projects.get(index);
@@ -287,7 +286,7 @@ fn refresh(
                         key, project, village.stock.sandbox, None,
                     );
                     if already_planned {
-                        color.0 = Color::srgb_u8(40, 53, 43);
+                        color.0 = crate::theme::BUTTON_DISABLED;
                     }
                     let missing = !village.stock.sandbox
                         && village.stock.missing(&project.materials).is_some();

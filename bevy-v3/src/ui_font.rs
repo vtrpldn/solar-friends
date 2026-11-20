@@ -11,8 +11,25 @@ impl Plugin for UiFontPlugin {
     }
 }
 
-pub fn ui_font(assets: &AssetServer, size: f32) -> TextFont {
-    TextFont::from_font_size(size).with_font(load_embedded_asset!(assets, "outfit.ttf"))
+/// Outfit at V2's body weight, in V2's ink colour.
+pub fn ui_font(assets: &AssetServer, size: f32) -> impl Bundle {
+    ui_font_weight(assets, size, 400)
+}
+
+/// Outfit at a chosen weight; V2 uses 600 for buttons and 750 for headings.
+pub fn ui_font_weight(assets: &AssetServer, size: f32, weight: u16) -> impl Bundle {
+    ui_font_styled(assets, size, weight, crate::theme::INK)
+}
+
+/// Outfit at a chosen weight and colour, for captions and status lines.
+pub fn ui_font_styled(assets: &AssetServer, size: f32, weight: u16, color: Color) -> impl Bundle {
+    (
+        TextFont {
+            weight: bevy::text::FontWeight(weight),
+            ..TextFont::from_font_size(size).with_font(load_embedded_asset!(assets, "outfit.ttf"))
+        },
+        TextColor(color),
+    )
 }
 
 #[cfg(test)]

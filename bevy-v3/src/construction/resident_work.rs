@@ -99,7 +99,8 @@ impl Construction {
             || self.changes.values().any(|job| job.worker == Some(index))
     }
 
-    pub fn basic_needs_overview(&self, stock: &Stock, temperature: f64) -> String {
+    /// Food, power and water status lines for the top bar, each with an alert flag.
+    pub fn need_cards(&self, stock: &Stock, temperature: f64) -> [(String, bool); 3] {
         let present = self
             .residents
             .iter()
@@ -116,19 +117,19 @@ impl Construction {
             })
             .sum();
         let sanitation = self.residents_needing_sanitation();
-        let services =
+        let [power, water] =
             self.utilities
-                .service_overview(thirsty, sanitation, daily_water, stock.sandbox);
+                .card_statuses(thirsty, sanitation, daily_water, stock.sandbox);
         let portions = stock.food_portions();
         let food = if stock.sandbox {
-            "Unlimited".into()
+            ("Sandbox".into(), false)
         } else if portions == 0 {
-            "No ready food".into()
+            ("No ready food".into(), true)
         } else {
             let days = f64::from(portions) / (self.residents.len() as f64 * 3.0);
-            format!("{portions} portions · {days:.1} days estimated")
+            (format!("{days:.1} days of meals"), days < 1.0)
         };
-        format!("{services}\nFood · {food}")
+        [food, power, water]
     }
 
     pub fn residents_needing_sanitation(&self) -> usize {

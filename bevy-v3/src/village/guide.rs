@@ -314,7 +314,7 @@ fn spawn_diagram(mut commands: Commands) {
                 ..default()
             },
             ScrollPosition::default(),
-            BackgroundColor(Color::srgb_u8(251, 249, 239)),
+            BackgroundColor(crate::theme::PAPER),
         ))
         .with_child((
             GuideDiagramImage,
@@ -403,18 +403,18 @@ fn spawn_navigation(mut commands: Commands, assets: Res<AssetServer>) {
             GuideNavigation,
             Interaction::None,
             bevy::ui::FocusPolicy::Block,
-            Node {
+            crate::theme::panel_node(Node {
                 display: Display::None,
                 position_type: PositionType::Absolute,
-                right: px(20),
-                top: px(20),
-                width: px(236),
-                padding: UiRect::all(px(8)),
-                row_gap: px(4),
+                right: px(22),
+                top: px(super::RIGHT_PANEL_TOP),
+                width: px(240),
+                padding: UiRect::all(px(12)),
+                row_gap: px(8),
                 flex_direction: FlexDirection::Column,
                 ..default()
-            },
-            BackgroundColor(Color::srgb_u8(31, 45, 35)),
+            }),
+            crate::theme::panel(),
         ))
         .with_children(|panel| {
             for action in [
@@ -435,13 +435,16 @@ fn spawn_navigation(mut commands: Commands, assets: Res<AssetServer>) {
                     .spawn((
                         action,
                         Button,
-                        Node {
-                            padding: UiRect::axes(px(10), px(5)),
+                        crate::theme::button_node(Node {
+                            padding: UiRect::axes(px(12), px(6)),
                             ..default()
-                        },
-                        BackgroundColor(Color::srgb_u8(58, 78, 61)),
+                        }),
+                        crate::theme::button(),
                     ))
-                    .with_child((Text::default(), ui_font(&assets, 16.0)));
+                    .with_child((
+                        Text::default(),
+                        crate::ui_font::ui_font_weight(&assets, 15.0, 600),
+                    ));
             }
         });
 }
@@ -497,11 +500,7 @@ fn show_navigation(
             continue;
         };
         node.display = Display::Flex;
-        background.0 = if *interaction == Interaction::None {
-            Color::srgb_u8(58, 78, 61)
-        } else {
-            Color::srgb_u8(78, 105, 82)
-        };
+        background.0 = crate::theme::button_fill(*interaction, true);
         if let Ok(mut text) = labels.get_mut(children[0])
             && text.0 != label
         {

@@ -9,6 +9,8 @@ use bevy::asset::{embedded_asset, load_embedded_asset};
 
 pub(super) const PANEL_WIDTH: f32 = 240.0;
 
+mod top_bar;
+
 #[derive(Component, Clone, Copy)]
 enum Action {
     Build,
@@ -265,10 +267,9 @@ impl Action {
             Self::LensSite(_) => village.lenses.network_view().is_some(),
             Self::Guide | Self::ConnectRoad | Self::UndoRoad | Self::FinishRoad => true,
             Self::Manage => !village.construction.menu && !village.construction.is_placing(),
+            // Dock and stat-card shortcuts switch between panels or close their own.
             Self::ResourcePanel(panel) => {
-                village.utility_panel.is_none()
-                    && Self::Manage.available(village)
-                    && Self::Panel(panel).available(village)
+                Self::Manage.available(village) && Self::Panel(panel).available(village)
             }
             Self::GridFromFinances => {
                 village.utility_panel == Some(UtilityPanel::Finances)
@@ -447,8 +448,8 @@ impl Action {
                 ["Camp in shade", "Camp near entrance", "Camp in clearing"][index].into()
             }
             Self::Setup => "Setup".into(),
-            Self::View if picker.view_open => "Close view".into(),
-            Self::View => "View".into(),
+            Self::View if picker.view_open => "Close options".into(),
+            Self::View => "View & options".into(),
             Self::CameraControls => "Keyboard & camera".into(),
             Self::GridOverlay if village.show_grid => "Hide grid".into(),
             Self::GridOverlay => "Show grid".into(),
@@ -533,9 +534,6 @@ impl Action {
                 .into(),
             Self::Manage if picker.open => "Close menu".into(),
             Self::Manage => "Manage".into(),
-            Self::ResourcePanel(UtilityPanel::Finances) => "Savings".into(),
-            Self::ResourcePanel(UtilityPanel::Pantry) => "Food portions".into(),
-            Self::ResourcePanel(UtilityPanel::Power) => "Battery".into(),
             Self::GridFromFinances => "Manage grid power".into(),
             Self::StoresFromUpkeep => "Manage service supplies".into(),
             Self::PantryFromStores => "Manage food".into(),
@@ -859,6 +857,7 @@ pub(super) fn install(app: &mut App) {
     embedded_asset!(app, "resident_portraits/luz.png");
     embedded_asset!(app, "resident_portraits/caua.png");
     embedded_asset!(app, "resident_portraits/nina.png");
+    top_bar::install(app);
     app.init_resource::<PanelPicker>()
         .add_systems(Startup, spawn)
         .add_systems(
@@ -883,31 +882,54 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
             Toolbar,
             Interaction::None,
             bevy::ui::FocusPolicy::Block,
-            Node {
+            crate::theme::panel_node(Node {
                 display: Display::None,
                 position_type: PositionType::Absolute,
-                bottom: px(20),
-                right: px(20),
-                max_width: Val::Vw(94.0),
+                bottom: px(18),
+                left: px(22),
+                right: px(22),
                 flex_wrap: FlexWrap::Wrap,
-                justify_content: JustifyContent::FlexEnd,
-                row_gap: px(5),
-                column_gap: px(5),
-                padding: UiRect::all(px(6)),
+                justify_content: JustifyContent::Center,
+                row_gap: px(8),
+                column_gap: px(8),
+                padding: UiRect::all(px(12)),
                 ..default()
-            },
-            BackgroundColor(Color::srgb_u8(31, 45, 35)),
+            }),
+            crate::theme::panel(),
         ))
         .with_children(|row| {
+            // V2's dock: building and land first, then the village's panels, then options.
+            for (action, key) in [
+                (Action::Build, Some("B")),
+                (Action::ResourcePanel(UtilityPanel::Projects), Some("F11")),
+                (Action::ResourcePanel(UtilityPanel::Residents), Some("N")),
+                (Action::Terrain, Some("F4")),
+                (Action::ResourcePanel(UtilityPanel::Inventory), Some("F10")),
+                (Action::ResourcePanel(UtilityPanel::Crafting), None),
+                (Action::ResourcePanel(UtilityPanel::Pantry), None),
+                (Action::ResourcePanel(UtilityPanel::Water), Some("V")),
+                (Action::ResourcePanel(UtilityPanel::Power), Some("P")),
+                (Action::ResourcePanel(UtilityPanel::Finances), Some("H")),
+                (Action::ResourcePanel(UtilityPanel::Upkeep), Some("F7")),
+                (Action::ResourcePanel(UtilityPanel::Events), Some("F8")),
+                (Action::ResourcePanel(UtilityPanel::Trade), None),
+                (Action::View, None),
+            ] {
+                let button = spawn_button(row, &assets, action);
+                if let Some(key) = key {
+                    row.commands_mut()
+                        .entity(button)
+                        .with_children(|button| top_bar::key_chip(button, &assets, key));
+                }
+            }
+            // Shown on their own only while their screen is open; otherwise they live in
+            // the View & options menu.
+            for action in [Action::Setup, Action::Library, Action::Sound] {
+                spawn_button(row, &assets, action);
+            }
             for action in [
                 Action::Page(false),
                 Action::Page(true),
-                Action::Build,
-                Action::Setup,
-                Action::View,
-                Action::Forecast,
-                Action::Library,
-                Action::Sound,
                 Action::Recipes,
                 Action::Gather,
                 Action::Beds,
@@ -916,13 +938,6 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 Action::ConnectRoad,
                 Action::UndoRoad,
                 Action::FinishRoad,
-                Action::Terrain,
-                Action::Advance(AdvanceAction::Toggle),
-                Action::Manage,
-                Action::ResourcePanel(UtilityPanel::Finances),
-                Action::ResourcePanel(UtilityPanel::Pantry),
-                Action::ResourcePanel(UtilityPanel::Power),
-                Action::ResourcePanel(UtilityPanel::Water),
                 Action::ClosePanel,
                 Action::InventoryView,
                 Action::InventorySearch,
@@ -934,10 +949,6 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 Action::MoveCraftJob,
                 Action::StartCraft,
                 Action::PantryFromStores,
-                Action::Pause,
-                Action::Speed,
-                Action::Guide,
-                Action::Lenses,
                 Action::LensFilter(false),
                 Action::LensFilter(true),
                 Action::LensSite(false),
@@ -957,7 +968,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 PanelMenu,
                 Interaction::None,
                 bevy::ui::FocusPolicy::Block,
-                Node {
+                crate::theme::panel_node(Node {
                     display: Display::None,
                     position_type: PositionType::Absolute,
                     right: px(0),
@@ -970,9 +981,9 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                     overflow: Overflow::scroll_y(),
                     align_content: AlignContent::Start,
                     ..default()
-                },
+                }),
                 ScrollPosition::default(),
-                BackgroundColor(Color::srgb_u8(31, 45, 35)),
+                crate::theme::panel(),
             ))
             .with_children(|menu| {
                 use crate::CameraAction::*;
@@ -992,6 +1003,9 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 spawn_button(menu, &assets, Action::GridOverlay);
                 spawn_button(menu, &assets, Action::Forecast);
                 spawn_button(menu, &assets, Action::Diagnostics);
+                spawn_button(menu, &assets, Action::Setup);
+                spawn_button(menu, &assets, Action::Library);
+                spawn_button(menu, &assets, Action::Sound);
                 for row in 0..9 {
                     spawn_button(menu, &assets, Action::Lens(row));
                 }
@@ -1211,20 +1225,20 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 Text::default(),
                 ui_font(&assets, 15.0),
                 Visibility::Hidden,
-                BackgroundColor(Color::srgb_u8(31, 45, 35)),
-                Node {
+                crate::theme::panel(),
+                crate::theme::panel_node(Node {
                     position_type: PositionType::Absolute,
                     right: px(PANEL_WIDTH + 8.),
                     bottom: percent(100),
                     width: px(254),
-                    padding: UiRect::all(px(10)),
+                    padding: UiRect::all(px(12)),
                     ..default()
-                },
+                }),
             ));
         });
 }
 
-fn spawn_button(parent: &mut ChildSpawnerCommands, assets: &AssetServer, action: Action) {
+fn spawn_button(parent: &mut ChildSpawnerCommands, assets: &AssetServer, action: Action) -> Entity {
     let trade_button = matches!(
         action,
         Action::TradeItem(_)
@@ -1234,42 +1248,25 @@ fn spawn_button(parent: &mut ChildSpawnerCommands, assets: &AssetServer, action:
             | Action::Trade(_)
             | Action::TradePolicy(_)
     );
-    let (vertical_padding, font_size) = if trade_button { (4, 15.0) } else { (7, 17.0) };
+    let (vertical_padding, font_size) = if trade_button { (4, 14.0) } else { (6, 15.0) };
     let mut button = parent.spawn((
         action,
         Button,
-        Node {
-            padding: UiRect::axes(px(10), px(vertical_padding)),
+        crate::theme::button_node(Node {
+            padding: UiRect::axes(px(12), px(vertical_padding)),
+            column_gap: px(6),
+            align_items: AlignItems::Center,
             ..default()
-        },
-        BackgroundColor(Color::srgb_u8(58, 78, 61)),
+        }),
+        crate::theme::button(),
     ));
     if matches!(action, Action::View | Action::Forecast) {
         button.insert(crate::audio::DisclosureSound);
     }
-    button.with_child((Text::default(), ui_font(assets, font_size)));
-    if let Action::ResourcePanel(panel) = action
-        && let Some(slot) = super::thumbnails::icon_slot(panel)
-    {
-        button.insert(Node {
-            padding: UiRect::axes(px(10), px(3)),
-            flex_direction: FlexDirection::RowReverse,
-            justify_content: JustifyContent::FlexEnd,
-            align_items: AlignItems::Center,
-            column_gap: px(4),
-            ..default()
-        });
-        button.with_child((
-            super::thumbnails::ThumbnailImage(slot),
-            ImageNode::default(),
-            Node {
-                width: px(40),
-                height: px(30),
-                flex_shrink: 0.,
-                ..default()
-            },
-        ));
-    }
+    button.with_child((
+        Text::default(),
+        crate::ui_font::ui_font_weight(assets, font_size, 600),
+    ));
     if let Action::Resident(index) = action {
         let image = match index {
             0 => load_embedded_asset!(assets, "resident_portraits/iara.png"),
@@ -1279,14 +1276,14 @@ fn spawn_button(parent: &mut ChildSpawnerCommands, assets: &AssetServer, action:
             4 => load_embedded_asset!(assets, "resident_portraits/nina.png"),
             _ => unreachable!("the roster has five residents"),
         };
-        button.insert(Node {
+        button.insert(crate::theme::button_node(Node {
             padding: UiRect::axes(px(10), px(3)),
             flex_direction: FlexDirection::RowReverse,
             justify_content: JustifyContent::FlexEnd,
             align_items: AlignItems::Center,
             column_gap: px(6),
             ..default()
-        });
+        }));
         button.with_child((
             ImageNode::new(image),
             Node {
@@ -1297,6 +1294,7 @@ fn spawn_button(parent: &mut ChildSpawnerCommands, assets: &AssetServer, action:
             },
         ));
     }
+    button.id()
 }
 
 fn fit_and_scroll_menu(
@@ -1385,6 +1383,7 @@ fn handle_buttons(
                 Action::Sound => {
                     sound.open = true;
                     picker.open = false;
+                    picker.view_open = false;
                 }
                 Action::Volume { .. } => {}
                 Action::View => {
@@ -1416,10 +1415,12 @@ fn handle_buttons(
                     }
                     setup.open = true;
                     picker.open = false;
+                    picker.view_open = false;
                 }
                 Action::Library => {
                     library_ui::toggle_library(&mut saves, setup.mode);
                     picker.open = false;
+                    picker.view_open = false;
                 }
                 Action::Build => {
                     let sandbox = village.stock.sandbox;
@@ -1496,6 +1497,9 @@ fn handle_buttons(
                 Action::Manage => {
                     picker.open = !picker.open;
                     picker.view_open = false;
+                }
+                Action::ResourcePanel(panel) if village.utility_panel == Some(panel) => {
+                    village.utility_panel = None;
                 }
                 Action::Panel(panel) | Action::ResourcePanel(panel)
                     if picker.open || matches!(action, Action::ResourcePanel(_)) =>
@@ -2008,8 +2012,13 @@ type ToolbarButtons<'w, 's> = Query<
         &'static Interaction,
         &'static Children,
         &'static ChildOf,
-        &'static mut BackgroundColor,
+        (
+            &'static mut BackgroundColor,
+            &'static mut BorderColor,
+            &'static mut BoxShadow,
+        ),
         &'static mut Node,
+        (Has<top_bar::TopBarItem>, Has<top_bar::CustomLabel>),
     ),
     (Without<Toolbar>, Without<PanelMenu>),
 >;
@@ -2168,7 +2177,10 @@ fn refresh(
         menu.display = Display::None;
     }
     let mut action_details = String::new();
-    for (&action, &interaction, children, parent, mut background, mut node) in &mut buttons {
+    let top_bar_visible = top_bar::visible(&village, &setup, &saves, &sound);
+    let mut menu_has_items = false;
+    for (&action, &interaction, children, parent, paint, mut node, (top, custom)) in &mut buttons {
+        let (mut background, mut border, mut shadow) = paint;
         let show = match action {
             Action::Lens(row) => show_lenses && row < village.lenses.choices().len(),
             Action::LensPage | Action::ClearLens => show_lenses,
@@ -2320,6 +2332,15 @@ fn refresh(
             Action::Camera(_) | Action::CameraControls | Action::GridOverlay | Action::Diagnostics
         ) {
             show_view
+        } else if matches!(action, Action::Setup | Action::Library | Action::Sound) {
+            // The dock copies only show while their own screen is open (handled below).
+            show_view && parent.parent() == *menu_id
+        } else if let Action::ResourcePanel(panel) = action
+            && parent.parent() != *menu_id
+        {
+            Action::Panel(panel).available(&village)
+                && !village.construction.is_placing()
+                && !village.terrain_editor.open
         } else {
             show && !(show_view && parent.parent() == *menu_id)
         };
@@ -2334,6 +2355,9 @@ fn refresh(
         } else {
             show
         };
+        // Top-bar controls stay put while panels and menus come and go, as in V2.
+        let show = if top { top_bar_visible } else { show };
+        menu_has_items |= show && parent.parent() == *menu_id;
         node.display = if show { Display::Flex } else { Display::None };
         if !show {
             continue;
@@ -2401,19 +2425,37 @@ fn refresh(
                 action_details = description;
             }
         }
-        background.0 = if action_issue.is_some()
-            || !action.available(&village)
-                && !matches!(
+        let enabled = action_issue.is_none()
+            && (top
+                || matches!(action, Action::ResourcePanel(_))
+                || action.available(&village)
+                || matches!(
                     action,
                     Action::Volume { .. } | Action::Library | Action::Sound
-                ) {
-            Color::srgb_u8(40, 53, 43)
-        } else if interaction == Interaction::None {
-            Color::srgb_u8(58, 78, 61)
-        } else {
-            Color::srgb_u8(78, 105, 82)
+                ));
+        let active = match action {
+            Action::ResourcePanel(panel) => village.utility_panel == Some(panel),
+            Action::Build => village.construction.menu,
+            Action::Terrain => village.terrain_editor.open,
+            Action::View => picker.view_open,
+            Action::Pause => top && village.paused,
+            Action::Guide => top && village.guide.open(),
+            Action::Lenses => top && (village.lenses.open || village.lenses.active.is_some()),
+            Action::Advance(_) => top && village.advance.open,
+            _ => false,
         };
-        if let Ok(mut text) = labels.get_mut(children[0]) {
+        // The weather line is a plain link inside the clock card, not a raised button.
+        if !(top && matches!(action, Action::Forecast)) {
+            crate::theme::paint_button(
+                interaction,
+                enabled,
+                active,
+                &mut background,
+                &mut border,
+                &mut shadow,
+            );
+        }
+        if !custom && let Ok(mut text) = labels.get_mut(children[0]) {
             let label = match action {
                 Action::Farm(FarmControl::Work(work)) if let Some(counts) = plot_actions => {
                     let count = counts[work as usize];
@@ -2488,6 +2530,9 @@ fn refresh(
                 text.0 = label;
             }
         }
+    }
+    if !menu_has_items {
+        menu.display = Display::None;
     }
     let (details_id, visibility) = &mut *details;
     **visibility = if action_details.is_empty() {

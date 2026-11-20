@@ -27,6 +27,7 @@ mod save_library;
 mod setup;
 mod stock;
 mod terrain;
+mod theme;
 mod time_advance;
 mod town_work;
 mod trade;
@@ -591,16 +592,24 @@ mod tests {
         interact_with_button(app, label, Interaction::Pressed);
     }
 
-    fn interact_with_button(app: &mut App, label: &str, input: Interaction) {
+    fn visible_button(app: &mut App, label: &str) -> Option<Entity> {
         let world = app.world_mut();
-        let button = world
+        world
             .query_filtered::<(Entity, &Children), With<Button>>()
             .iter(world)
             .find_map(|(entity, children)| {
-                if !children
-                    .iter()
-                    .any(|child| world.get::<Text>(child).is_some_and(|text| text.0 == label))
-                {
+                // Labels may sit a level down, as in the top bar's stat cards.
+                let matches = |entity: Entity| {
+                    world
+                        .get::<Text>(entity)
+                        .is_some_and(|text| text.0 == label)
+                };
+                if !children.iter().any(|child| {
+                    matches(child)
+                        || world
+                            .get::<Children>(child)
+                            .is_some_and(|inner| inner.iter().any(matches))
+                }) {
                     return None;
                 }
                 let mut ancestor = Some(entity);
@@ -615,7 +624,34 @@ mod tests {
                 }
                 Some(entity)
             })
-            .unwrap_or_else(|| panic!("missing visible button: {label}"));
+    }
+
+    fn interact_with_button(app: &mut App, label: &str, input: Interaction) {
+        // Setup, saved villages, sound and camera tools live in the View & options menu.
+        if visible_button(app, label).is_none() && visible_button(app, "View & options").is_some() {
+            interact_with_button(app, "View & options", Interaction::Pressed);
+        }
+        let Some(button) = visible_button(app, label) else {
+            let world = app.world_mut();
+            let mut labels = Vec::new();
+            for (entity, children) in world
+                .query_filtered::<(Entity, &Children), With<Button>>()
+                .iter(world)
+            {
+                let shown = world
+                    .get::<Node>(entity)
+                    .is_some_and(|n| n.display != Display::None);
+                for child in children.iter() {
+                    if let Some(text) = world.get::<Text>(child)
+                        && shown
+                    {
+                        labels.push(text.0.clone());
+                    }
+                }
+            }
+            panic!("missing visible button: {label}; shown: {labels:?}");
+        };
+        let world = app.world_mut();
         *world
             .get_mut::<Interaction>(button)
             .expect("button interaction") = input;
@@ -992,7 +1028,7 @@ mod tests {
         press_button(&mut app, "16×");
         press_button(&mut app, "1×");
 
-        press_button(&mut app, "View");
+        press_button(&mut app, "View & options");
         press_button(&mut app, "Keyboard & camera");
         assert!(
             app.world()
@@ -1071,7 +1107,7 @@ mod tests {
                 .map_input_blocked()
         );
 
-        press_button(&mut app, "View");
+        press_button(&mut app, "View & options");
         press_button(&mut app, "Focus river");
         let camera = app
             .world_mut()
@@ -1160,14 +1196,26 @@ mod tests {
             .reset(KeyCode::Escape);
         assert!(!app.world().resource::<WorldSetup>().open);
 
-        press_button(&mut app, "Show forecast");
-        assert!(
+        // The forecast toggle now lives on the top bar's weather line; F reaches it too.
+        for _ in 0..2 {
             app.world_mut()
-                .query::<&Text>()
-                .iter(app.world())
-                .any(|text| text.0.contains("Day 3 ·"))
-        );
-        press_button(&mut app, "Hide forecast");
+                .resource_mut::<ButtonInput<KeyCode>>()
+                .press(KeyCode::KeyF);
+            app.world_mut().run_schedule(Update);
+            app.world_mut()
+                .resource_mut::<ButtonInput<KeyCode>>()
+                .reset(KeyCode::KeyF);
+            let shown = app.world().resource::<village::Village>().show_forecast;
+            if shown {
+                assert!(
+                    app.world_mut()
+                        .query::<&Text>()
+                        .iter(app.world())
+                        .any(|text| text.0.contains("Day 3 ·"))
+                );
+            }
+        }
+        assert!(!app.world().resource::<village::Village>().show_forecast);
         for (button, legend, second_page) in [
             ("Land & slope", "Land & slope · Green", false),
             ("Resources", "Resources · Green", false),
@@ -1216,7 +1264,6 @@ mod tests {
         assert!(app.world().resource::<village::Village>().is_paused());
         press_button(&mut app, "Resume");
         assert!(!app.world().resource::<village::Village>().is_paused());
-        press_button(&mut app, "Manage");
         press_button(&mut app, "Finances");
         press_button(&mut app, "Bento");
         press_button(&mut app, "Book one day shift");
@@ -1227,7 +1274,6 @@ mod tests {
         press_button(&mut app, "Manage grid power");
         press_button(&mut app, "Disconnect grid");
         press_button(&mut app, "Connect grid");
-        press_button(&mut app, "Manage");
         press_button(&mut app, "Residents");
         {
             let world = app.world_mut();
@@ -1263,7 +1309,6 @@ mod tests {
                     && text.0.contains("Repeat 4h shifts on weekdays · on"))
         );
         press_button(&mut app, "Book one day shift");
-        press_button(&mut app, "Manage");
         press_button(&mut app, "Trade");
         assert!(app.world().resource::<village::Village>().trade_open());
         let trade_state = |app: &App| {
@@ -1365,8 +1410,6 @@ mod tests {
         press_button(&mut app, "Previous page");
         press_button(&mut app, "Close food batches");
         press_button(&mut app, "Close panel");
-
-        press_button(&mut app, "Manage");
         press_button(&mut app, "Water");
         press_button(&mut app, "Camp source");
         press_button(&mut app, "Camp destination");
@@ -1376,16 +1419,12 @@ mod tests {
         press_button(&mut app, "Channel · Sewage");
         press_button(&mut app, "Channel · Drinking");
         press_button(&mut app, "Close panel");
-
-        press_button(&mut app, "Manage");
         press_button(&mut app, "Projects");
         press_button(&mut app, "Show underway");
         press_button(&mut app, "Next page");
         press_button(&mut app, "Previous page");
         press_button(&mut app, "Show all projects");
         press_button(&mut app, "Close panel");
-
-        press_button(&mut app, "Manage");
         press_button(&mut app, "Maintenance");
         press_button(&mut app, "Manage service supplies");
         press_button(&mut app, "Find material");
@@ -1466,7 +1505,6 @@ mod tests {
                 })
         );
         press_button(&mut app, "Close panel");
-        press_button(&mut app, "Manage");
         press_button(&mut app, "Crafting");
         assert!(
             app.world_mut()
@@ -1490,7 +1528,6 @@ mod tests {
                 .any(|text| text.0.contains("No crafting jobs underway."))
         );
         press_button(&mut app, "Close panel");
-        press_button(&mut app, "Manage");
         press_button(&mut app, "Stores");
         press_button(&mut app, "Show items and equipment");
         press_button(&mut app, "Show food");
@@ -1604,8 +1641,6 @@ mod tests {
         let sandbox = app.world().resource::<village::Village>();
         assert_eq!(sandbox.camp, Some(IVec2::new(36, 36)));
         assert!(matches!(sandbox.mode(), Some(setup::Mode::Sandbox)));
-
-        press_button(&mut app, "Manage");
         press_button(&mut app, "Residents");
         press_button(&mut app, "Story");
         assert!(

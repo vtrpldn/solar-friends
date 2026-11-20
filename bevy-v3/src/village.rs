@@ -246,7 +246,7 @@ pub struct Village {
     #[serde(default)]
     pub(super) camera_view: Option<CameraView>,
     #[serde(skip)]
-    show_forecast: bool,
+    pub(crate) show_forecast: bool,
     #[serde(skip)]
     advance: Advance,
     #[serde(skip)]
@@ -1373,18 +1373,18 @@ fn spawn_hud(mut commands: Commands, assets: Res<AssetServer>) {
             VillageHud,
             Interaction::None,
             bevy::ui::FocusPolicy::Block,
-            Node {
+            crate::theme::panel_node(Node {
                 display: Display::None,
                 position_type: PositionType::Absolute,
-                top: px(20),
-                left: px(20),
-                padding: UiRect::all(px(14)),
+                top: px(18),
+                left: px(22),
+                padding: UiRect::all(px(18)),
                 flex_direction: FlexDirection::Column,
                 row_gap: px(6),
                 overflow: Overflow::scroll_y(),
                 ..default()
-            },
-            BackgroundColor(Color::srgb_u8(31, 45, 35)),
+            }),
+            crate::theme::panel(),
         ))
         .with_children(|hud| {
             resident_meters::spawn(hud, &assets);
@@ -1394,9 +1394,11 @@ fn spawn_hud(mut commands: Commands, assets: Res<AssetServer>) {
                     display: Display::None,
                     height: px(6),
                     flex_shrink: 0.0,
+                    border_radius: BorderRadius::all(px(3)),
+                    overflow: Overflow::clip(),
                     ..default()
                 },
-                BackgroundColor(Color::srgb_u8(57, 76, 60)),
+                BackgroundColor(crate::theme::TRACK),
             ))
             .with_child((
                 ConstructionProgressFill,
@@ -1405,12 +1407,12 @@ fn spawn_hud(mut commands: Commands, assets: Res<AssetServer>) {
                     height: percent(100),
                     ..default()
                 },
-                BackgroundColor(Color::srgb_u8(174, 212, 133)),
+                BackgroundColor(crate::theme::LEAF),
             ));
             hud.spawn((
                 VillageHudText,
                 Text::default(),
-                ui_font(&assets, 17.0),
+                ui_font(&assets, 15.0),
                 Node {
                     flex_shrink: 0.,
                     ..default()
@@ -1680,29 +1682,11 @@ fn nearest_resident(cursor: Vec2, residents: impl Iterator<Item = (usize, Vec2)>
         .map(|(index, _)| index)
 }
 
-/// Utility problems that stay visible on the HUD until the matching panel is opened.
-fn utility_alerts(utilities: &crate::utilities::Utilities, panel: Option<UtilityPanel>) -> String {
-    let mut alerts = Vec::new();
-    let shortages = utilities.power_shortages().count();
-    if shortages > 0 && panel != Some(UtilityPanel::Power) {
-        let noun = if shortages == 1 {
-            "building"
-        } else {
-            "buildings"
-        };
-        alerts.push(format!("{shortages} {noun} short of power · P"));
-    }
-    let tanks = utilities.waste_tanks_needing_attention().count();
-    if tanks > 0 && panel != Some(UtilityPanel::Water) {
-        let noun = if tanks == 1 {
-            "waste tank needs"
-        } else {
-            "waste tanks need"
-        };
-        alerts.push(format!("{tanks} {noun} service · V"));
-    }
-    alerts.join(" · ")
-}
+/// Top of right-hand panels, below the clock card and its Guide and Lenses buttons.
+const RIGHT_PANEL_TOP: f32 = 176.0;
+
+/// Space the top bar's stat cards take, so panels open beneath them.
+const TOP_BAR_CLEARANCE: f32 = 112.0;
 
 const CAMP_OFFSET: IVec2 = IVec2::new(-1, -3);
 const CAMP_ACCESS_ERROR: &str = "Choose somewhere reachable from the supplies.";
@@ -2860,7 +2844,6 @@ fn show_hud(
     mut progress_nodes: ConstructionProgressNodes,
     (catalog, land, saves): (Res<Catalog>, Res<Land>, Res<SaveMenu>),
     (placement, sound): (Res<MapNotice>, Res<SoundSettings>),
-    mut resource_trends: Local<resource_trends::ResourceTrends>,
 ) {
     if !saves.is_changed()
         && !setup.is_changed()
@@ -2870,26 +2853,11 @@ fn show_hud(
     {
         return;
     }
-    let utilities = &village.construction.utilities;
     for (mut node, track) in &mut progress_nodes {
         if track {
             node.display = Display::None;
         }
     }
-    let savings = village.stock.balance() as f64 / 100.0;
-    let food = village.stock.food_portions();
-    let energy = utilities.stored_energy();
-    let water = utilities.stored_drinking_water();
-    let rates = if !setup.open && village.camp.is_some() {
-        resource_trends.sample(
-            village.session_serial,
-            village.clock,
-            [savings, f64::from(food), energy, water],
-        )
-    } else {
-        None
-    };
-    let rate = |index, unit| resource_trends::hourly_rate(rates.map(|rates| rates[index]), unit);
     node.max_width = Val::Auto;
     if sound.open {
         node.display = Display::Flex;
@@ -2923,14 +2891,19 @@ fn show_hud(
         return;
     }
     node.display = Display::Flex;
-    node.top = px(20);
+    // Below the top bar's stat cards; panels and reference pages get more room than the
+    // short status notes shown while playing.
+    node.top = px(TOP_BAR_CLEARANCE);
     node.bottom = Val::Auto;
-    if matches!(
-        village.utility_panel,
-        Some(UtilityPanel::Power | UtilityPanel::Water)
-    ) {
-        node.max_width = Val::Vw(40.0);
-    }
+    node.max_width = if village.utility_panel.is_some()
+        || village.guide.open()
+        || village.lenses.open
+        || village.lenses.active.is_some()
+    {
+        Val::Vw(46.0)
+    } else {
+        px(520)
+    };
     if village.trade_open()
         || (village.utility_panel.is_none() && village.construction.production.open)
     {
@@ -2944,9 +2917,6 @@ fn show_hud(
         text.0 = page;
         return;
     }
-    let minute = crate::weather::game_minutes(village.clock);
-    let hour = minute / 60 % 24;
-    let day = minute / 1440 + 1;
     let controls = if village.arrival_time < ARRIVAL_DURATION {
         "Arriving at the village".into()
     } else if village.camp.is_none() {
@@ -2955,57 +2925,28 @@ fn show_hud(
             .unwrap_or("Click to choose camp · 1 Shade · 2 Entrance · 3 Clearing")
             .into()
     } else if village.paused && !village.construction.menu {
-        "B Build · Space Resume".into()
+        String::new()
     } else {
         village
             .construction
             .instructions(&catalog, village.stock.sandbox)
     };
-    let speed = if village.planning_pause() {
-        "Paused".into()
+    // The clock, stock counters, date and weather live in the top bar; this card only
+    // carries what the player is doing right now.
+    let mut label = if controls == "B Build · Space Pause · 1–4 Speed" {
+        String::new()
     } else {
-        village.speed_label()
+        controls
     };
-    let stock = if village.stock.sandbox {
-        format!(
-            "Sandbox · I {}\nWater {water:.0} L ({})",
-            village.construction.sandbox_status(),
-            rate(3, ""),
-        )
-    } else {
-        format!(
-            "R${savings:.2} ({}) · Food {food} portions ({}) · {} timber\nBattery {energy:.1} kWh ({}) · Water {water:.0} L ({}) · Shift+U {}",
-            rate(0, "R$"),
-            rate(1, ""),
-            village.stock.available("wood"),
-            rate(2, ""),
-            rate(3, ""),
-            village.construction.auto_buy_status(),
-        )
-    };
-    let mut label = format!(
-        "Day {day}   {hour:02}:{:02}   {speed}\n{stock}\n{controls}",
-        minute % 60
-    );
     if let Some(notice) = &placement.0 {
         label.push('\n');
         label.push_str(notice);
     }
-    let weather = weather_at(village.clock, setup.biome(), setup.seed());
-    label.push('\n');
-    label.push_str(&crate::weather::calendar_label(village.clock));
-    label.push_str(" · ");
-    label.push_str(&weather.summary(village.clock));
-    label.push_str(if village.selected_project_focus().is_some() {
-        " · F Find in village · Alt+F Forecast · F1 Guide · Shift+F1 Sound"
-    } else {
-        " · F Forecast · F1 Guide · Shift+F1 Sound"
-    });
     if village.show_forecast {
         label.push('\n');
         label.push_str(&forecast(village.clock, setup.biome(), setup.seed()));
     }
-    if village.camp.is_some() {
+    if village.camp.is_some() && village.advance.has_status() {
         label.push('\n');
         label.push_str(&village.advance.status(village.utility_owns_advance_key()));
         if village.advance.open {
@@ -3052,32 +2993,6 @@ fn show_hud(
     {
         label.push('\n');
         label.push_str(&natural);
-    }
-    if village.camp.is_some() {
-        label.push_str(
-            "\nP Power · V Water · N Residents · F4 Terrain · F8 Events · F10 Stores · F11 Projects\nShift+L Map lenses · Shift+G Grid",
-        );
-        if !village.stock.sandbox {
-            label.push_str(" · H Finances · F7 Maintenance");
-        }
-        let alerts = utility_alerts(&village.construction.utilities, village.utility_panel);
-        if !alerts.is_empty() {
-            label.push_str("\nAttention: ");
-            label.push_str(&alerts);
-        }
-    }
-    if village.camp.is_some()
-        && village.utility_panel.is_none()
-        && !village.construction.menu
-        && !village.advance.open
-        && !village.terrain_editor.open
-    {
-        label.push('\n');
-        label.push_str(
-            &village
-                .construction
-                .basic_needs_overview(&village.stock, weather.temperature),
-        );
     }
     match village.utility_panel {
         Some(UtilityPanel::Power) => {
@@ -3521,6 +3436,13 @@ fn show_hud(
         label.push('\n');
         label.push_str(&village.save_notice);
     }
+    let label = label.trim_start_matches('\n').to_owned();
+    let meters = village.resident_overview_open();
+    node.display = if label.is_empty() && !meters {
+        Display::None
+    } else {
+        Display::Flex
+    };
     if text.0 != label {
         text.0 = label;
     }
@@ -3884,19 +3806,6 @@ fn outdoor_animation_time(seconds: f64) -> f32 {
 mod tests {
     use super::*;
     use bevy::ecs::system::RunSystemOnce;
-
-    #[test]
-    fn full_waste_tanks_stay_on_the_hud_until_water_opens() {
-        let mut utilities = crate::utilities::Utilities::default();
-        utilities.sync(std::iter::empty());
-        assert_eq!(utility_alerts(&utilities, None), "");
-        utilities.fill_waste_tank(0);
-        assert_eq!(
-            utility_alerts(&utilities, None),
-            "1 waste tank needs service · V"
-        );
-        assert_eq!(utility_alerts(&utilities, Some(UtilityPanel::Water)), "");
-    }
 
     #[test]
     fn stepping_through_lens_facilities_selects_each_building() {

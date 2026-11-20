@@ -448,7 +448,7 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
     commands
         .spawn((
             SetupPanel,
-            Node {
+            crate::theme::panel_node(Node {
                 position_type: PositionType::Absolute,
                 left: px(32),
                 top: px(32),
@@ -459,8 +459,8 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
                 row_gap: px(6),
                 overflow: Overflow::scroll_y(),
                 ..default()
-            },
-            BackgroundColor(Color::srgb_u8(31, 45, 35)),
+            }),
+            crate::theme::panel(),
             Interaction::default(),
             ScrollPosition::default(),
         ))
@@ -468,7 +468,7 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
             panel.spawn((
                 SetupHeading,
                 Text::new("Solar Friends"),
-                ui_font(&assets, 30.0),
+                crate::ui_font::ui_font_weight(&assets, 30.0, 750),
             ));
             for action in [
                 Action::Resume,
@@ -495,7 +495,7 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
                 let mut button = panel.spawn((
                     action,
                     Button,
-                    Node {
+                    crate::theme::button_node(Node {
                         display: if !action.is_title_action()
                             || matches!(
                                 action,
@@ -509,12 +509,12 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
                         flex_shrink: 0.,
                         flex_direction: FlexDirection::Column,
                         ..default()
-                    },
-                    BackgroundColor(Color::srgb_u8(62, 83, 65)),
+                    }),
+                    crate::theme::button(),
                 ));
                 button.with_child((
                     Text::new(setup.label(action, false)),
-                    ui_font(&assets, 17.0),
+                    crate::ui_font::ui_font_weight(&assets, 16.0, 600),
                 ));
                 if matches!(action, Action::Continue(Mode::Story)) {
                     button.with_child((
@@ -528,7 +528,7 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
     commands
         .spawn((
             PlotPreview,
-            Node {
+            crate::theme::panel_node(Node {
                 position_type: PositionType::Absolute,
                 right: px(32),
                 top: px(32),
@@ -536,11 +536,14 @@ fn spawn_panel(mut commands: Commands, setup: Res<WorldSetup>, assets: Res<Asset
                 flex_direction: FlexDirection::Column,
                 row_gap: px(8),
                 ..default()
-            },
-            BackgroundColor(Color::srgb_u8(31, 45, 35)),
+            }),
+            crate::theme::panel(),
         ))
         .with_children(|panel| {
-            panel.spawn((Text::new("Plot preview"), ui_font(&assets, 20.0)));
+            panel.spawn((
+                Text::new("Plot preview"),
+                crate::ui_font::ui_font_weight(&assets, 20.0, 750),
+            ));
             panel.spawn((
                 PlotPreviewImage,
                 ImageNode::default(),
@@ -598,10 +601,10 @@ fn refresh_title(
     } else {
         panel.left = px(32);
         panel.top = px(32);
-        background.0 = Color::srgb_u8(31, 45, 35);
+        background.0 = crate::theme::PAPER;
         text.0 = "Choose the land".into();
         font.font_size = 30.;
-        color.0 = Color::WHITE;
+        color.0 = crate::theme::INK;
     }
 }
 
@@ -775,11 +778,7 @@ fn refresh_panel(
             } else {
                 commands.entity(entity).insert(InteractionDisabled);
             }
-            background.0 = if enabled {
-                Color::srgb_u8(62, 83, 65)
-            } else {
-                Color::srgb_u8(43, 54, 45)
-            };
+            background.0 = crate::theme::button_fill(Interaction::None, enabled);
         }
         let visible = match action {
             Action::Resume => !setup.choosing_land && has_village,

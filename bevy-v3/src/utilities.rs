@@ -824,43 +824,55 @@ impl Utilities {
         (!status.is_empty()).then_some(status)
     }
 
-    pub fn service_overview(
+    /// Short power and water lines for the top bar's stat cards, each with an alert flag.
+    pub fn card_statuses(
         &self,
         thirsty: usize,
         sanitation_waiting: usize,
         daily_water: f64,
         sandbox: bool,
-    ) -> String {
-        let enabled = || self.nodes.values().filter(|node| node.enabled);
+    ) -> [(String, bool); 2] {
         let shortage = self.power_shortages().count();
         let power = if shortage > 0 {
-            format!("{shortage} buildings undersupplied")
+            (format!("{shortage} short of power"), true)
         } else if self.grid_import_kw > 0.0 {
-            format!("{:.2} kW grid backup", self.grid_import_kw)
+            (format!("{:.2} kW from grid", self.grid_import_kw), false)
         } else if self.demand_kw > 0.0 {
-            "Demand supplied".into()
+            ("Supplied".into(), false)
         } else {
-            "No demand".into()
+            ("No demand".into(), false)
         };
-        let fresh: f64 = enabled()
-            .filter(|node| !matches!(node.kind.as_str(), "coop" | "goat_pasture"))
+        let fresh: f64 = self
+            .nodes
+            .values()
+            .filter(|node| node.enabled && !matches!(node.kind.as_str(), "coop" | "goat_pasture"))
             .map(|node| node.water[0])
             .sum();
+        let tanks = self.waste_tanks_needing_attention().count();
         let water = if sandbox {
-            "Sandbox".into()
+            ("Sandbox".into(), false)
+        } else if self.sewage_blocks_toilets() {
+            ("Toilets blocked".into(), true)
+        } else if tanks > 0 {
+            let noun = if tanks == 1 {
+                "Waste tank"
+            } else {
+                "Waste tanks"
+            };
+            (format!("{noun} full"), true)
         } else if thirsty > 0 {
-            format!("{fresh:.1} L potable · {thirsty} thirsty")
+            (format!("{thirsty} thirsty"), true)
+        } else if sanitation_waiting > 0 {
+            (format!("{sanitation_waiting} need a toilet"), true)
         } else if fresh < 0.5 {
-            "No drinking water".into()
+            ("No drinking water".into(), true)
         } else if daily_water > 0.0 {
             let hours = fresh / daily_water * 24.0;
-            let warning = if hours < 6.0 { " · Low reserve" } else { "" };
-            format!("{fresh:.1} L potable · {hours:.1}h estimated{warning}")
+            (format!("{hours:.0}h in reserve"), hours < 6.0)
         } else {
-            format!("{fresh:.1} L potable")
+            ("In reserve".into(), false)
         };
-        let sanitation = self.sanitation_status(sanitation_waiting);
-        format!("Power · {power}\nWater · {water} · Sanitation · {sanitation}")
+        [power, water]
     }
 
     pub fn sanitation_status(&self, sanitation_waiting: usize) -> String {
@@ -1145,12 +1157,6 @@ impl Utilities {
             river_flow_liters_per_day: ground.flow,
             runoff_liters: ground.runoff,
         })
-    }
-
-    #[cfg(test)]
-    pub(crate) fn fill_waste_tank(&mut self, id: usize) {
-        let node = self.nodes.get_mut(&id).expect("utility node exists");
-        node.water[2] = node.capacity[2];
     }
 
     pub fn waste_tanks_needing_attention(
@@ -2119,8 +2125,12 @@ mod tests {
         utilities.toggle(1);
         assert!(
             utilities
-                .service_overview(0, 1, 0.0, false)
+                .sanitation_status(1)
                 .contains("Sewage tanks too full for toilets")
+        );
+        assert_eq!(
+            utilities.card_statuses(0, 1, 0.0, false)[1],
+            ("Toilets blocked".to_owned(), true)
         );
         utilities.service_waste(1);
         assert!(!utilities.sewage_blocks_toilets());

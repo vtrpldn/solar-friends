@@ -26,8 +26,9 @@ const ICONS: [(UtilityPanel, &str); 4] = [
 pub(super) const SELECTED_SLOT: usize = crate::construction::BUILD_ROWS;
 const FIRST_ICON_SLOT: usize = SELECTED_SLOT + 1;
 pub(super) const SLOTS: usize = FIRST_ICON_SLOT + ICONS.len();
-/// Frames a framed slot keeps rendering so materials and transforms settle.
-const SETTLE_FRAMES: u8 = 6;
+/// Seconds a framed slot keeps rendering. Shaders compile asynchronously, so a fixed
+/// frame count could stop before the first visible draw, as it did at startup.
+const SETTLE_SECONDS: f32 = 1.5;
 /// Keeps thumbnail layers clear of the village scene, which renders on layer 0.
 const FIRST_LAYER: usize = 20;
 
@@ -36,7 +37,8 @@ pub(super) struct Thumbnails {
     pub(super) images: [Handle<Image>; SLOTS],
     shown: [Option<usize>; SLOTS],
     framed: [bool; SLOTS],
-    rendered: [u8; SLOTS],
+    /// Real time each slot's camera started rendering its framed model.
+    rendered: [Option<f32>; SLOTS],
     icon_models: [Option<usize>; ICONS.len()],
 }
 
@@ -109,11 +111,7 @@ fn spawn(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
             Camera {
                 order: -10 - slot as isize,
                 is_active: false,
-                clear_color: ClearColorConfig::Custom(if slot >= FIRST_ICON_SLOT {
-                    Color::NONE
-                } else {
-                    Color::srgb_u8(46, 63, 49)
-                }),
+                clear_color: ClearColorConfig::Custom(Color::NONE),
                 ..default()
             },
             Projection::Orthographic(OrthographicProjection::default_3d()),
@@ -127,7 +125,7 @@ fn spawn(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
         images,
         shown: [None; SLOTS],
         framed: [false; SLOTS],
-        rendered: [0; SLOTS],
+        rendered: [None; SLOTS],
         icon_models: icon_models(),
     });
 }
@@ -167,7 +165,7 @@ fn show_models(
     mut commands: Commands,
     (setup, village, catalog): (Res<WorldSetup>, Res<Village>, Res<Catalog>),
     (saves, sound, assets): (Res<SaveMenu>, Res<SoundSettings>, Res<AssetServer>),
-    picker: Res<toolbar::PanelPicker>,
+    (picker, time): (Res<toolbar::PanelPicker>, Res<Time<Real>>),
     mut thumbnails: ResMut<Thumbnails>,
     models: Query<(Entity, &ThumbnailModel)>,
     mut cameras: Query<(&ThumbnailCamera, &mut Camera)>,
@@ -179,15 +177,16 @@ fn show_models(
         .collect();
     for slot in changed {
         thumbnails.framed[slot] = false;
-        thumbnails.rendered[slot] = 0;
+        thumbnails.rendered[slot] = None;
     }
+    let now = time.elapsed_secs();
     for (camera, mut settings) in &mut cameras {
         let slot = camera.0;
-        let active = wanted[slot].is_some()
-            && !(thumbnails.framed[slot] && thumbnails.rendered[slot] >= SETTLE_FRAMES);
-        if active && thumbnails.framed[slot] {
-            thumbnails.rendered[slot] += 1;
+        if thumbnails.framed[slot] && thumbnails.rendered[slot].is_none() {
+            thumbnails.rendered[slot] = Some(now);
         }
+        let settled = thumbnails.rendered[slot].is_some_and(|start| now - start > SETTLE_SECONDS);
+        let active = wanted[slot].is_some() && !settled;
         if settings.is_active != active {
             settings.is_active = active;
         }

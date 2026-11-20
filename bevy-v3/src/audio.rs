@@ -242,18 +242,18 @@ fn spawn_volume_panel(mut commands: Commands, assets: Res<AssetServer>) {
         .spawn((
             VolumePanel,
             GlobalZIndex(1),
-            Node {
+            crate::theme::panel_node(Node {
                 display: Display::None,
                 position_type: PositionType::Absolute,
-                right: px(20),
-                bottom: px(82),
+                right: px(22),
+                bottom: px(96),
                 width: px(308),
-                padding: UiRect::all(px(16)),
+                padding: UiRect::all(px(18)),
                 flex_direction: FlexDirection::Column,
                 row_gap: px(8),
                 ..default()
-            },
-            BackgroundColor(Color::srgb_u8(31, 45, 35)),
+            }),
+            crate::theme::panel(),
         ))
         .with_children(|panel| {
             for effects in [false, true] {
@@ -265,10 +265,12 @@ fn spawn_volume_panel(mut commands: Commands, assets: Res<AssetServer>) {
                         RelativeCursorPosition::default(),
                         Node {
                             width: percent(100),
-                            height: px(18),
+                            height: px(14),
+                            border_radius: BorderRadius::all(px(7)),
+                            overflow: Overflow::clip(),
                             ..default()
                         },
-                        BackgroundColor(Color::srgb_u8(63, 80, 65)),
+                        BackgroundColor(crate::theme::TRACK),
                     ))
                     .with_child((
                         VolumeFill(effects),
@@ -276,7 +278,7 @@ fn spawn_volume_panel(mut commands: Commands, assets: Res<AssetServer>) {
                             height: percent(100),
                             ..default()
                         },
-                        BackgroundColor(Color::srgb_u8(142, 175, 109)),
+                        BackgroundColor(crate::theme::LEAF),
                         bevy::ui::FocusPolicy::Pass,
                     ));
             }
