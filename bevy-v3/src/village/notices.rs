@@ -197,8 +197,8 @@ fn toast(text: &str) -> Toast {
 }
 
 /// Whether a sheet sits where toasts appear: the build catalog, a dialog or the guide.
-fn covered(village: &Village) -> bool {
-    village.modal_panel() || village.guide.open() || village.construction.menu
+fn covered(village: &Village, setup: &WorldSetup) -> bool {
+    setup.open || village.modal_panel() || village.guide.open() || village.construction.menu
 }
 
 fn collect_news(
@@ -209,7 +209,7 @@ fn collect_news(
     mut news: ResMut<News>,
 ) {
     // Toasts wait, without ageing, while a sheet covers their place above the dock.
-    let delta = if covered(&village) {
+    let delta = if covered(&village, &setup) {
         0.
     } else {
         time.delta_secs()
@@ -274,7 +274,7 @@ fn show_toasts(
     assets: Res<AssetServer>,
     stack: Single<(Entity, &mut Node), With<ToastStack>>,
     toolbar: Single<&ComputedNode, With<toolbar::Toolbar>>,
-    village: Res<Village>,
+    (village, setup): (Res<Village>, Res<WorldSetup>),
     mut shown: Local<Vec<(Option<String>, String)>>,
     mut fades: Query<(&ToastAge, &mut BackgroundColor, &mut BorderColor)>,
     mut texts: Query<(&ToastAge, &mut TextColor)>,
@@ -285,7 +285,7 @@ fn show_toasts(
     if node.bottom != bottom {
         node.bottom = bottom;
     }
-    let display = if covered(&village) {
+    let display = if covered(&village, &setup) {
         Display::None
     } else {
         Display::Flex
@@ -373,6 +373,9 @@ fn show_goals(
         .flatten()
         .filter(|_| {
             !village.stock.sandbox
+                && !setup.open
+                && !saves.open
+                && !sound.open
                 && !projects_card::visible(&village, &setup, &saves, &sound)
                 && !build_menu::visible(&setup, &village, &saves, &sound)
                 && !village.terrain_editor.open

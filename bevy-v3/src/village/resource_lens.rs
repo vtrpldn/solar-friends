@@ -51,9 +51,15 @@ pub(super) fn draw(
                 let recipe = &catalog.gathering[site.recipe()];
                 let mut detail = format!("{} · {status}", recipe.name);
                 if !ecology && !matches!(status, ResourceStatus::Exhausted) {
+                    // The same measure the site card and stores use, e.g. 160 kg.
                     for (material, units) in &recipe.output {
-                        let name = &catalog.materials[material].name;
-                        let _ = write!(detail, " · {units} {name} per gather");
+                        let material = &catalog.materials[material];
+                        let _ = write!(
+                            detail,
+                            " · {} {} per gather",
+                            material.quantity_text(u64::from(*units)),
+                            material.name.to_lowercase()
+                        );
                     }
                 }
                 detail
