@@ -145,7 +145,10 @@ fn update_lighting(
             && let Some(material) = materials.get_mut(&material.0)
         {
             material.base_color = pane.original.mix(&warm, amount * 0.65);
-            material.emissive = warm.to_linear() * (amount * 0.85);
+            material.emissive = warm.to_linear() * (amount * 1.1);
+            // Like the workshop's lamps: glow at face value instead of being scaled down
+            // by the camera's exposure, which left powered windows nearly dark.
+            material.emissive_exposure_weight = 0.0;
             pane.amount = amount;
         }
     }
@@ -181,8 +184,9 @@ fn update_lighting(
     }
     for (slot, mut light, mut transform, mut visibility) in &mut lights {
         if let Some(&(_, _, position, windowed)) = candidates.get(slot.0) {
-            light.intensity = night * if windowed { 2_400.0 } else { 5_000.0 };
-            light.range = if windowed { 8.0 } else { 12.0 };
+            // Bright enough to read next to the campfire (40 000), as V2's lamps do.
+            light.intensity = night * if windowed { 12_000.0 } else { 30_000.0 };
+            light.range = if windowed { 10.0 } else { 16.0 };
             transform.translation = position;
             *visibility = Visibility::Visible;
         } else if *visibility != Visibility::Hidden {

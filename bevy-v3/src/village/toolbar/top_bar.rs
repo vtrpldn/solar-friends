@@ -125,11 +125,14 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
             bevy::ui::FocusPolicy::Pass,
         ))
         .with_children(|bar| {
+            // V2 centres the stat cards in the space left of the clock card.
             bar.spawn(Node {
                 column_gap: px(8),
                 flex_wrap: FlexWrap::Wrap,
                 row_gap: px(8),
+                flex_grow: 1.,
                 flex_shrink: 1.,
+                justify_content: JustifyContent::Center,
                 ..default()
             })
             .with_children(|cards| {
