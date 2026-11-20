@@ -1296,7 +1296,7 @@ fn handle_buttons(
                 Action::Page(forward) if village.utility_panel == Some(UtilityPanel::Residents) => {
                     let pages = village
                         .construction
-                        .home_options(&catalog)
+                        .home_options(&catalog, village.selected_resident)
                         .count()
                         .div_ceil(HOME_ROWS)
                         .max(1);
@@ -1753,14 +1753,17 @@ fn refresh(
         Vec::new()
     };
     let homes: Vec<_> = if show_residents {
-        village.construction.home_options(&catalog).collect()
+        village
+            .construction
+            .home_options(&catalog, village.selected_resident)
+            .collect()
     } else {
         Vec::new()
     };
     let home_pages = homes.len().div_ceil(HOME_ROWS).max(1);
     picker.home_page = picker.home_page.min(home_pages - 1);
     let homes = &homes[(picker.home_page * HOME_ROWS)..];
-    picker.visible_homes = std::array::from_fn(|row| homes.get(row).map(|option| option.0));
+    picker.visible_homes = std::array::from_fn(|row| homes.get(row).map(|option| option.id));
     menu.display = if show_view
         || show_lenses
         || show_beds
@@ -1922,18 +1925,26 @@ fn refresh(
         if !show {
             continue;
         }
-        let trade_issue = match action {
+        let action_issue = match action {
             Action::Trade(order) => village.construction.selected_trade_issue(
                 &catalog,
                 &village.stock,
                 trade_clock,
                 order,
             ),
+            Action::ListedHome(row) if !homes[row].open => {
+                Some("Reopen this home before assigning residents.")
+            }
+            Action::ListedHome(row)
+                if homes[row].occupants >= homes[row].beds && !homes[row].assigned =>
+            {
+                Some("This home has no free beds.")
+            }
             _ => None,
         };
         if interaction != Interaction::None {
             let description = match action {
-                Action::Trade(_) => trade_issue.map(str::to_owned),
+                Action::Trade(_) | Action::ListedHome(_) => action_issue.map(str::to_owned),
                 Action::CampPreset(index) => Some(
                     [
                         "Cool afternoons, but a longer walk from the unloading point.",
@@ -1962,7 +1973,7 @@ fn refresh(
                 action_details = description;
             }
         }
-        background.0 = if trade_issue.is_some()
+        background.0 = if action_issue.is_some()
             || !action.available(&village)
                 && !matches!(
                     action,
@@ -2018,8 +2029,25 @@ fn refresh(
                 }
                 Action::HoldTradeQueued(row) => format!("Order {} · Hold for pickup", row + 1),
                 Action::ListedHome(row) => {
-                    let (home, name, occupants, beds) = homes[row];
-                    format!("{name} #{} · {occupants}/{beds} beds", home + 1)
+                    let home = &homes[row];
+                    let state = if home.assigned {
+                        " · Assigned"
+                    } else if !home.open {
+                        " · Closed"
+                    } else if home.occupants >= home.beds {
+                        " · Full"
+                    } else {
+                        ""
+                    };
+                    format!(
+                        "{} #{} · ({}, {}) · {}/{} beds{state}",
+                        home.name,
+                        home.id + 1,
+                        home.position.x,
+                        home.position.y,
+                        home.occupants,
+                        home.beds
+                    )
                 }
                 _ => action.label(&village, &picker),
             };

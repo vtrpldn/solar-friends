@@ -10,6 +10,16 @@ use crate::{
 
 use super::*;
 
+pub(crate) struct HomeOption<'a> {
+    pub id: usize,
+    pub name: &'a str,
+    pub position: IVec2,
+    pub occupants: usize,
+    pub beds: usize,
+    pub assigned: bool,
+    pub open: bool,
+}
+
 pub(super) const NAMES: [&str; 5] = ["Iara", "Bento", "Luz", "Cauã", "Nina"];
 
 fn latrine_sites(terrain: &Terrain, camp: IVec2, index: usize) -> impl Iterator<Item = IVec2> + '_ {
@@ -532,24 +542,31 @@ impl Construction {
     pub fn home_options<'a>(
         &'a self,
         catalog: &'a Catalog,
-    ) -> impl Iterator<Item = (usize, &'a str, usize, usize)> + 'a {
-        self.plans.iter().enumerate().filter_map(move |(home, _)| {
-            let definition = self.completed_shelter(catalog, home)?;
-            if definition.kind != "home" || self.changes.contains_key(&home) {
-                return None;
-            }
-            let occupants = self
-                .residents
-                .iter()
-                .filter(|resident| resident.home == Some(home))
-                .count();
-            Some((
-                home,
-                definition.name.as_str(),
-                occupants,
-                definition.beds.unwrap_or(2),
-            ))
-        })
+        resident: usize,
+    ) -> impl Iterator<Item = HomeOption<'a>> + 'a {
+        self.plans
+            .iter()
+            .enumerate()
+            .filter_map(move |(home, plan)| {
+                let definition = self.completed_shelter(catalog, home)?;
+                if definition.kind != "home" || self.changes.contains_key(&home) {
+                    return None;
+                }
+                let occupants = self
+                    .residents
+                    .iter()
+                    .filter(|other| other.home == Some(home))
+                    .count();
+                Some(HomeOption {
+                    id: home,
+                    name: definition.name.as_str(),
+                    position: plan.position,
+                    occupants,
+                    beds: definition.beds.unwrap_or(2),
+                    assigned: self.residents[resident].home == Some(home),
+                    open: self.utilities.enabled(home),
+                })
+            })
     }
 
     pub fn assign_home(
@@ -590,7 +607,7 @@ impl Construction {
 
     fn resident_home_summary(&self, index: usize, catalog: &Catalog) -> String {
         let Some(home) = self.residents[index].home else {
-            return if self.home_options(catalog).next().is_some() {
+            return if self.home_options(catalog, index).next().is_some() {
                 "Unassigned · uses available shelter".into()
             } else {
                 "Complete a house to assign a permanent home.".into()
