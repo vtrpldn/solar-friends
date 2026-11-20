@@ -1718,6 +1718,37 @@ mod tests {
                 .unwrap()
                 .contains("1 supplier load")
         );
+        let mut exact_village: Construction =
+            serde_json::from_slice(&serde_json::to_vec(&village).unwrap()).unwrap();
+        let camp = IVec2::splat(36);
+        let terrain = setup.terrain().with_camp(camp);
+        let land = Land::default();
+        exact_village.choose_blueprint("well");
+        exact_village.plan(
+            &catalog,
+            &mut exact_budget,
+            ConstructionSite {
+                terrain: &terrain,
+                land: &land,
+                camp,
+            },
+            IVec2::new(45, 36),
+            clock,
+        );
+        assert_eq!(exact_village.plans.len(), 2, "{}", exact_village.status);
+        exact_village.tick_construction_delivery(&catalog, &mut exact_budget, clock);
+        assert!(exact_village.construction_delivery_at(0));
+        assert!(exact_village.construction_delivery_at(1));
+        assert_eq!(
+            exact_budget.balance(),
+            exact_village.market.expansion_reserve()
+        );
+        assert_eq!(
+            exact_village.construction_freight_budget(&catalog, BTreeMap::new()),
+            Some((0, 0))
+        );
+        assert!(exact_village.valid_save(&catalog, &exact_budget));
+
         Construction::reserve_project(
             &mut village.market,
             &mut stock,
