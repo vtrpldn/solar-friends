@@ -1,6 +1,6 @@
 # Solar Friends V3
 
-Run the desktop preview from the repository root.
+Run the standalone Bevy desktop game from the repository root.
 
 ```sh
 cargo run --locked --manifest-path bevy-v3/Cargo.toml
@@ -12,7 +12,7 @@ Choose Story or Sandbox, a biome, landscape, water availability, resource richne
 
 After the cars arrive, click the ground to place camp or select a preset with 1 (shade), 2 (entrance), or 3 (clearing). Press Space to pause or resume the village clock. After placing camp, press B to open the build catalog. Use Tab for categories and Page Up/Down to browse. Select a blueprint with its number key, R to rotate it, and click the plot to reserve materials and mark the site. The placement outline follows the model and changes color when the site or supply plan is blocked. Residents carry each reserved load to the site before assembly. The project model appears when they finish. Press Ctrl+D or Command+D on a selected project to place another copy of its blueprint. Select a project to prioritize or cancel an unstarted plan, or to queue relocation, salvage, or demolition.
 
-V3 runs as a standalone Bevy desktop application. The preview covers land generation, navigation, the opening camp, and construction, including orders and town pickup for missing materials. The V2 browser game remains available at `/v2/`.
+The desktop port includes Story and Sandbox villages, local saves, and the V2 collection, workshop, and Balance Lab. The V2 browser game remains available at `/v2/`.
 
 Press F for the three-day forecast, P for power, V for water, and N to see what the residents are doing. Use O in the power panel to switch the grid connection, or J after selecting a powered building to switch it off or on. Use 1–4 to change simulation speed with the build menu closed. Open Sound settings from setup or press Shift+F1. Drag either volume slider, or choose Music or Interaction sounds with Up/Down and adjust by 1% with Left/Right, or hold Shift to adjust by 5%. Press M in the sound panel to mute the selected channel.
 
@@ -26,11 +26,11 @@ Select a completed field, garden, or greenhouse and press K to manage the whole 
 
 A completed coop or goat pen can store feed and drinking water, then produce eggs or milk. Residents take fodder to the animals when supplies are available. Select a pen and press C to see its care and collection options.
 
-Story reserves cash for town pickup when a blueprint needs materials beyond current stock. Press Shift+U to toggle automatic ordering. Press U in the village view to open Water management.
+Story reserves cash for transport when a blueprint needs materials beyond current stock. The Build menu shows the price for the selected transport and explains shortages. Press Shift+U to toggle automatic ordering. Press U in the village view to open Water management.
 
 Sandbox skips the arrival and pitches camp in the clearing when it is free. If the clearing is occupied, choose your campsite immediately. Materials are unlimited. Press I to toggle instant building.
 
-In Story, press H for finances and paid town shifts. Book one day shift or turn on repeating weekday work for a selected resident. Wages reach village savings when the resident returns. Press Tab in Finances to open town trade, buy for pickup or freight, quote and reserve a sale, or set an automatic sale policy. Households can restock food automatically. Tab again to inspect food expiry and cold-storage use. Dried provisions keep longer, and powered cold storage slows aging for the food that fits.
+In Story, press H for finances and paid town shifts. Book one day shift or turn on repeating weekday work for a selected resident. Wages reach village savings when the resident returns. Press Tab in Finances to open Trade. Press D or click **Purchases** to switch between resident pickup and supplier freight, then press I or click the Buy button for that transport. The same setting applies to automatic construction, seed, and pantry purchases. Trade also quotes sales and lets you set automatic sale policies. Press Tab again to inspect food expiry and cold-storage use. Dried provisions keep longer, and powered cold storage slows aging for the food that fits.
 
 Press **F** or choose **Find in village** to center the camera on the selected project. **Alt+F** opens the forecast while a project is selected.
 
@@ -74,7 +74,7 @@ Regenerate the build catalog models with `node scripts/export-v3-building-models
 
 ## macOS desktop bundle
 
-The Bevy desktop CI job extracts the macOS app archive, runs and replays a village scenario with the packaged executable, then uploads the archive. Unzip it and open **Solar Friends V3.app**.
+The desktop check on the pull request uploads the `solar-friends-v3-macos` artifact after running and replaying two village scenarios from the packaged executable. Download and unzip the artifact, then open **Solar Friends V3.app**.
 
 To package a local build from the repository root:
 
