@@ -1,4 +1,5 @@
 mod map;
+mod trends;
 
 use std::{
     io,
@@ -705,7 +706,7 @@ fn open_lab(catalog: Catalog, runner: Runner, replay: Option<Replay>, source: Op
         .add_plugins(crate::ui_font::UiFontPlugin)
         .add_systems(Startup, setup_lab_window)
         .init_resource::<map::MapState>()
-        .add_systems(Update, (update_lab_window, map::draw).chain())
+        .add_systems(Update, (update_lab_window, map::draw, trends::draw).chain())
         .run();
 }
 
@@ -851,6 +852,7 @@ fn setup_lab_window(mut commands: Commands, assets: Res<AssetServer>) {
             });
     }
     commands.spawn((Text::default(), ui_font(&assets, 18.0), ChildOf(layout)));
+    trends::spawn(&mut commands, layout, &assets);
 }
 
 #[derive(Clone, Copy, Default, PartialEq, Eq)]
@@ -1104,65 +1106,16 @@ fn lab_trends(history: &TrendHistory, catalog: &Catalog, orders: usize) -> Strin
         "Simulation trends · {retained} hourly samples retained · {} older omitted · {orders} recorded orders\nCharts · Latest {charts} samples · Steps {}–{} · Tab Switch view",
         history.omitted, first.step, last.step
     );
-    let food_mass = catalog.materials["food"].mass;
-    for (label, unit, values) in [
-        (
-            "Savings",
-            "R$",
-            samples
-                .iter()
-                .map(|s| s.cash_centavos as f64 / 100.0)
-                .collect::<Vec<_>>(),
-        ),
-        (
-            "Clean water",
-            "L",
-            samples.iter().map(|s| s.potable_liters).collect(),
-        ),
-        (
-            "Lowest hydration",
-            "%",
-            samples.iter().map(|s| s.minimum_hydration).collect(),
-        ),
-        (
-            "Food ingredients",
-            "kg",
-            samples
-                .iter()
-                .map(|s| f64::from(s.food_units) * food_mass)
-                .collect(),
-        ),
-    ] {
-        let (low, high) = values
-            .iter()
-            .fold((f64::INFINITY, f64::NEG_INFINITY), |(low, high), &value| {
-                (low.min(value), high.max(value))
-            });
-        let width = values.len().min(40);
-        const ROWS: usize = 4;
-        let levels: Vec<_> = (0..width)
-            .map(|column| {
-                let value = values[column * (values.len() - 1) / (width - 1).max(1)];
-                if high > low {
-                    ((value - low) / (high - low) * (ROWS - 1) as f64).round() as usize
-                } else {
-                    0
-                }
-            })
-            .collect();
+    for ((label, unit), values) in trends::LABELS
+        .into_iter()
+        .zip(trends::series(history, catalog))
+    {
+        let (low, high) = trends::bounds(&values);
         let latest = values[values.len() - 1];
         let _ = write!(
             text,
-            "\n\n{label} · {latest:.1} {unit} · range {low:.1}–{high:.1}"
+            "\n{label} · {latest:.1} {unit} · range {low:.1}–{high:.1}"
         );
-        for row in (0..ROWS).rev() {
-            text.push('\n');
-            text.extend(
-                levels
-                    .iter()
-                    .map(|&level| if row == level { '+' } else { '-' }),
-            );
-        }
     }
     text
 }
@@ -1924,6 +1877,8 @@ type LabControlPresses<'w, 's> =
     Query<'w, 's, (&'static Interaction, &'static LabControl), Changed<Interaction>>;
 
 type LabToolbarNodes<'w, 's> = Query<'w, 's, (&'static LabToolbar, &'static mut Node)>;
+type LabChartRoot<'w, 's> =
+    Single<'w, 's, &'static mut Node, (With<trends::ChartRoot>, Without<LabToolbar>)>;
 
 fn choose_lab_export(file_name: &str) -> Option<PathBuf> {
     rfd::FileDialog::new()
@@ -1947,10 +1902,11 @@ fn update_lab_window(
         MessageReader<bevy::window::FileDragAndDrop>,
     ),
     mut playback: Local<Playback>,
-    (mut panel, controls, mut toolbars): (
+    (mut panel, controls, mut toolbars, mut charts): (
         Single<&mut Text, Without<LabControlLabel>>,
         LabControlPresses,
         LabToolbarNodes,
+        Option<LabChartRoot>,
     ),
     (mut replay, mut map, source): (
         Option<ResMut<Replay>>,
@@ -1958,6 +1914,9 @@ fn update_lab_window(
         Option<Res<LabSource>>,
     ),
 ) {
+    if let Some(root) = &mut charts {
+        root.display = Display::None;
+    }
     let clicked = |action| {
         controls.iter().any(|(interaction, control)| {
             *interaction == Interaction::Pressed && *control == action
@@ -2519,6 +2478,9 @@ fn update_lab_window(
         } else if playback.view == LabView::Residents {
             lab_resident_view(&mut runner, &catalog, &keys, playback)
         } else if playback.view == LabView::Trends {
+            if let Some(root) = &mut charts {
+                root.display = Display::Flex;
+            }
             lab_trends(&runner.trends, &catalog, runner.outcomes.len())
         } else if playback.view == LabView::Events {
             let (pages, text) = village
@@ -2876,7 +2838,7 @@ mod tests {
         assert!(trends.contains("3 hourly samples retained"));
         assert!(trends.contains("Steps 0–2"));
         assert!(trends.contains("2 recorded orders"));
-        assert!(trends.contains("Savings · 2.0 R$ · range 1.0–3.0\n-+-\n--+\n---\n+--"));
+        assert!(trends.contains("Savings · 2.0 R$ · range 1.0–3.0"));
         assert!(trends.contains("Clean water"));
         assert!(trends.contains("Lowest hydration"));
         assert!(trends.contains("Food ingredients"));
