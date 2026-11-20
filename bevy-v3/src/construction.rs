@@ -3899,11 +3899,10 @@ mod tests {
             let target = &construction.plans[1];
             if target.staged > 0 && !saw_staging {
                 assert_eq!(target.delivered, 0);
-                assert!(
-                    construction
-                        .project_status(&catalog, 1)
-                        .contains("at nearby storage")
-                );
+                assert!(construction.project_status(&catalog, 1).contains(&format!(
+                    "at nearby storage ({} #1)",
+                    catalog.projects["warehouse"].name
+                )));
                 let json = serde_json::to_string(&construction).unwrap();
                 construction = serde_json::from_str(&json).unwrap();
                 assert!(construction.valid_save(&catalog, &stock));
@@ -3942,16 +3941,21 @@ mod tests {
         assert!(interrupted.changes.contains_key(&0));
         assert!(interrupted.haul_depots(&catalog, 1, false).is_empty());
         assert_eq!(interrupted.haul_depots(&catalog, 1, true), vec![0]);
-        interrupted.remove_project(0);
-        assert_eq!(interrupted.plans[1].depot, None);
-        assert_eq!(interrupted.plans[1].staged, 0);
-        assert!(interrupted.valid_save(&catalog, &stock));
+        // Start near the end of the warehouse's multi-day demolition.
+        let demolition = interrupted.changes.get_mut(&0).unwrap();
+        demolition.work = demolition.required - 1.0;
         for _ in 0..8_000 {
             interrupted.tick(&catalog, &mut stock, site, clock, 0.1, false);
-            if interrupted.finished_models(&catalog).count() == 1 {
+            if interrupted.plans[0].removed
+                && interrupted.plans[1].work >= catalog.projects["gathering"].work
+            {
                 break;
             }
         }
+        assert!(interrupted.plans[0].removed);
+        assert_eq!(interrupted.plans[1].depot, None);
+        assert_eq!(interrupted.plans[1].staged, 0);
+        assert!(interrupted.valid_save(&catalog, &stock));
         assert_eq!(interrupted.finished_models(&catalog).count(), 1);
         assert_eq!(interrupted.plans[1].delivered, interrupted.plans[1].loads);
         assert_eq!(stock.available("wood"), 28);
