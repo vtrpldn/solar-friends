@@ -1156,6 +1156,11 @@ impl Guide {
         self.screen.is_some()
     }
 
+    /// Whether keys are going into the guide's search box.
+    pub(super) fn searching(&self) -> bool {
+        self.screen == Some(Screen::Search)
+    }
+
     pub(super) fn open_camera_controls(&mut self) {
         self.screen = Some(Screen::Quick(1));
     }

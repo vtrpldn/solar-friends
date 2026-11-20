@@ -104,6 +104,11 @@ impl WorldSetup {
         }
     }
 
+    /// Whether keys are going into the land seed field.
+    pub fn entering_seed(&self) -> bool {
+        self.seed_entry.is_some()
+    }
+
     pub fn open_main_menu(&mut self) {
         self.open = true;
         self.choosing_land = false;

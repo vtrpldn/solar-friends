@@ -500,6 +500,10 @@ fn camera_controls(
         view.target += orientation * drag * distance_per_pixel;
     }
     view.heading += turn * delta * 1.2;
+    // Comma and period tilt the view, as dragging up and down with the right button does.
+    let tilt = axis(&[KeyCode::Period], &[KeyCode::Comma]);
+    view.polar = (view.polar + tilt * delta * 0.9)
+        .clamp(*CAMERA_POLAR_LIMITS.start(), *CAMERA_POLAR_LIMITS.end());
     if *drag_button == Some(MouseButton::Right) {
         let orbit = motion.delta / window.height().max(1.0) * std::f32::consts::TAU;
         view.heading -= orbit.x;

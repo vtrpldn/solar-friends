@@ -7,8 +7,9 @@ use crate::{
 use bevy::asset::{embedded_asset, load_embedded_asset};
 
 pub(super) const PANEL_WIDTH: f32 = 272.0;
-// The dock stays clickable over dimmed village screens, including Advance days.
-const DOCK_LAYER: i32 = 26;
+// Above the village and its cards, below the dimmed backdrop of almanac screens and
+// Advance days, which cover the dock as in V2.
+const DOCK_LAYER: i32 = 5;
 
 mod dock_icon;
 mod top_bar;
