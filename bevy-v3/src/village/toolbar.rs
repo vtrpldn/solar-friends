@@ -79,6 +79,7 @@ enum Action {
     Resident(usize),
     ResidentProfile(ResidentProfile),
     FocusResident,
+    FocusResidentProject,
     WorkPriority(WorkGroup),
     WorkerReservation(bool),
     Home(bool),
@@ -324,6 +325,13 @@ impl Action {
             }
             Self::WorkPriority(_) | Self::WorkerReservation(_) => {
                 village.utility_panel == Some(UtilityPanel::Residents)
+            }
+            Self::FocusResidentProject => {
+                village.utility_panel == Some(UtilityPanel::Residents)
+                    && village
+                        .construction
+                        .resident_project(village.selected_resident)
+                        .is_some()
             }
             Self::FocusResident => {
                 let resident = village.selected_resident;
@@ -577,6 +585,7 @@ impl Action {
             }
             Self::Resident(index) => NAMES[index].into(),
             Self::FocusResident => "Find resident in village".into(),
+            Self::FocusResidentProject => "View resident project".into(),
             Self::ResidentProfile(profile) if profile == village.resident_profile => {
                 format!("› {}", profile.label())
             }
@@ -926,6 +935,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                     spawn_button(menu, &assets, Action::Resident(index));
                 }
                 spawn_button(menu, &assets, Action::FocusResident);
+                spawn_button(menu, &assets, Action::FocusResidentProject);
                 for profile in ResidentProfile::ALL {
                     spawn_button(menu, &assets, Action::ResidentProfile(profile));
                 }
@@ -1338,6 +1348,13 @@ fn handle_buttons(
                     village.projects_page = 0;
                 }
                 Action::Resident(index) if !picker.open => village.select_resident(index),
+                Action::FocusResidentProject if !picker.open => {
+                    let resident = village.selected_resident;
+                    if village.construction.select_resident_project(resident) {
+                        village.utility_panel = None;
+                        village.focus_selected_project(&setup, camera);
+                    }
+                }
                 Action::FocusResident if !picker.open => {
                     let (position, _) = village
                         .construction
@@ -1586,6 +1603,7 @@ fn handle_buttons(
                 | Action::Resident(_)
                 | Action::ResidentProfile(_)
                 | Action::FocusResident
+                | Action::FocusResidentProject
                 | Action::WorkPriority(_)
                 | Action::WorkerReservation(_)
                 | Action::Home(_)
@@ -1835,7 +1853,9 @@ fn refresh(
             Action::ListedHome(row) => homes.get(row).is_some(),
             Action::Resident(_) => show_residents || show_finances,
             Action::ResidentProfile(_) => show_residents,
-            Action::FocusResident => show_residents && action.available(&village),
+            Action::FocusResident | Action::FocusResidentProject => {
+                show_residents && action.available(&village)
+            }
             Action::WorkPriority(_) | Action::WorkerReservation(_) => show_residents,
             Action::Shift(_) => !picker.open && action.available(&village),
             Action::Ledger => show_finances,

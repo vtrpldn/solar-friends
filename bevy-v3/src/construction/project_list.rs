@@ -328,6 +328,40 @@ impl Construction {
         Some(center)
     }
 
+    pub(crate) fn resident_project(&self, resident: usize) -> Option<usize> {
+        let worker = &self.residents[resident];
+        if worker.health.task.is_some()
+            || self.away_for_work(resident)
+            || self.driver_away(resident)
+        {
+            return None;
+        }
+        let site = self
+            .production
+            .jobs
+            .iter()
+            .find(|job| job.worker == Some(resident))
+            .map(|job| job.site)
+            .or_else(|| {
+                self.farming
+                    .jobs
+                    .iter()
+                    .find(|job| job.worker == Some(resident))
+                    .map(|job| job.site)
+            })
+            .or_else(|| worker.assignment.as_ref().map(|job| job.project))?;
+        self.plans.get(site).filter(|plan| !plan.removed)?;
+        Some(site)
+    }
+
+    pub(crate) fn select_resident_project(&mut self, resident: usize) -> bool {
+        let Some(site) = self.resident_project(resident) else {
+            return false;
+        };
+        self.select_project(Some(site));
+        true
+    }
+
     pub fn selected_project_center(&self) -> Option<Vec2> {
         let plan = self.plans.get(self.production.selected?)?;
         (!plan.removed).then(|| project_center(plan))
@@ -341,4 +375,31 @@ impl Construction {
 fn project_center(plan: &Blueprint) -> Vec2 {
     let center = plan.position.as_vec2() + (plan.size.as_vec2() - Vec2::ONE) * 0.5;
     world_position(center.x, center.y)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn resident_project_selects_the_assigned_site_and_skips_removed_work() {
+        let catalog = Catalog::default();
+        let mut construction = Construction::default();
+        let position = IVec2::new(44, 36);
+        let plan = construction.proposed_site(&catalog, "well", position);
+        let center = project_center(&plan);
+        construction.plans.push(plan);
+        assert!(!construction.select_resident_project(0));
+        construction.residents[0].assignment = Some(Assignment {
+            project: 0,
+            spot: position,
+            activity: Activity::Walk,
+            to_site: Default::default(),
+            haul: Haul::Direct,
+        });
+        assert!(construction.select_resident_project(0));
+        assert_eq!(construction.selected_project_center(), Some(center));
+        construction.plans[0].removed = true;
+        assert!(!construction.select_resident_project(0));
+    }
 }
