@@ -2122,16 +2122,20 @@ impl Construction {
     pub fn cultivated_sites<'a>(
         &'a self,
         catalog: &'a Catalog,
-    ) -> impl Iterator<Item = (&'a str, IVec2, IVec2)> {
+    ) -> impl Iterator<Item = (&'a str, IVec2, IVec2, bool)> {
         self.plans.iter().filter_map(|plan| {
             let definition = &catalog.projects[&plan.key];
             (!plan.removed
-                && plan.work >= definition.work
                 && matches!(
                     definition.kind.as_str(),
                     "field" | "garden" | "grove" | "orchard" | "greenhouse"
                 ))
-            .then_some((definition.name.as_str(), plan.position, plan.size))
+            .then_some((
+                definition.name.as_str(),
+                plan.position,
+                plan.size,
+                plan.work >= definition.work,
+            ))
         })
     }
 

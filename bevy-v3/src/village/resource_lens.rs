@@ -17,7 +17,7 @@ pub(super) fn draw(
     let cell = hovered.map(|hit| hit.cell);
     let hovered_site = cell.and_then(|cell| land.site_at(cell));
     let mut legend = if ecology {
-        "Ecology · Green standing or available · Gold queued or recovering · Gray cleared · Blue cultivated"
+        "Ecology · Green standing or available · Gold queued or recovering · Gray cleared or depleted · Blue cultivated"
     } else {
         "Resources · Green available · Gold queued or recovering · Gray depleted"
     }
@@ -29,6 +29,9 @@ pub(super) fn draw(
             catalog,
             (setup.seed(), setup.richness(), village.clock),
         );
+        if !ecology && matches!(status, ResourceStatus::Cleared) {
+            continue;
+        }
         let color = match status {
             ResourceStatus::Cleared | ResourceStatus::Exhausted => Color::srgb_u8(147, 146, 140),
             ResourceStatus::Queued | ResourceStatus::Recovering(_) => Color::srgb_u8(243, 200, 108),
@@ -38,29 +41,41 @@ pub(super) fn draw(
         if hovered_site == Some(index) {
             let detail = if ecology && site.recipe() == "fell_tree" {
                 match status {
-                    ResourceStatus::Cleared => "Cleared tree".into(),
+                    ResourceStatus::Cleared => {
+                        "Cleared tree · Does not regrow automatically".into()
+                    }
                     ResourceStatus::Queued => "Tree marked for felling".into(),
                     _ => "Standing tree".into(),
                 }
             } else {
-                format!("{} · {status}", catalog.gathering[site.recipe()].name)
+                let recipe = &catalog.gathering[site.recipe()];
+                let mut detail = format!("{} · {status}", recipe.name);
+                if !ecology && !matches!(status, ResourceStatus::Exhausted) {
+                    for (material, units) in &recipe.output {
+                        let name = &catalog.materials[material].name;
+                        let _ = write!(detail, " · {units} {name} per gather");
+                    }
+                }
+                detail
             };
             let _ = write!(legend, "\n{detail}");
         }
     }
     if ecology {
-        for (name, position, size) in village.construction.cultivated_sites(catalog) {
-            draw_marker(
-                terrain,
-                position,
-                size,
-                Color::srgb_u8(109, 220, 255),
-                gizmos,
-            );
+        for (name, position, size, finished) in village.construction.cultivated_sites(catalog) {
+            let (color, detail) = if finished {
+                (Color::srgb_u8(109, 220, 255), "Cultivated land")
+            } else {
+                (
+                    Color::srgb_u8(243, 200, 108),
+                    "Cultivation site under construction",
+                )
+            };
+            draw_marker(terrain, position, size, color, gizmos);
             if cell
                 .is_some_and(|cell| cell.cmpge(position).all() && cell.cmplt(position + size).all())
             {
-                let _ = write!(legend, "\n{name} · Cultivated land");
+                let _ = write!(legend, "\n{name} · {detail}");
             }
         }
     }
