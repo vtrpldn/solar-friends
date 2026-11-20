@@ -896,6 +896,15 @@ impl Construction {
             spendable as f64 / 100.0,
             self.trade.purchases,
         ));
+        let freight_shortfall = committed.saturating_sub(stock.balance());
+        if self.supplier_construction && !stock.sandbox && freight_shortfall > 0 {
+            use std::fmt::Write;
+            let _ = write!(
+                display,
+                "\nQueued supplier freight needs R${:.2} more. Choose resident pickup to use the existing pickup fares.",
+                freight_shortfall as f64 / 100.0,
+            );
+        }
         if let Some(status) =
             self.supplier_delivery_status(catalog, maximum.saturating_sub(used), clock.seconds)
         {

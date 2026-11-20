@@ -2212,6 +2212,11 @@ mod tests {
         assert!(village.active_trips().next().is_none());
         assert_eq!(stock.balance(), balance);
         assert_eq!(village.market.committed_fares(), reserved);
+        assert!(
+            village
+                .trade_status(&catalog, &stock, clock)
+                .contains("Queued supplier freight needs R$0.01 more")
+        );
         village.toggle_supplier_construction();
         village.tick_trip(&catalog, &mut stock, site, clock, 0.1);
 
