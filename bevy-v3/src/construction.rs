@@ -1852,8 +1852,26 @@ impl Construction {
         if !stock.sandbox {
             self.age_assets(catalog, clock, dt);
         }
-        self.utilities
-            .tick(setup, stock, self.market.committed_fares(), clock, dt);
+        let committed = if self.supplier_construction
+            && !self.utilities.grid_off
+            && !stock.sandbox
+            && self
+                .plans
+                .iter()
+                .any(|plan| !plan.removed && plan.pickups > 0)
+        {
+            self.protected_freight_cash(
+                catalog,
+                TownClock {
+                    seconds: clock,
+                    round_trip_km: setup.round_trip_km(),
+                },
+            )
+            .unwrap_or(stock.balance())
+        } else {
+            self.market.committed_fares()
+        };
+        self.utilities.tick(setup, stock, committed, clock, dt);
     }
 
     pub fn valid_save(&self, catalog: &Catalog, stock: &Stock) -> bool {
@@ -3378,6 +3396,53 @@ mod tests {
             village.status,
             "Leave residents a walking route to the food stores."
         );
+    }
+
+    #[test]
+    fn grid_does_not_spend_cash_protected_for_construction_freight() {
+        let setup = WorldSetup::default();
+        let catalog = Catalog::default();
+        let mut stock = Stock::for_start(&setup, &catalog);
+        let mut village = Construction::default();
+        let clock = TownClock {
+            seconds: 16.0 * crate::weather::HOUR,
+            round_trip_km: setup.round_trip_km(),
+        };
+        let mut plan = village.proposed_site(&catalog, "well", IVec2::new(45, 36));
+        Construction::reserve_project(&mut village.market, &mut stock, &catalog, &mut plan, clock)
+            .unwrap();
+        village.plans.push(plan);
+        let mut streetlight = village.proposed_site(&catalog, "streetlight", IVec2::new(44, 36));
+        streetlight.work = catalog.projects["streetlight"].work;
+        streetlight.delivered = streetlight.loads;
+        village.plans.push(streetlight);
+        village.toggle_supplier_construction();
+        let protected = village.protected_freight_cash(&catalog, clock).unwrap();
+        stock.debit(
+            stock.balance() - protected,
+            crate::stock::CashKind::Materials,
+        );
+
+        village.tick_services(
+            &catalog,
+            &setup,
+            &mut stock,
+            clock.seconds,
+            crate::weather::HOUR,
+        );
+        assert!(!village.utilities.powered(1));
+        assert_eq!(stock.balance(), protected);
+
+        village.toggle_supplier_construction();
+        village.tick_services(
+            &catalog,
+            &setup,
+            &mut stock,
+            clock.seconds,
+            crate::weather::HOUR,
+        );
+        assert!(village.utilities.powered(1));
+        assert!(stock.balance() < protected);
     }
 
     #[test]
