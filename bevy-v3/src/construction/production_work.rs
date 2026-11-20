@@ -27,6 +27,13 @@ impl Construction {
         self.select_project(index);
     }
 
+    /// Selects a project picked from its model, ignoring removed or unknown ones.
+    pub fn select_built_project(&mut self, index: usize) {
+        if self.plans.get(index).is_some_and(|plan| !plan.removed) {
+            self.select_project(Some(index));
+        }
+    }
+
     pub(super) fn select_project(&mut self, index: Option<usize>) {
         if self.production.selected != index {
             self.farming.pending_crop_clear = None;

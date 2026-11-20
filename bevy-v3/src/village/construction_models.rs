@@ -7,7 +7,7 @@ use crate::{catalog::Catalog, setup::WorldSetup};
 
 #[derive(Component)]
 pub(super) struct ConstructionModel {
-    project: usize,
+    pub(super) project: usize,
     scene: usize,
 }
 

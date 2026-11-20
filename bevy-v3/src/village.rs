@@ -1459,6 +1459,8 @@ struct CampPointer {
     clicked: Option<GroundHit>,
     hovered: Option<GroundHit>,
     resident: Option<usize>,
+    /// Building whose model was clicked, which beats the ground cell under the cursor.
+    project: Option<usize>,
     terrain_stroke: Vec<Vec3>,
     terrain_stroke_finished: bool,
 }
@@ -1480,7 +1482,7 @@ fn read_camp_pointer(
     ),
     camera: Single<(&Camera, &GlobalTransform), With<VillageCamera>>,
     (ground, actors): (Query<(), With<GroundMesh>>, Query<ResidentPick>),
-    ui: Query<&Interaction>,
+    (buildings, ui): (BuildingPick, Query<&Interaction>),
     mut raycast: MeshRayCast,
     (mut input, mut pointer): (Local<Option<Vec2>>, ResMut<CampPointer>),
 ) {
@@ -1488,6 +1490,7 @@ fn read_camp_pointer(
     pointer.clicked = None;
     pointer.hovered = None;
     pointer.resident = None;
+    pointer.project = None;
     if pointer.terrain_stroke_finished {
         pointer.terrain_stroke.clear();
         pointer.terrain_stroke_finished = false;
@@ -1541,6 +1544,15 @@ fn read_camp_pointer(
     let Ok(ray) = camera.viewport_to_world(transform, cursor) else {
         return;
     };
+    if clicked
+        && village.camp.is_some()
+        && !painting
+        && !village.planning_roads()
+        && !village.construction.placing_project()
+        && village.lenses.active.is_none()
+    {
+        pointer.project = building_under_cursor(ray, &mut raycast, &buildings);
+    }
     let filter = |entity| ground.contains(entity);
     let settings = MeshRayCastSettings::default().with_filter(&filter);
     if let Some((_, hit)) = raycast.cast_ray(ray, &settings).first() {
@@ -1584,6 +1596,50 @@ type ResidentPick = (
     &'static GlobalTransform,
     &'static InheritedVisibility,
 );
+
+type BuildingPick<'w, 's> = (
+    Query<'w, 's, &'static ChildOf>,
+    Query<'w, 's, &'static BuiltProject>,
+    Query<'w, 's, &'static construction_models::ConstructionModel>,
+);
+
+/// The project owning the first model surface under the cursor, if any.
+fn building_under_cursor(
+    ray: Ray3d,
+    raycast: &mut MeshRayCast,
+    (parents, built, staged): &BuildingPick,
+) -> Option<usize> {
+    building_hit(
+        ray,
+        raycast,
+        (parents, built, staged),
+        RayCastVisibility::VisibleInView,
+    )
+}
+
+fn building_hit(
+    ray: Ray3d,
+    raycast: &mut MeshRayCast,
+    (parents, built, staged): (
+        &Query<&ChildOf>,
+        &Query<&BuiltProject>,
+        &Query<&construction_models::ConstructionModel>,
+    ),
+    visibility: RayCastVisibility,
+) -> Option<usize> {
+    let settings = MeshRayCastSettings::default().with_visibility(visibility);
+    let (mut entity, _) = *raycast.cast_ray(ray, &settings).first()?;
+    for _ in 0..32 {
+        if let Ok(building) = built.get(entity) {
+            return Some(building.index);
+        }
+        if let Ok(model) = staged.get(entity) {
+            return Some(model.project);
+        }
+        entity = parents.get(entity).ok()?.parent();
+    }
+    None
+}
 
 /// Screen-space pick radius around a resident's torso, in logical pixels.
 const RESIDENT_PICK_RADIUS: f32 = 26.0;
@@ -2487,6 +2543,11 @@ fn village_input(
         {
             town.select_resident(index);
             town.utility_panel = Some(UtilityPanel::Residents);
+        } else if let Some(index) = pointer.project
+            && !town.construction.menu
+        {
+            town.construction.select_built_project(index);
+            town.construction.gathering.select(&land, None);
         } else if let Some(position) = pointer.clicked.map(|hit| hit.cell)
             && !town.construction.menu
         {
@@ -3808,6 +3869,7 @@ fn outdoor_animation_time(seconds: f64) -> f32 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use bevy::ecs::system::RunSystemOnce;
 
     #[test]
     fn full_waste_tanks_stay_on_the_hud_until_water_opens() {
@@ -3820,6 +3882,50 @@ mod tests {
             "1 waste tank needs service · V"
         );
         assert_eq!(utility_alerts(&utilities, Some(UtilityPanel::Water)), "");
+    }
+
+    #[test]
+    fn clicking_a_roof_selects_the_building_that_owns_it() {
+        let mut app = App::new();
+        app.add_plugins((MinimalPlugins, TransformPlugin, AssetPlugin::default()))
+            .init_asset::<Mesh>();
+        let roof = Mesh::from(Cuboid::new(2.0, 1.0, 2.0));
+        let bounds = bevy::camera::primitives::MeshAabb::compute_aabb(&roof).unwrap();
+        let mesh = app.world_mut().resource_mut::<Assets<Mesh>>().add(roof);
+        app.world_mut()
+            .spawn((
+                BuiltProject {
+                    index: 7,
+                    model: 0,
+                    rooftop_solar: false,
+                },
+                Transform::default(),
+            ))
+            .with_child((
+                Mesh3d(mesh),
+                bounds,
+                Visibility::default(),
+                Transform::from_xyz(0.0, 3.0, 0.0),
+            ));
+        app.update();
+        let picked = app
+            .world_mut()
+            .run_system_once(
+                |mut raycast: MeshRayCast,
+                 parents: Query<&ChildOf>,
+                 built: Query<&BuiltProject>,
+                 staged: Query<&construction_models::ConstructionModel>| {
+                    let down = Ray3d::new(Vec3::new(0.0, 10.0, 0.0), Dir3::NEG_Y);
+                    let miss = Ray3d::new(Vec3::new(5.0, 10.0, 0.0), Dir3::NEG_Y);
+                    let tables = (&parents, &built, &staged);
+                    (
+                        building_hit(down, &mut raycast, tables, RayCastVisibility::Any),
+                        building_hit(miss, &mut raycast, tables, RayCastVisibility::Any),
+                    )
+                },
+            )
+            .unwrap();
+        assert_eq!(picked, (Some(7), None));
     }
 
     #[test]
