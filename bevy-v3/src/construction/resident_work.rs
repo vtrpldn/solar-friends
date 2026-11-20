@@ -588,6 +588,30 @@ impl Construction {
         format!("{} can use any free bed.", NAMES[index])
     }
 
+    fn resident_home_summary(&self, index: usize, catalog: &Catalog) -> String {
+        let Some(home) = self.residents[index].home else {
+            return if self.home_options(catalog).next().is_some() {
+                "Unassigned · uses available shelter".into()
+            } else {
+                "Complete a house to assign a permanent home.".into()
+            };
+        };
+        let housemates = self
+            .residents
+            .iter()
+            .enumerate()
+            .filter(|(other, worker)| *other != index && worker.home == Some(home))
+            .map(|(other, _)| NAMES[other])
+            .collect::<Vec<_>>();
+        let name = &catalog.projects[&self.plans[home].key].name;
+        let occupancy = if housemates.is_empty() {
+            "Lives here alone.".to_owned()
+        } else {
+            format!("Lives with {}.", housemates.join(", "))
+        };
+        format!("{name} #{} · {occupancy}", home + 1)
+    }
+
     fn rest_route(
         &self,
         index: usize,
@@ -1636,10 +1660,11 @@ impl Construction {
         };
         let _ = write!(
             rows,
-            "\n\n{} · {}\n{}\n\nNeeds · Energy {:.0}%",
+            "\n\n{} · {}\n{}\n\nHome\n{}\n\nNeeds · Energy {:.0}%",
             NAMES[selected],
             profile.role,
             profile.traits.join(" · "),
+            self.resident_home_summary(selected, catalog),
             worker.health.energy,
         );
         for (label, need) in [
@@ -1739,6 +1764,43 @@ pub(super) fn approach_points(start: IVec2, size: IVec2, from: Vec2) -> Vec<IVec
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn resident_home_summary_tracks_assignment_and_housemates() {
+        let catalog = Catalog::default();
+        let mut village = Construction::default();
+        assert!(
+            village
+                .resident_home_summary(0, &catalog)
+                .contains("Complete a house")
+        );
+        let mut home = village.proposed_site(&catalog, "house", IVec2::new(44, 36));
+        home.work = catalog.projects["house"].work;
+        village.plans.push(home);
+        assert!(
+            village
+                .resident_home_summary(0, &catalog)
+                .contains("Unassigned")
+        );
+        village.assign_home(0, &catalog, 0).unwrap();
+        assert!(
+            village
+                .resident_home_summary(0, &catalog)
+                .contains("Lives here alone.")
+        );
+        village.assign_home(1, &catalog, 0).unwrap();
+        assert!(
+            village
+                .resident_home_summary(0, &catalog)
+                .contains("Lives with Bento.")
+        );
+        village.clear_home(1);
+        assert!(
+            village
+                .resident_home_summary(0, &catalog)
+                .contains("Lives here alone.")
+        );
+    }
 
     #[test]
     fn automatic_speed_requires_every_resident_to_be_asleep_or_away() {
