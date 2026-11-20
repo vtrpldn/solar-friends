@@ -60,6 +60,13 @@ impl LensPicker {
         self.open = false;
     }
 
+    pub(super) fn all_choices() -> impl Iterator<Item = (MapLens, &'static str)> {
+        LENSES
+            .iter()
+            .chain(SECOND_PAGE.iter())
+            .map(|&(_, lens, label)| (lens, label))
+    }
+
     pub(super) fn choices(&self) -> &'static [(KeyCode, MapLens, &'static str)] {
         if self.next_page {
             &SECOND_PAGE
@@ -147,28 +154,5 @@ impl LensPicker {
             return true;
         }
         false
-    }
-
-    pub(super) fn text(&self) -> Option<String> {
-        use std::fmt::Write;
-        if !self.open {
-            return None;
-        }
-        let page = if self.next_page { 2 } else { 1 };
-        let mut text = format!("Map lenses · {page}/2 · Page Up/Down · Esc Close\n0 Normal view");
-        let options = if self.next_page {
-            SECOND_PAGE.as_slice()
-        } else {
-            LENSES.as_slice()
-        };
-        for (index, &(_, lens, label)) in options.iter().enumerate() {
-            let active = if self.active == Some(lens) {
-                " · Active"
-            } else {
-                ""
-            };
-            let _ = write!(text, "\n{} {label}{active}", index + 1);
-        }
-        Some(text)
     }
 }

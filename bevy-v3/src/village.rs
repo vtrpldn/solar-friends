@@ -11,6 +11,7 @@ mod guide;
 mod guide_diagrams;
 pub(crate) mod lab;
 mod land_lens;
+mod lens_card;
 mod lens_picker;
 mod thumbnails;
 use lens_picker::{LensPicker, MapLens};
@@ -171,6 +172,7 @@ impl Plugin for VillagePlugin {
         library_ui::install(app);
         resident_meters::install(app);
         terrain_card::install(app);
+        lens_card::install(app);
         building_lighting::install(app);
         livestock_motion::install(app);
         vehicle_motion::install(app);
@@ -3068,12 +3070,13 @@ fn show_hud(
     {
         node.right = px(toolbar::PANEL_WIDTH + 40.0);
     }
-    if let Some(page) = village
-        .guide
-        .text(&catalog)
-        .or_else(|| village.lenses.text())
-    {
+    if let Some(page) = village.guide.text(&catalog) {
         text.0 = page;
+        return;
+    }
+    if village.lenses.open {
+        node.display = Display::None;
+        text.0.clear();
         return;
     }
     let controls = if village.arrival_time < ARRIVAL_DURATION {
