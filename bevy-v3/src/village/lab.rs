@@ -698,10 +698,17 @@ enum LabControl {
     CycleSpeed,
     SetInterval,
     AdvanceHour,
+    Confirm,
+    Cancel,
 }
 
 #[derive(Component)]
 struct LabControlLabel;
+
+#[derive(Component)]
+struct LabToolbar {
+    prompt: bool,
+}
 
 fn setup_lab_window(mut commands: Commands, assets: Res<AssetServer>) {
     commands.spawn(Camera2d);
@@ -718,7 +725,7 @@ fn setup_lab_window(mut commands: Commands, assets: Res<AssetServer>) {
     ));
     use LabControl::{AdvanceHour, CycleSpeed, SetInterval, Shortcut};
 
-    let rows: [&[(LabControl, &str)]; 2] = [
+    let rows: [&[(LabControl, &str)]; 3] = [
         &[
             (Shortcut(KeyCode::Space), "Run / pause"),
             (Shortcut(KeyCode::KeyJ), "Single step"),
@@ -735,44 +742,54 @@ fn setup_lab_window(mut commands: Commands, assets: Res<AssetServer>) {
             (Shortcut(KeyCode::F3), "Run interval"),
             (Shortcut(KeyCode::F4), "Cycle stop condition"),
         ],
+        &[
+            (LabControl::Confirm, "Confirm"),
+            (LabControl::Cancel, "Cancel"),
+        ],
     ];
-    commands
-        .spawn(Node {
-            position_type: PositionType::Absolute,
-            flex_direction: FlexDirection::Column,
-            top: px(10),
-            left: px(24),
-            row_gap: px(6),
-            ..default()
-        })
-        .with_children(|toolbar| {
-            for row in rows {
-                toolbar
-                    .spawn(Node {
-                        column_gap: px(6),
-                        ..default()
-                    })
-                    .with_children(|group| {
-                        for &(action, label) in row {
-                            group
-                                .spawn((
-                                    Button,
-                                    action,
-                                    Node {
-                                        padding: UiRect::axes(px(12), px(8)),
-                                        ..default()
-                                    },
-                                    BackgroundColor(Color::srgb_u8(62, 83, 65)),
-                                ))
-                                .with_child((
-                                    Text::new(label),
-                                    LabControlLabel,
-                                    ui_font(&assets, 15.0),
-                                ));
-                        }
-                    });
-            }
-        });
+    for prompt in [false, true] {
+        commands
+            .spawn((
+                LabToolbar { prompt },
+                Node {
+                    display: if prompt { Display::None } else { Display::Flex },
+                    position_type: PositionType::Absolute,
+                    flex_direction: FlexDirection::Column,
+                    top: px(10),
+                    left: px(24),
+                    row_gap: px(6),
+                    ..default()
+                },
+            ))
+            .with_children(|toolbar| {
+                for row in if prompt { &rows[2..] } else { &rows[..2] } {
+                    toolbar
+                        .spawn(Node {
+                            column_gap: px(6),
+                            ..default()
+                        })
+                        .with_children(|group| {
+                            for &(action, label) in *row {
+                                group
+                                    .spawn((
+                                        Button,
+                                        action,
+                                        Node {
+                                            padding: UiRect::axes(px(12), px(8)),
+                                            ..default()
+                                        },
+                                        BackgroundColor(Color::srgb_u8(62, 83, 65)),
+                                    ))
+                                    .with_child((
+                                        Text::new(label),
+                                        LabControlLabel,
+                                        ui_font(&assets, 15.0),
+                                    ));
+                            }
+                        });
+                }
+            });
+    }
 }
 
 #[derive(Default, PartialEq, Eq)]
@@ -1847,6 +1864,8 @@ fn lab_bed_page(
 type LabControlPresses<'w, 's> =
     Query<'w, 's, (&'static Interaction, &'static LabControl), Changed<Interaction>>;
 
+type LabToolbarNodes<'w, 's> = Query<'w, 's, (&'static LabToolbar, &'static mut Node)>;
+
 fn update_lab_window(
     mut runner: ResMut<Runner>,
     catalog: Res<Catalog>,
@@ -1857,9 +1876,10 @@ fn update_lab_window(
         MessageReader<bevy::window::FileDragAndDrop>,
     ),
     mut playback: Local<Playback>,
-    (mut panel, controls): (
+    (mut panel, controls, mut toolbars): (
         Single<&mut Text, Without<LabControlLabel>>,
         LabControlPresses,
+        LabToolbarNodes,
     ),
     (mut replay, mut map, source): (
         Option<ResMut<Replay>>,
@@ -1873,6 +1893,22 @@ fn update_lab_window(
         })
     };
     let pressed = |key| keys.just_pressed(key) || clicked(LabControl::Shortcut(key));
+    let prompt = playback.interval_entry.is_some()
+        || playback.story_settings.is_some()
+        || playback.replacement.is_some();
+    for (toolbar, mut node) in &mut toolbars {
+        let display = if toolbar.prompt == prompt {
+            Display::Flex
+        } else {
+            Display::None
+        };
+        if node.display != display {
+            node.display = display;
+        }
+    }
+    let cancel = keys.just_pressed(KeyCode::Escape) || (prompt && clicked(LabControl::Cancel));
+    let confirm = keys.any_just_pressed([KeyCode::Enter, KeyCode::NumpadEnter])
+        || (prompt && clicked(LabControl::Confirm));
     playback.replaying = replay.is_some();
     let dropped = files
         .read()
@@ -1898,11 +1934,11 @@ fn update_lab_window(
     }
     if let Some(mut entry) = playback.interval_entry.take() {
         map.visible = false;
-        if keys.just_pressed(KeyCode::Escape) {
+        if cancel {
             events.clear();
             return;
         }
-        if keys.any_just_pressed([KeyCode::Enter, KeyCode::NumpadEnter]) {
+        if confirm {
             events.clear();
             match playback.set_custom_interval(&entry) {
                 Ok(()) => {
@@ -1940,10 +1976,10 @@ fn update_lab_window(
         if let Some(mut settings) = playback.story_settings.take() {
             map.visible = false;
             events.clear();
-            if keys.just_pressed(KeyCode::Escape) {
+            if cancel {
                 return;
             }
-            if keys.any_just_pressed([KeyCode::Enter, KeyCode::NumpadEnter]) {
+            if confirm {
                 if let Ok(number) = settings.seed.parse::<std::num::NonZeroU32>() {
                     let next = LabSource::Story(settings.world.clone().with_seed(number));
                     match next.load(&catalog) {
@@ -1973,7 +2009,7 @@ fn update_lab_window(
     if playback.order.is_none() && playback.build_search.is_none() {
         let replacement = if let Some(path) = dropped {
             Some(LabReplacement::File(path.clone()))
-        } else if keys.just_pressed(KeyCode::Escape) {
+        } else if cancel {
             playback.replacement = None;
             None
         } else if pressed(KeyCode::F9) {
@@ -1988,7 +2024,9 @@ fn update_lab_window(
                     None
                 }
             }
-        } else if keys.just_pressed(KeyCode::F8) {
+        } else if keys.just_pressed(KeyCode::F8)
+            || (playback.replacement.is_some() && clicked(LabControl::Confirm))
+        {
             if let Some(candidate) = playback.replacement.take() {
                 match candidate.load(source.as_deref(), runner.scenario.steps, &catalog) {
                     Ok((opened, imported_replay)) => {
@@ -3314,6 +3352,10 @@ mod tests {
             .add_message::<bevy::window::FileDragAndDrop>()
             .add_systems(Update, update_lab_window);
         let panel = app.world_mut().spawn(Text::default()).id();
+        let confirm = app
+            .world_mut()
+            .spawn((Interaction::None, LabControl::Confirm))
+            .id();
         let press_reload = |app: &mut App| {
             let mut keys = app.world_mut().resource_mut::<ButtonInput<KeyCode>>();
             keys.reset_all();
@@ -3330,7 +3372,11 @@ mod tests {
                 .contains("Confirm")
         );
         assert_eq!(app.world().resource::<Runner>().index, 1);
-        press_reload(&mut app);
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .reset_all();
+        *app.world_mut().get_mut::<Interaction>(confirm).unwrap() = Interaction::Pressed;
+        app.update();
         let reloaded = app.world().resource::<Runner>();
         assert_eq!(reloaded.index, 0);
         assert_eq!(reloaded.scenario.steps, 8);
