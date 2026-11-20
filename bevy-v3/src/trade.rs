@@ -1140,6 +1140,31 @@ mod tests {
     }
 
     #[test]
+    fn automatic_sale_preview_includes_both_buyer_price_bands() {
+        let catalog = Catalog::default();
+        let wood = &catalog.materials["wood"];
+        let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);
+        stock.receive(&BTreeMap::from([("wood".into(), 120)]));
+        let mut market = Market::default();
+        let mut trade = Trade::default();
+        trade.sale_policy("wood").enabled = true;
+        let premium = (wood.price * wood.buyer.ratio).floor() as u64 * 100;
+        let bulk = (wood.price * wood.buyer.bulk_ratio).floor() as u64 * 100;
+        assert!(premium > bulk);
+        let expected = premium * u64::from(wood.buyer.full_price_batches)
+            + bulk * u64::from(wood.buyer.batches - wood.buyer.full_price_batches);
+        assert_eq!(
+            trade.automatic_sale_offer(&catalog, &stock, "wood", 0).1,
+            Ok((wood.pack * wood.buyer.batches, expected))
+        );
+        trade.auto_sell(&catalog, &mut stock, &mut market, 0., 776);
+        assert_eq!(
+            trade.orders.iter().map(|order| order.cents).sum::<u64>(),
+            expected
+        );
+    }
+
+    #[test]
     fn changing_pantry_reserve_changes_both_the_offer_and_automatic_sale() {
         let catalog = Catalog::default();
         let mut stock = Stock::for_start(&WorldSetup::default(), &catalog);

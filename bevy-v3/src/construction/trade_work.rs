@@ -36,6 +36,19 @@ pub(crate) struct TradeQueueRow {
     pub held: Option<bool>,
 }
 
+fn sale_proceeds(cents: u64, fare: u64) -> String {
+    let net = (cents as f64 - fare as f64) / 100.0;
+    let after_fuel = if net < 0.0 {
+        format!("-R${:.2}", -net)
+    } else {
+        format!("R${net:.2}")
+    };
+    format!(
+        "R${:.2} gross · {after_fuel} after dedicated fuel",
+        cents as f64 / 100.0
+    )
+}
+
 impl Construction {
     pub fn page_trade(&mut self, catalog: &Catalog, forward: bool) {
         if let Some(page) = self.trade.queue_page {
@@ -66,11 +79,12 @@ impl Construction {
             .map(|page| page.min(self.trade_queue_pages() - 1) * ORDER_ROWS)
     }
 
-    pub fn trade_queue_labels(&self, catalog: &Catalog, clock: f64) -> Vec<TradeQueueRow> {
+    pub fn trade_queue_labels(&self, catalog: &Catalog, clock: TownClock) -> Vec<TradeQueueRow> {
         let Some(offset) = self.trade_queue_offset() else {
             return Vec::new();
         };
-        let sale_wait = self.trade.sale_dispatch_wait(clock);
+        let sale_wait = self.trade.sale_dispatch_wait(clock.seconds);
+        let fare = fare_cents(clock.round_trip_km);
         self.trade
             .orders
             .iter()
@@ -115,9 +129,14 @@ impl Construction {
                 } else {
                     ""
                 };
+                let proceeds = if trip.is_none() && !order.buying {
+                    format!(" · {}", sale_proceeds(order.cents, fare))
+                } else {
+                    String::new()
+                };
                 TradeQueueRow {
                     label: format!(
-                        "{direction} · {} · {} · {status}{outcome}",
+                        "{direction} · {} · {} · {status}{outcome}{proceeds}",
                         item.name,
                         item.quantity_text(u64::from(order.quantity))
                     ),
@@ -636,7 +655,7 @@ impl Construction {
                 offset / ORDER_ROWS + 1,
                 self.trade_queue_pages(),
             );
-            let rows = self.trade_queue_labels(catalog, clock.seconds);
+            let rows = self.trade_queue_labels(catalog, clock);
             if rows.is_empty() {
                 display.push_str("\nNo pickup or sale orders.");
             }
@@ -744,16 +763,10 @@ impl Construction {
         let fare = fare_cents(clock.round_trip_km);
         let quote = match self.trade.quote_sale_order(catalog, stock, id, day, 0) {
             Ok((qty, cents)) => {
-                let net = (cents as f64 - fare as f64) / 100.0;
-                let after_fuel = if net < 0.0 {
-                    format!("-R${:.2}", -net)
-                } else {
-                    format!("R${net:.2}")
-                };
                 let mut quote = format!(
-                    "{} · R${:.2} gross · {after_fuel} after dedicated fuel",
+                    "{} · {}",
                     item.quantity_text(u64::from(qty)),
-                    cents as f64 / 100.0,
+                    sale_proceeds(cents, fare),
                 );
                 if self.market.can_hold_fare(stock, fare) {
                     quote.push_str("\nEnter Queue sale");
@@ -888,8 +901,11 @@ mod tests {
         });
         village.toggle_trade_queue();
         village.trade.note_sale_queued(clock.seconds);
-        let rows = village.trade_queue_labels(&catalog, clock.seconds);
+        let rows = village.trade_queue_labels(&catalog, clock);
         assert!(rows[0].can_cancel && rows[0].label.contains("Consolidating for 18 more game min"));
+        let cents = village.trade.orders[0].cents;
+        assert!(rows[0].label.contains(&sale_proceeds(cents, fare)));
+        assert!(!rows[1].label.contains("dedicated fuel"));
         assert!(!rows[1].can_cancel && rows[1].label.contains("Booked"));
         village.cancel_trade_queue_row(&catalog, &mut stock, 1);
         assert_eq!(village.trade.orders.len(), 2);
@@ -906,19 +922,19 @@ mod tests {
         trip.boarded = true;
         trip.elapsed = 33.0;
         assert!(
-            village.trade_queue_labels(&catalog, clock.seconds)[0]
+            village.trade_queue_labels(&catalog, clock)[0]
                 .label
                 .contains("In town · 15 game min")
         );
         village.trip.as_mut().unwrap().elapsed = 50.0;
         assert!(
-            village.trade_queue_labels(&catalog, clock.seconds)[0]
+            village.trade_queue_labels(&catalog, clock)[0]
                 .label
                 .contains("Returning · 8 game min")
         );
         village.trip.as_mut().unwrap().elapsed = 66.0;
         assert!(
-            village.trade_queue_labels(&catalog, clock.seconds)[0]
+            village.trade_queue_labels(&catalog, clock)[0]
                 .label
                 .contains("Waiting for storage")
         );

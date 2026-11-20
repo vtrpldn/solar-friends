@@ -1643,10 +1643,14 @@ fn refresh(
     let show_projects = !picker.open && Action::ProjectFilter.available(&village);
     let show_trade = !picker.open && Action::TradeItem(0).available(&village);
     let show_trade_queue = show_trade && village.construction.trade.queue_page.is_some();
+    let trade_clock = TownClock {
+        seconds: village.clock,
+        round_trip_km: setup.round_trip_km(),
+    };
     let trade_queue = if show_trade_queue {
         village
             .construction
-            .trade_queue_labels(&catalog, village.clock)
+            .trade_queue_labels(&catalog, trade_clock)
     } else {
         Vec::new()
     };
@@ -1728,10 +1732,6 @@ fn refresh(
     if saves.open || sound.open {
         menu.display = Display::None;
     }
-    let trade_clock = TownClock {
-        seconds: village.clock,
-        round_trip_km: setup.round_trip_km(),
-    };
     let mut action_details = String::new();
     for (&action, &interaction, children, parent, mut background, mut node) in &mut buttons {
         let show = match action {
