@@ -9,7 +9,7 @@ All commands run from the repository root.
 
 ```sh
 scripts/v3-dev.sh                   # fast relinks + live asset reloading
-scripts/v3-dev.sh --hot             # also patches edited systems into the running game
+scripts/v3-dev.sh --hot             # experimental: patches edited systems into the running game
 scripts/v3-dev.sh --inspector       # also the egui entity inspector
 ```
 
@@ -24,7 +24,15 @@ Game arguments pass through, for example `scripts/v3-dev.sh --hot --play --sandb
 Every mode includes the `dev-tools` feature. Release builds, CI and the web build leave
 these features off.
 
-### Hot patching limits
+### Hot patching is experimental here
+
+Tested on 2026-11-20 on an M3 Pro: `dx` picked up the edit, but the patch took two
+minutes to build because it relinks the whole game. Applying it then crashed the game with
+a thread-local storage panic in a material system (`cannot access a Thread Local Storage
+value during or after destruction`). Until that changes, the default mode is faster: a
+7-second rebuild plus a restart with `--play` or `--play --sandbox`, then F9 to reload a
+village saved with F5.
+
 
 Hot patching replaces function bodies only. These changes still need a restart, which
 `dx` does automatically:

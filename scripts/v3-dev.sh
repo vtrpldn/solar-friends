@@ -2,7 +2,7 @@
 # Run the V3 desktop game with local iteration tools. See bevy-v3/docs/iteration.md.
 #
 #   scripts/v3-dev.sh [game args]              fast relinks, live asset reloading
-#   scripts/v3-dev.sh --hot [game args]        also patch edited systems into the running game
+#   scripts/v3-dev.sh --hot [game args]        experimental: patch edited systems live
 #   scripts/v3-dev.sh --inspector [game args]  also the entity inspector (Alt+`)
 #
 # Game args pass through, e.g. `scripts/v3-dev.sh --hot --play --sandbox`.
