@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import {MAP_HALF} from './map-size.js';
+import {CLOUD_GLSL, useVillageClouds} from './painted-village.js';
 
 // One small map grounds all projects without extra meshes or screen-space passes.
 // RGBA stores contact shade, woodland floor, exposed earth and stone respectively.
@@ -33,10 +34,13 @@ export function createLandSurface(){
  }};
 }
 
-export function terrainMaterial(seed,palette,surface){
+// `wear` (see ground-wear.js) switches on the lived-in ground: colour follows the
+// lie of the land, and yards, footpaths and wildflowers replace the noise patches.
+export function terrainMaterial(seed,palette,surface,wear=null){
  const material=new THREE.MeshStandardMaterial({roughness:1});
- material.customProgramCacheKey=()=> 'solar-land-surface-v1';
+ material.customProgramCacheKey=()=> wear?'solar-land-surface-lived':'solar-land-surface-v1';
  material.onBeforeCompile=shader=>{
+  if(wear){shader.uniforms.landWear={value:wear};useVillageClouds(shader);}
   Object.assign(shader.uniforms,{
    landSurface:{value:surface.texture},landSeed:{value:(seed%997)*.071},
    landGrass:{value:new THREE.Color(palette[0])},landDry:{value:new THREE.Color(palette[1])},
@@ -53,7 +57,9 @@ export function terrainMaterial(seed,palette,surface){
   `);
   shader.fragmentShader=shader.fragmentShader.replace('#include <common>',`#include <common>
    uniform sampler2D landSurface;
+   uniform sampler2D landWear;
    uniform float landSeed;
+   ${wear?CLOUD_GLSL:''}
    uniform vec3 landGrass,landDry,landLush,landSoil,landRock;
    varying vec3 landPosition,landNormal;
    varying float landBank;
@@ -82,8 +88,44 @@ export function terrainMaterial(seed,palette,surface){
    float grain=1.0-smoothstep(.15,.8,length(fwidth(p)));
    float crest = smoothstep(-2.0,15.0,landPosition.y);
    turf*=mix(.87,1.16,crest)+(fine-.5)*.045*grain;
-   diffuseColor.rgb*=turf*(1.0-habitat.r*.25-damp*.06);
+   ${wear?`
+   // Hollows stay deep green and rises dry out, so colour describes the relief.
+   float rise=smoothstep(-1.0,10.0,landPosition.y)+(broad-.5)*.22;
+   vec3 lived=mix(landLush*.9,landGrass,smoothstep(.05,.5,rise));
+   lived=mix(lived,landDry,smoothstep(.5,1.0,rise+(mottle-.5)*.3)*(.7-damp*.45));
+   // Long directional dabs, like a loaded brush dragged across the slope.
+   vec2 stroke=vec2(p.x*.82+p.y*.57,p.y*.82-p.x*.57);
+   float dab=landNoise(stroke*vec2(2.3,.55)+broad*4.0);
+   lived*=1.0+(smoothstep(.35,.65,dab)-.5)*.11*grain;
+   lived=mix(lived,landSoil,max(shore,max(habitat.b,habitat.g*.32))*(.75+mottle*.25)*.8);
+   lived=mix(lived,landRock,rock);
+   vec2 wobble=(vec2(landNoise(p*.45),landNoise(p*.45+31.7))-.5)*2.4;
+   vec4 worn=texture2D(landWear,(p+wobble+${MAP_HALF.toFixed(1)})/${(MAP_HALF*2).toFixed(1)});
+   float tread=worn.r+(fine-.5)*.16;
+   float yard=smoothstep(.36,.5,worn.g+(mottle-.5)*.45);
+   float path=smoothstep(.22,.5,tread);
+   // Wildflowers gather in drifts and never grow where people walk.
+   vec2 bloomCell=floor(p*.75),bloomAt=fract(p*.75)-.5;
+   float bloomSeed=landHash(bloomCell);
+   bloomAt-=(vec2(landHash(bloomCell+3.1),landHash(bloomCell+5.7))-.5)*.55;
+   float drift=smoothstep(.6,.82,landNoise(p*.045+7.3));
+   float bloom=(1.0-smoothstep(.13,.24,length(bloomAt)))*step(1.0-drift*.42,bloomSeed)
+     *(1.0-smoothstep(.02,.2,worn.r+worn.g))*(1.0-rock)*(1.0-smoothstep(.2,.9,length(fwidth(p))));
+   float tint=landHash(bloomCell+9.2);
+   lived=mix(lived,tint<.3?vec3(.85,.78,.55):tint<.72?vec3(.88,.5,.03):vec3(.58,.08,.24),bloom*.9);
+   // Grass yellows beside a path before it gives way to packed earth.
+   lived=mix(lived,landDry*.97,smoothstep(.05,.26,tread)*.55*(1.0-yard));
+   // Linear-light values: red earth underfoot, paler where yards are swept daily.
+   vec3 trodden=mix(vec3(.40,.13,.06),vec3(.50,.19,.09),mottle);
+   vec3 swept=mix(vec3(.62,.37,.2),vec3(.72,.47,.27),mottle);
+   lived=mix(lived,trodden*(.94+fine*.12),path*.92*(1.0-yard));
+   lived=mix(lived,swept*(.95+fine*.1),yard);
+   lived*=mix(.9,1.1,crest);
+   diffuseColor.rgb*=lived*(1.0-habitat.r*.1*(1.0-yard)-damp*.06);
+   `:'diffuseColor.rgb*=turf*(1.0-habitat.r*.25-damp*.06);'}
   `);
+  if(wear)shader.fragmentShader=shader.fragmentShader.replace('#include <aomap_fragment>',`#include <aomap_fragment>
+   reflectedLight.directDiffuse*=cloudLight(landPosition.xz);`);
  };
  return material;
 }

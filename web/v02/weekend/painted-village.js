@@ -2,6 +2,28 @@ import * as THREE from 'three';
 
 const paintedColors = new WeakMap();
 
+// Drifting cloud shadows are shared by the land and everything standing on it.
+export const villageClouds = {offset: {value: new THREE.Vector2()}, strength: {value: 0}};
+export const CLOUD_GLSL = `
+  uniform vec2 cloudOffset;
+  uniform float cloudStrength;
+  float cloudHash(vec2 p) { return fract(sin(dot(p, vec2(41.3, 289.1))) * 43758.5453); }
+  float cloudNoise(vec2 p) {
+    vec2 i = floor(p), f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    return mix(mix(cloudHash(i), cloudHash(i + vec2(1, 0)), f.x),
+               mix(cloudHash(i + vec2(0, 1)), cloudHash(i + vec2(1)), f.x), f.y);
+  }
+  float cloudLight(vec2 p) {
+    p += cloudOffset;
+    float cover = cloudNoise(p * .011) * .62 + cloudNoise(p * .029 + 11.0) * .28 + cloudNoise(p * .08) * .10;
+    return 1.0 - cloudStrength * smoothstep(.50, .61, cover);
+  }`;
+export function useVillageClouds(shader) {
+  shader.uniforms.cloudOffset = villageClouds.offset;
+  shader.uniforms.cloudStrength = villageClouds.strength;
+}
+
 function applyMatteFinish(material) {
   material.roughness = Math.max(.92, material.roughness);
   const compile = material.onBeforeCompile;
@@ -9,6 +31,7 @@ function applyMatteFinish(material) {
   material.customProgramCacheKey = () => `${cacheKey}|village-matte`;
   material.onBeforeCompile = function (shader, renderer) {
     compile.call(this, shader, renderer);
+    useVillageClouds(shader);
     shader.vertexShader = shader.vertexShader
       .replace('#include <common>', '#include <common>\nvarying vec3 paintWorld;')
       .replace('#include <project_vertex>', `#include <project_vertex>
@@ -20,6 +43,7 @@ function applyMatteFinish(material) {
     shader.fragmentShader = shader.fragmentShader
       .replace('#include <common>', `#include <common>
         varying vec3 paintWorld;
+        ${CLOUD_GLSL}
         float paintHash(vec3 p) {
           p = fract(p * 0.3183099 + vec3(.11, .29, .41));
           p *= 17.0;
@@ -40,6 +64,7 @@ function applyMatteFinish(material) {
         tooth *= 1.0 - smoothstep(.10, .40, length(fwidth(paintWorld)));
         diffuseColor.rgb *= mix(vec3(.84,.77,.77), vec3(1.13,1.13,1.18), wash) + tooth * .07;`)
       .replace('#include <aomap_fragment>', `#include <aomap_fragment>
+        reflectedLight.directDiffuse *= cloudLight(paintWorld.xz);
         // Use broad, soft bands in diffuse light while retaining light colour.
         float lit = dot(reflectedLight.directDiffuse, vec3(.2126,.7152,.0722));
         float base = max(dot(diffuseColor.rgb, vec3(.2126,.7152,.0722)), .015);

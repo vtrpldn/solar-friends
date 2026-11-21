@@ -4,7 +4,7 @@ import { MAP_CELLS, MAP_HALF } from "./map-size.js";
 import { riverCenter, riverWidth } from "./river-layout.js";
 import { elevationVertex } from "./elevation.js";
 import * as THREE from "three";
-export function createTerrain(seed = 0, elevationSeed = seed, pads = []) {
+export function createTerrain(seed = 0, elevationSeed = seed, pads = [], wear = null) {
   const geometry = new THREE.PlaneGeometry(
     MAP_HALF * 2,
     MAP_HALF * 2,
@@ -26,7 +26,7 @@ export function createTerrain(seed = 0, elevationSeed = seed, pads = []) {
   const surface=createLandSurface();
   const mesh = new THREE.Mesh(
     geometry,
-    terrainMaterial(seed,palette,surface),
+    terrainMaterial(seed,palette,surface,wear),
   );
   mesh.userData.surface=surface;
   mesh.receiveShadow = true;

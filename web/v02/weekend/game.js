@@ -1,5 +1,6 @@
 import { DREAM_LIGHTS, lightingAt } from "./dream-lighting.js";
-import {createPaintedView, paintVillageModel} from "./painted-village.js";
+import {createPaintedView, paintVillageModel, villageClouds} from "./painted-village.js";
+import {createGroundWear} from './ground-wear.js';
 import "./keyboard-focus.js";
 import {renderDevTools} from './dev-tools.js';
 renderDevTools(document.getElementById('dev-tools'));
@@ -148,8 +149,12 @@ import {
 const $ = (id) => document.getElementById(id),
   SAVE = saveKey(new URLSearchParams(location.search).get("mode"));
 const scalePreview = new URLSearchParams(location.search).has("scale-preview");
-const dreamPreview = new URLSearchParams(location.search).get("scale-preview") === "dream";
-let fixedLighting = dreamPreview ? DREAM_LIGHTS.opal : null;
+const previewCollection = new URLSearchParams(location.search).get("scale-preview");
+const dreamPreview = previewCollection === "dream" || previewCollection === "lived";
+// The lived-in look is an art-direction trial: on in its own preview, optional in the catalog.
+const livedLook = dreamPreview && (new URLSearchParams(location.search).get("look") ??
+  (previewCollection === "lived" ? "lived" : "plain")) === "lived";
+let fixedLighting = livedLook ? DREAM_LIGHTS.clear : dreamPreview ? DREAM_LIGHTS.opal : null;
 let previewCycle = false;
 const wildlifePreview = new URLSearchParams(location.search).has("wildlife-preview");
 const downtimePreview = new URLSearchParams(location.search).has("downtime-preview");
@@ -311,7 +316,8 @@ function updateSunlight(time, dt) {
 }
 const mat = (color) =>
   new THREE.MeshStandardMaterial({ color, roughness: 1, flatShading: true });
-const ground = createTerrain(s.landSeed, s.elevationSeed, s.terrainPads);
+const groundWear = livedLook ? createGroundWear() : null;
+const ground = createTerrain(s.landSeed, s.elevationSeed, s.terrainPads, groundWear?.texture);
 scene.add(ground);
 let accessRoad = compactModel(createAccessRoad(s.elevationSeed, s.terrainPads));
 scene.add(accessRoad);
@@ -570,6 +576,7 @@ function syncBuildings() {
   }
   syncTerrain();
   ground.userData.surface.update(s.projects,PROJECTS,footprint);
+  groundWear?.settle(s.projects,PROJECTS,footprint,s.landSeed);
   autoConnectUtilities(s, PROJECTS);
   for (const p of s.projects) {
     const def = PROJECTS[p.key],
@@ -2288,7 +2295,7 @@ if (dreamPreview) {
     const bounds = new THREE.Box3();
     for (const p of s.projects) {
       const entry = buildings.get(p.id);
-      if (entry && isBuildOption(p.key, PROJECTS[p.key])) bounds.expandByObject(entry.root);
+      if (entry && isBuildOption(p.key, PROJECTS[p.key]) && (previewCollection !== 'lived' || p.key !== 'bridge')) bounds.expandByObject(entry.root);
     }
     const center = bounds.getCenter(new THREE.Vector3());
     controls.target.copy(center);
@@ -2310,7 +2317,13 @@ if (dreamPreview) {
   for (const [key, preset] of Object.entries(DREAM_LIGHTS))
     picker.add(new Option(preset.label, key));
   picker.add(new Option("Play day cycle", "cycle"));
-  picker.value = "opal";
+  picker.value = livedLook ? "clear" : "opal";
+  $("dream-lived").checked = livedLook;
+  $("dream-lived").onchange = event => {
+    const url = new URL(location.href);
+    url.searchParams.set("look", event.target.checked ? "lived" : "plain");
+    location.replace(url);
+  };
   function applyPreset() {
     fixedLighting = DREAM_LIGHTS[picker.value] ?? null;
     previewCycle = picker.value === "cycle";
@@ -2362,7 +2375,7 @@ function frame(now) {
       if (next && (!last || next.distanceTo(last) >= spacing)) activateMap(point);
     }
   }
-  if (paused && !s.rain && !cameraChanged && now >= renderUntil) {
+  if (paused && !s.rain && !cameraChanged && now >= renderUntil && !livedLook) {
     // The interface and autosave remain live; unchanged scene transforms do not
     // need rebuilding while the player reads or plans in a paused village.
     if (now - lastUI > 450) { renderUI(); lastUI = now; }
@@ -2633,6 +2646,16 @@ function frame(now) {
   fitTerrainCamera(camera, controls.target, scene.fog);
   scene.fog.near -= 62;
   scene.fog.far = scene.fog.near + 155;
+  if (livedLook) {
+    // Distance thins into haze far beyond the plot instead of veiling the village.
+    scene.fog.near += 40;
+    scene.fog.far = scene.fog.near + 330;
+    villageClouds.offset.value.x += dt * 2.4;
+    villageClouds.offset.value.y += dt * 1.1;
+    villageClouds.strength.value = .46 * lightingAt(visual.time).sun.daylight;
+    if (!paused) visual.people.forEach((r, i) => { if (s.people[i].walk?.length) groundWear.step(r.x, r.z); });
+    groundWear.flush();
+  }
   // Keep the shadow volume over the viewed land, not the world origin.
   // Moving light and target together preserves the time-of-day sun direction.
   const shadowExtent = Math.max(16, Math.hypot(camera.right - camera.left, camera.top - camera.bottom) / (2 * camera.zoom) + 12);
@@ -2645,7 +2668,7 @@ function frame(now) {
   updateUtilityLighting();
   lenses.update(now);
   accessPreview.visible=!!placing&&(ghost.visible||!!wireframe?.visible);
-  const rendered = !paused || s.rain || cameraChanged || now < renderUntil;
+  const rendered = !paused || s.rain || cameraChanged || now < renderUntil || livedLook;
   if (rendered) renderPaintedView(scene, camera, atmosphere);
   lastVisualTime = visual.time;
   recordPerformance(now, visual.time, rendered);

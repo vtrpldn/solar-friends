@@ -8,6 +8,10 @@ export const DREAM_LIGHTS = {
     fog: '#add3df', direct: 2.5, ambient: 1.6, shadow: .74, angle: [-.46, .79, .4], bloom: .12, lamps: 0, paint: 1.65},
   blue: {label: 'Blue hour', hour: 19.5, sun: '#a5afff', sky: '#aebcfc', ground: '#4a6291',
     fog: '#637eac', direct: .65, ambient: 1.25, shadow: .64, angle: [-.66, .44, .61], bloom: .57, lamps: 1, paint: 1.2},
+  // A hard low sun with violet shade: strong values and no haze, for the lived-in look.
+  // It lights one visible wall of each house and leaves the other in shade.
+  clear: {label: 'Clear morning', hour: 9, sun: '#ffe9c2', sky: '#9aa2ff', ground: '#8f7aa8',
+    fog: '#c3d9ea', direct: 3.1, ambient: 1.2, shadow: .88, angle: [.72, .5, -.28], bloom: 0, lamps: 0, paint: 0},
 };
 
 const midnight = {

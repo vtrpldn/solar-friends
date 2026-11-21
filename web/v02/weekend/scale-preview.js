@@ -44,6 +44,34 @@ export function createScalePreview(validate = false, collection = 'village') {
     s.log = ['Dream lighting preview · All build catalog models. This scene never autosaves.'];
     return s;
   }
+  if (collection === 'lived') {
+    // A small settled village: homes turn their doors to a shared square,
+    // with food, animals and workshops behind them.
+    const village = [
+      ['square',56,48], ['fire-circle',62,54], ['picnic-table',53,54], ['groundwater-well',62,45],
+      ['kitchen',55,39], ['house',47,40], ['home-ochre',63,38],
+      ['home-garden',46,48,1], ['adobe-gable',43,54,1],
+      ['home-studio',66,48,3], ['home-courtyard',68,53,3],
+      ['home-lane',52,58,2], ['home-cottage',58,59,2], ['adobe-veranda',64,61,2],
+      ['garden',37,43], ['garden',31,45], ['greenhouse',36,52], ['orchard',38,62], ['compost',33,60],
+      ['coop',74,43], ['goat_pasture',79,50], ['eco_toilet',76,59], ['workshop',72,35], ['warehouse',46,32],
+      ['solar_farm',71,67], ['clothesline',50,46], ['hammock',70,60], ['woodpile',53,44],
+      ['rain-barrel',52,41], ['garden-bench',59,54], ['wash-station',74,57], ['tool-rack',71,40],
+    ];
+    for (const [key, x, z, rotation = 0] of village) {
+      const def = PROJECTS[key], [w, d] = rotation % 2 ? [def.size[1], def.size[0]] : def.size;
+      const pad = foundationPad(x, z, w, d, s.elevationSeed, s.terrainPads);
+      if (pad) s.terrainPads.push(pad);
+      else if (w * d > 4) throw new Error(`Lived preview ${key}: incompatible foundation`);
+      s.projects.push({id: s.nextId++, key, x, z, rotation, work: def.work, delivered: requiredLoads(key),
+        ...(key === 'field' ? {fieldSize: [...def.size]} : {})});
+    }
+    place('bridge', 6, 48);
+    s.people.forEach((r, i) => { r.x = 55 + i * 1.7; r.z = 53.5 + (i % 2); r.walk = []; r.target = null; });
+    s.time = 400; s.rain = false; s.rainSeen = true; s.rainResolved = true;
+    s.log = ['Lived-in look preview · swept yards, worn paths and hard light. This scene never autosaves.'];
+    return s;
+  }
   const sites = collection==='new-homes' ? HOME_DESIGNS.map((d,i)=>[d.id,35+(i%5)*12,i<5?43:57]) : collection==='sites' ? [
     ['solar_farm',44,44],['picnic-table',54,44],['eco_toilet',60,44],
     ['supply-0',67,43],['home-shared',54,55],
