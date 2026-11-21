@@ -163,8 +163,14 @@ PROJECTS.well.legacyMaterials={...PROJECTS.well.materials,tank:1};
 PROJECTS.solar_farm.legacyMaterials={...PROJECTS.solar_farm.materials};
 PROJECTS.solar_farm.materials={...PROJECTS.solar_farm.materials,panels:6};
 export { PROCESSES };
+const DEFAULT_FIELD_SIZE = [2, 2], DEPOSIT_PREVIEW_SIZE = [1, 1];
+function projectSiteSize(p) {
+  if (p.key === 'field') return p.fieldSize || DEFAULT_FIELD_SIZE;
+  if (!p.natural && (p.key === 'supply-2' || p.key === 'supply-3')) return DEPOSIT_PREVIEW_SIZE;
+  return unrotatedSiteSize(p, PROJECTS[p.key].size);
+}
 export function footprint(p) {
-  const [w, d] = p.key==='field' ? (p.fieldSize||[2,2]) : !p.natural && ['supply-2','supply-3'].includes(p.key) ? [1,1] : unrotatedSiteSize(p, PROJECTS[p.key].size);
+  const [w, d] = projectSiteSize(p);
   return (p.rotation || 0) % 2 ? [d, w] : [w, d];
 }
 function shelteredFrontCell(p, x, z) {
@@ -618,6 +624,13 @@ function isFarmWork(s,op) {
   return op.farm || Object.hasOwn(CROP_CARE,op.recipe) || ['eggs','milk','honey','gather-wild-forage'].includes(op.recipe);
 }
 
+const foodRecipesByKind = new Map();
+for (const [id, recipe] of Object.entries(PROCESSES)) {
+  if (!foodRecipesByKind.has(recipe.kind) && Object.keys(recipe.output).some(id => FOOD_SERVINGS[id])) {
+    foodRecipesByKind.set(recipe.kind, id);
+  }
+}
+
 function maintainFood(s) {
   if(s.time<(s.nextFoodCheck||0))return;
   s.nextFoodCheck=s.time+10;
@@ -627,8 +640,8 @@ function maintainFood(s) {
   if(food>=target)return;
   // Harvest existing food plots before construction or nonessential production.
   for(const p of s.projects) {
-    const recipe=Object.entries(PROCESSES).find(([,d])=>d.kind===PROJECTS[p.key].kind&&Object.keys(d.output).some(id=>FOOD_SERVINGS[id]));
-    if(recipe&&!(PROJECTS[p.key].kind==='kitchen'&&(p.repeat||foodPolicy(s).automatic))&&!s.operations?.some(o=>!o.done&&o.site===p.id&&!o.water))queueProduction(s,p.id,recipe[0]);
+    const recipe=foodRecipesByKind.get(PROJECTS[p.key].kind);
+    if(recipe&&!(PROJECTS[p.key].kind==='kitchen'&&(p.repeat||foodPolicy(s).automatic))&&!s.operations?.some(o=>!o.done&&o.site===p.id&&!o.water))queueProduction(s,p.id,recipe);
   }
   // Old saves retain the cooldown for their last purchase.
   if (s.emergencyFood === false || s.time < (s.nextFoodTrip || 0)) return;
@@ -1723,8 +1736,8 @@ function prepareNavigation(s){
   let cache=navigationCaches.get(s);
   let same=cache?.campSignature===campSignature&&cache.projects.length===s.projects.length;
   if(same)for(let i=0;i<s.projects.length;i++){
-    const p=s.projects[i],old=cache.projects[i],[w,d]=footprint(p);
-    if(old.id!==p.id||old.key!==p.key||old.x!==p.x||old.z!==p.z||old.rotation!==p.rotation||old.felled!==p.felled||old.cultivated!==!!p.cultivation||old.complete!==(p.work>=PROJECTS[p.key].work)||old.w!==w||old.d!==d){same=false;break;}
+    const p=s.projects[i],old=cache.projects[i],size=projectSiteSize(p);
+    if(old.id!==p.id||old.key!==p.key||old.x!==p.x||old.z!==p.z||old.rotation!==p.rotation||old.felled!==p.felled||old.cultivated!==!!p.cultivation||old.complete!==(p.work>=PROJECTS[p.key].work)||old.w!==size[0]||old.d!==size[1]){same=false;break;}
   }
   if(!same){
     const obstacles=new Map();
@@ -1737,7 +1750,7 @@ function prepareNavigation(s){
           }
       }
     }
-    cache={campSignature,projects:s.projects.map(p=>{const [w,d]=footprint(p);return {id:p.id,key:p.key,x:p.x,z:p.z,rotation:p.rotation,felled:p.felled,cultivated:!!p.cultivation,complete:p.work>=PROJECTS[p.key].work,w,d};}),state:s,cells:new Map(),terrain:new Map(),routes:new Map(),roads:new Map(),obstacles,camp:blockedCamp(s)};navigationCaches.set(s,cache);
+    cache={campSignature,projects:s.projects.map(p=>{const [w,d]=projectSiteSize(p);return {id:p.id,key:p.key,x:p.x,z:p.z,rotation:p.rotation,felled:p.felled,cultivated:!!p.cultivation,complete:p.work>=PROJECTS[p.key].work,w,d};}),state:s,cells:new Map(),terrain:new Map(),routes:new Map(),roads:new Map(),obstacles,camp:blockedCamp(s)};navigationCaches.set(s,cache);
   }
   return cache;
 }

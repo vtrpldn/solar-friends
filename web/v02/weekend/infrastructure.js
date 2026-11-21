@@ -21,7 +21,7 @@ export function workingMachine(s,node) {
     ['Working','Waiting for power'].includes(o.status) && !o.biogas && s.people.some(r=>r.operation===o.id && ['produce','blocked'].includes(r.action) && r.energy>=25 && !r.sleepUntil));
 }
 function hasBuiltInPower(kind) {
-  return !!POWER_LOAD[kind] || ["solar_farm", "hydro", "home", "camp"].includes(kind);
+  return !!POWER_LOAD[kind] || kind === "solar_farm" || kind === "hydro" || kind === "home" || kind === "camp";
 }
 // Capability, not instantaneous demand: lights still have a switch in daylight,
 // and pumps still have one while their tanks are empty or their pipes disabled.
@@ -112,8 +112,9 @@ export function syncProjectNode(sys, p, defs) {
   if (p.work < defs[p.key].work) return;
   const kind = defs[p.key].kind || p.key;
   const batteryHealth=Math.max(.8,1-(p.batteryAgeDays||0)/(8*365)*.2);
-  const battery =
-    (projectMaterials(p,defs)?.batteries??(["solar_farm","hydro","supply-6"].includes(kind)?1:0))*4*batteryHealth;
+  const materials = projectMaterials(p, defs);
+  const defaultBatteries = kind === "solar_farm" || kind === "hydro" || kind === "supply-6" ? 1 : 0;
+  const battery = (materials?.batteries ?? defaultBatteries) * 4 * batteryHealth;
   sys.nodes[p.id] ??= {
     id: p.id,
     kind,
@@ -127,7 +128,7 @@ export function syncProjectNode(sys, p, defs) {
     power: 0,
   };
   const node=sys.nodes[p.id];
-  if(["water-storage","well"].includes(kind))node.maintainFresh ??= true;
+  if(kind === "water-storage" || kind === "well")node.maintainFresh ??= true;
   if (kind === "home" && node.capacity[3] === 0) node.capacity = [...CAPACITY.home];
   if(node.capacity[3]>0)node.maintainSanitation ??= true;
   node.serviceFactor=serviceFactor(p);
@@ -135,7 +136,7 @@ export function syncProjectNode(sys, p, defs) {
     node.battery=battery;
     if(node.charge>battery){sys.account.curtailed+=node.charge-battery;node.charge=battery;}
   }
-  node.solarKw=(projectMaterials(p,defs)?.panels??(kind==="solar_farm"?2:0))*.6;
+  node.solarKw=(materials?.panels??(kind==="solar_farm"?2:0))*.6;
   if(kind==='goat_pasture'&&node.capacity[0]<40)node.capacity[0]=40;
   if(kind==='kitchen'){node.coldStorage=!!p.coldStorage;node.coolingEnabled=p.coolingEnabled!==false;}
   if(kind==='home'){node.solarUpgrade=!!p.solarUpgrade;node.battery=p.solarUpgrade?4*batteryHealth:0;if(node.charge>node.battery){sys.account.curtailed+=node.charge-node.battery;node.charge=node.battery;}}
