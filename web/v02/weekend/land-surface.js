@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import {MAP_HALF} from './map-size.js';
-import {CLOUD_GLSL, HATCH_GLSL, useVillageClouds} from './painted-village.js';
+import {CLOUD_GLSL, useVillageClouds} from './painted-village.js';
 
 // One small map grounds all projects without extra meshes or screen-space passes.
 // RGBA stores contact shade, woodland floor, exposed earth and stone respectively.
@@ -59,7 +59,7 @@ export function terrainMaterial(seed,palette,surface,wear=null){
    uniform sampler2D landSurface;
    uniform sampler2D landWear;
    uniform float landSeed;
-   ${wear?CLOUD_GLSL+HATCH_GLSL:''}
+   ${wear?CLOUD_GLSL:''}
    uniform vec3 landGrass,landDry,landLush,landSoil,landRock;
    varying vec3 landPosition,landNormal;
    varying float landBank;
@@ -125,10 +125,7 @@ export function terrainMaterial(seed,palette,surface,wear=null){
    `:'diffuseColor.rgb*=turf*(1.0-habitat.r*.25-damp*.06);'}
   `);
   if(wear)shader.fragmentShader=shader.fragmentShader.replace('#include <aomap_fragment>',`#include <aomap_fragment>
-   reflectedLight.directDiffuse*=cloudLight(landPosition.xz);
-   float landLevel=dot(reflectedLight.directDiffuse,vec3(.2126,.7152,.0722))/max(dot(diffuseColor.rgb,vec3(.2126,.7152,.0722)),.015);`)
-   .replace('#include <opaque_fragment>',`outgoingLight*=hatchShade(landLevel,landPosition,landNoise(landPosition.xz*.7));
-   #include <opaque_fragment>`);
+   reflectedLight.directDiffuse*=cloudLight(landPosition.xz);`);
  };
  return material;
 }

@@ -19,26 +19,9 @@ export const CLOUD_GLSL = `
     float cover = cloudNoise(p * .011) * .62 + cloudNoise(p * .029 + 11.0) * .28 + cloudNoise(p * .08) * .10;
     return 1.0 - cloudStrength * smoothstep(.50, .61, cover);
   }`;
-// Shade is cut into parallel lines like a cordel woodcut instead of a flat tone.
-// Lines follow the surface in world space, so they hold still under the camera.
-export const villageHatch = {value: 0};
-export const HATCH_GLSL = `
-  uniform float hatchStrength;
-  float hatchShade(float level, vec3 world, float wobble) {
-    float shade = 1.0 - smoothstep(.12, .42, level);
-    float across = (world.x * .62 + world.z * .78 + world.y * .9) * 2.1 + wobble * 1.3;
-    float soft = fwidth(across);
-    float gap = abs(fract(across) - .5) * 2.0;
-    float cut = mix(.22, .6, shade);
-    float line = 1.0 - smoothstep(cut - soft, cut + soft, gap);
-    // Lines thinner than a pixel settle into their average tone.
-    float visible = 1.0 - smoothstep(.35, .8, soft);
-    return mix(1.0, mix(1.0, mix(1.24, .56, line), visible), shade * hatchStrength);
-  }`;
 export function useVillageClouds(shader) {
   shader.uniforms.cloudOffset = villageClouds.offset;
   shader.uniforms.cloudStrength = villageClouds.strength;
-  shader.uniforms.hatchStrength = villageHatch;
 }
 
 function applyMatteFinish(material) {
@@ -61,7 +44,6 @@ function applyMatteFinish(material) {
       .replace('#include <common>', `#include <common>
         varying vec3 paintWorld;
         ${CLOUD_GLSL}
-        ${HATCH_GLSL}
         float paintHash(vec3 p) {
           p = fract(p * 0.3183099 + vec3(.11, .29, .41));
           p *= 17.0;
@@ -93,9 +75,7 @@ function applyMatteFinish(material) {
                     + max(0.0, level - .88);
         reflectedLight.directDiffuse *= mix(1.0, bands / max(level, .001), .53);
         reflectedLight.directSpecular *= .22;
-        reflectedLight.indirectSpecular *= .45;`)
-      .replace('#include <opaque_fragment>', `outgoingLight *= hatchShade(level, paintWorld, paintNoise(paintWorld * .7));
-        #include <opaque_fragment>`);
+        reflectedLight.indirectSpecular *= .45;`);
   };
 }
 
