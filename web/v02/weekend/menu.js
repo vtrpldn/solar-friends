@@ -1,3 +1,4 @@
+import {renderDevTools} from './dev-tools.js';
 import { disabledReason, installDisabledInfo } from './disabled-info.js';
 import {saveSlots} from "./save-slots.js";
 import {installSaveDialog} from "./save-dialog.js";
@@ -97,3 +98,4 @@ $('setup-start').onclick=()=>{
 if(new URLSearchParams(location.search).has('load-error')) $('menu-status').textContent='Your village could not be loaded. Its save has been preserved. Open Load village to export it or try the previous save; no fresh village has overwritten it.';
 
 installDisabledInfo();
+renderDevTools(document.getElementById('dev-tools'));

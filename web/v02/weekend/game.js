@@ -1,3 +1,5 @@
+import {renderDevTools} from './dev-tools.js';
+renderDevTools(document.getElementById('dev-tools'));
 import {upcomingMilestones, milestoneTime} from './time-skip-milestones.js';
 import {skipDays} from './time-skip.js';
 import {basicNeeds,renderBasicNeeds} from './basic-needs.js';

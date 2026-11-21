@@ -8,7 +8,7 @@
       const route = new URLSearchParams(location.search);
       if (
         !route.has("mode") &&
-        !["wildlife-preview", "arrival-preview", "utilities-preview", "rest-preview", "needs-preview", "downtime-preview"].some((k) =>
+        !["wildlife-preview", "arrival-preview", "utilities-preview", "rest-preview", "needs-preview", "downtime-preview", "scale-preview"].some((k) =>
           route.has(k),
         )
       )
@@ -212,7 +212,7 @@
           </div><div class="view-control-row"><button id="copy-diagnostics">Copy bug report</button></div>
           <small>Copies the current village, resident tasks, recent activity and errors. Paste it into your bug report.</small>
           <small id="diagnostics-status" role="status"></small>
-          <a href="../library/">Art collection ↗</a>
+          <details class="dev-tools" id="dev-tools"></details>
           <fieldset class="audio-controls"><legend>Sound</legend>
             <label for="audio-music">Music <input id="audio-music" type="range" min="0" max="100" step="1" aria-label="Music volume" /></label>
             <label for="audio-effects">Interaction sounds <input id="audio-effects" type="range" min="0" max="100" step="1" aria-label="Interaction sounds volume" /></label>
