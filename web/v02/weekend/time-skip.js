@@ -21,16 +21,16 @@ function createYielder() {
   };
 }
 
-// Use precisely the same fixed step as simulationFrame; larger steps alter
-// scheduling, resource consumption and the ordering of resident decisions.
+// Exact advances match simulationFrame. Fast advances use the largest step tick supports.
 export async function skipDays(state, days, {
-  progress = () => {}, cancelled = () => false,
+  fast = false, progress = () => {}, cancelled = () => false,
   yieldControl,
   now = () => performance.now(),
 } = {}) {
   if (!Number.isInteger(days) || days < 1 || days > 365) throw new RangeError('Choose 1–365 whole days.');
   if (state.stage === 'arrival' || state.arrivalAnimating) throw new Error('Finish arriving first.');
-  const total = Math.round(days * DAY / .1);
+  const stepSeconds = fast ? 1 : .1;
+  const total = Math.round(days * DAY / stepSeconds);
   let steps = 0;
   const yielder = yieldControl ? {yieldControl} : createYielder();
   try {
@@ -40,7 +40,7 @@ export async function skipDays(state, days, {
       if (cancelled()) break;
       const started = now();
       do {
-        tick(state, .1);
+        tick(state, stepSeconds);
         steps++;
       } while (steps < total && now() - started < 12);
       progress(steps / total);

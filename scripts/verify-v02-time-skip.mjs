@@ -31,6 +31,15 @@ for (const days of [1,2]) {
   assert(yields>1,'long skips yield for UI updates');
   assert(restore(save(skipped)),'advanced village can be loaded');
 }
+const fastVillage = fresh();
+assert.equal(plan(fastVillage, 'gathering', 29, 35), '');
+const fastStart = fastVillage.time;
+const fastResult = await skipDays(fastVillage, 2, {fast:true, yieldControl:async()=>{}});
+assert.deepEqual(fastResult, {steps:2*DAY, completed:true});
+assert.equal(fastVillage.time, fastStart + 2*DAY);
+assert(finished(fastVillage, 'gathering'));
+assert(restore(save(fastVillage)), 'fast simulation produces a loadable save');
+
 const s=fresh();let stop=false;
 const result=await skipDays(s,1,{now:(()=>{let n=0;return()=>n+=13;})(),progress:f=>{if(f>0)stop=true;},cancelled:()=>stop,yieldControl:async()=>{}});
 assert.equal(result.steps,1);assert.equal(result.completed,false);

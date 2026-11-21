@@ -1335,6 +1335,7 @@ $("skip-form").onsubmit = async event => {
   skippingTime = true;
   $("skip-start").disabled = true;
   $("skip-days").disabled = true;
+  $("skip-fast").disabled = true;
   $("skip-close").textContent = 'Stop here';
   let stopped = false;
   let nextProgressUpdate = 0;
@@ -1342,6 +1343,7 @@ $("skip-form").onsubmit = async event => {
   $("skip-progress").hidden = false;
   try {
     await skipDays(s, Number($("skip-days").value), {
+      fast: $("skip-fast").checked,
       cancelled: () => stopped,
       progress: fraction => {
         const now = performance.now();
@@ -1349,7 +1351,7 @@ $("skip-form").onsubmit = async event => {
         nextProgressUpdate = now + 100;
         $("skip-progress").value = fraction;
         renderSkipMilestones();
-        $("skip-status").textContent = `Simulating every moment… ${Math.floor(fraction * 100)}%`;
+        $("skip-status").textContent = `Advancing days… ${Math.floor(fraction * 100)}%`;
       },
     });
     message(stopped ? 'Time advance stopped. Your village is paused.' : 'Days advanced. Your village is paused.');
@@ -1367,6 +1369,7 @@ $("skip-form").onsubmit = async event => {
     persist();
     $("skip-start").disabled = false;
     $("skip-days").disabled = false;
+    $("skip-fast").disabled = false;
     $("skip-close").textContent = 'Cancel';
     $("skip-close").onclick = () => skipDialog.close();
     requestSceneRender();
