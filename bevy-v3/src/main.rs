@@ -9,6 +9,8 @@ mod arrival;
 mod audio;
 mod catalog;
 mod construction;
+#[cfg(feature = "dev-tools")]
+mod dev_tools;
 mod economy_reference;
 mod equipment;
 mod farming;
@@ -219,6 +221,8 @@ fn main() {
         app.add_plugins(performance::PerformancePlugin);
     }
     app.add_plugins(web_loading::WebLoadingPlugin);
+    #[cfg(feature = "dev-tools")]
+    app.add_plugins(dev_tools::DevToolsPlugin);
     app.add_systems(
         PostUpdate,
         (update_land, animate_river)
