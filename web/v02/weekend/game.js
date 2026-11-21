@@ -1,3 +1,5 @@
+import {createPaintedView, paintVillageModel} from "./painted-village.js";
+import "./keyboard-focus.js";
 import {renderDevTools} from './dev-tools.js';
 renderDevTools(document.getElementById('dev-tools'));
 import {upcomingMilestones, milestoneTime} from './time-skip-milestones.js';
@@ -232,8 +234,8 @@ let speed = savedView?.speed || 1,
   lastSave = 0;
 const scene = new THREE.Scene();
 const foliageWind=createFoliageWind();
-scene.background = new THREE.Color("#cbd5ac");
-scene.fog = new THREE.Fog("#cbd5ac", 90, 200);
+scene.background = new THREE.Color("#98c9dd");
+scene.fog = new THREE.Fog("#98c9dd", 90, 200);
 const renderer = new THREE.WebGLRenderer({
   canvas: $("world"),
   antialias: true,
@@ -244,6 +246,7 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.08;
+const renderPaintedView = createPaintedView(renderer);
 const camera = new THREE.OrthographicCamera(-26, 26, 20, -20, 0.1, 300);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
@@ -253,10 +256,11 @@ controls.maxPolarAngle = Math.PI * 0.46;
 controls.minPolarAngle = 0.25;
 const navigation = installCameraNavigation(camera, controls, {
   home: () => focus(campLocation(s)),
+  allowDisabledControls: () => farmingUI.placingField(),
 });
-const daylight = new THREE.HemisphereLight("#e4eff6", "#777455", 1.4);
+const daylight = new THREE.HemisphereLight("#e0f3f6", "#607c70", 1.4);
 scene.add(daylight);
-const sun = new THREE.DirectionalLight("#ffe2a8", 3.4);
+const sun = new THREE.DirectionalLight("#ffdf9d", 3.4);
 sun.position.set(-25, 45, 18);
 sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048);
@@ -271,7 +275,7 @@ Object.assign(sun.shadow.camera, {
 sun.shadow.normalBias = 0.04;
 scene.add(sun, sun.target);
 let cloudCover = s.rain ? 1 : 0;
-const noonColor = new THREE.Color("#ffe2a8");
+const noonColor = new THREE.Color("#ffdf9d");
 const sunsetColor = new THREE.Color("#ffad72");
 const overcastColor = new THREE.Color("#d6e3ef");
 function updateSunlight(time, dt) {
@@ -349,6 +353,7 @@ function prop(id, x, z, rotation = 0) {
   const model=createAsset(id, Math.round(x * 971 + z * 7919 + s.landSeed));
   const rooftop=model.getObjectByName('optional-rooftop-solar');
   if(rooftop){rooftop.removeFromParent();rooftop.geometry.dispose();}
+  paintVillageModel(model);
   const g = compactModel(model);
   if(TREE_SPECIES[id])foliageWind.apply(g);
   g.position.copy(world(x, z));
@@ -404,7 +409,9 @@ function drawCamp() {
   const c = campLocation(s);
   campGroup.position.copy(world(c.x, c.z));
   for (let i = 0; i < 2; i++) {
-    const tent = compactModel(createTent(i));
+    const model = createTent(i);
+    paintVillageModel(model);
+    const tent = compactModel(model);
     tent.position.set(i * 3, 0, -3);
     campGroup.add(tent);
   }
@@ -860,11 +867,17 @@ for (const [key, d] of Object.entries(PROJECTS)) {
   b.title = `${d.description} ${constructionSpecText(d)}`;
   buildMaterialTooltip.attach(b);
   b.dataset.category = d.category;
-  b.onclick = () => { setPanel(null); startPlacement(key); };
+  b.onclick = () => { setPanel(null); startPlacement(key); $("world").focus({preventScroll: true}); };
   $("build-list").append(b);
 }
 const ray = new THREE.Raycaster(),
   mouse = new THREE.Vector2();
+const reticle = $("map-reticle");
+let terrainStroke = null;
+function setKeyboardAim(active) {
+  reticle.hidden = !active;
+}
+const aimPoint = shiftKey => ({clientX: innerWidth / 2, clientY: innerHeight / 2, shiftKey});
 let down = null,
   cell = null;
 const roadPreview = new THREE.Line(
@@ -892,6 +905,11 @@ $("world").addEventListener("pointerdown", (e) => {
   down = { x: e.clientX, y: e.clientY };
 });
 $("world").addEventListener("pointermove", (e) => {
+  terrainStroke = null;
+  setKeyboardAim(false);
+  if (!farmingUI.placingField()) previewMapAction(e);
+}, true);
+function previewMapAction(e) {
   if (openPanel === "terrain-panel") {
     const point = hit(e);
     terrainBrush.visible = !!point;
@@ -923,7 +941,7 @@ $("world").addEventListener("pointermove", (e) => {
   shiftPlacement = e.shiftKey;
   cell = nextCell;
   if(!placementPreviewPending){placementPreviewPending=true;requestAnimationFrame(()=>{placementPreviewPending=false;updatePlacementPreview();});}
-});
+}
 function updatePlacementPreview() {
   if (!cell) return;
   const pitching =
@@ -1007,11 +1025,15 @@ $("world").addEventListener("click", (e) => {
     Math.hypot(e.clientX - down.x, e.clientY - down.y) > 6
   )
     return;
+  activateMap(e);
+});
+function activateMap(e) {
   const p = hit(e);
   if (!p) return;
   const x = Math.round(p.x / 2 + 32),
     z = Math.round(p.z / 2 + 32);
   if (openPanel === "terrain-panel") {
+    if (terrainStroke) terrainStroke.point = p;
     const old = s.terrainPads.find(p=>p.terraform);
     const tool = $("terrain-tool").value;
     if (tool === "flatten" && flattenLevel === null) flattenLevel = p.y;
@@ -1091,7 +1113,7 @@ $("world").addEventListener("click", (e) => {
     if (selected && lenses.active && openPanel) setPanel(null);
     renderUI();
   }
-});
+}
 $("cancel-project").onclick = () => {
   const error = cancelProject(s, selected);
   if (!error) { selected = null; syncBuildings(); persist(); }
@@ -1177,11 +1199,13 @@ $("undo-road").onclick = () => {
   message("Last road stroke undone.");
 };
 addEventListener("keyup", (e) => {
+  if (e.code === "Enter") terrainStroke = null;
   if (e.key === "Shift") {
     shiftPlacement = false;
     roadPreview.visible = false;
   }
 });
+addEventListener("blur", () => { terrainStroke = null; });
 addEventListener("keydown", (e) => {
   const dialogOpen = !!document.querySelector('dialog[open]');
   const editing = e.target.closest?.('input,textarea,select,[contenteditable]:not([contenteditable="false"])');
@@ -1214,6 +1238,19 @@ addEventListener("keydown", (e) => {
     }
     const input = $(dialogOpen ? 'resource-search' : 'build-search');
     input.focus(); input.select();
+    return;
+  }
+  const controlFocused = e.target.closest?.('button,summary,a,[role="button"]');
+  if (e.code === "Enter" && !controlFocused && !ignoreGameShortcut(e, dialogOpen)) {
+    e.preventDefault();
+    $("world").focus({preventScroll: true});
+    setKeyboardAim(true);
+    const point = aimPoint(e.shiftKey);
+    if (openPanel === "terrain-panel") {
+      terrainStroke = {point: null};
+      previewMapAction(point);
+    }
+    if (!farmingUI.markCorner(point)) activateMap(point);
     return;
   }
   if (ignoreGameShortcut(e, dialogOpen)) return;
@@ -2244,8 +2281,20 @@ function frame(now) {
   }
   diagnostics.observe(s);
   updateSpeedButton();
-  navigation.update(dt);
+  const keyboardMoved = navigation.update(dt);
   const cameraChanged = controls.update();
+  if (keyboardMoved) {
+    setKeyboardAim(true);
+    const point = aimPoint(shiftPlacement);
+    if (farmingUI.placingField()) farmingUI.previewCorner(point);
+    else previewMapAction(point);
+    if (terrainStroke && openPanel === "terrain-panel") {
+      const next = hit(point);
+      const last = terrainStroke.point;
+      const spacing = Math.max(.5, Number($("terrain-radius").value) / 2);
+      if (next && (!last || next.distanceTo(last) >= spacing)) activateMap(point);
+    }
+  }
   if (paused && !s.rain && !cameraChanged && now >= renderUntil) {
     // The interface and autosave remain live; unchanged scene transforms do not
     // need rebuilding while the player reads or plans in a paused village.
@@ -2528,7 +2577,7 @@ function frame(now) {
   lenses.update(now);
   accessPreview.visible=!!placing&&(ghost.visible||!!wireframe?.visible);
   const rendered = !paused || s.rain || cameraChanged || now < renderUntil;
-  if (rendered) renderer.render(scene, camera);
+  if (rendered) renderPaintedView(scene, camera);
   lastVisualTime = visual.time;
   recordPerformance(now, visual.time, rendered);
   requestAnimationFrame(frame);

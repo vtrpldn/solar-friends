@@ -1,3 +1,4 @@
+import "./keyboard-focus.js";
 import {renderDevTools} from './dev-tools.js';
 import { disabledReason, installDisabledInfo } from './disabled-info.js';
 import {saveSlots} from "./save-slots.js";

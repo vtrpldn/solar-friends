@@ -10,9 +10,9 @@ export const townDuration=setting=>tripEstimate(setting).minutes/.45;
 export const richnessFactor=setting=>({sparse:.6,balanced:1,rich:1.6}[setting]||1);
 export const waterFactor=setting=>({dry:.55,seasonal:1,abundant:1.5}[setting]||1);
 export const BIOMES={
- 'mata-atlantica':{name:'Mata Atlântica',colors:['#9fad72','#b9ad7b','#849965'],trees:['jequitiba','pau_brasil','jucara','embauba']},
- cerrado:{name:'Cerrado',colors:['#b3ad68','#b58951','#92965d'],trees:['pequi','barbatimao','bunchgrass','campo']},
- caatinga:{name:'Caatinga',colors:['#b6a67b','#c2b18b','#998c76'],trees:['umbuzeiro','jurema','mandacaru','macambira']},
+ 'mata-atlantica':{name:'Mata Atlântica',colors:['#72a65c','#b5c464','#42865d'],trees:['jequitiba','pau_brasil','jucara','embauba']},
+ cerrado:{name:'Cerrado',colors:['#98aa58','#d1c266','#678d50'],trees:['pequi','barbatimao','bunchgrass','campo']},
+ caatinga:{name:'Caatinga',colors:['#afa76a','#d7bc7c','#858a55'],trees:['umbuzeiro','jurema','mandacaru','macambira']},
 };
 export function applySettings(s,settings){
  s.worldSettings={...DEFAULT_SETTINGS,...settings};registerWorld(s.landSeed,s.worldSettings);

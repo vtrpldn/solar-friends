@@ -44,7 +44,8 @@ export function installFarmingUI({state,selected,scene,hit,controls,select,chang
  }
  button.onclick=()=>{
   begin();panel.classList.add('farm-placement');placementGrid(true);document.getElementById('farm-title').textContent='New field';document.body.dataset.cultivationOpen='true';active=true;hiddenSite=null;panel.hidden=false;controls.enabled=false;start=null;pending=null;
-  content.innerHTML='<p class="farm-intro">Drag across the grid to mark your field. Its edges snap to whole 2 m cells.</p><label>Row direction <select id="field-direction"><option value="0">North–south</option><option value="1">East–west</option></select></label><p id="field-summary">Minimum 2 × 2 cells.</p><button id="confirm-field" disabled data-disabled-reason="Drag across the grid to mark a field first.">Confirm field</button>';
+  content.innerHTML='<p class="farm-intro">Drag across the grid or press Enter at each corner. Edges snap to 2 m cells.</p><label>Row direction <select id="field-direction"><option value="0">North–south</option><option value="1">East–west</option></select></label><p id="field-summary">Minimum 2 × 2 cells.</p><button id="confirm-field" disabled data-disabled-reason="Drag across the grid to mark a field first.">Confirm field</button>';
+  canvas.focus({preventScroll:true});
   content.querySelector('#field-direction').value=String(rotation);
   content.querySelector('#field-direction').onchange=e=>{rotation=Number(e.target.value);draw();};
   content.querySelector('#confirm-field').onclick=()=>{const r=rectangle(),error=planField(state(),r.x,r.z,r.size,rotation);if(error){message(error);return;}stop();select(state().projects.at(-1).id);refresh();};
@@ -116,5 +117,21 @@ export function installFarmingUI({state,selected,scene,hit,controls,select,chang
    content.querySelector('#farm-resize').onclick=()=>{message(resizeField(s,p.id,[Number(content.querySelector('#farm-width').value),Number(content.querySelector('#farm-depth').value)])||'Field dimensions updated.');changed();};
   }
  }
- return {refresh,open:()=>{hiddenSite=null;lastRender=null;refresh();}};
+ function previewCorner(point){
+  if(!active||!start||pending)return;
+  const next=cell(point);
+  if(next&&(next.x!==end.x||next.z!==end.z)){end=next;draw();}
+ }
+ function markCorner(point){
+  if(!active)return false;
+  const corner=cell(point);
+  if(!corner)return true;
+  if(!start||pending){start=corner;end=corner;pending=null;}
+  else{end=corner;pending=rectangle();}
+  draw();
+  if(pending&&!content.querySelector('#confirm-field').disabled)
+   content.querySelector('#confirm-field').focus({preventScroll:true});
+  return true;
+ }
+ return {refresh,previewCorner,markCorner,placingField:()=>active,open:()=>{hiddenSite=null;lastRender=null;refresh();}};
 }

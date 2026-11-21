@@ -18,6 +18,7 @@ export function cameraStep({ x, z, zoom }, keys, dt) {
     x: ((sideways * z - forward * x) / length) * distance,
     z: ((-sideways * x - forward * z) / length) * distance,
     angle: (Number(keys.has("KeyE")) - Number(keys.has("KeyQ"))) * dt * 1.2,
+    tilt: (Number(keys.has("Period")) - Number(keys.has("Comma"))) * dt,
     zoom: Math.exp(
       (Number(keys.has("Equal") || keys.has("NumpadAdd")) -
         Number(keys.has("Minus") || keys.has("NumpadSubtract"))) *
@@ -29,7 +30,7 @@ export function cameraStep({ x, z, zoom }, keys, dt) {
 export function installCameraNavigation(
   camera,
   controls,
-  { home, onInteract = () => {} },
+  { home, allowDisabledControls = () => false, onInteract = () => {} },
 ) {
   const keys = new Set(),
     handled = new Set([
@@ -43,6 +44,8 @@ export function installCameraNavigation(
       "ArrowRight",
       "KeyQ",
       "KeyE",
+      "Comma",
+      "Period",
       "Equal",
       "Minus",
       "NumpadAdd",
@@ -62,7 +65,8 @@ export function installCameraNavigation(
       event.metaKey ||
       event.ctrlKey ||
       event.altKey ||
-      editing(event)
+      editing(event) ||
+      (event.code.startsWith("Arrow") && event.target?.closest?.("button,summary,a"))
     )
       return;
     event.preventDefault();
@@ -110,7 +114,7 @@ export function installCameraNavigation(
         keys.clear();
         return;
       }
-      if (!keys.size || document.hidden) return;
+      if (!keys.size || document.hidden || (controls.enabled === false && !allowDisabledControls())) return;
       const offset = camera.position.clone().sub(controls.target);
       const step = cameraStep(
         { x: offset.x, z: offset.z, zoom: camera.zoom },
@@ -134,7 +138,13 @@ export function installCameraNavigation(
       camera.position.x += x;
       camera.position.z += z;
       if (step.angle) rotate(step.angle);
+      if (step.tilt) {
+        const orbit = new THREE.Spherical().setFromVector3(camera.position.clone().sub(controls.target));
+        orbit.phi = THREE.MathUtils.clamp(orbit.phi + step.tilt, controls.minPolarAngle, controls.maxPolarAngle);
+        camera.position.setFromSpherical(orbit).add(controls.target);
+      }
       if (step.zoom !== 1) zoom(step.zoom);
+      return !!(step.x || step.z || step.angle || step.tilt || step.zoom !== 1);
     },
   };
 }

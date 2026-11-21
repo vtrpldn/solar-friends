@@ -40,8 +40,8 @@ export function terrainMaterial(seed,palette,surface){
   Object.assign(shader.uniforms,{
    landSurface:{value:surface.texture},landSeed:{value:(seed%997)*.071},
    landGrass:{value:new THREE.Color(palette[0])},landDry:{value:new THREE.Color(palette[1])},
-   landLush:{value:new THREE.Color(palette[2])},landSoil:{value:new THREE.Color('#96734f')},
-   landRock:{value:new THREE.Color('#999783')},
+   landLush:{value:new THREE.Color(palette[2])},landSoil:{value:new THREE.Color('#c48272')},
+   landRock:{value:new THREE.Color('#9f9889')},
   });
   shader.vertexShader=shader.vertexShader.replace('#include <common>',`#include <common>
    attribute float bankDistance;
@@ -64,22 +64,24 @@ export function terrainMaterial(seed,palette,surface){
    }
   `).replace('#include <color_fragment>',`#include <color_fragment>
    vec2 p=landPosition.xz;
-   float broad=landNoise(p*.055);
-   float mottle=landNoise(p*.19+vec2(broad*2.0));
+   float broad=landNoise(p*.032);
+   float mottle=landNoise(p*.084+vec2(broad*2.0));
    float fine=landNoise(p*1.7);
    vec4 habitat=texture2D(landSurface,(p+${MAP_HALF.toFixed(1)})/${(MAP_HALF*2).toFixed(1)});
    float damp=1.0-smoothstep(2.0,13.0,landBank);
    vec3 turf=mix(landGrass,landLush,smoothstep(.22,.75,broad)*.8);
    turf=mix(turf,landDry,smoothstep(.48,.75,mottle)*(.65-damp*.4));
    float shore=(1.0-smoothstep(0.0,4.0,landBank))*(.65+mottle*.35);
-   float soil=max(shore,max(habitat.b,habitat.g*.42))*(.75+mottle*.25);
+   float wornGround = habitat.r * smoothstep(.15,.72,mottle);
+   float soil=max(shore,max(habitat.b,max(habitat.g*.32,wornGround)))*(.75+mottle*.25);
    turf=mix(turf,landSoil,soil*.8);
    float slope=1.0-clamp(normalize(landNormal).y,0.0,1.0);
    float rock=max(habitat.a*.8,smoothstep(.06,.24,slope)*(.5+mottle*.5));
    turf=mix(turf,landRock,rock);
    // Fade tiny grain at distant zooms to prevent shimmering.
    float grain=1.0-smoothstep(.15,.8,length(fwidth(p)));
-   turf*=1.0+(fine-.5)*.12*grain;
+   float crest = smoothstep(-2.0,15.0,landPosition.y);
+   turf*=mix(.87,1.16,crest)+(fine-.5)*.045*grain;
    diffuseColor.rgb*=turf*(1.0-habitat.r*.25-damp*.06);
   `);
  };
