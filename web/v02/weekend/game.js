@@ -245,7 +245,7 @@ const renderer = new THREE.WebGLRenderer({
 });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.type = THREE.PCFShadowMap;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.08;
@@ -281,7 +281,7 @@ let cloudCover = dreamPreview ? 0 : Math.max(s.weather?.cloudCover ?? 0, s.rain 
 const overcastColor = new THREE.Color("#d6e3ef");
 const overcastFog = new THREE.Color("#aebcca");
 const lightingColor = new THREE.Color();
-const atmosphere = {bloom: 0, paint: 1, lamps: 0};
+const atmosphere = {bloom: 0, paint: 1, lamps: 0, shadowTint: new THREE.Color()};
 function updateSunlight(time, dt) {
   const weatherCover = dreamPreview ? 0 : Math.max(s.weather?.cloudCover ?? 0, s.rain ? .7 : 0);
   cloudCover += (weatherCover - cloudCover) * (1 - Math.exp(-dt / 3));
@@ -307,6 +307,7 @@ function updateSunlight(time, dt) {
   atmosphere.bloom = mix("bloom") * (1 - .4 * cloudCover);
   atmosphere.paint = mix("paint");
   atmosphere.lamps = mix("lamps");
+  atmosphere.shadowTint.setRGB(.49, .49, .49).lerp(daylight.groundColor, .45);
 }
 const mat = (color) =>
   new THREE.MeshStandardMaterial({ color, roughness: 1, flatShading: true });

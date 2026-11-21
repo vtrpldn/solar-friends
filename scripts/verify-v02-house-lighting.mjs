@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import * as THREE from "three";
+import { paintVillageModel } from "../web/v02/weekend/painted-village.js";
 import {
   ASSETS,
   createAsset,
@@ -11,14 +12,20 @@ import {
   updateHouseLighting,
   selectBuildingLights,
 } from "../web/v02/weekend/house-lighting.js";
+function paintedAsset(id) {
+  const model = createAsset(id);
+  paintVillageModel(model);
+  return compactModel(model);
+}
+
 for (const def of ASSETS.filter((a) => a.category === "Homes")) {
-  const model = compactModel(createAsset(def.id)),
+  const model = paintedAsset(def.id),
     lighting = prepareHouseLighting(model);
   assert.ok(
     lighting.panes.length >= 1,
     def.id + " has illuminated window panes",
   );
-  const other = compactModel(createAsset(def.id)),
+  const other = paintedAsset(def.id),
     unlit = prepareHouseLighting(other);
   updateHouseLighting(lighting, 1);
   assert.ok(lighting.panes.every((p) => p.material.emissiveIntensity === 0.85));
@@ -45,7 +52,7 @@ console.log(
 );
 
 for (const id of ["kitchen", "reading-room", "community-hall"]) {
-  const model = compactModel(createAsset(id));
+  const model = paintedAsset(id);
   const lighting = prepareHouseLighting(model);
   assert(lighting.panes.length > 0, id + " has lit windows");
   const pane = [...lighting.panes].sort((a,b) => b.center.z-a.center.z)[0];
@@ -74,3 +81,21 @@ nodes[9].enabled=false;
 buildings.set(10,{});
 assert.deepEqual(chosen().map(n=>n.id),[11],"disabled and unfinished buildings do not emit");
 console.log("PASS facility windows, rotated anchors, partial power, and active-light priority.");
+
+const original = new THREE.MeshStandardMaterial({color: '#b86d52', roughness: .12});
+const mesh = new THREE.Mesh(new THREE.BoxGeometry(), original);
+paintVillageModel(mesh);
+assert.notEqual(mesh.material, original, 'village finish leaves catalog materials untouched');
+assert.equal(original.roughness, .12);
+assert(mesh.material.roughness >= .92);
+const finished = mesh.material;
+paintVillageModel(mesh);
+assert.equal(mesh.material, finished, 'reapplying the village finish keeps the same material');
+const shader = {...THREE.ShaderLib.standard};
+finished.onBeforeCompile(shader);
+assert.match(shader.vertexShader, /paintWorld =/);
+assert.match(shader.fragmentShader, /reflectedLight\.directDiffuse \*=/);
+mesh.geometry.dispose();
+original.dispose();
+finished.dispose();
+console.log('PASS: matte shader, shared catalog isolation and repeated application.');
