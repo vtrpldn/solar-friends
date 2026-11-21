@@ -1,12 +1,22 @@
 import * as THREE from 'three';
 
 const paintedColors = new WeakMap();
+const paintedRoofs = new WeakMap();
 
-function applyMatteFinish(material) {
+function usePaintedRoofPlanes(model) {
+  const tiles = [];
+  model.traverse(mesh => { if (mesh.name === 'roof-tile') tiles.push(mesh); });
+  for (const tile of tiles) {
+    tile.removeFromParent();
+    tile.geometry.dispose();
+  }
+}
+
+function applyMatteFinish(material, roof) {
   material.roughness = Math.max(.92, material.roughness);
   const compile = material.onBeforeCompile;
   const cacheKey = material.customProgramCacheKey();
-  material.customProgramCacheKey = () => `${cacheKey}|village-matte`;
+  material.customProgramCacheKey = () => `${cacheKey}|village-matte|${roof}`;
   material.onBeforeCompile = function (shader, renderer) {
     compile.call(this, shader, renderer);
     shader.vertexShader = shader.vertexShader
@@ -35,10 +45,16 @@ function applyMatteFinish(material) {
                 mix(paintHash(i + vec3(0,1,1)), paintHash(i + vec3(1,1,1)), f.x), f.y), f.z);
         }`)
       .replace('#include <color_fragment>', `#include <color_fragment>
-        float wash = smoothstep(.22, .78, paintNoise(paintWorld * .65));
-        float tooth = paintNoise(paintWorld * 3.0) - .5;
-        tooth *= 1.0 - smoothstep(.10, .40, length(fwidth(paintWorld)));
-        diffuseColor.rgb *= mix(vec3(.84,.77,.77), vec3(1.13,1.13,1.18), wash) + tooth * .07;`)
+        vec3 pigmentPoint = paintWorld + vec3(paintWorld.z * .27, paintWorld.x * .18, 0.0);
+        float wash = paintNoise(pigmentPoint * .34);
+        float strokes = paintNoise(pigmentPoint * vec3(.52, 2.1, 1.5));
+        float dab = smoothstep(.37, .66, wash * .64 + strokes * .36);
+        float brushFade = 1.0 - smoothstep(.18, .6, length(fwidth(paintWorld)));
+        vec3 pigment = mix(vec3(.78,.74,.80), vec3(1.19,1.13,1.04), dab);
+        diffuseColor.rgb *= mix(vec3(1.0), pigment, ${roof ? '0.88' : '0.64'});
+        diffuseColor.rgb *= 1.0 + (strokes - .5) * brushFade * .15;${roof ? `
+        diffuseColor.rgb *= mix(vec3(.94,.68,.81), vec3(1.0), wash);
+        ` : ''}`)
       .replace('#include <aomap_fragment>', `#include <aomap_fragment>
         // Use broad, soft bands in diffuse light while retaining light colour.
         float lit = dot(reflectedLight.directDiffuse, vec3(.2126,.7152,.0722));
@@ -55,11 +71,14 @@ function applyMatteFinish(material) {
 }
 
 export function paintVillageModel(model) {
+  usePaintedRoofPlanes(model);
   model.traverse(mesh => {
     const source = mesh.material;
     if (!source?.isMeshStandardMaterial || source.transparent || source.userData.windowPane ||
         source.emissive.getHex() !== 0) return;
-    if (!paintedColors.has(source)) {
+    const roof = mesh.name === 'clay-roof-plane';
+    const palette = roof ? paintedRoofs : paintedColors;
+    if (!palette.has(source)) {
       const color = source.color.clone().convertLinearToSRGB();
       const {h, s, l} = color.getHSL({});
       if (l >= .1) {
@@ -73,11 +92,11 @@ export function paintVillageModel(model) {
       }
       const material = mesh.userData.ownedMaterial ? source : source.clone();
       material.color.copy(color.convertSRGBToLinear());
-      applyMatteFinish(material);
-      paintedColors.set(source, material);
-      paintedColors.set(material, material);
+      applyMatteFinish(material, roof);
+      palette.set(source, material);
+      palette.set(material, material);
     }
-    mesh.material = paintedColors.get(source);
+    mesh.material = palette.get(source);
   });
 }
 
@@ -166,7 +185,7 @@ export function createPaintedView(renderer) {
 
   return (village, view, treatment) => {
     material.uniforms.glow.value = treatment?.bloom ?? 0;
-    material.uniforms.brush.value = (treatment?.paint ?? 1) * THREE.MathUtils.clamp(1.55 - view.zoom * .43, .8, 1.5);
+    material.uniforms.brush.value = (treatment?.paint ?? 1) * THREE.MathUtils.clamp(1.85 - view.zoom * .48, .9, 1.8);
     material.uniforms.depthRange.value = view.far - view.near;
     material.uniforms.shadowTint.value.copy(treatment.shadowTint);
     renderer.getDrawingBufferSize(size);

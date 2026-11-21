@@ -99,3 +99,14 @@ mesh.geometry.dispose();
 original.dispose();
 finished.dispose();
 console.log('PASS: matte shader, shared catalog isolation and repeated application.');
+
+const house = createAsset('house');
+assert(house.getObjectByName('roof-tile'), 'the catalog model has barrel tiles');
+paintVillageModel(house);
+assert.equal(house.getObjectByName('roof-tile'), undefined);
+const roof = house.getObjectByName('clay-roof-plane');
+assert(roof?.castShadow && roof.receiveShadow, 'the painted roof keeps its shadow-casting plane');
+assert.match(roof.material.customProgramCacheKey(), /village-matte\|true$/);
+assert(createAsset('house').getObjectByName('roof-tile'), 'other catalog callers still get tiles');
+disposeModel(house);
+console.log('PASS: village roofs trade tile repetition for painted planes with shadows.');
