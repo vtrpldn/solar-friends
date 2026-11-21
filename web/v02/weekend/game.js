@@ -1,4 +1,4 @@
-import { DREAM_LIGHTS } from "./dream-lighting.js";
+import { DREAM_LIGHTS, lightingAt } from "./dream-lighting.js";
 import {createPaintedView, paintVillageModel} from "./painted-village.js";
 import "./keyboard-focus.js";
 import {renderDevTools} from './dev-tools.js';
@@ -79,7 +79,6 @@ import { COMMUNITY } from "../library/community-defs.js";
 import { resourceIcon, illustrateResources } from "./resource-icons.js";
 import { createManagement } from "./management.js";
 import { illustrate } from "./ui-art.js";
-import { sunlightAt } from "./sunlight.js";
 import { createUtilitiesPreview } from "./utilities-preview.js";
 import { syncInfrastructure, LIQUIDS, hasPowerService, canSwitchBuilding, switchBuilding } from "./infrastructure.js";
 import { createAccessRoad } from "./access-road.js";
@@ -150,7 +149,8 @@ const $ = (id) => document.getElementById(id),
   SAVE = saveKey(new URLSearchParams(location.search).get("mode"));
 const scalePreview = new URLSearchParams(location.search).has("scale-preview");
 const dreamPreview = new URLSearchParams(location.search).get("scale-preview") === "dream";
-let dreamLight = dreamPreview ? DREAM_LIGHTS.opal : null;
+let fixedLighting = dreamPreview ? DREAM_LIGHTS.opal : null;
+let previewCycle = false;
 const wildlifePreview = new URLSearchParams(location.search).has("wildlife-preview");
 const downtimePreview = new URLSearchParams(location.search).has("downtime-preview");
 const needsPreview = new URLSearchParams(location.search).has("needs-preview");
@@ -277,33 +277,36 @@ Object.assign(sun.shadow.camera, {
 });
 sun.shadow.normalBias = 0.04;
 scene.add(sun, sun.target);
-let cloudCover = s.rain ? 1 : 0;
-const noonColor = new THREE.Color("#ffdf9d");
-const sunsetColor = new THREE.Color("#ffad72");
+let cloudCover = dreamPreview ? 0 : Math.max(s.weather?.cloudCover ?? 0, s.rain ? .7 : 0);
 const overcastColor = new THREE.Color("#d6e3ef");
+const overcastFog = new THREE.Color("#aebcca");
+const lightingColor = new THREE.Color();
+const atmosphere = {bloom: 0, paint: 1, lamps: 0};
 function updateSunlight(time, dt) {
-  if (dreamLight) {
-    sun.position.fromArray(dreamLight.angle).add(sun.target.position);
-    sun.color.set(dreamLight.sun);
-    sun.intensity = dreamLight.direct;
-    sun.shadow.intensity = dreamLight.shadow;
-    daylight.color.set(dreamLight.sky);
-    daylight.groundColor.set(dreamLight.ground);
-    daylight.intensity = dreamLight.ambient;
-    scene.background.set(dreamLight.fog);
-    scene.fog.color.set(dreamLight.fog);
-    return;
-  }
-  cloudCover += ((s.weather?.cloudCover ?? (s.rain ? 1 : 0)) - cloudCover) * (1 - Math.exp(-dt / 3));
-  const light = sunlightAt(time, cloudCover);
-  sun.position.set(light.x, light.y, light.z).add(sun.target.position);
-  sun.intensity = light.direct;
-  sun.shadow.intensity = light.shadow;
-  sun.color
-    .copy(noonColor)
-    .lerp(sunsetColor, light.warmth)
-    .lerp(overcastColor, cloudCover);
-  daylight.intensity = light.ambient;
+  const weatherCover = dreamPreview ? 0 : Math.max(s.weather?.cloudCover ?? 0, s.rain ? .7 : 0);
+  cloudCover += (weatherCover - cloudCover) * (1 - Math.exp(-dt / 3));
+  const {sun: solar, from, to, blend} = lightingAt(time);
+  const first = fixedLighting ?? from;
+  const last = fixedLighting ?? to;
+  const mix = key => THREE.MathUtils.lerp(first[key], last[key], blend);
+  const color = (target, key) => target.set(first[key]).lerp(lightingColor.set(last[key]), blend);
+
+  if (fixedLighting) sun.position.fromArray(fixedLighting.angle);
+  else sun.position.set(solar.x, solar.y, solar.z);
+  sun.position.add(sun.target.position);
+  color(sun.color, "sun");
+  sun.color.lerp(overcastColor, cloudCover * .65);
+  sun.intensity = mix("direct") * (1 - .76 * cloudCover);
+  sun.shadow.intensity = mix("shadow") * (1 - .74 * cloudCover);
+  color(daylight.color, "sky");
+  color(daylight.groundColor, "ground");
+  daylight.intensity = mix("ambient") * (1 - .12 * cloudCover);
+  color(scene.fog.color, "fog");
+  scene.fog.color.lerp(overcastFog, cloudCover * (.18 + .45 * solar.daylight));
+  scene.background.copy(scene.fog.color);
+  atmosphere.bloom = mix("bloom") * (1 - .4 * cloudCover);
+  atmosphere.paint = mix("paint");
+  atmosphere.lamps = mix("lamps");
 }
 const mat = (color) =>
   new THREE.MeshStandardMaterial({ color, roughness: 1, flatShading: true });
@@ -457,12 +460,12 @@ const utilityLights = [];
 function updateUtilityLighting() {
   const sys = s.infrastructure;
   if (!sys) return;
-  const night = 1 - sunlightAt(s.time).daylight;
+  const night = atmosphere.lamps;
   for (const [id, entry] of buildings) {
     if (entry.houseLighting)
       updateHouseLighting(
         entry.houseLighting,
-        dreamLight ? Number(dreamLight === DREAM_LIGHTS.blue) :
+        dreamPreview ? night :
           night * (sys.nodes[id]?.enabled ? sys.nodes[id]?.power || 0 : 0),
       );
   }
@@ -2301,10 +2304,13 @@ if (dreamPreview) {
   const picker = $("dream-light");
   for (const [key, preset] of Object.entries(DREAM_LIGHTS))
     picker.add(new Option(preset.label, key));
+  picker.add(new Option("Play day cycle", "cycle"));
   picker.value = "opal";
   function applyPreset() {
-    dreamLight = DREAM_LIGHTS[picker.value];
-    s.time = ((dreamLight.hour + 24 - 9) * 60) / .45;
+    fixedLighting = DREAM_LIGHTS[picker.value] ?? null;
+    previewCycle = picker.value === "cycle";
+    if (fixedLighting) s.time = ((fixedLighting.hour + 24 - 9) * 60) / .45;
+    previousMotion = captureMotion(s);
     s.rain = false;
     renderUI();
     requestSceneRender();
@@ -2318,7 +2324,12 @@ function frame(now) {
   if (skippingTime) { previous = now; requestAnimationFrame(frame); return; }
   const dt = Math.max(0, Math.min((now - previous) / 1000, 0.1));
   previous = now;
-  if (!paused && !document.hidden) {
+  if (previewCycle && !document.hidden) {
+    // Run a full visual cycle in 48 real seconds without simulating this fixture.
+    s.time += dt * (3200 / 48);
+    requestSceneRender();
+  }
+  if (!previewCycle && !paused && !document.hidden) {
     if (catchUpSeconds > 0) {
       const result = catchUpFrame(catchUpSeconds, accumulator, () => simulationSpeed(s,speed), step => tick(s,step));
       catchUpSeconds = result.seconds;
@@ -2357,7 +2368,7 @@ function frame(now) {
   }
   wildlife.update(!paused && !document.hidden ? dt : 0);
   capybaras.update(!paused && !document.hidden ? dt : 0);
-  const visual = interpolateMotion(previousMotion, s, accumulator / 0.1);
+  const visual = interpolateMotion(previousMotion, s, previewCycle ? 1 : accumulator / 0.1);
   const arrivalTime=Math.max(0,s.arrivalElapsed-(paused?0:0.1)+accumulator);
   drawCamp();
   syncBuildings();
@@ -2601,7 +2612,7 @@ function frame(now) {
     }
     drops.attributes.position.needsUpdate = true;
   }
-  updateSunlight(visual.time, paused ? 0 : dt);
+  updateSunlight(visual.time, dt);
   if (now - lastUI > 450) {
     if (s.log[0] !== latestMessage) {
       latestMessage = s.log[0];
@@ -2615,10 +2626,8 @@ function frame(now) {
     lastSave = now;
   }
   fitTerrainCamera(camera, controls.target, scene.fog);
-  if (dreamLight) {
-    scene.fog.near = camera.position.distanceTo(controls.target) + 8;
-    scene.fog.far = scene.fog.near + 155;
-  }
+  scene.fog.near -= 62;
+  scene.fog.far = scene.fog.near + 155;
   // Keep the shadow volume over the viewed land, not the world origin.
   // Moving light and target together preserves the time-of-day sun direction.
   const shadowExtent = Math.max(16, Math.hypot(camera.right - camera.left, camera.top - camera.bottom) / (2 * camera.zoom) + 12);
@@ -2632,7 +2641,7 @@ function frame(now) {
   lenses.update(now);
   accessPreview.visible=!!placing&&(ghost.visible||!!wireframe?.visible);
   const rendered = !paused || s.rain || cameraChanged || now < renderUntil;
-  if (rendered) renderPaintedView(scene, camera, dreamLight);
+  if (rendered) renderPaintedView(scene, camera, atmosphere);
   lastVisualTime = visual.time;
   recordPerformance(now, visual.time, rendered);
   requestAnimationFrame(frame);

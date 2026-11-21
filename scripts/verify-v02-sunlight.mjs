@@ -1,3 +1,4 @@
+import { DREAM_LIGHTS, lightingAt } from "../web/v02/weekend/dream-lighting.js";
 import assert from "node:assert/strict";
 import { sunlightAt } from "../web/v02/weekend/sunlight.js";
 const at = (hour, cloud = 0) => sunlightAt(((hour - 9) * 60) / 0.45, cloud);
@@ -26,3 +27,17 @@ for (let hour = 0; hour < 24; hour += 0.1) {
 console.log(
   "PASS: daily orbit, projected shadow length, rain contrast, night, wrap and map coverage",
 );
+
+const artAt = hour => lightingAt((hour - 9) * 60 / .45);
+const value = (hour, key) => {
+  const {from, to, blend} = artAt(hour);
+  return from[key] + (to[key] - from[key]) * blend;
+};
+for (const preset of Object.values(DREAM_LIGHTS)) assert.equal(artAt(preset.hour).from, preset);
+for (const hour of [0, ...Object.values(DREAM_LIGHTS).map(preset => preset.hour)]) {
+  for (const key of ['ambient', 'direct', 'shadow', 'bloom', 'paint', 'lamps'])
+    assert(Math.abs(value(hour - .001, key) - value(hour + .001, key)) < .00001, key);
+}
+assert(value(13, 'lamps') < value(16, 'lamps'));
+assert(value(16, 'lamps') < value(19.5, 'lamps'));
+console.log('PASS: dream lighting and window glow blend across every preset and midnight.');
