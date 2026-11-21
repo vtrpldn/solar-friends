@@ -1,5 +1,5 @@
 import { DREAM_LIGHTS, lightingAt } from "./dream-lighting.js";
-import {createPaintedView, paintVillageModel, villageClouds} from "./painted-village.js";
+import {createPaintedView, paintVillageModel, villageClouds, villageHatch} from "./painted-village.js";
 import {createGroundWear} from './ground-wear.js';
 import "./keyboard-focus.js";
 import {renderDevTools} from './dev-tools.js';
@@ -2319,6 +2319,7 @@ if (dreamPreview) {
   picker.add(new Option("Play day cycle", "cycle"));
   picker.value = livedLook ? "clear" : "opal";
   $("dream-lived").checked = livedLook;
+  $("dream-hatch-label").hidden = !livedLook;
   $("dream-lived").onchange = event => {
     const url = new URL(location.href);
     url.searchParams.set("look", event.target.checked ? "lived" : "plain");
@@ -2653,6 +2654,8 @@ function frame(now) {
     villageClouds.offset.value.x += dt * 2.4;
     villageClouds.offset.value.y += dt * 1.1;
     villageClouds.strength.value = .46 * lightingAt(visual.time).sun.daylight;
+    // Hatching needs a strong sun to separate light from shade.
+    villageHatch.value = $("dream-hatch").checked ? THREE.MathUtils.smoothstep(sun.intensity, 1.2, 2.4) : 0;
     if (!paused) visual.people.forEach((r, i) => { if (s.people[i].walk?.length) groundWear.step(r.x, r.z); });
     groundWear.flush();
   }
