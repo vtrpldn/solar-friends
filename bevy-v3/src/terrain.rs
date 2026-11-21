@@ -8,7 +8,9 @@ use bevy::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::arrival::{MAP_START, ROAD_END, road_center, road_width, world_position};
+use crate::arrival::{
+    MAP_START, PARK_Z, ROAD_END, road_center, road_flare, road_width, world_position,
+};
 
 const CELLS: u32 = 128;
 const RIVER_COLUMNS: u32 = 13;
@@ -667,22 +669,89 @@ impl Terrain {
         surface_mesh(positions, indices).with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, colors)
     }
 
-    pub fn road_mesh(&self) -> Mesh {
+    /// One lengthwise band of the access road, between `left` and `right` of its centre line.
+    /// Bands widen into the parking clearing and are sampled across their width so they
+    /// follow the ground instead of cutting through it on cross-slopes.
+    pub fn road_strip_mesh(&self, left: f32, right: f32, lift: f32) -> Mesh {
+        let end = PARK_Z + 4.0;
+        let rows = (end - MAP_START).round() as u32;
+        let columns = ((right - left) / 1.0).ceil().max(1.0) as u32;
         let mut positions = Vec::new();
         let mut indices = Vec::new();
-        let rows = (ROAD_END - MAP_START) as u32;
         for row in 0..=rows {
             let z = MAP_START + row as f32;
-            let width = road_width(z);
-            for x in [road_center(z) - width, road_center(z) + width] {
-                positions.push([x, self.height_at(x, z) + 0.04, z]);
+            let flare = road_flare(z);
+            let center = road_center(z);
+            for column in 0..=columns {
+                let x = center + (left + (right - left) * column as f32 / columns as f32) * flare;
+                positions.push([x, self.height_at(x, z) + lift, z]);
             }
             if row < rows {
-                let a = row * 2;
-                indices.extend_from_slice(&[a, a + 2, a + 1, a + 2, a + 3, a + 1]);
+                let stride = columns + 1;
+                for column in 0..columns {
+                    let a = row * stride + column;
+                    let b = a + stride;
+                    indices.extend_from_slice(&[a, b, a + 1, b, b + 1, a + 1]);
+                }
             }
         }
         surface_mesh(positions, indices)
+    }
+
+    /// The rounded parking clearing where the road ends inside the plot.
+    pub fn road_clearing_mesh(&self, lift: f32) -> Mesh {
+        const RINGS: u32 = 5;
+        const SEGMENTS: u32 = 32;
+        let (cx, cz, rx, rz) = (1.1, PARK_Z + 3.0, 5.5, 3.0);
+        let mut positions = vec![[cx, self.height_at(cx, cz) + lift, cz]];
+        let mut indices = Vec::new();
+        for ring in 1..=RINGS {
+            let r = ring as f32 / RINGS as f32;
+            for segment in 0..SEGMENTS {
+                let angle = segment as f32 / SEGMENTS as f32 * std::f32::consts::TAU;
+                let (x, z) = (cx + angle.cos() * rx * r, cz + angle.sin() * rz * r);
+                positions.push([x, self.height_at(x, z) + lift, z]);
+            }
+        }
+        for segment in 0..SEGMENTS {
+            let next = (segment + 1) % SEGMENTS;
+            indices.extend_from_slice(&[0, 1 + next, 1 + segment]);
+        }
+        for ring in 1..RINGS {
+            let inner = 1 + (ring - 1) * SEGMENTS;
+            let outer = inner + SEGMENTS;
+            for segment in 0..SEGMENTS {
+                let next = (segment + 1) % SEGMENTS;
+                indices.extend_from_slice(&[
+                    inner + segment,
+                    inner + next,
+                    outer + segment,
+                    inner + next,
+                    outer + next,
+                    outer + segment,
+                ]);
+            }
+        }
+        surface_mesh(positions, indices)
+    }
+
+    /// Small stones scattered along both road edges, as `(position, radius, palette)`.
+    pub fn road_pebbles(&self) -> Vec<(Vec3, f32, usize)> {
+        const COUNT: usize = 46;
+        let span = PARK_Z + 3.0 - MAP_START;
+        (0..COUNT)
+            .map(|index| {
+                let z = MAP_START + index as f32 * span / COUNT as f32;
+                let side = if index % 2 == 1 { 1.0 } else { -1.0 };
+                let x = road_center(z) + side * (4.5 + (index % 3) as f32 * 0.12);
+                let radius = 0.07 + (index % 3) as f32 * 0.035;
+                (
+                    Vec3::new(x, self.height_at(x, z) + 0.05, z),
+                    radius,
+                    usize::from(index % 3 == 0),
+                )
+            })
+            .collect()
     }
 
     pub fn river_mesh(&self) -> Mesh {

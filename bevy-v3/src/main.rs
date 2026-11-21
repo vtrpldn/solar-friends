@@ -12,6 +12,7 @@ mod construction;
 #[cfg(feature = "dev-tools")]
 mod dev_tools;
 mod economy_reference;
+mod entrance;
 mod equipment;
 mod farming;
 mod file_dialog;
@@ -214,6 +215,7 @@ fn main() {
         audio::VillageAudio,
         land::LandPlugin,
         palette::PalettePlugin,
+        entrance::EntrancePlugin,
         weather::WeatherPlugin,
         resident_animation::ResidentAnimationPlugin,
         wildlife::WildlifePlugin,
@@ -293,7 +295,7 @@ fn setup_scene(mut commands: Commands) {
     ));
 }
 
-#[derive(Component)]
+#[derive(Component, Clone)]
 struct LandMesh;
 
 #[derive(Component)]
@@ -308,9 +310,9 @@ fn update_land(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    setup: Res<WorldSetup>,
+    assets: Res<AssetServer>,
+    (setup, village): (Res<WorldSetup>, Res<village::Village>),
     old_land: Query<Entity, With<LandMesh>>,
-    village: Res<village::Village>,
     mut drawn: Local<Option<LandDrawKey>>,
 ) {
     let camp = if setup.open { None } else { village.camp };
@@ -334,11 +336,58 @@ fn update_land(
             ..default()
         })),
     ));
+    // V2's dirt road: a grassy verge, a packed surface with worn wheel ruts and a rounded
+    // parking clearing where it ends inside the plot.
+    let road_material = |materials: &mut Assets<StandardMaterial>, hex: u32| {
+        materials.add(StandardMaterial {
+            base_color: Color::srgb_u8((hex >> 16) as u8, (hex >> 8) as u8, hex as u8),
+            perceptual_roughness: 1.0,
+            ..default()
+        })
+    };
+    let surface = road_material(&mut materials, 0xcc8870);
+    let rut = road_material(&mut materials, 0xb87662);
+    for (left, right, lift, material) in [
+        (-5.0, 5.0, 0.03, road_material(&mut materials, 0x9cb46e)),
+        (-4.45, 4.45, 0.04, road_material(&mut materials, 0xd8a088)),
+        (-4.12, 4.12, 0.05, surface.clone()),
+    ]
+    .into_iter()
+    .chain([-2.95, -1.25, 1.25, 2.95].map(|x| (x - 0.14, x + 0.14, 0.06, rut.clone())))
+    {
+        commands.spawn((
+            LandMesh,
+            Mesh3d(meshes.add(terrain.road_strip_mesh(left, right, lift))),
+            MeshMaterial3d(material),
+        ));
+    }
     commands.spawn((
         LandMesh,
-        Mesh3d(meshes.add(terrain.road_mesh())),
-        MeshMaterial3d(materials.add(Color::srgb_u8(204, 136, 112))),
+        Mesh3d(meshes.add(terrain.road_clearing_mesh(0.055))),
+        MeshMaterial3d(surface),
     ));
+    let pebble_mesh = meshes.add(Sphere::new(1.0).mesh().ico(0).expect("icosahedron"));
+    let pebble_materials = [0xd8b4a4, 0xbc9888].map(|hex| road_material(&mut materials, hex));
+    for (position, radius, palette) in terrain.road_pebbles() {
+        commands.spawn((
+            LandMesh,
+            Mesh3d(pebble_mesh.clone()),
+            MeshMaterial3d(pebble_materials[palette].clone()),
+            Transform::from_translation(position).with_scale(Vec3::new(
+                radius,
+                radius * 0.5,
+                radius,
+            )),
+        ));
+    }
+    entrance::spawn(
+        &mut commands,
+        &assets,
+        &mut meshes,
+        &mut materials,
+        &terrain,
+        LandMesh,
+    );
     for (width, height, color) in [
         (1.9, 0.025, Color::srgb_u8(88, 140, 92)),
         (1.1, 0.035, Color::srgb_u8(222, 176, 146)),
@@ -934,6 +983,7 @@ mod tests {
             village::VillagePlugin,
             ui_font::UiFontPlugin,
             land::LandPlugin,
+            entrance::EntrancePlugin,
             weather::WeatherPlugin,
             wildlife::WildlifePlugin,
         ))

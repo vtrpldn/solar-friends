@@ -23,6 +23,15 @@ pub fn road_center(z: f32) -> f32 {
     1.1 - 7.0 * t * t
 }
 
+/// How much the drawn road widens as it opens into the parking clearing.
+pub fn road_flare(z: f32) -> f32 {
+    if z > PARK_Z - 4.0 {
+        1.0 + (z - PARK_Z + 4.0) * 0.045
+    } else {
+        1.0
+    }
+}
+
 pub fn road_width(z: f32) -> f32 {
     if z < MAP_START + 12.0 {
         8.3
