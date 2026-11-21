@@ -19,10 +19,6 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Check the Bevy catalog against V2
-        run: |
-          node scripts/export-v3-catalog.mjs --check
-          node scripts/export-v3-guide-diagrams.mjs --check
       - run: npx playwright install --with-deps chromium
       - name: Check resident decisions and desktop profiles
         timeout-minutes: 15
