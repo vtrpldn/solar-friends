@@ -2918,6 +2918,14 @@ impl Construction {
         self.blocked_ignoring(catalog, terrain, land, camp, cell, None)
     }
 
+    /// Cell position and size of every standing plan, for ground wear under buildings.
+    pub(crate) fn ground_footprints(&self) -> impl Iterator<Item = (IVec2, IVec2)> + '_ {
+        self.plans
+            .iter()
+            .filter(|plan| !plan.removed)
+            .map(|plan| (plan.position, plan.size))
+    }
+
     pub(crate) fn wildlife_clear(&self, point: Vec2) -> bool {
         let cell = point * 0.5 + Vec2::splat(32.0);
         let buffer = Vec2::splat(0.7);

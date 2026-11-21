@@ -531,6 +531,10 @@ impl Village {
         )
     }
 
+    pub(crate) fn ground_footprints(&self) -> impl Iterator<Item = (IVec2, IVec2)> + '_ {
+        self.construction.ground_footprints()
+    }
+
     pub(crate) fn wildlife_clear(&self, point: Vec2) -> bool {
         self.construction.wildlife_clear(point)
     }

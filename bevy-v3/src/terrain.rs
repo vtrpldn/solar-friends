@@ -651,12 +651,16 @@ impl Terrain {
         let mut positions = Vec::with_capacity((stride * stride) as usize);
         let mut colors = Vec::with_capacity((stride * stride) as usize);
         let mut indices = Vec::with_capacity((CELLS * CELLS * 6) as usize);
+        let mut banks = Vec::with_capacity((stride * stride) as usize);
         for row in 0..stride {
             let z = f64::from(row) * 2.0 - HALF_WIDTH;
             for column in 0..stride {
                 let x = f64::from(column) * 2.0 - HALF_WIDTH;
                 positions.push([x as f32, self.elevation(x, z) as f32, z as f32]);
                 colors.push(crate::palette::ground_color(self, biome, x, z));
+                // The ground shader reads distance from the river bank out of the first UV.
+                let (center, width) = self.river(z);
+                banks.push([((x - center).abs() - width).max(0.0) as f32, 0.0]);
             }
         }
         for row in 0..CELLS {
@@ -666,7 +670,9 @@ impl Terrain {
                 indices.extend_from_slice(&[a, b, a + 1, b, b + 1, a + 1]);
             }
         }
-        surface_mesh(positions, indices).with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, colors)
+        surface_mesh(positions, indices)
+            .with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, colors)
+            .with_inserted_attribute(Mesh::ATTRIBUTE_UV_0, banks)
     }
 
     /// One lengthwise band of the access road, between `left` and `right` of its centre line.

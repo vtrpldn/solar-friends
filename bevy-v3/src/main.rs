@@ -18,6 +18,7 @@ mod farming;
 mod file_dialog;
 mod food;
 mod gathering;
+mod ground;
 mod land;
 mod livestock;
 mod market;
@@ -215,6 +216,7 @@ fn main() {
         audio::VillageAudio,
         land::LandPlugin,
         palette::PalettePlugin,
+        ground::GroundPlugin,
         entrance::EntrancePlugin,
         weather::WeatherPlugin,
         resident_animation::ResidentAnimationPlugin,
@@ -312,6 +314,7 @@ fn update_land(
     mut materials: ResMut<Assets<StandardMaterial>>,
     assets: Res<AssetServer>,
     (setup, village): (Res<WorldSetup>, Res<village::Village>),
+    (habitat, mut ground_materials): (Res<ground::Habitat>, ResMut<Assets<ground::GroundMaterial>>),
     old_land: Query<Entity, With<LandMesh>>,
     mut drawn: Local<Option<LandDrawKey>>,
 ) {
@@ -329,12 +332,8 @@ fn update_land(
         LandMesh,
         GroundMesh,
         Mesh3d(meshes.add(terrain.ground_mesh(setup.biome()))),
-        // The painted fields live in the ground's vertex colours.
-        MeshMaterial3d(materials.add(StandardMaterial {
-            perceptual_roughness: 1.0,
-            reflectance: 0.2,
-            ..default()
-        })),
+        // The painted fields ride in the vertex colours; the shader adds wear, damp and rock.
+        MeshMaterial3d(ground_materials.add(ground::material(&setup, &habitat))),
     ));
     // V2's dirt road: a grassy verge, a packed surface with worn wheel ruts and a rounded
     // parking clearing where it ends inside the plot.
@@ -983,6 +982,7 @@ mod tests {
             village::VillagePlugin,
             ui_font::UiFontPlugin,
             land::LandPlugin,
+            ground::GroundPlugin,
             entrance::EntrancePlugin,
             weather::WeatherPlugin,
             wildlife::WildlifePlugin,

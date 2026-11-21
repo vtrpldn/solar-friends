@@ -112,6 +112,19 @@ pub(crate) fn advance_landscape_motion(
     }
 }
 
+impl Site {
+    /// Which ground channel this site wears: 1 woodland floor (trees), 2 exposed earth,
+    /// 3 stone, or 0 for contact shade only.
+    pub(crate) fn surface_channel(&self) -> usize {
+        match self.model {
+            model if model < EARTH => 1,
+            EARTH => 2,
+            STONE => 3,
+            _ => 0,
+        }
+    }
+}
+
 impl Land {
     pub fn occupied(&self, cell: IVec2) -> bool {
         self.occupied.contains_key(&cell)
