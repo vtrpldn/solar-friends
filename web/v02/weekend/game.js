@@ -1,3 +1,4 @@
+import { DREAM_LIGHTS } from "./dream-lighting.js";
 import {createPaintedView, paintVillageModel} from "./painted-village.js";
 import "./keyboard-focus.js";
 import {renderDevTools} from './dev-tools.js';
@@ -148,6 +149,8 @@ import {
 const $ = (id) => document.getElementById(id),
   SAVE = saveKey(new URLSearchParams(location.search).get("mode"));
 const scalePreview = new URLSearchParams(location.search).has("scale-preview");
+const dreamPreview = new URLSearchParams(location.search).get("scale-preview") === "dream";
+let dreamLight = dreamPreview ? DREAM_LIGHTS.opal : null;
 const wildlifePreview = new URLSearchParams(location.search).has("wildlife-preview");
 const downtimePreview = new URLSearchParams(location.search).has("downtime-preview");
 const needsPreview = new URLSearchParams(location.search).has("needs-preview");
@@ -249,7 +252,7 @@ renderer.toneMappingExposure = 1.08;
 const renderPaintedView = createPaintedView(renderer);
 const camera = new THREE.OrthographicCamera(-26, 26, 20, -20, 0.1, 300);
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
+controls.enableDamping = !dreamPreview;
 controls.minZoom = 0.18;
 controls.maxZoom = 6;
 controls.maxPolarAngle = Math.PI * 0.46;
@@ -279,6 +282,18 @@ const noonColor = new THREE.Color("#ffdf9d");
 const sunsetColor = new THREE.Color("#ffad72");
 const overcastColor = new THREE.Color("#d6e3ef");
 function updateSunlight(time, dt) {
+  if (dreamLight) {
+    sun.position.fromArray(dreamLight.angle).add(sun.target.position);
+    sun.color.set(dreamLight.sun);
+    sun.intensity = dreamLight.direct;
+    sun.shadow.intensity = dreamLight.shadow;
+    daylight.color.set(dreamLight.sky);
+    daylight.groundColor.set(dreamLight.ground);
+    daylight.intensity = dreamLight.ambient;
+    scene.background.set(dreamLight.fog);
+    scene.fog.color.set(dreamLight.fog);
+    return;
+  }
   cloudCover += ((s.weather?.cloudCover ?? (s.rain ? 1 : 0)) - cloudCover) * (1 - Math.exp(-dt / 3));
   const light = sunlightAt(time, cloudCover);
   sun.position.set(light.x, light.y, light.z).add(sun.target.position);
@@ -447,7 +462,8 @@ function updateUtilityLighting() {
     if (entry.houseLighting)
       updateHouseLighting(
         entry.houseLighting,
-        night * (sys.nodes[id]?.enabled ? sys.nodes[id]?.power || 0 : 0),
+        dreamLight ? Number(dreamLight === DREAM_LIGHTS.blue) :
+          night * (sys.nodes[id]?.enabled ? sys.nodes[id]?.power || 0 : 0),
       );
   }
   const lit = selectBuildingLights(sys.nodes, buildings, controls.target, world);
@@ -2262,6 +2278,41 @@ document.addEventListener('visibilitychange', () => {
     requestSceneRender();
   }
 });
+if (dreamPreview) {
+  syncBuildings();
+  const frameBuildings = () => {
+    const bounds = new THREE.Box3();
+    for (const p of s.projects) {
+      const entry = buildings.get(p.id);
+      if (entry && isBuildOption(p.key, PROJECTS[p.key])) bounds.expandByObject(entry.root);
+    }
+    const center = bounds.getCenter(new THREE.Vector3());
+    controls.target.copy(center);
+    camera.position.copy(center).add(new THREE.Vector3(32, 48, 32));
+    const radius = bounds.getBoundingSphere(new THREE.Sphere()).radius;
+    camera.zoom = .86 * Math.min(camera.right, camera.top) / radius;
+    controls.minZoom = Math.min(.18, camera.zoom);
+    camera.updateProjectionMatrix();
+    controls.update();
+    requestSceneRender();
+  };
+  $("dream-frame").onclick = frameBuildings;
+  frameBuildings();
+  const picker = $("dream-light");
+  for (const [key, preset] of Object.entries(DREAM_LIGHTS))
+    picker.add(new Option(preset.label, key));
+  picker.value = "opal";
+  function applyPreset() {
+    dreamLight = DREAM_LIGHTS[picker.value];
+    s.time = ((dreamLight.hour + 24 - 9) * 60) / .45;
+    s.rain = false;
+    renderUI();
+    requestSceneRender();
+  }
+  picker.addEventListener("change", applyPreset);
+  $("dream-light-panel").hidden = false;
+  applyPreset();
+}
 requestSceneRender();
 function frame(now) {
   if (skippingTime) { previous = now; requestAnimationFrame(frame); return; }
@@ -2564,6 +2615,10 @@ function frame(now) {
     lastSave = now;
   }
   fitTerrainCamera(camera, controls.target, scene.fog);
+  if (dreamLight) {
+    scene.fog.near = camera.position.distanceTo(controls.target) + 8;
+    scene.fog.far = scene.fog.near + 155;
+  }
   // Keep the shadow volume over the viewed land, not the world origin.
   // Moving light and target together preserves the time-of-day sun direction.
   const shadowExtent = Math.max(16, Math.hypot(camera.right - camera.left, camera.top - camera.bottom) / (2 * camera.zoom) + 12);
@@ -2577,7 +2632,7 @@ function frame(now) {
   lenses.update(now);
   accessPreview.visible=!!placing&&(ghost.visible||!!wireframe?.visible);
   const rendered = !paused || s.rain || cameraChanged || now < renderUntil;
-  if (rendered) renderPaintedView(scene, camera);
+  if (rendered) renderPaintedView(scene, camera, dreamLight);
   lastVisualTime = visual.time;
   recordPerformance(now, visual.time, rendered);
   requestAnimationFrame(frame);

@@ -15,6 +15,7 @@ export const DEV_TOOL_GROUPS = [
       ["Basic needs", "./?needs-preview", "Residents with varied needs"],
       ["Rest", "./?rest-preview", "Sleep and rest behaviour"],
       ["Downtime", "./?downtime-preview", "Leisure when no work calls"],
+      ["Dream lighting · all buildings", "./?scale-preview=dream", "Compare three lighting treatments across the build catalog"],
       ["Scale · village", "./?scale-preview", "Core buildings side by side"],
       ["Scale · homes", "./?scale-preview=homes", "Every home design"],
       ["Scale · new homes", "./?scale-preview=new-homes", "Library home designs"],

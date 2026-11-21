@@ -1,5 +1,6 @@
 import {HOME_DESIGNS} from '../library/home-designs.js';
 import { createSandbox, plan, placementError, PROJECTS, requiredLoads } from './simulation.js';
+import { isBuildOption } from './build-categories.js';
 import { foundationPad } from './elevation.js';
 
 // Isolated desktop fixture, never loaded from or autosaved over a village.
@@ -19,10 +20,29 @@ export function createScalePreview(validate = false, collection = 'village') {
         s.terrainPads.push(pad);
       }
       s.projects.push({id:s.nextId++,key,x,z,rotation:0,
-        work:def.work,delivered:requiredLoads(key),...(key==='bridge'?{siteVersion:1}:{})});
+        work:def.work,delivered:requiredLoads(key),...(key==='bridge'?{siteVersion:1}:key==='field'?{fieldSize:[...def.size]}:{})});
     }
     // Demonstration paths are already built, like the surrounding buildings.
     s.projects.at(-1).work=PROJECTS[key].work;
+  }
+  if (collection === 'dream') {
+    let x = 28, z = 19, depth = 0;
+    for (const [key, def] of Object.entries(PROJECTS)) {
+      if (!isBuildOption(key, def) || key === 'bridge') continue;
+      const [width, length] = def.size;
+      if (x + width > 92) {
+        x = 28;
+        z += depth + 2;
+        depth = 0;
+      }
+      place(key, x, z);
+      x += width + 2;
+      depth = Math.max(depth, length);
+    }
+    place('bridge', 6, 48);
+    s.time = 400;
+    s.log = ['Dream lighting preview · All build catalog models. This scene never autosaves.'];
+    return s;
   }
   const sites = collection==='new-homes' ? HOME_DESIGNS.map((d,i)=>[d.id,35+(i%5)*12,i<5?43:57]) : collection==='sites' ? [
     ['solar_farm',44,44],['picnic-table',54,44],['eco_toilet',60,44],

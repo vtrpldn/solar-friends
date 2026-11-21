@@ -39,7 +39,10 @@ export function createPaintedView(renderer) {
   const material = new THREE.ShaderMaterial({
     depthTest: false,
     depthWrite: false,
-    uniforms: {village: {value: target.texture}, pixel: {value: new THREE.Vector2()}},
+    uniforms: {
+      village: {value: target.texture}, pixel: {value: new THREE.Vector2()},
+      glow: {value: 0}, brush: {value: 1},
+    },
     vertexShader: `
       varying vec2 paintUV;
       void main() {
@@ -49,6 +52,7 @@ export function createPaintedView(renderer) {
     fragmentShader: `
       uniform sampler2D village;
       uniform vec2 pixel;
+      uniform float glow, brush;
       varying vec2 paintUV;
       void main() {
         vec3 center = texture2D(village, paintUV).rgb;
@@ -57,13 +61,22 @@ export function createPaintedView(renderer) {
         // Blend nearby colours within the same brush area, leaving silhouettes sharp.
         for (int x = -1; x <= 1; x += 2) {
           for (int y = -1; y <= 1; y += 2) {
-            vec3 nearby = texture2D(village, paintUV + vec2(float(x), float(y)) * pixel).rgb;
+            vec3 nearby = texture2D(village, paintUV + vec2(float(x), float(y)) * pixel * brush).rgb;
             float weight = 0.65 * (1.0 - smoothstep(0.01, 0.11, length(center - nearby)));
             paint += nearby * weight;
             total += weight;
           }
         }
-        gl_FragColor = vec4(paint / total, 1.0);
+        vec3 halo = vec3(0.0);
+        if (glow > 0.0) {
+          for (int i = 0; i < 8; i++) {
+            float angle = float(i) * 0.785398;
+            vec2 direction = vec2(cos(angle), sin(angle));
+            vec3 highlight = texture2D(village, paintUV + direction * pixel * 8.0).rgb;
+            halo += max(highlight - vec3(0.75), 0.0);
+          }
+        }
+        gl_FragColor = vec4(paint / total + halo * glow / 8.0, 1.0);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
         float grain = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453);
@@ -75,7 +88,9 @@ export function createPaintedView(renderer) {
   quad.frustumCulled = false;
   scene.add(quad);
 
-  return (village, view) => {
+  return (village, view, treatment) => {
+    material.uniforms.glow.value = treatment?.bloom ?? 0;
+    material.uniforms.brush.value = treatment?.paint ?? 1;
     renderer.getDrawingBufferSize(size);
     if (target.width !== size.x || target.height !== size.y) {
       target.setSize(size.x, size.y);

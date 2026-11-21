@@ -1,3 +1,8 @@
+import { CELL_MIN, CELL_MAX } from "../web/v02/weekend/map-size.js";
+import { isBuildOption } from "../web/v02/weekend/build-categories.js";
+import { createCultivationModel } from "../web/v02/weekend/cultivation-models.js";
+import { ensureCultivation } from "../web/v02/weekend/cultivation.js";
+
 import { createScalePreview } from '../web/v02/weekend/scale-preview.js';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
@@ -65,3 +70,19 @@ assert.deepEqual(seeded.projects, validated.projects.map(({billOfMaterials,...p}
 assert.deepEqual(seeded.terrainPads, validated.terrainPads);
 assert(restore(save(seeded)), 'desktop review fixture remains save-compatible');
 console.log('PASS: shared scale, catalog/site agreement, planted areas and garden aisle, narrow bridge geometry and crossing, legacy widths/rotations/occupancy, movement and save round trips.');
+
+const dream = createScalePreview(false, 'dream');
+for (const [key, definition] of Object.entries(PROJECTS)) {
+  if (!isBuildOption(key, definition)) continue;
+  const fixtures = dream.projects.filter(project => project.key === key);
+  assert.equal(fixtures.length, 1, key);
+  const [project] = fixtures;
+  assert.equal(project.work, definition.work, key);
+  const [width, depth] = footprint(project);
+  assert(project.x >= CELL_MIN && project.x + width <= CELL_MAX, key);
+  assert(project.z >= CELL_MIN && project.z + depth <= CELL_MAX, key);
+}
+const field = dream.projects.find(project => project.key === 'field');
+ensureCultivation(dream, field);
+assert(createCultivationModel(field, dream).children.length, 'preview field renders');
+console.log('PASS: Dream lighting preview includes the complete build catalog within the map.');
