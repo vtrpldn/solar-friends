@@ -1,5 +1,7 @@
 # Solar Friends V3
 
+> **Abandoned.** V3 was a failed experiment to port V2 to Bevy. Bevy proved too slow for this game, so V3 is no longer developed. V2 (`web/v02/weekend`) is the active game. This code is kept for reference only; do not start new work here.
+
 Run the standalone Bevy desktop game from the repository root.
 
 ```sh
