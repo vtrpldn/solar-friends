@@ -95,7 +95,7 @@ export function createPaintedView(renderer) {
     depthWrite: false,
     uniforms: {
       village: {value: target.texture}, pixel: {value: new THREE.Vector2()},
-      glow: {value: 0}, brush: {value: 1},
+      glow: {value: 0}, gouacheRadius: {value: 0}, brush: {value: 1},
       villageDepth: {value: target.depthTexture}, depthRange: {value: 1},
       contactRadius: {value: 1}, shadowTint: {value: new THREE.Color()},
     },
@@ -108,14 +108,52 @@ export function createPaintedView(renderer) {
     fragmentShader: `
       uniform sampler2D village, villageDepth;
       uniform vec2 pixel;
-      uniform float glow, brush, depthRange, contactRadius;
+      uniform float glow, gouacheRadius, brush, depthRange, contactRadius;
       uniform vec3 shadowTint;
       varying vec2 paintUV;
+      // A small Kuwahara filter chooses the most uniform nearby paint region.
+      // Predict depth along the current plane so sloped roofs can smooth along
+      // their faces while windows, eaves and separate buildings stay legible.
+      vec3 gouacheColor(vec3 center, float depth, vec2 depthSlope) {
+        vec3 weighted = vec3(0.0);
+        float weights = 0.0;
+        for (int sector = 0; sector < 4; sector++) {
+          vec2 signPair = vec2(sector < 2 ? -1.0 : 1.0,
+                              sector == 0 || sector == 2 ? -1.0 : 1.0);
+          vec3 sum = center;
+          vec3 squareSum = center * center;
+          float count = 1.0;
+          for (int sampleIndex = 0; sampleIndex < 4; sampleIndex++) {
+            vec2 stepUV = vec2(sampleIndex == 1 ? 0.0 : 1.0,
+                               sampleIndex == 0 ? 0.0 : 1.0);
+            if (sampleIndex == 3) stepUV *= 1.65;
+            vec2 delta = stepUV * signPair * gouacheRadius;
+            vec2 uv = paintUV + delta * pixel;
+            float sampleDepth = texture2D(villageDepth, uv).r;
+            float gap = abs(sampleDepth - depth) * depthRange;
+            float residual = abs((sampleDepth - depth) * depthRange - dot(delta, depthSlope));
+            vec3 sampleColor = texture2D(village, uv).rgb;
+            float weight = (1.0 - smoothstep(.13, .40, min(gap, residual)))
+                         * (1.0 - smoothstep(.65, 2.0, gap))
+                         * (1.0 - smoothstep(.26, .72, distance(center, sampleColor)));
+            sum += sampleColor * weight;
+            squareSum += sampleColor * sampleColor * weight;
+            count += weight;
+          }
+          vec3 mean = sum / count;
+          vec3 variance = max(vec3(0.0), squareSum / count - mean * mean);
+          float confidence = (count - 1.0) / (1.0 + 180.0 * dot(variance, vec3(1.0)));
+          weighted += mean * confidence;
+          weights += confidence;
+        }
+        return weights > .001 ? weighted / weights : center;
+      }
       void main() {
         vec3 center = texture2D(village, paintUV).rgb;
         vec3 paint = center;
         float total = 1.0;
         float centerDepth = texture2D(villageDepth, paintUV).r;
+        vec2 depthSlope = vec2(dFdx(centerDepth), dFdy(centerDepth)) * depthRange * 1.5;
         float occlusion = 0.0;
         // Opposite samples cancel the depth gradient of an uninterrupted slope.
         // A nearby surface in front of that slope leaves a positive residual.
@@ -140,6 +178,9 @@ export function createPaintedView(renderer) {
           total += weight;
         }
         vec3 painted = paint / total;
+        if (gouacheRadius > 0.0 && centerDepth < .99999) {
+          painted = mix(painted, gouacheColor(center, centerDepth, depthSlope), .86);
+        }
         if (centerDepth < .99999) {
           painted *= mix(vec3(1.0), shadowTint, clamp(occlusion * .13, 0.0, .38));
         }
@@ -165,6 +206,9 @@ export function createPaintedView(renderer) {
   scene.add(quad);
 
   return (village, view, treatment) => {
+    material.uniforms.gouacheRadius.value = treatment?.gouache
+      ? renderer.getPixelRatio() * THREE.MathUtils.clamp(4.0 - view.zoom, 1.65, 3.7)
+      : 0;
     material.uniforms.glow.value = treatment?.bloom ?? 0;
     material.uniforms.brush.value = (treatment?.paint ?? 1) * THREE.MathUtils.clamp(1.55 - view.zoom * .43, .8, 1.5);
     material.uniforms.depthRange.value = view.far - view.near;
