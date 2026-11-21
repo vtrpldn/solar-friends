@@ -66,9 +66,6 @@ export function terrainMaterial(seed,palette,surface){
    vec2 p=landPosition.xz;
    float broad=landNoise(p*.032);
    float mottle=landNoise(p*.084+vec2(broad*2.0));
-   vec2 brushPoint = vec2(p.x + p.y*.39, p.y - p.x*.24);
-   float strokes = landNoise(brushPoint*vec2(.21,.67)+mottle*.8);
-   float paintBands = smoothstep(.28,.60,mottle*.68+strokes*.32);
    float fine=landNoise(p*1.7);
    vec4 habitat=texture2D(landSurface,(p+${MAP_HALF.toFixed(1)})/${(MAP_HALF*2).toFixed(1)});
    float damp=1.0-smoothstep(2.0,13.0,landBank);
@@ -84,7 +81,7 @@ export function terrainMaterial(seed,palette,surface){
    // Fade tiny grain at distant zooms to prevent shimmering.
    float grain=1.0-smoothstep(.15,.8,length(fwidth(p)));
    float crest = smoothstep(-2.0,15.0,landPosition.y);
-   turf*=mix(.87,1.16,crest)+.13*(paintBands-.5)+(fine-.5)*.045*grain;
+   turf*=mix(.87,1.16,crest)+(fine-.5)*.045*grain;
    diffuseColor.rgb*=turf*(1.0-habitat.r*.25-damp*.06);
   `);
  };

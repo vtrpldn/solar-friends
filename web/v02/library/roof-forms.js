@@ -13,7 +13,7 @@ function face(g,a0,b0,c0,d0){
   if(normal.y<0)normal.negate();
   const surface=new THREE.BufferGeometry();
   surface.setAttribute('position',new THREE.Float32BufferAttribute([...a0,...b0,...d0,...b0,...c0,...d0],3));surface.computeVertexNormals();
-  const skin=new THREE.Mesh(surface,clay);skin.name='clay-roof-plane';skin.castShadow=true;skin.receiveShadow=true;g.add(skin);
+  const skin=new THREE.Mesh(surface,clay);skin.material=clay;skin.castShadow=true;skin.receiveShadow=true;g.add(skin);
   // Use the far (narrower) edge of each course so no tile crosses a hip seam.
   const slope=new THREE.Vector3().addVectors(c,d).sub(a).sub(b).multiplyScalar(.5);
   const length=slope.length(),rows=Math.ceil(length/.42),u=b.clone().sub(a).normalize(),v=slope.normalize();
