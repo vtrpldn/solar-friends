@@ -552,6 +552,19 @@ impl Terrain {
         self
     }
 
+    /// Distance to the nearest camp or building pad, capped at 8 m.
+    pub fn worn_distance(&self, x: f64, z: f64) -> f64 {
+        self.pads()
+            .filter(|pad| {
+                x > pad.left - 8.0
+                    && x < pad.right + 8.0
+                    && z > pad.top - 8.0
+                    && z < pad.bottom + 8.0
+            })
+            .map(|pad| pad.distance(x, z))
+            .fold(8.0, f64::min)
+    }
+
     pub fn elevation(&self, x: f64, z: f64) -> f64 {
         let mut total = 0.0;
         let mut graded = 0.0;
@@ -631,15 +644,17 @@ impl Terrain {
         height as f32
     }
 
-    pub fn ground_mesh(&self) -> Mesh {
+    pub fn ground_mesh(&self, biome: usize) -> Mesh {
         let stride = CELLS + 1;
         let mut positions = Vec::with_capacity((stride * stride) as usize);
+        let mut colors = Vec::with_capacity((stride * stride) as usize);
         let mut indices = Vec::with_capacity((CELLS * CELLS * 6) as usize);
         for row in 0..stride {
             let z = f64::from(row) * 2.0 - HALF_WIDTH;
             for column in 0..stride {
                 let x = f64::from(column) * 2.0 - HALF_WIDTH;
                 positions.push([x as f32, self.elevation(x, z) as f32, z as f32]);
+                colors.push(crate::palette::ground_color(self, biome, x, z));
             }
         }
         for row in 0..CELLS {
@@ -649,7 +664,7 @@ impl Terrain {
                 indices.extend_from_slice(&[a, b, a + 1, b, b + 1, a + 1]);
             }
         }
-        surface_mesh(positions, indices)
+        surface_mesh(positions, indices).with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, colors)
     }
 
     pub fn road_mesh(&self) -> Mesh {

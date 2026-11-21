@@ -21,6 +21,7 @@ mod land;
 mod livestock;
 mod market;
 mod navigation;
+mod palette;
 mod performance;
 mod production;
 mod resident_animation;
@@ -212,6 +213,7 @@ fn main() {
         ui_font::UiFontPlugin,
         audio::VillageAudio,
         land::LandPlugin,
+        palette::PalettePlugin,
         weather::WeatherPlugin,
         resident_animation::ResidentAnimationPlugin,
         wildlife::WildlifePlugin,
@@ -258,13 +260,14 @@ fn setup_scene(mut commands: Commands) {
             ..OrthographicProjection::default_3d()
         }),
         DistanceFog {
-            color: Color::srgb_u8(203, 213, 172),
+            color: Color::srgb_u8(196, 216, 228),
             falloff: FogFalloff::Linear {
                 start: CAMERA_DISTANCE + 70.0,
                 end: CAMERA_DISTANCE + 220.0,
             },
             ..default()
         },
+        palette::PaintedFinish::default(),
         VillageCamera {
             target: CAMERA_HOME,
             heading: 0.0,
@@ -323,18 +326,23 @@ fn update_land(
     commands.spawn((
         LandMesh,
         GroundMesh,
-        Mesh3d(meshes.add(terrain.ground_mesh())),
-        MeshMaterial3d(materials.add(setup.ground_color())),
+        Mesh3d(meshes.add(terrain.ground_mesh(setup.biome()))),
+        // The painted fields live in the ground's vertex colours.
+        MeshMaterial3d(materials.add(StandardMaterial {
+            perceptual_roughness: 1.0,
+            reflectance: 0.2,
+            ..default()
+        })),
     ));
     commands.spawn((
         LandMesh,
         Mesh3d(meshes.add(terrain.road_mesh())),
-        MeshMaterial3d(materials.add(Color::srgb_u8(159, 120, 82))),
+        MeshMaterial3d(materials.add(Color::srgb_u8(204, 136, 112))),
     ));
     for (width, height, color) in [
-        (1.9, 0.025, Color::srgb_u8(130, 144, 106)),
-        (1.1, 0.035, Color::srgb_u8(182, 167, 128)),
-        (0.3, 0.045, Color::srgb_u8(159, 174, 145)),
+        (1.9, 0.025, Color::srgb_u8(88, 140, 92)),
+        (1.1, 0.035, Color::srgb_u8(222, 176, 146)),
+        (0.3, 0.045, Color::srgb_u8(150, 186, 150)),
     ] {
         commands.spawn((
             LandMesh,
@@ -345,9 +353,9 @@ fn update_land(
     let rocks = terrain.river_boulders();
     let rock_mesh = meshes.add(Sphere::new(1.0).mesh().ico(0).expect("icosahedron"));
     let rock_materials = [
-        Color::srgb_u8(151, 155, 134),
-        Color::srgb_u8(176, 174, 148),
-        Color::srgb_u8(125, 139, 126),
+        Color::srgb_u8(150, 156, 178),
+        Color::srgb_u8(184, 178, 196),
+        Color::srgb_u8(124, 136, 162),
     ]
     .map(|color| materials.add(color));
     for rock in &rocks {

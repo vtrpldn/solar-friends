@@ -93,7 +93,12 @@ pub(super) fn apply(
     models: Query<(&Mesh3d, &MeshMaterial3d<StandardMaterial>, Option<&Aabb>)>,
     (meshes, materials): (Res<Assets<Mesh>>, Res<Assets<StandardMaterial>>),
     mut wind_materials: ResMut<Assets<WindMaterial>>,
-    (mut cache, clock): (ResMut<WindMaterials>, Res<WindClock>),
+    (mut cache, clock, server, repainted): (
+        ResMut<WindMaterials>,
+        Res<WindClock>,
+        Res<AssetServer>,
+        Res<crate::palette::Repainted>,
+    ),
 ) {
     for entity in descendants.iter_descendants(event.entity) {
         let Ok((mesh, original, bounds)) = models.get(entity) else {
@@ -103,8 +108,10 @@ pub(super) fn apply(
             continue;
         };
         let handle = cache.0.entry(original.0.id()).or_insert_with(|| {
+            let mut base = base.clone();
+            crate::palette::repaint_copy(&server, &repainted, original.0.id(), &mut base);
             wind_materials.add(WindMaterial {
-                base: base.clone(),
+                base,
                 extension: Wind {
                     clock: clock.buffer.clone(),
                 },

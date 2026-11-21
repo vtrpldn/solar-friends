@@ -33,6 +33,8 @@ impl Plugin for LandPlugin {
         embedded_asset!(app, "land.glb");
         tree_wind::install(app);
         app.init_resource::<Land>()
+            // Tree wind copies read which materials already carry the palette.
+            .init_resource::<crate::palette::Repainted>()
             .init_resource::<LandscapeMotion>()
             .add_message::<WindowOccluded>()
             .add_systems(PreUpdate, generate_land)

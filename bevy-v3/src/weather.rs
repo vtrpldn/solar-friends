@@ -268,7 +268,7 @@ fn sunlight(
         .rotation;
     light.illuminance = 4_400.0 * daylight * (2.1 + height * 1.3) * (1.0 - cloud * 0.88);
     let warmth = (1.0 - (height * 2.0).min(1.0)) * (1.0 - cloud);
-    let daylight_color = Color::srgb_u8(255, 226, 168).to_linear();
+    let daylight_color = Color::srgb_u8(255, 236, 206).to_linear();
     let sunset_color = Color::srgb_u8(255, 173, 114).to_linear();
     let overcast = Color::srgb_u8(214, 227, 239).to_linear();
     light.color = Color::LinearRgba(
@@ -279,18 +279,20 @@ fn sunlight(
     // V2's sky light is a warm hemisphere (#e4eff6 over #777455) that stays near 45% of
     // midday after sunset, so the ground still reads olive at dusk rather than blue-black.
     // A blue night tint greyed the grass; V2's night keeps a warm, slightly green cast.
+    // By day the sky light leans cool, so shade reads blue-green against warm sunlight, as in
+    // Tarsila do Amaral's landscapes.
     ambient.color = Color::srgb(
-        0.86 + 0.14 * daylight,
-        0.90 + 0.10 * daylight,
+        0.86 - 0.12 * daylight,
+        0.90 - 0.02 * daylight,
         0.80 + 0.20 * daylight,
     );
     ambient.brightness = 500.0 + 60.0 * daylight * (0.8 + cloud * 0.35);
     sky.0 = Color::srgb(
-        0.08 + daylight * (0.63 - cloud * 0.12),
-        0.12 + daylight * (0.68 - cloud * 0.15),
-        0.22 + daylight * (0.68 - cloud * 0.16),
+        0.08 + daylight * (0.58 - cloud * 0.08),
+        0.12 + daylight * (0.68 - cloud * 0.14),
+        0.22 + daylight * (0.71 - cloud * 0.18),
     );
-    let daylight_fog = Color::srgb_u8(203, 213, 172).to_srgba();
+    let daylight_fog = Color::srgb_u8(196, 216, 228).to_srgba();
     fog.color = Color::Srgba(
         sky.0
             .to_srgba()
