@@ -50,6 +50,7 @@ import {saveSlots} from "./save-slots.js";
 import {installSaveDialog} from "./save-dialog.js";
 import {createCapybaraVisitors} from "./capybaras.js";
 import { constructionProgress } from "./construction-logistics.js";
+import { createPlannedSites } from "./planned-sites.js";
 import { BUILD_CATEGORIES, buildingCategory, inBuildCategory, isBuildOption } from "./build-categories.js";
 import {createResourceTrends,resourceSnapshot,formatTrend} from './resource-trends.js';
 import {materialTooltip} from './material-tooltip.js';
@@ -645,7 +646,7 @@ function syncBuildings() {
     );
     entry.root.scale.z = bridgeWidthScale(p);
     entry.root.rotation.y = ((p.rotation || 0) * Math.PI) / 2;
-    entry.root.visible=!p.felled;
+    entry.root.visible=!p.felled&&!plannedSites.hidesModel(p,def);
 
     if (def.asset === "fire-circle") {
       if (fraction >= 1 && !entry.fire) {
@@ -680,7 +681,15 @@ function syncBuildings() {
       }
     }
   }
+  plannedSites.sync(s, atmosphere.lamps);
 }
+// Stakes, string, lime lines and a pale outline mark every site not yet built.
+const plannedSites = createPlannedSites({
+  world, footprint, definitions: PROJECTS, loads: requiredLoads, widthScale: bridgeWidthScale,
+  hasStages: (asset) => assets.has(`${asset}-construction-0`),
+  model: (asset) => compactModel(createAsset(asset)),
+});
+scene.add(plannedSites.group);
 const ghost = new THREE.Mesh(
   new THREE.PlaneGeometry(4, 4),
   new THREE.MeshBasicMaterial({
