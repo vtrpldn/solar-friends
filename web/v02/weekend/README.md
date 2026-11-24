@@ -12,6 +12,8 @@ New game opens setup for Mata Atlântica, Cerrado or Caatinga, landscape, water 
 
 WASD/arrows or left-drag pan; Shift pans faster. Q/E or right-drag rotate the camera. Scroll or +/− zoom; Home centers camp. Placement supports a model wireframe and rotation. Buildings and tents can level their footprint; basic terrain tools do not currently charge money or labor.
 
+Every toolbar and HUD destination has a key, shown as a badge on its button: B Build, J Projects, N Residents, T Terrain, M Finances, K Items & equipment, C Crafting, Y Food, I Resources, U Water, P Power, L Lenses, H Guide, V View & options, X Advance days. `?` lists them all in the game. Enter selects or places at the center reticle, R rotates, Esc steps back one layer. `keyboard-shortcuts.js` is the only place a key is defined: handlers, badges and the in-game list read that table, and `scripts/verify-v02-keyboard-shortcuts.mjs` plus `scripts/verify-v02-keyboard-browser.mjs` fail on duplicate bindings or drift. Mnemonic letters follow the printed key on any layout; W A S D, Q/E, `,`/`.` and the number row follow physical position.
+
 Normal play supports speeds through 16×. Opening management/planning screens pauses time. View & options contains camera controls, sound, saves and main-menu navigation. Layouts adapt to smaller/shorter windows; desktop is the tested platform. `responsive.css` is loaded after the existing game/menu styles.
 
 ## Residents and construction

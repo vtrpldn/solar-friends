@@ -1290,7 +1290,6 @@ function activateAtReticle(e) {
   if (!farmingUI.markCorner(point)) activateMap(point);
   // Hand the new selection to the keyboard; Esc returns to the map.
   if (selected && selected !== before && !$("selection").hidden) $("selection").focus({preventScroll: true});
-  else if (placing) aimAtReticle();
 }
 function togglePanel(panel) {
   if (s.stage !== 'playing') return;
@@ -1426,8 +1425,8 @@ function updateSpeedButton() {
   const description = !paused && catchUpSeconds >= 1
     ? 'Catching up on time spent in a hidden tab. Pause to stop here.'
     : automatic
-    ? `Automatic speed 64× while everyone is asleep or away. Selected speed ${speed}×. Keys 1 to 4 select speed.`
-    : `Simulation speed ${speed}×. Keys 1 to 4 select speed.`;
+    ? `Automatic speed 64× while everyone is asleep or away. Selected speed ${speed}×. Keys ${keyLabel('speed')} select speed.`
+    : `Simulation speed ${speed}×. Keys ${keyLabel('speed')} select speed.`;
   if ($("speed").textContent !== label) $("speed").textContent = label;
   if ($("speed").getAttribute('aria-label') !== description) $("speed").setAttribute('aria-label', description);
 }
@@ -2128,7 +2127,7 @@ function renderUI() {
       const tabs=document.createElement('nav');tabs.className='resident-tabs';tabs.setAttribute('aria-label','Profile sections');
       for(const label of ['Overview','Story','Skills','Relationships']){
         const tab=document.createElement('button');tab.textContent=label;tab.setAttribute('aria-pressed',String(residentTab===label));
-        tab.onclick=()=>{residentTab=label;uiSignature='';renderUI();};tabs.append(tab);
+        tab.onclick=()=>{residentTab=label;uiSignature='';renderUI();[...$('resident-detail').querySelectorAll('button[aria-pressed]')].find(b=>b.textContent===label)?.focus();};tabs.append(tab);
       }
       detail.append(tabs);
       const paragraph=(text,kind='p')=>{const el=document.createElement(kind);el.textContent=text;detail.append(el);};
