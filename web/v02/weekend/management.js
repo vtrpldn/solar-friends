@@ -76,6 +76,8 @@ export function createManagement({
   notify,
   isPaused,
   setPaused,
+  holdPause = () => { const was = isPaused(); setPaused(true); return was; },
+  releasePause = setPaused,
 }) {
   $("toggle-grid-power").onclick = () => {
     const grid = state().infrastructure.grid;
@@ -109,7 +111,7 @@ export function createManagement({
         const options = document.createElement('optgroup'); options.label = group.name;
         for (const id of group.ids) {
           const item = MATERIALS[id];
-          if (item.quantity) options.append(new Option(`${item.quantity} ${item.name} · ${brl(item.price)}`, id));
+          if (item.quantity) options.append(new Option(`${quantityText(id, item.quantity)} ${item.name} · ${brl(item.price)}`, id));
         }
         if (options.children.length) purchase.append(options);
       }
@@ -118,8 +120,7 @@ export function createManagement({
     }
     const opening = !dialog.open;
     if (opening) {
-      wasPaused = isPaused();
-      setPaused(true);
+      wasPaused = holdPause();
       dialog.showModal();
     }
     // Land on the screen's own tab: arrows walk the tabs, Tab enters the screen.
@@ -128,11 +129,10 @@ export function createManagement({
     $("utility-kind").innerHTML = (view === "power" ? ["power"] : LIQUIDS)
       .map(
         (k) =>
-          `<option value="${k}">${k === "power" ? "Power cable" : k === "fresh" ? "Fresh water" : k === "irrigation" ? "Irrigation water" : k === "greywater" ? "Greywater" : "Sealed sewage"}</option>`,
+          `<option value="${k}">${k === "power" ? "Power cable" : k === "fresh" ? "Drinking water" : k === "irrigation" ? "Irrigation water" : k === "greywater" ? "Greywater" : "Sealed sewage"}</option>`,
       )
       .join("");
-    $("management-message").textContent =
-      "Village paused while this screen is open.";
+    $("management-message").textContent = "";
     refresh();
   }
   document
@@ -140,7 +140,7 @@ export function createManagement({
     .forEach((b) => (b.onclick = () => open(b.dataset.manage)));
   $("close-management").onclick = () => dialog.close();
   dialog.addEventListener("close", () => {
-    setPaused(wasPaused);
+    releasePause(wasPaused);
   });
   $("resource-search").oninput = () => render();
   $("utility-kind").onchange = refresh;
@@ -185,7 +185,7 @@ export function createManagement({
         if (n.capacity[i]) {
           const line = document.createElement("div");
           line.className = `water-level ${k}`;
-          line.textContent = `${{ fresh: "Drinking water", irrigation: "Irrigation water", greywater: "Greywater", sewage: "Sewage" }[k]} · ${n.water[i].toFixed(1)} / ${n.capacity[i]}`;
+          line.textContent = `${{ fresh: "Drinking water", irrigation: "Irrigation water", greywater: "Greywater", sewage: "Sewage" }[k]} · ${n.water[i].toFixed(1)} / ${n.capacity[i]} L`;
           const meter = document.createElement("progress");
           meter.max = n.capacity[i];
           meter.value = n.water[i];
@@ -271,7 +271,7 @@ export function createManagement({
     $("grid-power-panel").hidden = view !== "power";
     $("grid-tariff-description").textContent=`Your own generation and batteries come first. Grid backup supplies up to ${ECONOMY_REFERENCE.electricity.capacityKw} kW at ${brl(GRID_TARIFF)}/kWh. No standing charge. Collection budgets stay protected.`;
     const grid = s.infrastructure.grid;
-    $("grid-power-status").textContent = `${grid.enabled ? (s.money <= 0 ? "No funds for grid power" : "Grid backup connected") : "Off-grid"} · ${grid.importing.toFixed(2)} kW imported now · ${grid.imported.toFixed(2)} kWh purchased · ${brl(grid.spent)} spent`;
+    $("grid-power-status").textContent = `${grid.enabled ? (s.money <= 0 ? "No funds for grid power" : "Grid backup connected") : "Off-grid"} · ${grid.importing.toFixed(1)} kW imported now · ${grid.imported.toFixed(1)} kWh purchased · ${brl(grid.spent)} spent`;
     $("toggle-grid-power").textContent = grid.enabled ? "Disconnect grid power" : "Connect grid backup";
     $("toggle-grid-power").setAttribute("aria-pressed", String(grid.enabled));
     const inventoryView = view === 'resources' || view === 'items' || view === 'food';
@@ -383,7 +383,7 @@ export function createManagement({
       ];
     else if(view==='food'){
       const f=pantryForecast(s),c=coolingStatus(s);
-      stats=[['Edible portions',f.portions],['Reserve coverage',s.mode==='sandbox'?'Unlimited':`${f.days.toFixed(1)} days`],['At risk of spoilage',s.mode==='sandbox'?'Inactive':`${f.atRisk.toFixed(1)} portions`],['Powered cold storage',`${c.capacity} L`]];
+      stats=[['Edible portions',f.portions],['Reserve coverage',s.mode==='sandbox'?'Unlimited':`${(s.people.length?f.portions/(s.people.length*3):0).toFixed(1)} days`],['At risk of spoilage',s.mode==='sandbox'?'Inactive':`${f.atRisk.toFixed(1)} portions`],['Powered cold storage',`${c.capacity} L`]];
     }
     else if (inventoryView)
       stats = [
@@ -427,7 +427,7 @@ export function createManagement({
           greywater: "Greywater",
           sewage: "Sewage",
         }[k],
-        `${nodes.reduce((v, n) => v + n.water[i], 0).toFixed(1)} stored`,
+        `${nodes.reduce((v, n) => v + n.water[i], 0).toFixed(1)} L stored`,
       ]);
     if(view==='water'){
       const sanitation=basicNeeds(s).find(row=>row.id==='sanitation');

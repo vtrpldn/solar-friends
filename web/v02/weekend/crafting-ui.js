@@ -2,6 +2,7 @@ import { CRAFT_SKILLS, skillLevel, craftStage } from './crafting.js';
 import { MATERIALS, materialCount, queueProduction, moveCraftJob } from './simulation.js';
 import { equipmentSummary, EQUIPMENT_LIFE } from './equipment.js';
 import { ITEMS } from './items.js';
+import { quantityText } from './material-measures.js';
 import { illustrate } from './ui-art.js';
 import { craftItem, craftName, craftEntries, craftWorkspaces, chosenWorkspace, workspaceName, recipeStatus, craftJobStatus } from './crafting-view.js';
 
@@ -125,9 +126,9 @@ export function renderCrafting(s, root, notify, refresh) {
       add(body, 'h4', 'Materials');
       const materials = add(body, 'dl', '', 'craft-materials');
       for (const [key, n] of Object.entries(recipe.input)) {
-        add(materials, 'dt', MATERIALS[key].name);
+        add(materials, 'dt', MATERIALS[key].name.charAt(0).toUpperCase() + MATERIALS[key].name.slice(1));
         const have = materialCount(s, key);
-        add(materials, 'dd', `${n} needed · ${have} available`, have < n ? 'craft-shortage' : '');
+        add(materials, 'dd', `${quantityText(key, n)} needed · ${quantityText(key, have)} available`, have < n ? 'craft-shortage' : '');
       }
       const sites = craftWorkspaces(s, recipe), site = chosenWorkspace(s, recipe, ui.sites.get(id));
       const select = workspaceSelect(body, sites, site?.id, `workspace-${id}`, 'Workspace');
@@ -161,7 +162,6 @@ export function renderCrafting(s, root, notify, refresh) {
       start.dataset.disabledReason = blocker;
       start.setAttribute('aria-describedby', reason.id);
     }
-    add(footer, 'small', 'Village paused · Close to return to the village.', 'craft-note');
   }
   const message = add(root, 'p', ui.message, 'craft-message');
   message.setAttribute('role', 'status');

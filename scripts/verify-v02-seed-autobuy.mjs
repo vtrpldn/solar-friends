@@ -52,4 +52,26 @@ const run=(s,seconds,done)=>{for(let i=0;i<seconds*4;i++){tick(s,.25);if(done())
    'An unattended prepared field buys, receives and plants missing seed');
  assert.equal(s.suppliers.greens_seed.units,MATERIALS.greens_seed.quantity,'One paid pack serves the field');
 }
-console.log('PASS seed auto-buy: toggle, funds, existing stock, bulk jobs, physical pickup/delivery, no duplicates, ownership, planting and saves');
+{
+ // The per-farm switch overrides the village setting in both directions.
+ const {s,p}=fresh();s.autoBuy=false;p.autoBuyInputs=true;
+ assert.equal(queueBedJob(s,p.id,0,'plant'),'','A farm with its own switch on orders seeds while village Auto-buy is off');
+ assert(s.operations.at(-1).waitingSeeds);assert(restore(save(s)),'The farm switch survives reload');
+ const bad=JSON.parse(save(s));bad.projects.find(a=>a.id===p.id).autoBuyInputs='yes';assert.equal(restore(JSON.stringify(bad)),null);
+ const off=fresh();off.p.autoBuyInputs=false;
+ assert.match(queueBedJob(off.s,off.p.id,0,'plant'),/Auto-buy is off/);
+ run(off.s,15,()=>false);assert(!off.s.operations?.some(o=>o.waitingSeeds),'A farm with its switch off places no automatic seed orders');
+}
+{
+ const {s,p}=fresh();s.materials.compost=0;p.cultivation.beds.forEach(b=>b.stage='growing');
+ p.autoBuyInputs=false;const before=save(s);
+ assert.match(queueBedJob(s,p.id,0,'amend'),/Missing/);assert.equal(save(s),before);
+ p.autoBuyInputs=true;
+ assert.equal(plantingPurchase(s,p.cultivation.beds[0],p,'amend').cost,MATERIALS.compost.price);
+ assert.equal(queueBedJob(s,p.id,0,'amend'),'');assert(s.operations.at(-1).waitingSeeds);
+ assert.equal(committedMaterials(s).compost||0,0,'Unpurchased compost is not reserved inventory');
+ const loaded=restore(save(s));assert(loaded,'Waiting compost work survives reload');enableFastNavigation(loaded);
+ assert(run(loaded,3600,()=>loaded.projects.find(a=>a.id===p.id).cultivation.beds[0].amendmentAppliedKg>0),'Residents buy, collect and apply compost');
+ assert.equal(loaded.suppliers.compost.units,MATERIALS.compost.quantity,'One compost batch is bought');
+}
+console.log('PASS seed auto-buy: toggle, funds, existing stock, bulk jobs, per-farm switch, compost, physical pickup/delivery, no duplicates, ownership, planting and saves');

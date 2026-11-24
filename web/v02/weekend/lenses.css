@@ -10,7 +10,9 @@ body[data-lens]:not([data-lens=""]) #world { filter: saturate(.32) brightness(.6
 .lens-heading { display:flex; align-items:center; justify-content:space-between; gap:8px; }
 .lens-heading h2 { margin:2px 0 12px; font-size:21px; }
 .lens-heading small { letter-spacing:.15em; font-size:10px; color:#7d6949; }
-#map-lenses .lens-heading button { background:#fff4d3; color:var(--ink); border:2px solid var(--edge); border-radius:50%; width:30px; height:30px; padding:0; font-size:20px; line-height:1; box-shadow:none; flex-shrink:0; }
+#map-lenses .lens-heading button { flex-shrink:0; }
+/* An odd last lens spans the row instead of leaving a gap beside it. */
+.lens-choices button:last-child:nth-child(odd) { grid-column:1 / -1; }
 .lens-choices { display:grid; grid-template-columns:1fr 1fr; gap:9px 7px; }
 #map-lenses .lens-choices button { font:inherit; font-weight:600; text-align:left; padding:9px 8px; color:var(--ink); background:#fff4d3; border:2px solid var(--edge); box-shadow:0 2px 0 #b19a6e; border-radius:11px; }
 #map-lenses .lens-choices button:hover { background:#fffbe9; }

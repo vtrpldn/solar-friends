@@ -13,7 +13,7 @@ export function foodControls(root,s,projects,recipes,materials,refresh){
  const forecast=pantryForecast(s);
  if(s.mode!=='sandbox'&&forecast.shortfall)make(panel,'p',`Food reserve warning: ${forecast.shortfall} portions short of your chosen reserve. Check incoming supplies, prepare meals or buy food.`);
  const controls=make(panel,'fieldset');controls.className='food-policy-controls';make(controls,'legend','Kitchen policy');
- const toggle=make(controls,'button',policy.automatic?'Automatic food management: on':'Manage food automatically');toggle.setAttribute('aria-pressed',String(policy.automatic));toggle.disabled=s.mode==='sandbox';toggle.dataset.disabledReason='Food automation is inactive in sandbox, where food is unlimited.';toggle.onclick=()=>{policy.automatic=!policy.automatic;refresh();};
+ const toggle=make(controls,'button',policy.automatic?'Automatic food management: on':'Automatic food management: off');toggle.setAttribute('aria-pressed',String(policy.automatic));toggle.disabled=s.mode==='sandbox';toggle.dataset.disabledReason='Food automation is inactive in sandbox, where food is unlimited.';toggle.onclick=()=>{policy.automatic=!policy.automatic;refresh();};
  for(const [key,label]of [['freshDays','Fresh-meal target (days)'],['provisionDays','Dried-provision target (days)']]){
   const field=make(controls,'label',label),input=make(field,'input');input.type='number';input.min=0;input.max=7;input.step=.5;input.value=policy[key];input.disabled=s.mode==='sandbox';input.dataset.disabledReason='Food reserve targets are inactive in sandbox, where food is unlimited.';
   input.onchange=()=>{policy[key]=Math.max(0,Math.min(7,Number(input.value)||0));refresh();};

@@ -841,7 +841,7 @@ function focus(c) {
   camera.updateProjectionMatrix();
   controls.update();
 }
-focus(truckPreview ? s.stock : scalePreview ? (new URLSearchParams(location.search).get("scale-preview")==="new-homes"?{x:62,z:53}:new URLSearchParams(location.search).get("scale-preview")==="homes"?{x:63,z:52}:{x:56,z:57}) : s.arrivalAnimating ? s.stock : campLocation(s));
+focus(truckPreview ? s.stock : scalePreview ? (previewCollection==="farm"?{x:53,z:54}:new URLSearchParams(location.search).get("scale-preview")==="new-homes"?{x:62,z:53}:new URLSearchParams(location.search).get("scale-preview")==="homes"?{x:63,z:52}:{x:56,z:57}) : s.arrivalAnimating ? s.stock : campLocation(s));
 if (savedView) {
   camera.position.fromArray(savedView.position);
   controls.target.fromArray(savedView.target);
@@ -884,6 +884,19 @@ function message(t) {
 }
 let activeSaveSlot;
 try { activeSaveSlot=saveSlots(localStorage).active(s.mode||"story"); } catch {}
+// Screens that pause the village share one count, so a screen opened while another
+// is still closing cannot leave the village paused or running by mistake.
+let pauseHolds = 0;
+function holdPause() {
+  const resume = pauseHolds++ ? pauseResume : paused;
+  pauseResume = resume; paused = true; updatePauseButton();
+  return resume;
+}
+function releasePause(resume) {
+  pauseHolds = Math.max(0, pauseHolds - 1);
+  pauseResume = resume; paused = pauseHolds ? true : resume; updatePauseButton();
+}
+let pauseResume = false;
 function viewPauseState() {
   if (guide?.isOpen) return guide.resumePaused;
   if (document.querySelector('.village-saves[open]')) return savesWasPaused;
@@ -1001,7 +1014,9 @@ function startPlacement(key, id = null) {
 }
 
 const buildMaterialTooltip = materialTooltip();
-for (const [key, d] of Object.entries(PROJECTS)) {
+// Cards follow the category list, so "All" reads in the same order as the sidebar.
+const buildOrder = definition => { const i = BUILD_CATEGORIES.indexOf(buildingCategory(definition)); return i < 0 ? BUILD_CATEGORIES.length : i; };
+for (const [key, d] of Object.entries(PROJECTS).sort(([, a], [, b]) => buildOrder(a) - buildOrder(b))) {
   if (!isBuildOption(key, d)) continue;
   const b = document.createElement("button");
   b.id = `build-${key}`;
@@ -1266,7 +1281,7 @@ $("cancel-project").onclick = () => {
   message(error || s.log[0]);
   uiSignature = ''; renderUI();
 };
-guide=installGuide({button:$('open-guide'),isPaused:()=>paused,savePauseState:()=>viewPauseState(),setPaused:value=>{paused=value;updatePauseButton();}});
+guide=installGuide({button:$('open-guide'),isPaused:()=>paused,savePauseState:()=>viewPauseState(),setPaused:value=>{paused=value;updatePauseButton();},holdPause,releasePause});
 let controlsWasPaused = false;
 $("copy-diagnostics").onclick = async () => {
   const button=$("copy-diagnostics"),status=$("diagnostics-status");
@@ -1290,11 +1305,11 @@ $("copy-diagnostics").onclick = async () => {
 renderShortcutHelp($("controls-list"));
 $("show-controls").onclick = () => {
   if ($("controls-dialog").open) return;
-  controlsWasPaused = paused; paused = true; updatePauseButton();
+  controlsWasPaused = holdPause();
   $("controls-dialog").showModal();
 };
 $("close-controls").onclick = () => $("controls-dialog").close();
-$("controls-dialog").addEventListener('close', () => { paused = controlsWasPaused; updatePauseButton(); });
+$("controls-dialog").addEventListener('close', () => releasePause(controlsWasPaused));
 $("priority").onclick = () => {
   prioritize(s, selected);
   message(s.log[0]);
@@ -1508,6 +1523,7 @@ let catchUpSeconds = 0;
 const pace = createPace();
 function updatePauseButton() {
   $("pause").textContent = paused ? "▶" : "Ⅱ";
+  document.body.dataset.paused = String(paused);
   $("pause").setAttribute(
     "aria-label",
     paused ? "Resume simulation" : "Pause simulation",
@@ -1567,16 +1583,14 @@ $("time-skip").onclick = () => {
   if (s.stage === 'arrival' || s.arrivalAnimating) { message('Choose your camp and finish arriving before advancing days.'); return; }
   if (placing) cancel();
   setPanel(null);
-  skipWasPaused = paused;
-  paused = true;
-  updatePauseButton();
+  skipWasPaused = holdPause();
   $("skip-status").textContent = 'Life continues while you wait: residents, supplies, bills, weather, and construction.';
   $("skip-progress").hidden = true;
   renderSkipMilestones();
   skipDialog.showModal();
 };
 skipDialog.addEventListener('cancel', event => { if (skippingTime) event.preventDefault(); });
-skipDialog.addEventListener('close', () => { paused = skipWasPaused; updatePauseButton(); });
+skipDialog.addEventListener('close', () => releasePause(skipWasPaused));
 $("skip-close").onclick = () => skipDialog.close();
 const skipSummaryDialog = $("skip-summary-dialog");
 $("skip-summary-close").onclick = () => skipSummaryDialog.close();
@@ -1655,7 +1669,7 @@ function askReset() {
   $("keep").focus(); // Enter must not be the destructive choice.
 }
 let savesWasPaused=false;
-installSaveDialog($("saved-villages"), {onSaved:slot=>{activeSaveSlot=slot.id;},current:()=>({mode:s.mode||'story',data:saveWithView(savesWasPaused)}),beforeOpen:()=>{if(placing)cancel();savesWasPaused=paused;paused=true;updatePauseButton();},afterClose:()=>{paused=savesWasPaused;updatePauseButton();}});
+installSaveDialog($("saved-villages"), {onSaved:slot=>{activeSaveSlot=slot.id;},current:()=>({mode:s.mode||'story',data:saveWithView(savesWasPaused)}),beforeOpen:()=>{if(placing)cancel();savesWasPaused=holdPause();},afterClose:()=>releasePause(savesWasPaused)});
 $("main-menu").onclick = () => {
   persist();
   location.href = "./menu.html";
@@ -1764,7 +1778,7 @@ function renderUtilityUI() {
     (l) => (management?.view === "power") === (l.kind === "power"),
   )) {
     const b = document.createElement("button");
-    b.textContent = `${{ power: "Power", fresh: "Drinking water", irrigation: "Irrigation", greywater: "Greywater", sewage: "Sewage" }[l.kind]} · ${labels.find(([id]) => id === l.from)?.[1]} → ${labels.find(([id]) => id === l.to)?.[1]}: ${l.work < l.required ? Math.floor((l.work / l.required) * 100) + "% installed" : l.enabled ? "on" : "off"}`;
+    b.textContent = `${{ power: "Power", fresh: "Drinking water", irrigation: "Irrigation water", greywater: "Greywater", sewage: "Sewage" }[l.kind]} · ${labels.find(([id]) => id === l.from)?.[1]} → ${labels.find(([id]) => id === l.to)?.[1]}: ${l.work < l.required ? Math.floor((l.work / l.required) * 100) + "% installed" : l.enabled ? "on" : "off"}`;
     b.setAttribute("aria-pressed", String(l.enabled));
     b.title = l.enabled
       ? "Switch this connection off"
@@ -1822,7 +1836,7 @@ function renderUtilityUI() {
     ? `${hasPowerService(sys,node) ? node.enabled === false ? "Switched off" : node.power >= .995 ? "Powered" : `Getting ${(node.power * 100).toFixed(0)}% of the power it needs` : ""}${node.battery ? ` · Battery ${node.charge.toFixed(1)}/${node.battery} kWh` : ""}${hasPowerService(sys,node) ? ". " : ""}${LIQUIDS.map(
         (k, i) =>
           node.capacity[i]
-            ? `${k}: ${node.water[i].toFixed(1)}/${node.capacity[i]}`
+            ? `${{ fresh: "Drinking water", irrigation: "Irrigation water", greywater: "Greywater", sewage: "Sewage" }[k]}: ${node.water[i].toFixed(1)}/${node.capacity[i]} L`
             : "",
       )
         .filter(Boolean)
@@ -1830,7 +1844,7 @@ function renderUtilityUI() {
           " · ",
         )} ${op ? op.status || "Resident job queued" : p.productionStatus || (p.readyAt > s.time ? `Growing: about ${Math.ceil((p.readyAt - s.time) * .45)} game minutes left` : "")}`
     : "";
-  if(p){const status=buildingOperatingStatus(s,p);$("building-service").textContent=`${status.state}: ${status.reason} · ${$("building-service").textContent}`;}
+  if(p){const status=buildingOperatingStatus(s,p),rest=$("building-service").textContent.trim();$("building-service").textContent=`${status.state}: ${status.reason}${rest?` · ${rest}`:''}`;}
   const recipe=PROCESSES[$("production").value];
   if(p&&recipe?.gathering)$("building-service").textContent+=` · ${gatheringStatus(s,p)}`;
   if(p && recipe?.deposit) $("building-service").textContent+=` · Deposit: ${Math.max(0,depositCapacity(s.landSeed,p,recipe)-(p.extracted||0))} remaining`;
@@ -1946,13 +1960,12 @@ function focusPanel(panel) {
 function setPanel(panel) {
   const previousPanel = openPanel;
   if (panel && !previousPanel) panelOpener = document.activeElement;
-  if(openPanel && openPanel!=='people'){paused=trayWasPaused;updatePauseButton();}
+  if(openPanel && openPanel!=='people')releasePause(trayWasPaused);
   if (placing) cancel();
-  if(panel && panel!=='people'){trayWasPaused=paused;paused=true;updatePauseButton();}
+  if(panel && panel!=='people')trayWasPaused=holdPause();
   if(panel==='people') {
     expandedResident??=s.people[0].id;
-    residentsWasPaused=paused;paused=true;updatePauseButton();
-    if(!$("people").open) $("people").showModal();
+    if(!$("people").open){residentsWasPaused=holdPause();$("people").showModal();}
   } else if($("people").open) $("people").close();
   openPanel = panel;
   terrainBrush.visible = false;
@@ -1981,7 +1994,7 @@ document
   .querySelectorAll("[data-close-panel]")
   .forEach((button) => (button.onclick = () => setPanel(null)));
 $("people").addEventListener('close',()=>{
-  paused=residentsWasPaused;updatePauseButton();
+  releasePause(residentsWasPaused);
   if(openPanel==='people')openPanel=null;
   uiSignature='';renderUI();
 });
@@ -2070,7 +2083,7 @@ function renderUI() {
     ],
     [
       "water",
-      Math.floor(Object.values(s.infrastructure?.nodes||{}).reduce((sum,n)=>sum+n.water[0],0)),
+      `${Math.floor(Object.values(s.infrastructure?.nodes||{}).reduce((sum,n)=>sum+n.water[0],0))} L`,
       "Water",
       "water",
     ],
@@ -2388,10 +2401,10 @@ function renderUI() {
     const total = (purchase.cost || 0) + (purchase.transport || 0);
     b.querySelector(".build-cost").textContent = s.mode === "sandbox" ? `Free · ${footprint}`
       : !missing.length ? `Materials in stock · ${footprint}`
-      : s.autoBuy === false ? "Missing materials · auto-buy off"
-      : !purchase.cost ? "Needs local materials"
-      : blocked && total + (s.expansionReserve ?? 0) > s.money ? `${brl(total)} · not enough savings`
-      : blocked ? `${brl(total)} · supplies unavailable`
+      : s.autoBuy === false ? `Missing materials · auto-buy off · ${footprint}`
+      : !purchase.cost ? `Needs local materials · ${footprint}`
+      : blocked && total + (s.expansionReserve ?? 0) > s.money ? `${brl(total)} · not enough savings · ${footprint}`
+      : blocked ? `${brl(total)} · supplies unavailable · ${footprint}`
       : `${brl(total)} to buy · ${footprint}`;
     buildMaterialTooltip.update(b, missing, blocked ? purchase.error : "");
     b.classList.toggle("active", placing === key);
@@ -2474,6 +2487,8 @@ management = createManagement({
     paused = value;
     updatePauseButton();
   },
+  holdPause,
+  releasePause,
 });
 $("tank-attention").onclick = () => management.open("water");
 $("supplies").onclick = (event) => {

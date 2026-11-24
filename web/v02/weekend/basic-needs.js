@@ -14,7 +14,7 @@ export function basicNeeds(s) {
  const fresh=enabled.filter(n=>!['coop','goat_pasture'].includes(n.kind)).reduce((sum,n)=>sum+Math.max(0,n.water?.[0]||0),0);
  const daily=residents.reduce((sum,r)=>sum+hydrationDemand(s,r),0),hours=daily?fresh/daily*24:0;
  const thirsty=residents.filter(r=>(r.needs?.hydration??100)<30);
- const water=item('water','Water',!count?'neutral':thirsty.length||fresh<.5?'alert':hours<6?'watch':'good',!count?'No residents':thirsty.length?'Residents thirsty':fresh<.5?'No drinking water':hours<6?'Low reserve':'In reserve',`${fresh.toFixed(1)} L potable · ${thirsty.length?`${thirsty.length} thirsty`:'access still required'}`,'water');
+ const water=item('water','Water',!count?'neutral':thirsty.length||fresh<.5?'alert':hours<6?'watch':'good',!count?'No residents':thirsty.length?'Residents thirsty':fresh<.5?'No drinking water':hours<6?'Low reserve':'In reserve',`${fresh.toFixed(1)} L drinking water · ${thirsty.length?`${thirsty.length} thirsty`:'access still required'}`,'water');
  if(s.mode==='sandbox'){water.status='neutral';water.summary='Sandbox';water.detail='Resident hydration is maintained in sandbox';}
  const portions=foodPortions(s),days=count?portions/(count*3):0;
  const food=item('food','Food',!count?'neutral':!portions?'alert':days<1?'watch':'good',!count?'No residents':!portions?'No ready food':days<1?'Low reserve':'In reserve',`${portions} portions · ${days.toFixed(1)} days estimated`,'food');

@@ -60,10 +60,10 @@ export const BINDINGS = [
 
   {id: 'finances', group: 'Almanac', label: 'M', text: 'Finances', key: ['m'], screen: 'finances', modal: 'management', hint: '[data-manage="finances"], [data-panel="finances"]'},
   {id: 'items', group: 'Almanac', label: 'K', text: 'Items & equipment', key: ['k'], screen: 'items', modal: 'management', hint: '[data-manage="items"]'},
-  {id: 'crafting', group: 'Almanac', label: 'C', text: 'Crafting', key: ['c'], screen: 'crafting', modal: 'management', hint: '[data-manage="crafting"]'},
+  {id: 'crafting', group: 'Almanac', label: 'C', text: 'Crafting & repairs', key: ['c'], screen: 'crafting', modal: 'management', hint: '[data-manage="crafting"]'},
   {id: 'food', group: 'Almanac', label: 'Y', text: 'Food', key: ['y'], screen: 'food', modal: 'management', hint: '[data-manage="food"]'},
   {id: 'resources', group: 'Almanac', label: 'I', text: 'Resources', key: ['i'], screen: 'resources', modal: 'management', hint: '[data-manage="resources"]'},
-  {id: 'water', group: 'Almanac', label: 'U', text: 'Water', key: ['u'], screen: 'water', modal: 'management', hint: '[data-manage="water"]'},
+  {id: 'water', group: 'Almanac', label: 'U', text: 'Water & sanitation', key: ['u'], screen: 'water', modal: 'management', hint: '[data-manage="water"]'},
   {id: 'power', group: 'Almanac', label: 'P', text: 'Power', key: ['p'], screen: 'power', modal: 'management', hint: '[data-manage="power"]'},
 
   {id: 'guide', group: 'Help & options', label: 'H', text: 'Village guide', key: ['h'], modal: 'village-guide', hint: '#open-guide'},
