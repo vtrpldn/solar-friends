@@ -70,6 +70,10 @@ export const BINDINGS = [
   {id: 'view-options', group: 'Help & options', label: 'V', text: 'View & options: camera buttons, saves, sound', key: ['v'], hint: '.view-menu > summary'},
   {id: 'help', group: 'Help & options', label: '?', text: 'This list of keyboard and camera controls', key: ['?'], shift: 'any', modal: 'controls-dialog', quiet: '#show-controls'},
 
+  {id: 'skip-arrival', group: 'Arrival & camp', label: 'Esc', alt: 'Enter or Space', text: 'Skip the drive in', note: true},
+  {id: 'rotate-camp', group: 'Arrival & camp', label: 'R', alt: 'Shift + R', text: 'Turn the camp while choosing where to pitch it', note: true},
+  {id: 'keep-camp', group: 'Arrival & camp', label: 'Esc', text: 'Keep the camp where it is while moving it', note: true},
+
   {id: 'tab', group: 'Menus & dialogs', label: 'Tab', alt: 'Shift + Tab', text: 'Move between controls', note: true},
   {id: 'arrows', group: 'Menus & dialogs', label: '↑ ← ↓ →', text: 'Move to the nearest button in that direction; from a search field, ↓ enters the results', note: true},
   {id: 'press', group: 'Menus & dialogs', label: 'Enter', alt: 'Space', text: 'Press the focused button', note: true},

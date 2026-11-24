@@ -89,5 +89,5 @@ assert.equal((lensesSource.match(/<kbd/g) || []).length, 0);
 assert(html.includes('id="controls-list"') && game.includes('renderShortcutHelp($("controls-list"))'), 'help dialog is rendered from the table');
 const rows = helpGroups().flatMap(g => g.rows);
 assert.equal(rows.length, BINDINGS.length, 'help lists every binding once');
-assert.deepEqual(helpGroups().map(g => g.name), ['Camera', 'Map', 'Time', 'Village', 'Almanac', 'Help & options', 'Menus & dialogs', 'Mouse']);
+assert.deepEqual(helpGroups().map(g => g.name), ['Camera', 'Map', 'Time', 'Village', 'Almanac', 'Help & options', 'Arrival & camp', 'Menus & dialogs', 'Mouse']);
 console.log(`PASS ${BINDINGS.length} bindings: no duplicates, layout-aware matching, guards, one handler each, hints and help generated from the table`);

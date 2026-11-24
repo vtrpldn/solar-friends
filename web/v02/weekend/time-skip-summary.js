@@ -1,3 +1,4 @@
+import {brl} from './money.js';
 import {DAY, HOUR, weatherAt} from './weather.js';
 import {foodPortions} from './food-storage.js';
 import {eventTime} from './event-history.js';
@@ -60,7 +61,7 @@ const ROUTINE = [/purified .* for drinking/, /is heading to the car for town/, /
 
 export function summarizeSkip(before, s, {
   projects = {}, materials = {}, recipes = {},
-  money = n => `R$${n.toFixed(2)}`,
+  money = brl,
   requestedDays = null, completed = true,
 } = {}) {
   const elapsed = Math.max(0, s.time - before.time), days = elapsed / DAY;

@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {brl} from '../web/v02/weekend/money.js';
 import {createWeekend,createSandbox,chooseCamp,save,enableFastNavigation,PROJECTS,MATERIALS} from '../web/v02/weekend/simulation.js';
 import {PROCESSES} from '../web/v02/weekend/catalog-rules.js';
 import {DAY} from '../web/v02/weekend/weather.js';
@@ -8,7 +9,8 @@ import {snapshotVillage,summarizeSkip} from '../web/v02/weekend/time-skip-summar
 
 const options={projects:PROJECTS,materials:MATERIALS,recipes:PROCESSES};
 const fresh=()=>{const s=createWeekend(42);chooseCamp(s,'entrance');enableFastNavigation(s);return s;};
-const cents=text=>Math.round(Number(text.replace('−','-').replace(/[^0-9.+-]/g,''))*100);
+// Money reads as pt-BR: "R$ 1.234,56".
+const cents=text=>Math.round(Number(text.replace('−','-').replace(/[^0-9,+-]/g,'').replace(',','.'))*100);
 const find=(summary,id)=>summary.sections.find(section=>section.id===id);
 const water=s=>Object.values(s.infrastructure?.nodes||{}).reduce((n,node)=>n+(node.water?.[0]||0),0);
 
@@ -29,7 +31,7 @@ assert.equal(summary.from,'Day 1 · 09:00');assert.equal(summary.to,'Day 6 · 09
 assert.match(summary.weather,/^(No rain|Rain every day|Rain on [1-4] of 5 days)$/);
 const money=find(summary,'money');
 assert(money,'idle days still cost money');assert.equal(money.screen,'finances');
-assert.equal(money.total,`R$${start.money.toFixed(2)} → R$${s.money.toFixed(2)}`);
+assert.equal(money.total,`${brl(start.money)} → ${brl(s.money)}`);
 assert.equal(money.rows.reduce((n,row)=>n+cents(row.value),0),Math.round((s.money-start.money)*100),'category rows add up to the savings change');
 assert.equal(cents(money.note),Math.round((s.money-start.money)*100));
 for(const [key,label] of [['household','Food bought'],['transport','Trips to town and deliveries']])
