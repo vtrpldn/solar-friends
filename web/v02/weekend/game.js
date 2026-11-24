@@ -7,6 +7,8 @@ import {renderDevTools} from './dev-tools.js';
 renderDevTools(document.getElementById('dev-tools'));
 import {upcomingMilestones, milestoneTime} from './time-skip-milestones.js';
 import {skipDays} from './time-skip.js';
+import {snapshotVillage, summarizeSkip} from './time-skip-summary.js';
+import {renderSkipSummary} from './time-skip-summary-ui.js';
 import {basicNeeds,renderBasicNeeds} from './basic-needs.js';
 import {installGuide} from './guide.js';
 let guide;
@@ -1406,6 +1408,11 @@ $("time-skip").onclick = () => {
 skipDialog.addEventListener('cancel', event => { if (skippingTime) event.preventDefault(); });
 skipDialog.addEventListener('close', () => { paused = skipWasPaused; updatePauseButton(); });
 $("skip-close").onclick = () => skipDialog.close();
+const skipSummaryDialog = $("skip-summary-dialog");
+$("skip-summary-close").onclick = () => skipSummaryDialog.close();
+skipSummaryDialog.addEventListener('close', () => {
+  if (skipSummaryDialog.returnValue !== 'screen') $("time-skip").focus({preventScroll: true});
+});
 $("skip-form").onsubmit = async event => {
   event.preventDefault();
   if (skippingTime || !$("skip-form").reportValidity()) return;
@@ -1418,8 +1425,10 @@ $("skip-form").onsubmit = async event => {
   let nextProgressUpdate = 0;
   $("skip-close").onclick = () => { stopped = true; };
   $("skip-progress").hidden = false;
+  const skipBefore = snapshotVillage(s), skipRequested = Number($("skip-days").value);
+  let skipCompleted = false;
   try {
-    await skipDays(s, Number($("skip-days").value), {
+    ({completed: skipCompleted} = await skipDays(s, skipRequested, {
       fast: $("skip-fast").checked,
       cancelled: () => stopped,
       progress: fraction => {
@@ -1430,8 +1439,8 @@ $("skip-form").onsubmit = async event => {
         renderSkipMilestones();
         $("skip-status").textContent = `Advancing days… ${Math.floor(fraction * 100)}%`;
       },
-    });
-    message(stopped ? 'Time advance stopped. Your village is paused.' : 'Days advanced. Your village is paused.');
+    }));
+    message('');
   } catch (error) {
     console.error(error);
     message('Time advance interrupted. Your village is paused at the last simulated moment.');
@@ -1452,6 +1461,12 @@ $("skip-form").onsubmit = async event => {
     $("skip-close").onclick = () => skipDialog.close();
     requestSceneRender();
     skipDialog.close();
+    renderSkipSummary(skipSummaryDialog, summarizeSkip(skipBefore, s, {
+      projects: PROJECTS, materials: MATERIALS, recipes: PROCESSES,
+      requestedDays: skipRequested, completed: skipCompleted,
+    }), {openScreen: screen => management.open(screen)});
+    skipSummaryDialog.returnValue = '';
+    skipSummaryDialog.showModal();
   }
 };
 

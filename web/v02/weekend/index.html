@@ -354,6 +354,14 @@
         <div><button id="skip-close" type="button">Cancel</button><button id="skip-start" type="submit">Advance time</button></div>
       </form>
     </dialog>
+    <dialog id="skip-summary-dialog" aria-labelledby="skip-summary-title" aria-describedby="skip-summary-span">
+      <p class="skip-summary-eyebrow">While time passed</p>
+      <h2 id="skip-summary-title"></h2>
+      <p id="skip-summary-span"></p>
+      <p id="skip-summary-stopped" hidden></p>
+      <div id="skip-summary-body"></div>
+      <div class="skip-summary-foot"><span>Your village is paused.</span><button id="skip-summary-close" type="button" autofocus>Back to the village</button></div>
+    </dialog>
     <script type="module" src="game.js"></script>
   </body>
 </html>
