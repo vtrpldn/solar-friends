@@ -4,6 +4,9 @@
   "type": "module",
   "scripts": {
     "dev": "node scripts/dev.mjs",
+    "dev:v2": "node scripts/dev.mjs --no-rust",
+    "check": "node scripts/check.mjs",
+    "check:changed": "node scripts/check.mjs --changed --syntax",
     "benchmark": "node scripts/benchmark-engine.mjs",
     "dev:check": "node scripts/dev-check.mjs",
     "dev:browser": "node scripts/dev-check.mjs --browser-only",

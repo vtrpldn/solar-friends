@@ -11,7 +11,7 @@ const root=fileURLToPath(new URL('../',import.meta.url));
 process.chdir(root);
 const env={...process.env,PATH:`${homedir()}/.cargo/bin:${process.env.PATH}`};
 const buildRoot=path.join(root,'target/dev-web');
-const clients=new Set();let current,building=false,pending=false,timer,child,revision=0,queuedRust=false,lastFingerprint;
+const clients=new Set();let current,building=false,pending=false,timer,child,revision=0,queuedRust=false,queuedStyles=true,lastFingerprint;
 const send=value=>{for(const res of clients)res.write(`data: ${JSON.stringify(value)}\n\n`);};
 function run(command,args){return new Promise((resolve,reject)=>{child=spawn(command,args,{cwd:root,env,stdio:'inherit'});child.once('error',reject);child.once('close',code=>{child=null;code===0?resolve():reject(new Error(`${command} exited ${code}`));});});}
 async function fingerprint(){
@@ -36,25 +36,29 @@ async function build(){
  finally{building=false;if(pending){pending=false;await build();}}
 }
 const watchers=[];
-function schedule(rust){queuedRust ||= rust;clearTimeout(timer);timer=setTimeout(()=>{const compile=queuedRust;queuedRust=false;if(compile)build();else if(building)pending=true;else send({status:'ready',revision:current,asset:Date.now()});},150);}
+// Style-only edits are swapped into the running page, so the village keeps playing.
+function schedule(rust,style){queuedRust ||= rust;queuedStyles &&= style;clearTimeout(timer);timer=setTimeout(()=>{const compile=queuedRust&&!process.argv.includes('--no-rust'),styles=queuedStyles;queuedRust=false;queuedStyles=true;if(compile)build();else if(building)pending=true;else send(styles?{status:'styles'}:{status:'ready',revision:current,asset:Date.now()});},rust?150:40);}
 for(const dir of ['src','web'])watchers.push(watch(dir,{recursive:true},(_,file)=>{
  if(!file||/^(pkg|dev-report)\//.test(file)||! /\.(rs|js|css|html|png|json|svg)$/.test(file))return;
- schedule(dir==='src');
+ schedule(dir==='src',file.endsWith('.css'));
 }));
-for(const file of ['Cargo.toml','Cargo.lock'])watchers.push(watch(file,()=>schedule(true)));
-await build();
-if(!current)process.exit(1);
+for(const file of ['Cargo.toml','Cargo.lock'])watchers.push(watch(file,()=>schedule(true,false)));
 const client=await readFile('scripts/dev-reload.js','utf8');
 const server=await serve(Number(process.env.PORT||4173),{handle:async(req,res,pathname)=>{
  if(pathname==='/__dev/events'){
   res.writeHead(200,{'Content-Type':'text/event-stream','Cache-Control':'no-store','Connection':'keep-alive'});res.write(`data: ${JSON.stringify({status:'connected',revision:current})}\n\n`);clients.add(res);req.on('close',()=>clients.delete(res));return true;
  }
  if(pathname==='/__dev/client.js'){res.writeHead(200,{'Content-Type':'text/javascript','Cache-Control':'no-store'}).end(client);return true;}
- if(pathname.startsWith('/pkg/') || pathname.startsWith('/v1/pkg/')){res.writeHead(307,{Location:`/__dev/build/${current}/${path.basename(pathname)}`,'Cache-Control':'no-store'}).end();return true;}
+ // Until the first v1 build finishes, fall through to any existing web/pkg.
+ if(current&&(pathname.startsWith('/pkg/') || pathname.startsWith('/v1/pkg/'))){res.writeHead(307,{Location:`/__dev/build/${current}/${path.basename(pathname)}`,'Cache-Control':'no-store'}).end();return true;}
  const match=pathname.match(/^\/__dev\/build\/([0-9a-f-]{36})\/(solar_friends(?:_bg\.wasm|\.js))$/);
  if(match){const bytes=await readFile(path.join(buildRoot,match[1],match[2]));res.writeHead(200,{'Content-Type':match[2].endsWith('.wasm')?'application/wasm':'text/javascript','Cache-Control':'no-store'}).end(bytes);return true;}
  return false;
 },html:body=>body.replace('</body>','<script type="module" src="/__dev/client.js"></script></body>')});
-console.log(`Live game: http://127.0.0.1:${server.address().port} (Rust + artwork + UI watch)`);
+console.log(`Live game: http://127.0.0.1:${server.address().port}/v2/ (UI + artwork watch; styles swap without a reload)`);
+// v2 is plain JavaScript and is playable immediately. The v1 engine compiles in the
+// background; `--no-rust` (or a machine without cargo) skips it entirely.
+if(process.argv.includes('--no-rust'))console.log('v1 Rust engine: skipped.');
+else build().then(()=>{if(!current)console.log('v1 Rust engine is unavailable; v2 keeps running.');});
 function stop(){clearTimeout(timer);for(const w of watchers)w.close();child?.kill('SIGTERM');for(const res of clients)res.end();server.close(()=>process.exit(0));}
 process.once('SIGINT',stop);process.once('SIGTERM',stop);

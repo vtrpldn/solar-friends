@@ -5,47 +5,96 @@ on:
   pull_request:
 permissions:
   contents: read
+  pull-requests: read
+# A newer push to the same branch makes the older run pointless.
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      rust: ${{ steps.filter.outputs.rust }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/workflows
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            rust:
+              - 'src/**'
+              - 'Cargo.toml'
+              - 'Cargo.lock'
+              - 'rust-toolchain.toml'
+              - 'scripts/build.sh'
+              - '.github/workflows/check.yml'
+
+  # The current game is plain JavaScript: no Rust toolchain, no v1 build.
   game:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install pinned Rust toolchain
-        run: rustup show
-      - uses: Swatinem/rust-cache@v2
-      - run: cargo install wasm-bindgen-cli --version 0.2.100 --locked
+        with:
+          # Nothing the game or its checks read lives in the 3 GB art archive.
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /*
+            !/assets/
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - name: Check resident decisions and desktop profiles
-        timeout-minutes: 15
-        run: |
-          node scripts/verify-v02-personality.mjs
-          node scripts/verify-v02-resident-agency.mjs
-          node scripts/verify-v02-downtime.mjs
-          node scripts/verify-v02-expressive-motion.mjs
-          node scripts/verify-v02-seed-autobuy.mjs
-          node scripts/verify-v02-daily-routines.mjs
-          node scripts/verify-v02-needs.mjs
-          node scripts/verify-v02-urgent-needs.mjs
-          node scripts/verify-v02-resident-agency-browser.mjs
-      - run: npm run dev:check -- --v2
+      - name: Check the v2 game
+        timeout-minutes: 45
+        run: node scripts/check.mjs --syntax
         env:
-          REALISM_SCREENSHOTS: artifacts/dev-check/realism
-          LAB_SCREENSHOTS: artifacts/dev-check/lab
+          REALISM_SCREENSHOTS: artifacts/check-evidence/realism
+          LAB_SCREENSHOTS: artifacts/check-evidence/lab
+          SOLAR_EVIDENCE_DIR: artifacts/check-evidence/residents
       - uses: actions/upload-artifact@v4
         if: always()
         continue-on-error: true
         with:
-          name: development-check
-          path: artifacts/dev-check/
+          name: check
+          path: |
+            artifacts/check/
+            artifacts/check-evidence/
           retention-days: 7
+
+  # The preserved v1 engine only needs checking when its sources change.
+  rust:
+    needs: changes
+    if: needs.changes.outputs.rust == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /*
+            !/assets/
+      - name: Install pinned Rust toolchain
+        run: rustup show
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions/cache@v4
+        id: wasm-bindgen
+        with:
+          path: ~/.cargo/bin/wasm-bindgen
+          key: wasm-bindgen-0.2.100-${{ runner.os }}
+      - if: steps.wasm-bindgen.outputs.cache-hit != 'true'
+        run: cargo install wasm-bindgen-cli --version 0.2.100 --locked
+      - run: cargo fmt --check
+      - run: cargo clippy --locked --all-targets -- -D warnings
+      - run: cargo test --locked --all-targets
+      - run: cargo test --locked --doc
+      - run: bash scripts/build.sh
       - uses: actions/upload-artifact@v4
         continue-on-error: true
         with:
-          name: solar-friends-browser
-          path: web/
+          name: solar-friends-v1-engine
+          path: web/pkg/
           retention-days: 7

@@ -13,10 +13,10 @@ The game focuses on village planning and resource tradeoffs. Residents do the ph
 
 ```sh
 npm install
-npm run dev:serve
+npm run dev:v2
 ```
 
-Open http://127.0.0.1:4173/v2/. The local server and production use `/v1/` and `/v2/`; the playable v2 has no `/weekend` prefix. Source directories retain their historical names, including `web/v02/weekend`.
+Open http://127.0.0.1:4173/v2/. `dev:v2` serves immediately, reloads the page when game files change and swaps edited stylesheets into the running page without a reload. `npm run dev` does the same and also compiles the v1 Rust engine in the background; `npm run dev:serve` is a plain static server. The local server and production use `/v1/` and `/v2/`; the playable v2 has no `/weekend` prefix. Source directories retain their historical names, including `web/v02/weekend`.
 
 For changes to the v1 Rust engine, install the pinned Rust toolchain and `wasm-bindgen-cli` 0.2.100, then run `bash scripts/build.sh`. Serving v2's JavaScript does not require rebuilding v1. `npm run build:site` packages the web files into `dist/v1` and `dist/v2`; the Netlify build also compiles the Rust engine.
 
@@ -57,6 +57,8 @@ node scripts/verify-v02-lab.mjs
 npm run build:site
 git diff --check
 ```
+
+`npm run check:changed` runs, in parallel, only the `verify-v02-*` checks whose imports reach the files you changed (every browser check when game files changed) and reports all failures together. `npm run check` runs the whole v2 suite the same way, as CI does; add words to filter by name (`npm run check -- needs trade`), `--no-browser` to skip Playwright checks, or `--list` to preview the selection.
 
 Choose additional `scripts/verify-v02-*.mjs` checks for the changed subsystem. Historical checks may encode older design assumptions; investigate failures rather than claiming the entire suite passes. The recovery replay uses an existing normal-game save and automated ticks; it is not a manual browser playthrough. UI changes need rendered browser checks.
 
