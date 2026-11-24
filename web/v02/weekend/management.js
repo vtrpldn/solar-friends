@@ -114,11 +114,15 @@ export function createManagement({
       if ([...purchase.options].some(o => o.value === previous)) purchase.value = previous;
       if (previousView !== view) $('resource-search').value = '';
     }
-    if (!dialog.open) {
+    const opening = !dialog.open;
+    if (opening) {
       wasPaused = isPaused();
       setPaused(true);
       dialog.showModal();
     }
+    // Land on the screen's own tab: arrows walk the tabs, Tab enters the screen.
+    if (opening || !dialog.contains(document.activeElement) || document.activeElement.closest('.management-tabs'))
+      dialog.querySelector(`.management-tabs [data-manage="${view}"]`)?.focus({preventScroll: true});
     $("utility-kind").innerHTML = (view === "power" ? ["power"] : LIQUIDS)
       .map(
         (k) =>

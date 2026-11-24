@@ -1,29 +1,24 @@
 import { MAP_HALF } from "./map-size.js";
 import * as THREE from "three";
+import { HELD, heldCode, binding } from "./keyboard-shortcuts.js";
+const held = (keys, part) => HELD[part].some((code) => keys.has(code));
+// `keys` holds the canonical code of each held direction (see heldCode).
 export function cameraStep({ x, z, zoom }, keys, dt) {
   const length = Math.hypot(x, z) || 1;
-  let sideways =
-    Number(keys.has("KeyD") || keys.has("ArrowRight")) -
-    Number(keys.has("KeyA") || keys.has("ArrowLeft"));
-  let forward =
-    Number(keys.has("KeyW") || keys.has("ArrowUp")) -
-    Number(keys.has("KeyS") || keys.has("ArrowDown"));
+  let sideways = Number(held(keys, "right")) - Number(held(keys, "left"));
+  let forward = Number(held(keys, "forward")) - Number(held(keys, "back"));
   const magnitude = Math.hypot(sideways, forward) || 1;
   sideways /= magnitude;
   forward /= magnitude;
   const distance =
-    ((24 * dt) / Math.sqrt(zoom)) *
-    (keys.has("ShiftLeft") || keys.has("ShiftRight") ? 2.2 : 1);
+    ((24 * dt) / Math.sqrt(zoom)) * (held(keys, "fast") ? 2.2 : 1);
   return {
     x: ((sideways * z - forward * x) / length) * distance,
     z: ((-sideways * x - forward * z) / length) * distance,
-    angle: (Number(keys.has("KeyE")) - Number(keys.has("KeyQ"))) * dt * 1.2,
-    tilt: (Number(keys.has("Period")) - Number(keys.has("Comma"))) * dt,
+    angle: (Number(held(keys, "turnRight")) - Number(held(keys, "turnLeft"))) * dt * 1.2,
+    tilt: (Number(held(keys, "tiltDown")) - Number(held(keys, "tiltUp"))) * dt,
     zoom: Math.exp(
-      (Number(keys.has("Equal") || keys.has("NumpadAdd")) -
-        Number(keys.has("Minus") || keys.has("NumpadSubtract"))) *
-        dt *
-        1.3,
+      (Number(held(keys, "zoomIn")) - Number(held(keys, "zoomOut"))) * dt * 1.3,
     ),
   };
 }
@@ -32,35 +27,19 @@ export function installCameraNavigation(
   controls,
   { home, allowDisabledControls = () => false, onInteract = () => {} },
 ) {
-  const keys = new Set(),
-    handled = new Set([
-      "KeyW",
-      "KeyA",
-      "KeyS",
-      "KeyD",
-      "ArrowUp",
-      "ArrowDown",
-      "ArrowLeft",
-      "ArrowRight",
-      "KeyQ",
-      "KeyE",
-      "Comma",
-      "Period",
-      "Equal",
-      "Minus",
-      "NumpadAdd",
-      "NumpadSubtract",
-      "Home",
-      "ShiftLeft",
-      "ShiftRight",
-    ]);
+  // Physical key -> the movement it started, so a release always ends it even
+  // if the layout or Shift state changed while the key was down.
+  const keys = new Set(), pressed = new Map();
+  const homeCodes = binding("home").code;
   const editing = (event) =>
     event.target?.closest?.(
       'input,textarea,select,[contenteditable]:not([contenteditable="false"]),dialog[open]',
     ) || document.querySelector("dialog[open]");
   addEventListener("keydown", (event) => {
+    const isHome = homeCodes.includes(event.code);
+    const code = isHome ? null : heldCode(event);
     if (
-      !handled.has(event.code) ||
+      (!code && !isHome) ||
       event.defaultPrevented || event.isComposing ||
       event.metaKey ||
       event.ctrlKey ||
@@ -70,15 +49,25 @@ export function installCameraNavigation(
     )
       return;
     event.preventDefault();
-    keys.add(event.code);
     onInteract();
-    if (event.code === "Home" && !event.repeat) home();
+    if (isHome) {
+      if (!event.repeat) home();
+      return;
+    }
+    pressed.set(event.code, code);
+    keys.add(code);
   });
-  addEventListener("keyup", (event) => keys.delete(event.code));
-  addEventListener("blur", () => keys.clear());
-  document.addEventListener("focusin", () => keys.clear());
+  const release = (event) => {
+    const code = pressed.get(event.code);
+    pressed.delete(event.code);
+    if (code && ![...pressed.values()].includes(code)) keys.delete(code);
+  };
+  addEventListener("keyup", release);
+  const clear = () => { keys.clear(); pressed.clear(); };
+  addEventListener("blur", clear);
+  document.addEventListener("focusin", clear);
   document.addEventListener("visibilitychange", () => {
-    if (document.hidden) keys.clear();
+    if (document.hidden) clear();
   });
   const rotate = (angle) => {
     const offset = camera.position.clone().sub(controls.target);
@@ -111,7 +100,7 @@ export function installCameraNavigation(
     },
     update(dt) {
       if (document.querySelector("dialog[open]")) {
-        keys.clear();
+        clear();
         return;
       }
       if (!keys.size || document.hidden || (controls.enabled === false && !allowDisabledControls())) return;

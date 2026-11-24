@@ -5,7 +5,7 @@ import {CELL_MIN,CELL_MAX} from './map-size.js';
 // Read-only presentation. No lens preferences or derived data enter the save.
 export function installLenses({state,camera,world,focus,inspect}) {
   const root=document.createElement('section');root.id='map-lenses';root.setAttribute('aria-label','Map lenses');
-  root.innerHTML=`<button id="lens-toggle" aria-expanded="false" aria-controls="lens-panel">◉ Lenses <kbd>L</kbd></button>
+  root.innerHTML=`<button id="lens-toggle" aria-expanded="false" aria-controls="lens-panel"><span id="lens-toggle-label">◉ Lenses</span></button>
     <div id="lens-panel" hidden><div class="lens-heading"><div><small>READ THE LAND</small><h2>Map lenses</h2></div><button id="lens-close" aria-label="Close lens menu">×</button></div>
     <div class="lens-choices" role="group" aria-label="Choose a map lens"></div></div>
     <section id="lens-legend" hidden aria-label="Active lens"><div class="lens-heading"><strong id="lens-title"></strong><button id="lens-off" aria-label="Return to normal view">×</button></div><p id="lens-description"></p>
@@ -19,13 +19,19 @@ export function installLenses({state,camera,world,focus,inspect}) {
   const glyph={good:'●',warn:'▲',bad:'!',info:'◆',muted:'−'};
   const choices=root.querySelector('.lens-choices');
   for(const lens of LENSES){const b=document.createElement('button');b.textContent=lens.name;b.dataset.lens=lens.id;b.setAttribute('aria-pressed','false');b.onclick=()=>choose(active===lens.id?'':lens.id);choices.append(b);}
-  function menu(open){$('lens-panel').hidden=!open;$('lens-toggle').setAttribute('aria-expanded',String(open));}
+  // Opening moves focus to the current choice; closing hands it back to the toggle.
+  function menu(open){
+    const inside=root.contains(document.activeElement)&&document.activeElement!==$('lens-toggle');
+    $('lens-panel').hidden=!open;$('lens-toggle').setAttribute('aria-expanded',String(open));
+    if(open)(choices.querySelector('[aria-pressed="true"]')||choices.firstElementChild).focus({preventScroll:true});
+    else if(inside)$('lens-toggle').focus({preventScroll:true});
+  }
   function choose(id){
     active=id;last=-Infinity;terrain=[];tooltip.hidden=true;$('lens-list').replaceChildren();$('lens-results').open=false;$('lens-results').hidden=id==='land';
     document.body.dataset.lens=id;canvas.hidden=!id;$('lens-legend').hidden=!id;
     for(const b of choices.children)b.setAttribute('aria-pressed',String(b.dataset.lens===id));
     const lens=LENSES.find(l=>l.id===id);$('lens-title').textContent=lens?.name||'';$('lens-description').textContent=lens?.description||'';
-    $('lens-toggle').textContent=id?`◉ ${lens.name} · L`:'◉ Lenses · L';
+    $('lens-toggle-label').textContent=id?`◉ ${lens.name}`:'◉ Lenses';
     $('lens-filter-label').hidden=!['water','chains'].includes(id);
     const filter=$('lens-filter');filter.replaceChildren();
     const options=id==='water'?[['fresh','Drinking water'],['irrigation','Irrigation'],['greywater','Greywater'],['sewage','Sewage']]:Object.entries(MATERIALS).map(([k,v])=>[k,v.name]);
@@ -37,11 +43,6 @@ export function installLenses({state,camera,world,focus,inspect}) {
   }
   $('lens-filter').onchange=e=>{if(active==='water'){liquid=e.target.value;const expanded=$('lens-results').open;choose(active);$('lens-results').open=expanded;}else material=e.target.value;last=-Infinity;};
   $('lens-toggle').onclick=()=>menu($('lens-panel').hidden);$('lens-close').onclick=()=>menu(false);$('lens-off').onclick=()=>choose('');
-  document.addEventListener('keydown',e=>{
-    if(e.target.closest?.('input,textarea,select,[contenteditable],dialog')||document.querySelector('dialog[open]')||e.ctrlKey||e.metaKey||e.altKey||e.repeat)return;
-    if(e.code==='KeyL'){e.preventDefault();menu($('lens-panel').hidden);}
-    if(e.key==='Escape'&&(!$('lens-panel').hidden||active)){e.preventDefault();e.stopImmediatePropagation();if(!$('lens-panel').hidden)menu(false);else choose('');}
-  },true);
   document.getElementById('world').addEventListener('pointermove',e=>{pointer={x:e.clientX,y:e.clientY};});
   document.getElementById('world').addEventListener('pointerleave',()=>{pointer=null;tooltip.hidden=true;});
   function project(p,offset=.3){const v=p.position?.clone()||world(p.x,p.z);v.y+=offset;v.project(camera);return {x:(v.x+1)*innerWidth/2,y:(1-v.y)*innerHeight/2,visible:v.z>=-1&&v.z<=1};}
@@ -98,5 +99,5 @@ export function installLenses({state,camera,world,focus,inspect}) {
     const hit=active==='land'?terrainHit:pointer?projected.reduce((best,p)=>{const d=Math.hypot(pointer.x-p.x,pointer.y-p.y);return d<(best?.d??18)?{...p,d}:best;},null):null;
     tooltip.hidden=!hit;
     if(hit){tooltip.textContent=`${hit.mark.label} · ${hit.mark.detail}`;tooltip.style.left=`${Math.max(8,Math.min(w-340,pointer.x+16))}px`;tooltip.style.top=`${Math.max(8,Math.min(h-tooltip.offsetHeight-8,pointer.y+18))}px`;}
-  },get active(){return active;}};
+  },get active(){return active;},get menuOpen(){return !$('lens-panel').hidden;},toggleMenu(){menu($('lens-panel').hidden);},closeMenu(){menu(false);},clear(){choose('');}};
 }

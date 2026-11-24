@@ -23,7 +23,7 @@ assert(
   ) < 1e-9,
 );
 assert(step(["KeyQ"]).angle < 0 && step(["KeyE"]).angle > 0);
-assert(step(["Equal"]).zoom > 1 && step(["Minus"]).zoom < 1);
+assert(step(["NumpadAdd"]).zoom > 1 && step(["NumpadSubtract"]).zoom < 1);
 console.log(
   "PASS: camera-relative directions, arrows, diagonal normalization, sprint, frame-rate independence, rotation and zoom.",
 );
