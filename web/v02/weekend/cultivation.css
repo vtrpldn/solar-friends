@@ -11,7 +11,7 @@ body[data-cultivation-open] #selection { visibility: hidden; }
 #cultivation-panel .farm-heading { position: static; display: flex; align-items: center; justify-content: space-between; padding: 17px 18px 14px; border-bottom: 1px solid #d9ccaa; flex-shrink: 0; }
 .farm-heading small { display: block; font-size: 9px; letter-spacing: 1.7px; color: #6d7758; font-weight: 650; }
 #cultivation-panel h2 { margin: 3px 0 0; font-size: 22px; line-height: 1.2; font-weight: 600; }
-#cultivation-panel #close-farm { min-width: 30px; min-height: 30px; padding: 0; font-size: 23px; border: 0; background: transparent; box-shadow: none; }
+#cultivation-panel #close-farm { flex-shrink: 0; }
 #farm-content { padding: 16px 18px 18px; overflow: auto; scrollbar-gutter: stable; }
 #cultivation-panel p { margin: 0; font-size: 12px; line-height: 1.5; }
 #cultivation-panel h3 { margin: 0 0 3px; font-size: 19px; font-weight: 600; line-height: 1.15; }

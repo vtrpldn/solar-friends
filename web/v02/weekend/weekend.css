@@ -488,7 +488,7 @@ label {
   margin-bottom: 10px;
 }
 #selection button {
-  font-size: 11px;
+  font-size: 12px;
   padding: 8px;
   margin: 4px 3px 4px 0;
 }
@@ -1432,7 +1432,11 @@ body[data-tray="closed"] {
 
 .panel-close,
 #selection #close-selection,
-#management #close-management {
+#management #close-management,
+#close-controls,
+#guide-close,
+#lens-close,
+#cultivation-panel #close-farm {
   width: 32px;
   height: 32px;
   padding: 0;
@@ -1528,8 +1532,9 @@ header > .time { grid-column: 3; justify-self: end; }
 .resident-heading > img { width: 72px; height: 88px; object-fit: contain; background: #e3ebcc; border-radius: 18px; }
 #resident-detail .resident-traits { color: #778557; font-size: 12px; }
 .resident-tabs { display: flex; gap: 8px; margin: 18px 0; border-bottom: 1px solid #d8c79e; padding-bottom: 12px; }
-.resident-tabs button { font-size: 13px; padding: 8px 14px; box-shadow: none; }
-.resident-tabs button[aria-pressed="true"] { background: #e3ebcc; border-color: #7b9260; }
+/* Same tab look as the Almanac's Make / Repair / Jobs row. */
+.resident-tabs button { font-size: 13px; padding: 8px 18px; box-shadow: none; background: transparent; border: 1px solid transparent; border-radius: 7px; }
+.resident-tabs button[aria-pressed="true"] { background: #40563e; color: #fff7df; border-color: #40563e; }
 .resident-activity { padding: 12px; border-left: 3px solid #8a9c64; background: #eeecd7; border-radius: 6px; font-size: 14px; }
 #resident-detail .resident-needs { gap: 12px 24px; margin-bottom: 16px; }
 #resident-detail .resident-needs span { font-size: 13px; }
@@ -1653,7 +1658,8 @@ header > .time { grid-column: 3; justify-self: end; }
 #production-progress, .production-site progress { width: 100%; }
 #log li { margin-bottom: 10px; }
 #log li > small { display: block; font-size: 11px; font-weight: 400; letter-spacing: normal; }
-#cancel-project { border-style: dashed; }
+/* A dashed edge marks actions that discard work. */
+#cancel-project, #salvage-building, #demolish-building { border-style: dashed; }
 #cancel-project-note { display: block; font-size: 12px; letter-spacing: normal; line-height: 1.4; }
 
 #tank-attention { position: absolute; top: 86px; left: 16px; width: auto; background: #f7e2bb; color: #733d27; border-color: #b77b4a; font-size: 12px; padding: 6px 10px; }
@@ -1755,3 +1761,30 @@ header > .time { display: grid; grid-template-columns: auto auto; gap: 5px 10px;
   align-items: center;
   padding: 10px 14px;
 }
+
+/* A card whose illustration is still being drawn keeps its shape instead of going blank. */
+#build-list .build-art:not(.ready) { background: #efe5c6; border-radius: 10px; filter: none; opacity: .7; }
+
+/* Dialogs end the same way: the way back on the left, the main action on the right. */
+.dialog-actions { display: flex; justify-content: space-between; gap: 10px; margin-top: 16px; }
+.dialog-actions button { margin: 0; }
+dialog .primary-action { background: #3f5a44; color: #fff7df; border-color: #2f4634; }
+dialog .primary-action:hover:not(:disabled) { background: #4a6a50; }
+#time-skip-dialog label[for="skip-days"] { margin-right: 8px; }
+/* Shortcut hints must not make one button taller than its neighbours. */
+#selection [data-shortcut]::after { padding: 0 3px; line-height: 1.2; }
+/* The whole dock stays on one row on ordinary desktop widths. */
+@media (max-width: 1700px) {
+  #village-actions { gap: 6px; padding: 10px; }
+  #village-actions > button, #village-actions .view-menu > summary { padding: 10px 11px; }
+  .dock-divider { margin: 0 1px; }
+}
+@media (max-width: 1400px) {
+  #village-actions > button, #village-actions .view-menu > summary { padding: 9px 8px; font-size: 13px; }
+}
+/* Trays pause the village too; say so in the same words as the dialogs. */
+.paused-note { display: none; font-size: 11px; font-weight: 400; letter-spacing: normal; color: #68765b; white-space: nowrap; }
+body[data-paused="true"] .paused-note { display: block; }
+aside .paused-note { margin: -4px 0 10px; }
+/* The open options menu sits above the building panel it may share a corner with. */
+footer:has(.view-menu[open]) { z-index: 6; }
