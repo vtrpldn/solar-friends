@@ -73,7 +73,7 @@ export function installFarmingUI({state,selected,scene,hit,controls,select,chang
   const job=s.operations?.find(o=>!o.done&&o.site===p.id&&o.farm?.bed===bedId),standing=['growing','harvestable','failed'].includes(b.stage),locked=standing||!!job;
   const expired=harvestExpired(b,s.time),stage=expired?'expired':b.stage;
   const condition=Math.min(b.elapsed?1-b.stress/b.elapsed:1,1-(b.droughtDamage||0)),max=harvestYield(b,s.time);
-  document.getElementById('farm-title').textContent=`${p.key==='field'?'Field':p.key==='greenhouse'?'Greenhouse':'Garden'} #${p.id}`;
+  document.getElementById('farm-title').textContent=`${p.key==='field'?'Field':p.key==='greenhouse'?'Greenhouse':'Garden'}${p.number?` ${p.number}`:''}`;
   if(wholeSite){
    renderCultivationOverview({content,s,p,feedback:bulkFeedback,changed:()=>{lastRender=null;changed();refresh();},message:text=>{bulkFeedback=text;message(text);},inspect:()=>{wholeSite=false;lastRender=null;refresh();}});
    return;

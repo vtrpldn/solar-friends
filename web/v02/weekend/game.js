@@ -1533,7 +1533,7 @@ function renderUtilityUI() {
       ? "River intake"
       : n.id === 0
         ? "Camp stores"
-        : `${PROJECTS[s.projects.find((p) => p.id === n.id).key].name} #${n.id}`,
+        : projectLabel(s.projects.find((p) => p.id === n.id), PROJECTS),
   ]);
   const kind = $("utility-kind").value;
   const liquidIndex = LIQUIDS.indexOf(kind);

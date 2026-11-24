@@ -1,3 +1,4 @@
+import { projectLabel, numberProject, numberProjects } from "./project-names.js";
 import { brl } from "./money.js";
 import {ensureAnimalCare,animalAvailable,collectAnimal,validAnimalCare} from './animal-care.js';
 import {packDrinkingWater,hydrationWorkFactor} from './hydration.js';
@@ -371,7 +372,7 @@ export function planField(s,x,z,size,rotation=0){
   if(s.stage!=='playing')return 'Choose a campsite first.';
   const error=fieldPlacementError(s,x,z,size,rotation);if(error)return error;
   const p={id:s.nextId++,key:'field',x,z,rotation,fieldSize:[...size],work:1,delivered:0,billOfMaterials:{}};
-  s.projects.push(p);ensureCultivation(s,p);syncInfrastructure(s,PROJECTS);invalidateNavigation(s);return '';
+  numberProject(s,p,PROJECTS);s.projects.push(p);ensureCultivation(s,p);syncInfrastructure(s,PROJECTS);invalidateNavigation(s);return '';
 }
 export function resizeField(s,id,size){
   const p=s.projects.find(p=>p.id===id&&p.key==='field');if(!p)return 'Choose a field.';
@@ -915,7 +916,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     r.operation = null;
     r.cargo = false;
     if(recipe.equipmentRepair)repairEquipment(s,recipe.equipmentRepair);
-    say(s, op.recipe === "solar_upgrade" ? `Solar upgrade installed at ${PROJECTS[p.key].name} #${p.id}.` : `${recipe.name}: supplies delivered to storage from ${PROJECTS[p.key].name} #${p.id}.`);
+    say(s, op.recipe === "solar_upgrade" ? `Solar upgrade installed at ${projectLabel(p,PROJECTS)}.` : `${recipe.name}: supplies delivered to storage from ${projectLabel(p,PROJECTS)}.`);
     return true;
   }
 
@@ -1469,6 +1470,7 @@ export function plan(s, key, x, z, rotation = 0) {
   const instant = key !== "road" && s.mode === "sandbox" && s.instantBuild !== false;
   s.projects.push({
     id: s.nextId++,
+    number: numberProject(s, {key}, PROJECTS).number,
     key,
     x,
     z,
@@ -1596,7 +1598,7 @@ export function cancelProject(s, id) {
     }
   }
   invalidateNavigation(s);
-  say(s, `${PROJECTS[p.key].name} #${id} plan cancelled. Reserved supplies returned${p.pendingMaterials ? ' and pending purchases refunded' : ''}.`);
+  say(s, `${projectLabel(p,PROJECTS)} plan cancelled. Reserved supplies returned${p.pendingMaterials ? ' and pending purchases refunded' : ''}.`);
   return '';
 }
 
@@ -2332,7 +2334,7 @@ function tickUncached(s, dt) {
     if(!beds)continue;
     const warning=beds.some(b=>b.stage==='failed')?'failed':beds.some(b=>harvestExpired(b,s.time))?'expired':beds.some(b=>['growing','harvestable'].includes(b.stage)&&(b.droughtDamage||0)>0)?'damaged':beds.some(b=>['growing','harvestable'].includes(b.stage)&&b.moisture<.2)?'wilting':'healthy';
     if(warning!==p.cropWarning){
-      if(warning!=='healthy')say(s,`${PROJECTS[p.key].name} #${p.id}: crops ${warning}. ${warning==='failed'?'Clear failed beds before replanting.':warning==='expired'?'The harvest window has closed. Clear expired crops before replanting.':'Restore irrigation; earlier damage cannot be reversed.'}`,`crop-condition-${p.id}-${warning}`);
+      if(warning!=='healthy')say(s,`${projectLabel(p,PROJECTS)}: crops ${warning}. ${warning==='failed'?'Clear failed beds before replanting.':warning==='expired'?'The harvest window has closed. Clear expired crops before replanting.':'Restore irrigation; earlier damage cannot be reversed.'}`,`crop-condition-${p.id}-${warning}`);
       p.cropWarning=warning;
     }
   }
@@ -2815,6 +2817,7 @@ export function restore(text) {
     if(s.weather===undefined)weatherStep(s);
     if(!validGathering(s))return null;
     restoreHomeAssignments(s);
+    numberProjects(s, PROJECTS);
     // Saves predating narrow footbridges retain their exact 8×2 occupancy,
     // centre, rotations and deck width. New plans explicitly write version 1.
     for (const project of s.projects) {

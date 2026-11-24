@@ -67,7 +67,7 @@ export function renderCrafting(s, root, notify, refresh) {
     const text = add(row, 'span');
     add(text, 'strong', craftName(recipe));
     let status;
-    if (job) status = `${recipe.equipmentRepair ? 'Repair · ' : ''}${craftJobStatus(s, job).state} · #${job.id}`;
+    if (job) status = `${recipe.equipmentRepair ? 'Repair · ' : ''}${craftJobStatus(s, job).state}`;
     else if (ui.section === 'repair') {
       const equipment = equipmentSummary(s, recipe.equipmentRepair);
       status = equipment.repairing ? 'Repair in progress' : equipment.wear > 0 ? `${equipment.broken ? 'Broken · ' : ''}Needs repair` : 'Good condition';
@@ -86,7 +86,7 @@ export function renderCrafting(s, root, notify, refresh) {
     const heading = add(body, 'div', '', 'craft-detail-heading');
     art(heading, recipe);
     const title = add(heading, 'div');
-    add(title, 'small', job ? `JOB #${job.id} · ${recipe.equipmentRepair ? 'REPAIR' : 'MAKE'}` : recipe.equipmentRepair ? 'CARE FOR SHARED TOOLS' : 'MADE IN THE VILLAGE', 'craft-eyebrow');
+    add(title, 'small', job ? recipe.equipmentRepair ? 'REPAIR JOB' : 'MAKING NOW' : recipe.equipmentRepair ? 'CARE FOR SHARED TOOLS' : 'MADE IN THE VILLAGE', 'craft-eyebrow');
     add(title, 'h3', craftName(recipe));
     add(title, 'p', recipe.equipmentRepair ? 'Restore one tool’s worth of condition.' : `Makes ${Object.values(recipe.output)[0]} · ${materialCount(s, craftItem(recipe))} in stores`);
     const footer = add(detail, 'div', '', 'craft-action');

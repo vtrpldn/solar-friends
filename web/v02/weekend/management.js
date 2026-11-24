@@ -1,3 +1,4 @@
+import {projectLabel} from './project-names.js';
 import { brl } from "./money.js";
 import { isBuildOption } from "./build-categories.js";
 import {basicNeeds} from './basic-needs.js';
@@ -95,7 +96,7 @@ export function createManagement({
       ? "River · manual collection source"
       : n.id === 0
         ? "Camp stores"
-        : `${PROJECTS[state().projects.find((p) => p.id === n.id).key].name} #${n.id}`;
+        : projectLabel(state().projects.find((p) => p.id === n.id), PROJECTS);
   function open(next) {
     if (state().stage === "arrival") return;
     beforeOpen();
@@ -346,7 +347,7 @@ export function createManagement({
         const jobs=add('details','');add('summary',`Inspect ${service.jobs.length} upkeep jobs`,jobs);
         for(const job of service.jobs){
           const site=s.projects.find(p=>p.id===job.target),row=add('article','',jobs);
-          add('strong',site?`${PROJECTS[site.key].name} #${site.id}`:`Car ${(job.vehicle??0)+1}`,row);
+          add('strong',site?projectLabel(site,PROJECTS):`Car ${(job.vehicle??0)+1}`,row);
           add('p',job.status||'Waiting for an available resident',row);
           add('p',`${job.partsPaid?'Materials already reserved':'Required supplies'}: ${Object.entries(serviceParts(job)).map(([id,n])=>`${quantityText(id,n)} ${MATERIALS[id].name}`).join(' · ')}`,row);
           if(site){const find=add('button','Find in village',row);find.onclick=()=>{dialog.close();inspect(site.id);};}
@@ -513,7 +514,7 @@ export function createManagement({
         if(PROJECTS[p.key].kind==='wild-tree')continue;
         if(p.cultivation){
           if(view==='items'||p.work<PROJECTS[p.key].work)continue;
-          const beds=p.cultivation.beds,name=`${PROJECTS[p.key].name} #${p.id}`;
+          const beds=p.cultivation.beds,name=projectLabel(p,PROJECTS);
           if(search&&!`${name} ${beds.map(b=>b.crop).join(' ')}`.toLowerCase().includes(search))continue;
           const card=document.createElement('article');card.className='production-site';card.dataset.cultivationSite=p.id;
           const img=document.createElement('img');illustrate(img,PROJECTS[p.key].asset);
@@ -535,10 +536,10 @@ export function createManagement({
         const img = document.createElement("img");
         illustrate(img, PROJECTS[p.key].asset);
         const name = document.createElement("strong");
-        name.textContent = `${PROJECTS[p.key].name} #${p.id} (${p.x}, ${p.z})`;
+        name.textContent = projectLabel(p,PROJECTS);
         if(Object.values(CROP_CARE).some(c=>c.kind===PROJECTS[p.key].kind)){
           const irrigationLabel=document.createElement('label');irrigationLabel.textContent='Crop irrigation ';
-          const irrigation=document.createElement('select');irrigation.setAttribute('aria-label',`Irrigation for ${PROJECTS[p.key].name} #${p.id}`);
+          const irrigation=document.createElement('select');irrigation.setAttribute('aria-label',`Irrigation for ${projectLabel(p,PROJECTS)}`);
           for(const [value,text] of Object.entries(IRRIGATION_POLICIES)){const option=document.createElement('option');option.value=value;option.textContent=text;irrigation.append(option);}
           irrigation.value=p.irrigationPolicy||'balanced';irrigation.onchange=()=>{p.irrigationPolicy=irrigation.value;refresh();render();};irrigationLabel.append(irrigation);el.append(irrigationLabel);
           const hint=document.createElement('p');hint.textContent='Change during growth: conserving saves stored water but leaves less drought buffer. Rain-fed crops rely on rain; dry soil slows or stops growth. Residents still handle harvesting.';el.append(hint);
