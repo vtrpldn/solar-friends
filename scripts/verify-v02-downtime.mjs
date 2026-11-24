@@ -10,6 +10,8 @@ import {chooseNeed,inviteConversation} from '../web/v02/weekend/resident-needs.j
 const fresh=()=>{
  const s=createWeekend(42);chooseCamp(s,'entrance');enableFastNavigation(s);s.rainSeen=s.rainResolved=true;s.time=1300;
  s.people.forEach((r,i)=>{r.x=30+i;r.z=25;r.energy=95;r.needs={hunger:95,bladder:95,bowels:95,hygiene:95,social:95,fun:90};});
+ // A stocked village leaves no self-started work, so residents are free for leisure.
+ for(const id of ['earth','stone','logs','bamboo'])s.materials[id]=99;
  syncInfrastructure(s,PROJECTS);return s;
 };
 const fire=s=>{const p={id:s.nextId++,key:'fire-circle',x:34,z:25,work:PROJECTS['fire-circle'].work,delivered:requiredLoads('fire-circle')};s.projects.push(p);syncInfrastructure(s,PROJECTS);return p;};

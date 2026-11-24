@@ -4,6 +4,7 @@ import {ensureHydrology,extractWater,validHydrology} from './hydrology.js';
 import {weatherStep,validWeather} from './weather.js';
 import {harvestExpired,CROPS,fieldSizeValid,bedLayout,bedWorld,ensureCultivation,farmRecipe,farmJobError,farmJobSpec,finishFarmJob,cultivationStep,validCultivation} from './cultivation.js';
 import {foodPolicy,validFoodPolicy,manageKitchens} from './food-policy.js';
+import {startAutonomousWork,autonomousWorkPlan} from './autonomous-work.js';
 import {pantryForecast} from './food-planning.js';
 import {registerGathering,gatheringStatus,gatheringState,validGathering} from './gathering.js';
 import {biologyLabel} from './biological-production.js';
@@ -427,6 +428,21 @@ export function productionBlocker(s, site, recipe) {
   }
   return '';
 }
+// Walking distance from the village stores to a site's work position; Infinity when unreachable.
+const walkCache=new WeakMap();
+function walkFromStores(s,p){
+  const cached=walkCache.get(p);
+  if(cached&&cached.until>s.time&&cached.x===s.stock.x&&cached.z===s.stock.z)return cached.length;
+  const resident=s.people.find(r=>r.action!=='town'&&!atTownJob(r))||s.people[0];
+  const start=supplySpot(s,resident,0)||s.stock,from={...resident,x:start.x,z:start.z,needTask:null},node=ensureInfrastructure(s).nodes[p.id];
+  const spot=node&&utilitySpot(s,node,from),path=spot&&route(s,from,spot);
+  let length=Infinity;
+  if(path){length=0;let a=from;for(const b of path){length+=Math.hypot(b.x-a.x,b.z-a.z);a=b;}}
+  walkCache.set(p,{until:s.time+600,x:s.stock.x,z:s.stock.z,length});
+  return length;
+}
+const autonomyApi={blocker:productionBlocker,queue:(s,site,recipe)=>{const error=queueProduction(s,site,recipe);if(!error)s.operations.at(-1).auto=true;return error;},stored:storedMaterials,capacity:storageCapacity,count:materialCount,walk:walkFromStores};
+export function residentWorkPlan(s,p){return autonomousWorkPlan(s,p,PROCESSES,PROJECTS,autonomyApi);}
 export function queueProduction(s, site, recipe) {
   const error=productionBlocker(s,site,recipe);
   if(error)return error;
@@ -476,7 +492,8 @@ export function buildingOperatingStatus(s,p) {
   if(gatheringStatus(s,p))return result(gatheringState(s,p),gatheringStatus(s,p));
   if(p.readyAt>s.time)return result('Growing',`Ready in about ${Math.ceil((p.readyAt-s.time)*.45)} game minutes.`);
   if(def.kind==='home')return result('Ready','Available for resident rest. Solar upgrades are separate work orders.');
-  return result('Ready',Object.values(PROCESSES).some(r=>r.kind===def.kind)?'No batch is currently in progress.':'Construction complete; available for its village service.');
+  const next=residentWorkPlan(s,p).reason;
+  return result('Ready',Object.values(PROCESSES).some(r=>r.kind===def.kind)?(next?`No batch in progress. ${next}`:'No batch is currently in progress.'):'Construction complete; available for its village service.');
 }
 export function moveCraftJob(s,operation,site) {
   const op=s.operations?.find(o=>o.id===operation&&!o.done&&o.phase!=='return');
@@ -578,10 +595,12 @@ function scheduleFarmWork(s) {
       else if (b.stage === 'failed') action = 'clear';
       else if (b.stage === 'unprepared' || b.stage === 'harvested') action = 'prepare';
       else if (b.stage === 'prepared') action = 'plant';
+      // Tired soil gets one dressing of mature compost while nothing else is due.
+      else if (b.fertility < .7 && !(b.amendmentKg > 0) && materialCount(s,'compost') >= farmJobSpec(b,'amend').input.compost) action = 'amend';
       if (action) bedJobs.push({site:p.id, bed:b, action});
     }
   }
-  const priority = {harvest:0, plant:1, clear:2, prepare:3};
+  const priority = {harvest:0, plant:1, clear:2, prepare:3, amend:4};
   bedJobs.sort((a,b) => priority[a.action] - priority[b.action]);
   let seedOrderPending = pending.some(op => op.waitingSeeds);
   for (const job of bedJobs) {
@@ -641,7 +660,7 @@ function maintainFood(s) {
   // Harvest existing food plots before construction or nonessential production.
   for(const p of s.projects) {
     const recipe=foodRecipesByKind.get(PROJECTS[p.key].kind);
-    if(recipe&&!(PROJECTS[p.key].kind==='kitchen'&&(p.repeat||foodPolicy(s).automatic))&&!s.operations?.some(o=>!o.done&&o.site===p.id&&!o.water))queueProduction(s,p.id,recipe);
+    if(recipe&&!(PROJECTS[p.key].kind==='kitchen'&&(p.repeat||foodPolicy(s).automatic))&&!s.operations?.some(o=>!o.done&&o.site===p.id&&!o.water)&&!(PROCESSES[recipe].gathering&&!productionBlocker(s,p.id,recipe)&&walkFromStores(s,p)===Infinity))queueProduction(s,p.id,recipe);
   }
   // Old saves retain the cooldown for their last purchase.
   if (s.emergencyFood === false || s.time < (s.nextFoodTrip || 0)) return;
@@ -748,7 +767,8 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
   );
   if (!op) op = (s.operations || []).filter(o=>!o.done).sort((a,b)=>{
     const priority=o=>o.water?0:(Object.keys(PROCESSES[o.recipe]?.output||{}).some(id=>FOOD_SERVINGS[id])&&s.infrastructure.hungry?1:2);
-    return priority(a)-priority(b) || workPreference(r,s.projects.find(p=>p.id===b.site)?.key)-workPreference(r,s.projects.find(p=>p.id===a.site)?.key);
+    // Orders from the player come before work residents started themselves.
+    return priority(a)-priority(b) || Number(!!a.auto)-Number(!!b.auto) || workPreference(r,s.projects.find(p=>p.id===b.site)?.key)-workPreference(r,s.projects.find(p=>p.id===a.site)?.key);
   }).find(eligible);
   if ((waterOnly || group) && !op) return false;
   if (
@@ -1086,6 +1106,7 @@ export function beginArrival(s) {
 export function createWeekend(landSeed = 0) {
   return {
     version: 2,
+    autonomy: 1,
     expansionReserve:100,
     materialBillVersion:2,
     constructionLaborVersion: CONSTRUCTION_LABOR_VERSION,
@@ -2346,6 +2367,7 @@ function tickUncached(s, dt) {
   if (checkSupplies) restockUpkeep(s);
   maintainWater(s);
   manageKitchens(s,PROJECTS,PROCESSES,{blocker:productionBlocker,queue:queueProduction,stored:storedMaterials,capacity:storageCapacity});
+  if (checkSupplies) startAutonomousWork(s,PROCESSES,PROJECTS,autonomyApi);
   for (const [i,r] of s.people.entries()) {
     if(atTownJob(r))continue;
     decayNeeds(s,r,i,dt);
@@ -2558,7 +2580,8 @@ function tickUncached(s, dt) {
         x: r.x + (d ? (dx / d) * travel : 0),
         z: r.z + (d ? (dz / d) * travel : 0),
       };
-      if (d > 0.1 && nearby.length) {
+      // A step that reaches the waypoint lands on it; sidestepping there orbits forever at large steps.
+      if (d > 0.1 && travel < d && nearby.length) {
         const sidestep = {
           x: candidate.x + (dz / d) * dt * 0.18,
           z: candidate.z - (dx / d) * dt * 0.18,
@@ -3162,6 +3185,8 @@ export function restore(text) {
       return null;
     // Retire old repeat policies without cancelling paid or in-flight work.
     for(const p of s.projects){if(p.repeat)delete p.productionStatus;delete p.repeat;delete p.stockTarget;}
+    // Residents cook for themselves by default; a later player choice is kept.
+    if(!s.autonomy){if(s.foodPolicy)s.foodPolicy.automatic=true;s.autonomy=1;}
     s.log = Array.isArray(s.log)
       ? s.log.filter((t) => typeof t === "string").slice(0, 12)
       : [];
