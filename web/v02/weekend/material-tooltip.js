@@ -16,8 +16,8 @@ export function materialTooltip(){
   const icon=button.querySelector('.material-warning');
   icon.addEventListener('mouseenter',()=>show(button));icon.addEventListener('mouseleave',hide);
   button.addEventListener('focus',()=>show(button));button.addEventListener('blur',hide);button.addEventListener('click',hide);
- },update(button,missing){
-  button.dataset.missingMaterials=missing.length?`Missing materials\n${missing.map(m=>`• ${m}`).join('\n')}`:'';
+ },update(button,missing,reason=''){
+  button.dataset.missingMaterials=reason&&missing.length?`Cannot start yet\n${reason}\n${missing.map(m=>`• ${m}`).join('\n')}`:'';
   if(active===button)show(button);
  }};
 }

@@ -205,7 +205,7 @@ export function createManagement({
         inspect(p.id);
       };
       const toggle = document.createElement("button");
-      toggle.textContent = n.enabled ? "Switch off" : "Switch on";
+      toggle.textContent = n.enabled ? "Switch power off" : "Switch power on";
       toggle.onclick = () => {
         if (!switchBuilding(state().infrastructure,n.id)) return;
         notify(
@@ -306,8 +306,8 @@ export function createManagement({
       stats=[["Shared savings",money(f.balance)],["Income recorded",money(f.income)],["Expenses recorded",money(f.expenses)],["Net change",`${f.net>=0?'+':'−'}${money(Math.abs(f.net))}`]];
       const screen=$("finance-screen");screen.replaceChildren();
       const add=(tag,text,parent=screen)=>{const el=document.createElement(tag);el.textContent=text;parent.append(el);return el;};
-      add('p',s.mode==='sandbox'?'Sandbox supplies and funds are unlimited; purchases are not tracked.':`Records begin ${financeTime(f.since)} with ${money(f.opening)}. Earlier purchases in an existing save are not reconstructed.`);
-      add('p',`Available to spend: ${money(f.available)}. Reserved for undelivered construction supplies: ${money(f.committed)} in collection costs. This reserve stays in savings until each trip departs.`);
+      add('p',s.mode==='sandbox'?'Sandbox supplies and funds are unlimited; purchases are not tracked.':`Tracking since ${financeTime(f.since)}, when savings were ${money(f.opening)}.${f.since>0?' Spending before then is not listed.':''}`);
+      add('p',`Available to spend: ${money(f.available)}.${f.committed>0?` Set aside for trips to collect ordered building supplies: ${money(f.committed)}, paid as each trip leaves.`:''}`);
       if (s.mode !== 'sandbox') {
         const resident = s.people.find(person => person.id === dayShiftResidentId) || s.people[0];
         screen.append(dayShiftControls(s, resident, refresh, id => {

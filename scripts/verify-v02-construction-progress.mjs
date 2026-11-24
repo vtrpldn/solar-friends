@@ -7,7 +7,7 @@ const state = {people: [{name: 'Iara', job: 1, action: 'haul', cargo: true, haul
 const progress = () => constructionProgress(state, project, definition, 8);
 assert.equal(progress().phase, 'Delivering supplies');
 assert.equal(progress().value, .25);
-assert.match(progress().detail, /2\/8 · 2 in transit/);
+assert.match(progress().detail, /2 of 8 loads on site · 2 being carried/);
 assert.equal(progress().workers, 'Assigned: Iara');
 
 project.pendingMaterials = true;

@@ -415,7 +415,7 @@ export function productionBlocker(s, site, recipe) {
   if ((s.operations || []).some((o) => o.site === p.id && !o.done && !o.water))
     return "This site already has a job.";
   if ((p.readyAt || 0) > s.time)
-    return def.gathering ? gatheringStatus(s,p) : `Growing: ready in ${Math.ceil((p.readyAt-s.time)*.45)} game minutes (affected by simulation speed).`;
+    return def.gathering ? gatheringStatus(s,p) : `Growing: ready in ${Math.ceil((p.readyAt-s.time)*.45)} game minutes.`;
   if(def.gatherLimit&&(p.extracted||0)>=def.gatherLimit)return 'This patch has been gathered out.';
   if (def.deposit && (p.extracted || 0) >= depositCapacity(s.landSeed,p,def))
     return "This deposit is exhausted.";
@@ -477,8 +477,8 @@ export function buildingOperatingStatus(s,p) {
   }
   if(gatheringStatus(s,p))return result(gatheringState(s,p),gatheringStatus(s,p));
   if(p.readyAt>s.time)return result('Growing',`Ready in about ${Math.ceil((p.readyAt-s.time)*.45)} game minutes.`);
-  if(def.kind==='home')return result('Ready','Available for resident rest. Solar upgrades are separate work orders.');
-  return result('Ready',Object.values(PROCESSES).some(r=>r.kind===def.kind)?'No batch is currently in progress.':'Construction complete; available for its village service.');
+  if(def.kind==='home')return result('Ready','Ready for residents to rest in.');
+  return result('Ready',Object.values(PROCESSES).some(r=>r.kind===def.kind)?'No batch is currently in progress.':'Built and ready to use.');
 }
 export function moveCraftJob(s,operation,site) {
   const op=s.operations?.find(o=>o.id===operation&&!o.done&&o.phase!=='return');
@@ -1058,7 +1058,7 @@ export function blueprintPurchase(s, key, count = 1) {
   if(supplierIssue)return {items,cost,transport:0,error:supplierIssue};
   cost = Math.ceil(cost * 100) / 100;
   const budget=collectionBudget(s,items), transport=budget.cost, reserve=s.expansionReserve??0;
-  return {items, cost, transport, error: cost > 0 && cost + transport + reserve > s.money ? `Missing materials cost ${brl(cost)} plus ${brl(transport)} committed to ${budget.trips} collection trips, while keeping ${brl(reserve)} for essentials; shared savings are too low.` : ""};
+  return {items, cost, transport, error: cost > 0 && cost + transport + reserve > s.money ? `Not enough savings: the missing materials cost ${brl(cost)}, plus ${brl(transport)} for ${budget.trips} ${budget.trips===1?'trip':'trips'} to collect them${reserve?`, and ${brl(reserve)} is kept in reserve`:''}.` : ""};
 }
 function dispatchBlueprintPickup(s) {
   if(!dispatchReady(s))return;

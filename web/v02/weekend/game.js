@@ -1616,10 +1616,10 @@ function renderUtilityUI() {
   $("toggle-building").hidden = !canSwitchBuilding(sys,node);
   disabledReason($("toggle-building"), "This structure has no switchable service.");
   $("toggle-building").disabled = !canSwitchBuilding(sys,node);
-  $("toggle-building").textContent = node?.enabled ? "Switch off" : "Switch on";
+  $("toggle-building").textContent = node?.enabled ? "Switch power off" : "Switch power on";
   const op = p && (s.operations || []).find((o) => o.site === p.id && !o.done && !o.water);
   $("building-service").textContent = node
-    ? `${hasPowerService(sys,node) ? node.enabled === false ? "Switched off" : `Power ${(node.power * 100).toFixed(0)}%` : ""}${node.battery ? ` · Battery ${node.charge.toFixed(1)}/${node.battery} kWh` : ""}${hasPowerService(sys,node) ? ". " : ""}${LIQUIDS.map(
+    ? `${hasPowerService(sys,node) ? node.enabled === false ? "Switched off" : node.power >= .995 ? "Powered" : `Getting ${(node.power * 100).toFixed(0)}% of the power it needs` : ""}${node.battery ? ` · Battery ${node.charge.toFixed(1)}/${node.battery} kWh` : ""}${hasPowerService(sys,node) ? ". " : ""}${LIQUIDS.map(
         (k, i) =>
           node.capacity[i]
             ? `${k}: ${node.water[i].toFixed(1)}/${node.capacity[i]}`
@@ -1628,7 +1628,7 @@ function renderUtilityUI() {
         .filter(Boolean)
         .join(
           " · ",
-        )} ${op ? op.status || "Resident job queued" : p.productionStatus || (p.readyAt > s.time ? `Growing: ${Math.ceil(p.readyAt - s.time)} seconds remaining` : "")}`
+        )} ${op ? op.status || "Resident job queued" : p.productionStatus || (p.readyAt > s.time ? `Growing: about ${Math.ceil((p.readyAt - s.time) * .45)} game minutes left` : "")}`
     : "";
   if(p){const status=buildingOperatingStatus(s,p);$("building-service").textContent=`${status.state}: ${status.reason} · ${$("building-service").textContent}`;}
   const recipe=PROCESSES[$("production").value];
@@ -1874,7 +1874,7 @@ function renderUI() {
     const unlimited=s.mode==='sandbox'&&i<3;
     trend.textContent=unlimited?'Unlimited':formatTrend(rate,i===0);
     trend.dataset.direction=rate>.05?'up':rate<-.05?'down':'flat';
-    button.title=`Open ${counter[3]} management. ${unlimited?'Unlimited in sandbox.':rate===null?'Gathering trend data (first five in-game minutes).':`${i===2?'Stored energy':counter[2]}: ${formatTrend(rate,i===0)} net change over the last in-game hour, or time observed since loading. Includes spending, consumption and deliveries.`}`;
+    button.title=`Open ${counter[3]} management. ${unlimited?'Unlimited in sandbox.':rate===null?'The hourly trend appears after five in-game minutes.':`${i===2?'Stored energy':counter[2]}: ${formatTrend(rate,i===0)} net change over the last in-game hour, or time observed since loading. Includes spending, consumption and deliveries.`}`;
     disabledReason(button, "Wait for the residents to arrive and choose a campsite to manage village supplies.");
     button.disabled = !active;
   });
@@ -2137,7 +2137,7 @@ function renderUI() {
   $("sell").title=tradeQuote(s,$("purchase").value,MATERIALS,materialCount).error || "Payment after trading in town; combine batches to share transport costs.";
   const journeys=activeTrips(s).map(trip=>`${s.people.find(r=>r.id===trip.person).name}: ${{boarding:"walking to the car",outbound:"driving to town",away:"trading in town",inbound:"driving home",unloading:"unloading supplies"}[trip.phase]}`);
   if(s.delivery)journeys.push(`Supplier delivery: ${Math.ceil(s.delivery.left*.45)} game minutes remaining`);
-  $("trip").textContent = journeys.length?journeys.join(' · '):`Storage: ${Math.round(storedMaterials(s))}/${storageCapacity(s)} units. ${pendingExports(s).length} sale batches waiting. ${brl(spendableMoney(s))} available after collection commitments. ${s.deliveryOnly?'Delivery':'Car trip'}: ${brl(transportCost(s))}.`;
+  $("trip").textContent = journeys.length?journeys.join(' · '):`Storage: ${Math.round(storedMaterials(s))}/${storageCapacity(s)} units. ${pendingExports(s).length?`Sale batches waiting: ${pendingExports(s).length}. `:''}Available to spend: ${brl(spendableMoney(s))}. ${s.deliveryOnly?'Delivery':'Car trip'}: ${brl(transportCost(s))}.`;
   const equipmentBlocked = protectedEquipment(s,$("purchase").value)>0 && materialCount(s,$("purchase").value)-protectedEquipment(s,$("purchase").value)<1;
   $("sell").disabled ||= equipmentBlocked;
   disabledReason($("sell"),equipmentBlocked ? "Return borrowed equipment or repair worn equipment before selling it." : $("sell").title);
@@ -2162,15 +2162,22 @@ function renderUI() {
       !PROJECTS[key].repeatable &&
       s.projects.some((p) => p.key === key);
     const missing = missingMaterials(s, key);
-    buildMaterialTooltip.update(b,missing);
     const purchase = blueprintPurchase(s, key);
-    b.title = `${["coop","goat_pasture"].includes(key) ? "Animals require daily fodder and drinking water; purchase feed before they arrive. " : ""}${PROJECTS[key].description} ${constructionSpecText(PROJECTS[key])} Materials: ${recipeText(key)}. ${missing.length ? purchase.error || `Auto-buy missing materials: ${brl(purchase.cost)}. Collection reserve: ${brl(purchase.transport)} across outstanding orders.` : "All materials available."}`;
-    b.querySelector(".build-cost").textContent = s.mode === "sandbox" ? "Free"
-      : s.autoBuy===false && missing.length ? 'Missing materials'
-      : purchase.cost ? `${brl(purchase.cost)} + ${brl((purchase.transport || 0))} collection reserve`
-      : `${Object.values(PROJECTS[key].materials).reduce((sum, n) => sum + n, 0)} materials · ${PROJECTS[key].size.join("×")}`;
+    b.title = `${["coop","goat_pasture"].includes(key) ? "Animals require daily fodder and drinking water; purchase feed before they arrive. " : ""}${PROJECTS[key].description} ${constructionSpecText(PROJECTS[key])} Materials: ${recipeText(key)}. ${missing.length ? purchase.error || `Buying the missing materials costs ${brl(purchase.cost)}, plus ${brl(purchase.transport)} set aside for the trips to collect them.` : "All materials available."}`;
+    // The badge marks only plans that cannot start yet; an affordable purchase is just a price.
+    const blocked = s.mode !== "sandbox" && missing.length > 0 && !!purchase.error;
+    const footprint = PROJECTS[key].size.join("×");
+    const total = (purchase.cost || 0) + (purchase.transport || 0);
+    b.querySelector(".build-cost").textContent = s.mode === "sandbox" ? `Free · ${footprint}`
+      : !missing.length ? `Materials in stock · ${footprint}`
+      : s.autoBuy === false ? "Missing materials · auto-buy off"
+      : !purchase.cost ? "Needs local materials"
+      : blocked && total + (s.expansionReserve ?? 0) > s.money ? `${brl(total)} · not enough savings`
+      : blocked ? `${brl(total)} · supplies unavailable`
+      : `${brl(total)} to buy · ${footprint}`;
+    buildMaterialTooltip.update(b, missing, blocked ? purchase.error : "");
     b.classList.toggle("active", placing === key);
-    b.classList.toggle("needs-materials", missing.length > 0);
+    b.classList.toggle("needs-materials", blocked);
   }
   renderUtilityUI();
   management?.render();

@@ -22,7 +22,7 @@ export function constructionStatus(state, project, definition, loads) {
   if (project.pendingMaterials) return (state.trip?.projects || [state.trip?.project]).includes(project.id) ? 'Materials purchased · resident collecting in town' : 'Materials purchased · waiting for town pickup';
   if (project.delivered < loads) {
     const moving = crew.reduce((n,r) => n + carriedLoads(r), 0);
-    return `Supplies ${project.delivered}/${loads} · ${moving} in transit${project.staged ? ` · ${project.staged} at nearby storage` : ''}`;
+    return `${project.delivered} of ${loads} loads on site · ${moving} being carried${project.staged ? ` · ${project.staged} waiting at nearby storage` : ''}`;
   }
   const building = crew.filter(r => r.action === 'build').length;
   if (building) {const estimate=constructionEstimate(state,project,definition);return `${building}/${crewLimit(definition)} builders · ~${estimate.assemblyHours.toFixed(1)} game hours of assembly left (before skill, needs and weather)`;}
