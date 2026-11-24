@@ -1,7 +1,5 @@
 import {biologyLabel} from './biological-production.js';
-export function projectLabel(project, definitions) {
-  return `${definitions[project.key].name} #${project.id}`;
-}
+export {projectLabel} from './project-names.js';
 
 export function upgradeAction(project, operations) {
   if (project.solarUpgrade) return {label: 'Solar upgrade installed', disabled: true};

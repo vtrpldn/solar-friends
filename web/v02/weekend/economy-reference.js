@@ -1,3 +1,4 @@
+import { brl } from "./money.js";
 // Reference observations and explicit assumptions are documented separately in
 // docs/economy-calibration.md. Never treat a proxy as a local supplier quote.
 export const ECONOMY_REFERENCE = Object.freeze({
@@ -17,7 +18,7 @@ export function tripEstimate(setting='drive') {
 }
 export function tripEstimateText(setting){
  const q=tripEstimate(setting);
- return `${q.km} km round trip · about ${q.minutes} game minutes plus walking/parking · ${q.liters.toFixed(1)} L fuel · R$${q.cost.toFixed(2)}. Fuel charged at departure; vehicle wear requires separate service materials and resident work.`;
+ return `${q.km} km round trip · about ${q.minutes} game minutes plus walking/parking · ${q.liters.toFixed(1)} L fuel · ${brl(q.cost)}. Fuel charged at departure; vehicle wear requires separate service materials and resident work.`;
 }
 
 // Scenario endowment after buying the land; not an income source or a price quote.

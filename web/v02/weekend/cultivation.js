@@ -20,6 +20,8 @@ function edibleYield(b,time){
  const health=b.stage==='failed'?0:Math.min(b.elapsed?Math.max(0,1-b.stress/b.elapsed):1,1-(b.droughtDamage||0));
  return b.w*b.d*CROPS[b.crop].yieldKg*Math.min(b.density,1.2)/(1+Math.max(0,b.density-1)*1.5)*health*harvestFactor(b,time);
 }
+// Per-site switch for seed and compost orders. Unset follows the village Auto-buy setting.
+export const farmAutoBuy=(s,p)=>p?.autoBuyInputs??s.autoBuy!==false;
 export const FARM_ACTIONS=['prepare','plant','harvest','clear','amend','collect'];
 export const CULTIVATION_KEYS=['field','garden','greenhouse'];
 export const fieldSizeValid=size=>Array.isArray(size)&&size.length===2&&size.every(n=>Number.isInteger(n)&&n>=2&&n<=32);
@@ -133,6 +135,7 @@ export function cultivationStep(s,dt,useWater,defs){
 export function validCultivation(s){
  for(const p of s.projects){
   if(p.key==='field'&&!fieldSizeValid(p.fieldSize))return false;
+  if(p.autoBuyInputs!==undefined&&(typeof p.autoBuyInputs!=='boolean'||!CULTIVATION_KEYS.includes(p.key)))return false;
   if(p.harvestRemainder && Object.entries(p.harvestRemainder).some(([crop,n])=>!Object.hasOwn(CROPS,crop)||!Number.isFinite(n)||n<0||n>=1))return false;
   if(!p.cultivation)continue;
   const layout=bedLayout(p),f=p.cultivation;
@@ -152,7 +155,7 @@ export function validCultivation(s){
   if(!CROPS[o.farm.crop]||![.5,1,1.5].includes(o.farm.density))return false;
   const spec=farmJobSpec({...b,crop:o.farm.crop,density:o.farm.density},o.farm.action);
   if(spec.work!==o.farm.work||JSON.stringify(spec.input)!==JSON.stringify(o.input))return false;
-  if(o.waitingSeeds!==undefined&&(o.waitingSeeds!==true||o.done||o.farm.action!=='plant'||o.phase!=='pickup'||o.work!==0))return false;
+  if(o.waitingSeeds!==undefined&&(o.waitingSeeds!==true||o.done||!['plant','amend'].includes(o.farm.action)||o.phase!=='pickup'||o.work!==0))return false;
   if(!o.input||Object.entries(o.input).some(([id,n])=>!['compost',...Object.keys(CROPS).map(c=>`${c}_seed`)].includes(id)||!Number.isInteger(n)||n<0||n>100))return false;
   if(o.harvestOutput&&Object.entries(o.harvestOutput).some(([id,n])=>![o.farm.crop,'scraps'].includes(id)||!Number.isInteger(n)||n<0||n>(id==='scraps'?1000000:b.w*b.d*CROPS[o.farm.crop].yieldKg*1.2)))return false;
  }

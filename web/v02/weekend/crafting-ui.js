@@ -2,6 +2,7 @@ import { CRAFT_SKILLS, skillLevel, craftStage } from './crafting.js';
 import { MATERIALS, materialCount, queueProduction, moveCraftJob } from './simulation.js';
 import { equipmentSummary, EQUIPMENT_LIFE } from './equipment.js';
 import { ITEMS } from './items.js';
+import { quantityText } from './material-measures.js';
 import { illustrate } from './ui-art.js';
 import { craftItem, craftName, craftEntries, craftWorkspaces, chosenWorkspace, workspaceName, recipeStatus, craftJobStatus } from './crafting-view.js';
 
@@ -67,7 +68,7 @@ export function renderCrafting(s, root, notify, refresh) {
     const text = add(row, 'span');
     add(text, 'strong', craftName(recipe));
     let status;
-    if (job) status = `${recipe.equipmentRepair ? 'Repair · ' : ''}${craftJobStatus(s, job).state} · #${job.id}`;
+    if (job) status = `${recipe.equipmentRepair ? 'Repair · ' : ''}${craftJobStatus(s, job).state}`;
     else if (ui.section === 'repair') {
       const equipment = equipmentSummary(s, recipe.equipmentRepair);
       status = equipment.repairing ? 'Repair in progress' : equipment.wear > 0 ? `${equipment.broken ? 'Broken · ' : ''}Needs repair` : 'Good condition';
@@ -86,7 +87,7 @@ export function renderCrafting(s, root, notify, refresh) {
     const heading = add(body, 'div', '', 'craft-detail-heading');
     art(heading, recipe);
     const title = add(heading, 'div');
-    add(title, 'small', job ? `JOB #${job.id} · ${recipe.equipmentRepair ? 'REPAIR' : 'MAKE'}` : recipe.equipmentRepair ? 'CARE FOR SHARED TOOLS' : 'MADE IN THE VILLAGE', 'craft-eyebrow');
+    add(title, 'small', job ? recipe.equipmentRepair ? 'REPAIR JOB' : 'MAKING NOW' : recipe.equipmentRepair ? 'CARE FOR SHARED TOOLS' : 'MADE IN THE VILLAGE', 'craft-eyebrow');
     add(title, 'h3', craftName(recipe));
     add(title, 'p', recipe.equipmentRepair ? 'Restore one tool’s worth of condition.' : `Makes ${Object.values(recipe.output)[0]} · ${materialCount(s, craftItem(recipe))} in stores`);
     const footer = add(detail, 'div', '', 'craft-action');
@@ -125,9 +126,9 @@ export function renderCrafting(s, root, notify, refresh) {
       add(body, 'h4', 'Materials');
       const materials = add(body, 'dl', '', 'craft-materials');
       for (const [key, n] of Object.entries(recipe.input)) {
-        add(materials, 'dt', MATERIALS[key].name);
+        add(materials, 'dt', MATERIALS[key].name.charAt(0).toUpperCase() + MATERIALS[key].name.slice(1));
         const have = materialCount(s, key);
-        add(materials, 'dd', `${n} needed · ${have} available`, have < n ? 'craft-shortage' : '');
+        add(materials, 'dd', `${quantityText(key, n)} needed · ${quantityText(key, have)} available`, have < n ? 'craft-shortage' : '');
       }
       const sites = craftWorkspaces(s, recipe), site = chosenWorkspace(s, recipe, ui.sites.get(id));
       const select = workspaceSelect(body, sites, site?.id, `workspace-${id}`, 'Workspace');
@@ -161,7 +162,6 @@ export function renderCrafting(s, root, notify, refresh) {
       start.dataset.disabledReason = blocker;
       start.setAttribute('aria-describedby', reason.id);
     }
-    add(footer, 'small', 'Village paused · Close to return to the village.', 'craft-note');
   }
   const message = add(root, 'p', ui.message, 'craft-message');
   message.setAttribute('role', 'status');

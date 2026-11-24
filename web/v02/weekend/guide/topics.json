@@ -45,7 +45,8 @@
       "weather.js",
       "environment-info.js",
       "time-skip.js",
-      "time-skip-milestones.js"
+      "time-skip-milestones.js",
+      "session-ui.js"
     ],
     "tests": [
       "modes",
@@ -55,10 +56,10 @@
       "time-skip",
       "time-skip-milestones"
     ],
-    "description": "Use the clock to pause or change speed. A running village catches up when you return to its open tab. Pause to stop catch-up at the current moment. When everyone is asleep or away, time can advance at 64×.",
-    "diagram": "flowchart TD\n Mode{Play mode} -->|Story| Story[Finite supplies and biological waiting]\n Mode -->|Sandbox| Sandbox[Replenished supplies and no biological waiting]\n Clock[Clock controls] --> Running{Time running?}\n Running -->|Yes| Calendar[Days, seasons and schedules advance]\n Running -->|No| Hold[Village activity pauses]\n Calendar --> Weather[Seasonal rain, cloud cover and temperature]\n Weather --> Effects[Water recharge, crop stress and hydration demand]\n Calendar --> Residents[Resident needs, trips and work]",
+    "description": "Use the clock to pause or change speed. A running village catches up when you return to its open tab. Pause to stop catch-up at the current moment. When everyone is asleep or away, time can advance at 64×. If this computer cannot hold the selected speed, the speed button shows the rate the village is really running at.",
+    "diagram": "flowchart TD\n Mode{Play mode} -->|Story| Story[Finite supplies and biological waiting]\n Mode -->|Sandbox| Sandbox[Replenished supplies and no biological waiting]\n Clock[Clock controls] --> Running{Time running?}\n Running -->|Yes| Calendar[Days, seasons and schedules advance]\n Running -->|No| Hold[Village activity pauses]\n Clock --> Skip{Advance days}\n Skip -->|Normal steps| Calendar\n Skip -->|Fast simulation| Coarse[Larger steps: decisions and totals can differ]\n Coarse --> Calendar\n Calendar --> Weather[Seasonal rain, cloud cover and temperature]\n Weather --> Effects[Water recharge, crop stress and hydration demand]\n Calendar --> Residents[Resident needs, trips and work]",
     "boundary": "Sandbox also skips asset upkeep and tool wear.",
-    "tip": "Advance days runs the same simulation steps while you wait. Check upcoming milestones first; supplies, bills, weather and resident needs continue. Stop here keeps progress and pauses the village.",
+    "tip": "Advance days runs the same simulation steps while you wait. Fast simulation takes larger steps, so resident decisions and resource totals can differ from normal play. Check upcoming milestones first; supplies, bills, weather and resident needs continue. Stop here keeps progress and pauses the village. When the days end, a recap lists what changed in savings, food, water and building work.",
     "facts": null
   },
   {
@@ -162,7 +163,7 @@
     "description": "Residents carry committed materials and assemble buildings.",
     "diagram": "flowchart TD\n Blueprint[Choose valid blueprint and rotation] --> Bill[Capture material bill and work requirement]\n Bill --> Stock{Required supplies available?}\n Stock -->|No| Purchase[Purchase or produce missing supplies]\n Purchase --> Stock\n Stock -->|Yes| Reserve[Commit materials to project]\n Reserve --> Haul[Residents carry loads via stores or depot]\n Haul --> Stage[Materials staged at site]\n Stage --> Assemble[Accessible crew performs assembly]\n Assemble --> More{Materials or work remaining?}\n More -->|Yes| Haul\n More -->|No| Complete[Completed building joins available services]\n Needs[Needs and equipment] --> Assemble",
     "boundary": "Money pays for supplies and transport; resident construction labor is not a wage charge.",
-    "tip": "Build only what your stores and carrying capacity can support.",
+    "tip": "Build only what your stores and carrying capacity can support. A planned site is marked on the ground with an outline, corner stakes and a faint shape of the building until work begins.",
     "facts": null
   },
   {
@@ -271,7 +272,7 @@
     "description": "Manage a whole planting area or inspect one bed. Each bed keeps its own crop, care and harvest cycle.",
     "diagram": "flowchart TB\n Soil[Unprepared soil] -->|Resident preparation| Ready[Prepared bed]\n Ready -->|Seeds + planting work| Planted[Planted crop]\n Planted -->|Normal mode| Growth[Growing]\n Planted -->|Sandbox: instant growth| Mature[Harvestable]\n Growth -->|Accumulated growing conditions| Mature\n Mature -->|Resident harvesting| Harvest[Harvested bed + residues]\n Growth -->|Explicit clearing: residues only| Harvest\n Mature -->|Explicit clearing: residues only| Harvest\n Harvest -->|Prepare next planting| Ready\n Harvest --> Residues[Leave cover or collect residues]\n classDef soil fill:#f2e5d6,stroke:#c8af90,color:#654c35;\n classDef growing fill:#e9efd9,stroke:#b5c49a,color:#485d32;\n classDef mature fill:#d4e6d0,stroke:#88a67c,color:#2d5136;\n class Soil,Ready,Harvest soil;\n class Planted,Growth growing;\n class Mature,Residues mature;\n",
     "boundary": "Harvest quantities resolve once. Delayed harvest can reduce yield; clearing returns residues only. Fields snap to 2 m map cells.",
-    "tip": "Residents prepare beds, plant the selected crop with stored seeds, and harvest ripe beds automatically. With Auto-buy on, residents order missing seed packets when shared savings can cover them and collection. Keep water, work access and storage available.",
+    "tip": "Residents prepare beds, plant the selected crop with stored seeds, and harvest ripe beds automatically. With Auto-buy on, residents order missing seed packets when shared savings can cover them and collection; each field, garden and greenhouse has its own Auto-buy seeds & compost switch, which also covers compost for Apply compost work. Keep water, work access and storage available.",
     "facts": "crops"
   },
   {
@@ -456,8 +457,8 @@
       "deliveries"
     ],
     "description": "Purchases and sales need supply, demand, capacity and physical transport.",
-    "diagram": "flowchart TD\n Request[Purchase request or sale policy] --> Quote[Supplier stock or buyer quote and demand]\n Quote --> Reserve[Reserve goods, cash commitments or exports]\n Reserve --> Method{Transport method}\n Method -->|Resident pickup| Car[Available driver and car; town operating hours]\n Method -->|Paid supplier| Freight[Reserve delivery cost and capacity]\n Car --> Cargo[Load within mass and volume limits]\n Cargo --> Town[Travel to town and settle eligible sales once]\n Town --> Return[Return with purchased goods or unsold lots]\n Return --> Unload[Unload into stores or project shipment]\n Freight --> Unload\n Consolidate[Trip consolidation and protected reserves] --> Car\n Age[Perishable lot ageing in transit] --> Return",
-    "boundary": "There are two resident vehicles plus paid freight.",
+    "diagram": "flowchart TD\n Request[Purchase request or sale policy] --> Quote[Supplier stock or buyer quote and demand]\n Quote --> Reserve[Reserve goods, cash commitments or exports]\n Reserve --> Method{Transport method}\n Method -->|Resident pickup| Car[Available driver and car; town operating hours]\n Method -->|Paid supplier| Freight[Reserve delivery cost and capacity]\n Method -->|Project order over one car load| Freight\n Car --> Cargo[Load within mass and volume limits]\n Cargo --> Town[Travel to town and settle eligible sales once]\n Town --> Return[Return with purchased goods or unsold lots]\n Return --> Unload[Unload into stores or project shipment]\n Freight --> Unload\n Consolidate[Trip consolidation and protected reserves] --> Car\n Age[Perishable lot ageing in transit] --> Return",
+    "boundary": "There are two resident vehicles plus paid freight. A project order too large for one car load arrives by supplier truck even when purchases are set to resident pickup. Truck goods count as received once the truck has parked and unloaded.",
     "tip": "Set the food reserve and daily food budget in Resources. Plan for three portions per resident per day. Emergency purchases count incoming food and include transport in the daily budget. Check dedicated-trip fuel costs or hold a sale for a shared pickup. Manual sales can draw on household reserves.",
     "facts": null
   },

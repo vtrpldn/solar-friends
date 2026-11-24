@@ -2,6 +2,7 @@ import {HOME_DESIGNS} from '../library/home-designs.js';
 import { createSandbox, plan, placementError, PROJECTS, requiredLoads } from './simulation.js';
 import { isBuildOption } from './build-categories.js';
 import { foundationPad } from './elevation.js';
+import { ensureCultivation } from './cultivation.js';
 
 // Isolated desktop fixture, never loaded from or autosaved over a village.
 // The test validates the layout through plan(); the browser seeds those same
@@ -42,6 +43,40 @@ export function createScalePreview(validate = false, collection = 'village') {
     place('bridge', 6, 48);
     s.time = 400;
     s.log = ['Dream lighting preview · All build catalog models. This scene never autosaves.'];
+    return s;
+  }
+  if (collection === 'farm') {
+    // Every bed state side by side: one field column per stage, a garden and
+    // a greenhouse, with a house for scale.
+    const add = (key, x, z, extra = {}) => {
+      const def = PROJECTS[key];
+      if (key !== 'field') {
+        const pad = foundationPad(x, z, ...def.size, s.elevationSeed, s.terrainPads);
+        if (pad) s.terrainPads.push(pad);
+      }
+      const p = {id: s.nextId++, key, x, z, rotation: 0, work: def.work, delivered: requiredLoads(key), ...extra};
+      s.projects.push(p);
+      return ensureCultivation(s, p)?.beds || [];
+    };
+    const grow = (b, crop, growth, extra = {}) => Object.assign(b, {crop, growth, moisture: .7,
+      stage: growth >= 1 ? 'harvestable' : 'growing', ...(growth >= 1 ? {ripeAt: 0} : {}), ...extra});
+    // Columns run along x; five beds per column.
+    const columns = [
+      b => {}, b => Object.assign(b, {stage: 'prepared', moisture: .2}), b => Object.assign(b, {stage: 'prepared', moisture: .7}),
+      b => grow(b, 'greens', .2), b => grow(b, 'greens', .6), b => grow(b, 'greens', 1),
+      b => grow(b, 'beans', .2), b => grow(b, 'beans', .6), b => grow(b, 'beans', 1),
+      b => grow(b, 'corn', .2), b => grow(b, 'corn', .6), b => grow(b, 'corn', 1),
+      b => grow(b, 'corn', .8, {stage: 'failed', droughtDamage: .9, moisture: .05}),
+      b => Object.assign(b, {stage: 'harvested', cover: .8, residueKg: 1, moisture: .5}),
+    ];
+    add('field', 44, 50, {fieldSize: [columns.length, 6]}).forEach((b, i) => columns[Math.floor(i / 5)](b));
+    add('field', 62, 50, {fieldSize: [10, 6]}).forEach((b, i) => grow(b, ['corn', 'beans', 'greens'][Math.floor(i / 15) % 3] || 'greens', 1));
+    add('garden', 46, 60).forEach((b, i) => grow(b, ['greens', 'beans', 'corn', 'greens'][i], [1, .6, 1, .2][i]));
+    add('greenhouse', 52, 60).forEach((b, i) => grow(b, ['greens', 'beans'][i], 1));
+    add('house', 60, 60);
+    s.people.forEach((r, i) => { r.x = 50 + i; r.z = 57; r.walk = []; r.target = null; });
+    s.time = 400; s.rain = false; s.rainSeen = true; s.rainResolved = true;
+    s.log = ['Farm look preview · every bed state. This scene never autosaves.'];
     return s;
   }
   if (collection === 'lived') {

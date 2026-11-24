@@ -14,7 +14,7 @@ try{
  await page.goto(`http://127.0.0.1:${server.address().port}/v2/?mode=story`);
  // Reproduce the production host badge that previously intercepted the options button.
  await page.evaluate(()=>{const badge=document.createElement('iframe');badge.id='nl-badge-frame';badge.title='Hosting badge';badge.style.cssText='position:fixed;bottom:0;right:0;width:202px;height:64px;z-index:2147483645;border:0';document.body.append(badge);});
- await page.locator('.view-menu summary').click();
+ await page.locator('.view-menu > summary').click();
  await page.screenshot({path:'/tmp/solar-diagnostics-menu.png'});
  await page.getByRole('button',{name:'Copy bug report',exact:true}).click();
  await page.waitForFunction(()=>document.querySelector('#diagnostics-status').textContent.startsWith('Bug report copied'));

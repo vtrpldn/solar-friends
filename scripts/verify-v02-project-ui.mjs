@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {createSandbox, plan, PROJECTS} from '../web/v02/weekend/simulation.js';
 import {projectLabel, upgradeAction, undoRoadPlan} from '../web/v02/weekend/project-ui.js';
-assert.equal(projectLabel({key:'road',id:42}, PROJECTS), `${PROJECTS.road.name} #42`);
+assert.equal(projectLabel({key:'road',id:42}, PROJECTS), PROJECTS.road.name);
 const home = {id:4};
 assert.deepEqual(upgradeAction(home, []), {label:'Install solar upgrade',disabled:false});
 assert.equal(upgradeAction(home, [{site:4,recipe:'solar_upgrade',done:false}]).label, 'Solar upgrade queued');

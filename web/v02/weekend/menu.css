@@ -261,3 +261,17 @@ body {
 #world-setup p { font-size: 13px; line-height: 1.5; }
 .setup-actions { display: flex; justify-content: space-between; }
 #world-setup #land-preview { position: static; inset: auto; display: block; height: auto; aspect-ratio: 1; max-width: 330px; margin: auto; }
+
+/* New-game setup: labels sit above their fields, the seven land choices share
+   two columns, and Back / Start stay in view while the choices scroll. */
+#world-setup label { margin: 10px 0 5px; font-weight: 600; }
+#world-setup #setup-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+#world-setup #setup-fields > div { min-width: 0; }
+#world-setup .setup-layout { margin: 12px 0 8px; }
+#world-setup .setup-actions {
+  position: sticky; bottom: -28px; margin: 0 -28px -28px; padding: 14px 28px;
+  background: #fff7df; border-top: 1px solid #d9c9a0; z-index: 1;
+}
+#world-setup .setup-primary { background: #3f5a44; color: #fff7df; border-color: #2f4634; }
+#world-setup .setup-primary:hover { background: #4a6a50; }
+#world-setup :focus-visible { outline: 3px solid #bb663d; outline-offset: 2px; }

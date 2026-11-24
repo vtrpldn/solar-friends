@@ -14,7 +14,7 @@ try{for(const [width,height]of [[1440,1000],[1280,800]]){
  await page.keyboard.press('i');await page.locator('.management-tabs [data-manage="food"]').click();
  // On by default; switching it off and on again still works.
  await page.getByRole('button',{name:'Automatic food management: on',exact:true}).click();
- await page.getByRole('button',{name:'Manage food automatically',exact:true}).click();
+ await page.getByRole('button',{name:'Automatic food management: off',exact:true}).click();
  await page.getByLabel('Fresh-meal target (days)',{exact:true}).fill('2');await page.getByLabel('Fresh-meal target (days)',{exact:true}).press('Tab');
  await page.getByLabel('Chill first',{exact:true}).selectOption('meals');
  assert.equal(await page.getByLabel('Fresh-meal target (days)',{exact:true}).inputValue(),'2');

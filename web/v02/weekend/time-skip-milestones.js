@@ -1,3 +1,4 @@
+import {projectLabel} from './project-names.js';
 import {DAY} from './weather.js';
 import {BIOLOGY, CROP_CARE, growthRate} from './biological-production.js';
 import {CROPS, harvestExpired} from './cultivation.js';
@@ -11,7 +12,7 @@ export function upcomingMilestones(s, days, {projects = {}} = {}) {
     const remaining = Math.max(0, at - s.time);
     events.push({remaining, title, detail, estimated, withinSkip: remaining <= days * DAY});
   };
-  const siteName = p => `${projects[p.key]?.name || p.key} #${p.id}`;
+  const siteName = p => projectLabel(p, projects);
   if (s.mode !== 'sandbox') {
     for (const p of s.projects || []) for (const b of p.cultivation?.beds || []) {
       const crop = CROPS[b.crop];

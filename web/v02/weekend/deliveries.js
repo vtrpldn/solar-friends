@@ -1,11 +1,12 @@
 import {reserveSupplier,purchaseCategory} from './supplier-stock.js';
-import {blueprintManifest,fitsCargo,receiveBlueprintShipment,transportCost} from './physical-trade.js';
+import {blueprintManifest,fitsCargo,receiveBlueprintShipment,transportCost,TRUCK_LIMITS} from './physical-trade.js';
 import {uncollectedProjects} from './trip-state.js';
 import {transact} from './finances.js';
 import {spendableMoney} from './procurement-budget.js';
 import {freshLots,FOOD_DAYS} from './food-storage.js';
 import {tripEstimate} from './economy-reference.js';
-export const DELIVERY_LIMITS={cargoKg:5000,cargoM3:12};
+import {TRUCK_DRIVE,TRUCK_UNLOAD} from './delivery-truck.js';
+export const DELIVERY_LIMITS=TRUCK_LIMITS;
 export function orderDelivery(s,id,project,materials,stored,capacity){
  if(s.delivery||s.stage!=='playing')return false;
  const item=materials[id],shipments=project?blueprintManifest(uncollectedProjects(s),DELIVERY_LIMITS):null;
@@ -21,18 +22,24 @@ export function orderDelivery(s,id,project,materials,stored,capacity){
  return true;
 }
 export function deliveryStep(s,dt,materials,changeMaterial,stored,capacity){
- const d=s.delivery;if(!d)return;d.left=Math.max(0,d.left-dt);if(d.left>0)return;
+ if(s.truckLeaving){s.truckLeaving.left-=dt;if(s.truckLeaving.left<=0)delete s.truckLeaving;}
+ const d=s.delivery;if(!d)return;
+ if(d.left>0){d.left=Math.max(0,d.left-dt);return;}
+ // Parked: the goods count as received once the crane has cleared the bed.
+ d.unloaded=Math.min(TRUCK_UNLOAD,(d.unloaded||0)+dt);if(d.unloaded<TRUCK_UNLOAD)return;
  if(d.shipments)receiveBlueprintShipment(s,d);
  else{
   const quantity=d.foodLots?d.foodLots.reduce((n,l)=>n+l.n,0):d.quantity;
   if(stored+quantity>capacity){d.status='Delivery waiting: storage full';return;}
   changeMaterial(s,d.material,quantity,d.foodLots);
  }
- s.delivery=null;
+ s.delivery=null;s.truckLeaving={left:TRUCK_DRIVE};
 }
 export function validDelivery(s,materials){
  if(s.deliveryOnly!==undefined&&typeof s.deliveryOnly!=='boolean')return false;
+ const out=s.truckLeaving;if(out!==undefined&&(!out||!Number.isFinite(out.left)||out.left<=0||out.left>TRUCK_DRIVE))return false;
  const d=s.delivery;if(!d)return true;
+ if(d.unloaded!==undefined&&(!Number.isFinite(d.unloaded)||d.unloaded<0||d.unloaded>TRUCK_UNLOAD||d.left>0))return false;
  if(!materials[d.material]||!Number.isFinite(d.duration)||d.duration<=0||d.duration>1200||!Number.isFinite(d.left)||d.left<0||d.left>d.duration)return false;
  if(!d.shipments)return d.quantity===materials[d.material].quantity;
  if(!Array.isArray(d.shipments)||!d.shipments.length||d.shipments.length>512)return false;

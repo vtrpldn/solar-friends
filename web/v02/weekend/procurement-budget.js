@@ -1,5 +1,5 @@
 import {activeTrips} from "./trip-state.js";
-import {blueprintManifest,transportCost} from './physical-trade.js';
+import {blueprintManifest,projectFreight} from './physical-trade.js';
 
 // Derive commitments from undelivered goods rather than a second mutable wallet.
 // An active shipment has already paid its fare and must not reserve it twice.
@@ -17,16 +17,21 @@ export function collectionBudget(s,extra={}) {
   for(const p of pending)if((trip.projects||[trip.project]).includes(p.id))p.pendingMaterials={};
  }
  if(Object.keys(extra).length)pending.push({id:'new',pendingMaterials:{...extra}});
- const fare=transportCost(s),key=JSON.stringify([fare,pending,boardingPaid]);
+ const key=JSON.stringify([s.worldSettings?.town,!!s.deliveryOnly,pending,boardingPaid]);
  const previous=cache.get(s);if(previous?.key===key)return previous.value;
- let trips=0;
- while(pending.some(p=>Object.values(p.pendingMaterials).some(n=>n>0))){
-  const manifest=blueprintManifest(pending,s.deliveryOnly?{cargoKg:5000,cargoM3:12}:undefined);
-  if(!manifest.length)return {trips:Infinity,cost:Infinity};
+ const load=limits=>{
+  const manifest=blueprintManifest(pending,limits);
   for(const part of manifest){const p=pending.find(p=>p.id===part.project);for(const [id,n]of Object.entries(part.items))p.pendingMaterials[id]-=n;}
-  trips++;
+  return manifest.length;
+ };
+ // Cars still boarding have paid their fare and take the first loads.
+ for(let i=0;i<boardingPaid;i++)load();
+ let trips=0,cost=0,truck=false;
+ while(pending.some(p=>Object.values(p.pendingMaterials).some(n=>n>0))){
+  const freight=projectFreight(s,pending);
+  if(!load(freight.limits))return {trips:Infinity,cost:Infinity};
+  trips++;cost+=freight.fare;truck||=freight.truck;
  }
- if(boardingPaid)trips=Math.max(0,trips-boardingPaid);
- const value={trips,cost:Math.round(trips*fare*100)/100};cache.set(s,{key,value});return value;
+ const value={trips,cost:Math.round(cost*100)/100,...(truck?{truck}:{})};cache.set(s,{key,value});return value;
 }
 export function spendableMoney(s){return Math.max(0,Math.round((s.money-collectionBudget(s).cost)*100)/100);}

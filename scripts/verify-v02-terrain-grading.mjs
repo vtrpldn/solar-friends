@@ -98,7 +98,7 @@ poor.wood = 0;
 poor.money = 0;
 for (const key of Object.keys(poor.materials)) poor.materials[key] = 0;
 const untouched = JSON.stringify(poor.terrainPads);
-assert.match(plan(poor, "garden", site.x, site.z), /Missing/);
+assert.match(plan(poor, "garden", site.x, site.z), /Not enough savings/);
 assert.equal(JSON.stringify(poor.terrainPads), untouched);
 const invalid = JSON.parse(save(s));
 invalid.terrainPads[0].height = 100;

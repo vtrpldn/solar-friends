@@ -1,23 +1,24 @@
 {
-  "source": "web/v02/weekend/cultivation-models.js",
-  "sha256": "5ec9c81346a0ae9a1e85344f984418d6562dd6507193ccdb81cf634d214edddd",
-  "status": "reviewed locally; awaiting user review",
-  "evidence": "assets/validation/farming-field-models/comparison.png",
-  "comparison": "Original on left; revised on right. Each group shows greens, beans and corn at 20%, 60% and full growth.",
+  "source": "web/v02/weekend/cultivation-look.js",
+  "sha256": "f1d5bb664406e43dabdcc899638a4464afde8910d84634cdb01b1bef781bf7d7",
+  "status": "approved by user from preview on 2026-11-24",
+  "evidence": [
+    "assets/validation/farm-look/close.png",
+    "assets/validation/farm-look/far.png",
+    "assets/validation/farm-look/after-full.png"
+  ],
+  "comparison": "Previous look on the left; current look on the right. One field column per bed state, plus a garden and a greenhouse (?scale-preview=farm).",
   "findings": [
-    "Layered greens, branching beans and longer corn leaves have distinct silhouettes.",
-    "Warm matte foliage and soil colors retained.",
-    "Segmented raised furrows follow terrain; field perimeter closes.",
-    "Desktop field/greenhouse scene reviewed beside residents and a house, in day and night."
+    "Worked beds sit on trodden earth that fades into grass; unworked beds stay grassy.",
+    "Mounded beds are draped over terrain in half-metre sections.",
+    "Each plant is one merged leafy model; detail follows camera zoom, not screen position."
   ],
   "checks": [
-    "verify-v02-cultivation.mjs passed",
-    "verify-v02-cultivation-browser.mjs passed",
-    "benchmark-v02-cultivation.mjs: 10000 plants; 3 total distant draw calls",
-    "60 crop/stage/rotation geometry and LOD combinations passed"
+    "verify-v02-cultivation.mjs, -bulk, -browser and -bulk-browser passed",
+    "verify-v02-building-sites.mjs and verify-v02-physical-scale.mjs passed",
+    "benchmark-v02-cultivation.mjs: 10000 plants; 1 crop draw call distant (40k triangles) and near (400k triangles)"
   ],
   "limitations": [
-    "Benchmark used SwiftShader; hardware frame rate not established.",
-    "Final leaf geometry reduction reviewed in comparison render; gameplay flow checks preceded that geometry-only change."
+    "Benchmark used SwiftShader; hardware frame rate not established."
   ]
 }

@@ -1,7 +1,7 @@
 import {guideFacts} from './guide-facts.js';
-export function installGuide({button,isPaused,savePauseState=isPaused,setPaused}) {
+export function installGuide({button,isPaused,savePauseState=isPaused,setPaused,holdPause=()=>{const was=isPaused();setPaused(true);return was;},releasePause=setPaused}) {
  const dialog=document.createElement('dialog');dialog.id='village-guide';dialog.setAttribute('aria-labelledby','guide-title');
- dialog.innerHTML=`<div class="guide-heading"><div><small>LEARN THE VILLAGE</small><h2 id="guide-title">Village guide</h2></div><span>Ⅱ Paused while you read</span><button id="guide-close" aria-label="Close Guide">×</button></div><div class="guide-layout"><nav aria-label="Guide systems"><label for="guide-search">Find a system</label><input id="guide-search" type="search" placeholder="Water, food, tools…"><div id="guide-topics"></div></nav><article id="guide-article" aria-live="polite"><p>Loading the Guide…</p></article></div>`;
+ dialog.innerHTML=`<div class="guide-heading"><div><small>LEARN THE VILLAGE</small><h2 id="guide-title">Village guide</h2></div><span>Ⅱ Village paused</span><button id="guide-close" aria-label="Close Guide">×</button></div><div class="guide-layout"><nav aria-label="Guide systems"><label for="guide-search">Find a system</label><input id="guide-search" type="search" placeholder="Water, food, tools…"><div id="guide-topics"></div></nav><article id="guide-article" aria-live="polite"><p>Loading the Guide…</p></article></div>`;
  document.body.append(dialog);
  let resumePaused=false,savePaused=false,topics=null,current='autonomy',loading=null;
  const article=dialog.querySelector('#guide-article'),list=dialog.querySelector('#guide-topics'),search=dialog.querySelector('#guide-search');
@@ -28,13 +28,15 @@ export function installGuide({button,isPaused,savePauseState=isPaused,setPaused}
   if(!matches.length)list.append(text('p','No matching systems. Try water, crops or tools.'));
  }
  async function load(){
-  if(!loading)loading=fetch(new URL('./guide/topics.json',import.meta.url)).then(r=>{if(!r.ok)throw Error('Guide unavailable');return r.json();}).then(data=>{topics=data;renderList();renderTopic(current);}).catch(()=>{loading=null;article.replaceChildren(text('p','The Guide could not load. Close it and try again.'));});
+  if(!loading)loading=fetch(new URL('./guide/topics.json',import.meta.url)).then(r=>{if(!r.ok)throw Error('Guide unavailable');return r.json();}).then(data=>{topics=data;renderList();renderTopic(current);focusTopic();}).catch(()=>{loading=null;article.replaceChildren(text('p','The Guide could not load. Close it and try again.'));});
   return loading;
  }
- button.onclick=()=>{if(dialog.open)return;resumePaused=isPaused();savePaused=savePauseState();setPaused(true);dialog.showModal();load();};
+ // Open on the topic being read, so arrows browse topics straight away.
+ function focusTopic(){if(dialog.open&&(dialog.querySelector('#guide-close')===document.activeElement||!dialog.contains(document.activeElement)))list.querySelector('[aria-current="true"]')?.focus({preventScroll:true});}
+ button.onclick=()=>{if(dialog.open)return;savePaused=savePauseState();resumePaused=holdPause();dialog.showModal();load().then(focusTopic);};
  dialog.querySelector('#guide-close').onclick=()=>dialog.close();
  dialog.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();dialog.close();}});
- dialog.addEventListener('close',()=>{setPaused(resumePaused);button.focus({preventScroll:true});});
+ dialog.addEventListener('close',()=>{releasePause(resumePaused);button.focus({preventScroll:true});});
  search.oninput=()=>{if(topics)renderList();};
  return {get isOpen(){return dialog.open;},get resumePaused(){return savePaused;}};
 }

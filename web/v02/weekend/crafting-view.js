@@ -1,3 +1,4 @@
+import {projectLabel} from './project-names.js';
 // Derived display state only. Queue eligibility belongs to the simulation.
 import { PROJECTS, PROCESSES, MATERIALS, productionBlocker, buildingOperatingStatus } from './simulation.js';
 import { ITEMS } from './items.js';
@@ -11,7 +12,7 @@ export function craftName(recipe) {
   return ITEMS[id]?.name || MATERIALS[id]?.name || recipe.name;
 }
 export function workspaceName(site) {
-  return site ? `${PROJECTS[site.key].name} #${site.id}` : 'Workspace unavailable';
+  return site ? projectLabel(site,PROJECTS) : 'Workspace unavailable';
 }
 export function craftWorkspaces(s, recipe) {
   return s.projects.filter(p => !p.felled && !p.removal && PROJECTS[p.key]?.kind === recipe.kind && p.work >= PROJECTS[p.key].work);

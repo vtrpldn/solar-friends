@@ -1,3 +1,4 @@
+import { brl } from "./money.js";
 import {foodPortions} from './food-storage.js';
 const HOUR=60/.45;
 export function resourceSnapshot(s){return {
@@ -28,5 +29,6 @@ export function createResourceTrends(){
 export function formatTrend(value,money=false){
  if(value===null)return '— /h';
  const rounded=Math.round(value*10)/10;
- return `${rounded>0?'+':rounded<0?'−':''}${money?'R$':''}${Math.abs(rounded).toLocaleString('en-US',{maximumFractionDigits:1})}/h`;
+ const sign=rounded>0?"+":rounded<0?"−":"";
+ return money?`${sign}${brl(Math.abs(rounded))}/h`:`${sign}${Math.abs(rounded).toLocaleString("en-US",{maximumFractionDigits:1})}/h`;
 }

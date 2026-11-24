@@ -23,6 +23,13 @@ try{
  await page.locator('#farm-density').selectOption('0.5');
  await page.locator('#farm-irrigation').uncheck();
  assert(await page.evaluate(()=>fixture.p.cultivation.beds.every(b=>b.density===.5&&!b.irrigation)));
+ const autoBuy=page.locator('#farm-auto-buy');
+ assert.equal(await autoBuy.getAttribute('aria-pressed'),'false','unset farm switch follows village Auto-buy');
+ await autoBuy.click();assert.equal(await autoBuy.getAttribute('aria-pressed'),'true');
+ assert.match(await autoBuy.innerText(),/Auto-buy seeds & compost: on/);
+ assert.equal(await page.evaluate(()=>fixture.p.autoBuyInputs),true);
+ if(process.env.FARM_AUTOBUY_SCREENSHOT)await page.screenshot({path:process.env.FARM_AUTOBUY_SCREENSHOT});
+ await autoBuy.click();assert.equal(await page.evaluate(()=>fixture.p.autoBuyInputs),false);
  await page.screenshot({path:process.env.FARM_BULK_SCREENSHOT||'/tmp/farming-bulk-overview.png'});
  await page.locator('[data-farm-action="prepare"]').click();
  assert.equal(await page.evaluate(()=>fixture.s.operations.length),72);
@@ -37,10 +44,12 @@ try{
  await page.evaluate(()=>fixture.finish());
  await page.locator('#farm-inspect-bed').click();await page.locator('#farm-bed').selectOption('47');
  assert.equal(await page.locator('#farm-bed').inputValue(),'47');
+ assert.match(await page.locator('#farm-auto-buy').innerText(),/off/,'bed view shows the same farm switch');
+ if(process.env.FARM_AUTOBUY_SCREENSHOT)await page.screenshot({path:process.env.FARM_AUTOBUY_SCREENSHOT.replace('.png','-bed.png')});
  await page.locator('#farm-whole-site').click();assert.equal(await page.locator('#farm-bed').count(),0);
  await page.locator('.farm-details summary').click();
  page.once('dialog',dialog=>dialog.dismiss());await page.locator('[data-farm-action="clear"]').click();
  assert.equal(await page.evaluate(()=>fixture.s.operations.filter(o=>!o.done).length),0,'cancelled clearing changes nothing');
  assert.deepEqual(errors,[]);
- console.log('PASS desktop 72-bed overview, bulk settings, prepare, partial planting, retry, individual inspection and cancelled clearing');
+ console.log('PASS desktop 72-bed overview, bulk settings, farm auto-buy switch, prepare, partial planting, retry, individual inspection and cancelled clearing');
 }finally{await browser.close();server.close();}

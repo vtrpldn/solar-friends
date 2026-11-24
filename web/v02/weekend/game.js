@@ -1,3 +1,4 @@
+import { brl } from "./money.js";
 import { DREAM_LIGHTS, lightingAt } from "./dream-lighting.js";
 import {createPaintedView, paintVillageModel, villageClouds} from "./painted-village.js";
 import {createGroundWear} from './ground-wear.js';
@@ -6,6 +7,8 @@ import {renderDevTools} from './dev-tools.js';
 renderDevTools(document.getElementById('dev-tools'));
 import {upcomingMilestones, milestoneTime} from './time-skip-milestones.js';
 import {skipDays} from './time-skip.js';
+import {snapshotVillage, summarizeSkip} from './time-skip-summary.js';
+import {renderSkipSummary} from './time-skip-summary-ui.js';
 import {basicNeeds,renderBasicNeeds} from './basic-needs.js';
 import {installGuide} from './guide.js';
 let guide;
@@ -28,9 +31,9 @@ import {constructionSpecText} from './construction-specs.js';
 import {spendableMoney} from './procurement-budget.js';
 import {tradeQuote,transportCost,pendingExports} from './physical-trade.js';
 import {installLenses} from './lenses.js';
-import {simulationSpeed, simulationFrame, catchUpFrame, restoredView, wasteWarnings, operationalStatus, buildingBenefit} from './session-ui.js';
+import {simulationSpeed, simulationFrame, catchUpFrame, createPace, resetPace, laggingSpeed, restoredView, wasteWarnings, operationalStatus, buildingBenefit} from './session-ui.js';
 import {eventHistory, eventTime} from './event-history.js';
-import {PANEL_SHORTCUTS, MANAGEMENT_SHORTCUTS, SPEED_SHORTCUTS, ignoreGameShortcut} from './keyboard-shortcuts.js';
+import {binding, bindingFor, keyLabel, ignoreGameShortcut, applyShortcutHints, renderShortcutHelp} from './keyboard-shortcuts.js';
 import {projectLabel, upgradeAction, undoRoadPlan, productionSearchText, productionActivity, residentProject} from './project-ui.js';
 import { availableHomes, homeResidents, assignHome } from './simulation.js';
 import { createScalePreview } from './scale-preview.js';
@@ -47,6 +50,7 @@ import {saveSlots} from "./save-slots.js";
 import {installSaveDialog} from "./save-dialog.js";
 import {createCapybaraVisitors} from "./capybaras.js";
 import { constructionProgress } from "./construction-logistics.js";
+import { createPlannedSites } from "./planned-sites.js";
 import { BUILD_CATEGORIES, buildingCategory, inBuildCategory, isBuildOption } from "./build-categories.js";
 import {createResourceTrends,resourceSnapshot,formatTrend} from './resource-trends.js';
 import {materialTooltip} from './material-tooltip.js';
@@ -85,7 +89,9 @@ import { syncInfrastructure, LIQUIDS, hasPowerService, canSwitchBuilding, switch
 import { createAccessRoad } from "./access-road.js";
 import { captureMotion, interpolateMotion } from "./presentation.js";
 import { installCameraNavigation } from "./camera-navigation.js";
-import { createJimny } from "../library/vehicles.js";
+import { createJimny, createDeliveryTruck, createCargoBundle } from "../library/vehicles.js";
+import { truckPose, bundleCount, bedSlot, pileSlot, unloadProgress, craneCycle, CRANE_REST, MAX_BUNDLES, TRUCK_DRIVE } from "./delivery-truck.js";
+import { cargoSize } from "./physical-trade.js";
 import {
   ARRIVAL_DURATION,
   vehiclePose,
@@ -94,7 +100,8 @@ import {
 } from "./arrival.js";
 import { createRiver } from "./river.js";
 import { riverBankAt, riverAccess } from "./river-layout.js";
-import { createTent } from "../library/camping.js";
+import { installCampUI } from "./camp-ui.js";
+import { campFacing } from "./camp.js";
 import { performanceReadout } from "./performance.js";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
@@ -161,8 +168,10 @@ const downtimePreview = new URLSearchParams(location.search).has("downtime-previ
 const needsPreview = new URLSearchParams(location.search).has("needs-preview");
 const utilitiesPreview = needsPreview || downtimePreview || new URLSearchParams(location.search).has(
   "utilities-preview",
-);
+) || new URLSearchParams(location.search).has("truck-preview");
 const restPreview = new URLSearchParams(location.search).has("rest-preview");
+// ?truck-preview loops a full supplier delivery in the unsaved utilities scene.
+const truckPreview = new URLSearchParams(location.search).has("truck-preview");
 const arrivalPreview =
   scalePreview ||
   wildlifePreview ||
@@ -232,6 +241,12 @@ if (s.stage === "evening") {
     }
 }
 enableFastNavigation(s);
+// Side panels stop above the dock, whose height changes when its buttons wrap.
+{
+  const dock = document.querySelector("body > footer");
+  const measure = () => document.documentElement.style.setProperty("--footer-height", `${dock.offsetHeight}px`);
+  if (dock) { new ResizeObserver(measure).observe(dock); measure(); }
+}
 const savedView = restoredView(s.view);
 let speed = savedView?.speed || 1,
   paused = lightingPreview || scalePreview || savedView?.paused || false,
@@ -423,23 +438,114 @@ const vehicles = [0, 1].map((index) => {
   scene.add(root);
   return { root, wheels };
 });
+// The supplier truck, its crane, the lifts on its bed and the receiving pile.
+const truck = (() => {
+  const model = createDeliveryTruck(),
+    wheels = model.children.filter((part) => part.userData.wheel),
+    crane = model.getObjectByName("crane");
+  for (const part of [...wheels, crane]) model.remove(part);
+  const root = compactModel(model);
+  root.add(...wheels, crane);
+  root.visible = false;
+  scene.add(root);
+  const bundle = (parent) => {
+    const g = new THREE.Group();
+    g.add(...[0, 1, 2].map((kind) => compactModel(createCargoBundle(kind))));
+    g.visible = false;
+    parent.add(g);
+    return g;
+  };
+  return {
+    root, wheels, crane, shown: 0, fade: 0,
+    boom: crane.getObjectByName("boom"), cable: crane.getObjectByName("cable"), hook: crane.getObjectByName("hook"),
+    cargo: Array.from({ length: MAX_BUNDLES }, () => bundle(root)),
+    pile: Array.from({ length: MAX_BUNDLES }, () => bundle(scene)),
+    pileKinds: Array.from({ length: MAX_BUNDLES }, (_, i) => i % 3),
+  };
+})();
+const showKind = (bundle, kind) => bundle.children.forEach((variant, i) => { variant.visible = i === kind; });
+function placeVehicle(vehicle, pose, halfLength, halfWidth, wheelRadius) {
+  vehicle.root.visible = pose.visible;
+  vehicle.root.position.set(pose.x, elevationAt(pose.x, pose.z, s.elevationSeed, s.terrainPads), pose.z);
+  const forwardX = Math.sin(pose.yaw), forwardZ = Math.cos(pose.yaw);
+  const height = (right, forward) => elevationAt(
+    pose.x + Math.cos(pose.yaw) * right + forwardX * forward,
+    pose.z - Math.sin(pose.yaw) * right + forwardZ * forward,
+    s.elevationSeed, s.terrainPads);
+  vehicle.root.rotation.set(
+    -Math.atan2(height(0, halfLength) - height(0, -halfLength), halfLength * 2),
+    pose.yaw,
+    Math.atan2(height(halfWidth, 0) - height(-halfWidth, 0), halfWidth * 2),
+    "YXZ");
+  for (const wheel of vehicle.wheels) {
+    wheel.rotation.set(0, 0, Math.PI / 2);
+    wheel.rotateY((pose.z + 22) / wheelRadius);
+  }
+}
+// Reserved loads still lying at the receiving pile, waiting for a resident to carry them.
+function waitingLoads() {
+  let count = 0;
+  for (const p of s.projects) {
+    const def = PROJECTS[p.key];
+    if (!def || def.natural || p.natural || p.pendingMaterials || p.removal || !(def.work > 0) || p.work >= def.work) continue;
+    const carried = s.people.reduce((n, r) => n + (r.job === p.id && r.cargo ? r.haulLoads || 1 : 0), 0);
+    count += Math.max(0, requiredLoads(p) - p.delivered - (p.staged || 0) - carried);
+  }
+  return count;
+}
+function updateTruck(lag, seconds) {
+  const d = s.delivery, parked = d && d.left <= 0;
+  const pose = truckPose(d && { left: parked ? 0 : d.left + lag }, s.truckLeaving && { left: s.truckLeaving.left + lag });
+  placeVehicle(truck, pose, 2.3, 1, 0.48);
+  truck.root.updateMatrixWorld();
+  const waiting = waitingLoads();
+  const slotWorld = (index) => {
+    const slot = pileSlot(index);
+    return new THREE.Vector3(slot.x, elevationAt(slot.x, slot.z, s.elevationSeed, s.terrainPads) + slot.y, slot.z);
+  };
+  let hook = CRANE_REST, landed = 0;
+  for (const bundle of truck.cargo) bundle.visible = false;
+  if (d && pose.visible) {
+    const items = {};
+    for (const part of d.shipments || [{ items: { [d.material]: d.quantity } }]) for (const [id, n] of Object.entries(part.items)) items[id] = (items[id] || 0) + n;
+    const count = truckPreview ? MAX_BUNDLES : bundleCount(cargoSize(items).kg);
+    const { done, fraction } = unloadProgress(parked ? Math.max(0, (d.unloaded || 0) - lag) : 0, count);
+    landed = done;
+    for (let i = 0; i < count - done; i++) {
+      const slot = bedSlot(i);
+      truck.cargo[i].position.set(slot.x, slot.y, slot.z);
+      truck.cargo[i].visible = true;
+      showKind(truck.cargo[i], i % 3);
+    }
+    if (parked && done < count) {
+      const index = count - 1 - done, target = (waiting + done) % MAX_BUNDLES;
+      const local = (n) => { const v = truck.root.worldToLocal(slotWorld(waiting + n)); return { x: v.x, y: v.y, z: v.z }; };
+      hook = craneCycle(fraction, bedSlot(index), local(done), done ? { ...local(done - 1) } : undefined);
+      if (hook.carrying) truck.cargo[index].position.set(hook.x, hook.y - 0.56, hook.z);
+      else if (fraction >= 0.9) { truck.cargo[index].visible = false; landed = done + 1; }
+      truck.pileKinds[target] = index % 3;
+    }
+  }
+  const reach = Math.max(0.4, Math.hypot(hook.x, hook.z - 0.72)), drop = Math.max(0.1, 2.98 - hook.y - 0.06);
+  truck.crane.rotation.y = Math.atan2(hook.x, hook.z - 0.72);
+  truck.boom.scale.z = reach; truck.boom.position.z = reach / 2;
+  truck.cable.scale.y = drop; truck.cable.position.set(0, -drop / 2, reach);
+  truck.hook.position.set(0, -drop, reach);
+  // The pile grows as lifts land and shrinks one bundle at a time as it is carried off.
+  const wanted = Math.min(MAX_BUNDLES, waiting + landed);
+  if (wanted >= truck.shown) { truck.shown = wanted; truck.fade = 0; }
+  else if ((truck.fade += seconds) > 0.35) { truck.shown--; truck.fade = 0; }
+  for (const [i, bundle] of truck.pile.entries()) {
+    bundle.visible = i < truck.shown;
+    if (bundle.visible) { bundle.position.copy(slotWorld(i)); showKind(bundle, truck.pileKinds[i]); }
+  }
+}
 const campGroup = new THREE.Group();
 scene.add(campGroup);
-let campDrawn = null;
+// Tents, gear, the site preview and the arrival skip live in camp-ui.js.
+let campUI;
 function drawCamp() {
-  if (campDrawn === s.camp) return;
-  campDrawn = s.camp;
-  campGroup.clear();
-  if (!s.camp) return;
-  const c = campLocation(s);
-  campGroup.position.copy(world(c.x, c.z));
-  for (let i = 0; i < 2; i++) {
-    const model = createTent(i);
-    paintVillageModel(model);
-    const tent = compactModel(model);
-    tent.position.set(i * 3, 0, -3);
-    campGroup.add(tent);
-  }
+  if (campUI.update(performance.now())) requestSceneRender();
 }
 const border = new THREE.LineLoop(
   new THREE.BufferGeometry().setFromPoints(
@@ -636,7 +742,7 @@ function syncBuildings() {
     );
     entry.root.scale.z = bridgeWidthScale(p);
     entry.root.rotation.y = ((p.rotation || 0) * Math.PI) / 2;
-    entry.root.visible=!p.felled;
+    entry.root.visible=!p.felled&&!plannedSites.hidesModel(p,def);
 
     if (def.asset === "fire-circle") {
       if (fraction >= 1 && !entry.fire) {
@@ -671,7 +777,15 @@ function syncBuildings() {
       }
     }
   }
+  plannedSites.sync(s, atmosphere.lamps);
 }
+// Stakes, string, lime lines and a pale outline mark every site not yet built.
+const plannedSites = createPlannedSites({
+  world, footprint, definitions: PROJECTS, loads: requiredLoads, widthScale: bridgeWidthScale,
+  hasStages: (asset) => assets.has(`${asset}-construction-0`),
+  model: (asset) => compactModel(createAsset(asset)),
+});
+scene.add(plannedSites.group);
 const ghost = new THREE.Mesh(
   new THREE.PlaneGeometry(4, 4),
   new THREE.MeshBasicMaterial({
@@ -727,7 +841,7 @@ function focus(c) {
   camera.updateProjectionMatrix();
   controls.update();
 }
-focus(scalePreview ? (new URLSearchParams(location.search).get("scale-preview")==="new-homes"?{x:62,z:53}:new URLSearchParams(location.search).get("scale-preview")==="homes"?{x:63,z:52}:{x:56,z:57}) : s.arrivalAnimating ? s.stock : campLocation(s));
+focus(truckPreview ? s.stock : scalePreview ? (previewCollection==="farm"?{x:53,z:54}:new URLSearchParams(location.search).get("scale-preview")==="new-homes"?{x:62,z:53}:new URLSearchParams(location.search).get("scale-preview")==="homes"?{x:63,z:52}:{x:56,z:57}) : s.arrivalAnimating ? s.stock : campLocation(s));
 if (savedView) {
   camera.position.fromArray(savedView.position);
   controls.target.fromArray(savedView.target);
@@ -770,6 +884,19 @@ function message(t) {
 }
 let activeSaveSlot;
 try { activeSaveSlot=saveSlots(localStorage).active(s.mode||"story"); } catch {}
+// Screens that pause the village share one count, so a screen opened while another
+// is still closing cannot leave the village paused or running by mistake.
+let pauseHolds = 0;
+function holdPause() {
+  const resume = pauseHolds++ ? pauseResume : paused;
+  pauseResume = resume; paused = true; updatePauseButton();
+  return resume;
+}
+function releasePause(resume) {
+  pauseHolds = Math.max(0, pauseHolds - 1);
+  pauseResume = resume; paused = pauseHolds ? true : resume; updatePauseButton();
+}
+let pauseResume = false;
 function viewPauseState() {
   if (guide?.isOpen) return guide.resumePaused;
   if (document.querySelector('.village-saves[open]')) return savesWasPaused;
@@ -805,7 +932,7 @@ const rotateButton = $("rotate-placement");
 function rotatePlacement(direction = 1) {
   if (!placing) return;
   placementRotation = (placementRotation + direction + 4) % 4;
-  rotateButton.textContent = `Rotate · R · ${placementRotation * 90}°`;
+  rotateButton.textContent = `Rotate · ${placementRotation * 90}°`;
   updatePlacementPreview();
 }
 rotateButton.onclick = () => rotatePlacement();
@@ -866,25 +993,30 @@ function startPlacement(key, id = null) {
   scene.add(wireframe);
   wireframe.visible = false;
   rotateButton.hidden = key === "road";
-  rotateButton.textContent = `Rotate · R · ${placementRotation * 90}°`;
+  rotateButton.textContent = `Rotate · ${placementRotation * 90}°`;
   ghost.visible = false;
   $("cancel").hidden = false;
-  $("cancel").textContent = key === 'road' ? 'Finish planning · Esc' : 'Cancel placement · Esc';
+  $("cancel").textContent = key === 'road' ? 'Finish planning' : 'Cancel placement';
   $("undo-road").hidden = key !== 'road' || !!id;
   $("undo-road").disabled = true;
   grid.visible = true;
   message(
     key === "bridge"
-      ? "Span the river with both ends on dry land. R rotates. Esc cancels."
+      ? `Span the river with both ends on dry land. ${keyLabel('rotate')} rotates. ${keyLabel('back')} cancels.`
       : key === "road"
-        ? "Road planning paused · Shift-click extends · Undo removes the last stroke · Esc keeps the plan."
-        : "Choose a building site. R rotates. Shift-click repeats. Ground levels automatically. Esc cancels.",
+        ? `Road planning paused · Shift-click or ${keyLabel('activate-repeat')} extends · Undo removes the last stroke · ${keyLabel('back')} keeps the plan.`
+        : `Choose a building site. ${keyLabel('rotate')} rotates. Shift-click or ${keyLabel('activate-repeat')} repeats. Ground levels automatically. ${keyLabel('back')} cancels.`,
   );
   renderUI();
+  // Chosen from the keyboard: aim at the middle of the view straight away, so
+  // the site is previewed before Enter commits to it.
+  if (keyboardInput) aimAtReticle();
 }
 
 const buildMaterialTooltip = materialTooltip();
-for (const [key, d] of Object.entries(PROJECTS)) {
+// Cards follow the category list, so "All" reads in the same order as the sidebar.
+const buildOrder = definition => { const i = BUILD_CATEGORIES.indexOf(buildingCategory(definition)); return i < 0 ? BUILD_CATEGORIES.length : i; };
+for (const [key, d] of Object.entries(PROJECTS).sort(([, a], [, b]) => buildOrder(a) - buildOrder(b))) {
   if (!isBuildOption(key, d)) continue;
   const b = document.createElement("button");
   b.id = `build-${key}`;
@@ -905,6 +1037,17 @@ function setKeyboardAim(active) {
   reticle.hidden = !active;
 }
 const aimPoint = shiftKey => ({clientX: innerWidth / 2, clientY: innerHeight / 2, shiftKey});
+// True while the player is driving with keys rather than the pointer.
+let keyboardInput = false;
+for (const type of ['pointerdown', 'pointermove', 'wheel'])
+  addEventListener(type, () => { keyboardInput = false; }, {capture: true, passive: true});
+function aimAtReticle() {
+  setKeyboardAim(true);
+  cell = null;
+  const point = aimPoint(shiftPlacement);
+  if (farmingUI.placingField()) farmingUI.previewCorner(point);
+  else previewMapAction(point);
+}
 let down = null,
   cell = null;
 const roadPreview = new THREE.Line(
@@ -927,6 +1070,11 @@ let farmingUI=installFarmingUI({state:()=>s,selected:()=>selected,scene,hit,cont
   select:id=>{selected=id;syncBuildings();persist();renderUI();},
   changed:()=>{syncBuildings();persist();renderUI();},message,
   begin:()=>{placing=null;setPanel(null);ghost.visible=false;},
+});
+campUI = installCampUI({state:()=>s,scene,campGroup,actors,world,hit,camera,message,persist,
+  finish:model=>{paintVillageModel(model);return compactModel(model);},
+  placing:()=>!!placing||!!openPanel||farmingUI.placingField(),
+  refresh:()=>{uiSignature='';renderUI();},
 });
 $("world").addEventListener("pointerdown", (e) => {
   down = { x: e.clientX, y: e.clientY };
@@ -952,8 +1100,8 @@ function previewMapAction(e) {
     }
     return;
   }
-  const pitching =
-    s.stage === "arrival" && s.arrivalElapsed >= ARRIVAL_DURATION;
+  if (campUI.hover(e)) return;
+  const pitching = false;
   if (!placing && !pitching) return;
   const p = hit(e);
   if (!p) {
@@ -971,8 +1119,7 @@ function previewMapAction(e) {
 }
 function updatePlacementPreview() {
   if (!cell) return;
-  const pitching =
-    !placing && s.stage === "arrival" && s.arrivalElapsed >= ARRIVAL_DURATION;
+  const pitching = false;
   if (!placing && !pitching) return;
   const size = pitching
     ? [5, 4]
@@ -1002,7 +1149,7 @@ function updatePlacementPreview() {
   if (placing) {
     const missing = moving ? [] : missingMaterials(s, placing);
     const purchase = blueprintPurchase(s, placing);
-    hint ||= missing.length ? purchase.error || `Place to buy missing materials for R$${purchase.cost.toFixed(2)} · ${s.trip ? "Pickup queued after current trip" : "Resident pickup arranged automatically"}` : "";
+    hint ||= missing.length ? purchase.error || `Place to buy missing materials for ${brl(purchase.cost)} · ${s.trip ? "Pickup queued after current trip" : "Resident pickup arranged automatically"}` : "";
     if (placing === "road" && shiftPlacement && lastRoad) {
       const line = roadLine(lastRoad, cell);
       if (!line) hint = "Choose a shorter road route (up to 128 cells).";
@@ -1014,12 +1161,12 @@ function updatePlacementPreview() {
         roadPreview.visible = true;
         const count = line.filter((c) => !s.projects.some((p) => p.key === "road" && p.x === c.x && p.z === c.z)).length;
         const total = blueprintPurchase(s, "road", count);
-        hint = error || total.error || `${count} road sections${total.cost ? ` · Auto-buy R$${total.cost.toFixed(2)} total` : " · Materials available"} · Shift-click to plan`;
+        hint = error || total.error || `${count} road sections${total.cost ? ` · Auto-buy ${brl(total.cost)} total` : " · Materials available"} · Shift-click to plan`;
       }
     }
     message(
       hint ||
-        `${PROJECTS[placing].name} · Site ${siteDimensions(size)} · ${placementRotation * 90}° · ${placing === "road" ? "Shift-click extends roads" : "R rotates · Shift-click repeats · Gold: entrance · Blue: work access"}`,
+        `${PROJECTS[placing].name} · Site ${siteDimensions(size)} · ${placementRotation * 90}° · ${placing === "road" ? "Shift-click extends roads" : `${keyLabel('rotate')} rotates · Shift-click repeats · Gold: entrance · Blue: work access`}`,
     );
   } else if (hint) message(hint);
   ghost.material.color.set(error ? "#c26847" : "#d9eda5");
@@ -1055,6 +1202,7 @@ $("world").addEventListener("click", (e) => {
   activateMap(e);
 });
 function activateMap(e) {
+  if (campUI.click(e)) return;
   const p = hit(e);
   if (!p) return;
   const x = Math.round(p.x / 2 + 32),
@@ -1072,20 +1220,6 @@ function activateMap(e) {
       message("Terrain updated · no materials, money or resident work used.");
     } else message("No change here. Try open ground away from protected areas.");
     $("terrain-level").textContent = flattenLevel === null ? "Flatten uses the height of your first click." : `Flatten height: ${flattenLevel.toFixed(1)} m`;
-    return;
-  }
-  if (s.stage === "arrival" && s.arrivalElapsed >= ARRIVAL_DURATION) {
-    const error = campPlacementError(s, x, z);
-    if (error) {
-      message(error);
-      return;
-    }
-    chooseCamp(s, { x, z });
-    message("Camp is ready. Choose what your community needs first.");
-    ghost.visible = false;
-    focus(campLocation(s));
-    persist();
-    renderUI();
     return;
   }
   if (placing) {
@@ -1147,7 +1281,7 @@ $("cancel-project").onclick = () => {
   message(error || s.log[0]);
   uiSignature = ''; renderUI();
 };
-guide=installGuide({button:$('open-guide'),isPaused:()=>paused,savePauseState:()=>viewPauseState(),setPaused:value=>{paused=value;updatePauseButton();}});
+guide=installGuide({button:$('open-guide'),isPaused:()=>paused,savePauseState:()=>viewPauseState(),setPaused:value=>{paused=value;updatePauseButton();},holdPause,releasePause});
 let controlsWasPaused = false;
 $("copy-diagnostics").onclick = async () => {
   const button=$("copy-diagnostics"),status=$("diagnostics-status");
@@ -1155,7 +1289,7 @@ $("copy-diagnostics").onclick = async () => {
   try{
     const report=diagnostics.report(JSON.parse(saveWithView()),{
       url:location.origin+location.pathname,mode:s.mode,paused,hidden:document.hidden,
-      selectedSpeed:speed,effectiveSpeed:simulationSpeed(s,speed),accumulator,
+      selectedSpeed:speed,effectiveSpeed:simulationSpeed(s,speed),accumulator,paceRatio:pace.ratio,paceDebt:pace.debt,
       selectedProject:selected,selectedResident:expandedResident,openPanel,placing,
       browser:navigator.userAgent,viewport:{width:innerWidth,height:innerHeight,pixelRatio:devicePixelRatio},
     });
@@ -1168,12 +1302,14 @@ $("copy-diagnostics").onclick = async () => {
   }catch(error){status.textContent='Could not prepare the bug report. Please try again.';diagnostics.error('diagnostic-export',error);}
   finally{button.disabled=false;}
 };
+renderShortcutHelp($("controls-list"));
 $("show-controls").onclick = () => {
-  controlsWasPaused = paused; paused = true; updatePauseButton();
+  if ($("controls-dialog").open) return;
+  controlsWasPaused = holdPause();
   $("controls-dialog").showModal();
 };
 $("close-controls").onclick = () => $("controls-dialog").close();
-$("controls-dialog").addEventListener('close', () => { paused = controlsWasPaused; updatePauseButton(); });
+$("controls-dialog").addEventListener('close', () => releasePause(controlsWasPaused));
 $("priority").onclick = () => {
   prioritize(s, selected);
   message(s.log[0]);
@@ -1192,7 +1328,7 @@ $("copy-building").onclick = () => {
     setPanel(null);
     startPlacement(p.key);
     placementRotation = rotation;
-    rotateButton.textContent = `Rotate · R · ${rotation * 90}°`;
+    rotateButton.textContent = `Rotate · ${rotation * 90}°`;
   }
 };
 $("focus-selection").onclick = () => {
@@ -1226,84 +1362,142 @@ $("undo-road").onclick = () => {
   message("Last road stroke undone.");
 };
 addEventListener("keyup", (e) => {
-  if (e.code === "Enter") terrainStroke = null;
+  if (binding('activate').code.includes(e.code)) terrainStroke = null;
   if (e.key === "Shift") {
     shiftPlacement = false;
     roadPreview.visible = false;
   }
 });
 addEventListener("blur", () => { terrainStroke = null; });
-addEventListener("keydown", (e) => {
-  const dialogOpen = !!document.querySelector('dialog[open]');
-  const editing = e.target.closest?.('input,textarea,select,[contenteditable]:not([contenteditable="false"])');
-  if (e.key === "Shift" && !editing && !dialogOpen) {
-    shiftPlacement = true;
-    updatePlacementPreview();
-  }
-  // Escape belongs to the topmost dialog, including saves and confirmations.
-  if (e.key === "Escape" && !dialogOpen) {
-    if (editing && e.target.type === 'search' && e.target.value) {
-      e.preventDefault();
-      e.target.value = '';
-      e.target.dispatchEvent(new Event('input', {bubbles: true}));
-      return;
-    }
-    if (placing) cancel();
-    else if (selected) { selected = null; uiSignature = ''; renderUI(); }
-    else if (openPanel) setPanel(null);
-    else document.querySelector('.view-menu').open = false;
-    $("world").focus({preventScroll: true});
+const typingTarget = 'input,textarea,select,[contenteditable]:not([contenteditable="false"])';
+const focusWorld = () => $("world").focus({preventScroll: true});
+const viewMenu = document.querySelector('.view-menu');
+// Esc unwinds exactly one visible layer per press, topmost first.
+function stepBack(e) {
+  const field = e.target.closest?.(typingTarget);
+  if (field?.type === 'search' && field.value) {
+    field.value = '';
+    field.dispatchEvent(new Event('input', {bubbles: true}));
     return;
   }
-  // Search remains available inside Resources, but never steals typed text.
-  if (e.code === 'Slash' && !e.shiftKey && !ignoreGameShortcut(e) &&
-      (!dialogOpen || $("management").open && management.view === 'resources')) {
-    e.preventDefault();
-    if (!dialogOpen) {
+  if (viewMenu.open) {
+    const inside = viewMenu.contains(document.activeElement);
+    viewMenu.open = false;
+    if (inside) viewMenu.querySelector('summary').focus({preventScroll: true});
+    return;
+  }
+  if (lenses.menuOpen) { lenses.closeMenu(); return; }
+  if (placing) { cancel(); focusWorld(); }
+  else if (openPanel && !selected) setPanel(null);
+  else if (lenses.active) lenses.clear();
+  else if (selected) {
+    selected = null;
+    // A panel hidden behind the selection goes with it: one visible layer per press.
+    if (openPanel) setPanel(null);
+    else { uiSignature = ''; renderUI(); }
+    focusWorld();
+  } else focusWorld();
+}
+function activateAtReticle(e) {
+  focusWorld();
+  setKeyboardAim(true);
+  const point = aimPoint(e.shiftKey);
+  if (openPanel === "terrain-panel") {
+    terrainStroke = {point: null};
+    previewMapAction(point);
+  }
+  const before = selected;
+  if (!farmingUI.markCorner(point)) activateMap(point);
+  // Hand the new selection to the keyboard; Esc returns to the map.
+  if (selected && selected !== before && !$("selection").hidden) $("selection").focus({preventScroll: true});
+}
+function togglePanel(panel) {
+  if (s.stage !== 'playing') return;
+  setPanel(openPanel === panel ? null : panel);
+}
+function toggleScreen(screen) {
+  if (s.stage !== 'playing') return;
+  if (management.isOpen && management.view === screen) $("management").close();
+  else management.open(screen);
+}
+// One entry per discrete binding in keyboard-shortcuts.js; the table decides
+// which key reaches which entry.
+const shortcutActions = {
+  back: stepBack,
+  activate: activateAtReticle,
+  'activate-repeat': activateAtReticle,
+  rotate: () => rotatePlacement(1),
+  'rotate-back': () => rotatePlacement(-1),
+  find: () => { if (selected) $("focus-selection").click(); else focus(campLocation(s)); },
+  grid: () => $("grid").click(),
+  lenses: () => lenses.toggleMenu(),
+  pause: () => $("pause").click(),
+  speed: e => setSpeed(binding('speed').values[e.code]),
+  'advance-days': () => $("time-skip").click(),
+  build: () => togglePanel('build'),
+  projects: () => togglePanel('projects-panel'),
+  residents: () => togglePanel('people'),
+  terrain: () => togglePanel('terrain-panel'),
+  search: () => {
+    if (management.isOpen) {
+      if (management.view !== 'resources') return;
+    } else {
       if (s.stage !== 'playing') return;
       setPanel('build');
     }
-    const input = $(dialogOpen ? 'resource-search' : 'build-search');
+    const input = $(management.isOpen ? 'resource-search' : 'build-search');
     input.focus(); input.select();
+  },
+  finances: () => toggleScreen('finances'),
+  items: () => toggleScreen('items'),
+  crafting: () => toggleScreen('crafting'),
+  food: () => toggleScreen('food'),
+  resources: () => toggleScreen('resources'),
+  water: () => toggleScreen('water'),
+  power: () => toggleScreen('power'),
+  guide: () => { const dialog = $("village-guide"); if (dialog.open) dialog.close(); else $("open-guide").click(); },
+  'view-options': () => {
+    if ($("village-actions").hidden) return;
+    viewMenu.open = !viewMenu.open;
+    if (viewMenu.open) $("show-controls").focus({preventScroll: true});
+    else focusWorld();
+  },
+  help: () => { const dialog = $("controls-dialog"); if (dialog.open) dialog.close(); else $("show-controls").click(); },
+};
+addEventListener("keydown", (e) => {
+  const dialog = document.querySelector('dialog[open]');
+  const editing = e.target.closest?.(typingTarget);
+  if (!['Shift', 'Control', 'Alt', 'Meta'].includes(e.key)) keyboardInput = true;
+  if (e.key === "Shift" && !editing && !dialog) {
+    shiftPlacement = true;
+    updatePlacementPreview();
+  }
+  const bound = bindingFor(e);
+  if (!bound || e.defaultPrevented) return;
+  // Escape belongs to the topmost dialog, including saves and confirmations.
+  if (bound.id === 'back') {
+    if (dialog) return;
+    e.preventDefault();
+    stepBack(e);
     return;
   }
-  const controlFocused = e.target.closest?.('button,summary,a,[role="button"]');
-  if (e.code === "Enter" && !controlFocused && !ignoreGameShortcut(e, dialogOpen)) {
-    e.preventDefault();
-    $("world").focus({preventScroll: true});
-    setKeyboardAim(true);
-    const point = aimPoint(e.shiftKey);
-    if (openPanel === "terrain-panel") {
-      terrainStroke = {point: null};
-      previewMapAction(point);
-    }
-    if (!farmingUI.markCorner(point)) activateMap(point);
-    return;
-  }
-  if (ignoreGameShortcut(e, dialogOpen)) return;
-  if (e.code === 'KeyR' && placing) {
-    e.preventDefault(); rotatePlacement(e.shiftKey ? -1 : 1); return;
-  }
-  if (e.shiftKey) return;
-  const panel = PANEL_SHORTCUTS[e.code], screen = MANAGEMENT_SHORTCUTS[e.code];
-  if ((panel || screen) && s.stage === 'playing') {
-    e.preventDefault();
-    $("world").focus({preventScroll: true});
-    if (panel) setPanel(openPanel === panel ? null : panel);
-    else management.open(screen);
-    if (!document.querySelector('dialog[open]')) $("world").focus({preventScroll: true});
-  } else if (SPEED_SHORTCUTS[e.code]) {
-    e.preventDefault(); setSpeed(SPEED_SHORTCUTS[e.code]);
-  } else if (e.code === 'KeyG') {
-    e.preventDefault(); $("grid").click();
-  } else if (e.code === 'KeyF') {
-    e.preventDefault();
-    if (selected) $("focus-selection").click();
-    else focus(campLocation(s));
-  } else if (e.code === 'Space' && !e.target.closest?.('button,summary,a')) {
-    e.preventDefault(); $("pause").click();
-  }
+  // Never while typing, composing, auto-repeating or holding Ctrl/Cmd/Alt.
+  if (ignoreGameShortcut(e)) return;
+  // A modal isolates the game, except for the key that opened it (or one of its screens).
+  if (dialog && bound.modal !== dialog.id) return;
+  // Enter and Space keep their native meaning on a focused control.
+  if (['activate', 'activate-repeat', 'pause'].includes(bound.id) && e.target.closest?.('button,summary,a,[role="button"]')) return;
+  if (['rotate', 'rotate-back'].includes(bound.id) && !placing) return;
+  e.preventDefault();
+  shortcutActions[bound.id](e);
 });
+// From either search field, Down or Enter steps into the results.
+for (const [field, results] of [['build-search', '#build-list button:not([hidden])'], ['resource-search', '#resource-grid button']])
+  $(field).addEventListener('keydown', e => {
+    if (!['ArrowDown', 'Enter'].includes(e.key) || e.isComposing) return;
+    const first = document.querySelector(results);
+    if (first) { e.preventDefault(); first.focus(); }
+  });
 
 $("town").onclick = () => {
   if (supplyRun(s, $("purchase").value)) {
@@ -1326,8 +1520,10 @@ $("uphill").onclick = () => {
   renderUI();
 };
 let catchUpSeconds = 0;
+const pace = createPace();
 function updatePauseButton() {
   $("pause").textContent = paused ? "▶" : "Ⅱ";
+  document.body.dataset.paused = String(paused);
   $("pause").setAttribute(
     "aria-label",
     paused ? "Resume simulation" : "Pause simulation",
@@ -1337,7 +1533,7 @@ updatePauseButton();
 $("pause").onclick = () => {
   if (roadWasPaused !== null) { cancel(); return; }
   paused = !paused;
-  if (paused) catchUpSeconds = 0;
+  if (paused) { catchUpSeconds = 0; resetPace(pace); }
   updatePauseButton();
 };
 function setSpeed(value) {
@@ -1347,12 +1543,17 @@ function setSpeed(value) {
 function updateSpeedButton() {
   const effective = paused ? speed : simulationSpeed(s, speed);
   const automatic = effective !== speed;
-  const label = !paused && catchUpSeconds >= 1 ? `Catching up · ${Math.ceil(catchUpSeconds)}s` : automatic ? '64× Auto' : `${speed}×`;
+  // Show the rate the village really runs at when this computer cannot hold the selected speed.
+  const lagging = paused ? null : laggingSpeed(pace, effective);
+  const actual = lagging === null ? '' : `${lagging < 10 ? lagging.toFixed(1) : Math.round(lagging)}×`;
+  const label = !paused && catchUpSeconds >= 1 ? `Catching up · ${Math.ceil(catchUpSeconds)}s` : lagging !== null ? `${actual} of ${effective}×` : automatic ? '64× Auto' : `${speed}×`;
   const description = !paused && catchUpSeconds >= 1
     ? 'Catching up on time spent in a hidden tab. Pause to stop here.'
+    : lagging !== null
+    ? `Running at about ${actual}. This computer cannot keep up with ${effective}×. Selected speed ${speed}×. Keys 1 to 4 select speed.`
     : automatic
-    ? `Automatic speed 64× while everyone is asleep or away. Selected speed ${speed}×. Keys 1 to 4 select speed.`
-    : `Simulation speed ${speed}×. Keys 1 to 4 select speed.`;
+    ? `Automatic speed 64× while everyone is asleep or away. Selected speed ${speed}×. Keys ${keyLabel('speed')} select speed.`
+    : `Simulation speed ${speed}×. Keys ${keyLabel('speed')} select speed.`;
   if ($("speed").textContent !== label) $("speed").textContent = label;
   if ($("speed").getAttribute('aria-label') !== description) $("speed").setAttribute('aria-label', description);
 }
@@ -1382,17 +1583,20 @@ $("time-skip").onclick = () => {
   if (s.stage === 'arrival' || s.arrivalAnimating) { message('Choose your camp and finish arriving before advancing days.'); return; }
   if (placing) cancel();
   setPanel(null);
-  skipWasPaused = paused;
-  paused = true;
-  updatePauseButton();
+  skipWasPaused = holdPause();
   $("skip-status").textContent = 'Life continues while you wait: residents, supplies, bills, weather, and construction.';
   $("skip-progress").hidden = true;
   renderSkipMilestones();
   skipDialog.showModal();
 };
 skipDialog.addEventListener('cancel', event => { if (skippingTime) event.preventDefault(); });
-skipDialog.addEventListener('close', () => { paused = skipWasPaused; updatePauseButton(); });
+skipDialog.addEventListener('close', () => releasePause(skipWasPaused));
 $("skip-close").onclick = () => skipDialog.close();
+const skipSummaryDialog = $("skip-summary-dialog");
+$("skip-summary-close").onclick = () => skipSummaryDialog.close();
+skipSummaryDialog.addEventListener('close', () => {
+  if (skipSummaryDialog.returnValue !== 'screen') $("time-skip").focus({preventScroll: true});
+});
 $("skip-form").onsubmit = async event => {
   event.preventDefault();
   if (skippingTime || !$("skip-form").reportValidity()) return;
@@ -1405,8 +1609,10 @@ $("skip-form").onsubmit = async event => {
   let nextProgressUpdate = 0;
   $("skip-close").onclick = () => { stopped = true; };
   $("skip-progress").hidden = false;
+  const skipBefore = snapshotVillage(s), skipRequested = Number($("skip-days").value);
+  let skipCompleted = false;
   try {
-    await skipDays(s, Number($("skip-days").value), {
+    ({completed: skipCompleted} = await skipDays(s, skipRequested, {
       fast: $("skip-fast").checked,
       cancelled: () => stopped,
       progress: fraction => {
@@ -1417,8 +1623,8 @@ $("skip-form").onsubmit = async event => {
         renderSkipMilestones();
         $("skip-status").textContent = `Advancing days… ${Math.floor(fraction * 100)}%`;
       },
-    });
-    message(stopped ? 'Time advance stopped. Your village is paused.' : 'Days advanced. Your village is paused.');
+    }));
+    message('');
   } catch (error) {
     console.error(error);
     message('Time advance interrupted. Your village is paused at the last simulated moment.');
@@ -1426,6 +1632,7 @@ $("skip-form").onsubmit = async event => {
     skippingTime = false;
     skipWasPaused = true;
     accumulator = 0;
+    resetPace(pace);
     previousMotion = captureMotion(s);
     previous = performance.now();
     uiSignature = '';
@@ -1438,6 +1645,12 @@ $("skip-form").onsubmit = async event => {
     $("skip-close").onclick = () => skipDialog.close();
     requestSceneRender();
     skipDialog.close();
+    renderSkipSummary(skipSummaryDialog, summarizeSkip(skipBefore, s, {
+      projects: PROJECTS, materials: MATERIALS, recipes: PROCESSES,
+      requestedDays: skipRequested, completed: skipCompleted,
+    }), {openScreen: screen => management.open(screen)});
+    skipSummaryDialog.returnValue = '';
+    skipSummaryDialog.showModal();
   }
 };
 
@@ -1453,9 +1666,10 @@ $("grid").onclick = () => {
 };
 function askReset() {
   $("reset-dialog").showModal();
+  $("keep").focus(); // Enter must not be the destructive choice.
 }
 let savesWasPaused=false;
-installSaveDialog($("saved-villages"), {onSaved:slot=>{activeSaveSlot=slot.id;},current:()=>({mode:s.mode||'story',data:saveWithView(savesWasPaused)}),beforeOpen:()=>{if(placing)cancel();savesWasPaused=paused;paused=true;updatePauseButton();},afterClose:()=>{paused=savesWasPaused;updatePauseButton();}});
+installSaveDialog($("saved-villages"), {onSaved:slot=>{activeSaveSlot=slot.id;},current:()=>({mode:s.mode||'story',data:saveWithView(savesWasPaused)}),beforeOpen:()=>{if(placing)cancel();savesWasPaused=holdPause();},afterClose:()=>releasePause(savesWasPaused)});
 $("main-menu").onclick = () => {
   persist();
   location.href = "./menu.html";
@@ -1488,6 +1702,7 @@ $("confirm-reset").onclick = () => {
 };
 const actionText = {
   idle: "Taking in the land",
+  unpack: "Carrying the camp over from the cars",
   collect: "Collecting materials",
   carry: "Carrying supplies",
   walk: "Walking to the project",
@@ -1532,7 +1747,7 @@ function renderUtilityUI() {
       ? "River intake"
       : n.id === 0
         ? "Camp stores"
-        : `${PROJECTS[s.projects.find((p) => p.id === n.id).key].name} #${n.id}`,
+        : projectLabel(s.projects.find((p) => p.id === n.id), PROJECTS),
   ]);
   const kind = $("utility-kind").value;
   const liquidIndex = LIQUIDS.indexOf(kind);
@@ -1563,7 +1778,7 @@ function renderUtilityUI() {
     (l) => (management?.view === "power") === (l.kind === "power"),
   )) {
     const b = document.createElement("button");
-    b.textContent = `${{ power: "Power", fresh: "Drinking water", irrigation: "Irrigation", greywater: "Greywater", sewage: "Sewage" }[l.kind]} · ${labels.find(([id]) => id === l.from)?.[1]} → ${labels.find(([id]) => id === l.to)?.[1]}: ${l.work < l.required ? Math.floor((l.work / l.required) * 100) + "% installed" : l.enabled ? "on" : "off"}`;
+    b.textContent = `${{ power: "Power", fresh: "Drinking water", irrigation: "Irrigation water", greywater: "Greywater", sewage: "Sewage" }[l.kind]} · ${labels.find(([id]) => id === l.from)?.[1]} → ${labels.find(([id]) => id === l.to)?.[1]}: ${l.work < l.required ? Math.floor((l.work / l.required) * 100) + "% installed" : l.enabled ? "on" : "off"}`;
     b.setAttribute("aria-pressed", String(l.enabled));
     b.title = l.enabled
       ? "Switch this connection off"
@@ -1615,21 +1830,21 @@ function renderUtilityUI() {
   $("toggle-building").hidden = !canSwitchBuilding(sys,node);
   disabledReason($("toggle-building"), "This structure has no switchable service.");
   $("toggle-building").disabled = !canSwitchBuilding(sys,node);
-  $("toggle-building").textContent = node?.enabled ? "Switch off" : "Switch on";
+  $("toggle-building").textContent = node?.enabled ? "Switch power off" : "Switch power on";
   const op = p && (s.operations || []).find((o) => o.site === p.id && !o.done && !o.water);
   $("building-service").textContent = node
-    ? `${hasPowerService(sys,node) ? node.enabled === false ? "Switched off" : `Power ${(node.power * 100).toFixed(0)}%` : ""}${node.battery ? ` · Battery ${node.charge.toFixed(1)}/${node.battery} kWh` : ""}${hasPowerService(sys,node) ? ". " : ""}${LIQUIDS.map(
+    ? `${hasPowerService(sys,node) ? node.enabled === false ? "Switched off" : node.power >= .995 ? "Powered" : `Getting ${(node.power * 100).toFixed(0)}% of the power it needs` : ""}${node.battery ? ` · Battery ${node.charge.toFixed(1)}/${node.battery} kWh` : ""}${hasPowerService(sys,node) ? ". " : ""}${LIQUIDS.map(
         (k, i) =>
           node.capacity[i]
-            ? `${k}: ${node.water[i].toFixed(1)}/${node.capacity[i]}`
+            ? `${{ fresh: "Drinking water", irrigation: "Irrigation water", greywater: "Greywater", sewage: "Sewage" }[k]}: ${node.water[i].toFixed(1)}/${node.capacity[i]} L`
             : "",
       )
         .filter(Boolean)
         .join(
           " · ",
-        )} ${op ? op.status || "Resident job queued" : p.productionStatus || (p.readyAt > s.time ? `Growing: ${Math.ceil(p.readyAt - s.time)} seconds remaining` : "")}`
+        )} ${op ? op.status || "Resident job queued" : p.productionStatus || (p.readyAt > s.time ? `Growing: about ${Math.ceil((p.readyAt - s.time) * .45)} game minutes left` : "")}`
     : "";
-  if(p){const status=buildingOperatingStatus(s,p);$("building-service").textContent=`${status.state}: ${status.reason} · ${$("building-service").textContent}`;}
+  if(p){const status=buildingOperatingStatus(s,p),rest=$("building-service").textContent.trim();$("building-service").textContent=`${status.state}: ${status.reason}${rest?` · ${rest}`:''}`;}
   const recipe=PROCESSES[$("production").value];
   if(p&&recipe?.gathering)$("building-service").textContent+=` · ${gatheringStatus(s,p)}`;
   if(p && recipe?.deposit) $("building-service").textContent+=` · Deposit: ${Math.max(0,depositCapacity(s.landSeed,p,recipe)-(p.extracted||0))} remaining`;
@@ -1733,14 +1948,24 @@ $("terrain-undo").onclick = () => {
   $("terrain-undo").disabled = !terrainHistory.length;
   message("Terrain edit undone.");
 };
+// Where focus lands when a panel opens, and where it returns when it closes.
+let panelOpener = null;
+function focusPanel(panel) {
+  const target = panel === 'build' ? document.querySelector('#build-categories [aria-pressed="true"]') || $("build-search")
+    : panel === 'projects-panel' ? document.querySelector('#tasks button:not(:disabled)') || document.querySelector('#projects-panel .panel-close')
+    : panel === 'people' ? document.querySelector('#roster .resident-picker[aria-pressed="true"]')
+    : $("world"); // Terrain tools act on the map, so the map keeps the keys.
+  target?.focus({preventScroll: true});
+}
 function setPanel(panel) {
-  if(openPanel && openPanel!=='people'){paused=trayWasPaused;updatePauseButton();}
+  const previousPanel = openPanel;
+  if (panel && !previousPanel) panelOpener = document.activeElement;
+  if(openPanel && openPanel!=='people')releasePause(trayWasPaused);
   if (placing) cancel();
-  if(panel && panel!=='people'){trayWasPaused=paused;paused=true;updatePauseButton();}
+  if(panel && panel!=='people')trayWasPaused=holdPause();
   if(panel==='people') {
     expandedResident??=s.people[0].id;
-    residentsWasPaused=paused;paused=true;updatePauseButton();
-    if(!$("people").open) $("people").showModal();
+    if(!$("people").open){residentsWasPaused=holdPause();$("people").showModal();}
   } else if($("people").open) $("people").close();
   openPanel = panel;
   terrainBrush.visible = false;
@@ -1749,6 +1974,13 @@ function setPanel(panel) {
   document.body.dataset.tray = panel === "build" ? "open" : "closed";
   uiSignature = "";
   renderUI();
+  if (panel && panel !== previousPanel) focusPanel(panel);
+  else if (!panel && previousPanel && previousPanel !== 'people') {
+    // The dialog restores focus itself; trays hand it back to their opener.
+    const active = document.activeElement;
+    if (!active || active === document.body || !active.checkVisibility())
+      (panelOpener?.isConnected && panelOpener.checkVisibility() ? panelOpener : $("world")).focus({preventScroll: true});
+  }
 }
 document.querySelectorAll("[data-panel-toggle]").forEach((button) => {
   button.onclick = () =>
@@ -1762,7 +1994,7 @@ document
   .querySelectorAll("[data-close-panel]")
   .forEach((button) => (button.onclick = () => setPanel(null)));
 $("people").addEventListener('close',()=>{
-  paused=residentsWasPaused;updatePauseButton();
+  releasePause(residentsWasPaused);
   if(openPanel==='people')openPanel=null;
   uiSignature='';renderUI();
 });
@@ -1815,7 +2047,7 @@ function renderUI() {
   if (active && arrivalMessageShown) message("");
   arrivalMessageShown = !active;
   if(s.arrivalAnimating) message("Our friends are arriving…");
-  else if(s.stage === "arrival") message("Click clear ground to pitch your tents.");
+  else if(s.stage === "arrival") message("Move over the land to try a camp site. R turns it; click to pitch the tents.");
   $("auto-buy").hidden=s.mode==='sandbox';
   $("auto-buy").textContent=`Auto-buy: ${s.autoBuy===false?'off':'on'}`;
   $("auto-buy").setAttribute('aria-pressed',String(s.autoBuy!==false));
@@ -1841,7 +2073,7 @@ function renderUI() {
     !active || s.stage === "evening" || openPanel !== "build" || !!selected;
   const trends=resourceTrends(s.time,resourceSnapshot(s));
   const counters = [
-    ["money", `R$${s.money.toFixed(2)}`, "Savings", "finances"],
+    ["money", `${brl(s.money)}`, "Savings", "finances"],
     ["meals", `${foodPortions(s)}`, "Food portions", "food"],
     [
       "power",
@@ -1851,7 +2083,7 @@ function renderUI() {
     ],
     [
       "water",
-      Math.floor(Object.values(s.infrastructure?.nodes||{}).reduce((sum,n)=>sum+n.water[0],0)),
+      `${Math.floor(Object.values(s.infrastructure?.nodes||{}).reduce((sum,n)=>sum+n.water[0],0))} L`,
       "Water",
       "water",
     ],
@@ -1863,17 +2095,17 @@ function renderUI() {
           `<button class="resource" data-panel="${panel}" title="Open ${panel} management">${resourceIcon(icon)}<b></b><small>${label}</small><em class="resource-trend"></em></button>`,
       )
       .join("");
+  applyShortcutHints(document);
   illustrateResources($("supplies"));
   counters.forEach((counter, i) => {
     $("supplies").children[i].querySelector("b").textContent =
       s.mode === "sandbox" && i < 3 ? "∞" : counter[1];
     const button=$("supplies").children[i],rate=trends?.[counter[0]]??null;
-    if (i === 0) { button.dataset.shortcut = 'M'; button.setAttribute('aria-keyshortcuts', 'M'); }
     const trend=button.querySelector('.resource-trend');
     const unlimited=s.mode==='sandbox'&&i<3;
     trend.textContent=unlimited?'Unlimited':formatTrend(rate,i===0);
     trend.dataset.direction=rate>.05?'up':rate<-.05?'down':'flat';
-    button.title=`Open ${counter[3]} management. ${unlimited?'Unlimited in sandbox.':rate===null?'Gathering trend data (first five in-game minutes).':`${i===2?'Stored energy':counter[2]}: ${formatTrend(rate,i===0)} net change over the last in-game hour, or time observed since loading. Includes spending, consumption and deliveries.`}`;
+    button.title=`Open ${counter[3]} management. ${unlimited?'Unlimited in sandbox.':rate===null?'The hourly trend appears after five in-game minutes.':`${i===2?'Stored energy':counter[2]}: ${formatTrend(rate,i===0)} net change over the last in-game hour, or time observed since loading. Includes spending, consumption and deliveries.`}`;
     disabledReason(button, "Wait for the residents to arrive and choose a campsite to manage village supplies.");
     button.disabled = !active;
   });
@@ -2034,7 +2266,7 @@ function renderUI() {
       const tabs=document.createElement('nav');tabs.className='resident-tabs';tabs.setAttribute('aria-label','Profile sections');
       for(const label of ['Overview','Story','Skills','Relationships']){
         const tab=document.createElement('button');tab.textContent=label;tab.setAttribute('aria-pressed',String(residentTab===label));
-        tab.onclick=()=>{residentTab=label;uiSignature='';renderUI();};tabs.append(tab);
+        tab.onclick=()=>{residentTab=label;uiSignature='';renderUI();[...$('resident-detail').querySelectorAll('button[aria-pressed]')].find(b=>b.textContent===label)?.focus();};tabs.append(tab);
       }
       detail.append(tabs);
       const paragraph=(text,kind='p')=>{const el=document.createElement(kind);el.textContent=text;detail.append(el);};
@@ -2053,7 +2285,7 @@ function renderUI() {
             $('resident-detail').querySelector('.day-shift input')?.focus();
           };
           const job = OUTSIDE_JOBS[r.id];
-          schedule.append(repeat, `Repeat a ${job.hours}-hour shift on weekdays (R$${job.pay} gross)`);
+          schedule.append(repeat, `Repeat a ${job.hours}-hour shift on weekdays (${brl(job.pay)} gross)`);
           work.append(schedule);
           detail.append(work);
         }
@@ -2119,7 +2351,7 @@ function renderUI() {
   }
   const purchase = MATERIALS[$("purchase").value];
   $("town").textContent =
-    `${s.deliveryOnly?"Order delivery:":"Fetch"} ${materialText($("purchase").value, purchase.quantity)} · R$${(purchase.price + pickupFare(s)).toFixed(2)} ${returnPickup(s)?"· existing trip, no extra fuel":"incl. transport"}`;
+    `${s.deliveryOnly?"Order delivery:":"Fetch"} ${materialText($("purchase").value, purchase.quantity)} · ${brl((purchase.price + pickupFare(s)))} ${returnPickup(s)?"· existing trip, no extra fuel":"incl. transport"}`;
   const townHour=((540+s.time*.45)/60)%24;
   const supplierIssue=(townHour<7||townHour>=18) ? "Town opens at 07:00; pickups stop departing at 18:00. Planned construction and food pickups retry automatically." : supplierError(s,{[$("purchase").value]:purchase.quantity},MATERIALS);
   disabledReason($("town"), supplierIssue || (s.stage !== "playing" ? "Choose a campsite first." : "Wait for an available vehicle or delivery and enough uncommitted savings for supplies and transport."));
@@ -2130,13 +2362,13 @@ function renderUI() {
     .join(" · ");
   const sale=tradeQuote(s,$("purchase").value,MATERIALS,materialCount,protectedEquipment(s,$("purchase").value));
   $("sell").textContent =
-    `Queue sale: ${materialText($("purchase").value, sale.quantity || 0)} · R$${((sale.cents || 0)/100).toFixed(2)} gross · R$${((sale.cents||0)/100-transportCost({...s,deliveryOnly:false})).toFixed(2)} after dedicated fuel`;
+    `Queue sale: ${materialText($("purchase").value, sale.quantity || 0)} · ${brl(((sale.cents || 0)/100))} gross · ${brl(((sale.cents||0)/100-transportCost({...s,deliveryOnly:false})))} after dedicated fuel`;
   $("sell").disabled =
     !!tradeQuote(s,$("purchase").value,MATERIALS,materialCount).error;
   $("sell").title=tradeQuote(s,$("purchase").value,MATERIALS,materialCount).error || "Payment after trading in town; combine batches to share transport costs.";
   const journeys=activeTrips(s).map(trip=>`${s.people.find(r=>r.id===trip.person).name}: ${{boarding:"walking to the car",outbound:"driving to town",away:"trading in town",inbound:"driving home",unloading:"unloading supplies"}[trip.phase]}`);
-  if(s.delivery)journeys.push(`Supplier delivery: ${Math.ceil(s.delivery.left*.45)} game minutes remaining`);
-  $("trip").textContent = journeys.length?journeys.join(' · '):`Storage: ${Math.round(storedMaterials(s))}/${storageCapacity(s)} units. ${pendingExports(s).length} sale batches waiting. R$${spendableMoney(s).toFixed(2)} available after collection commitments. ${s.deliveryOnly?'Delivery':'Car trip'}: R$${transportCost(s).toFixed(2)}.`;
+  if(s.delivery)journeys.push(s.delivery.left>0?`Supplier delivery: ${Math.ceil(s.delivery.left*.45)} game minutes remaining`:`Supplier truck: ${s.delivery.status||'unloading'}`);
+  $("trip").textContent = journeys.length?journeys.join(' · '):`Storage: ${Math.round(storedMaterials(s))}/${storageCapacity(s)} units. ${pendingExports(s).length?`Sale batches waiting: ${pendingExports(s).length}. `:''}Available to spend: ${brl(spendableMoney(s))}. ${s.deliveryOnly?'Delivery':'Car trip'}: ${brl(transportCost(s))}.`;
   const equipmentBlocked = protectedEquipment(s,$("purchase").value)>0 && materialCount(s,$("purchase").value)-protectedEquipment(s,$("purchase").value)<1;
   $("sell").disabled ||= equipmentBlocked;
   disabledReason($("sell"),equipmentBlocked ? "Return borrowed equipment or repair worn equipment before selling it." : $("sell").title);
@@ -2161,15 +2393,22 @@ function renderUI() {
       !PROJECTS[key].repeatable &&
       s.projects.some((p) => p.key === key);
     const missing = missingMaterials(s, key);
-    buildMaterialTooltip.update(b,missing);
     const purchase = blueprintPurchase(s, key);
-    b.title = `${["coop","goat_pasture"].includes(key) ? "Animals require daily fodder and drinking water; purchase feed before they arrive. " : ""}${PROJECTS[key].description} ${constructionSpecText(PROJECTS[key])} Materials: ${recipeText(key)}. ${missing.length ? purchase.error || `Auto-buy missing materials: R$${purchase.cost.toFixed(2)}. Collection reserve: R$${purchase.transport.toFixed(2)} across outstanding orders.` : "All materials available."}`;
-    b.querySelector(".build-cost").textContent = s.mode === "sandbox" ? "Free"
-      : s.autoBuy===false && missing.length ? 'Missing materials'
-      : purchase.cost ? `R$${purchase.cost.toFixed(2)} + R$${(purchase.transport || 0).toFixed(2)} collection reserve`
-      : `${Object.values(PROJECTS[key].materials).reduce((sum, n) => sum + n, 0)} materials · ${PROJECTS[key].size.join("×")}`;
+    b.title = `${["coop","goat_pasture"].includes(key) ? "Animals require daily fodder and drinking water; purchase feed before they arrive. " : ""}${PROJECTS[key].description} ${constructionSpecText(PROJECTS[key])} Materials: ${recipeText(key)}. ${missing.length ? purchase.error || `Buying the missing materials costs ${brl(purchase.cost)}, plus ${brl(purchase.transport)} set aside for the trips to collect them.` : "All materials available."}`;
+    // The badge marks only plans that cannot start yet; an affordable purchase is just a price.
+    const blocked = s.mode !== "sandbox" && missing.length > 0 && !!purchase.error;
+    const footprint = PROJECTS[key].size.join("×");
+    const total = (purchase.cost || 0) + (purchase.transport || 0);
+    b.querySelector(".build-cost").textContent = s.mode === "sandbox" ? `Free · ${footprint}`
+      : !missing.length ? `Materials in stock · ${footprint}`
+      : s.autoBuy === false ? `Missing materials · auto-buy off · ${footprint}`
+      : !purchase.cost ? `Needs local materials · ${footprint}`
+      : blocked && total + (s.expansionReserve ?? 0) > s.money ? `${brl(total)} · not enough savings · ${footprint}`
+      : blocked ? `${brl(total)} · supplies unavailable · ${footprint}`
+      : `${brl(total)} to buy · ${footprint}`;
+    buildMaterialTooltip.update(b, missing, blocked ? purchase.error : "");
     b.classList.toggle("active", placing === key);
-    b.classList.toggle("needs-materials", missing.length > 0);
+    b.classList.toggle("needs-materials", blocked);
   }
   renderUtilityUI();
   management?.render();
@@ -2201,7 +2440,7 @@ function renderUI() {
             ? " Housing: 0 goats / 2 places."
             : "";
     $("selected-desc").textContent =
-      `${projectDescription(PROJECTS[p.key], p)} ${constructionSpecText(PROJECTS[p.key])}${p.work >= PROJECTS[p.key].work ? livestock : ""} ${p.pendingMaterials ? "Purchased materials awaiting pickup." : "Materials reserved."} Reserved bill: ${Object.entries(p.billOfMaterials||PROJECTS[p.key].materials).map(([id,n])=>materialText(id,n)).join(" · ")}. Delivered ${p.delivered}/${requiredLoads(p)} loads. Labor ${Math.round(p.work * 0.45)}/${Math.round(PROJECTS[p.key].work * 0.45)} person-minutes.`;
+      `${projectDescription(PROJECTS[p.key], p)} ${constructionSpecText(PROJECTS[p.key])}${p.work >= PROJECTS[p.key].work ? livestock : ""} ${p.pendingMaterials ? (s.delivery?.shipments?.some(part => part.project === p.id) ? "Purchased materials arriving by supplier truck." : "Purchased materials awaiting pickup.") : "Materials reserved."} Reserved bill: ${Object.entries(p.billOfMaterials||PROJECTS[p.key].materials).map(([id,n])=>materialText(id,n)).join(" · ")}. Delivered ${p.delivered}/${requiredLoads(p)} loads. Labor ${Math.round(p.work * 0.45)}/${Math.round(PROJECTS[p.key].work * 0.45)} person-minutes.`;
     disabledReason($("priority"), "Construction is complete; this building no longer needs construction priority.");
     $("priority").disabled = p.work >= PROJECTS[p.key].work;
     $("cancel-project").hidden = !!PROJECTS[p.key].natural || p.work > 0;
@@ -2220,7 +2459,7 @@ for (const group of RESOURCE_GROUPS) {
     if (!item.quantity) continue;
     const option = document.createElement("option");
     option.value = id;
-    option.textContent = `${materialText(id, item.quantity)} · R$${item.price}`;
+    option.textContent = `${materialText(id, item.quantity)} · ${brl(item.price)}`;
     options.append(option);
   }
   if (options.children.length) $("purchase").append(options);
@@ -2248,6 +2487,8 @@ management = createManagement({
     paused = value;
     updatePauseButton();
   },
+  holdPause,
+  releasePause,
 });
 $("tank-attention").onclick = () => management.open("water");
 $("supplies").onclick = (event) => {
@@ -2259,6 +2500,8 @@ $("purchase").onchange = () => {
   renderUI();
 };
 renderUI();
+// The land takes the keys from the first press; panels take focus when opened.
+$("world").focus({preventScroll: true});
 if (s.stage !== "arrival") message(s.log[0] || "Welcome back to your camp.");
 const recordPerformance = performanceReadout(renderer);
 const capybaras = createCapybaraVisitors(scene,s);
@@ -2340,7 +2583,9 @@ if (dreamPreview) {
 requestSceneRender();
 function frame(now) {
   if (skippingTime) { previous = now; requestAnimationFrame(frame); return; }
-  const dt = Math.max(0, Math.min((now - previous) / 1000, 0.1));
+  // Camera and effects use a clamped step. The simulation is owed the whole interval.
+  const wall = Math.max(0, (now - previous) / 1000);
+  const dt = Math.min(wall, 0.1);
   previous = now;
   if (previewCycle && !document.hidden) {
     // Run a full visual cycle in 48 real seconds without simulating this fixture.
@@ -2354,11 +2599,11 @@ function frame(now) {
       accumulator = result.accumulator;
       previousMotion = captureMotion(s);
     }
-    accumulator = simulationFrame(accumulator, dt, () => simulationSpeed(s, speed), step => {
+    accumulator = simulationFrame(accumulator, wall, () => simulationSpeed(s, speed), step => {
       previousMotion = captureMotion(s);
       tick(s, step);
-    });
-  }
+    }, undefined, pace);
+  } else resetPace(pace);
   diagnostics.observe(s);
   updateSpeedButton();
   const keyboardMoved = navigation.update(dt);
@@ -2407,23 +2652,10 @@ function frame(now) {
       const current=activeTrips(s).find(t=>t.vehicle===index);
       const trip=current&&{...current,left:current.left+(s.time-visual.time)};
       const pose = s.arrivalAnimating ? {...vehiclePose(arrivalTime,index),visible:true} : townCarPose(trip, index);
-      vehicle.root.visible = pose.visible;
-      vehicle.root.position.set(pose.x, elevationAt(pose.x, pose.z, s.elevationSeed, s.terrainPads), pose.z);
-      const forwardX = Math.sin(pose.yaw), forwardZ = Math.cos(pose.yaw);
-      const height = (right, forward) => elevationAt(
-        pose.x + Math.cos(pose.yaw) * right + forwardX * forward,
-        pose.z - Math.sin(pose.yaw) * right + forwardZ * forward,
-        s.elevationSeed, s.terrainPads);
-      vehicle.root.rotation.set(
-        -Math.atan2(height(0, 1.4) - height(0, -1.4), 2.8),
-        pose.yaw,
-        Math.atan2(height(.8, 0) - height(-.8, 0), 1.6),
-        "YXZ");
-      for (const wheel of vehicle.wheels) {
-        wheel.rotation.set(0, 0, Math.PI / 2);
-        wheel.rotateY((pose.z + 22) / 0.41);
-      }
+      placeVehicle(vehicle, pose, 1.4, .8, .41);
     }
+  if (truckPreview && !s.delivery && !s.truckLeaving) s.delivery = { material: "stone", quantity: MATERIALS.stone.quantity, left: TRUCK_DRIVE, duration: 800 };
+  updateTruck(s.time - visual.time, dt);
   for (const [i, r] of s.people.entries()) {
     const g = actors[i];
     if(s.arrivalAnimating){
@@ -2449,7 +2681,7 @@ function frame(now) {
       const travel = isHome ? (recessed ? 1.15 : 0.75) : 1.35;
       // Enter at the authored door, including recessed house verandas.
       g.visible = inward < (isHome ? 0.82 : 0.64);
-      const facing = ((restingBuilding?.rotation || 0) * Math.PI) / 2;
+      const facing = restingBuilding ? ((restingBuilding.rotation || 0) * Math.PI) / 2 : campFacing(campLocation(s));
       g.position.copy(
         world(
           door.x - Math.sin(facing) * inward * travel,
@@ -2590,7 +2822,7 @@ function frame(now) {
       }
     }
     const motion = r.walk.length
-      ? r.cargo
+      ? r.cargo || r.unpack?.phase === "carry"
         ? "carry-walk"
         : "walk"
       : visit?.animation
@@ -2674,6 +2906,8 @@ function frame(now) {
   recordPerformance(now, visual.time, rendered);
   requestAnimationFrame(frame);
 }
+$("selection").tabIndex = -1;
+$("selection").setAttribute('aria-labelledby', 'selected-name');
 const lenses = installLenses({state:()=>s,camera,world,focus,inspect:id=>{setPanel(null);selected=id;renderUI();}});
 addEventListener("pagehide", persist);
 requestAnimationFrame(frame);

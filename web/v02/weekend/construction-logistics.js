@@ -1,3 +1,4 @@
+import {projectFreight} from './physical-trade.js';
 export const STORAGE_KINDS = ['warehouse', 'covered-storage', 'supply-5'];
 export function crewLimit(definition) {
   return Math.max(2, Math.min(3, Math.max(Math.ceil(definition.work / 350), Math.ceil(definition.size[0] * definition.size[1] / 2))));
@@ -19,10 +20,12 @@ export function constructionProgress(state, project, definition, loads) {
 }
 export function constructionStatus(state, project, definition, loads) {
   const crew = state.people.filter(r => r.job === project.id);
+  if (project.pendingMaterials && state.delivery?.shipments?.some(part => part.project === project.id)) return 'Materials purchased · supplier truck on its way';
+  if (project.pendingMaterials && projectFreight(state, [project]).truck) return 'Materials purchased · waiting for a supplier truck';
   if (project.pendingMaterials) return (state.trip?.projects || [state.trip?.project]).includes(project.id) ? 'Materials purchased · resident collecting in town' : 'Materials purchased · waiting for town pickup';
   if (project.delivered < loads) {
     const moving = crew.reduce((n,r) => n + carriedLoads(r), 0);
-    return `Supplies ${project.delivered}/${loads} · ${moving} in transit${project.staged ? ` · ${project.staged} at nearby storage` : ''}`;
+    return `${project.delivered} of ${loads} loads on site · ${moving} being carried${project.staged ? ` · ${project.staged} waiting at nearby storage` : ''}`;
   }
   const building = crew.filter(r => r.action === 'build').length;
   if (building) {const estimate=constructionEstimate(state,project,definition);return `${building}/${crewLimit(definition)} builders · ~${estimate.assemblyHours.toFixed(1)} game hours of assembly left (before skill, needs and weather)`;}

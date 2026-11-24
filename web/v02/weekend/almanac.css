@@ -149,3 +149,7 @@
 #management .craft-entry small, #management .craft-action small { letter-spacing: 0; font-weight: normal; }
 
 #management[data-screen="crafting"] #management-message { display: none; }
+#management-message:empty { display: none; }
+/* More than four figures break into even rows, each starting flush left. */
+#management:is([data-screen="water"], [data-screen="power"]) .management-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 14px; }
+#management:is([data-screen="water"], [data-screen="power"]) .management-stats > div:nth-child(3n + 1) { padding-left: 0; border-left: 0; }

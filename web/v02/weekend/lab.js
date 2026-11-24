@@ -1,3 +1,4 @@
+import { brl } from "./money.js";
 import {PROJECTS,PROCESSES,MATERIALS,materialCount,footprint,campLocation} from './simulation.js';
 import {tradeQuote,transportCost} from './physical-trade.js';
 import {protectedStock} from './economy-policies.js';
@@ -15,7 +16,7 @@ const send=(type,args={})=>{if(type==='run-for')notice('Running requested interv
 const notice=text=>$('notice').textContent=text;
 const opts=(element,items)=>{element.replaceChildren(...items.map(([value,text])=>{const o=document.createElement('option');o.value=value;o.textContent=text;return o;}));};
 const buildOptions=()=>{opts($('building'),Object.entries(PROJECTS).filter(([k,d])=>!d.natural&&d.name.toLowerCase().includes($('search').value.toLowerCase())).map(([k,d])=>[k,`${d.name} · ${d.size.join('×')}`]));$('field-size').hidden=$('building').value!=='field';};buildOptions();$('search').oninput=buildOptions;
-opts($('material'),Object.entries(MATERIALS).filter(([k,d])=>d.price>0).map(([k,d])=>[k,`${d.name} · ${d.quantity} / R$${d.price}`]));
+opts($('material'),Object.entries(MATERIALS).filter(([k,d])=>d.price>0).map(([k,d])=>[k,`${d.name} · ${d.quantity} / ${brl(d.price)}`]));
 $('new').onclick=()=>{if(s&&!confirm('Start a new isolated lab run? Export evidence first to keep the current history, or save a checkpoint to keep the village.'))return;selected=0;inspectorKey='';send('new',{seed:Number($('seed').value)>>>0,settings:Object.fromEntries(Object.keys(OPTIONS).map(k=>[k,$('world-'+k).value]))});};
 $('load').onclick=()=>{const raw=localStorage.getItem(KEY);if(raw)send('load',{raw});else notice('No lab save yet. Normal-game saves are untouched.');};
 $('save').onclick=()=>send('save');$('export').onclick=()=>send('export');$('pause').onclick=()=>send('pause');$('speed').onchange=()=>send('speed',{value:Number($('speed').value)});
@@ -32,14 +33,14 @@ function render(){if(!s)return;
  const built=new Set(s.projects.filter(p=>!p.natural&&p.work>=PROJECTS[p.key].work).map(p=>p.key));$('catalog-status').textContent=`Built ${built.size}/${Object.values(PROJECTS).filter(d=>!d.natural).length} building types · ${s.projects.filter(p=>!p.natural&&p.work<PROJECTS[p.key].work).length} construction projects`;
  const minutes=540+Math.floor(s.time*.45),nodes=Object.values(s.infrastructure?.nodes||{});
  $('clock').textContent=`Day ${1+Math.floor(minutes/1440)} · ${String(Math.floor(minutes/60)%24).padStart(2,'0')}:${String(minutes%60).padStart(2,'0')}`;
- $('totals').textContent=`R$${s.money.toFixed(2)} · ${s.wood} timber · ${s.materials.meals} meals + ${s.materials.food} ingredients · ${nodes.reduce((n,a)=>n+a.water[0],0).toFixed(0)} clean water · Grid R$${s.infrastructure.grid.spent.toFixed(2)} total`;
+ $('totals').textContent=`${brl(s.money)} · ${s.wood} timber · ${s.materials.meals} meals + ${s.materials.food} ingredients · ${nodes.reduce((n,a)=>n+a.water[0],0).toFixed(0)} clean water · Grid ${brl(s.infrastructure.grid.spent)} total`;
  const material=$('material').value,stock=materialCount(s,material);
  const quote=tradeQuote(s,material,MATERIALS,materialCount,protectedEquipment(s,material));
  const serving=FOOD_SERVINGS[material],reserve=protectedStock(s,material,PROCESSES);
  const remaining=serving?foodPortions(s)-Math.floor(stock/serving)+Math.floor((stock-(quote.quantity||0))/serving):0;
  const fare=transportCost({...s,deliveryOnly:false});
  $('trade').textContent=quote.error?`Available: ${stock} · ${quote.error}`:
-  `Available: ${stock} · Reserve: ${reserve} · After sale: ${stock-quote.quantity}${serving?` · Household food left: ${remaining} portions`:''} · R$${(quote.cents/100).toFixed(2)} gross · R$${fare.toFixed(2)} dedicated fuel · R$${(quote.cents/100-fare).toFixed(2)} after fuel · Shared pickup adds R$0 fuel.`;
+  `Available: ${stock} · Reserve: ${reserve} · After sale: ${stock-quote.quantity}${serving?` · Household food left: ${remaining} portions`:''} · ${brl((quote.cents/100))} gross · ${brl(fare)} dedicated fuel · ${brl((quote.cents/100-fare))} after fuel · Shared pickup adds no fuel cost.`;
  const siteList=[['0','Camp stores'],...s.projects.filter(p=>!p.felled).map(p=>[String(p.id),`${PROJECTS[p.key].name} #${p.id} (${p.x}, ${p.z})`])];if($('sites').options.length!==siteList.length){opts($('sites'),siteList);}$('sites').value=selected;
  const p=s.projects.find(p=>p.id===selected),n=s.infrastructure.nodes[selected],ops=s.operations?.filter(o=>o.site===selected&&!o.done)||[];
  const key=JSON.stringify([replaying,selected,p?.work,p?.readyAt,n?.water.map(v=>Math.floor(v)),n?.maintainFresh,n?.maintainSanitation,ops.map(o=>[o.id,o.status]),Math.floor(s.time/20),s.infrastructure.grid.enabled,s.emergencyFood]);
@@ -121,7 +122,7 @@ function renderDiagnostics(){
  }
  const env=$('environment');env.replaceChildren();if(s.weather)line(env,`Weather: ${s.weather.temperatureC.toFixed(1)} °C · rain ${s.weather.rainMmPerHour.toFixed(2)} mm/h · cloud ${(s.weather.cloudCover*100).toFixed(0)}%`);
  if(s.hydrology){const h=s.hydrology;line(env,`Groundwater ${h.groundwater.toFixed(0)} / ${h.capacity.toFixed(0)} L · river ${h.river.toFixed(0)} L · flow ${h.flowLitersPerDay.toFixed(0)} L/day`);}
- line(env,`Income R$${(s.finances?.income||0).toFixed(2)} · expenses R$${(s.finances?.expenses||0).toFixed(2)} · spoiled ${JSON.stringify(s.foodStorage?.spoiled||{})}`);
+ line(env,`Income ${brl((s.finances?.income||0))} · expenses ${brl((s.finances?.expenses||0))} · spoiled ${JSON.stringify(s.foodStorage?.spoiled||{})}`);
  const inventory=$('inventory');inventory.replaceChildren();for(const [id,n]of Object.entries({wood:s.wood,...s.materials}).filter(([,n])=>$('inventory-filter').value==='all'||n>0)) {const span=document.createElement('span');span.textContent=`${MATERIALS[id]?.name||id}: ${Number(n).toFixed(1)}`;inventory.append(span);}
  const jobs=$('jobs');jobs.replaceChildren();const list=(s.operations||[]).filter(o=>!o.done&&($('job-filter').value!=='selected'||o.site===selected)&&($('job-filter').value!=='waiting'||/waiting|blocked|needs/i.test(o.status||'')));
  for(const o of list){const row=document.createElement('div');row.className='job';line(row,`#${o.id} · site ${o.site} · ${o.recipe||'water service'} · ${o.status||o.phase} · work ${o.work.toFixed(1)} · worker ${s.people.filter(r=>r.operation===o.id).map(r=>r.name).join(', ')||'unassigned'}`);button(row,'Inspect site','unused');row.lastChild.onclick=()=>{selected=o.site;bed='all';inspectorKey='';render();};jobs.append(row);}if(!list.length)line(jobs,'No matching active jobs.');

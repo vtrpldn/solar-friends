@@ -1,3 +1,5 @@
+import {projectLabel} from './project-names.js';
+import { brl } from "./money.js";
 import { isBuildOption } from "./build-categories.js";
 import {basicNeeds} from './basic-needs.js';
 import {animalCareText} from './animal-care.js';
@@ -74,6 +76,8 @@ export function createManagement({
   notify,
   isPaused,
   setPaused,
+  holdPause = () => { const was = isPaused(); setPaused(true); return was; },
+  releasePause = setPaused,
 }) {
   $("toggle-grid-power").onclick = () => {
     const grid = state().infrastructure.grid;
@@ -94,7 +98,7 @@ export function createManagement({
       ? "River · manual collection source"
       : n.id === 0
         ? "Camp stores"
-        : `${PROJECTS[state().projects.find((p) => p.id === n.id).key].name} #${n.id}`;
+        : projectLabel(state().projects.find((p) => p.id === n.id), PROJECTS);
   function open(next) {
     if (state().stage === "arrival") return;
     beforeOpen();
@@ -107,26 +111,28 @@ export function createManagement({
         const options = document.createElement('optgroup'); options.label = group.name;
         for (const id of group.ids) {
           const item = MATERIALS[id];
-          if (item.quantity) options.append(new Option(`${item.quantity} ${item.name} · R$${item.price}`, id));
+          if (item.quantity) options.append(new Option(`${quantityText(id, item.quantity)} ${item.name} · ${brl(item.price)}`, id));
         }
         if (options.children.length) purchase.append(options);
       }
       if ([...purchase.options].some(o => o.value === previous)) purchase.value = previous;
       if (previousView !== view) $('resource-search').value = '';
     }
-    if (!dialog.open) {
-      wasPaused = isPaused();
-      setPaused(true);
+    const opening = !dialog.open;
+    if (opening) {
+      wasPaused = holdPause();
       dialog.showModal();
     }
+    // Land on the screen's own tab: arrows walk the tabs, Tab enters the screen.
+    if (opening || !dialog.contains(document.activeElement) || document.activeElement.closest('.management-tabs'))
+      dialog.querySelector(`.management-tabs [data-manage="${view}"]`)?.focus({preventScroll: true});
     $("utility-kind").innerHTML = (view === "power" ? ["power"] : LIQUIDS)
       .map(
         (k) =>
-          `<option value="${k}">${k === "power" ? "Power cable" : k === "fresh" ? "Fresh water" : k === "irrigation" ? "Irrigation water" : k === "greywater" ? "Greywater" : "Sealed sewage"}</option>`,
+          `<option value="${k}">${k === "power" ? "Power cable" : k === "fresh" ? "Drinking water" : k === "irrigation" ? "Irrigation water" : k === "greywater" ? "Greywater" : "Sealed sewage"}</option>`,
       )
       .join("");
-    $("management-message").textContent =
-      "Village paused while this screen is open.";
+    $("management-message").textContent = "";
     refresh();
   }
   document
@@ -134,7 +140,7 @@ export function createManagement({
     .forEach((b) => (b.onclick = () => open(b.dataset.manage)));
   $("close-management").onclick = () => dialog.close();
   dialog.addEventListener("close", () => {
-    setPaused(wasPaused);
+    releasePause(wasPaused);
   });
   $("resource-search").oninput = () => render();
   $("utility-kind").onchange = refresh;
@@ -179,7 +185,7 @@ export function createManagement({
         if (n.capacity[i]) {
           const line = document.createElement("div");
           line.className = `water-level ${k}`;
-          line.textContent = `${{ fresh: "Drinking water", irrigation: "Irrigation water", greywater: "Greywater", sewage: "Sewage" }[k]} · ${n.water[i].toFixed(1)} / ${n.capacity[i]}`;
+          line.textContent = `${{ fresh: "Drinking water", irrigation: "Irrigation water", greywater: "Greywater", sewage: "Sewage" }[k]} · ${n.water[i].toFixed(1)} / ${n.capacity[i]} L`;
           const meter = document.createElement("progress");
           meter.max = n.capacity[i];
           meter.value = n.water[i];
@@ -203,7 +209,7 @@ export function createManagement({
         inspect(p.id);
       };
       const toggle = document.createElement("button");
-      toggle.textContent = n.enabled ? "Switch off" : "Switch on";
+      toggle.textContent = n.enabled ? "Switch power off" : "Switch power on";
       toggle.onclick = () => {
         if (!switchBuilding(state().infrastructure,n.id)) return;
         notify(
@@ -263,9 +269,9 @@ export function createManagement({
       b.setAttribute("aria-pressed", String(b.dataset.manage === view));
     });
     $("grid-power-panel").hidden = view !== "power";
-    $("grid-tariff-description").textContent=`Your own generation and batteries come first. Grid backup supplies up to ${ECONOMY_REFERENCE.electricity.capacityKw} kW at R$${GRID_TARIFF.toFixed(2)}/kWh. No standing charge. Collection budgets stay protected.`;
+    $("grid-tariff-description").textContent=`Your own generation and batteries come first. Grid backup supplies up to ${ECONOMY_REFERENCE.electricity.capacityKw} kW at ${brl(GRID_TARIFF)}/kWh. No standing charge. Collection budgets stay protected.`;
     const grid = s.infrastructure.grid;
-    $("grid-power-status").textContent = `${grid.enabled ? (s.money <= 0 ? "No funds for grid power" : "Grid backup connected") : "Off-grid"} · ${grid.importing.toFixed(2)} kW imported now · ${grid.imported.toFixed(2)} kWh purchased · R$${grid.spent.toFixed(2)} spent`;
+    $("grid-power-status").textContent = `${grid.enabled ? (s.money <= 0 ? "No funds for grid power" : "Grid backup connected") : "Off-grid"} · ${grid.importing.toFixed(1)} kW imported now · ${grid.imported.toFixed(1)} kWh purchased · ${brl(grid.spent)} spent`;
     $("toggle-grid-power").textContent = grid.enabled ? "Disconnect grid power" : "Connect grid backup";
     $("toggle-grid-power").setAttribute("aria-pressed", String(grid.enabled));
     const inventoryView = view === 'resources' || view === 'items' || view === 'food';
@@ -300,12 +306,12 @@ export function createManagement({
         : "Sources, tanks & treatment";
     let stats;
     if(view === "finances") {
-      const f=financeSummary(s), money=n=>`R$${n.toFixed(2)}`;
+      const f=financeSummary(s), money=n=>`${brl(n)}`;
       stats=[["Shared savings",money(f.balance)],["Income recorded",money(f.income)],["Expenses recorded",money(f.expenses)],["Net change",`${f.net>=0?'+':'−'}${money(Math.abs(f.net))}`]];
       const screen=$("finance-screen");screen.replaceChildren();
       const add=(tag,text,parent=screen)=>{const el=document.createElement(tag);el.textContent=text;parent.append(el);return el;};
-      add('p',s.mode==='sandbox'?'Sandbox supplies and funds are unlimited; purchases are not tracked.':`Records begin ${financeTime(f.since)} with ${money(f.opening)}. Earlier purchases in an existing save are not reconstructed.`);
-      add('p',`Available to spend: ${money(f.available)}. Reserved for undelivered construction supplies: ${money(f.committed)} in collection costs. This reserve stays in savings until each trip departs.`);
+      add('p',s.mode==='sandbox'?'Sandbox supplies and funds are unlimited; purchases are not tracked.':`Tracking since ${financeTime(f.since)}, when savings were ${money(f.opening)}.${f.since>0?' Spending before then is not listed.':''}`);
+      add('p',`Available to spend: ${money(f.available)}.${f.committed>0?` Set aside for trips to collect ordered building supplies: ${money(f.committed)}, paid as each trip leaves.`:''}`);
       if (s.mode !== 'sandbox') {
         const resident = s.people.find(person => person.id === dayShiftResidentId) || s.people[0];
         screen.append(dayShiftControls(s, resident, refresh, id => {
@@ -345,7 +351,7 @@ export function createManagement({
         const jobs=add('details','');add('summary',`Inspect ${service.jobs.length} upkeep jobs`,jobs);
         for(const job of service.jobs){
           const site=s.projects.find(p=>p.id===job.target),row=add('article','',jobs);
-          add('strong',site?`${PROJECTS[site.key].name} #${site.id}`:`Car ${(job.vehicle??0)+1}`,row);
+          add('strong',site?projectLabel(site,PROJECTS):`Car ${(job.vehicle??0)+1}`,row);
           add('p',job.status||'Waiting for an available resident',row);
           add('p',`${job.partsPaid?'Materials already reserved':'Required supplies'}: ${Object.entries(serviceParts(job)).map(([id,n])=>`${quantityText(id,n)} ${MATERIALS[id].name}`).join(' · ')}`,row);
           if(site){const find=add('button','Find in village',row);find.onclick=()=>{dialog.close();inspect(site.id);};}
@@ -371,17 +377,17 @@ export function createManagement({
       stats=[['Craft jobs',s.operations?.filter(o=>!o.done&&PROCESSES[o.recipe]?.craft).length||0],['Residents',s.people.length]];
     else if (view === 'items')
       stats = [
-        ['Shared savings', `R$${s.money.toFixed(2)}`],
+        ['Shared savings', `${brl(s.money)}`],
         ['Items owned', [...EQUIPMENT_IDS].reduce((total, id) => total + materialCount(s, id), 0)],
         ['Crafting jobs', `${(s.operations || []).filter(o => !o.done && (PROCESSES[o.recipe]?.equipmentRepair || Object.keys(PROCESSES[o.recipe]?.output || {}).some(id => EQUIPMENT_IDS.has(id)))).length} queued`],
       ];
     else if(view==='food'){
       const f=pantryForecast(s),c=coolingStatus(s);
-      stats=[['Edible portions',f.portions],['Reserve coverage',s.mode==='sandbox'?'Unlimited':`${f.days.toFixed(1)} days`],['At risk of spoilage',s.mode==='sandbox'?'Inactive':`${f.atRisk.toFixed(1)} portions`],['Powered cold storage',`${c.capacity} L`]];
+      stats=[['Edible portions',f.portions],['Reserve coverage',s.mode==='sandbox'?'Unlimited':`${(s.people.length?f.portions/(s.people.length*3):0).toFixed(1)} days`],['At risk of spoilage',s.mode==='sandbox'?'Inactive':`${f.atRisk.toFixed(1)} portions`],['Powered cold storage',`${c.capacity} L`]];
     }
     else if (inventoryView)
       stats = [
-        ["Shared savings", `R$${s.money.toFixed(2)}`],
+        ["Shared savings", `${brl(s.money)}`],
         [
           "Storage used",
           `${Math.round(storedMaterials(s))} / ${storageCapacity(s)}`,
@@ -421,7 +427,7 @@ export function createManagement({
           greywater: "Greywater",
           sewage: "Sewage",
         }[k],
-        `${nodes.reduce((v, n) => v + n.water[i], 0).toFixed(1)} stored`,
+        `${nodes.reduce((v, n) => v + n.water[i], 0).toFixed(1)} L stored`,
       ]);
     if(view==='water'){
       const sanitation=basicNeeds(s).find(row=>row.id==='sanitation');
@@ -462,7 +468,7 @@ export function createManagement({
       const waste=document.createElement('p');waste.textContent=s.mode==='sandbox'?'Food does not spoil in sandbox.':forecast.atRisk>0?`About ${forecast.atRisk.toFixed(1)} portions may spoil during this reserve period. Cook short-lived ingredients, dry provisions for later, or lower production targets.`:'No stored portions are forecast to spoil during this reserve period.';settingsBody.append(waste);
       const reserveNote=document.createElement('p');reserveNote.textContent='Planning estimate: two evenly spaced portions per resident per day, oldest food first. Includes stored food only; future harvests, deliveries and continued refrigeration can change the outcome. The purchase budget is a spending limit, not reserved cash; drivers, funds or storage may delay replenishment.';settingsBody.append(reserveNote);
       const delivery=document.createElement('button');delivery.textContent=s.deliveryOnly?'Purchases: supplier delivery':'Purchases: resident pickup';delivery.setAttribute('aria-pressed',String(!!s.deliveryOnly));delivery.onclick=()=>{s.deliveryOnly=!s.deliveryOnly;refresh();render();};settingsBody.append(delivery);
-      const freight=document.createElement('p');freight.textContent=s.delivery?`${s.delivery.status||'Supplier delivery on its way'} · ${Math.ceil(s.delivery.left*.45)} game minutes remaining`:s.deliveryOnly?`Supplier delivery: R$${transportCost(s).toFixed(2)} freight, up to 5 tonnes / 12 m³. About six hours plus travel; no resident driver needed.`:'Resident pickups use the village cars and their cargo limits.';settingsBody.append(freight);
+      const freight=document.createElement('p');freight.textContent=s.delivery?(s.delivery.left>0?`Supplier delivery on its way · ${Math.ceil(s.delivery.left*.45)} game minutes remaining`:s.delivery.status||'Supplier truck unloading'):s.deliveryOnly?`Supplier delivery: ${brl(transportCost(s))} freight, up to 5 tonnes / 12 m³. About six hours plus travel; no resident driver needed.`:'Resident pickups use the village cars and their cargo limits. Project orders too large for one car load still arrive by supplier truck.';settingsBody.append(freight);
       }
       const search = $("resource-search").value.trim().toLowerCase(), committed=committedMaterials(s);
       for (const group of inventoryGroups(view)) {
@@ -512,7 +518,7 @@ export function createManagement({
         if(PROJECTS[p.key].kind==='wild-tree')continue;
         if(p.cultivation){
           if(view==='items'||p.work<PROJECTS[p.key].work)continue;
-          const beds=p.cultivation.beds,name=`${PROJECTS[p.key].name} #${p.id}`;
+          const beds=p.cultivation.beds,name=projectLabel(p,PROJECTS);
           if(search&&!`${name} ${beds.map(b=>b.crop).join(' ')}`.toLowerCase().includes(search))continue;
           const card=document.createElement('article');card.className='production-site';card.dataset.cultivationSite=p.id;
           const img=document.createElement('img');illustrate(img,PROJECTS[p.key].asset);
@@ -534,10 +540,10 @@ export function createManagement({
         const img = document.createElement("img");
         illustrate(img, PROJECTS[p.key].asset);
         const name = document.createElement("strong");
-        name.textContent = `${PROJECTS[p.key].name} #${p.id} (${p.x}, ${p.z})`;
+        name.textContent = projectLabel(p,PROJECTS);
         if(Object.values(CROP_CARE).some(c=>c.kind===PROJECTS[p.key].kind)){
           const irrigationLabel=document.createElement('label');irrigationLabel.textContent='Crop irrigation ';
-          const irrigation=document.createElement('select');irrigation.setAttribute('aria-label',`Irrigation for ${PROJECTS[p.key].name} #${p.id}`);
+          const irrigation=document.createElement('select');irrigation.setAttribute('aria-label',`Irrigation for ${projectLabel(p,PROJECTS)}`);
           for(const [value,text] of Object.entries(IRRIGATION_POLICIES)){const option=document.createElement('option');option.value=value;option.textContent=text;irrigation.append(option);}
           irrigation.value=p.irrigationPolicy||'balanced';irrigation.onchange=()=>{p.irrigationPolicy=irrigation.value;refresh();render();};irrigationLabel.append(irrigation);el.append(irrigationLabel);
           const hint=document.createElement('p');hint.textContent='Change during growth: conserving saves stored water but leaves less drought buffer. Rain-fed crops rely on rain; dry soil slows or stops growth. Residents still handle harvesting.';el.append(hint);

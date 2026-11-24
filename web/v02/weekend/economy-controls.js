@@ -1,3 +1,4 @@
+import { brl } from "./money.js";
 import {physicalUnit,stockQuantity,quantityText} from './material-measures.js';
 import {logisticsPolicy} from './logistics-policy.js';
 import {foodChange} from './food-storage.js';
@@ -28,7 +29,7 @@ export function economyControls(root,s,materials,recipes,count,refresh){
    input.oninput=()=>{p[key]=Math.max(0,Math.min(100000,stockQuantity(selected,Number(input.value)||0)));p.above=Math.max(p.above,p.keep);};input.onchange=()=>refresh();
  }
  const offer=salePreview(s,selected,materials,recipes,count);
- make(trade,'p',s.mode==='sandbox'?'Automatic sales are disabled in sandbox. These settings apply to normal villages.':`${quantityText(selected,offer.quantity)} could be queued for R$${offer.revenue.toFixed(2)} now. Protected reserve: ${quantityText(selected,offer.reserve)}. ${offer.quantity?'':offer.reason+'.'} Sales use whole trade batches. Set production targets at least one trade batch above the protected reserve.`);
+ make(trade,'p',s.mode==='sandbox'?'Automatic sales are disabled in sandbox. These settings apply to normal villages.':`${quantityText(selected,offer.quantity)} could be queued for ${brl(offer.revenue)} now. Protected reserve: ${quantityText(selected,offer.reserve)}. ${offer.quantity?'':offer.reason+'.'} Sales use whole trade batches. Set production targets at least one trade batch above the protected reserve.`);
  make(trade,'p','Already committed materials cannot be sold. Food and the next two batches at repeating sites stay protected. Automatic sales reserve goods for town trips. Payment arrives in town, subject to buyer demand. Transport costs are shared across batches.');
  const toggle=make(trade,'button',p.enabled?'Automatic sales: on':'Enable automatic sales');toggle.setAttribute('aria-pressed',String(p.enabled));toggle.onclick=()=>{p.enabled=!p.enabled;refresh();};
  const logistics=make(panel,'fieldset');make(logistics,'legend','Consolidate automatic town trips');
@@ -39,9 +40,9 @@ export function economyControls(root,s,materials,recipes,count,refresh){
  }
  const send=make(logistics,'button',dispatch.urgent?'Waiting loads marked urgent':'Send waiting loads now');send.onclick=()=>{dispatch.urgent=true;refresh();};
  const orders=make(panel,'fieldset');make(orders,'legend','Town exports');
- make(orders,'p',`Goods leave available stock when queued. Trips combine sale batches within cargo capacity. Transport: R$${transportCost({...s,deliveryOnly:false})} per trip; the driver needs enough energy and the village must afford departure.`);
+ make(orders,'p',`Goods leave available stock when queued. Trips combine sale batches within cargo capacity. Transport: ${brl(transportCost({...s,deliveryOnly:false}))} per trip; the driver needs enough energy and the village must afford departure.`);
  for(const o of pendingExports(s)){
- const row=make(orders,'div');make(row,'span',`${quantityText(o.material,o.quantity)} ${materials[o.material].name} · R$${(o.cents/100).toFixed(2)} gross · R$${((o.cents/100)-transportCost({...s,deliveryOnly:false})).toFixed(2)} after dedicated fuel `);
+ const row=make(orders,'div');make(row,'span',`${quantityText(o.material,o.quantity)} ${materials[o.material].name} · ${brl((o.cents/100))} gross · ${brl(((o.cents/100)-transportCost({...s,deliveryOnly:false})))} after dedicated fuel `);
  const hold=make(row,'button',o.holdForPickup?'Allow dedicated trip':'Hold for a shared pickup');hold.onclick=()=>{o.holdForPickup=!o.holdForPickup;refresh();};
     const cancel=make(row,'button','Cancel sale');cancel.onclick=()=>{cancelExport(s,o.id,foodChange);refresh();};
  }

@@ -1,3 +1,4 @@
+import { brl } from "./money.js";
 import {activeTrips} from './trip-state.js';
 import {transact} from './finances.js';
 import {spendableMoney} from './procurement-budget.js';
@@ -40,7 +41,7 @@ export function outsideWorkText(r) {
   const job = OUTSIDE_JOBS[r.id];
   const schedule = r.outsideJobEnabled ? 'Scheduled on weekday mornings when rested and free.' : 'Weekday shifts are off.';
   const current = r.outsideWork ? ' The current shift finishes on return.' : '';
-  return `${job.name} · ${job.hours} hours · R$${job.pay} gross per weekday shift. The R$${COMMUTE_FARE} return fare can come out of wages. Meals, drinking water and toilet breaks are provided at work. ${schedule}${current}`;
+  return `${job.name} · ${job.hours} hours · ${brl(job.pay)} gross per weekday shift. The ${brl(COMMUTE_FARE)} return fare can come out of wages. Meals, drinking water and toilet breaks are provided at work. ${schedule}${current}`;
 }
 
 function departureBlocker(s, r) {
@@ -174,7 +175,7 @@ export function outsideWorkStep(s, r, dt, go, say) {
     transact(s, paid, 'outsideWork', `${r.name}: ${job.name}${work.fareDue ? ' (bus fare deducted by employer)' : ''}`);
     r.outsideWork = null;
     r.action = 'idle';
-    say(s, `${r.name} returned from work and deposited R$${paid} in village savings.`);
+    say(s, `${r.name} returned from work and deposited ${brl(paid)} in village savings.`);
   }
 }
 
