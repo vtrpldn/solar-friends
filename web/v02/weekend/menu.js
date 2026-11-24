@@ -68,7 +68,7 @@ $("cancel-new").onclick = () => $("replace-save").close();
 $("confirm-new").onclick = () => start(pending);
 
 const labels={biome:'Brazilian biome',landscape:'Landscape',water:'Water availability',resources:'Land resources',savings:'Starting savings',supplies:'Starting supplies',town:'Town access'};
-const names={'mata-atlantica':'Mata Atlântica',cerrado:'Cerrado',caatinga:'Caatinga',gentle:'Gentle',rolling:'Rolling',rugged:'Rugged',dry:'Dry',seasonal:'Seasonal',abundant:'Abundant',sparse:'Sparse',balanced:'Balanced',rich:'Rich',tight:'Tight',modest:'Modest',comfortable:'Comfortable',essentials:'Bare essentials · 60% supplies',camp:'Weekend camp · standard supplies',prepared:'Well prepared · 170% supplies',nearby:'Nearby · 4 km',drive:'A drive away · 6 km',remote:'Remote · 18 km'};
+const names={'mata-atlantica':'Mata Atlântica',cerrado:'Cerrado',caatinga:'Caatinga',gentle:'Gentle',rolling:'Rolling',rugged:'Rugged',dry:'Dry',seasonal:'Seasonal',abundant:'Abundant',sparse:'Sparse',balanced:'Balanced',rich:'Rich',tight:'Tight',modest:'Modest',comfortable:'Comfortable',essentials:'Bare essentials · 60%',camp:'Weekend camp · 100%',prepared:'Well prepared · 170%',nearby:'Nearby · 4 km',drive:'A drive away · 6 km',remote:'Remote · 18 km'};
 for (const [tier, amount] of Object.entries(STARTING_CAPITAL)) {
   names[tier] += ' · ' + brlWhole(amount);
 }

@@ -21,7 +21,7 @@ export const SITE_SPACE = {
   bridge: { object: [16, 1.96], note: '1.75 m walking deck. Both ends must remain reachable on dry land.' },
   'rain-barrel': { object: [0.96, 0.86], note: 'The reserved site includes room to reach the tap; the barrel itself is about 0.74 m across.' },
   'wayfinding-sign': { object: [1.2, 0.15], note: 'A small sign, with a whole-cell placement reservation. Keep a walking route beside it.' },
-  'supply-5': { object: [2, 0.85], note: 'A 2 × 0.85 m bench; the rest of the site is working space. Keep one neighbouring side reachable.' },
+  'supply-5': { object: [2, 0.85], note: 'A 2 × 0.85 m bench; the rest of the site is working space. Keep one neighboring side reachable.' },
   'supply-6': { object: [0.78, 0.57], note: 'A compact battery unit with a whole-cell service reservation.' },
   'water-pump': { object: [1.5, 1.4], note: 'Pump pad with service space inside the reserved site.' },
 };
@@ -52,7 +52,7 @@ export function siteDescription(asset, size) {
   const space = asset === "bridge" && size[1] === 2
     ? {object: [16, 3.92], note: "Existing wide bridge: 3.5 m walking deck. Legacy site and centre retained."}
     : SITE_SPACE[asset];
-  return `Reserved site: ${siteDimensions(size)} (${size.join(' × ')} cells).${space ? ` ${space.object.join(' × ')} m ${['orchard','grove'].includes(asset) ? 'plot' : space.label || 'physical footprint'}. ${space.note}` : ' Includes the object and placement clearance.'} Access uses reachable neighbouring cells; it is not extra productive land.`;
+  return `Reserved site: ${siteDimensions(size)} (${size.join(' × ')} cells).${space ? ` ${space.object.join(' × ')} m ${['orchard','grove'].includes(asset) ? 'plot' : space.label || 'physical footprint'}. ${space.note}` : ' Includes the object and placement clearance.'} Access uses reachable neighboring cells; it is not extra productive land.`;
 }
 
 // Only this known historical layout is supported, not arbitrary saved dimensions.
