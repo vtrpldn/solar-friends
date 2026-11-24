@@ -1,3 +1,4 @@
+import { brl } from "./money.js";
 import {cropCondition} from './crop-stress.js';
 import {renderCultivationOverview} from './cultivation-overview.js';
 import * as THREE from 'three';
@@ -106,7 +107,7 @@ export function installFarmingUI({state,selected,scene,hit,controls,select,chang
    const button=document.createElement('button');button.textContent=label;button.dataset.farmAction=action;
    const spec=farmJobSpec(b,action),missing=Object.entries(spec.input).find(([id,n])=>(s.materials[id]||0)<n);
    const purchase=action==='plant'&&missing?plantingPurchase(s,b):null;
-   const error=farmJobError(s,p,b,action)||purchase?.error||(!purchase&&missing?`Needs ${missing[1]} ${missing[0]==='compost'?'kg of compost':'seed packet'+(missing[1]===1?'':'s')+' from Resources'}.`:'');button.disabled=!!error;button.title=error||(purchase?.cost?`Auto-buy seed packets: R$${purchase.cost.toFixed(2)} plus collection. Planting starts when seeds arrive.`:'');
+   const error=farmJobError(s,p,b,action)||purchase?.error||(!purchase&&missing?`Needs ${missing[1]} ${missing[0]==='compost'?'kg of compost':'seed packet'+(missing[1]===1?'':'s')+' from Resources'}.`:'');button.disabled=!!error;button.title=error||(purchase?.cost?`Auto-buy seed packets: ${brl(purchase.cost)} plus collection. Planting starts when seeds arrive.`:'');
    if(primary?.[0]===action){button.className='farm-primary';if(error&&!job)content.querySelector('#farm-feedback').textContent=error;}
    if(action==='clear')button.className='farm-danger';
    button.onclick=()=>{if(action==='clear'&&!confirm('Clear this standing crop? Only recoverable residues will remain.'))return;const result=queueBedJob(s,p.id,bedId,action);message(result||`${label} queued for a resident.`);changed();};

@@ -1,3 +1,4 @@
+import { brl } from "./money.js";
 import {ensureAnimalCare,animalAvailable,collectAnimal,validAnimalCare} from './animal-care.js';
 import {packDrinkingWater,hydrationWorkFactor} from './hydration.js';
 import {ensureHydrology,extractWater,validHydrology} from './hydrology.js';
@@ -1056,7 +1057,7 @@ export function blueprintPurchase(s, key, count = 1) {
   if(supplierIssue)return {items,cost,transport:0,error:supplierIssue};
   cost = Math.ceil(cost * 100) / 100;
   const budget=collectionBudget(s,items), transport=budget.cost, reserve=s.expansionReserve??0;
-  return {items, cost, transport, error: cost > 0 && cost + transport + reserve > s.money ? `Missing materials cost R$${cost.toFixed(2)} plus R$${transport.toFixed(2)} committed to ${budget.trips} collection trips, while keeping R$${reserve.toFixed(2)} for essentials; shared savings are too low.` : ""};
+  return {items, cost, transport, error: cost > 0 && cost + transport + reserve > s.money ? `Missing materials cost ${brl(cost)} plus ${brl(transport)} committed to ${budget.trips} collection trips, while keeping ${brl(reserve)} for essentials; shared savings are too low.` : ""};
 }
 function dispatchBlueprintPickup(s) {
   if(!dispatchReady(s))return;
@@ -1486,7 +1487,7 @@ export function plan(s, key, x, z, rotation = 0) {
     s,
     s.mode === "sandbox"
       ? `${def.name} ${instant ? "built" : "queued for resident construction"}. No materials spent.`
-      : purchase.cost ? `${def.name} planned. Missing materials purchased for R$${purchase.cost.toFixed(2)}; pickup ${s.trip ? "queued after the current trip" : "being arranged"}.`
+      : purchase.cost ? `${def.name} planned. Missing materials purchased for ${brl(purchase.cost)}; pickup ${s.trip ? "queued after the current trip" : "being arranged"}.`
       : `${def.name} planned. Materials reserved; friends will bring them over.`,
   );
   dispatchBlueprintPickup(s);
@@ -1688,7 +1689,7 @@ function startSupplyRun(s, material = "wood", project = null, saleOnly = false) 
 
   say(
     s,
-    saleOnly ? `${r.name} is taking reserved surplus to town. Payment arrives after trading.` : project ? `${r.name} is heading to town to collect the prepaid materials for ${PROJECTS[project.key].name}.` : `${r.name} is heading to the car for town: ${item.quantity} ${item.name} for R$${item.price}. Travel time depends on the distance to town.`,
+    saleOnly ? `${r.name} is taking reserved surplus to town. Payment arrives after trading.` : project ? `${r.name} is heading to town to collect the prepaid materials for ${PROJECTS[project.key].name}.` : `${r.name} is heading to the car for town: ${item.quantity} ${item.name} for ${brl(item.price)}. Travel time depends on the distance to town.`,
   );
   return true;
 }

@@ -1,3 +1,4 @@
+import { brl } from "./money.js";
 import {cancelDayShift, dayShiftOffer, requestDayShift} from './outside-work.js';
 import {spendableMoney} from './procurement-budget.js';
 
@@ -26,7 +27,7 @@ export function dayShiftControls(state, resident, refresh, chooseResident) {
   const job = document.createElement('strong');
   job.textContent = `${offer.job} · ${offer.hours}-hour shift`;
   const pay = document.createElement('p');
-  pay.textContent = `R$${offer.pay} gross · R$${offer.fare} round-trip bus fare · R$${offer.pay - offer.fare} take-home. Wages go into village savings on return.`;
+  pay.textContent = `${brl(offer.pay)} gross · ${brl(offer.fare)} round-trip bus fare · ${brl(offer.pay - offer.fare)} take-home. Wages go into village savings on return.`;
   if (resident.outsideWork ? resident.outsideWork.fareDue : spendableMoney(state) < offer.fare) {
     pay.append(' The employer covers the bus fare up front and deducts it from pay.');
   }

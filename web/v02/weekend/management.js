@@ -1,3 +1,4 @@
+import { brl } from "./money.js";
 import { isBuildOption } from "./build-categories.js";
 import {basicNeeds} from './basic-needs.js';
 import {animalCareText} from './animal-care.js';
@@ -107,7 +108,7 @@ export function createManagement({
         const options = document.createElement('optgroup'); options.label = group.name;
         for (const id of group.ids) {
           const item = MATERIALS[id];
-          if (item.quantity) options.append(new Option(`${item.quantity} ${item.name} · R$${item.price}`, id));
+          if (item.quantity) options.append(new Option(`${item.quantity} ${item.name} · ${brl(item.price)}`, id));
         }
         if (options.children.length) purchase.append(options);
       }
@@ -263,9 +264,9 @@ export function createManagement({
       b.setAttribute("aria-pressed", String(b.dataset.manage === view));
     });
     $("grid-power-panel").hidden = view !== "power";
-    $("grid-tariff-description").textContent=`Your own generation and batteries come first. Grid backup supplies up to ${ECONOMY_REFERENCE.electricity.capacityKw} kW at R$${GRID_TARIFF.toFixed(2)}/kWh. No standing charge. Collection budgets stay protected.`;
+    $("grid-tariff-description").textContent=`Your own generation and batteries come first. Grid backup supplies up to ${ECONOMY_REFERENCE.electricity.capacityKw} kW at ${brl(GRID_TARIFF)}/kWh. No standing charge. Collection budgets stay protected.`;
     const grid = s.infrastructure.grid;
-    $("grid-power-status").textContent = `${grid.enabled ? (s.money <= 0 ? "No funds for grid power" : "Grid backup connected") : "Off-grid"} · ${grid.importing.toFixed(2)} kW imported now · ${grid.imported.toFixed(2)} kWh purchased · R$${grid.spent.toFixed(2)} spent`;
+    $("grid-power-status").textContent = `${grid.enabled ? (s.money <= 0 ? "No funds for grid power" : "Grid backup connected") : "Off-grid"} · ${grid.importing.toFixed(2)} kW imported now · ${grid.imported.toFixed(2)} kWh purchased · ${brl(grid.spent)} spent`;
     $("toggle-grid-power").textContent = grid.enabled ? "Disconnect grid power" : "Connect grid backup";
     $("toggle-grid-power").setAttribute("aria-pressed", String(grid.enabled));
     const inventoryView = view === 'resources' || view === 'items' || view === 'food';
@@ -300,7 +301,7 @@ export function createManagement({
         : "Sources, tanks & treatment";
     let stats;
     if(view === "finances") {
-      const f=financeSummary(s), money=n=>`R$${n.toFixed(2)}`;
+      const f=financeSummary(s), money=n=>`${brl(n)}`;
       stats=[["Shared savings",money(f.balance)],["Income recorded",money(f.income)],["Expenses recorded",money(f.expenses)],["Net change",`${f.net>=0?'+':'−'}${money(Math.abs(f.net))}`]];
       const screen=$("finance-screen");screen.replaceChildren();
       const add=(tag,text,parent=screen)=>{const el=document.createElement(tag);el.textContent=text;parent.append(el);return el;};
@@ -371,7 +372,7 @@ export function createManagement({
       stats=[['Craft jobs',s.operations?.filter(o=>!o.done&&PROCESSES[o.recipe]?.craft).length||0],['Residents',s.people.length]];
     else if (view === 'items')
       stats = [
-        ['Shared savings', `R$${s.money.toFixed(2)}`],
+        ['Shared savings', `${brl(s.money)}`],
         ['Items owned', [...EQUIPMENT_IDS].reduce((total, id) => total + materialCount(s, id), 0)],
         ['Crafting jobs', `${(s.operations || []).filter(o => !o.done && (PROCESSES[o.recipe]?.equipmentRepair || Object.keys(PROCESSES[o.recipe]?.output || {}).some(id => EQUIPMENT_IDS.has(id)))).length} queued`],
       ];
@@ -381,7 +382,7 @@ export function createManagement({
     }
     else if (inventoryView)
       stats = [
-        ["Shared savings", `R$${s.money.toFixed(2)}`],
+        ["Shared savings", `${brl(s.money)}`],
         [
           "Storage used",
           `${Math.round(storedMaterials(s))} / ${storageCapacity(s)}`,
@@ -462,7 +463,7 @@ export function createManagement({
       const waste=document.createElement('p');waste.textContent=s.mode==='sandbox'?'Food does not spoil in sandbox.':forecast.atRisk>0?`About ${forecast.atRisk.toFixed(1)} portions may spoil during this reserve period. Cook short-lived ingredients, dry provisions for later, or lower production targets.`:'No stored portions are forecast to spoil during this reserve period.';settingsBody.append(waste);
       const reserveNote=document.createElement('p');reserveNote.textContent='Planning estimate: two evenly spaced portions per resident per day, oldest food first. Includes stored food only; future harvests, deliveries and continued refrigeration can change the outcome. The purchase budget is a spending limit, not reserved cash; drivers, funds or storage may delay replenishment.';settingsBody.append(reserveNote);
       const delivery=document.createElement('button');delivery.textContent=s.deliveryOnly?'Purchases: supplier delivery':'Purchases: resident pickup';delivery.setAttribute('aria-pressed',String(!!s.deliveryOnly));delivery.onclick=()=>{s.deliveryOnly=!s.deliveryOnly;refresh();render();};settingsBody.append(delivery);
-      const freight=document.createElement('p');freight.textContent=s.delivery?`${s.delivery.status||'Supplier delivery on its way'} · ${Math.ceil(s.delivery.left*.45)} game minutes remaining`:s.deliveryOnly?`Supplier delivery: R$${transportCost(s).toFixed(2)} freight, up to 5 tonnes / 12 m³. About six hours plus travel; no resident driver needed.`:'Resident pickups use the village cars and their cargo limits.';settingsBody.append(freight);
+      const freight=document.createElement('p');freight.textContent=s.delivery?`${s.delivery.status||'Supplier delivery on its way'} · ${Math.ceil(s.delivery.left*.45)} game minutes remaining`:s.deliveryOnly?`Supplier delivery: ${brl(transportCost(s))} freight, up to 5 tonnes / 12 m³. About six hours plus travel; no resident driver needed.`:'Resident pickups use the village cars and their cargo limits.';settingsBody.append(freight);
       }
       const search = $("resource-search").value.trim().toLowerCase(), committed=committedMaterials(s);
       for (const group of inventoryGroups(view)) {

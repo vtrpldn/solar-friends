@@ -1,3 +1,4 @@
+import { brlWhole } from "./money.js";
 import "./keyboard-focus.js";
 import {renderDevTools} from './dev-tools.js';
 import { disabledReason, installDisabledInfo } from './disabled-info.js';
@@ -34,7 +35,7 @@ if (story)
   $("continue-label").textContent =
     story.stage === "arrival"
       ? "Choose a place for your tents."
-      : `${storyProjectCount} ${storyProjectCount === 1 ? "project" : "projects"} · R$${story.money.toFixed(2)} shared savings`;
+      : `${storyProjectCount} ${storyProjectCount === 1 ? "project" : "projects"} · ${brl(story.money)} shared savings`;
 $("continue-game").onclick = () => enter("story");
 $("continue-sandbox").onclick = () => enter("sandbox");
 function start(mode) {
@@ -69,7 +70,7 @@ $("confirm-new").onclick = () => start(pending);
 const labels={biome:'Brazilian biome',landscape:'Landscape',water:'Water availability',resources:'Land resources',savings:'Starting savings',supplies:'Starting supplies',town:'Town access'};
 const names={'mata-atlantica':'Mata Atlântica',cerrado:'Cerrado',caatinga:'Caatinga',gentle:'Gentle',rolling:'Rolling',rugged:'Rugged',dry:'Dry',seasonal:'Seasonal',abundant:'Abundant',sparse:'Sparse',balanced:'Balanced',rich:'Rich',tight:'Tight',modest:'Modest',comfortable:'Comfortable',essentials:'Bare essentials · 60% supplies',camp:'Weekend camp · standard supplies',prepared:'Well prepared · 170% supplies',nearby:'Nearby · 4 km',drive:'A drive away · 6 km',remote:'Remote · 18 km'};
 for (const [tier, amount] of Object.entries(STARTING_CAPITAL)) {
-  names[tier] += ' · R$' + amount.toLocaleString('en-US');
+  names[tier] += ' · ' + brlWhole(amount);
 }
 for(const [key,values] of Object.entries(OPTIONS)){
  const label=document.createElement('label');label.textContent=labels[key];const select=document.createElement('select');select.id='setup-'+key;

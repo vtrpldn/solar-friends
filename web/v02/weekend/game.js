@@ -1,3 +1,4 @@
+import { brl } from "./money.js";
 import { DREAM_LIGHTS, lightingAt } from "./dream-lighting.js";
 import {createPaintedView, paintVillageModel, villageClouds} from "./painted-village.js";
 import {createGroundWear} from './ground-wear.js';
@@ -1002,7 +1003,7 @@ function updatePlacementPreview() {
   if (placing) {
     const missing = moving ? [] : missingMaterials(s, placing);
     const purchase = blueprintPurchase(s, placing);
-    hint ||= missing.length ? purchase.error || `Place to buy missing materials for R$${purchase.cost.toFixed(2)} · ${s.trip ? "Pickup queued after current trip" : "Resident pickup arranged automatically"}` : "";
+    hint ||= missing.length ? purchase.error || `Place to buy missing materials for ${brl(purchase.cost)} · ${s.trip ? "Pickup queued after current trip" : "Resident pickup arranged automatically"}` : "";
     if (placing === "road" && shiftPlacement && lastRoad) {
       const line = roadLine(lastRoad, cell);
       if (!line) hint = "Choose a shorter road route (up to 128 cells).";
@@ -1014,7 +1015,7 @@ function updatePlacementPreview() {
         roadPreview.visible = true;
         const count = line.filter((c) => !s.projects.some((p) => p.key === "road" && p.x === c.x && p.z === c.z)).length;
         const total = blueprintPurchase(s, "road", count);
-        hint = error || total.error || `${count} road sections${total.cost ? ` · Auto-buy R$${total.cost.toFixed(2)} total` : " · Materials available"} · Shift-click to plan`;
+        hint = error || total.error || `${count} road sections${total.cost ? ` · Auto-buy ${brl(total.cost)} total` : " · Materials available"} · Shift-click to plan`;
       }
     }
     message(
@@ -1841,7 +1842,7 @@ function renderUI() {
     !active || s.stage === "evening" || openPanel !== "build" || !!selected;
   const trends=resourceTrends(s.time,resourceSnapshot(s));
   const counters = [
-    ["money", `R$${s.money.toFixed(2)}`, "Savings", "finances"],
+    ["money", `${brl(s.money)}`, "Savings", "finances"],
     ["meals", `${foodPortions(s)}`, "Food portions", "food"],
     [
       "power",
@@ -2053,7 +2054,7 @@ function renderUI() {
             $('resident-detail').querySelector('.day-shift input')?.focus();
           };
           const job = OUTSIDE_JOBS[r.id];
-          schedule.append(repeat, `Repeat a ${job.hours}-hour shift on weekdays (R$${job.pay} gross)`);
+          schedule.append(repeat, `Repeat a ${job.hours}-hour shift on weekdays (${brl(job.pay)} gross)`);
           work.append(schedule);
           detail.append(work);
         }
@@ -2119,7 +2120,7 @@ function renderUI() {
   }
   const purchase = MATERIALS[$("purchase").value];
   $("town").textContent =
-    `${s.deliveryOnly?"Order delivery:":"Fetch"} ${materialText($("purchase").value, purchase.quantity)} · R$${(purchase.price + pickupFare(s)).toFixed(2)} ${returnPickup(s)?"· existing trip, no extra fuel":"incl. transport"}`;
+    `${s.deliveryOnly?"Order delivery:":"Fetch"} ${materialText($("purchase").value, purchase.quantity)} · ${brl((purchase.price + pickupFare(s)))} ${returnPickup(s)?"· existing trip, no extra fuel":"incl. transport"}`;
   const townHour=((540+s.time*.45)/60)%24;
   const supplierIssue=(townHour<7||townHour>=18) ? "Town opens at 07:00; pickups stop departing at 18:00. Planned construction and food pickups retry automatically." : supplierError(s,{[$("purchase").value]:purchase.quantity},MATERIALS);
   disabledReason($("town"), supplierIssue || (s.stage !== "playing" ? "Choose a campsite first." : "Wait for an available vehicle or delivery and enough uncommitted savings for supplies and transport."));
@@ -2130,13 +2131,13 @@ function renderUI() {
     .join(" · ");
   const sale=tradeQuote(s,$("purchase").value,MATERIALS,materialCount,protectedEquipment(s,$("purchase").value));
   $("sell").textContent =
-    `Queue sale: ${materialText($("purchase").value, sale.quantity || 0)} · R$${((sale.cents || 0)/100).toFixed(2)} gross · R$${((sale.cents||0)/100-transportCost({...s,deliveryOnly:false})).toFixed(2)} after dedicated fuel`;
+    `Queue sale: ${materialText($("purchase").value, sale.quantity || 0)} · ${brl(((sale.cents || 0)/100))} gross · ${brl(((sale.cents||0)/100-transportCost({...s,deliveryOnly:false})))} after dedicated fuel`;
   $("sell").disabled =
     !!tradeQuote(s,$("purchase").value,MATERIALS,materialCount).error;
   $("sell").title=tradeQuote(s,$("purchase").value,MATERIALS,materialCount).error || "Payment after trading in town; combine batches to share transport costs.";
   const journeys=activeTrips(s).map(trip=>`${s.people.find(r=>r.id===trip.person).name}: ${{boarding:"walking to the car",outbound:"driving to town",away:"trading in town",inbound:"driving home",unloading:"unloading supplies"}[trip.phase]}`);
   if(s.delivery)journeys.push(`Supplier delivery: ${Math.ceil(s.delivery.left*.45)} game minutes remaining`);
-  $("trip").textContent = journeys.length?journeys.join(' · '):`Storage: ${Math.round(storedMaterials(s))}/${storageCapacity(s)} units. ${pendingExports(s).length} sale batches waiting. R$${spendableMoney(s).toFixed(2)} available after collection commitments. ${s.deliveryOnly?'Delivery':'Car trip'}: R$${transportCost(s).toFixed(2)}.`;
+  $("trip").textContent = journeys.length?journeys.join(' · '):`Storage: ${Math.round(storedMaterials(s))}/${storageCapacity(s)} units. ${pendingExports(s).length} sale batches waiting. ${brl(spendableMoney(s))} available after collection commitments. ${s.deliveryOnly?'Delivery':'Car trip'}: ${brl(transportCost(s))}.`;
   const equipmentBlocked = protectedEquipment(s,$("purchase").value)>0 && materialCount(s,$("purchase").value)-protectedEquipment(s,$("purchase").value)<1;
   $("sell").disabled ||= equipmentBlocked;
   disabledReason($("sell"),equipmentBlocked ? "Return borrowed equipment or repair worn equipment before selling it." : $("sell").title);
@@ -2163,10 +2164,10 @@ function renderUI() {
     const missing = missingMaterials(s, key);
     buildMaterialTooltip.update(b,missing);
     const purchase = blueprintPurchase(s, key);
-    b.title = `${["coop","goat_pasture"].includes(key) ? "Animals require daily fodder and drinking water; purchase feed before they arrive. " : ""}${PROJECTS[key].description} ${constructionSpecText(PROJECTS[key])} Materials: ${recipeText(key)}. ${missing.length ? purchase.error || `Auto-buy missing materials: R$${purchase.cost.toFixed(2)}. Collection reserve: R$${purchase.transport.toFixed(2)} across outstanding orders.` : "All materials available."}`;
+    b.title = `${["coop","goat_pasture"].includes(key) ? "Animals require daily fodder and drinking water; purchase feed before they arrive. " : ""}${PROJECTS[key].description} ${constructionSpecText(PROJECTS[key])} Materials: ${recipeText(key)}. ${missing.length ? purchase.error || `Auto-buy missing materials: ${brl(purchase.cost)}. Collection reserve: ${brl(purchase.transport)} across outstanding orders.` : "All materials available."}`;
     b.querySelector(".build-cost").textContent = s.mode === "sandbox" ? "Free"
       : s.autoBuy===false && missing.length ? 'Missing materials'
-      : purchase.cost ? `R$${purchase.cost.toFixed(2)} + R$${(purchase.transport || 0).toFixed(2)} collection reserve`
+      : purchase.cost ? `${brl(purchase.cost)} + ${brl((purchase.transport || 0))} collection reserve`
       : `${Object.values(PROJECTS[key].materials).reduce((sum, n) => sum + n, 0)} materials · ${PROJECTS[key].size.join("×")}`;
     b.classList.toggle("active", placing === key);
     b.classList.toggle("needs-materials", missing.length > 0);
@@ -2220,7 +2221,7 @@ for (const group of RESOURCE_GROUPS) {
     if (!item.quantity) continue;
     const option = document.createElement("option");
     option.value = id;
-    option.textContent = `${materialText(id, item.quantity)} · R$${item.price}`;
+    option.textContent = `${materialText(id, item.quantity)} · ${brl(item.price)}`;
     options.append(option);
   }
   if (options.children.length) $("purchase").append(options);
