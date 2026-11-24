@@ -123,7 +123,7 @@
       </details>
       <button id="toggle-building">Switch off</button>
       <button id="priority">Do this next</button
-      ><button id="focus-selection" data-shortcut="F" aria-keyshortcuts="F" title="F">Find in village</button
+      ><button id="focus-selection" data-shortcut="F" aria-keyshortcuts="F">Find in village</button
       ><button id="copy-building">Build another</button
       ><button id="move">Move building</button
       ><button id="cancel-project">Cancel plan</button
@@ -132,15 +132,7 @@
         ×
       </button>
     </section>
-    <dialog id="controls-dialog" aria-labelledby="controls-title"><button id="close-controls" aria-label="Close keyboard controls">×</button><h2 id="controls-title">Keyboard &amp; camera</h2>            <p>
-              <kbd>W A S D</kbd> Move around<br /><kbd>Q / E</kbd> Turn the
-              view<br />Scroll to zoom · Drag to pan<br /><kbd>Enter</kbd> Select or place at the center reticle · <kbd>,</kbd>/<kbd>.</kbd> Tilt<br /><kbd>Tab</kbd> Move between controls · Arrow keys move between nearby buttons<br /><kbd>Space</kbd> Pause
-              / resume<br /><kbd>1–4</kbd> Speed: 1× / 4× / 8× / 16×<br /><kbd>B</kbd> Build · <kbd>J</kbd> Projects · <kbd>N</kbd> Residents<br /><kbd>T</kbd> Terrain · <kbd>I</kbd> Resources<br /><kbd>U</kbd> Water · <kbd>P</kbd> Power · <kbd>M</kbd> Finances<br /><kbd>/</kbd> Search buildings or resources<br /><kbd>Home</kbd> Camp · <kbd>G</kbd> Grid ·
-              <kbd>F</kbd> Focus<br /><kbd>R</kbd> Rotate building ·
-              <kbd>Shift + R</kbd> Reverse<br /><kbd>Shift-click</kbd> Repeat
-              building / extend a straight road<br /><kbd>Esc</kbd> Cancel
-              placement / finish road plan / close panel
-            </p></dialog>
+    <dialog id="controls-dialog" aria-labelledby="controls-title"><button id="close-controls" aria-label="Close keyboard controls">×</button><h2 id="controls-title">Keyboard &amp; camera</h2><p class="hint">Game paused. Shortcuts wait while you type in a field.</p><div id="controls-list"></div></dialog>
     <footer>
       <section id="build" hidden>
         <div class="build-toolbar">
@@ -152,16 +144,16 @@
           ><input
             id="build-search"
             type="search"
-            placeholder="Find something to build…  /"
+            placeholder="Find something to build…"
             aria-keyshortcuts="/"
             aria-label="Find a building"
           /><button id="auto-buy" aria-pressed="true" title="Automatically purchase missing building materials when savings allow.">Auto-buy: on</button><button id="toggle-build-list">Close catalog</button>
         </div>
         <div class="build-browser"><nav id="build-categories" aria-label="Building categories"></nav><div class="build-results"><div id="build-count" aria-live="polite"></div><div id="build-list"></div><p id="build-empty" hidden>No buildings found. Try a name or purpose, like water or food.</p></div></div>
       </section>
-      <button id="rotate-placement" hidden>Rotate · R · 0°</button>
+      <button id="rotate-placement" hidden>Rotate · 0°</button>
       <button id="undo-road" hidden disabled>Undo last road stroke</button>
-      <button id="cancel" hidden>Cancel placement · Esc</button>
+      <button id="cancel" hidden>Cancel placement</button>
       <div id="message" role="status">
         Move over the land to try a camp site. R turns it; click to pitch the tents.
       </div>
@@ -200,7 +192,7 @@
         <summary>View &amp; options</summary>
         <div class="controls">
           <div class="view-control-row camera-row">
-          <button id="show-controls" aria-label="Keyboard and camera controls">?</button>
+          <button id="show-controls" aria-label="Keyboard and camera controls" aria-haspopup="dialog">?</button>
           <button id="rotate-left" data-shortcut="Q" aria-keyshortcuts="Q" aria-label="Rotate camera left" title="Q">
             ↶</button
           ><button id="rotate-right" data-shortcut="E" aria-keyshortcuts="E" aria-label="Rotate camera right" title="E">
@@ -263,7 +255,7 @@
               <input
                 id="resource-search"
                 type="search"
-                placeholder="Find a resource…  /" aria-keyshortcuts="/"
+                placeholder="Find a resource…"
                 aria-label="Find a resource"
               />
             </div>
@@ -327,8 +319,8 @@
         Choose a resource or building to get started.
       </div>
     </dialog>
-    <dialog id="reset-dialog">
-      <h2>Start a new weekend?</h2>
+    <dialog id="reset-dialog" aria-labelledby="reset-title">
+      <h2 id="reset-title">Start a new weekend?</h2>
       <p>
         This starts a fresh camp and replaces your current village. Ready for a
         new adventure?

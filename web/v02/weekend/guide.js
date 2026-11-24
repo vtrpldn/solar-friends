@@ -28,10 +28,12 @@ export function installGuide({button,isPaused,savePauseState=isPaused,setPaused}
   if(!matches.length)list.append(text('p','No matching systems. Try water, crops or tools.'));
  }
  async function load(){
-  if(!loading)loading=fetch(new URL('./guide/topics.json',import.meta.url)).then(r=>{if(!r.ok)throw Error('Guide unavailable');return r.json();}).then(data=>{topics=data;renderList();renderTopic(current);}).catch(()=>{loading=null;article.replaceChildren(text('p','The Guide could not load. Close it and try again.'));});
+  if(!loading)loading=fetch(new URL('./guide/topics.json',import.meta.url)).then(r=>{if(!r.ok)throw Error('Guide unavailable');return r.json();}).then(data=>{topics=data;renderList();renderTopic(current);focusTopic();}).catch(()=>{loading=null;article.replaceChildren(text('p','The Guide could not load. Close it and try again.'));});
   return loading;
  }
- button.onclick=()=>{if(dialog.open)return;resumePaused=isPaused();savePaused=savePauseState();setPaused(true);dialog.showModal();load();};
+ // Open on the topic being read, so arrows browse topics straight away.
+ function focusTopic(){if(dialog.open&&(dialog.querySelector('#guide-close')===document.activeElement||!dialog.contains(document.activeElement)))list.querySelector('[aria-current="true"]')?.focus({preventScroll:true});}
+ button.onclick=()=>{if(dialog.open)return;resumePaused=isPaused();savePaused=savePauseState();setPaused(true);dialog.showModal();load().then(focusTopic);};
  dialog.querySelector('#guide-close').onclick=()=>dialog.close();
  dialog.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();dialog.close();}});
  dialog.addEventListener('close',()=>{setPaused(resumePaused);button.focus({preventScroll:true});});

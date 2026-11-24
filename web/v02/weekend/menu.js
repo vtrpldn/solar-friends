@@ -101,3 +101,5 @@ if(new URLSearchParams(location.search).has('load-error')) $('menu-status').text
 
 installDisabledInfo();
 renderDevTools(document.getElementById('dev-tools'));
+// Start with the most likely choice focused so the menu works from the first key press.
+document.querySelector('.menu-actions .primary:not([hidden])')?.focus();

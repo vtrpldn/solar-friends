@@ -1638,8 +1638,16 @@ header > .time { grid-column: 3; justify-self: end; }
 .road-project-group > summary { cursor: pointer; font-weight: 600; }
 #undo-road { background: var(--paper); }
 
-#controls-dialog { width: 460px; max-height: calc(100vh - 80px); overflow-y: auto; }
+#controls-dialog { width: 760px; max-width: calc(100vw - 80px); max-height: calc(100vh - 80px); overflow-y: auto; }
 #controls-dialog p { line-height: 1.9; }
+#controls-list { columns: 2; column-gap: 28px; }
+#controls-list section { break-inside: avoid; margin-bottom: 14px; }
+#controls-list h3 { margin: 0 0 4px; font-size: 12px; letter-spacing: .8px; text-transform: uppercase; color: #6d674d; }
+#controls-list dl { display: grid; grid-template-columns: max-content 1fr; gap: 5px 12px; margin: 0; font-size: 13px; line-height: 1.45; }
+#controls-list dt { white-space: nowrap; }
+#controls-list dd { margin: 0; }
+/* Panels that take focus as a whole when chosen from the map. */
+#selection:focus-visible { outline: 3px solid #bb663d; outline-offset: 3px; }
 #close-controls { float: right; }
 #production-activity { font-size: 12px; line-height: 1.5; }
 #production-progress, .production-site progress { width: 100%; }

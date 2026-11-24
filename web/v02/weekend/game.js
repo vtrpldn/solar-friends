@@ -33,7 +33,7 @@ import {tradeQuote,transportCost,pendingExports} from './physical-trade.js';
 import {installLenses} from './lenses.js';
 import {simulationSpeed, simulationFrame, catchUpFrame, createPace, resetPace, laggingSpeed, restoredView, wasteWarnings, operationalStatus, buildingBenefit} from './session-ui.js';
 import {eventHistory, eventTime} from './event-history.js';
-import {PANEL_SHORTCUTS, MANAGEMENT_SHORTCUTS, SPEED_SHORTCUTS, ignoreGameShortcut} from './keyboard-shortcuts.js';
+import {binding, bindingFor, keyLabel, ignoreGameShortcut, applyShortcutHints, renderShortcutHelp} from './keyboard-shortcuts.js';
 import {projectLabel, upgradeAction, undoRoadPlan, productionSearchText, productionActivity, residentProject} from './project-ui.js';
 import { availableHomes, homeResidents, assignHome } from './simulation.js';
 import { createScalePreview } from './scale-preview.js';
@@ -813,7 +813,7 @@ const rotateButton = $("rotate-placement");
 function rotatePlacement(direction = 1) {
   if (!placing) return;
   placementRotation = (placementRotation + direction + 4) % 4;
-  rotateButton.textContent = `Rotate · R · ${placementRotation * 90}°`;
+  rotateButton.textContent = `Rotate · ${placementRotation * 90}°`;
   updatePlacementPreview();
 }
 rotateButton.onclick = () => rotatePlacement();
@@ -874,21 +874,24 @@ function startPlacement(key, id = null) {
   scene.add(wireframe);
   wireframe.visible = false;
   rotateButton.hidden = key === "road";
-  rotateButton.textContent = `Rotate · R · ${placementRotation * 90}°`;
+  rotateButton.textContent = `Rotate · ${placementRotation * 90}°`;
   ghost.visible = false;
   $("cancel").hidden = false;
-  $("cancel").textContent = key === 'road' ? 'Finish planning · Esc' : 'Cancel placement · Esc';
+  $("cancel").textContent = key === 'road' ? 'Finish planning' : 'Cancel placement';
   $("undo-road").hidden = key !== 'road' || !!id;
   $("undo-road").disabled = true;
   grid.visible = true;
   message(
     key === "bridge"
-      ? "Span the river with both ends on dry land. R rotates. Esc cancels."
+      ? `Span the river with both ends on dry land. ${keyLabel('rotate')} rotates. ${keyLabel('back')} cancels.`
       : key === "road"
-        ? "Road planning paused · Shift-click extends · Undo removes the last stroke · Esc keeps the plan."
-        : "Choose a building site. R rotates. Shift-click repeats. Ground levels automatically. Esc cancels.",
+        ? `Road planning paused · Shift-click or ${keyLabel('activate-repeat')} extends · Undo removes the last stroke · ${keyLabel('back')} keeps the plan.`
+        : `Choose a building site. ${keyLabel('rotate')} rotates. Shift-click or ${keyLabel('activate-repeat')} repeats. Ground levels automatically. ${keyLabel('back')} cancels.`,
   );
   renderUI();
+  // Chosen from the keyboard: aim at the middle of the view straight away, so
+  // the site is previewed before Enter commits to it.
+  if (keyboardInput) aimAtReticle();
 }
 
 const buildMaterialTooltip = materialTooltip();
@@ -913,6 +916,17 @@ function setKeyboardAim(active) {
   reticle.hidden = !active;
 }
 const aimPoint = shiftKey => ({clientX: innerWidth / 2, clientY: innerHeight / 2, shiftKey});
+// True while the player is driving with keys rather than the pointer.
+let keyboardInput = false;
+for (const type of ['pointerdown', 'pointermove', 'wheel'])
+  addEventListener(type, () => { keyboardInput = false; }, {capture: true, passive: true});
+function aimAtReticle() {
+  setKeyboardAim(true);
+  cell = null;
+  const point = aimPoint(shiftPlacement);
+  if (farmingUI.placingField()) farmingUI.previewCorner(point);
+  else previewMapAction(point);
+}
 let down = null,
   cell = null;
 const roadPreview = new THREE.Line(
@@ -1031,7 +1045,7 @@ function updatePlacementPreview() {
     }
     message(
       hint ||
-        `${PROJECTS[placing].name} · Site ${siteDimensions(size)} · ${placementRotation * 90}° · ${placing === "road" ? "Shift-click extends roads" : "R rotates · Shift-click repeats · Gold: entrance · Blue: work access"}`,
+        `${PROJECTS[placing].name} · Site ${siteDimensions(size)} · ${placementRotation * 90}° · ${placing === "road" ? "Shift-click extends roads" : `${keyLabel('rotate')} rotates · Shift-click repeats · Gold: entrance · Blue: work access`}`,
     );
   } else if (hint) message(hint);
   ghost.material.color.set(error ? "#c26847" : "#d9eda5");
@@ -1167,7 +1181,9 @@ $("copy-diagnostics").onclick = async () => {
   }catch(error){status.textContent='Could not prepare the bug report. Please try again.';diagnostics.error('diagnostic-export',error);}
   finally{button.disabled=false;}
 };
+renderShortcutHelp($("controls-list"));
 $("show-controls").onclick = () => {
+  if ($("controls-dialog").open) return;
   controlsWasPaused = paused; paused = true; updatePauseButton();
   $("controls-dialog").showModal();
 };
@@ -1191,7 +1207,7 @@ $("copy-building").onclick = () => {
     setPanel(null);
     startPlacement(p.key);
     placementRotation = rotation;
-    rotateButton.textContent = `Rotate · R · ${rotation * 90}°`;
+    rotateButton.textContent = `Rotate · ${rotation * 90}°`;
   }
 };
 $("focus-selection").onclick = () => {
@@ -1225,84 +1241,142 @@ $("undo-road").onclick = () => {
   message("Last road stroke undone.");
 };
 addEventListener("keyup", (e) => {
-  if (e.code === "Enter") terrainStroke = null;
+  if (binding('activate').code.includes(e.code)) terrainStroke = null;
   if (e.key === "Shift") {
     shiftPlacement = false;
     roadPreview.visible = false;
   }
 });
 addEventListener("blur", () => { terrainStroke = null; });
-addEventListener("keydown", (e) => {
-  const dialogOpen = !!document.querySelector('dialog[open]');
-  const editing = e.target.closest?.('input,textarea,select,[contenteditable]:not([contenteditable="false"])');
-  if (e.key === "Shift" && !editing && !dialogOpen) {
-    shiftPlacement = true;
-    updatePlacementPreview();
-  }
-  // Escape belongs to the topmost dialog, including saves and confirmations.
-  if (e.key === "Escape" && !dialogOpen) {
-    if (editing && e.target.type === 'search' && e.target.value) {
-      e.preventDefault();
-      e.target.value = '';
-      e.target.dispatchEvent(new Event('input', {bubbles: true}));
-      return;
-    }
-    if (placing) cancel();
-    else if (selected) { selected = null; uiSignature = ''; renderUI(); }
-    else if (openPanel) setPanel(null);
-    else document.querySelector('.view-menu').open = false;
-    $("world").focus({preventScroll: true});
+const typingTarget = 'input,textarea,select,[contenteditable]:not([contenteditable="false"])';
+const focusWorld = () => $("world").focus({preventScroll: true});
+const viewMenu = document.querySelector('.view-menu');
+// Esc unwinds exactly one visible layer per press, topmost first.
+function stepBack(e) {
+  const field = e.target.closest?.(typingTarget);
+  if (field?.type === 'search' && field.value) {
+    field.value = '';
+    field.dispatchEvent(new Event('input', {bubbles: true}));
     return;
   }
-  // Search remains available inside Resources, but never steals typed text.
-  if (e.code === 'Slash' && !e.shiftKey && !ignoreGameShortcut(e) &&
-      (!dialogOpen || $("management").open && management.view === 'resources')) {
-    e.preventDefault();
-    if (!dialogOpen) {
+  if (viewMenu.open) {
+    const inside = viewMenu.contains(document.activeElement);
+    viewMenu.open = false;
+    if (inside) viewMenu.querySelector('summary').focus({preventScroll: true});
+    return;
+  }
+  if (lenses.menuOpen) { lenses.closeMenu(); return; }
+  if (placing) { cancel(); focusWorld(); }
+  else if (openPanel && !selected) setPanel(null);
+  else if (lenses.active) lenses.clear();
+  else if (selected) {
+    selected = null;
+    // A panel hidden behind the selection goes with it: one visible layer per press.
+    if (openPanel) setPanel(null);
+    else { uiSignature = ''; renderUI(); }
+    focusWorld();
+  } else focusWorld();
+}
+function activateAtReticle(e) {
+  focusWorld();
+  setKeyboardAim(true);
+  const point = aimPoint(e.shiftKey);
+  if (openPanel === "terrain-panel") {
+    terrainStroke = {point: null};
+    previewMapAction(point);
+  }
+  const before = selected;
+  if (!farmingUI.markCorner(point)) activateMap(point);
+  // Hand the new selection to the keyboard; Esc returns to the map.
+  if (selected && selected !== before && !$("selection").hidden) $("selection").focus({preventScroll: true});
+}
+function togglePanel(panel) {
+  if (s.stage !== 'playing') return;
+  setPanel(openPanel === panel ? null : panel);
+}
+function toggleScreen(screen) {
+  if (s.stage !== 'playing') return;
+  if (management.isOpen && management.view === screen) $("management").close();
+  else management.open(screen);
+}
+// One entry per discrete binding in keyboard-shortcuts.js; the table decides
+// which key reaches which entry.
+const shortcutActions = {
+  back: stepBack,
+  activate: activateAtReticle,
+  'activate-repeat': activateAtReticle,
+  rotate: () => rotatePlacement(1),
+  'rotate-back': () => rotatePlacement(-1),
+  find: () => { if (selected) $("focus-selection").click(); else focus(campLocation(s)); },
+  grid: () => $("grid").click(),
+  lenses: () => lenses.toggleMenu(),
+  pause: () => $("pause").click(),
+  speed: e => setSpeed(binding('speed').values[e.code]),
+  'advance-days': () => $("time-skip").click(),
+  build: () => togglePanel('build'),
+  projects: () => togglePanel('projects-panel'),
+  residents: () => togglePanel('people'),
+  terrain: () => togglePanel('terrain-panel'),
+  search: () => {
+    if (management.isOpen) {
+      if (management.view !== 'resources') return;
+    } else {
       if (s.stage !== 'playing') return;
       setPanel('build');
     }
-    const input = $(dialogOpen ? 'resource-search' : 'build-search');
+    const input = $(management.isOpen ? 'resource-search' : 'build-search');
     input.focus(); input.select();
+  },
+  finances: () => toggleScreen('finances'),
+  items: () => toggleScreen('items'),
+  crafting: () => toggleScreen('crafting'),
+  food: () => toggleScreen('food'),
+  resources: () => toggleScreen('resources'),
+  water: () => toggleScreen('water'),
+  power: () => toggleScreen('power'),
+  guide: () => { const dialog = $("village-guide"); if (dialog.open) dialog.close(); else $("open-guide").click(); },
+  'view-options': () => {
+    if ($("village-actions").hidden) return;
+    viewMenu.open = !viewMenu.open;
+    if (viewMenu.open) $("show-controls").focus({preventScroll: true});
+    else focusWorld();
+  },
+  help: () => { const dialog = $("controls-dialog"); if (dialog.open) dialog.close(); else $("show-controls").click(); },
+};
+addEventListener("keydown", (e) => {
+  const dialog = document.querySelector('dialog[open]');
+  const editing = e.target.closest?.(typingTarget);
+  if (!['Shift', 'Control', 'Alt', 'Meta'].includes(e.key)) keyboardInput = true;
+  if (e.key === "Shift" && !editing && !dialog) {
+    shiftPlacement = true;
+    updatePlacementPreview();
+  }
+  const bound = bindingFor(e);
+  if (!bound || e.defaultPrevented) return;
+  // Escape belongs to the topmost dialog, including saves and confirmations.
+  if (bound.id === 'back') {
+    if (dialog) return;
+    e.preventDefault();
+    stepBack(e);
     return;
   }
-  const controlFocused = e.target.closest?.('button,summary,a,[role="button"]');
-  if (e.code === "Enter" && !controlFocused && !ignoreGameShortcut(e, dialogOpen)) {
-    e.preventDefault();
-    $("world").focus({preventScroll: true});
-    setKeyboardAim(true);
-    const point = aimPoint(e.shiftKey);
-    if (openPanel === "terrain-panel") {
-      terrainStroke = {point: null};
-      previewMapAction(point);
-    }
-    if (!farmingUI.markCorner(point)) activateMap(point);
-    return;
-  }
-  if (ignoreGameShortcut(e, dialogOpen)) return;
-  if (e.code === 'KeyR' && placing) {
-    e.preventDefault(); rotatePlacement(e.shiftKey ? -1 : 1); return;
-  }
-  if (e.shiftKey) return;
-  const panel = PANEL_SHORTCUTS[e.code], screen = MANAGEMENT_SHORTCUTS[e.code];
-  if ((panel || screen) && s.stage === 'playing') {
-    e.preventDefault();
-    $("world").focus({preventScroll: true});
-    if (panel) setPanel(openPanel === panel ? null : panel);
-    else management.open(screen);
-    if (!document.querySelector('dialog[open]')) $("world").focus({preventScroll: true});
-  } else if (SPEED_SHORTCUTS[e.code]) {
-    e.preventDefault(); setSpeed(SPEED_SHORTCUTS[e.code]);
-  } else if (e.code === 'KeyG') {
-    e.preventDefault(); $("grid").click();
-  } else if (e.code === 'KeyF') {
-    e.preventDefault();
-    if (selected) $("focus-selection").click();
-    else focus(campLocation(s));
-  } else if (e.code === 'Space' && !e.target.closest?.('button,summary,a')) {
-    e.preventDefault(); $("pause").click();
-  }
+  // Never while typing, composing, auto-repeating or holding Ctrl/Cmd/Alt.
+  if (ignoreGameShortcut(e)) return;
+  // A modal isolates the game, except for the key that opened it (or one of its screens).
+  if (dialog && bound.modal !== dialog.id) return;
+  // Enter and Space keep their native meaning on a focused control.
+  if (['activate', 'activate-repeat', 'pause'].includes(bound.id) && e.target.closest?.('button,summary,a,[role="button"]')) return;
+  if (['rotate', 'rotate-back'].includes(bound.id) && !placing) return;
+  e.preventDefault();
+  shortcutActions[bound.id](e);
 });
+// From either search field, Down or Enter steps into the results.
+for (const [field, results] of [['build-search', '#build-list button:not([hidden])'], ['resource-search', '#resource-grid button']])
+  $(field).addEventListener('keydown', e => {
+    if (!['ArrowDown', 'Enter'].includes(e.key) || e.isComposing) return;
+    const first = document.querySelector(results);
+    if (first) { e.preventDefault(); first.focus(); }
+  });
 
 $("town").onclick = () => {
   if (supplyRun(s, $("purchase").value)) {
@@ -1356,8 +1430,8 @@ function updateSpeedButton() {
     : lagging !== null
     ? `Running at about ${actual}. This computer cannot keep up with ${effective}×. Selected speed ${speed}×. Keys 1 to 4 select speed.`
     : automatic
-    ? `Automatic speed 64× while everyone is asleep or away. Selected speed ${speed}×. Keys 1 to 4 select speed.`
-    : `Simulation speed ${speed}×. Keys 1 to 4 select speed.`;
+    ? `Automatic speed 64× while everyone is asleep or away. Selected speed ${speed}×. Keys ${keyLabel('speed')} select speed.`
+    : `Simulation speed ${speed}×. Keys ${keyLabel('speed')} select speed.`;
   if ($("speed").textContent !== label) $("speed").textContent = label;
   if ($("speed").getAttribute('aria-label') !== description) $("speed").setAttribute('aria-label', description);
 }
@@ -1472,6 +1546,7 @@ $("grid").onclick = () => {
 };
 function askReset() {
   $("reset-dialog").showModal();
+  $("keep").focus(); // Enter must not be the destructive choice.
 }
 let savesWasPaused=false;
 installSaveDialog($("saved-villages"), {onSaved:slot=>{activeSaveSlot=slot.id;},current:()=>({mode:s.mode||'story',data:saveWithView(savesWasPaused)}),beforeOpen:()=>{if(placing)cancel();savesWasPaused=paused;paused=true;updatePauseButton();},afterClose:()=>{paused=savesWasPaused;updatePauseButton();}});
@@ -1753,7 +1828,18 @@ $("terrain-undo").onclick = () => {
   $("terrain-undo").disabled = !terrainHistory.length;
   message("Terrain edit undone.");
 };
+// Where focus lands when a panel opens, and where it returns when it closes.
+let panelOpener = null;
+function focusPanel(panel) {
+  const target = panel === 'build' ? document.querySelector('#build-categories [aria-pressed="true"]') || $("build-search")
+    : panel === 'projects-panel' ? document.querySelector('#tasks button:not(:disabled)') || document.querySelector('#projects-panel .panel-close')
+    : panel === 'people' ? document.querySelector('#roster .resident-picker[aria-pressed="true"]')
+    : $("world"); // Terrain tools act on the map, so the map keeps the keys.
+  target?.focus({preventScroll: true});
+}
 function setPanel(panel) {
+  const previousPanel = openPanel;
+  if (panel && !previousPanel) panelOpener = document.activeElement;
   if(openPanel && openPanel!=='people'){paused=trayWasPaused;updatePauseButton();}
   if (placing) cancel();
   if(panel && panel!=='people'){trayWasPaused=paused;paused=true;updatePauseButton();}
@@ -1769,6 +1855,13 @@ function setPanel(panel) {
   document.body.dataset.tray = panel === "build" ? "open" : "closed";
   uiSignature = "";
   renderUI();
+  if (panel && panel !== previousPanel) focusPanel(panel);
+  else if (!panel && previousPanel && previousPanel !== 'people') {
+    // The dialog restores focus itself; trays hand it back to their opener.
+    const active = document.activeElement;
+    if (!active || active === document.body || !active.checkVisibility())
+      (panelOpener?.isConnected && panelOpener.checkVisibility() ? panelOpener : $("world")).focus({preventScroll: true});
+  }
 }
 document.querySelectorAll("[data-panel-toggle]").forEach((button) => {
   button.onclick = () =>
@@ -1883,12 +1976,12 @@ function renderUI() {
           `<button class="resource" data-panel="${panel}" title="Open ${panel} management">${resourceIcon(icon)}<b></b><small>${label}</small><em class="resource-trend"></em></button>`,
       )
       .join("");
+  applyShortcutHints(document);
   illustrateResources($("supplies"));
   counters.forEach((counter, i) => {
     $("supplies").children[i].querySelector("b").textContent =
       s.mode === "sandbox" && i < 3 ? "∞" : counter[1];
     const button=$("supplies").children[i],rate=trends?.[counter[0]]??null;
-    if (i === 0) { button.dataset.shortcut = 'M'; button.setAttribute('aria-keyshortcuts', 'M'); }
     const trend=button.querySelector('.resource-trend');
     const unlimited=s.mode==='sandbox'&&i<3;
     trend.textContent=unlimited?'Unlimited':formatTrend(rate,i===0);
@@ -2054,7 +2147,7 @@ function renderUI() {
       const tabs=document.createElement('nav');tabs.className='resident-tabs';tabs.setAttribute('aria-label','Profile sections');
       for(const label of ['Overview','Story','Skills','Relationships']){
         const tab=document.createElement('button');tab.textContent=label;tab.setAttribute('aria-pressed',String(residentTab===label));
-        tab.onclick=()=>{residentTab=label;uiSignature='';renderUI();};tabs.append(tab);
+        tab.onclick=()=>{residentTab=label;uiSignature='';renderUI();[...$('resident-detail').querySelectorAll('button[aria-pressed]')].find(b=>b.textContent===label)?.focus();};tabs.append(tab);
       }
       detail.append(tabs);
       const paragraph=(text,kind='p')=>{const el=document.createElement(kind);el.textContent=text;detail.append(el);};
@@ -2286,6 +2379,8 @@ $("purchase").onchange = () => {
   renderUI();
 };
 renderUI();
+// The land takes the keys from the first press; panels take focus when opened.
+$("world").focus({preventScroll: true});
 if (s.stage !== "arrival") message(s.log[0] || "Welcome back to your camp.");
 const recordPerformance = performanceReadout(renderer);
 const capybaras = createCapybaraVisitors(scene,s);
@@ -2703,6 +2798,8 @@ function frame(now) {
   recordPerformance(now, visual.time, rendered);
   requestAnimationFrame(frame);
 }
+$("selection").tabIndex = -1;
+$("selection").setAttribute('aria-labelledby', 'selected-name');
 const lenses = installLenses({state:()=>s,camera,world,focus,inspect:id=>{setPanel(null);selected=id;renderUI();}});
 addEventListener("pagehide", persist);
 requestAnimationFrame(frame);
