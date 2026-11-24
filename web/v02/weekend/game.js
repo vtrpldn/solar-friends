@@ -28,7 +28,7 @@ import {constructionSpecText} from './construction-specs.js';
 import {spendableMoney} from './procurement-budget.js';
 import {tradeQuote,transportCost,pendingExports} from './physical-trade.js';
 import {installLenses} from './lenses.js';
-import {simulationSpeed, simulationFrame, catchUpFrame, restoredView, wasteWarnings, operationalStatus, buildingBenefit} from './session-ui.js';
+import {simulationSpeed, simulationFrame, catchUpFrame, createPace, resetPace, laggingSpeed, restoredView, wasteWarnings, operationalStatus, buildingBenefit} from './session-ui.js';
 import {eventHistory, eventTime} from './event-history.js';
 import {PANEL_SHORTCUTS, MANAGEMENT_SHORTCUTS, SPEED_SHORTCUTS, ignoreGameShortcut} from './keyboard-shortcuts.js';
 import {projectLabel, upgradeAction, undoRoadPlan, productionSearchText, productionActivity, residentProject} from './project-ui.js';
@@ -1155,7 +1155,7 @@ $("copy-diagnostics").onclick = async () => {
   try{
     const report=diagnostics.report(JSON.parse(saveWithView()),{
       url:location.origin+location.pathname,mode:s.mode,paused,hidden:document.hidden,
-      selectedSpeed:speed,effectiveSpeed:simulationSpeed(s,speed),accumulator,
+      selectedSpeed:speed,effectiveSpeed:simulationSpeed(s,speed),accumulator,paceRatio:pace.ratio,paceDebt:pace.debt,
       selectedProject:selected,selectedResident:expandedResident,openPanel,placing,
       browser:navigator.userAgent,viewport:{width:innerWidth,height:innerHeight,pixelRatio:devicePixelRatio},
     });
@@ -1326,6 +1326,7 @@ $("uphill").onclick = () => {
   renderUI();
 };
 let catchUpSeconds = 0;
+const pace = createPace();
 function updatePauseButton() {
   $("pause").textContent = paused ? "▶" : "Ⅱ";
   $("pause").setAttribute(
@@ -1337,7 +1338,7 @@ updatePauseButton();
 $("pause").onclick = () => {
   if (roadWasPaused !== null) { cancel(); return; }
   paused = !paused;
-  if (paused) catchUpSeconds = 0;
+  if (paused) { catchUpSeconds = 0; resetPace(pace); }
   updatePauseButton();
 };
 function setSpeed(value) {
@@ -1347,9 +1348,14 @@ function setSpeed(value) {
 function updateSpeedButton() {
   const effective = paused ? speed : simulationSpeed(s, speed);
   const automatic = effective !== speed;
-  const label = !paused && catchUpSeconds >= 1 ? `Catching up · ${Math.ceil(catchUpSeconds)}s` : automatic ? '64× Auto' : `${speed}×`;
+  // Show the rate the village really runs at when this computer cannot hold the selected speed.
+  const lagging = paused ? null : laggingSpeed(pace, effective);
+  const actual = lagging === null ? '' : `${lagging < 10 ? lagging.toFixed(1) : Math.round(lagging)}×`;
+  const label = !paused && catchUpSeconds >= 1 ? `Catching up · ${Math.ceil(catchUpSeconds)}s` : lagging !== null ? `${actual} of ${effective}×` : automatic ? '64× Auto' : `${speed}×`;
   const description = !paused && catchUpSeconds >= 1
     ? 'Catching up on time spent in a hidden tab. Pause to stop here.'
+    : lagging !== null
+    ? `Running at about ${actual}. This computer cannot keep up with ${effective}×. Selected speed ${speed}×. Keys 1 to 4 select speed.`
     : automatic
     ? `Automatic speed 64× while everyone is asleep or away. Selected speed ${speed}×. Keys 1 to 4 select speed.`
     : `Simulation speed ${speed}×. Keys 1 to 4 select speed.`;
@@ -1426,6 +1432,7 @@ $("skip-form").onsubmit = async event => {
     skippingTime = false;
     skipWasPaused = true;
     accumulator = 0;
+    resetPace(pace);
     previousMotion = captureMotion(s);
     previous = performance.now();
     uiSignature = '';
@@ -2340,7 +2347,9 @@ if (dreamPreview) {
 requestSceneRender();
 function frame(now) {
   if (skippingTime) { previous = now; requestAnimationFrame(frame); return; }
-  const dt = Math.max(0, Math.min((now - previous) / 1000, 0.1));
+  // Camera and effects use a clamped step. The simulation is owed the whole interval.
+  const wall = Math.max(0, (now - previous) / 1000);
+  const dt = Math.min(wall, 0.1);
   previous = now;
   if (previewCycle && !document.hidden) {
     // Run a full visual cycle in 48 real seconds without simulating this fixture.
@@ -2354,11 +2363,11 @@ function frame(now) {
       accumulator = result.accumulator;
       previousMotion = captureMotion(s);
     }
-    accumulator = simulationFrame(accumulator, dt, () => simulationSpeed(s, speed), step => {
+    accumulator = simulationFrame(accumulator, wall, () => simulationSpeed(s, speed), step => {
       previousMotion = captureMotion(s);
       tick(s, step);
-    });
-  }
+    }, undefined, pace);
+  } else resetPace(pace);
   diagnostics.observe(s);
   updateSpeedButton();
   const keyboardMoved = navigation.update(dt);
