@@ -52,7 +52,7 @@ import { autoConnectUtilities } from "./auto-utilities.js";
 import { PathQueue } from "./path-queue.js";
 import { carDoor, TRIP_DURATION, DRIVE_DURATION } from "./town-trip.js";
 import { CELL_MIN, CELL_MAX } from "./map-size.js";
-import { foundationPad } from "./elevation.js";
+import { foundationPad, elevationAt } from "./elevation.js";
 import { OPENING_PROJECTS, openingProgress } from "./opening.js";
 import { COMMUNITY } from "../library/community-defs.js";
 import {
@@ -68,6 +68,7 @@ import {
 import { expandMaterials, expandProjects, PROCESSES } from "./catalog-rules.js";
 import { accessRoadAt } from "./road-layout.js";
 import { ARRIVAL_DURATION, ARRIVAL_SPOTS } from "./arrival.js";
+import { CAMP_LOADS, campPoint, campRect, campCells, campSiteCells, campDoor, campApproach, campDropSpot, campEdges } from "./camp.js";
 import { riverBankAt, riverAccess, riverCenter, riverWidth } from "./river-layout.js";
 // A self-contained v2 prototype. Time is measured in active simulation seconds.
 export const CAMPS = [
@@ -1085,6 +1086,14 @@ export function beginArrival(s) {
   s.arrivalElapsed=0;
   return s;
 }
+// Skipping lands on exactly the state the animation ends in: the clock is the
+// only thing the arrival advances.
+export function skipArrival(s) {
+  if (!s.arrivalAnimating) return false;
+  s.arrivalElapsed = ARRIVAL_DURATION;
+  s.arrivalAnimating = false;
+  return true;
+}
 export function createWeekend(landSeed = 0) {
   return {
     version: 2,
@@ -1177,45 +1186,119 @@ export function say(s, text, key = null) {
 export function campLocation(s) {
   return s.camp === "custom" ? s.campSite : CAMPS.find((c) => c.id === s.camp);
 }
-export function campPlacementError(s, x, z) {
+const samePad = (a, b) => !!a && !!b && ["left", "right", "top", "bottom", "height"].every((k) => a[k] === b[k]);
+// The land as it is with no camp on it. While the camp can still be moved its
+// own tents and levelled pad must not count against the next site.
+// Hovering asks about many sites in a row, so the camp-less view keeps one
+// navigation cache for as long as the land itself is unchanged.
+const camplessViews = new WeakMap();
+function camplessState(s) {
+  const pad = canRepitchCamp(s) ? s.unpack.pad : null;
+  const key = JSON.stringify([s.camp, s.campSite, pad, s.stock, s.projects.length, s.terrainPads?.length]);
+  const cached = camplessViews.get(s);
+  if (cached?.key === key && cached.land.projects === s.projects) return cached.land;
+  const land = { ...s, camp: null, campSite: undefined, terrainPads: pad ? s.terrainPads.filter((p) => !samePad(p, pad)) : s.terrainPads };
+  enableFastNavigation(land);
+  camplessViews.set(s, { key, land });
+  return land;
+}
+export function campPlacementError(s, x, z, rotation = 0) {
+  if (!Number.isInteger(x) || !Number.isInteger(z) || ![0, 1, 2, 3].includes(rotation))
+    return "Keep the tents inside the plot.";
+  const site = { x, z, rotation }, rect = campRect(site);
   if (
-    !Number.isInteger(x) ||
-    !Number.isInteger(z) ||
-    x < CELL_MIN + 4 ||
-    z < CELL_MIN + 6 ||
-    x > CELL_MAX - 6 ||
-    z > CELL_MAX - 5
+    rect.x < CELL_MIN + 3 ||
+    rect.z < CELL_MIN + 3 ||
+    rect.x + rect.w - 1 > CELL_MAX - 3 ||
+    rect.z + rect.d - 1 > CELL_MAX - 5
   )
     return "Keep the tents inside the plot.";
+  const land = camplessState(s);
   if (
-    !foundationPad(x - 1, z - 3, 5, 4, s.elevationSeed, s.terrainPads)
+    !foundationPad(rect.x, rect.z, rect.w, rect.d, s.elevationSeed, land.terrainPads)
   )
     return "Leave space between foundations at different heights.";
-  for (let cx = x - 1; cx <= x + 3; cx++)
-    for (let cz = z - 3; cz <= z; cz++) {
-      if (riverBankAt(cx, cz, 2, s.landSeed))
+  const taken = blockedCamp(land);
+  for (const cell of campSiteCells(site)) {
+      if (riverBankAt(cell.x, cell.z, 2, s.landSeed))
         return "Keep the tents back from the river.";
       if (
-        accessRoadAt(cx, cz, 1) ||
-        blockedCamp({ ...s, camp: null }).some((p) => p.x === cx && p.z === cz)
+        accessRoadAt(cell.x, cell.z, 1) ||
+        taken.some((p) => p.x === cell.x && p.z === cell.z)
       )
         return "Leave the road, trees and supplies clear.";
     }
-  if (!route({ ...s, camp: null }, s.stock, { x, z: z + 1 }))
+  if (land.projects.some((p) => !p.felled && !["road", "bridge"].includes(p.key) && (() => {
+    const [w, d] = footprint(p);
+    return rect.x < p.x + w && rect.x + rect.w > p.x && rect.z < p.z + d && rect.z + rect.d > p.z;
+  })()))
+    return "A tree or outcrop stands on this ground.";
+  if (!route(land, s.stock, campApproach(site)))
     return "Choose somewhere reachable from the supplies.";
   return null;
 }
-export function chooseCamp(s, id) {
+const pathMetres = (from, path) => {
+  let metres = 0, at = from;
+  for (const p of path) { metres += Math.hypot(p.x - at.x, p.z - at.z) * 2; at = p; }
+  return Math.round(metres);
+};
+// Plain measurements of a possible camp site; nothing here rates the site.
+export function campSiteFacts(s, x, z, rotation = 0) {
+  const site = { x, z, rotation }, rect = campRect(site), land = camplessState(s);
+  const approach = campApproach(site);
+  const centre = { x: rect.x + (rect.w - 1) / 2, z: rect.z + (rect.d - 1) / 2 };
+  let low = Infinity, high = -Infinity;
+  for (let cx = rect.x - 0.5; cx <= rect.x + rect.w - 0.5; cx++)
+    for (let cz = rect.z - 0.5; cz <= rect.z + rect.d - 0.5; cz++) {
+      const h = elevationAt((cx - 32) * 2, (cz - 32) * 2, s.elevationSeed, land.terrainPads);
+      low = Math.min(low, h); high = Math.max(high, h);
+    }
+  const toCars = route(land, s.stock, approach);
+  const access = toCars && nearestRiverAccess(land, approach);
+  const toRiver = access && route(land, approach, access);
+  const trees = s.projects.filter((p) => !p.felled && PROJECTS[p.key]?.kind === "wild-tree" &&
+    Math.hypot(p.x - centre.x, p.z - centre.z) <= 6 + Math.max(rect.w, rect.d) / 2).length;
+  return {
+    carsMetres: toCars ? pathMetres(s.stock, toCars) : null,
+    carsPath: toCars ? [{ ...s.stock }, ...toCars] : null,
+    riverMetres: toRiver ? pathMetres(approach, toRiver) : null,
+    riverAccess: access || null,
+    fallMetres: Math.round((high - low) * 10) / 10,
+    // Height of the ground once the site has been levelled for the tents.
+    height: foundationPad(rect.x, rect.z, rect.w, rect.d, s.elevationSeed, land.terrainPads)?.height ??
+      elevationAt((centre.x - 32) * 2, (centre.z - 32) * 2, s.elevationSeed, land.terrainPads),
+    trees,
+  };
+}
+// The camp may move until the first load has been set down and nothing else
+// depends on where it stands.
+export function canRepitchCamp(s) {
+  return s.stage === "playing" && s.camp === "custom" && !!s.unpack && !s.unpack.delivered.length &&
+    !s.trip && !s.projects.some((p) => !p.natural) && !s.operations?.some((o) => !o.done);
+}
+export function repitchCamp(s, site) {
+  const rotation = site.rotation || 0;
+  if (!canRepitchCamp(s) || campPlacementError(s, site.x, site.z, rotation)) return false;
+  s.terrainPads = camplessState(s).terrainPads;
+  s.camp = null;
+  delete s.campSite;
+  s.stage = "arrival";
+  return chooseCamp(s, { x: site.x, z: site.z, rotation }, { unpack: true, moved: true });
+}
+// `unpack` leaves the tents and gear in the cars for the residents to carry
+// over. Without it the camp stands complete at once, as it always has.
+export function chooseCamp(s, id, { unpack = false, moved = false } = {}) {
   if (s.stage !== "arrival" || s.arrivalElapsed < ARRIVAL_DURATION)
     return false;
   const custom = typeof id === "object" && id !== null;
-  if (custom && campPlacementError(s, id.x, id.z)) return false;
+  if (custom && campPlacementError(s, id.x, id.z, id.rotation || 0)) return false;
   const c = custom
     ? {
         id: "custom",
         name: "Your camp",
         x: id.x,
         z: id.z,
+        ...(id.rotation ? { rotation: id.rotation } : {}),
         shade: false,
         wet: false,
       }
@@ -1223,15 +1306,22 @@ export function chooseCamp(s, id) {
   if (!c) return false;
   if (custom) s.campSite = c;
   s.camp = c.id;
+  const rect = campRect(c);
   const campPad = foundationPad(
-    c.x - 1,
-    c.z - 3,
-    5,
-    4,
+    rect.x,
+    rect.z,
+    rect.w,
+    rect.d,
     s.elevationSeed,
     s.terrainPads,
   );
   if (campPad) (s.terrainPads ??= []).push(campPad);
+  if (unpack) s.unpack = { delivered: [], pad: campPad ? { ...campPad } : null };
+  else delete s.unpack;
+  for (const r of s.people) {
+    if (!unpack || !moved) delete r.unpack;
+    else { r.walk = []; r.target = null; }
+  }
   // Unpacking tents is an instantaneous setup step; keep the group beside them.
   for (const r of s.people) {
     if (walkSegmentClear(s, r, r)) continue;
@@ -1252,12 +1342,16 @@ export function chooseCamp(s, id) {
     if (spots[0]) Object.assign(r, spots[0]);
   }
   s.stage = "playing";
+  if (moved) {
+    say(s, "The camp moves. Nothing has been set down yet, so everyone simply carries it to the new site.");
+    return true;
+  }
   if (s.opening)
     say(
       s,
       "Iara: We have tents, meals and drinking water. There’s a spare tarp in the supplies if the weather turns.",
     );
-  say(s, `${c.name}: unpack first, then choose what matters most.`);
+  say(s, unpack ? "The site is marked. The tents and camping gear are still in the cars; everyone starts carrying them over." : `${c.name}: unpack first, then choose what matters most.`);
   return true;
 }
 export function finished(s, key) {
@@ -1725,9 +1819,7 @@ function blockedCamp(s) {
     { x: 30, z: 24 - ROAD_SHIFT / 2 },
 
   ];
-  if (c)
-    for (let x = c.x - 1; x <= c.x + 3; x++)
-      for (let z = c.z - 3; z < c.z; z++) cells.push({ x, z });
+  if (c) cells.push(...campCells(c));
   return cells;
 }
 // The lab reuses static obstacle queries between routes. No movement or need rules change.
@@ -2076,10 +2168,49 @@ function go(s, r, target) {
   }
   return false;
 }
+// Carrying the camp over from the cars: one load per walk, set down on the
+// apron in front of the tents. The store of building supplies stays where the
+// cars unloaded it.
+function unpackStep(s, r, dt) {
+  const u = s.unpack;
+  if (!u) { if (r.unpack) delete r.unpack; return false; }
+  if (r.unpack && u.delivered.includes(r.unpack.load)) delete r.unpack;
+  if (!r.unpack) {
+    if (r.energy < 25 || r.cargo || r.operation || r.outsideWork) return false;
+    const held = s.people.filter((p) => p.unpack && !p.sleepUntil && !p.tentPhase && p.action !== "rest").map((p) => p.unpack.load);
+    const load = CAMP_LOADS.findIndex((_, k) => !u.delivered.includes(k) && !held.includes(k));
+    if (load < 0) return false;
+    for (const other of s.people) if (other.unpack?.load === load) delete other.unpack;
+    r.unpack = { load, phase: "fetch", wait: 0 };
+    r.job = null; r.workSpot = null; r.supplyGoal = null;
+    clearDowntime(r);
+  }
+  const job = r.unpack, carrying = job.phase === "carry";
+  const door = carDoor(CAMP_LOADS[job.load].car);
+  const target = carrying
+    ? campDropSpot(campLocation(s), job.load)
+    : { x: door.x, z: door.z + ((job.load >> 1) % 3) * 0.6 };
+  r.action = "unpack";
+  const arrived = go(s, r, target);
+  if (!arrived && r.walk.length) return true;
+  // A boxed-in spot must not stall the whole camp: hand the load on instead.
+  r.action = "unpack";
+  job.wait += dt;
+  if (arrived && job.wait < (carrying ? 0.8 : 1.2)) return true;
+  if (!carrying) { r.unpack = { load: job.load, phase: "carry", wait: 0 }; return true; }
+  u.delivered.push(job.load);
+  delete r.unpack;
+  r.action = "idle";
+  if (CAMP_LOADS[job.load].id === "tent-a") say(s, `${r.name} sets down the first tent and it goes up.`);
+  if (u.delivered.length >= CAMP_LOADS.length) {
+    delete s.unpack;
+    say(s, "The camp is unpacked: two tents, bedrolls, the cooler, water, a camp kitchen and chairs.");
+  }
+  return true;
+}
 const restingPlaces = new WeakMap(),campRestEntrances=new WeakMap();
 export function tentDoor(s, i) {
-  const camp = campLocation(s);
-  return { x: camp.x + (i % 2) * 1.5, z: camp.z };
+  return campDoor(campLocation(s), i);
 }
 export function restingDoor(s, i) {
   const r = s.people[i];
@@ -2144,15 +2275,13 @@ function chooseRestingPlace(s, r, i) {
     const front=tentDoor(s,i);if(route(s,r,front)){campRestEntrances.set(r,front);return;}
     // Older layouts could block the camp doors. Try another edge of the same
     // tents, rather than leaving exhausted residents stuck in a walking loop.
-    const c=campLocation(s),edges=[];
-    for(let dx=-1;dx<=3;dx++)edges.push({x:c.x+dx,z:c.z-4},{x:c.x+dx,z:c.z});
-    for(let dz=-3;dz<0;dz++)edges.push({x:c.x-2,z:c.z+dz},{x:c.x+4,z:c.z+dz});
+    const c=campLocation(s),edges=campEdges(c);
     edges.sort((a,b)=>Math.hypot(a.x-r.x,a.z-r.z)-Math.hypot(b.x-r.x,b.z-r.z));
     campRestEntrances.set(r,edges.find(edge=>route(s,r,edge))||front);
 }
 function restSpot(s, i) {
   const layout = JSON.stringify([
-    s.camp,
+    s.camp, s.campSite,
     s.projects.map((p) => [p.id, p.x, p.z, finished(s, p.key)]),
   ]);
   let cache = restingPlaces.get(s);
@@ -2179,7 +2308,7 @@ function restSpot(s, i) {
   ];
   for (let j = 0; j < offsets.length; j++) {
     const [x, z] = offsets[(i + j) % offsets.length],
-      target = { x: origin.x + x, z: origin.z + z };
+      target = p ? { x: origin.x + x, z: origin.z + z } : campPoint(c, x, z);
     if (
       !occupied(s, target.x, target.z) &&
       !cache.spots.some(
@@ -2614,6 +2743,7 @@ function tickUncached(s, dt) {
       }
       continue;
     }
+    if (s.unpack && unpackStep(s, r, dt)) continue;
     if (
       r.operation &&
       s.operations?.some(
@@ -2917,8 +3047,16 @@ export function restore(text) {
     )
       return null;
     if (s.stage !== 'arrival' && !(s.camp === 'custom'
-      ? s.campSite && [s.campSite.x,s.campSite.z].every(v=>Number.isInteger(v)&&v>=CELL_MIN&&v<=CELL_MAX)
+      ? s.campSite && [s.campSite.x,s.campSite.z].every(v=>Number.isInteger(v)&&v>=CELL_MIN&&v<=CELL_MAX) &&
+        (s.campSite.rotation===undefined || [0,1,2,3].includes(s.campSite.rotation))
       : CAMPS.some(c=>c.id===s.camp))) return null;
+    if (s.unpack !== undefined) {
+      const u = s.unpack, pad = u?.pad;
+      if (!u || s.stage === 'arrival' || !s.camp || !Array.isArray(u.delivered) || u.delivered.length >= CAMP_LOADS.length ||
+        new Set(u.delivered).size !== u.delivered.length || u.delivered.some(k=>!Number.isInteger(k)||k<0||k>=CAMP_LOADS.length) ||
+        (pad !== null && (!pad || typeof pad !== 'object' || ['left','right','top','bottom','height'].some(k=>!Number.isFinite(pad[k])))))
+        return null;
+    }
     if (s.materials)
       for (const id of Object.keys(MATERIALS))
         if (id !== "wood" && s.materials[id] === undefined) s.materials[id] = 0;
@@ -3064,6 +3202,13 @@ export function restore(text) {
       r.operation = null;
       r.linkJob = null;
       r.cargo = false;
+      if (r.unpack !== undefined) {
+        const job = r.unpack;
+        if (!job || !Number.isInteger(job.load) || job.load < 0 || job.load >= CAMP_LOADS.length ||
+          !["fetch", "carry"].includes(job.phase) || !Number.isFinite(job.wait) || job.wait < 0) return null;
+        if (!s.unpack || s.unpack.delivered.includes(job.load) ||
+          s.people.some((other, j) => j < i && other.unpack?.load === job.load)) delete r.unpack;
+      }
       if (
         r.tentPhase &&
         (!["enter", "inside", "exit"].includes(r.tentPhase) ||

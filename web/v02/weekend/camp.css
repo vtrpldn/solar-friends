@@ -1,0 +1,64 @@
+/* Camp-site readout, arrival skip and the move-camp control. */
+#camp-site {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 6;
+  width: 236px;
+  padding: 10px 13px 9px;
+  background: #fff7dff2;
+  border: 2px solid var(--edge);
+  border-radius: 14px;
+  box-shadow: 0 4px 0 #58482d33;
+  pointer-events: none;
+  font-size: 12px;
+  line-height: 1.35;
+}
+#camp-site.blocked {
+  border-color: #b9825d;
+  background: #fbe9d9f2;
+}
+#camp-site strong {
+  display: block;
+  font-size: 13px;
+  letter-spacing: 0.01em;
+}
+#camp-site.blocked strong {
+  color: #9c4a2b;
+}
+#camp-site p {
+  margin: 2px 0 0;
+}
+#camp-site dl {
+  margin: 7px 0 6px;
+  padding-top: 6px;
+  border-top: 1px dashed #c6b88d;
+}
+#camp-site dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+#camp-site dt {
+  color: #6c7560;
+}
+#camp-site dd {
+  margin: 0;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+#camp-site small {
+  color: #6c7560;
+}
+#skip-arrival-button,
+#move-camp {
+  display: block;
+  margin: 0 auto 8px;
+  font-size: 12px;
+  padding: 7px 14px;
+}
+#skip-arrival-button[hidden],
+#move-camp[hidden] {
+  display: none;
+}
