@@ -29,7 +29,7 @@ try{
  await page.locator('[data-panel-toggle="people"]').click();await page.getByRole('button',{name:'View Iara',exact:true}).click();
  const home=page.getByLabel('Assign home for Iara');await home.selectOption(String(s.projects.find(p=>p.key==='house').id));assert.equal(await home.inputValue(),String(s.projects.find(p=>p.key==='house').id));
  await page.getByRole('button',{name:'Close residents',exact:true}).click();
- await page.locator('.view-menu summary').click();await page.locator('#restart').click();
+ await page.locator('.view-menu > summary').click();await page.locator('#restart').click();
  await Promise.all([page.waitForEvent('load'),page.locator('#confirm-reset').click()]);
  const preserved=await page.evaluate(({key,id})=>{const db=JSON.parse(localStorage.getItem(key));return {active:db.active.sandbox,data:db.slots.find(slot=>slot.id===id).data};},{key:SLOT_KEY,id:named.id});
  assert.equal(preserved.active,undefined);const village=JSON.parse(preserved.data);assert.equal(village.landSeed,42);assert(village.projects.some(p=>p.key==='house'));
