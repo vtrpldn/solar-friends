@@ -20,6 +20,7 @@ export const DEV_TOOL_GROUPS = [
       ["Scale · homes", "./?scale-preview=homes", "Every home design"],
       ["Scale · new homes", "./?scale-preview=new-homes", "Library home designs"],
       ["Scale · sites", "./?scale-preview=sites", "Shared sites and facilities"],
+      ["Farm look", "./?scale-preview=farm", "Every bed state, a garden and a greenhouse"],
       ["Frame timings", "./?downtime-preview&performance", "Downtime scene with a performance readout"],
     ],
   },
