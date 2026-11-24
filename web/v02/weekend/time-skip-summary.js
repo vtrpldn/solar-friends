@@ -1,3 +1,4 @@
+import {projectLabel} from './project-names.js';
 import {brl} from './money.js';
 import {DAY, HOUR, weatherAt} from './weather.js';
 import {foodPortions} from './food-storage.js';
@@ -35,7 +36,7 @@ export function snapshotVillage(s) {
     stock: {...(s.materials || {}), wood: s.wood || 0},
     spoiled: {...(s.foodStorage?.spoiled || {})},
     batches: {...(s.productionAccounting?.batches || {})},
-    projects: Object.fromEntries((s.projects || []).map(p => [p.id, {key: p.key, work: p.work || 0, removing: !!p.removal}])),
+    projects: Object.fromEntries((s.projects || []).map(p => [p.id, {key: p.key, number: p.number, work: p.work || 0, removing: !!p.removal}])),
     beds: Object.fromEntries((s.projects || []).flatMap(p => (p.cultivation?.beds || []).map(b =>
       [`${p.id}:${b.id}`, {crop: b.crop, stage: b.stage, harvestedKg: b.exportedKg || 0, expired: harvestExpired(b, s.time)}]))),
     animals: Object.fromEntries((s.projects || []).filter(p => p.animalCare).map(p =>
@@ -66,7 +67,7 @@ export function summarizeSkip(before, s, {
 } = {}) {
   const elapsed = Math.max(0, s.time - before.time), days = elapsed / DAY;
   const signed = n => `${n > 0 ? '+' : n < 0 ? '−' : ''}${money(Math.abs(n))}`;
-  const siteName = (key, id) => projects[key]?.name || key.replaceAll('_', ' ');
+  const siteName = site => projectLabel({key: site.key, number: site.number}, {[site.key]: {name: projects[site.key]?.name || site.key.replaceAll('_', ' ')}});
   const materialName = id => materials[id]?.name || id.replaceAll('_', ' ');
   const sections = [];
   const section = (id, title, rows, extra = {}) => { if (rows.length) sections.push({id, title, rows, ...extra}); };
@@ -119,11 +120,11 @@ export function summarizeSkip(before, s, {
     const was = before.projects[p.id], def = projects[p.key];
     if (!def || !was || !def.work) continue;
     const then = percent(was, p.key), now = percent(p, p.key);
-    if (was.work < def.work && p.work >= def.work) buildRows.push({label: siteName(p.key), value: 'Finished', tone: 'gain', detail: `Was ${then}% built.`, site: p.id});
-    else if (now > then) buildRows.push({label: siteName(p.key), value: `${then}% → ${now}%`, site: p.id});
+    if (was.work < def.work && p.work >= def.work) buildRows.push({label: siteName(p), value: 'Finished', tone: 'gain', detail: `Was ${then}% built.`, site: p.id});
+    else if (now > then) buildRows.push({label: siteName(p), value: `${then}% → ${now}%`, site: p.id});
   }
   const current = new Set((s.projects || []).map(p => String(p.id)));
-  for (const [id, was] of Object.entries(before.projects)) if (!current.has(id)) buildRows.push({label: siteName(was.key), value: was.removing ? 'Removed' : 'No longer on the land'});
+  for (const [id, was] of Object.entries(before.projects)) if (!current.has(id)) buildRows.push({label: siteName(was), value: was.removing ? 'Removed' : 'No longer on the land'});
   section('building', 'Building', buildRows);
 
   // Crops, animals and things residents made.
@@ -145,8 +146,8 @@ export function summarizeSkip(before, s, {
     const care = p.animalCare, was = before.animals[p.id];
     if (!care || !was) continue;
     const collected = Math.floor(care.collected - was.collected + 1e-6), spoiled = Math.floor(care.spoiled - was.spoiled + 1e-6);
-    if (collected > 0) farmRows.push({label: `${siteName(p.key)}: collected`, value: String(collected), tone: 'gain', site: p.id});
-    if (spoiled > 0) farmRows.push({label: `${siteName(p.key)}: spoiled before collection`, value: String(spoiled), tone: 'loss', site: p.id});
+    if (collected > 0) farmRows.push({label: `${siteName(p)}: collected`, value: String(collected), tone: 'gain', site: p.id});
+    if (spoiled > 0) farmRows.push({label: `${siteName(p)}: spoiled before collection`, value: String(spoiled), tone: 'loss', site: p.id});
   }
   for (const [id, n] of Object.entries(s.productionAccounting?.batches || {})) {
     const made = n - (before.batches[id] || 0);
