@@ -243,3 +243,97 @@ export function createJimny(variant = 0) {
   g.add(cover);
   return g;
 }
+
+// A snub-nosed delivery truck with a timber dropside bed and a small
+// cab-side crane, the kind a building-supply yard sends out. The wheels and
+// the crane stay separate so the game can animate them.
+export function createDeliveryTruck() {
+  const g = new THREE.Group(),
+    paint = "#6f8c8c",
+    roof = "#dbd4b6",
+    trim = "#414b40",
+    glass = "#42616a",
+    floor = "#7d6243",
+    board = "#a98658",
+    stripe = "#e6dcbd",
+    steel = "#d3934e";
+  block(g, 1.05, 0.22, 6.2, trim, 0, 0.74, 0);
+  block(g, 2.2, 1.5, 1.9, paint, 0, 1.72, 2.2, 0.12);
+  block(g, 2.1, 0.1, 1.8, roof, 0, 2.5, 2.2, 0.04);
+  block(g, 1.86, 0.6, 0.04, glass, 0, 2.02, 3.155);
+  block(g, 2.26, 0.26, 0.16, trim, 0, 0.86, 3.2, 0.04);
+  block(g, 1.3, 0.38, 0.05, trim, 0, 1.36, 3.155);
+  for (const x of [-0.4, -0.2, 0, 0.2, 0.4])
+    block(g, 0.07, 0.28, 0.03, "#899787", x, 1.36, 3.185);
+  for (const side of [-1, 1]) {
+    block(g, 0.03, 0.56, 0.95, glass, side * 1.105, 2.02, 2.4);
+    block(g, 0.34, 0.1, 1.2, trim, side * 0.98, 1.04, 2.25, 0.03);
+    block(g, 0.16, 0.24, 0.1, paint, side * 1.22, 2.05, 3.0, 0.03);
+    const lamp = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.15, 0.15, 0.07, 12),
+      material("#f1dfb0"),
+    );
+    lamp.rotation.x = Math.PI / 2;
+    lamp.position.set(side * 0.84, 1.36, 3.17);
+    g.add(lamp);
+    block(g, 0.16, 0.2, 0.05, "#ae654e", side * 0.95, 0.98, -3.24);
+    // Dropside boards with the painted pinstripe old truck beds carry.
+    block(g, 0.07, 0.46, 4.3, board, side * 1.15, 1.29, -1.05);
+    block(g, 0.02, 0.05, 4.05, stripe, side * 1.19, 1.3, -1.05);
+    for (const z of [-3.0, -1.7, -0.4, 0.9])
+      block(g, 0.09, 0.56, 0.1, floor, side * 1.16, 1.28, z);
+    for (const [x, z, width] of [
+      [0.98, 2.25, 0.3],
+      [0.95, -1.75, 0.56],
+    ])
+      for (const [radius, extra, color] of [
+        [0.48, 0, trim],
+        [0.24, 0.02, "#b7b8a4"],
+      ]) {
+        const wheel = new THREE.Mesh(
+          new THREE.CylinderGeometry(radius, radius, width + extra, 12),
+          material(color),
+        );
+        wheel.position.set(side * x, 0.48, z);
+        wheel.rotation.z = Math.PI / 2;
+        wheel.castShadow = true;
+        wheel.userData.wheel = true;
+        g.add(wheel);
+      }
+  }
+  block(g, 2.3, 0.12, 4.3, floor, 0, 1.0, -1.05);
+  block(g, 2.3, 0.46, 0.07, board, 0, 1.29, -3.2);
+  block(g, 2.3, 0.95, 0.08, board, 0, 1.52, 1.08);
+  // Crane: a mast behind the cab, a telescoping boom and a cable.
+  block(g, 0.5, 0.16, 0.5, trim, 0, 1.14, 0.72);
+  block(g, 0.26, 1.9, 0.26, steel, 0, 2.0, 0.72, 0.03);
+  const crane = new THREE.Group();
+  crane.name = "crane";
+  crane.position.set(0, 2.98, 0.72);
+  block(crane, 0.3, 0.3, 0.3, trim, 0, 0, 0, 0.04);
+  const boom = block(crane, 0.16, 0.16, 1, steel, 0, 0, 0.5);
+  boom.name = "boom";
+  const cable = block(crane, 0.035, 1, 0.035, trim, 0, -0.5, 1);
+  cable.name = "cable";
+  const hook = block(crane, 0.14, 0.12, 0.14, trim, 0, -1, 1);
+  hook.name = "hook";
+  g.add(crane);
+  return g;
+}
+// One crane-lift of building supplies on a pallet: timber, blocks or sacks.
+export const CARGO_BUNDLE = { width: 0.95, height: 0.56, depth: 0.78 };
+export function createCargoBundle(kind = 0) {
+  const g = new THREE.Group();
+  block(g, 0.95, 0.07, 0.78, "#7d6243", 0, 0.035, 0);
+  if (kind % 3 === 0)
+    for (let tier = 0; tier < 3; tier++)
+      block(g, 0.9, 0.15, 0.72, tier % 2 ? "#bd9458" : "#d2b077", 0, 0.15 + tier * 0.155, 0);
+  else if (kind % 3 === 1)
+    for (let tier = 0; tier < 2; tier++)
+      for (const x of [-0.3, 0, 0.3])
+        block(g, 0.27, 0.22, 0.7, (tier + Math.round(x * 4)) % 2 ? "#b9785a" : "#c58a67", x, 0.185 + tier * 0.23, 0);
+  else
+    for (let tier = 0; tier < 3; tier++)
+      block(g, 0.84 - tier * 0.04, 0.16, 0.66, tier % 2 ? "#d9cfae" : "#cfc39c", tier % 2 ? 0.03 : -0.03, 0.15 + tier * 0.155, 0, 0.05);
+  return g;
+}

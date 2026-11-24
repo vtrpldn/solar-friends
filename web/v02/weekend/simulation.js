@@ -2475,8 +2475,8 @@ function tickUncached(s, dt) {
   }
   coolStoredFood(s,dt);
   foodStorageStep(s,PROCESSES,MATERIALS);
-  if (s.delivery) {
-    const freight = s.delivery;
+  if (s.delivery || s.truckLeaving) {
+    const freight = s.delivery || {};
     deliveryStep(s, dt, MATERIALS, changeMaterial, storedMaterials(s), storageCapacity(s));
     if (!s.delivery && freight.shipments) say(s, "The supplier truck unloaded the ordered building materials.");
   }

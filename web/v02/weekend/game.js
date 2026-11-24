@@ -89,7 +89,9 @@ import { syncInfrastructure, LIQUIDS, hasPowerService, canSwitchBuilding, switch
 import { createAccessRoad } from "./access-road.js";
 import { captureMotion, interpolateMotion } from "./presentation.js";
 import { installCameraNavigation } from "./camera-navigation.js";
-import { createJimny } from "../library/vehicles.js";
+import { createJimny, createDeliveryTruck, createCargoBundle } from "../library/vehicles.js";
+import { truckPose, bundleCount, bedSlot, pileSlot, unloadProgress, craneCycle, CRANE_REST, MAX_BUNDLES, TRUCK_DRIVE } from "./delivery-truck.js";
+import { cargoSize } from "./physical-trade.js";
 import {
   ARRIVAL_DURATION,
   vehiclePose,
@@ -166,8 +168,10 @@ const downtimePreview = new URLSearchParams(location.search).has("downtime-previ
 const needsPreview = new URLSearchParams(location.search).has("needs-preview");
 const utilitiesPreview = needsPreview || downtimePreview || new URLSearchParams(location.search).has(
   "utilities-preview",
-);
+) || new URLSearchParams(location.search).has("truck-preview");
 const restPreview = new URLSearchParams(location.search).has("rest-preview");
+// ?truck-preview loops a full supplier delivery in the unsaved utilities scene.
+const truckPreview = new URLSearchParams(location.search).has("truck-preview");
 const arrivalPreview =
   scalePreview ||
   wildlifePreview ||
@@ -434,6 +438,108 @@ const vehicles = [0, 1].map((index) => {
   scene.add(root);
   return { root, wheels };
 });
+// The supplier truck, its crane, the lifts on its bed and the receiving pile.
+const truck = (() => {
+  const model = createDeliveryTruck(),
+    wheels = model.children.filter((part) => part.userData.wheel),
+    crane = model.getObjectByName("crane");
+  for (const part of [...wheels, crane]) model.remove(part);
+  const root = compactModel(model);
+  root.add(...wheels, crane);
+  root.visible = false;
+  scene.add(root);
+  const bundle = (parent) => {
+    const g = new THREE.Group();
+    g.add(...[0, 1, 2].map((kind) => compactModel(createCargoBundle(kind))));
+    g.visible = false;
+    parent.add(g);
+    return g;
+  };
+  return {
+    root, wheels, crane, shown: 0, fade: 0,
+    boom: crane.getObjectByName("boom"), cable: crane.getObjectByName("cable"), hook: crane.getObjectByName("hook"),
+    cargo: Array.from({ length: MAX_BUNDLES }, () => bundle(root)),
+    pile: Array.from({ length: MAX_BUNDLES }, () => bundle(scene)),
+    pileKinds: Array.from({ length: MAX_BUNDLES }, (_, i) => i % 3),
+  };
+})();
+const showKind = (bundle, kind) => bundle.children.forEach((variant, i) => { variant.visible = i === kind; });
+function placeVehicle(vehicle, pose, halfLength, halfWidth, wheelRadius) {
+  vehicle.root.visible = pose.visible;
+  vehicle.root.position.set(pose.x, elevationAt(pose.x, pose.z, s.elevationSeed, s.terrainPads), pose.z);
+  const forwardX = Math.sin(pose.yaw), forwardZ = Math.cos(pose.yaw);
+  const height = (right, forward) => elevationAt(
+    pose.x + Math.cos(pose.yaw) * right + forwardX * forward,
+    pose.z - Math.sin(pose.yaw) * right + forwardZ * forward,
+    s.elevationSeed, s.terrainPads);
+  vehicle.root.rotation.set(
+    -Math.atan2(height(0, halfLength) - height(0, -halfLength), halfLength * 2),
+    pose.yaw,
+    Math.atan2(height(halfWidth, 0) - height(-halfWidth, 0), halfWidth * 2),
+    "YXZ");
+  for (const wheel of vehicle.wheels) {
+    wheel.rotation.set(0, 0, Math.PI / 2);
+    wheel.rotateY((pose.z + 22) / wheelRadius);
+  }
+}
+// Reserved loads still lying at the receiving pile, waiting for a resident to carry them.
+function waitingLoads() {
+  let count = 0;
+  for (const p of s.projects) {
+    const def = PROJECTS[p.key];
+    if (!def || def.natural || p.natural || p.pendingMaterials || p.removal || !(def.work > 0) || p.work >= def.work) continue;
+    const carried = s.people.reduce((n, r) => n + (r.job === p.id && r.cargo ? r.haulLoads || 1 : 0), 0);
+    count += Math.max(0, requiredLoads(p) - p.delivered - (p.staged || 0) - carried);
+  }
+  return count;
+}
+function updateTruck(lag, seconds) {
+  const d = s.delivery, parked = d && d.left <= 0;
+  const pose = truckPose(d && { left: parked ? 0 : d.left + lag }, s.truckLeaving && { left: s.truckLeaving.left + lag });
+  placeVehicle(truck, pose, 2.3, 1, 0.48);
+  truck.root.updateMatrixWorld();
+  const waiting = waitingLoads();
+  const slotWorld = (index) => {
+    const slot = pileSlot(index);
+    return new THREE.Vector3(slot.x, elevationAt(slot.x, slot.z, s.elevationSeed, s.terrainPads) + slot.y, slot.z);
+  };
+  let hook = CRANE_REST, landed = 0;
+  for (const bundle of truck.cargo) bundle.visible = false;
+  if (d && pose.visible) {
+    const items = {};
+    for (const part of d.shipments || [{ items: { [d.material]: d.quantity } }]) for (const [id, n] of Object.entries(part.items)) items[id] = (items[id] || 0) + n;
+    const count = truckPreview ? MAX_BUNDLES : bundleCount(cargoSize(items).kg);
+    const { done, fraction } = unloadProgress(parked ? Math.max(0, (d.unloaded || 0) - lag) : 0, count);
+    landed = done;
+    for (let i = 0; i < count - done; i++) {
+      const slot = bedSlot(i);
+      truck.cargo[i].position.set(slot.x, slot.y, slot.z);
+      truck.cargo[i].visible = true;
+      showKind(truck.cargo[i], i % 3);
+    }
+    if (parked && done < count) {
+      const index = count - 1 - done, target = (waiting + done) % MAX_BUNDLES;
+      const local = (n) => { const v = truck.root.worldToLocal(slotWorld(waiting + n)); return { x: v.x, y: v.y, z: v.z }; };
+      hook = craneCycle(fraction, bedSlot(index), local(done), done ? { ...local(done - 1) } : undefined);
+      if (hook.carrying) truck.cargo[index].position.set(hook.x, hook.y - 0.56, hook.z);
+      else if (fraction >= 0.9) { truck.cargo[index].visible = false; landed = done + 1; }
+      truck.pileKinds[target] = index % 3;
+    }
+  }
+  const reach = Math.max(0.4, Math.hypot(hook.x, hook.z - 0.72)), drop = Math.max(0.1, 2.98 - hook.y - 0.06);
+  truck.crane.rotation.y = Math.atan2(hook.x, hook.z - 0.72);
+  truck.boom.scale.z = reach; truck.boom.position.z = reach / 2;
+  truck.cable.scale.y = drop; truck.cable.position.set(0, -drop / 2, reach);
+  truck.hook.position.set(0, -drop, reach);
+  // The pile grows as lifts land and shrinks one bundle at a time as it is carried off.
+  const wanted = Math.min(MAX_BUNDLES, waiting + landed);
+  if (wanted >= truck.shown) { truck.shown = wanted; truck.fade = 0; }
+  else if ((truck.fade += seconds) > 0.35) { truck.shown--; truck.fade = 0; }
+  for (const [i, bundle] of truck.pile.entries()) {
+    bundle.visible = i < truck.shown;
+    if (bundle.visible) { bundle.position.copy(slotWorld(i)); showKind(bundle, truck.pileKinds[i]); }
+  }
+}
 const campGroup = new THREE.Group();
 scene.add(campGroup);
 // Tents, gear, the site preview and the arrival skip live in camp-ui.js.
@@ -735,7 +841,7 @@ function focus(c) {
   camera.updateProjectionMatrix();
   controls.update();
 }
-focus(scalePreview ? (new URLSearchParams(location.search).get("scale-preview")==="new-homes"?{x:62,z:53}:new URLSearchParams(location.search).get("scale-preview")==="homes"?{x:63,z:52}:{x:56,z:57}) : s.arrivalAnimating ? s.stock : campLocation(s));
+focus(truckPreview ? s.stock : scalePreview ? (new URLSearchParams(location.search).get("scale-preview")==="new-homes"?{x:62,z:53}:new URLSearchParams(location.search).get("scale-preview")==="homes"?{x:63,z:52}:{x:56,z:57}) : s.arrivalAnimating ? s.stock : campLocation(s));
 if (savedView) {
   camera.position.fromArray(savedView.position);
   controls.target.fromArray(savedView.target);
@@ -2248,7 +2354,7 @@ function renderUI() {
     !!tradeQuote(s,$("purchase").value,MATERIALS,materialCount).error;
   $("sell").title=tradeQuote(s,$("purchase").value,MATERIALS,materialCount).error || "Payment after trading in town; combine batches to share transport costs.";
   const journeys=activeTrips(s).map(trip=>`${s.people.find(r=>r.id===trip.person).name}: ${{boarding:"walking to the car",outbound:"driving to town",away:"trading in town",inbound:"driving home",unloading:"unloading supplies"}[trip.phase]}`);
-  if(s.delivery)journeys.push(`Supplier delivery: ${Math.ceil(s.delivery.left*.45)} game minutes remaining`);
+  if(s.delivery)journeys.push(s.delivery.left>0?`Supplier delivery: ${Math.ceil(s.delivery.left*.45)} game minutes remaining`:`Supplier truck: ${s.delivery.status||'unloading'}`);
   $("trip").textContent = journeys.length?journeys.join(' · '):`Storage: ${Math.round(storedMaterials(s))}/${storageCapacity(s)} units. ${pendingExports(s).length?`Sale batches waiting: ${pendingExports(s).length}. `:''}Available to spend: ${brl(spendableMoney(s))}. ${s.deliveryOnly?'Delivery':'Car trip'}: ${brl(transportCost(s))}.`;
   const equipmentBlocked = protectedEquipment(s,$("purchase").value)>0 && materialCount(s,$("purchase").value)-protectedEquipment(s,$("purchase").value)<1;
   $("sell").disabled ||= equipmentBlocked;
@@ -2531,23 +2637,10 @@ function frame(now) {
       const current=activeTrips(s).find(t=>t.vehicle===index);
       const trip=current&&{...current,left:current.left+(s.time-visual.time)};
       const pose = s.arrivalAnimating ? {...vehiclePose(arrivalTime,index),visible:true} : townCarPose(trip, index);
-      vehicle.root.visible = pose.visible;
-      vehicle.root.position.set(pose.x, elevationAt(pose.x, pose.z, s.elevationSeed, s.terrainPads), pose.z);
-      const forwardX = Math.sin(pose.yaw), forwardZ = Math.cos(pose.yaw);
-      const height = (right, forward) => elevationAt(
-        pose.x + Math.cos(pose.yaw) * right + forwardX * forward,
-        pose.z - Math.sin(pose.yaw) * right + forwardZ * forward,
-        s.elevationSeed, s.terrainPads);
-      vehicle.root.rotation.set(
-        -Math.atan2(height(0, 1.4) - height(0, -1.4), 2.8),
-        pose.yaw,
-        Math.atan2(height(.8, 0) - height(-.8, 0), 1.6),
-        "YXZ");
-      for (const wheel of vehicle.wheels) {
-        wheel.rotation.set(0, 0, Math.PI / 2);
-        wheel.rotateY((pose.z + 22) / 0.41);
-      }
+      placeVehicle(vehicle, pose, 1.4, .8, .41);
     }
+  if (truckPreview && !s.delivery && !s.truckLeaving) s.delivery = { material: "stone", quantity: MATERIALS.stone.quantity, left: TRUCK_DRIVE, duration: 800 };
+  updateTruck(s.time - visual.time, dt);
   for (const [i, r] of s.people.entries()) {
     const g = actors[i];
     if(s.arrivalAnimating){
