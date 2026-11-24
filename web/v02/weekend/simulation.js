@@ -704,6 +704,12 @@ export function utilitySpot(s, node, r) {
     (other.target&&Math.hypot(other.target.x-spot.x,other.target.z-spot.z)<.55)
   ))&&route(s,r,spot));
 }
+function nearestOpenGround(s, p, r) {
+  const spots=[];
+  for(let dz=-6;dz<=6;dz++)for(let dx=-6;dx<=6;dx++)if(dx||dz)spots.push({x:p.x+dx,z:p.z+dz});
+  return spots.sort((a,b)=>Math.hypot(a.x-p.x,a.z-p.z)-Math.hypot(b.x-p.x,b.z-p.z))
+    .find(spot=>!occupied(s,spot.x,spot.z)&&route(s,r,spot));
+}
 function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
   const sys = ensureInfrastructure(s);
   const reserved = (op) =>
@@ -819,6 +825,9 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     }
     if(w.purify) {
       const dest=utilitySpot(s,node,r);
+      // Name the walk: a resident left "idle" here is treated as at leisure
+      // and has this route cleared every tick while construction is pending.
+      r.action='walk';op.status='Walking to purify untreated water';
       if(!dest || !go(s,r,dest))return true;
       r.action='produce';op.status='Purifying untreated water';
       op.work+=dt;r.work+=dt;r.energy=Math.max(0,r.energy-dt*.06);
@@ -890,8 +899,16 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
       op.haulRemaining??={...output};op.returningToSite??=false;
       if(op.returningToSite){
         r.cargo=false;r.action="walk";op.status="Returning for the next production load";
-        const source=utilitySpot(s,node,r);
-        if(!source||!go(s,r,source))return true;
+        // A building may now stand over a felled tree. The cut logs stay
+        // reachable from the nearest open ground beside it.
+        const source=utilitySpot(s,node,r)||(p?.felled&&nearestOpenGround(s,p,r));
+        if(!source){
+          op.status="Waiting for an accessible route to the remaining output";
+          (op.accessRetryAt??={})[r.id]=s.time+30;
+          r.operation=null;r.target=null;r.walk=[];r.action='idle';
+          return false;
+        }
+        if(!go(s,r,source))return true;
         op.returningToSite=false;r.target=null;
       }
     }
@@ -2642,6 +2659,8 @@ function tickUncached(s, dt) {
     if (
       s.stage === "playing" &&
       !r.job &&
+      r.operation == null &&
+      r.linkJob == null &&
       !r.needTask &&
       r.energy >= 25 &&
       [
