@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { createCarport } from "./carport.js";
 import {box,cylinder,beam} from '../workshop/models.js';
 // Construction keeps the completed asset's cell allocation and material scale.
 export function construction(def, stage) {
@@ -10,6 +11,7 @@ export function construction(def, stage) {
     g.add(frame);
     return g;
   }
+  if (def.id==='carport') return createCarport(stage);
   if (def.id==='kitchen') {
     for (const x of [-2,2]) {
       const bay=construction({...def,id:'kitchen-bay',footprint:[2,2]},stage);

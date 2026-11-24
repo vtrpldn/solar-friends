@@ -66,7 +66,7 @@ import {
   validInfrastructure,
 } from "./infrastructure.js";
 import { expandMaterials, expandProjects, PROCESSES } from "./catalog-rules.js";
-import { accessRoadAt } from "./road-layout.js";
+import { accessRoadAt, PARKING_SITE } from "./road-layout.js";
 import { ARRIVAL_DURATION, ARRIVAL_SPOTS } from "./arrival.js";
 import { CAMP_LOADS, campPoint, campRect, campCells, campSiteCells, campDoor, campApproach, campDropSpot, campEdges } from "./camp.js";
 import { riverBankAt, riverAccess, riverCenter, riverWidth } from "./river-layout.js";
@@ -1388,6 +1388,10 @@ export function placementError(s, key, x, z, ignore = null, rotation = 0, detail
   const previous = ignore === null ? null : s.projects.find(p => p.id === ignore);
   const candidate = { ...previous, key, x, z, rotation, ...(key==='field'?{fieldSize:details?.fieldSize||previous?.fieldSize||[2,2]}:{}) };
   const [w, d] = footprint(candidate);
+  // The car shelter has one possible site: the cells the parked cars already fill.
+  const overParking = def.fixedSite;
+  if (overParking && (x !== PARKING_SITE.x || z !== PARKING_SITE.z || rotation !== PARKING_SITE.rotation))
+    return "The car shelter is built over the parking clearing, where the cars stand.";
   if (
     !["road", "bridge", "field"].includes(key) &&
     !foundationPad(x, z, w, d, s.elevationSeed, s.terrainPads)
@@ -1395,7 +1399,7 @@ export function placementError(s, key, x, z, ignore = null, rotation = 0, detail
     return "Leave a little space between foundations at different heights.";
   for (let dx = 0; dx < w; dx++)
     for (let dz = 0; dz < d; dz++)
-      if (key !== "road" && accessRoadAt(x + dx, z + dz, 1))
+      if (key !== "road" && !overParking && accessRoadAt(x + dx, z + dz, 1))
         return "Keep the access road and parking clearing open.";
   for (let dx = 0; dx < w; dx++)
     for (let dz = 0; dz < d; dz++)
@@ -1446,6 +1450,7 @@ export function placementError(s, key, x, z, ignore = null, rotation = 0, detail
     return "Another project occupies that space.";
   if(s.projects.some(p=>p.id!==ignore&&p.removal?.target&&(()=>{const t=p.removal.target,[rw,rd]=footprint({...p,rotation:t.rotation});return x<t.x+rw&&x+w>t.x&&z<t.z+rd&&z+d>t.z;})()))return "That space is reserved for a building relocation.";
   if (
+    !overParking &&
     blockedCamp(s).some(
       (c) => c.x >= x && c.x < x + w && c.z >= z && c.z < z + d,
     )
@@ -1640,6 +1645,7 @@ export function moveProject(s, id, x, z, rotation = undefined) {
   const p = s.projects.find((p) => p.id === id);
   if (!p || p.removal || s.stage !== "playing") return "Cannot move that now.";
   if(p.cultivation)return 'Cultivated soil stays on its land. Designate a new field instead.';
+  if(PROJECTS[p.key].fixedSite)return 'The car shelter stands where the cars park and cannot be moved.';
   if (
     s.people.some(
       (r) => r.restSite === id && (r.tentPhase || r.action === "rest"),

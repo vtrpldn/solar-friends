@@ -101,6 +101,7 @@ export function operationalStatus(project, node, activity) {
   return 'Ready to use';
 }
 export function buildingBenefit(def, processes, community) {
+  if (def.kind === 'carport') return 'Vehicle care: the cars parked beneath weather three times more slowly.';
   if (def.kind === 'home') return `Housing: ${def.beds || 2} resting places for residents.`;
   if (['warehouse','covered-storage'].includes(def.kind)) return 'Storage: adds 600 supply spaces in story mode. Sandbox storage stays unlimited.';
   if (community[def.kind]) return `Recreation: ${community[def.kind].activity.toLowerCase()}. Helps residents recover fun during breaks.`;

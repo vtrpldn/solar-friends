@@ -24,7 +24,8 @@ export function accessGeometry(p,def,size) {
  const shell=completed&&def.kind==='home'&&FUNCTIONAL_PROGRAM[p.key]?.shell;
  let dimensions=propDimensions||(shell&&shell.map(n=>n/METRES_PER_CELL));
  if(dimensions&&(p.rotation||0)%2)dimensions=[dimensions[1],dimensions[0]];
- const open=completed&&['shed','rain-shelter'].includes(def.kind);
+ // A car shelter is posts and a roof over cells walkers already avoid, at every stage.
+ const open=def.kind==='carport'||(completed&&['shed','rain-shelter'].includes(def.kind));
  const offset=shell&&layout?.terrace?-1/METRES_PER_CELL:0;
  const solids=open?[]:[{x:cx+Math.cos(angle)*offset,z:cz-Math.sin(angle)*offset,w:dimensions?.[0]||w,d:dimensions?.[1]||d}];
  const depth=(p.rotation||0)%2?w:d;

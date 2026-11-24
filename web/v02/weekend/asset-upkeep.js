@@ -15,6 +15,10 @@ export const ANIMAL_CARE=ANIMAL_RATIONS;
 export function upkeep(s){return s.upkeep??={version:1,automatic:true,dailyBudget:100,day:-1,used:0,vehicles:[{condition:100,km:0},{condition:100,km:0}],jobs:[]};}
 export function assetCondition(p){return p.condition??100;}
 export function serviceFactor(p){return Math.max(0,Math.min(1,assetCondition(p)/40));}
+// Engineering assumption: sun and rain cost a car parked in the open one service a
+// year; a roof over it cuts that weathering to a third.
+export const VEHICLE_WEATHER_DAYS={open:365,sheltered:1095};
+export function carsSheltered(s,defs){return s.projects.some(p=>defs[p.key]?.kind==='carport'&&!p.removal&&p.work>=defs[p.key].work);}
 export function recordVehicleDistance(s,index,km){const v=upkeep(s).vehicles[index];v.km+=km;v.condition=Math.max(0,v.condition-km*30/5000);}
 export function upkeepStep(s, defs, dt, refreshAsset) {
  if(s.mode==='sandbox')return;const u=upkeep(s),day=Math.floor((540+s.time*.45)/1440);
@@ -45,6 +49,8 @@ export function upkeepStep(s, defs, dt, refreshAsset) {
   }
   if(interval || agingBattery) refreshAsset?.(p);
  }
+ const weatherDays=VEHICLE_WEATHER_DAYS[carsSheltered(s,defs)?'sheltered':'open'];
+ for(const v of u.vehicles)v.condition=Math.max(0,v.condition-dt/GAME_DAY*30/weatherDays);
  for(let i=0;i<2;i++)if(u.automatic&&u.vehicles[i].condition<70&&!u.jobs.some(j=>j.vehicle===i&&!j.done))u.jobs.push({vehicle:i,work:0,partsPaid:false,done:false});
  u.jobs=u.jobs.filter(j=>!j.done&&(j.vehicle!==undefined||s.projects.some(p=>p.id===j.target)));
 }

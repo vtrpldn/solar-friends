@@ -14,3 +14,5 @@ export function accessRoadAt(column, row, margin = 0) {
   const width = z < -MAP_HALF + 12 ? 8.3 : z > PARK_Z - 3 ? 5.6 : 4.5;
   return Math.abs(x - roadCenter(z)) < width + margin;
 }
+// The two parked cars fill these cells; a car shelter can only stand over them.
+export const PARKING_SITE = { x: 31, z: 20 - ROAD_SHIFT / 2, size: [4, 3], rotation: 0 };

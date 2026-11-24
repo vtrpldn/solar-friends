@@ -26,6 +26,8 @@ const recipes = {
     tiles: 6,
   },
   shed: { wood: 8, hardware: 1, tiles: 6 },
+  // Six footed posts and about 40 m² of roof at 2 m² per roofing pack.
+  carport: { stone: 6, wood: 40, hardware: 6, roofing: 21 },
   garden: { earth: 4, wood: 4, seedlings: 2 },
   greenhouse: {
     stone: 4,
@@ -226,12 +228,15 @@ export function expandProjects(projects) {
         : COMMUNITY[model.id]?.category || category,
       repeatable: true,
       description:
-        ({'supply-5':'A hand-saw workbench. Residents turn felled raw wood into timber, then saw timber into planks. They also weave baskets, fit garden-tool handles, make crates, assemble wheelbarrows with purchased parts, and repair shared equipment. No electricity required.', 'well':'A cistern storing 1,000 liters of clean and 1,000 liters of untreated water. Collects rainwater and filters supplied untreated water at 25 per hour while powered.', 'groundwater-well':'A covered groundwater well. Recharges up to 8 untreated water per hour (less in dry conditions), storing 40. Residents can carry it to a cistern for filtering; no electricity needed.',
+        ({carport:'An open timber shelter with a lean-to roof, built over the two parking spaces. Cars left in the open weather in sun and rain and need a service about once a year even when they are not driven; under this roof they weather three times more slowly. It stands where the cars park and cannot be moved.',
+          'supply-5':'A hand-saw workbench. Residents turn felled raw wood into timber, then saw timber into planks. They also weave baskets, fit garden-tool handles, make crates, assemble wheelbarrows with purchased parts, and repair shared equipment. No electricity required.', 'well':'A cistern storing 1,000 liters of clean and 1,000 liters of untreated water. Collects rainwater and filters supplied untreated water at 25 per hour while powered.', 'groundwater-well':'A covered groundwater well. Recharges up to 8 untreated water per hour (less in dry conditions), storing 40. Residents can carry it to a cistern for filtering; no electricity needed.',
           'water-pump':'An electric intake beside a river or within 6 cells of a completed water well. Draws up to 600 liters of untreated water per hour and feeds cisterns and irrigation. Requires power; well recharge can limit supply.'}[model.id]) ||
         COMMUNITY[model.id]?.description ||
         `${model.name}. ${model.size.join(" × ")} cells. Build with physical supplies and resident labor.${["warehouse", "supply-5"].includes(kind) ? " Nearby construction can stage bundled deliveries here to reduce hauling trips." : ""}`,
     };
   }
+  // There is one parking clearing, so one shelter, on one site.
+  Object.assign(projects.carport, { repeatable: false, fixedSite: true });
   for (const model of BUILDING_MODELS) projects[model.id].description += ` ${siteDescription(model.id, model.size)}`;
   for (const key of ["gathering", "water", "shelter", "toilet"]) {
     projects[key].size = BUILDING_MODELS.find(

@@ -117,6 +117,16 @@ export const FUNCTIONAL_PROGRAM = {
     },
     "requirements": "Exterior shell only; no modeled rooms or indoor furniture. Occupancy is a mechanics assumption, not a measured room capacity."
   },
+  "carport": {
+    "site": [
+      4,
+      3
+    ],
+    "shell": null,
+    "targetUsableArea": null,
+    "capacity": {},
+    "requirements": "Open roof on posts over the two parked cars, clear of their doors, with headroom to drive in from the road side."
+  },
   "shed": {
     "site": [
       3,

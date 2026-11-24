@@ -70,7 +70,7 @@ import { roadLine } from "./placement-helpers.js";
 import { prepareHouseLighting, updateHouseLighting, selectBuildingLights } from "./house-lighting.js";
 import { autoConnectUtilities } from "./auto-utilities.js";
 import { townCarPose } from "./town-trip.js";
-import { accessRoadAt } from "./road-layout.js";
+import { accessRoadAt, PARKING_SITE } from "./road-layout.js";
 import { MAP_CELLS, MAP_HALF, CELL_MIN, CELL_MAX } from "./map-size.js";
 import { fitTerrainCamera } from "./camera-depth.js";
 import { elevationAt, foundationPad } from "./elevation.js";
@@ -920,7 +920,18 @@ for (const [key, d] of Object.entries(PROJECTS).sort(([, a], [, b]) => buildOrde
   b.title = `${d.description} ${constructionSpecText(d)}`;
   buildMaterialTooltip.attach(b);
   b.dataset.category = d.category;
-  b.onclick = () => { setPanel(null); startPlacement(key); $("world").focus({preventScroll: true}); };
+  b.onclick = () => {
+    setPanel(null);
+    $("world").focus({preventScroll: true});
+    if (!d.fixedSite) return startPlacement(key);
+    // One possible site, so there is nothing to aim: plan it where the cars stand.
+    const error = plan(s, key, PARKING_SITE.x, PARKING_SITE.z, PARKING_SITE.rotation);
+    message(error || s.log[0]);
+    if (error) return;
+    syncBuildings();
+    persist();
+    renderUI();
+  };
   $("build-list").append(b);
 }
 const ray = new THREE.Raycaster(),
@@ -2310,7 +2321,7 @@ function renderUI() {
   $("selection").hidden = !p || s.stage === "evening";
   if (p) {
     $("selected-name").textContent = projectLabel(p, PROJECTS);
-    $("move").hidden=!!PROJECTS[p.key].natural;
+    $("move").hidden=!!PROJECTS[p.key].natural||!!PROJECTS[p.key].fixedSite;
     for(const mode of ["salvage","demolish"]){$(mode+"-building").hidden=!!PROJECTS[p.key].natural;$(mode+"-building").disabled=!!p.removal;}
     $("copy-building").hidden = PROJECTS[p.key].natural ||
       s.mode !== "sandbox" && !PROJECTS[p.key].repeatable;

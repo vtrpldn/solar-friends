@@ -510,10 +510,11 @@
     ],
     "tests": [
       "upkeep",
-      "animal-care"
+      "animal-care",
+      "car-shelter"
     ],
-    "description": "Age and use reduce condition. Service needs parts, access and labor.",
-    "diagram": "flowchart TD\n Use[Time, active assets and vehicle distance] --> Condition[Condition and age change]\n Condition --> Due{Service or replacement due?}\n Due -->|Yes| Queue[Queue maintenance job]\n Queue --> Gate{Parts, allowance and accessible site?}\n Gate -->|No| Wait[Expose missing parts, budget or access]\n Gate -->|Yes| Work[Resident collects supplies and services asset]\n Work --> Restore[Restore condition or reset replacement age]\n Restore --> Condition\n Condition --> Capacity[Service factor and battery capacity affect utilities]\n Due -->|No| Continue[Continue operation]",
+    "description": "Age and use reduce condition. Service needs parts, access and labor. Cars also weather where they are parked; a car shelter slows that to a third.",
+    "diagram": "flowchart TD\n Use[Time, active assets and vehicle distance] --> Condition[Condition and age change]\n Parked[Cars parked in the open: sun and rain] --> Condition\n Shelter[Car shelter over the parking clearing] -->|Weathering three times slower| Parked\n Condition --> Due{Service or replacement due?}\n Due -->|Yes| Queue[Queue maintenance job]\n Queue --> Gate{Parts, allowance and accessible site?}\n Gate -->|No| Wait[Expose missing parts, budget or access]\n Gate -->|Yes| Work[Resident collects supplies and services asset]\n Work --> Restore[Restore condition or reset replacement age]\n Restore --> Condition\n Condition --> Capacity[Service factor and battery capacity affect utilities]\n Due -->|No| Continue[Continue operation]",
     "boundary": "",
     "tip": "In Finances, set a daily feed and repair shopping budget to cover missing supplies and transport. Zero disables shopping. Residents still need to receive the goods and do the work.",
     "facts": null

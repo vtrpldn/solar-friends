@@ -23,6 +23,7 @@ export const SITE_SPACE = {
   'wayfinding-sign': { object: [1.2, 0.15], note: 'A small sign, with a whole-cell placement reservation. Keep a walking route beside it.' },
   'supply-5': { object: [2, 0.85], note: 'A 2 × 0.85 m bench; the rest of the site is working space. Keep one neighboring side reachable.' },
   'supply-6': { object: [0.78, 0.57], note: 'A compact battery unit with a whole-cell service reservation.' },
+  carport: { object: [7.4, 5.4], label: 'roof', note: 'Open lean-to roof on six posts over both parking spaces; the cars drive in from the road side.' },
   'water-pump': { object: [1.5, 1.4], note: 'Pump pad with service space inside the reserved site.' },
 };
 for (const id of ['home-veranda','home-gable','home-courtyard','adobe-gable','adobe-veranda'])

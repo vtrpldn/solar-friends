@@ -13,7 +13,7 @@ import {supplierAvailable} from './supplier-stock.js';
 import {materialLedger,materialReconciliation} from './material-ledger.js';
 import {marketTerms} from './local-market.js';
 import {inventoryOwnership} from './economy-inventory.js';
-import {upkeep,upkeepText,serviceParts} from "./asset-upkeep.js";
+import {upkeep,upkeepText,serviceParts,carsSheltered} from "./asset-upkeep.js";
 import {biologyText,CROP_CARE,IRRIGATION_POLICIES} from "./biological-production.js";
 import {materialUnitText,quantityText,physicalUnit} from "./material-measures.js";
 import {tripEstimateText,GRID_TARIFF,ECONOMY_REFERENCE} from "./economy-reference.js";
@@ -341,6 +341,7 @@ export function createManagement({
       add('p',`Exports awaiting payment: ${money(queued.reduce((n,o)=>n+o.cents/100,0))} gross in ${queued.length} batches. This is reserved stock, not cash. Resident export trip costs ${money(transportCost({...s,deliveryOnly:false}))}.`);
       add('p',tripEstimateText(s.worldSettings?.town));
       add('h3','Asset upkeep');add('p',upkeepText(s));
+      add('p',`Cars: ${upkeep(s).vehicles.map((v,i)=>`car ${i+1} at ${Math.round(v.condition)}%`).join(', ')}. ${carsSheltered(s,PROJECTS)?'Parked under the car shelter, they weather three times more slowly than in the open.':'Parked in the open, sun and rain wear each one down by about one service a year, on top of driving. A car shelter over the parking clearing cuts that to a third.'}`);
       const service=upkeep(s),toggle=document.createElement('button');toggle.textContent=service.automatic?'Automatic upkeep: on':'Automatic upkeep: off';toggle.setAttribute('aria-pressed',String(service.automatic));toggle.onclick=()=>{service.automatic=!service.automatic;render();};screen.append(toggle);
       const allowance=document.createElement('input');allowance.type='number';allowance.min='0';allowance.max='100000';allowance.value=service.dailyBudget;allowance.setAttribute('aria-label','Daily upkeep materials allowance in reais');allowance.oninput=()=>{service.dailyBudget=Math.max(0,Math.min(100000,Number(allowance.value)||0));};allowance.onchange=()=>render();screen.append(allowance);
       const restockLabel=add('label','Daily feed and repair shopping budget including transport (R$)');

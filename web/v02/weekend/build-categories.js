@@ -7,7 +7,7 @@ export function isBuildOption(key, definition) {
   return !definition.natural && !retired.has(key);
 }
 const groups = {
-  'Homes & shelter': ['home', 'shed', 'rain-shelter', 'canvas-tent-teal', 'canvas-tent-ochre'],
+  'Homes & shelter': ['home', 'shed', 'carport', 'rain-shelter', 'canvas-tent-teal', 'canvas-tent-ochre'],
   'Food & farming': ['kitchen', 'garden', 'greenhouse', 'grove', 'orchard', 'compost', 'seedling-bench'],
   Animals: ['coop', 'goat_pasture', 'apiary'],
   'Water & sanitation': ['water-storage', 'well', 'groundwater-well', 'water-pump', 'rain-barrel', 'wash-station', 'eco_toilet', 'wetland', 'banana_treatment', 'biodigester', 'clothesline'],

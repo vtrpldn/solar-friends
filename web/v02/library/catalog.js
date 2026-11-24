@@ -8,6 +8,7 @@ import { COMMUNITY } from "./community-defs.js";
 import { createCommunity } from "./community.js";
 import { createPickup, createJimny } from "./vehicles.js";
 import { createTent } from "./camping.js";
+import { createCarport } from "./carport.js";
 import { LIVESTOCK } from "./livestock.js";
 import { construction } from "./construction.js";
 import {FUNCTIONAL_LAYOUTS} from './functional-layouts.js';
@@ -2026,6 +2027,7 @@ for(const crop of ['lettuce','beans','tomato','maize','cassava','fodder'])
     // A second smaller shoot changes the silhouette without increasing crop density excessively.
     if(crop==='fodder'){const shoot=plant(crop,stage);shoot.scale.setScalar(.45);shoot.position.x=.25;g.add(shoot);}return g;
   });
+add("carport", "Car shelter", "Buildings", [4, 3], () => createCarport());
 for(const def of ASSETS.filter(a=>a.id==='road'||['Homes','Buildings'].includes(a.category)))
   for(const stage of [0,1]){
     add(`${def.id}-construction-${stage}`,`${def.name} · ${stage?'assembly':'groundwork'}`,"Construction",def.footprint,()=>construction(def,stage));
