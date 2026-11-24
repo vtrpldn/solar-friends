@@ -59,7 +59,7 @@
     "description": "Use the clock to pause or change speed. A running village catches up when you return to its open tab. Pause to stop catch-up at the current moment. When everyone is asleep or away, time can advance at 64×. If this computer cannot hold the selected speed, the speed button shows the rate the village is really running at.",
     "diagram": "flowchart TD\n Mode{Play mode} -->|Story| Story[Finite supplies and biological waiting]\n Mode -->|Sandbox| Sandbox[Replenished supplies and no biological waiting]\n Clock[Clock controls] --> Running{Time running?}\n Running -->|Yes| Calendar[Days, seasons and schedules advance]\n Running -->|No| Hold[Village activity pauses]\n Clock --> Skip{Advance days}\n Skip -->|Normal steps| Calendar\n Skip -->|Fast simulation| Coarse[Larger steps: decisions and totals can differ]\n Coarse --> Calendar\n Calendar --> Weather[Seasonal rain, cloud cover and temperature]\n Weather --> Effects[Water recharge, crop stress and hydration demand]\n Calendar --> Residents[Resident needs, trips and work]",
     "boundary": "Sandbox also skips asset upkeep and tool wear.",
-    "tip": "Advance days runs the same simulation steps while you wait. Fast simulation takes larger steps, so resident decisions and resource totals can differ from normal play. Check upcoming milestones first; supplies, bills, weather and resident needs continue. Stop here keeps progress and pauses the village.",
+    "tip": "Advance days runs the same simulation steps while you wait. Fast simulation takes larger steps, so resident decisions and resource totals can differ from normal play. Check upcoming milestones first; supplies, bills, weather and resident needs continue. Stop here keeps progress and pauses the village. When the days end, a recap lists what changed in savings, food, water and building work.",
     "facts": null
   },
   {
@@ -163,7 +163,7 @@
     "description": "Residents carry committed materials and assemble buildings.",
     "diagram": "flowchart TD\n Blueprint[Choose valid blueprint and rotation] --> Bill[Capture material bill and work requirement]\n Bill --> Stock{Required supplies available?}\n Stock -->|No| Purchase[Purchase or produce missing supplies]\n Purchase --> Stock\n Stock -->|Yes| Reserve[Commit materials to project]\n Reserve --> Haul[Residents carry loads via stores or depot]\n Haul --> Stage[Materials staged at site]\n Stage --> Assemble[Accessible crew performs assembly]\n Assemble --> More{Materials or work remaining?}\n More -->|Yes| Haul\n More -->|No| Complete[Completed building joins available services]\n Needs[Needs and equipment] --> Assemble",
     "boundary": "Money pays for supplies and transport; resident construction labor is not a wage charge.",
-    "tip": "Build only what your stores and carrying capacity can support.",
+    "tip": "Build only what your stores and carrying capacity can support. A planned site is marked on the ground with an outline, corner stakes and a faint shape of the building until work begins.",
     "facts": null
   },
   {
