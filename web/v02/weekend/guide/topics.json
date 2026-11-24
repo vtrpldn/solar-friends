@@ -45,7 +45,8 @@
       "weather.js",
       "environment-info.js",
       "time-skip.js",
-      "time-skip-milestones.js"
+      "time-skip-milestones.js",
+      "session-ui.js"
     ],
     "tests": [
       "modes",
@@ -55,10 +56,10 @@
       "time-skip",
       "time-skip-milestones"
     ],
-    "description": "Use the clock to pause or change speed. A running village catches up when you return to its open tab. Pause to stop catch-up at the current moment. When everyone is asleep or away, time can advance at 64×.",
-    "diagram": "flowchart TD\n Mode{Play mode} -->|Story| Story[Finite supplies and biological waiting]\n Mode -->|Sandbox| Sandbox[Replenished supplies and no biological waiting]\n Clock[Clock controls] --> Running{Time running?}\n Running -->|Yes| Calendar[Days, seasons and schedules advance]\n Running -->|No| Hold[Village activity pauses]\n Calendar --> Weather[Seasonal rain, cloud cover and temperature]\n Weather --> Effects[Water recharge, crop stress and hydration demand]\n Calendar --> Residents[Resident needs, trips and work]",
+    "description": "Use the clock to pause or change speed. A running village catches up when you return to its open tab. Pause to stop catch-up at the current moment. When everyone is asleep or away, time can advance at 64×. If this computer cannot hold the selected speed, the speed button shows the rate the village is really running at.",
+    "diagram": "flowchart TD\n Mode{Play mode} -->|Story| Story[Finite supplies and biological waiting]\n Mode -->|Sandbox| Sandbox[Replenished supplies and no biological waiting]\n Clock[Clock controls] --> Running{Time running?}\n Running -->|Yes| Calendar[Days, seasons and schedules advance]\n Running -->|No| Hold[Village activity pauses]\n Clock --> Skip{Advance days}\n Skip -->|Normal steps| Calendar\n Skip -->|Fast simulation| Coarse[Larger steps: decisions and totals can differ]\n Coarse --> Calendar\n Calendar --> Weather[Seasonal rain, cloud cover and temperature]\n Weather --> Effects[Water recharge, crop stress and hydration demand]\n Calendar --> Residents[Resident needs, trips and work]",
     "boundary": "Sandbox also skips asset upkeep and tool wear.",
-    "tip": "Advance days runs the same simulation steps while you wait. Check upcoming milestones first; supplies, bills, weather and resident needs continue. Stop here keeps progress and pauses the village.",
+    "tip": "Advance days runs the same simulation steps while you wait. Fast simulation takes larger steps, so resident decisions and resource totals can differ from normal play. Check upcoming milestones first; supplies, bills, weather and resident needs continue. Stop here keeps progress and pauses the village.",
     "facts": null
   },
   {
