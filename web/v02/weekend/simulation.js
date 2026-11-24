@@ -1262,6 +1262,9 @@ export function campSiteFacts(s, x, z, rotation = 0) {
     riverMetres: toRiver ? pathMetres(approach, toRiver) : null,
     riverAccess: access || null,
     fallMetres: Math.round((high - low) * 10) / 10,
+    // Height of the ground once the site has been levelled for the tents.
+    height: foundationPad(rect.x, rect.z, rect.w, rect.d, s.elevationSeed, land.terrainPads)?.height ??
+      elevationAt((centre.x - 32) * 2, (centre.z - 32) * 2, s.elevationSeed, land.terrainPads),
     trees,
   };
 }

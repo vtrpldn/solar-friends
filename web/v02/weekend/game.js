@@ -94,7 +94,8 @@ import {
 } from "./arrival.js";
 import { createRiver } from "./river.js";
 import { riverBankAt, riverAccess } from "./river-layout.js";
-import { createTent } from "../library/camping.js";
+import { installCampUI } from "./camp-ui.js";
+import { campFacing } from "./camp.js";
 import { performanceReadout } from "./performance.js";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
@@ -425,21 +426,10 @@ const vehicles = [0, 1].map((index) => {
 });
 const campGroup = new THREE.Group();
 scene.add(campGroup);
-let campDrawn = null;
+// Tents, gear, the site preview and the arrival skip live in camp-ui.js.
+let campUI;
 function drawCamp() {
-  if (campDrawn === s.camp) return;
-  campDrawn = s.camp;
-  campGroup.clear();
-  if (!s.camp) return;
-  const c = campLocation(s);
-  campGroup.position.copy(world(c.x, c.z));
-  for (let i = 0; i < 2; i++) {
-    const model = createTent(i);
-    paintVillageModel(model);
-    const tent = compactModel(model);
-    tent.position.set(i * 3, 0, -3);
-    campGroup.add(tent);
-  }
+  if (campUI.update(performance.now())) requestSceneRender();
 }
 const border = new THREE.LineLoop(
   new THREE.BufferGeometry().setFromPoints(
@@ -928,6 +918,11 @@ let farmingUI=installFarmingUI({state:()=>s,selected:()=>selected,scene,hit,cont
   changed:()=>{syncBuildings();persist();renderUI();},message,
   begin:()=>{placing=null;setPanel(null);ghost.visible=false;},
 });
+campUI = installCampUI({state:()=>s,scene,campGroup,actors,world,hit,camera,message,persist,
+  finish:model=>{paintVillageModel(model);return compactModel(model);},
+  placing:()=>!!placing||!!openPanel||farmingUI.placingField(),
+  refresh:()=>{uiSignature='';renderUI();},
+});
 $("world").addEventListener("pointerdown", (e) => {
   down = { x: e.clientX, y: e.clientY };
 });
@@ -952,8 +947,8 @@ function previewMapAction(e) {
     }
     return;
   }
-  const pitching =
-    s.stage === "arrival" && s.arrivalElapsed >= ARRIVAL_DURATION;
+  if (campUI.hover(e)) return;
+  const pitching = false;
   if (!placing && !pitching) return;
   const p = hit(e);
   if (!p) {
@@ -971,8 +966,7 @@ function previewMapAction(e) {
 }
 function updatePlacementPreview() {
   if (!cell) return;
-  const pitching =
-    !placing && s.stage === "arrival" && s.arrivalElapsed >= ARRIVAL_DURATION;
+  const pitching = false;
   if (!placing && !pitching) return;
   const size = pitching
     ? [5, 4]
@@ -1055,6 +1049,7 @@ $("world").addEventListener("click", (e) => {
   activateMap(e);
 });
 function activateMap(e) {
+  if (campUI.click(e)) return;
   const p = hit(e);
   if (!p) return;
   const x = Math.round(p.x / 2 + 32),
@@ -1072,20 +1067,6 @@ function activateMap(e) {
       message("Terrain updated · no materials, money or resident work used.");
     } else message("No change here. Try open ground away from protected areas.");
     $("terrain-level").textContent = flattenLevel === null ? "Flatten uses the height of your first click." : `Flatten height: ${flattenLevel.toFixed(1)} m`;
-    return;
-  }
-  if (s.stage === "arrival" && s.arrivalElapsed >= ARRIVAL_DURATION) {
-    const error = campPlacementError(s, x, z);
-    if (error) {
-      message(error);
-      return;
-    }
-    chooseCamp(s, { x, z });
-    message("Camp is ready. Choose what your community needs first.");
-    ghost.visible = false;
-    focus(campLocation(s));
-    persist();
-    renderUI();
     return;
   }
   if (placing) {
@@ -1488,6 +1469,7 @@ $("confirm-reset").onclick = () => {
 };
 const actionText = {
   idle: "Taking in the land",
+  unpack: "Carrying the camp over from the cars",
   collect: "Collecting materials",
   carry: "Carrying supplies",
   walk: "Walking to the project",
@@ -1815,7 +1797,7 @@ function renderUI() {
   if (active && arrivalMessageShown) message("");
   arrivalMessageShown = !active;
   if(s.arrivalAnimating) message("Our friends are arriving…");
-  else if(s.stage === "arrival") message("Click clear ground to pitch your tents.");
+  else if(s.stage === "arrival") message("Move over the land to try a camp site. R turns it; click to pitch the tents.");
   $("auto-buy").hidden=s.mode==='sandbox';
   $("auto-buy").textContent=`Auto-buy: ${s.autoBuy===false?'off':'on'}`;
   $("auto-buy").setAttribute('aria-pressed',String(s.autoBuy!==false));
@@ -2449,7 +2431,7 @@ function frame(now) {
       const travel = isHome ? (recessed ? 1.15 : 0.75) : 1.35;
       // Enter at the authored door, including recessed house verandas.
       g.visible = inward < (isHome ? 0.82 : 0.64);
-      const facing = ((restingBuilding?.rotation || 0) * Math.PI) / 2;
+      const facing = restingBuilding ? ((restingBuilding.rotation || 0) * Math.PI) / 2 : campFacing(campLocation(s));
       g.position.copy(
         world(
           door.x - Math.sin(facing) * inward * travel,
@@ -2590,7 +2572,7 @@ function frame(now) {
       }
     }
     const motion = r.walk.length
-      ? r.cargo
+      ? r.cargo || r.unpack?.phase === "carry"
         ? "carry-walk"
         : "walk"
       : visit?.animation
