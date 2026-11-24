@@ -1,11 +1,11 @@
 import {reserveSupplier,purchaseCategory} from './supplier-stock.js';
-import {blueprintManifest,fitsCargo,receiveBlueprintShipment,transportCost} from './physical-trade.js';
+import {blueprintManifest,fitsCargo,receiveBlueprintShipment,transportCost,TRUCK_LIMITS} from './physical-trade.js';
 import {uncollectedProjects} from './trip-state.js';
 import {transact} from './finances.js';
 import {spendableMoney} from './procurement-budget.js';
 import {freshLots,FOOD_DAYS} from './food-storage.js';
 import {tripEstimate} from './economy-reference.js';
-export const DELIVERY_LIMITS={cargoKg:5000,cargoM3:12};
+export const DELIVERY_LIMITS=TRUCK_LIMITS;
 export function orderDelivery(s,id,project,materials,stored,capacity){
  if(s.delivery||s.stage!=='playing')return false;
  const item=materials[id],shipments=project?blueprintManifest(uncollectedProjects(s),DELIVERY_LIMITS):null;

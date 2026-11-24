@@ -28,7 +28,7 @@ import {refreshSandboxFood,foodChange,takeFoodLots,freshLots,foodStorageStep,val
 import {recordProduction,validProductionAccounting} from './production-accounting.js';
 import {applyConstructionSpecs,migrateConstructionLabor,CONSTRUCTION_LABOR_VERSION} from './construction-specs.js';
 import {collectionBudget,spendableMoney} from './procurement-budget.js';
-import {returnPickup,pickupFare,reserveExport,pendingExports,loadExports,settleExports,validTrade,transportCost,fitsCargo,blueprintManifest,receiveBlueprintShipment} from './physical-trade.js';
+import {returnPickup,pickupFare,reserveExport,pendingExports,loadExports,settleExports,validTrade,transportCost,fitsCargo,blueprintManifest,receiveBlueprintShipment,projectFreight} from './physical-trade.js';
 import {recordEvent} from './event-history.js';
 import { unrotatedSiteSize, validSiteVersion } from './site-space.js';
 import { accessGeometry, insideSolid, segmentHitsSolid, BODY_RADIUS } from './building-access.js';
@@ -1059,13 +1059,19 @@ export function blueprintPurchase(s, key, count = 1) {
   if(supplierIssue)return {items,cost,transport:0,error:supplierIssue};
   cost = Math.ceil(cost * 100) / 100;
   const budget=collectionBudget(s,items), transport=budget.cost, reserve=s.expansionReserve??0;
-  return {items, cost, transport, error: cost > 0 && cost + transport + reserve > s.money ? `Not enough savings: the missing materials cost ${brl(cost)}, plus ${brl(transport)} for ${budget.trips} ${budget.trips===1?'trip':'trips'} to collect them${reserve?`, and ${brl(reserve)} is kept in reserve`:''}.` : ""};
+  return {items, cost, transport, error: cost > 0 && cost + transport + reserve > s.money ? `Not enough savings: the missing materials cost ${brl(cost)}, plus ${brl(transport)} for ${budget.truck?'supplier truck delivery':`${budget.trips} ${budget.trips===1?'trip':'trips'} to collect them`}${reserve?`, and ${brl(reserve)} is kept in reserve`:''}.` : ""};
 }
 function dispatchBlueprintPickup(s) {
   if(!dispatchReady(s))return;
-  if(s.deliveryOnly){const pending=uncollectedProjects(s);if(pending.length)orderDelivery(s,Object.keys(pending[0].pendingMaterials)[0],pending[0],MATERIALS,storedMaterials(s),storageCapacity(s));return;}
-  for(const trip of activeTrips(s))if(trip.phase==='boarding'&&trip.shipments){
+  if(!s.deliveryOnly)for(const trip of activeTrips(s))if(trip.phase==='boarding'&&trip.shipments){
     trip.shipments=blueprintManifest(uncollectedProjects(s,trip));trip.projects=trip.shipments.map(p=>p.project);
+  }
+  // Whatever no boarding car will carry goes by truck when it exceeds one car load.
+  const pending=uncollectedProjects(s);
+  if(pending.length&&projectFreight(s,pending).truck){
+    if(orderDelivery(s,Object.keys(pending[0].pendingMaterials)[0],pending[0],MATERIALS,storedMaterials(s),storageCapacity(s))&&!s.deliveryOnly)
+      say(s,`A supplier truck will deliver the materials for ${s.delivery.shipments.length===1?projectLabel(s.projects.find(p=>p.id===s.delivery.shipments[0].project),PROJECTS):`${s.delivery.shipments.length} projects`}. The order is too large for one car load.`);
+    return;
   }
   if(activeTrips(s).length>=2)return;
   const shipments=blueprintManifest(uncollectedProjects(s));if(!shipments.length)return;
@@ -2469,7 +2475,11 @@ function tickUncached(s, dt) {
   }
   coolStoredFood(s,dt);
   foodStorageStep(s,PROCESSES,MATERIALS);
-  if (s.delivery) deliveryStep(s, dt, MATERIALS, changeMaterial, storedMaterials(s), storageCapacity(s));
+  if (s.delivery) {
+    const freight = s.delivery;
+    deliveryStep(s, dt, MATERIALS, changeMaterial, storedMaterials(s), storageCapacity(s));
+    if (!s.delivery && freight.shipments) say(s, "The supplier truck unloaded the ordered building materials.");
+  }
   if(s.time>=(s.nextAutomaticSale||0)){automaticSales(s);s.nextAutomaticSale=s.time+1;}
   arrangePlantingSeeds(s);
   const checkSupplies = s.time >= (s.nextFoodCheck || 0);

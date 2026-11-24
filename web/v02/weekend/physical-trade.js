@@ -9,6 +9,13 @@ export const TRADE_RULES={version:1,cargoKg:350,cargoM3:1.2,batchesPerBuyerDay:8
 export {materialMeasure as cargoUnit} from './material-measures.js';
 export function cargoSize(items){return Object.entries(items).reduce((a,[id,n])=>{const u=cargoUnit(id);a.kg+=n*u.kg;a.m3+=n*u.m3;return a;},{kg:0,m3:0});}
 export function fitsCargo(items,limits=TRADE_RULES){const c=cargoSize(items);return c.kg<=limits.cargoKg+1e-8&&c.m3<=limits.cargoM3+1e-8;}
+export const TRUCK_LIMITS={cargoKg:5000,cargoM3:12};
+// Project orders too large for one car load come on a supplier truck instead of repeated resident trips.
+export function projectFreight(s,projects){
+ const items={};for(const p of projects)for(const [id,n]of Object.entries(p.pendingMaterials||{}))if(n>0)items[id]=(items[id]||0)+n;
+ const truck=!!s.deliveryOnly||!fitsCargo(items);
+ return {truck,limits:truck?TRUCK_LIMITS:TRADE_RULES,fare:transportCost({worldSettings:s.worldSettings,deliveryOnly:truck})};
+}
 export function tradeDay(s){return Math.floor((540+s.time*.45)/1440);}
 export function transportCost(s){const q=tripEstimate(s.worldSettings?.town);return s.deliveryOnly?Math.round((35+q.km*.8)*100)/100:q.cost;}
 export function ensureTrade(s){return s.trade??={version:1,nextId:1,orders:[],market:{},dispatchAt:0};}
