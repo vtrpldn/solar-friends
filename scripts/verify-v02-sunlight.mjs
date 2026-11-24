@@ -33,11 +33,23 @@ const value = (hour, key) => {
   const {from, to, blend} = artAt(hour);
   return from[key] + (to[key] - from[key]) * blend;
 };
-for (const preset of Object.values(DREAM_LIGHTS)) assert.equal(artAt(preset.hour).from, preset);
-for (const hour of [0, ...Object.values(DREAM_LIGHTS).map(preset => preset.hour)]) {
+// The day cycle runs dawn -> opal -> blue. "Clear morning" is a fixed light for
+// the lived-in preview only: it must never become a stop of the daily cycle.
+const {clear, ...cyclePresets} = DREAM_LIGHTS;
+assert.deepEqual(Object.keys(cyclePresets), ['dawn', 'opal', 'blue']);
+for (const preset of Object.values(cyclePresets)) assert.equal(artAt(preset.hour).from, preset);
+assert.equal(clear.label, 'Clear morning');
+assert.equal(artAt(clear.hour).from, DREAM_LIGHTS.dawn);
+assert.equal(artAt(clear.hour).to, DREAM_LIGHTS.opal);
+for (let hour = 0; hour < 24; hour += .25) {
+  const {from, to, blend} = artAt(hour);
+  assert(from !== clear && to !== clear, `Preview-only light in the day cycle at ${hour}`);
+  assert(blend >= 0 && blend <= 1);
+}
+for (const hour of [0, ...Object.values(cyclePresets).map(preset => preset.hour)]) {
   for (const key of ['ambient', 'direct', 'shadow', 'bloom', 'paint', 'lamps'])
     assert(Math.abs(value(hour - .001, key) - value(hour + .001, key)) < .00001, key);
 }
 assert(value(13, 'lamps') < value(16, 'lamps'));
 assert(value(16, 'lamps') < value(19.5, 'lamps'));
-console.log('PASS: dream lighting and window glow blend across every preset and midnight.');
+console.log('PASS: dream lighting and window glow blend across every cycle preset and midnight; the clear-morning preview light stays out of the cycle.');

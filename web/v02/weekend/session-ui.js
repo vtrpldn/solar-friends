@@ -1,5 +1,4 @@
-// Keep fast-forward responsive even when routing is expensive. Slow simulated
-// time under load instead of accumulating a catch-up spiral on the UI thread.
+// Everyone asleep or away: nothing to watch, so run at 64× until someone is back.
 export function simulationSpeed(state, preferred) {
   if (state.stage !== 'playing' || !state.people.length) return preferred;
   const trips = [state.trip, state.secondTrip].filter(Boolean);
@@ -10,19 +9,59 @@ export function simulationSpeed(state, preferred) {
   );
   return unavailable ? 64 : preferred;
 }
-export function simulationFrame(accumulator, elapsed, speed, step, now = () => performance.now()) {
-  let remaining = Math.min(elapsed, .1);
+// Wall time the visible loop still owes the simulation. Slow frames and steps
+// that outrun their budget carry over here instead of being dropped, so game
+// time follows the labelled speed. `limit` bounds the carry-over: a long stall
+// or a machine that cannot keep up loses the excess instead of jumping ahead
+// or spiralling. `ratio` is the share of the last second of wall time that was
+// simulated, and `slow` counts consecutive seconds that fell short.
+export function createPace(limit = 1) {
+  return {debt: 0, limit, ratio: 1, slow: 0, wall: 0, spent: 0};
+}
+export function resetPace(pace) {
+  pace.debt = pace.wall = pace.spent = pace.slow = 0;
+  pace.ratio = 1;
+}
+// Without `pace`, a frame simulates at most 100ms and drops what it cannot
+// finish in 8ms. With `pace`, unspent wall time is kept as bounded debt and the
+// step budget grows with the frame interval (a quarter of it, 8-30ms), which
+// leaves the rest of every frame for input and paint however slow rendering is.
+export function simulationFrame(accumulator, elapsed, speed, step, now = () => performance.now(), pace = null) {
+  elapsed = Math.max(0, elapsed);
+  let remaining = pace ? Math.min(pace.debt + elapsed, pace.limit) : Math.min(elapsed, .1);
+  const owed = remaining;
+  const budget = pace ? Math.min(30, Math.max(8, elapsed * 250)) : 8;
   const started = now();
   while (remaining > 1e-9) {
     const currentSpeed = typeof speed === 'function' ? speed() : speed;
     const needed = (.1 - accumulator) / currentSpeed;
-    if (remaining + 1e-12 < needed) return accumulator + remaining * currentSpeed;
+    if (remaining + 1e-12 < needed) {
+      accumulator += remaining * currentSpeed;
+      remaining = 0;
+      break;
+    }
     remaining = Math.max(0, remaining - needed);
     accumulator = 0;
     step(.1);
-    if (now() - started >= 8) return 0;
+    if (now() - started >= budget) break;
+  }
+  if (pace) {
+    pace.debt = remaining;
+    // One stalled frame counts for at most `limit`, so it cannot dominate the meter.
+    pace.wall += Math.min(elapsed, pace.limit);
+    pace.spent += owed - remaining;
+    if (pace.wall >= 1) {
+      pace.ratio = pace.spent / pace.wall;
+      pace.slow = pace.ratio < .9 ? pace.slow + 1 : 0;
+      pace.wall = pace.spent = 0;
+    }
   }
   return accumulator;
+}
+// The speed the simulation is really achieving, or null while it keeps up.
+// A single hitch is repaid from the debt; only a sustained shortfall is reported.
+export function laggingSpeed(pace, labelled) {
+  return pace.slow >= 2 ? Math.max(.1, labelled * pace.ratio) : null;
 }
 // Spend hidden wall time in fixed simulation steps, using the same automatic
 // sleep/away speed as visible play. Leave enough frame time for input and paint.
