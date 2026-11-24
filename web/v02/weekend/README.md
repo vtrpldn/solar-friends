@@ -1,6 +1,6 @@
 # Solar Friends v2 gameplay
 
-Updated 2026-11-09. Public and local route: `/v2/`. The source folder remains `web/v02/weekend/`; v1 code and saves are separate.
+Updated 2026-11-09. Public and local route: `/v2/`. The source folder remains `web/v02/weekend/`.
 
 ## Why
 

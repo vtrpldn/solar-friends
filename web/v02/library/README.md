@@ -8,7 +8,7 @@ The approved house establishes a repeatable material and modeling language. This
 
 Day/night images use the same geometry with scene lighting. Portrait, idle and activity atlas entries refer to the same authored resident. The collection cards and sprite proofs remain static art studies. The land preview now has articulated resident motion and prop interaction rehearsals; it does not recreate v1 simulation or production behavior. Residents retain the approved scale-study body as requested; they are not a character creator. Species are stylized representations, not botanical models.
 
-Archived references, rejected images and earlier prototypes are deliberately excluded. All v1 source files and the original five model recipes remain intact. House study 03 is unchanged. New housing uses authored structural variations; randomized accessories remain deferred.
+Archived references, rejected images and earlier prototypes are deliberately excluded. The original five model recipes remain intact. House study 03 is unchanged. New housing uses authored structural variations; randomized accessories remain deferred.
 
 ## Review
 

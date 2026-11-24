@@ -4,7 +4,7 @@ Updated 2026-11-17.
 
 ## Why
 
-Separate current gameplay and operational guidance from historical plans and dated evidence. v1 is preserved; v2 is the active implementation. Source directory names still use `v02`, but browser routes use `/v2/`.
+Separate current gameplay and operational guidance from historical plans and dated evidence. v2 is the only implementation; the original v1 exploration and its plans were removed from the repository and remain in git history. Source directory names still use `v02`, but browser routes use `/v2/`.
 
 ## Current guides
 
@@ -42,7 +42,5 @@ Separate current gameplay and operational guidance from historical plans and dat
 Evidence is tied to the documented build and scenario. Historical successes do not establish current universal coverage or player enjoyment.
 
 ## Historical reference
-
-[V1.md](../V1.md) preserves the former root README. Root `*-plan.md` files, `plan.md`, `playtest.md` and `IDEAS.md` describe the v1 exploration, its plans or deferred work. The map/scenario builder and resident-creator planning history must not be interpreted as current v2 feature commitments; the resident creator was dropped.
 
 The [first-evening opening](v02/first-evening-opening.md) and [early interaction audit](v02/building-interaction-audit.md) record earlier v2 iterations. The playable guide supersedes their onboarding and catalog descriptions. Dated reports and saved evidence remain intact rather than being rewritten to imply newer tests were performed.

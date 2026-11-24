@@ -9,11 +9,7 @@ const web = path.join(root, "web"),
   out = path.join(root, "dist");
 await rm(out, { recursive: true, force: true });
 await mkdir(out, { recursive: true });
-await cp(web, path.join(out, "v1"), {
-  recursive: true,
-  filter: (p) =>
-    !["v02", "dev-report"].includes(path.relative(web, p).split(path.sep)[0]),
-});
+await cp(path.join(web, "fonts"), path.join(out, "fonts"), { recursive: true });
 await cp(path.join(web, "v02"), path.join(out, "v2"), {
   recursive: true,
   filter: (p) =>
@@ -41,13 +37,13 @@ let revision=process.env.COMMIT_REF || process.env.GITHUB_SHA;
 if(!revision){try{revision=execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim();}catch{revision='unknown';}}
 await writeFile(path.join(out,'v2/build-info.js'),`export const BUILD_INFO = ${JSON.stringify({revision,builtAt:new Date().toISOString()})};\n`);
 
-// Keep immutable artwork URLs intact: resident bundle hashes include these paths.
+// The first version of the game was retired; old links land on the current one.
 await writeFile(
   path.join(out, "_redirects"),
-  `/ /v2/menu.html 302\n/v1 /v1/ 301\n/v2 /v2/ 301\n/v02/weekend/* /v2/:splat 301\n/v02/* /v2/:splat 301\n/art/* /v1/art/:splat 200\n/fonts/* /v1/fonts/:splat 200\n`,
+  `/ /v2/menu.html 302\n/v2 /v2/ 301\n/v1 /v2/ 302\n/v1/* /v2/ 302\n/v02/weekend/* /v2/:splat 301\n/v02/* /v2/:splat 301\n`,
 );
 await writeFile(
   path.join(out, "index.html"),
-  '<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=/v2/menu.html"><title>Solar Friends</title><a href="/v2/">Play v2</a> · <a href="/v1/">Play v1</a>',
+  '<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=/v2/menu.html"><title>Solar Friends</title><a href="/v2/">Play Solar Friends</a>',
 );
-console.log("Built dist/v1 and dist/v2 (game at /v2/, no weekend prefix).");
+console.log("Built dist/v2 (game at /v2/, no weekend prefix).");

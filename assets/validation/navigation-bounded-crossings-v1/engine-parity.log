@@ -1,8 +1,0 @@
-{
-  snapshots: 10,
-  baselineBytes: 4406168,
-  candidateBytes: 4406424,
-  timings: undefined,
-  matrixAccepted: 12,
-  matrixRejected: 6
-}

@@ -1,11 +1,11 @@
 // Fast verification runner: runs verify scripts in parallel, reports every
 // failure, and can limit itself to the scripts affected by the files you changed.
 //
-//   npm run check                 every verify-v02-* script, in parallel
+//   npm run check                 every verify-* script, in parallel
 //   npm run check -- --changed    only scripts whose imports reach changed files
 //   npm run check -- needs trade  only scripts whose name contains a word
 //   options: --jobs N  --fail-fast  --no-browser  --syntax  --base REF  --browser-jobs N  --no-retry
-//            --all (include v1)  --list  --timeout SECONDS
+//            --list  --timeout SECONDS
 import {spawn,execFileSync} from 'node:child_process';
 import {mkdir,readFile,readdir,writeFile,rm} from 'node:fs/promises';
 import {availableParallelism} from 'node:os';
@@ -60,7 +60,7 @@ function changedFiles(){
   return [...files];
 }
 
-const pattern=flag('--all')?/^verify-.*\.mjs$/:/^verify-v02-.*\.mjs$/;
+const pattern=/^verify-.*\.mjs$/;
 let scripts=(await readdir('scripts')).filter(name=>pattern.test(name)).sort();
 if(words.length)scripts=scripts.filter(name=>words.some(word=>name.includes(word)));
 const browser=new Map();
