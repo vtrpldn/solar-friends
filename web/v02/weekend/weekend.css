@@ -1679,6 +1679,35 @@ header > .time { display: grid; grid-template-columns: auto auto; gap: 5px 10px;
 #skip-milestones strong, #skip-milestones span { display: block; }
 #skip-milestones span { margin-top: 4px; font-size: 12px; line-height: 1.4; }
 
+/* After advancing days: a journal page of what changed, read top to bottom. */
+#skip-summary-dialog { width: 640px; max-width: 640px; max-height: calc(100vh - 64px); padding: 24px 27px; }
+#skip-summary-dialog[open] { display: flex; flex-direction: column; }
+.skip-summary-eyebrow { margin: 0; font-weight: 700; font-size: 10px; letter-spacing: 1.8px; text-transform: uppercase; color: #7d7157; }
+#skip-summary-dialog h2 { margin: 4px 0 6px; font-size: 27px; }
+#skip-summary-span { margin: 0; font-size: 12px; color: #766d54; font-variant-numeric: tabular-nums; }
+#skip-summary-stopped { margin: 10px 0 0; padding: 8px 12px; border-left: 3px solid #b9853f; background: #f6ebc9; font-size: 12px; }
+#skip-summary-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; margin-top: 14px; padding-right: 8px; border-top: 1px solid #d8ccaa; scrollbar-gutter: stable; }
+#skip-summary-body section { padding: 14px 0 12px; border-bottom: 1px solid #d8ccaa; }
+.skip-summary-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 6px; }
+#skip-summary-body h3 { margin: 0; font-size: 15px; }
+.skip-summary-head strong { font-size: 13px; font-variant-numeric: tabular-nums; }
+.skip-summary-head button { margin: 0 0 0 auto; padding: 5px 10px; font-size: 11px; border-width: 1px; border-radius: 7px; box-shadow: 0 2px 0 #d6c59e; }
+#skip-summary-body dl { margin: 0; }
+#skip-summary-body dl > div { display: flex; align-items: baseline; justify-content: space-between; gap: 20px; padding: 5px 0; font-size: 13px; line-height: 1.45; }
+#skip-summary-body dt { min-width: 0; }
+#skip-summary-body dt span { display: block; margin-top: 2px; font-size: 11px; line-height: 1.45; color: #7d7157; }
+#skip-summary-body dd { margin: 0; flex: none; max-width: 60%; text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+#skip-summary-body .gain dd { color: #4c7038; }
+#skip-summary-body .loss dd { color: #a14a2c; }
+#skip-summary-body .quote { justify-content: flex-start; gap: 14px; }
+#skip-summary-body .quote dt { flex: none; width: 52px; font-size: 11px; color: #7d7157; }
+#skip-summary-body .quote dd { flex: 1; max-width: none; text-align: left; font-weight: 500; }
+.skip-summary-note { margin: 4px 0 0; font-size: 11px; color: #7d7157; }
+.skip-summary-quiet { margin: 28px 0; font-size: 14px; line-height: 1.6; text-align: center; }
+.skip-summary-foot { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 16px; font-size: 12px; color: #766d54; }
+.skip-summary-foot button { margin: 0; font-size: 13px; }
+#skip-summary-dialog button:focus-visible { outline: 3px solid #537d78; outline-offset: 3px; }
+
 /* Developer tools: one quiet fold in the main menu and View & options. */
 .dev-tools { font-size: 12px; text-align: left; }
 .dev-tools > summary { cursor: pointer; font-weight: 600; color: #526546; padding: 4px 0; }
