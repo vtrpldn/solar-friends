@@ -233,6 +233,12 @@ if (s.stage === "evening") {
     }
 }
 enableFastNavigation(s);
+// Side panels stop above the dock, whose height changes when its buttons wrap.
+{
+  const dock = document.querySelector("body > footer");
+  const measure = () => document.documentElement.style.setProperty("--footer-height", `${dock.offsetHeight}px`);
+  if (dock) { new ResizeObserver(measure).observe(dock); measure(); }
+}
 const savedView = restoredView(s.view);
 let speed = savedView?.speed || 1,
   paused = lightingPreview || scalePreview || savedView?.paused || false,

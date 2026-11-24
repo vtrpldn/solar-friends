@@ -97,3 +97,16 @@ footer { bottom: var(--ui-gap); max-width: calc(100vw - 2 * var(--ui-gap)); }
 .time .weather-forecast { position: relative; font-size: .8rem; margin: 0; padding: 0; border: 0; }
 .time .weather-forecast summary { cursor: pointer; white-space: nowrap; margin: 0; padding: 4px; border: 0; }
 .weather-forecast p { position: absolute; z-index: 30; right: 0; top: calc(100% + 8px); white-space: normal; width: 24rem; max-width: 70vw; padding: 1rem; margin: 0; border: 1px solid #64765b; border-radius: .5rem; background: #f6f0dd; color: #273525; box-shadow: 0 6px 20px #0003; line-height: 1.5; }
+
+/* Selected building: sit below the Guide and Lenses buttons, stop above the
+   dock, and keep the header compact so its actions fit without scrolling. */
+html body #selection, html body[data-lens=""] #selection {
+  top: 184px; width: 300px;
+  max-height: calc(100dvh - 184px - var(--footer-height, 120px) - 2 * var(--ui-gap));
+}
+#selection .selection-art { float: left; width: 68px; height: 68px; margin: 0 10px 6px 0; }
+#selection #selected-state { display: block; padding-top: 6px; }
+#selection h2 { font-size: 20px; line-height: 1.15; margin: 2px 26px 0 0; }
+#selection #construction-summary, #selection #selected-benefit, #selection #building-service,
+#selection #production-controls, #selection .building-notes { clear: both; }
+#selection p { margin: 6px 0; }
