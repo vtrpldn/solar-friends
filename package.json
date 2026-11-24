@@ -4,11 +4,9 @@
   "type": "module",
   "scripts": {
     "dev": "node scripts/dev.mjs",
-    "benchmark": "node scripts/benchmark-engine.mjs",
-    "dev:check": "node scripts/dev-check.mjs",
-    "dev:browser": "node scripts/dev-check.mjs --browser-only",
     "dev:serve": "node scripts/serve.mjs",
-    "dev:check-iteration": "node scripts/check-iteration.mjs",
+    "check": "node scripts/check.mjs",
+    "check:changed": "node scripts/check.mjs --changed --syntax",
     "build:site": "node scripts/build-site.mjs",
     "guide:refresh": "node scripts/build-guide.mjs",
     "guide:check": "node scripts/build-guide.mjs --check"

@@ -2,7 +2,7 @@
 
 ## Why
 
-Inspect the shared low-poly models used by the live 3D game; sprite export remains an optional proof tool. The v1 code and art remain unchanged. The workshop now includes the full v2 model collection. The original five recipes remain as the reference kit; house study 03 is approved, and the newly recreated models are reviewable studies.
+Inspect the shared low-poly models used by the live 3D game; sprite export remains an optional proof tool. The workshop now includes the full v2 model collection. The original five recipes remain as the reference kit; house study 03 is approved, and the newly recreated models are reviewable studies.
 
 Open http://127.0.0.1:4173/v2/workshop/ after `npm run dev:serve`.
 

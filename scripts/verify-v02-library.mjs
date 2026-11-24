@@ -1,6 +1,5 @@
 import assert from "node:assert/strict";
 import * as THREE from "three";
-import { catalog } from "../web/artwork/catalog.js";
 import {
   ASSETS,
   createAsset,
@@ -13,10 +12,6 @@ import {
   encode,
   decode,
 } from "../web/v02/land/editor.js";
-const mapping = new Set(ASSETS.flatMap((a) => a.legacy));
-// Reclaimed parts were intentionally retired from v2; v1 remains archived.
-for (const a of catalog.filter((a) => a.usage === "Active" && a.id !== "economy-4"))
-  assert(mapping.has(a.id), `Missing v0.1 asset ${a.id}`);
 assert.equal(new Set(ASSETS.map((a) => a.id)).size, ASSETS.length);
 let draws = 0;
 for (const a of ASSETS) {
@@ -65,5 +60,5 @@ assert.throws(() => validate([{ ...r, column: NaN }]));
 assert.throws(() => validate([{ ...r, rotation: 45 }]));
 assert.throws(() => validate([{ ...r, asset: "missing" }]));
 console.log(
-  `${ASSETS.length} 3D assets cover all ${mapping.size} active v0.1 catalog entries; ${draws} material batches. Bounds, compaction, scene validation and edit history pass.`,
+  `${ASSETS.length} 3D assets; ${draws} material batches. Bounds, compaction, scene validation and edit history pass.`,
 );

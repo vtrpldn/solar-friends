@@ -4,4 +4,3 @@
 
 [build.environment]
   NODE_VERSION = "24"
-  RUST_VERSION = "1.99.0"
