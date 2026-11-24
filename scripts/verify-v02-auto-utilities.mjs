@@ -1,3 +1,4 @@
+// check-tier: soak
 import assert from "node:assert/strict";
 import {
   createSandbox, enableFastNavigation,

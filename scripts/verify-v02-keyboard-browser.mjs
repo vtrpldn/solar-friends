@@ -1,12 +1,12 @@
 // Browser keyboard check. Only key presses are sent: no pointer input.
 // Fails when a hint or the help dialog drifts from the binding table, when a
 // shortcut fires while typing or with a modifier, or when focus is lost.
-import {chromium} from 'playwright';
+import {launchBrowser} from './browser.mjs';
 import assert from 'node:assert/strict';
 import {serve} from './serve.mjs';
 import {BINDINGS, helpGroups, hintTargets} from '../web/v02/weekend/keyboard-shortcuts.js';
 const server=await serve(0);
-const browser=await chromium.launch({headless:true,args:['--mute-audio',...(process.platform==='linux'?['--use-angle=swiftshader','--enable-unsafe-swiftshader']:[])]});
+const browser=await launchBrowser();
 const page=await browser.newPage({viewport:{width:1280,height:720}}),errors=[];
 page.on('pageerror',e=>errors.push(e.message));
 const k=page.keyboard,settle=()=>page.waitForTimeout(250);

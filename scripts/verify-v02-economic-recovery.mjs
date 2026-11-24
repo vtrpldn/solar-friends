@@ -1,3 +1,4 @@
+// check-tier: soak
 import fs from 'node:fs';import assert from 'node:assert/strict';
 import {restore,save,tick,enableFastNavigation} from '../web/v02/weekend/simulation.js';
 const s=restore(fs.readFileSync('docs/balance/evidence/2026-11-17-starved-catalog-save.json','utf8'));assert(s);enableFastNavigation(s);

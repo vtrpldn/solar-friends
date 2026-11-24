@@ -1,11 +1,11 @@
-import {chromium} from 'playwright';
+import {launchBrowser} from './browser.mjs';
 import {mkdir} from 'node:fs/promises';
 await mkdir('artifacts/food-almanac',{recursive:true});
 import {serve} from './serve.mjs';
 import {createWeekend,chooseCamp,save,PROJECTS} from '../web/v02/weekend/simulation.js';
 import assert from 'node:assert/strict';
 const s=createWeekend(42);chooseCamp(s,'entrance');s.projects.push({id:s.nextId++,key:'kitchen',x:s.stock.x+3,z:s.stock.z+3,rotation:0,work:PROJECTS.kitchen.work,delivered:0});
-const server=await serve();const browser=await chromium.launch({headless:true});
+const server=await serve();const browser=await launchBrowser();
 try{for(const [width,height]of [[1440,1000],[1280,800]]){
  const page=await browser.newPage({viewport:{width,height}}),errors=[];page.on('pageerror',e=>{errors.push(e.message);console.log('PAGE ERROR',e.message);});page.setDefaultTimeout(10000);
  await page.addInitScript(raw=>localStorage.setItem('solar-friends-v02-first-weekend-2',raw),save(s));

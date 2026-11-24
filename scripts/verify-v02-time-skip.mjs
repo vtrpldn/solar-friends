@@ -1,3 +1,4 @@
+// check-tier: soak
 import assert from 'node:assert/strict';
 import {createWeekend,chooseCamp,tick,save,restore,plan,placementError,finished,enableFastNavigation} from '../web/v02/weekend/simulation.js';
 import {DAY} from '../web/v02/weekend/weather.js';

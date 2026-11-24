@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict';
 import {mkdir} from 'node:fs/promises';
-import {chromium} from 'playwright';
+import {launchBrowser} from './browser.mjs';
 import {serve} from './serve.mjs';
 import {STORY_SAVE,SANDBOX_SAVE} from '../web/v02/weekend/modes.js';
 import {createSandbox,planField,save} from '../web/v02/weekend/simulation.js';
 const out=process.env.LAB_SCREENSHOTS||'/tmp/solar-lab-debug';await mkdir(out,{recursive:true});
-const server=await serve(0),browser=await chromium.launch({headless:true}),page=await browser.newPage({viewport:{width:1600,height:1000}}),errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
+const server=await serve(0),browser=await launchBrowser(),page=await browser.newPage({viewport:{width:1600,height:1000}}),errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('dialog',d=>d.accept());
 async function exported(){const ready=page.waitForEvent('download');await page.locator('#export').click();const download=await ready;const stream=await download.createReadStream();const chunks=[];for await(const chunk of stream)chunks.push(chunk);return JSON.parse(Buffer.concat(chunks).toString());}
 async function stopped(){await page.waitForFunction(()=>document.querySelector('#pause').textContent==='Resume'&&/completed|ready to harvest/.test(document.querySelector('#notice').textContent),undefined,{timeout:180000});}
 try{

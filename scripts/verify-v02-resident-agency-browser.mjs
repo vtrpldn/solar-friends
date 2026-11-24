@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {mkdir} from 'node:fs/promises';
 import path from 'node:path';
-import {chromium} from 'playwright';
+import {launchBrowser} from './browser.mjs';
 import {serve} from './serve.mjs';
 import {createWeekend,chooseCamp,save,tick,enableFastNavigation} from '../web/v02/weekend/simulation.js';
 import {PROFILES} from '../web/v02/weekend/resident-personality.js';
@@ -18,7 +18,7 @@ const directory=process.env.SOLAR_EVIDENCE_DIR;
 if(directory)await mkdir(directory,{recursive:true});
 const server=await serve();let browser;
 try {
- browser=await chromium.launch({headless:true,args:['--mute-audio',...(process.platform==='linux'?['--use-angle=swiftshader','--enable-unsafe-swiftshader']:[])]});
+ browser=await launchBrowser();
  const page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[];
  page.setDefaultTimeout(30000);
  page.on('pageerror',error=>errors.push(error.message));

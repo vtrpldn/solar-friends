@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {mkdir} from 'node:fs/promises';
 import path from 'node:path';
-import {chromium} from 'playwright';
+import {launchBrowser} from './browser.mjs';
 import {serve} from './serve.mjs';
 import {createWeekend,chooseCamp,PROJECTS,requiredLoads,save,restore} from '../web/v02/weekend/simulation.js';
 import {syncInfrastructure} from '../web/v02/weekend/infrastructure.js';
@@ -20,7 +20,7 @@ const directory=process.env.SOLAR_EVIDENCE_DIR;
 if(directory)await mkdir(directory,{recursive:true});
 const server=await serve();let browser;
 try {
- browser=await chromium.launch({headless:true,args:['--mute-audio',...(process.platform==='linux'?['--use-angle=swiftshader','--enable-unsafe-swiftshader']:[])]});
+ browser=await launchBrowser();
  const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=[];
  page.on('pageerror',e=>errors.push(e.message));
  await page.addInitScript(({key,snapshot})=>localStorage.setItem(key,snapshot),{key:STORY_SAVE,snapshot:save(s)});

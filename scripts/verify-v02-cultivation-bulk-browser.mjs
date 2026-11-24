@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {chromium} from 'playwright';
+import {launchBrowser} from './browser.mjs';
 import {serve} from './serve.mjs';
 const html=`<!doctype html><html><head><link rel="stylesheet" href="/v2/weekend.css"><link rel="stylesheet" href="/v2/cultivation.css"><script type="importmap">{"imports":{"three":"/v2/workshop/vendor/three.module.js"}}</script></head><body><button id="build-field">Field</button><div id="selection"></div><canvas id="world"></canvas><script type="module">
 import * as THREE from 'three';
@@ -12,7 +12,7 @@ const ui=installFarmingUI({state:()=>s,selected:()=>p.id,scene:new THREE.Scene()
 window.fixture={s,p,ui,finish:()=>{for(const o of s.operations.filter(o=>!o.done)){finishFarmJob(s,p,o);o.done=true;}ui.refresh();}};ui.refresh();
 </script></body></html>`;
 const server=await serve(0,{handle(req,res,path){if(path!=='/bulk-test')return false;res.writeHead(200,{'Content-Type':'text/html'}).end(html);return true;}});
-const browser=await chromium.launch({headless:true});
+const browser=await launchBrowser();
 try{
  const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto(`http://127.0.0.1:${server.address().port}/bulk-test`);await page.waitForSelector('#farm-inspect-bed');

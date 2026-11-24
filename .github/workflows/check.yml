@@ -3,6 +3,10 @@ on:
   push:
     branches: [main]
   pull_request:
+  # The soak tier also runs every night, so a soak never goes unrun for long.
+  schedule:
+    - cron: '17 5 * * *'
+  workflow_dispatch:
 permissions:
   contents: read
 # A newer push to the same branch makes the older run pointless.
@@ -36,4 +40,26 @@ jobs:
           path: |
             artifacts/check/
             artifacts/check-evidence/
+          retention-days: 7
+  # Multi-day simulation soaks (`// check-tier: soak`): skipped on pull requests to keep them quick,
+  # run on every push to main, nightly and on demand.
+  soak:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Run the soak checks
+        timeout-minutes: 45
+        run: node scripts/check.mjs --soak-only
+      - uses: actions/upload-artifact@v4
+        if: always()
+        continue-on-error: true
+        with:
+          name: check-soak
+          path: artifacts/check/
           retention-days: 7

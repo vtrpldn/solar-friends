@@ -1,3 +1,4 @@
+// check-tier: soak
 import fs from 'node:fs';import assert from 'node:assert/strict';
 import {createWeekend,chooseCamp,placementError,tentDoor,restore,save,tick,enableFastNavigation,utilitySpot,route} from '../web/v02/weekend/simulation.js';
 const fresh=createWeekend(42);chooseCamp(fresh,'entrance');const door=tentDoor(fresh,0);

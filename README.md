@@ -56,7 +56,9 @@ npm run build:site
 git diff --check
 ```
 
-`npm run check:changed` runs, in parallel, only the `verify-*` checks whose imports reach the files you changed (every browser check when game files changed) and reports all failures together. `npm run check` runs the whole suite the same way, as CI does; add words to filter by name (`npm run check -- needs trade`), `--no-browser` to skip Playwright checks, or `--list` to preview the selection. Only one check run works at a time on a machine: a run started from another worktree waits for the current one to finish (`--no-lock` runs alongside it anyway).
+`npm run check:changed` runs, in parallel, only the `verify-*` checks whose imports reach the files you changed (every browser check when game files changed) and reports all failures together. `npm run check` runs the default tier the same way; add words to filter by name (`npm run check -- needs trade`), `--no-browser` to skip Playwright checks, or `--list` to preview the selection and each script's tier.
+
+The suite has two tiers. Scripts whose first line is `// check-tier: soak` play days or weeks of game time; `npm run check` skips them and says how many it skipped, `npm run check -- --soak` adds them and `--soak-only` runs just those. CI runs the default tier on every pull request and push, and the soak tier on every push to `main` and nightly. Browser checks get Chromium from `scripts/browser.mjs`: one shared instance under `npm run check` (`--private-browsers` turns that off), a private one when a script is run on its own; `SOLAR_RENDERER=swiftshader` reproduces CI's software WebGL locally. Only one check run works at a time on a machine: a run started from another worktree waits for the current one to finish (`--no-lock` runs alongside it anyway).
 
 Choose additional `scripts/verify-v02-*.mjs` checks for the changed subsystem. Historical checks may encode older design assumptions; investigate failures rather than claiming the entire suite passes. The recovery replay uses an existing normal-game save and automated ticks; it is not a manual browser playthrough. UI changes need rendered browser checks.
 

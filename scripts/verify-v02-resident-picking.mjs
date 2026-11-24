@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {chromium} from 'playwright';
+import {launchBrowser} from './browser.mjs';
 import {serve} from './serve.mjs';
 import {createWeekend,chooseCamp,save} from '../web/v02/weekend/simulation.js';
 import {STORY_SAVE} from '../web/v02/weekend/modes.js';
@@ -8,7 +8,7 @@ const s=createWeekend(42);chooseCamp(s,'entrance');
 s.view={speed:1,paused:true,position:[20,35,20],target:[1,2,3],zoom:2};
 const server=await serve();let browser;
 try{
- browser=await chromium.launch({headless:true});
+ browser=await launchBrowser();
  const page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[];
  page.on('pageerror',e=>errors.push(e.message));
  // Test-only camera setup and projection. Selection still uses real pointer events.

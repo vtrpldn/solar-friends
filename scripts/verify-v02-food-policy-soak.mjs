@@ -1,3 +1,4 @@
+// check-tier: soak
 import assert from 'node:assert/strict';
 import {createWeekend,chooseCamp,enableFastNavigation,PROJECTS,PROCESSES,tick,save,restore} from '../web/v02/weekend/simulation.js';
 import {foodPolicy} from '../web/v02/weekend/food-policy.js';

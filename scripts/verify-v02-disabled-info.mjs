@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
-import {chromium} from 'playwright';
+import {launchBrowser} from './browser.mjs';
 import {serve} from './serve.mjs';
-const server=await serve(0,{handle(req,res,path){if(path!=='/disabled-info-test')return false;res.writeHead(200,{'Content-Type':'text/html'}).end('<!doctype html><html><head></head><body></body></html>');return true;}}),browser=await chromium.launch({headless:true,args:['--mute-audio']});
+const server=await serve(0,{handle(req,res,path){if(path!=='/disabled-info-test')return false;res.writeHead(200,{'Content-Type':'text/html'}).end('<!doctype html><html><head></head><body></body></html>');return true;}}),browser=await launchBrowser();
 try {
  const page=await browser.newPage();
  await page.goto(`http://127.0.0.1:${server.address().port}/disabled-info-test`);

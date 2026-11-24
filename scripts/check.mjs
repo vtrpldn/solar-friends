@@ -4,11 +4,16 @@
 //   npm run check                 every verify-* script, in parallel
 //   npm run check -- --changed    only scripts whose imports reach changed files
 //   npm run check -- needs trade  only scripts whose name contains a word
+//   npm run check -- --soak       also the multi-day simulation soaks (--soak-only: just those)
 //   options: --jobs N  --fail-fast  --no-browser  --syntax  --base REF  --browser-jobs N  --no-retry
-//            --list  --timeout SECONDS  --no-lock
+//            --list  --timeout SECONDS  --no-lock  --private-browsers
 //
 // Only one run works at a time on this machine: a run started from another
 // worktree waits its turn instead of competing for the same cores.
+//
+// Tiers: a script whose leading comment carries `// check-tier: soak` plays days of game time and is
+// skipped unless --soak or --soak-only is given; CI runs the soaks on main and nightly. Every other
+// script is in the default tier. `--list` shows each script's tier.
 import {spawn,execFileSync} from 'node:child_process';
 import {rmSync} from 'node:fs';
 import {mkdir,readFile,readdir,rename,writeFile,rm,stat} from 'node:fs/promises';
@@ -32,8 +37,9 @@ const timingFile=path.join(root,'artifacts/check-timings.json');
 const cache=new Map();
 async function facts(file){
   if(cache.has(file))return cache.get(file);
-  const result={imports:[],mentions:[],browser:false};cache.set(file,result);
+  const result={imports:[],mentions:[],browser:false,tier:'default'};cache.set(file,result);
   let source;try{source=await readFile(file,'utf8');}catch{return result;}
+  result.tier=/^\/\/ check-tier: (\w+)\s*$/m.exec(source.slice(0,600))?.[1]??'default';
   result.browser=/from\s*['"]playwright['"]|import\(\s*['"]playwright['"]\s*\)/.test(source);
   const dir=path.dirname(file);
   for(const match of source.matchAll(/(?:from\s*|import\s*\(?\s*)['"](\.{1,2}\/[^'"]+)['"]/g))result.imports.push(path.resolve(dir,match[1]));
@@ -67,8 +73,12 @@ function changedFiles(){
 const pattern=/^verify-.*\.mjs$/;
 let scripts=(await readdir('scripts')).filter(name=>pattern.test(name)).sort();
 if(words.length)scripts=scripts.filter(name=>words.some(word=>name.includes(word)));
-const browser=new Map();
-for(const name of scripts)browser.set(name,await usesBrowser(path.resolve('scripts',name)));
+const browser=new Map(),tier=new Map();
+for(const name of scripts){
+  browser.set(name,await usesBrowser(path.resolve('scripts',name)));
+  tier.set(name,(await facts(path.resolve('scripts',name))).tier);
+  if(!['default','soak'].includes(tier.get(name))){console.error(`${name}: unknown check-tier "${tier.get(name)}"`);process.exit(1);}
+}
 if(flag('--no-browser'))scripts=scripts.filter(name=>!browser.get(name));
 if(flag('--changed')){
   const changed=changedFiles();
@@ -82,6 +92,13 @@ if(flag('--changed')){
   }
   console.log(`${changed.length} changed file${changed.length===1?'':'s'} → ${selected.length} of ${scripts.length} checks`);
   scripts=selected;
+}
+// Soaks are skipped by default, never silently: the run says how many it left out.
+const selected=scripts,soaks=scripts.filter(name=>tier.get(name)==='soak');
+if(flag('--soak-only'))scripts=soaks;
+else if(!flag('--soak')){
+  scripts=scripts.filter(name=>tier.get(name)!=='soak');
+  if(soaks.length&&!flag('--list'))console.log(`Skipping ${soaks.length} soak check${soaks.length===1?'':'s'} (multi-day simulations): add --soak to run ${soaks.length===1?'it':'them'}`);
 }
 // `--syntax` parses every game and tooling script (only the changed ones with --changed).
 async function syntaxFiles(dir){
@@ -105,7 +122,12 @@ async function syntax(){
   console.log(`${broken.length?'FAIL':'PASS'} ${`${((performance.now()-begun)/1000).toFixed(1)}s`.padStart(7)}  syntax of ${files.length} scripts`);
   return broken.length;
 }
-if(flag('--list')){for(const name of scripts)console.log(`${browser.get(name)?'browser':'node   '} ${name}`);process.exit(0);}
+if(flag('--list')){
+  // The whole selection with tiers, so a skipped soak is visible rather than absent.
+  const listed=selected;
+  for(const name of listed)console.log(`${tier.get(name).padEnd(7)} ${browser.get(name)?'browser':'node   '} ${scripts.includes(name)?'run ':'skip'} ${name}`);
+  process.exit(0);
+}
 const syntaxErrors=flag('--syntax')?await syntax():0;
 if(syntaxErrors)process.exitCode=1;
 if(!scripts.length){console.log('No checks to run.');process.exit();}
@@ -155,12 +177,19 @@ async function takeTurn(){
   for(const signal of ['SIGINT','SIGTERM','SIGHUP'])process.on(signal,()=>{stopping=true;for(const child of running)child.kill('SIGTERM');process.exit(130);});
 }
 await takeTurn();
+// One Chromium for the whole run: each browser check connects to it and works in its own contexts
+// (see scripts/browser.mjs). --private-browsers gives every check its own launch instead.
+let shared=null;const environment={...process.env};delete environment.CHECK_BROWSER_WS;
+if(!flag('--private-browsers')&&queue.filter(name=>browser.get(name)).length>1){
+  const [{chromium},{launchOptions}]=await Promise.all([import('playwright'),import('./browser.mjs')]);
+  shared=await chromium.launchServer(launchOptions);environment.CHECK_BROWSER_WS=shared.wsEndpoint();
+}
 const started=performance.now();
 const seconds=ms=>`${(ms/1000).toFixed(1)}s`.padStart(7);
 function run(name){
   return new Promise(resolve=>{
     const begun=performance.now();let log='';
-    const child=spawn(process.execPath,[`scripts/${name}`],{cwd:root,env:process.env,stdio:['ignore','pipe','pipe'],timeout:limit});
+    const child=spawn(process.execPath,[`scripts/${name}`],{cwd:root,env:environment,stdio:['ignore','pipe','pipe'],timeout:limit});
     running.add(child);
     child.stdout.on('data',data=>log+=data);child.stderr.on('data',data=>log+=data);
     child.on('error',error=>{log+=`\n${error.stack}`;});
@@ -179,7 +208,7 @@ function run(name){
     });
   });
 }
-console.log(`Running ${queue.length} checks, ${jobs} at a time (browser checks ${browserJobs} at a time)`);
+console.log(`Running ${queue.length} checks, ${jobs} at a time (browser checks ${browserJobs} at a time${shared?', sharing one Chromium':''})`);
 const waiting=[...queue];let browsers=0;
 await Promise.all(Array.from({length:Math.min(jobs,queue.length)},async()=>{
   while(waiting.length&&!stopping){
@@ -192,6 +221,8 @@ await Promise.all(Array.from({length:Math.min(jobs,queue.length)},async()=>{
   }
 }));
 // A browser check that failed while sharing the machine gets one run on its own before it counts.
+// The retry also gets a browser of its own, in case the shared one was the problem.
+await shared?.close();delete environment.CHECK_BROWSER_WS;
 const retry=flag('--no-retry')||stopping?[]:results.filter(result=>!result.pass&&browser.get(result.name));
 for(const first of retry){
   results.splice(results.indexOf(first),1);

@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import {mkdir} from 'node:fs/promises';
-import {chromium} from 'playwright';
+import {launchBrowser} from './browser.mjs';
 import {serve} from './serve.mjs';
 import {createSandbox,save} from '../web/v02/weekend/simulation.js';
 import {SANDBOX_SAVE} from '../web/v02/weekend/modes.js';
-const server=await serve(0),browser=await chromium.launch({headless:true,args:['--mute-audio']});
+const server=await serve(0),browser=await launchBrowser();
 const out=process.env.GUIDE_SCREENSHOTS||'/tmp/solar-guide';await mkdir(out,{recursive:true});
 try{
  const page=await browser.newPage({viewport:{width:1440,height:1000}}),errors=[];page.on('pageerror',e=>errors.push(e.message));page.setDefaultTimeout(15000);
