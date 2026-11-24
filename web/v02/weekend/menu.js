@@ -1,4 +1,4 @@
-import { brlWhole } from "./money.js";
+import { brl, brlWhole } from "./money.js";
 import "./keyboard-focus.js";
 import {renderDevTools} from './dev-tools.js';
 import { disabledReason, installDisabledInfo } from './disabled-info.js';
@@ -73,9 +73,9 @@ for (const [tier, amount] of Object.entries(STARTING_CAPITAL)) {
   names[tier] += ' · ' + brlWhole(amount);
 }
 for(const [key,values] of Object.entries(OPTIONS)){
- const label=document.createElement('label');label.textContent=labels[key];const select=document.createElement('select');select.id='setup-'+key;
+ const field=document.createElement('div'),label=document.createElement('label');label.textContent=labels[key];label.htmlFor='setup-'+key;const select=document.createElement('select');select.id='setup-'+key;
  for(const value of values){const option=document.createElement('option');option.value=value;option.textContent=names[value];select.append(option);}
- select.value=DEFAULT_SETTINGS[key];select.onchange=()=>{$('setup-preset').value='custom';updatePreview();};label.append(select);$('setup-fields').append(label);
+ select.value=DEFAULT_SETTINGS[key];select.onchange=()=>{$('setup-preset').value='custom';updatePreview();};field.append(label,select);$('setup-fields').append(field);
 }
 function readSettings(){return Object.fromEntries(Object.keys(OPTIONS).map(key=>[key,$('setup-'+key).value]));}
 function updatePreview(){
