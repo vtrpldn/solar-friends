@@ -296,7 +296,7 @@ export function installCampUI({
       `<dl>${row("Cars and supplies", metres(facts.carsMetres))}${row("River", metres(facts.riverMetres))}` +
       `${row("Ground", facts.fallMetres < 0.15 ? "level" : `falls ${facts.fallMetres.toFixed(1)} m across the site`)}` +
       `${row("Trees within 12 m", facts.trees || "none")}</dl>` +
-      `<small>${["<kbd>R</kbd> turn", error ? "" : "click to pitch", moving ? "<kbd>Esc</kbd> keep the camp" : ""].filter(Boolean).join(" · ")}</small>`;
+      `<small>${["<kbd>R</kbd> turn", error ? "" : "click to pitch", moving ? "<kbd>Esc</kbd> cancel" : ""].filter(Boolean).join(" · ")}</small>`;
     card.hidden = false;
     place();
   }
@@ -322,7 +322,7 @@ export function installCampUI({
       h = card.offsetHeight;
     let x = right + 18;
     if (x + w > innerWidth - 12) x = left - w - 18;
-    const y = Math.max(70, Math.min(innerHeight - h - 150, (top + bottom) / 2 - h / 2));
+    const y = Math.max(86, Math.min(innerHeight - h - (state().stage === "arrival" ? 70 : 220), (top + bottom) / 2 - h / 2));
     card.style.transform = `translate(${Math.round(Math.max(12, x))}px, ${Math.round(y)}px)`;
   }
   function rotate(direction = 1) {
