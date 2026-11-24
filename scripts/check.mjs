@@ -5,10 +5,14 @@
 //   npm run check -- --changed    only scripts whose imports reach changed files
 //   npm run check -- needs trade  only scripts whose name contains a word
 //   options: --jobs N  --fail-fast  --no-browser  --syntax  --base REF  --browser-jobs N  --no-retry
-//            --list  --timeout SECONDS
+//            --list  --timeout SECONDS  --no-lock
+//
+// Only one run works at a time on this machine: a run started from another
+// worktree waits its turn instead of competing for the same cores.
 import {spawn,execFileSync} from 'node:child_process';
-import {mkdir,readFile,readdir,writeFile,rm} from 'node:fs/promises';
-import {availableParallelism} from 'node:os';
+import {rmSync} from 'node:fs';
+import {mkdir,readFile,readdir,rename,writeFile,rm,stat} from 'node:fs/promises';
+import {availableParallelism,tmpdir} from 'node:os';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
@@ -111,6 +115,46 @@ let timings={};try{timings=JSON.parse(await readFile(timingFile,'utf8'));}catch{
 const queue=[...scripts].sort((a,b)=>(timings[b]??(browser.get(b)?60:5))-(timings[a]??(browser.get(a)?60:5)));
 await rm(output,{recursive:true,force:true});await mkdir(output,{recursive:true});
 const results=[],running=new Set();let stopping=false;
+
+// Machine-wide turn-taking. The lock is a directory in the system temp folder
+// (creating one is atomic) holding the owner's pid; a lock whose owner has died
+// is taken over. --no-lock or CHECK_NO_LOCK=1 skips it, e.g. on CI runners.
+const lockDir=process.env.CHECK_LOCK_DIR||path.join(tmpdir(),'solar-friends-check.lock');
+const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+async function takeTurn(){
+  if(flag('--no-lock')||process.env.CHECK_NO_LOCK)return;
+  const ownerFile=path.join(lockDir,'owner.json'),began=Date.now();let announced=0;
+  for(;;){
+    try{await mkdir(lockDir);await writeFile(ownerFile,JSON.stringify({pid:process.pid,cwd:root,since:new Date().toISOString()}));break;}
+    catch(error){if(error.code!=='EEXIST')throw error;}
+    let owner=null;try{owner=JSON.parse(await readFile(ownerFile,'utf8'));}catch{}
+    let alive;
+    if(owner){try{process.kill(owner.pid,0);alive=true;}catch(error){alive=error.code==='EPERM';}}
+    // Between mkdir and the owner file there is a moment with no owner recorded.
+    else alive=Date.now()-((await stat(lockDir).catch(()=>null))?.mtimeMs??Date.now())<10000;
+    if(!alive){
+      // Claim the dead lock by renaming it, so two waiters cannot both clear it.
+      const stale=`${lockDir}.stale-${process.pid}`;
+      try{
+        await rename(lockDir,stale);
+        let moved=null;try{moved=JSON.parse(await readFile(path.join(stale,'owner.json'),'utf8'));}catch{}
+        if(moved&&moved.pid!==owner?.pid)await rename(stale,lockDir).catch(()=>{}); // A live run took it in between: give it back.
+        else await rm(stale,{recursive:true,force:true});
+      }catch{}
+      continue;
+    }
+    if(Date.now()-announced>=60000){
+      const waited=Math.round((Date.now()-began)/1000);
+      console.log(`Waiting for the check run in ${owner?path.basename(owner.cwd.replace(/\/$/,'')):'another worktree'}${waited?` (${waited}s so far)`:''}; pass --no-lock to run alongside it.`);
+      announced=Date.now();
+    }
+    await pause(2000);
+  }
+  const release=()=>{try{rmSync(lockDir,{recursive:true,force:true});}catch{}};
+  process.on('exit',release);
+  for(const signal of ['SIGINT','SIGTERM','SIGHUP'])process.on(signal,()=>{stopping=true;for(const child of running)child.kill('SIGTERM');process.exit(130);});
+}
+await takeTurn();
 const started=performance.now();
 const seconds=ms=>`${(ms/1000).toFixed(1)}s`.padStart(7);
 function run(name){

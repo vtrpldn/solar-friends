@@ -40,7 +40,7 @@ const expiry=fixture();foodChange(expiry.s,'greens',-8);foodChange(expiry.s,'bea
 assert.equal(kitchenPlan(expiry.s,expiry.kitchens[0],PROCESSES,api).recipe,undefined);
 const full=fixture();assert.equal(kitchenPlan(full.s,full.kitchens[0],PROCESSES,{...api,capacity:()=>0}).recipe,undefined);
 for(const value of [null,{version:2},{...foodPolicy(s),freshDays:Infinity},{...foodPolicy(s),coolingPriority:'magic'}]){s.foodPolicy=value;assert(!validFoodPolicy(s));assert.equal(restore(save(s)),null);}
-delete s.foodPolicy;foodPolicy(s).freshDays=2.5;foodPolicy(s).provisionDays=3;foodPolicy(s).coolingPriority='meals';assert.deepEqual(restore(save(s)).foodPolicy,s.foodPolicy);assert.equal(foodPolicy(s).automatic,false);
+delete s.foodPolicy;foodPolicy(s).freshDays=2.5;foodPolicy(s).provisionDays=3;foodPolicy(s).coolingPriority='meals';assert.deepEqual(restore(save(s)).foodPolicy,s.foodPolicy);assert.equal(foodPolicy(s).automatic,true);
 // 80 L fits 20 kg leafy greens, or 40 meals, or 800 eggs; allocation never creates stock.
 const cold={time:0,materials:{greens:30,meals:40,eggs:12},infrastructure:{nodes:{1:{coldStorage:true,enabled:true,power:1}}}};
 ensureFoodStorage(cold);foodPolicy(cold).coolingPriority='ingredients';cold.time=1;coolStoredFood(cold,1);

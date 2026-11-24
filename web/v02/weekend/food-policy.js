@@ -1,7 +1,7 @@
 import {ensureFoodStorage,FOOD_SERVINGS} from './food-storage.js';
 import {productionStock} from './food-planning.js';
 
-export function foodPolicy(s){return s.foodPolicy??={version:1,automatic:false,freshDays:1,provisionDays:2,coolingPriority:'expiry'};}
+export function foodPolicy(s){return s.foodPolicy??={version:1,automatic:true,freshDays:1,provisionDays:2,coolingPriority:'expiry'};}
 export function validFoodPolicy(s){
  const p=s.foodPolicy;
  return p===undefined||!!(p&&p.version===1&&typeof p.automatic==='boolean'&&['freshDays','provisionDays'].every(k=>Number.isFinite(p[k])&&p[k]>=0&&p[k]<=7)&&['expiry','meals','ingredients'].includes(p.coolingPriority));
