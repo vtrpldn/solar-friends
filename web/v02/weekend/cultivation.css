@@ -64,6 +64,8 @@ body[data-cultivation-open] #selection { visibility: hidden; }
 #farm-secondary-actions { display: flex; flex-wrap: wrap; gap: 7px; }
 #cultivation-panel .farm-danger { color: #974b35; border-color: #c8a48e; }
 #farm-resize { margin-top: 10px; }
+#cultivation-panel .farm-auto-buy { width: 100%; margin-top: 14px; background: transparent; border: 1px solid #cbbd97; color: var(--ink); }
+#cultivation-panel .farm-auto-buy[aria-pressed="true"] { background: #e0ebbd; border-color: #8c9d67; color: #344b36; }
 #cultivation-panel .farm-intro { margin-bottom: 16px; }
 #field-summary { padding: 14px 0; }
 #confirm-field { width: 100%; }

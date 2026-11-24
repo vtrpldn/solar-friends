@@ -4,7 +4,7 @@ import {ensureAnimalCare,animalAvailable,collectAnimal,validAnimalCare} from './
 import {packDrinkingWater,hydrationWorkFactor} from './hydration.js';
 import {ensureHydrology,extractWater,validHydrology} from './hydrology.js';
 import {weatherStep,validWeather} from './weather.js';
-import {harvestExpired,CROPS,fieldSizeValid,bedLayout,bedWorld,ensureCultivation,farmRecipe,farmJobError,farmJobSpec,finishFarmJob,cultivationStep,validCultivation} from './cultivation.js';
+import {harvestExpired,CROPS,fieldSizeValid,bedLayout,bedWorld,ensureCultivation,farmAutoBuy,farmRecipe,farmJobError,farmJobSpec,finishFarmJob,cultivationStep,validCultivation} from './cultivation.js';
 import {foodPolicy,validFoodPolicy,manageKitchens} from './food-policy.js';
 import {pantryForecast} from './food-planning.js';
 import {registerGathering,gatheringStatus,gatheringState,validGathering} from './gathering.js';
@@ -318,16 +318,18 @@ function incomingSeeds(s,id) {
  return [...activeTrips(s),s.delivery].filter(t=>t&&!t.project&&!t.shipments&&!t.saleOnly&&t.material===id)
   .reduce((n,t)=>n+(t.quantity??MATERIALS[id].quantity),0);
 }
-export function plantingPurchase(s,b) {
- const [id,n]=Object.entries(farmJobSpec(b,'plant').input)[0];
+const inputText=id=>id==='compost'?'compost':'seed packets';
+// Quotes the missing seeds or compost for one bed job. `waitingSeeds` marks either input.
+export function plantingPurchase(s,b,p=null,action='plant') {
+ const [id,n]=Object.entries(farmJobSpec(b,action).input)[0];
  const waiting=(s.operations||[]).filter(o=>!o.done&&o.waitingSeeds).reduce((sum,o)=>sum+(o.input[id]||0),0);
  const shortage=Math.max(0,n+waiting-(materialCount(s,id)||0)-incomingSeeds(s,id));
  const item=MATERIALS[id],batches=Math.ceil(shortage/item.quantity),cost=batches*item.price;
  if(!shortage)return {cost:0,error:''};
- if(s.autoBuy===false)return {cost,error:'Auto-buy is off. Buy seed packets in Resources first.'};
+ if(!farmAutoBuy(s,p))return {cost,error:`Auto-buy is off. Buy ${inputText(id)} in Resources first.`};
  const error=supplierError(s,{[id]:batches*item.quantity},MATERIALS);
  const total=cost+batches*transportCost(s)+(s.expansionReserve??0);
- return {cost,error:error||(!Number.isFinite(s.money)||total>spendableMoney(s)?'Not enough shared savings for seeds and collection while keeping the essentials reserve.':'')};
+ return {cost,error:error||(!Number.isFinite(s.money)||total>spendableMoney(s)?`Not enough shared savings for ${id==='compost'?'compost':'seeds'} and collection while keeping the essentials reserve.`:'')};
 }
 function arrangePlantingSeeds(s) {
  const attempted=new Set();
@@ -336,14 +338,15 @@ function arrangePlantingSeeds(s) {
   const [id,n]=Object.entries(op.input)[0];
   if((materialCount(s,id)||0)>=n){
    changeMaterial(s,id,-n,undefined,'cultivation input');delete op.waitingSeeds;
-   op.status='Seeds collected; waiting for a resident to plant';continue;
+   op.status=id==='compost'?'Compost collected; waiting for a resident to apply it':'Seeds collected; waiting for a resident to plant';continue;
   }
-  op.status=incomingSeeds(s,id)>0?'Waiting for seed packets to arrive':s.autoBuy===false?'Waiting for seeds · Auto-buy is off':'Waiting for a seed purchase and collection';
-  if(s.autoBuy===false||incomingSeeds(s,id)>0||attempted.has(id))continue;
+  const what=inputText(id),autoBuy=farmAutoBuy(s,s.projects.find(p=>p.id===op.site));
+  op.status=incomingSeeds(s,id)>0?`Waiting for ${what} to arrive`:!autoBuy?`Waiting for ${what} · Auto-buy is off`:`Waiting for a ${id==='compost'?'compost':'seed'} purchase and collection`;
+  if(!autoBuy||incomingSeeds(s,id)>0||attempted.has(id))continue;
   attempted.add(id);
   const item=MATERIALS[id];
-  if(spendableMoney(s)<item.price+transportCost(s)+(s.expansionReserve??0)) {op.status='Waiting for savings to buy seeds and pay for collection';continue;}
-  if(supplyRun(s,id))op.status='Seed packets purchased; waiting for collection';
+  if(spendableMoney(s)<item.price+transportCost(s)+(s.expansionReserve??0)) {op.status=`Waiting for savings to buy ${id==='compost'?'compost':'seeds'} and pay for collection`;continue;}
+  if(supplyRun(s,id))op.status=`${id==='compost'?'Compost':'Seed packets'} purchased; waiting for collection`;
  }
 }
 function prepareOperationQueue(s) {
@@ -355,14 +358,15 @@ export function queueBedJob(s,site,id,action) {
   if(!p||p.removal||p.work<PROJECTS[p.key].work)return 'Choose a completed cultivation site.';
   const b=ensureCultivation(s,p)?.beds[id],error=farmJobError(s,p,b,action);if(error)return error;
   const spec=farmJobSpec(b,action);
-  const waitingSeeds=action==='plant'&&Object.entries(spec.input).some(([item,n])=>(materialCount(s,item)||0)<n);
-  if(waitingSeeds){const purchase=plantingPurchase(s,b);if(purchase.error)return purchase.error;}
+  // Planting always quotes a purchase so the refusal explains Auto-buy; compost only orders when it is on.
+  const waitingSeeds=(action==='plant'||farmAutoBuy(s,p))&&Object.entries(spec.input).some(([item,n])=>(materialCount(s,item)||0)<n);
+  if(waitingSeeds){const purchase=plantingPurchase(s,b,p,action);if(purchase.error)return purchase.error;}
   else {
    for(const [item,n]of Object.entries(spec.input))if(materialCount(s,item)<n)return `Missing ${quantityText(item,n)} ${MATERIALS[item].name}.`;
    for(const [item,n]of Object.entries(spec.input))changeMaterial(s,item,-n,undefined,'cultivation input');
   }
   prepareOperationQueue(s);
-  s.operations.push({id:s.nextOperation=(s.nextOperation||0)+1,site,recipe:`farm_${action}`,farm:{bed:id,action,work:spec.work,crop:b.crop,density:b.density},input:spec.input,...(waitingSeeds?{waitingSeeds:true,status:'Waiting for seed purchase and collection'}:{}),work:0,phase:'pickup',done:false});
+  s.operations.push({id:s.nextOperation=(s.nextOperation||0)+1,site,recipe:`farm_${action}`,farm:{bed:id,action,work:spec.work,crop:b.crop,density:b.density},input:spec.input,...(waitingSeeds?{waitingSeeds:true,status:`Waiting for ${action==='amend'?'compost':'seed'} purchase and collection`}:{}),work:0,phase:'pickup',done:false});
   wakeHelpers(s);return '';
 }
 export function fieldPlacementError(s,x,z,size,rotation=0,ignore=null){
@@ -581,7 +585,7 @@ function scheduleFarmWork(s) {
       else if (b.stage === 'failed') action = 'clear';
       else if (b.stage === 'unprepared' || b.stage === 'harvested') action = 'prepare';
       else if (b.stage === 'prepared') action = 'plant';
-      if (action) bedJobs.push({site:p.id, bed:b, action});
+      if (action) bedJobs.push({site:p.id, autoBuy:farmAutoBuy(s,p), bed:b, action});
     }
   }
   const priority = {harvest:0, plant:1, clear:2, prepare:3};
@@ -590,7 +594,7 @@ function scheduleFarmWork(s) {
   for (const job of bedJobs) {
     const needsSeeds = job.action === 'plant' && !Object.entries(farmJobSpec(job.bed,'plant').input)
         .every(([id,n]) => materialCount(s,id) >= n);
-    if (needsSeeds && (s.mode === 'sandbox' || s.autoBuy === false || seedOrderPending)) continue;
+    if (needsSeeds && (s.mode === 'sandbox' || !job.autoBuy || seedOrderPending)) continue;
     if (queueBedJob(s,job.site,job.bed.id,job.action)) continue;
     if (needsSeeds) seedOrderPending = true;
     else if (--bedSlots <= 0) break;
