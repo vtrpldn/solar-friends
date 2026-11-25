@@ -2,6 +2,7 @@ import { brl } from "./money.js";
 import { DREAM_LIGHTS, lightingAt } from "./dream-lighting.js";
 import {createPaintedView, paintVillageModel, villageClouds} from "./painted-village.js";
 import {createGroundWear} from './ground-wear.js';
+import {landWet} from './land-surface.js';
 import "./keyboard-focus.js";
 import {renderDevTools} from './dev-tools.js';
 renderDevTools(document.getElementById('dev-tools'));
@@ -306,7 +307,17 @@ const overcastColor = new THREE.Color("#d6e3ef");
 const overcastFog = new THREE.Color("#aebcca");
 const lightingColor = new THREE.Color();
 const atmosphere = {gouache: false, bloom: 0, paint: 1, lamps: 0, shadowTint: new THREE.Color()};
+// About three millimetres of rain soaks the ground; it dries over half a day.
+let wetAt = s.time;
+landWet.value = !dreamPreview && s.rain ? 1 : 0;
+function updateGroundWetness() {
+  const elapsed = Math.max(0, Math.min(3200, s.time - wetAt));
+  wetAt = s.time;
+  const rain = dreamPreview ? 0 : s.weather?.rainMmPerHour || 0;
+  landWet.value = Math.max(0, Math.min(1, landWet.value + elapsed * (rain > .05 ? rain / 400 : -1 / 1600)));
+}
 function updateSunlight(time, dt) {
+  updateGroundWetness();
   const weatherCover = dreamPreview ? 0 : Math.max(s.weather?.cloudCover ?? 0, s.rain ? .7 : 0);
   cloudCover += (weatherCover - cloudCover) * (1 - Math.exp(-dt / 3));
   const {sun: solar, from, to, blend} = lightingAt(time);
