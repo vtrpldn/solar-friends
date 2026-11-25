@@ -16,6 +16,8 @@ import {
 import { footprintRelief } from "../web/v02/weekend/elevation.js";
 for (const key of ["workshop","home-cottage","home-longhouse",...HOME_DESIGNS.map(d=>d.id)]) for (let rotation = 0; rotation < 4; rotation++) {
   const s = createSandbox(42);
+  // Bare land: this fixture places buildings at fixed cells, before any grove could grow there.
+  s.naturalLandVersion = s.gatheringLandVersion = 1;
   assert.equal(plan(s, key, 60, 50, rotation), "");
   const p = s.projects.at(-1);
   assert.deepEqual(footprint(p), rotation % 2 ? [...PROJECTS[key].size].reverse() : PROJECTS[key].size);
