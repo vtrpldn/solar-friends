@@ -199,7 +199,7 @@
     "description": "Inputs travel to work sites. Finished output travels back to storage.",
     "diagram": "flowchart TD\n Queue[Queue recipe or bed job] --> Validate{Site, input and job constraints pass?}\n Validate -->|No| Block[Explain missing condition]\n Validate -->|Yes| Pickup[Acquire inputs from stores]\n Pickup --> Travel[Carry inputs to reachable work position]\n Travel --> Biology{Biological waiting required?}\n Biology -->|Yes| Grow[Release worker while biology advances]\n Grow --> Process[Resident processing or collection work]\n Biology -->|No| Process\n Process --> Resolve[Finished crop or recipe output]\n Resolve --> Loads[Split output into physical loads]\n Loads --> Carry[Carry to available storage]\n Carry --> Remaining{Output remaining?}\n Remaining -->|Yes| Loads\n Remaining -->|No| Done[Mark operation complete]\n Target[Repeat target and protected reserves] --> Queue",
     "boundary": "Planting beds, perennial crops and recipes have different waiting and harvest rules.",
-    "tip": "Residents start work at nearby sites themselves when stores fall below two batches and inputs and storage are ready. Queue work yourself for distant sites, tree felling and installations; your orders come first. Use Food Almanac policies to manage kitchen reserves.",
+    "tip": "Residents start work at nearby sites themselves when stores fall below two batches and inputs and storage are ready. With two or more residents at leisure and nothing else to make, they build the reserve up to four batches, one job at a time. Queue work yourself for distant sites, tree felling and installations; your orders come first. Use Food Almanac policies to manage kitchen reserves.",
     "facts": null
   },
   {

@@ -7,6 +7,8 @@ import {ANIMAL_CARE} from './asset-upkeep.js';
 // Residents start building work themselves. They keep a working stock of what
 // each completed building can make, and stop before shared storage fills.
 export const WORKING_BATCHES = 2;
+// With hands to spare and nothing else to make, residents build a deeper reserve, one job at a time.
+export const SPARE_BATCHES = 4;
 export const STORAGE_SHARE = .8;
 // Farther sites cost more walking than work between meals; the player can still order them.
 export const MAX_WALK = 60;
@@ -24,7 +26,7 @@ function fodderDemand(s,defs) {
 }
 
 // Lower is more urgent; null means residents have no reason to start it now.
-export function workNeed(s,recipe,recipes,defs,count) {
+export function workNeed(s,recipe,recipes,defs,count,batches=WORKING_BATCHES) {
   if (recipe.installation || recipe.bedAction) return null;
   if (recipe.equipmentRepair) return equipmentSummary(s,recipe.equipmentRepair).broken > 0 ? -1 : null;
   const outputs = Object.keys(recipe.output);
@@ -33,17 +35,17 @@ export function workNeed(s,recipe,recipes,defs,count) {
   for (const [id,n] of Object.entries(recipe.input))
     if (FOOD_SERVINGS[id] && (count(s,id)||0) - n < protectedStock(s,id,recipes)) return null;
   const id = outputs[0];
-  let target = ITEMS[id]?.durable ? 1 : recipe.output[id] * WORKING_BATCHES;
+  let target = ITEMS[id]?.durable ? 1 : recipe.output[id] * batches;
   if (id === 'fodder') {
     const demand = fodderDemand(s,defs);
     if (!demand) return null;
-    target = Math.max(target, demand * WORKING_BATCHES);
+    target = Math.max(target, demand * batches);
   }
   const have = (count(s,id)||0) + pendingOutput(s,recipes,id);
   return have < target ? have / target : null;
 }
 
-export function autonomousWorkPlan(s,p,recipes,defs,api) {
+export function autonomousWorkPlan(s,p,recipes,defs,api,batches=WORKING_BATCHES) {
   const def = defs[p.key];
   if (s.mode === 'sandbox') return {reason:'Residents wait for work orders in sandbox.'};
   // Carrying the camp over from the cars comes first, and the camp can still move until a load lands.
@@ -52,7 +54,7 @@ export function autonomousWorkPlan(s,p,recipes,defs,api) {
   if (s.infrastructure?.nodes[p.id]?.enabled === false) return {reason:'Switched off.'};
   if (s.operations?.some(o => !o.done && o.site === p.id && !o.water)) return {reason:'A job is in progress.'};
   const candidates = Object.entries(recipes).filter(([,r]) => r.kind === def.kind)
-    .map(([id,r]) => ({id,r,need:workNeed(s,r,recipes,defs,api.count)})).filter(c => c.need !== null)
+    .map(([id,r]) => ({id,r,need:workNeed(s,r,recipes,defs,api.count,batches)})).filter(c => c.need !== null)
     .sort((a,b) => a.need - b.need || a.id.localeCompare(b.id));
   if (!Object.values(recipes).some(r => r.kind === def.kind && !r.installation)) return {};
   let reason = 'The village has a working stock of everything made here.';
@@ -74,5 +76,12 @@ export function startAutonomousWork(s,recipes,defs,api) {
   for (const p of s.projects) {
     const plan = autonomousWorkPlan(s,p,recipes,defs,api);
     if (plan.recipe) api.queue(s,p.id,plan.recipe);
+  }
+  // Nothing left to make and at least two residents at leisure: stock up further.
+  if (s.operations?.some(o => !o.done && o.auto)) return;
+  if (s.people.filter(r => r.action === 'relax' && !r.operation && r.energy >= 50).length < 2) return;
+  for (const p of s.projects) {
+    const plan = autonomousWorkPlan(s,p,recipes,defs,api,SPARE_BATCHES);
+    if (plan.recipe && !api.queue(s,p.id,plan.recipe)) return;
   }
 }
