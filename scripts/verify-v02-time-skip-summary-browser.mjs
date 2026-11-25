@@ -37,9 +37,9 @@ try{
  const box=await summary.boundingBox();assert(box.y>=0&&box.y+box.height<=720&&box.x>=0&&box.x+box.width<=1280,'recap fits a 1280×720 window');
  if(screenshot)await page.screenshot({path:screenshot});
 
- // Enter closes it, focus returns to Advance days, and the village is still paused.
+ // Enter closes it, focus lands on the play button, and the village is still paused.
  await page.keyboard.press('Enter');await summary.waitFor({state:'hidden'});
- assert.equal(await page.evaluate(()=>document.activeElement.id),'time-skip');
+ await page.waitForFunction(()=>document.activeElement.id==='pause');
  assert.match(await page.locator('#pause').textContent(),/Resume|▶|Play/i);
 
  // Stopped early: the recap covers the part that ran; Esc closes it.
@@ -48,7 +48,7 @@ try{
  await summary.waitFor({state:'visible'});
  assert.match(await page.locator('#skip-summary-stopped').textContent(),/^Stopped early: .+ of the 30 days you asked for\.$/);
  await page.keyboard.press('Escape');await summary.waitFor({state:'hidden'});
- assert.equal(await page.evaluate(()=>document.activeElement.id),'time-skip');
+ await page.waitForFunction(()=>document.activeElement.id==='pause');
 
  // A section link leaves the recap for its management screen.
  await page.locator('#time-skip').click();await page.locator('#skip-days').fill('1');await page.locator('#skip-fast').check();await page.locator('#skip-start').click();

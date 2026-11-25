@@ -18,7 +18,7 @@ export function foodControls(root,s,projects,recipes,materials,refresh){
   const field=make(controls,'label',label),input=make(field,'input');input.type='number';input.min=0;input.max=7;input.step=.5;input.value=policy[key];input.disabled=s.mode==='sandbox';input.dataset.disabledReason='Food reserve targets are inactive in sandbox, where food is unlimited.';
   input.onchange=()=>{policy[key]=Math.max(0,Math.min(7,Number(input.value)||0));refresh();};
  }
- make(controls,'p',s.mode==='sandbox'?'Food automation and spoilage forecasts are inactive in sandbox.':'Targets use three portions per resident per day. Whole batches only; keep one day of edible food untouched. Existing kitchen jobs finish before the policy queues another batch.');
+ make(controls,'p',s.mode==='sandbox'?'Food automation and spoilage forecasts are inactive in sandbox.':'Targets use three portions per resident per day. Whole batches only; keep one day of edible food untouched. Existing kitchen jobs finish before the policy queues another batch. While this is on, residents also set aside for sale any food that would spoil before the village could eat it.');
  const cooling=make(panel,'fieldset');make(cooling,'legend','Refrigeration');make(cooling,'p',coolingText(s));
  const label=make(cooling,'label','Chill first'),select=make(label,'select');
  for(const [value,text]of [['expiry','Earliest expiry'],['meals','Prepared meals'],['ingredients','Ingredients']])select.add(new Option(text,value));select.value=policy.coolingPriority;

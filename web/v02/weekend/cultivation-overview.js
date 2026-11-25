@@ -38,7 +38,9 @@ export function renderCultivationOverview({content,s,p,changed,message,inspect,f
  const editable=b=>!busy(b)&&['unprepared','prepared','harvested'].includes(b.stage);
  const planting=beds.filter(editable),care=beds.filter(b=>!busy(b));
  const common=(items,key)=>items.length&&items.every(b=>b[key]===items[0][key])?String(items[0][key]):'';
- const options=(items,key,choices)=>`<option value="" disabled>${items.length?'Mixed — choose for all':'No available beds'}</option>`+choices.map(([value,label])=>`<option value="${value}" ${common(items,key)===String(value)?'selected':''}>${label}</option>`).join('');
+ // With nothing to match, the placeholder must be the selected option: a
+ // disabled first option is skipped, and the list would show its first real choice.
+ const options=(items,key,choices)=>`<option value="" disabled ${choices.some(([value])=>common(items,key)===String(value))?'':'selected'}>${items.length?'Mixed — choose for all':'No available beds'}</option>`+choices.map(([value,label])=>`<option value="${value}" ${common(items,key)===String(value)?'selected':''}>${label}</option>`).join('');
  content.innerHTML=`<section class="farm-overview"><div class="farm-overview-heading"><div><h3>Whole ${p.key==='field'?'field':p.key==='garden'?'garden':'greenhouse'}</h3><span class="farm-area">${beds.length} beds · ${beds.reduce((n,b)=>n+b.w*b.d,0).toFixed(1)} m² cultivated</span></div><span class="farm-stage">${beds.filter(busy).length} busy</span></div>
  <div class="farm-stage-list">${Object.entries(stages).filter(([stage])=>count(stage)).map(([stage,label])=>`<div><span>${label}</span><strong>${count(stage)}</strong></div>`).join('')}</div>
  <p class="farm-intro">Manage this entire planting area. Residents work through queued beds as they become available.</p><div id="farm-bulk-actions"></div><p id="farm-feedback" role="status"></p></section>

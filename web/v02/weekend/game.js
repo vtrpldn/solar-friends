@@ -1608,7 +1608,10 @@ $("skip-close").onclick = () => skipDialog.close();
 const skipSummaryDialog = $("skip-summary-dialog");
 $("skip-summary-close").onclick = () => skipSummaryDialog.close();
 skipSummaryDialog.addEventListener('close', () => {
-  if (skipSummaryDialog.returnValue !== 'screen') $("time-skip").focus({preventScroll: true});
+  // The recap leaves the village paused, and Space presses whatever control
+  // holds focus: land on the play button so Space resumes, instead of on
+  // Advance days where it would reopen the dialog.
+  if (skipSummaryDialog.returnValue !== 'screen') $("pause").focus({preventScroll: true});
 });
 $("skip-form").onsubmit = async event => {
   event.preventDefault();
@@ -2527,8 +2530,11 @@ let previous = performance.now(),
 let previousMotion = captureMotion(s);
 // Paused scenes are stable. Keep UI/camera work responsive without resubmitting
 // the same terrain, shadows and buildings until an interaction changes the view.
-let renderUntil = 0, lastVisualTime = s.time;
-const requestSceneRender = () => { renderUntil = performance.now() + 300; };
+// A request is owed at least one frame, however late that frame arrives: a
+// throttled or busy page can let the time window pass without drawing, which
+// left a cancelled placement grid on screen for as long as the pause lasted.
+let renderUntil = 0, renderOwed = true, lastVisualTime = s.time;
+const requestSceneRender = () => { renderUntil = performance.now() + 300; renderOwed = true; };
 for (const event of ['pointermove','pointerdown','pointerup','wheel','keydown','keyup','resize'])
   addEventListener(event, requestSceneRender, {passive:true});
 renderer.domElement.addEventListener('webglcontextrestored', requestSceneRender);
@@ -2633,7 +2639,7 @@ function frame(now) {
       if (next && (!last || next.distanceTo(last) >= spacing)) activateMap(point);
     }
   }
-  if (paused && !s.rain && !cameraChanged && now >= renderUntil && !livedPreview) {
+  if (paused && !s.rain && !cameraChanged && now >= renderUntil && !renderOwed && !livedPreview) {
     // The interface and autosave remain live; unchanged scene transforms do not
     // need rebuilding while the player reads or plans in a paused village.
     if (now - lastUI > 450) { renderUI(); lastUI = now; }
@@ -2914,8 +2920,8 @@ function frame(now) {
   updateUtilityLighting();
   lenses.update(now);
   accessPreview.visible=!!placing&&(ghost.visible||!!wireframe?.visible);
-  const rendered = !paused || s.rain || cameraChanged || now < renderUntil || livedPreview;
-  if (rendered) renderPaintedView(scene, camera, atmosphere);
+  const rendered = !paused || s.rain || cameraChanged || now < renderUntil || renderOwed || livedPreview;
+  if (rendered) { renderPaintedView(scene, camera, atmosphere); renderOwed = false; }
   lastVisualTime = visual.time;
   recordPerformance(now, visual.time, rendered);
   requestAnimationFrame(frame);
