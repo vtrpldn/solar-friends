@@ -26,6 +26,18 @@ export const squareCentre = square => [
 // How worn a square looks, from 0 (grass) towards 0.6 (packed earth).
 export const wearLevel = strides => .6 * (1 - Math.exp(-strides / PACKED));
 
+// Strides after which a track is plain enough that walkers follow it.
+const TRODDEN = 200;
+// Whether the two-metre map cell around a point holds a clearly worn track.
+export function trodden(s, x, z) {
+  const squares = s.footfall?.squares;
+  if (!squares) return false;
+  const gx = (Math.round(x) - CELL_MIN) * 2, gz = (Math.round(z) - CELL_MIN) * 2;
+  if (gx < 0 || gz < 0 || gx + 1 >= FOOTFALL_GRID || gz + 1 >= FOOTFALL_GRID) return false;
+  const at = gx + gz * FOOTFALL_GRID;
+  return Math.max(squares[at] || 0, squares[at + 1] || 0, squares[at + FOOTFALL_GRID] || 0, squares[at + FOOTFALL_GRID + 1] || 0) >= TRODDEN;
+}
+
 export const footfallBefore = s => s.people.map(r => [r.x, r.z]);
 // Adds the ground each resident covered since `before`, and lets a day's
 // regrowth happen when the date changes.

@@ -40,3 +40,24 @@ import {GAME_DAY} from '../web/v02/weekend/biological-production.js';
   assert(size<60000,`footfall stays small in the save (${size} bytes after two days)`);
 }
 console.log('PASS footfall accumulates by distance, regrows, survives saves and is recorded during fast time');
+// Walkers keep to a track others have worn rather than cutting a new line beside it.
+{
+  const {route}=await import('../web/v02/weekend/simulation.js');
+  const {trodden}=await import('../web/v02/weekend/footfall.js');
+  const s=createWeekend(42);chooseCamp(s,'entrance');
+  // A track one cell to the side is worth the small detour over a long enough walk.
+  const lines=[];
+  for(const length of [16,20,24,28])for(const dz of [6,9,12,-6,-9])for(const dx of [-2,2+length]){
+    const from={x:s.stock.x+dx-length,z:s.stock.z+dz},to={x:s.stock.x+dx,z:s.stock.z+dz};
+    const direct=route(s,from,to);
+    if(direct&&direct.every(p=>Math.abs(p.z-from.z)<.01))lines.push([from,to]);
+  }
+  assert(lines.length,'open ground is crossed in a straight line');
+  const [from,to]=lines.at(-1);
+  s.footfall={day:0,squares:{}};
+  for(let x=from.x-.5;x<=to.x+.5;x+=.5)for(const z of [from.z+1,from.z+1.25])s.footfall.squares[footfallSquare(x,z)]=300;
+  assert(trodden(s,from.x+4,from.z+1)&&!trodden(s,from.x+4,from.z-1),'a well-used track is recognised');
+  const drawn=route(s,from,to);
+  assert(drawn.some(p=>Math.abs(p.z-(from.z+1))<.01),'the route bends onto the worn track');
+}
+console.log('PASS worn tracks attract walkers');

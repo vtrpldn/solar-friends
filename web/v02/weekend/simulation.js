@@ -1,6 +1,6 @@
 import { projectLabel, numberProject, numberProjects } from "./project-names.js";
 import { brl } from "./money.js";
-import {ensureAnimalCare,animalAvailable,collectAnimal,validAnimalCare} from './animal-care.js';
+import {ensureAnimalCare,animalAvailable,collectAnimal,validAnimalCare,animalWaitText} from './animal-care.js';
 import {packDrinkingWater,hydrationWorkFactor} from './hydration.js';
 import {ensureHydrology,extractWater,validHydrology} from './hydrology.js';
 import {weatherStep,validWeather} from './weather.js';
@@ -31,7 +31,7 @@ import {applyConstructionSpecs,migrateConstructionLabor,CONSTRUCTION_LABOR_VERSI
 import {collectionBudget,spendableMoney} from './procurement-budget.js';
 import {returnPickup,pickupFare,reserveExport,pendingExports,loadExports,settleExports,validTrade,transportCost,fitsCargo,blueprintManifest,receiveBlueprintShipment,projectFreight} from './physical-trade.js';
 import {recordEvent} from './event-history.js';
-import {footfallBefore,recordFootfall,repairFootfall} from './footfall.js';
+import {footfallBefore,recordFootfall,repairFootfall,trodden} from './footfall.js';
 import { unrotatedSiteSize, validSiteVersion } from './site-space.js';
 import { accessGeometry, insideSolid, segmentHitsSolid, BODY_RADIUS } from './building-access.js';
 import { craftingBlocker, craftStage, practiceCraft, validCraftSkills } from './crafting.js';
@@ -205,6 +205,8 @@ function roadAt(s,x,z){
   if(!cache.has(key))cache.set(key,roadAtUncached(s,x,z));
   return cache.get(key);
 }
+// Made roads and the tracks residents have worn: ground a walker keeps to.
+const pathAt=(s,x,z)=>roadAt(s,x,z)||trodden(s,x,z);
 function roadAtUncached(s, x, z) {
   return (
     accessRoadAt(x, z) ||
@@ -808,7 +810,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
       if(!destination||destination.capacity[index]-destination.water[index]<=.00001)return false;
     }
     if (op.water || op.phase === "return") return true;
-    if(s.mode!=='sandbox'&&['eggs','milk'].includes(op.recipe)){const p=s.projects.find(p=>p.id===op.site);if(p&&!animalAvailable(p)){op.status='Waiting for daily animal production; feed and water are needed';return false;}}
+    if(s.mode!=='sandbox'&&['eggs','milk'].includes(op.recipe)){const p=s.projects.find(p=>p.id===op.site);if(p&&!animalAvailable(p)){op.status=animalWaitText(p,op.recipe);return false;}}
     const node = sys.nodes[op.site],
       recipe = farmRecipe(op,PROCESSES);
     if(recipe.craft && PROJECTS[s.projects.find(p=>p.id===op.site)?.key]?.kind!==recipe.kind) {op.status='Needs a compatible crafting workspace.';return false;}
@@ -2043,13 +2045,13 @@ export function walkSegmentClear(s, from, to) {
 
 function naturalPath(s, from, path) {
   const keepRoad =
-    roadAt(s, from.x, from.z) && path.every((p) => roadAt(s, p.x, p.z));
+    pathAt(s, from.x, from.z) && path.every((p) => pathAt(s, p.x, p.z));
   const roadClear = (a, b) => {
     if (!keepRoad) return true;
     const steps = Math.ceil(Math.hypot(a.x - b.x, a.z - b.z) * 3);
     for (let i = 0; i <= steps; i++) {
       const t = steps ? i / steps : 0;
-      if (!roadAt(s, a.x + (b.x - a.x) * t, a.z + (b.z - a.z) * t))
+      if (!pathAt(s, a.x + (b.x - a.x) * t, a.z + (b.z - a.z) * t))
         return false;
     }
     return true;
@@ -2236,9 +2238,9 @@ function routeUncached(s, from, to, step=1,reachOnly=false) {
       const result = [];
       let anchor = from,
         chunk = [],
-        onRoad = roadAt(s, from.x, from.z);
+        onRoad = pathAt(s, from.x, from.z);
       for (const point of path) {
-        const nextRoad = roadAt(s, point.x, point.z);
+        const nextRoad = pathAt(s, point.x, point.z);
         if (nextRoad !== onRoad && chunk.length) {
           result.push(...naturalPath(s, anchor, chunk));
           anchor = chunk.at(-1);
@@ -2269,7 +2271,8 @@ function routeUncached(s, from, to, step=1,reachOnly=false) {
         (x===start[0]&&z===start[1]&&!walkSegmentClear(s,from,{x:nx,z:nz}))
       )
         continue;
-      const nextCost = cost + step*(roadAt(s, nx, nz) ? 0.65 : 1);
+      // Walkers favour made roads, then tracks others have already worn.
+      const nextCost = cost + step*(roadAt(s, nx, nz) ? 0.65 : trodden(s, nx, nz) ? 0.8 : 1);
       if (nextCost >= (costs.get(k) ?? Infinity)) continue;
       costs.set(k, nextCost);
       parent.set(k, key(x, z));
