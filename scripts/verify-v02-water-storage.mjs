@@ -40,3 +40,16 @@ for (const preference of [undefined, false]) {
   assert.equal((loaded.operations ?? []).some(op => op.site === homeId && op.water?.service), preference ?? true);
 }
 console.log('PASS legacy homes migrate sanitation and honor the saved preference on the first tick');
+{
+ // Sites that only make greywater need emptying too, or a full tank stops
+ // their work for good. A wetland treats its own and is left alone.
+ const {createWeekend:fresh,chooseCamp:camp,PROJECTS:defs}=await import('../web/v02/weekend/simulation.js');
+ const {syncInfrastructure:sync,ensureInfrastructure:infra}=await import('../web/v02/weekend/infrastructure.js');
+ const v=fresh();v.arrivalElapsed=17;camp(v,'clearing');
+ for(const [key,x] of [['kitchen',10],['wash-station',20],['wetland',26],['garden',40]])v.projects.push({id:v.nextId++,key,x,z:40,rotation:0,work:defs[key].work,delivered:0});
+ sync(v,defs);
+ const upkeep=Object.fromEntries(Object.values(infra(v).nodes).map(n=>[n.kind,n.maintainSanitation]));
+ assert.equal(upkeep.kitchen,true);assert.equal(upkeep['wash-station'],true);
+ assert.equal(upkeep.wetland,undefined);assert.equal(upkeep.garden,undefined);
+ console.log('PASS greywater-only sites default to waste upkeep; treatment wetlands do not');
+}

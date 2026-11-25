@@ -131,8 +131,8 @@ export function syncProjectNode(sys, p, defs) {
   if(kind === "water-storage" || kind === "well")node.maintainFresh ??= true;
   if (kind === "home" && node.capacity[3] === 0) node.capacity = [...CAPACITY.home];
   // Greywater-only sites (kitchen, wash station) fill up too: left alone, a
-  // full tank stops their work for good.
-  if(node.capacity[2]>0||node.capacity[3]>0)node.maintainSanitation ??= true;
+  // full tank stops their work for good. A wetland treats its own greywater.
+  if(node.capacity[3]>0||(node.capacity[2]>0&&kind!=="wetland"))node.maintainSanitation ??= true;
   node.serviceFactor=serviceFactor(p);
   if(kind!=='home'){
     node.battery=battery;
