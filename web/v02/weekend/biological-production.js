@@ -11,7 +11,7 @@ export const BIOLOGY={
  compost:{days:60,window:Infinity,seasonal:false},
  eggs:{days:3,window:3,seasonal:false},milk:{days:1,window:1,seasonal:false},
  honey:{days:90,window:30,seasonal:true},
- // One crop a year; the first comes in the third year.
+  // About one crop a year; the first after three favourable growing years, which a long dry season stretches towards four.
  coffee:{days:330,window:21,seasonal:true,establish:730},
 };
 export function seasonAt(time){

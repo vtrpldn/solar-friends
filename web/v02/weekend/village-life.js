@@ -31,6 +31,9 @@ export const HELPER_PACE = .7;
 export const GOODWILL_REST = 30, GOODWILL_FADE = .08;
 const GATHERING_PLACES = ['square', 'fire-circle', 'community-hall'];
 const COURSE_PLACES = ['outdoor-classroom', 'community-hall'];
+const SHELTERED = ['community-hall'];
+// Neighbours on a wet site work at this share of their dry pace.
+export const RAIN_PACE = .5;
 const clamp = (n, low, high) => Math.max(low, Math.min(high, n));
 // Day and hour from one division, so the hour can never lag the day at midnight.
 export function clock(time) {
@@ -43,6 +46,11 @@ export function ensureCommunity(s) {
 }
 export const maxHelpers = s => clamp(2 + Math.floor(ensureCommunity(s).goodwill / 12), 2, 10);
 export const maxGuests = s => clamp(4 + Math.floor(ensureCommunity(s).goodwill / 10), 4, 14);
+// Share of a building that this many neighbours would add in a dry day's mutirão.
+export function mutiraoShare(project, guests, defs) {
+  const total = defs[project.key].work, hours = EVENT_KINDS.mutirao.to - EVENT_KINDS.mutirao.from;
+  return Math.max(0, Math.min(total * .97 - project.work, hours * HOUR * guests * HELPER_PACE)) / total;
+}
 export function goodwillText(goodwill) {
   return goodwill >= 80 ? 'The neighbours think of you as their own.' : goodwill >= 60 ? 'The neighbours are glad you came.'
     : goodwill >= 35 ? 'The neighbours know you and are friendly.' : goodwill >= 15 ? 'The neighbours know you by sight, and not much more.'
@@ -196,12 +204,16 @@ function start(s, e, defs, say) {
   if (e.kind === 'festa') {
     const june = clock(s.time).month === 5;
     e.title = june ? 'festa junina' : 'festa'; e.here = e.guests;
+    // Rain keeps half the neighbours at home unless the festa is under a roof.
+    if (s.rain && e.guests && !SHELTERED.includes(place.key)) { e.rained = true; e.here = e.guests = Math.floor(e.guests / 2); }
     if (s.mode !== 'sandbox') {
       if ((s.wood || 0) >= FESTA_WOOD) { foodChange(s, 'wood', -FESTA_WOOD, undefined, 'festa bonfire'); e.fire = true; }
       if (june && (s.materials.corn || 0) >= FESTA_CORN) { foodChange(s, 'corn', -FESTA_CORN, undefined, 'festa junina'); e.corn = true; }
     } else { e.fire = true; e.corn = june; }
     e.fed = feed(s, s.people.length + e.guests);
-    say(s, `The ${e.title} has begun${e.guests ? ` with ${e.guests} neighbours` : ''}${e.fire ? ', around a fire' : ''}.`);
+    // The friends are served first and have eaten: they need not leave for dinner.
+    s.people.slice(0, e.fed).forEach(r => { if (r.needs) r.needs.hunger = Math.max(r.needs.hunger, 90); });
+    say(s, `The ${e.title} has begun${e.guests ? ` with ${e.guests} neighbours` : ''}${e.fire ? ', around a fire' : ''}.${e.rained ? ' It is raining, and half the neighbours stayed home.' : ''}`);
   }
   if (e.kind === 'roda') say(s, 'The friends are sitting down for the weekly roda.');
 }
@@ -211,7 +223,7 @@ function finish(s, e, defs, say) {
   if (e.kind === 'mutirao') {
     c.owed += 1;
     const hours = e.worked / HOUR, share = place && defs[place.key] ? e.worked / defs[place.key].work : 0;
-    text = `Mutirão over: ${e.guests} neighbours gave ${hours.toFixed(1)} hours of work${share >= .01 ? `, ${Math.round(share * 100)}% of the building` : ''}${e.unfed ? `; ${e.unfed} went home hungry` : ''}. The village owes a day of work in return.`;
+    text = `Mutirão over: ${e.guests} neighbours gave ${hours.toFixed(1)} hours of work${share >= .01 ? `, ${Math.round(share * 100)}% of the building` : ''}${e.wet > HOUR ? ', slowed by rain' : ''}${e.unfed ? `; ${e.unfed} went home hungry` : ''}. The village owes a day of work in return.`;
     if (e.unfed) c.goodwill = clamp(c.goodwill - 2 * e.unfed, 0, 100);
     for (const r of s.people) rememberShared(s, r, `Neighbours came for a mutirão. ${profileFor(r).traits.includes('Reserved') ? 'So many hands; it was good, and a lot.' : 'Many hands made the day feel light.'}`);
   }
@@ -273,8 +285,9 @@ export function communityStep(s, dt, defs, api) {
       const place = s.projects.find(p => p.id === e.site), total = place && defs[place.key]?.work;
       // Neighbours stop short of the last touches: the friends finish their own building.
       if (place && api.ready(place) && place.work < total * .97) {
-        const add = Math.min(total * .97 - place.work, dt * e.here * HELPER_PACE);
+        const add = Math.min(total * .97 - place.work, dt * e.here * HELPER_PACE * (s.rain ? RAIN_PACE : 1));
         place.work += add; e.worked += add;
+        if (s.rain) e.wet = (e.wet || 0) + dt;
       }
     }
     if (rule.lunch !== undefined && e.kind !== 'festa' && e.fed === undefined && now.hour >= rule.lunch) {
@@ -299,5 +312,5 @@ export function validCommunity(s, defs) {
     Number.isInteger(e.guests) && e.guests >= 0 && e.guests <= 14 && ['planned', 'running'].includes(e.phase) && s.projects.some(p => p.id === e.site && defs[p.key]) &&
     (e.kind !== 'course' || s.people.some(r => r.id === e.teacher)) &&
     (e.phase !== 'running' || (Number.isFinite(e.until) && e.until <= s.time + DAY && e.centre && ['x', 'z', 'radius'].every(k => Number.isFinite(e.centre[k])))) &&
-    ['here', 'fed', 'unfed', 'worked', 'taught'].every(k => e[k] === undefined || (Number.isFinite(e[k]) && e[k] >= 0)));
+    ['here', 'fed', 'unfed', 'worked', 'taught', 'wet'].every(k => e[k] === undefined || (Number.isFinite(e[k]) && e[k] >= 0)));
 }

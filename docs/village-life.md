@@ -31,7 +31,8 @@ A course that the teacher attends for less than 40% of its length collapses: fee
 - Neighbours appear at the event and vanish after it. They do not walk in, use toilets or water, or have names.
 - A mutirão does not change what the residents themselves choose to work on.
 - The roda records worries the residents already have. It does not create decisions, votes or disagreements.
-- Residents break off from a festa or roda for hunger, thirst and the toilet, and return while it lasts.
+- Residents break off from a festa or roda only for a pressing bodily need, and return while it lasts. At a festa the friends are served first and count as having eaten.
+- Rain halves the neighbours who come to a festa unless it is held in the community hall, and halves the pace of neighbours at a mutirão. The Neighbours screen estimates the share of a building a mutirão would add on a dry day.
 - Guest stays, craft sales and a roadside stall are not modeled.
 - In sandbox, events run with unlimited food and no money changes hands.
 

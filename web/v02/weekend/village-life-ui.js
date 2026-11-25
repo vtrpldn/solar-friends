@@ -3,7 +3,7 @@ import {projectLabel} from './project-names.js';
 import {foodPortions} from './food-storage.js';
 import {
   ensureCommunity, planEvent, planError, cancelEvent, eventSites, eventDays, bookFavour, favourError, maxHelpers, maxGuests,
-  goodwillText, dayName, clock, EVENT_KINDS, COURSES, COURSE_FEE, COURSE_FEE_NO_LUNCH, COURSE_SEATS, FESTA_WOOD,
+  goodwillText, dayName, clock, mutiraoShare, HELPER_PACE, EVENT_KINDS, COURSES, COURSE_FEE, COURSE_FEE_NO_LUNCH, COURSE_SEATS, FESTA_WOOD,
 } from './village-life.js';
 
 // The Neighbours screen: what is coming up, what the village owes, and the
@@ -87,7 +87,9 @@ export function renderNeighbours(s, screen, defs, {notify, refresh, say, ready =
     const site = picker(mutirao, 'Building', 'mutirao-site', siteOptions('mutirao')), day = picker(mutirao, 'Day', 'mutirao-day', dayOptions('mutirao'));
     const most = maxHelpers(s), count = picker(mutirao, 'Neighbours', 'mutirao-guests', Array.from({length: most - 1}, (_, i) => [i + 2, String(i + 2)]));
     el('p', unlimited ? 'Sandbox stores always have lunch for them.' : `Lunch for ${count.value}: ${meals} portions of food in stores now. Up to ${most} neighbours will come at this goodwill.`, mutirao);
-    if (!ready(s.projects.find(p => p.id === Number(site.value)))) el('p', 'Its materials are not all on site yet. Neighbours can only work once they are; if they are still missing on the day, the neighbours will have nothing to do.', mutirao, 'neighbour-blocked');
+    const chosen = s.projects.find(p => p.id === Number(site.value)), share = mutiraoShare(chosen, Number(count.value), defs);
+    el('p', `${count.value} neighbours for a dry day would add about ${share < .005 ? 'less than 1' : Math.round(share * 100)}% of this building. Each works at ${Math.round(HELPER_PACE * 100)}% of a resident’s pace, half that in rain, and they leave the last touches to the friends.`, mutirao);
+    if (!ready(chosen)) el('p', 'Its materials are not all on site yet. Neighbours can only work once they are; if they are still missing on the day, the neighbours will have nothing to do.', mutirao, 'neighbour-blocked');
     call(mutirao, 'mutirao-call', 'Call the mutirão', 'mutirao', {site: Number(site.value), day: Number(day.value), guests: Number(count.value)});
   }
 
@@ -101,7 +103,7 @@ export function renderNeighbours(s, screen, defs, {notify, refresh, say, ready =
   }
 
   const festa = card('Hold a festa');
-  el('p', `An evening together, ${hours('festa')}, at a gathering place. Everyone who comes eats a portion from the stores; ${FESTA_WOOD} pieces of timber make the fire. In June it is a festa junina, and 4 kg of sweet corn makes it one to remember. Neighbours who are fed well think better of the village.`, festa);
+  el('p', `An evening together, ${hours('festa')}, at a gathering place. Everyone who comes eats a portion from the stores; ${FESTA_WOOD} pieces of timber make the fire. In June it is a festa junina, and 4 kg of sweet corn makes it one to remember. Neighbours who are fed well think better of the village. If it rains, half of them stay home unless the festa is in the community hall.`, festa);
   if (!siteOptions('festa').length) el('p', 'A festa needs a finished gathering place, fire circle or community hall.', festa, 'neighbour-blocked');
   else {
     const site = picker(festa, 'Place', 'festa-site', siteOptions('festa')), day = picker(festa, 'Day', 'festa-day', dayOptions('festa'));

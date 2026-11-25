@@ -67,7 +67,8 @@ export function chooseNeed(s,r,i,api) {
    .sort((a,b)=>(physical.includes(b)&&n[b]<15?1:0)-(physical.includes(a)&&n[a]<15?1:0)||n[a]/threshold(a)-n[b]/threshold(b));
  // A festa, the roda or a course to teach comes before work, after bodily needs.
  const gathering=gatheringFor(s,r);
- if(gathering && r.energy>=25 && !r.outsideWork && !pending.some(k=>physical.includes(k))){
+ // Only a pressing bodily need keeps a friend away: wanting dinner or a drink soon does not.
+ if(gathering && r.energy>=25 && !r.outsideWork && !physical.some(k=>n[k]<25)){
   const spot=api.groundSpot(r,gathering.centre,i+2);
   if(spot){assign(s,r,'gather',spot,{gathering:gathering.id,label:gathering.label,animation:gathering.animation,facing:{x:gathering.centre.x,z:gathering.centre.z}});return;}
  }

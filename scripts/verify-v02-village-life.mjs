@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {PROJECTS,createSandbox,plan,tick,save,restore,enableFastNavigation,requiredLoads} from '../web/v02/weekend/simulation.js';
-import {ensureCommunity,planEvent,planError,cancelEvent,eventSites,eventDays,communityVisitors,communityStep,clock as calendar,bookFavour,favourError,maxHelpers,maxGuests,validCommunity,COURSE_FEE,COURSE_FEE_NO_LUNCH,HELPER_PACE} from '../web/v02/weekend/village-life.js';
+import {ensureCommunity,planEvent,planError,cancelEvent,eventSites,eventDays,communityVisitors,communityStep,clock as calendar,bookFavour,favourError,maxHelpers,maxGuests,validCommunity,COURSE_FEE,COURSE_FEE_NO_LUNCH,HELPER_PACE,RAIN_PACE,mutiraoShare} from '../web/v02/weekend/village-life.js';
 import {DAY,HOUR} from '../web/v02/weekend/weather.js';
 
 // A sandbox village with a fire circle, a classroom and a house still to build.
@@ -89,4 +89,15 @@ console.log('PASS planning rules, mutirão work and debt, returned favour, weekl
  for(let w=1;w<=52;w++){quiet.time=w*7*DAY;communityStep(quiet,1,PROJECTS,api);if(w===1)assert(Math.abs(quiet.community.goodwill-94.4)<1e-9);}
  assert(quiet.community.goodwill>30&&quiet.community.goodwill<32,'a year of neglect leaves acquaintance');
  quiet.community.goodwill=10;quiet.time+=7*DAY;communityStep(quiet,1,PROJECTS,api);assert.equal(quiet.community.goodwill,11);assert(validCommunity(quiet,PROJECTS));}
-console.log('PASS course fees with and without lunch, an absent teacher, neighbours sent home hungry, and goodwill fading');
+// Rain: half the neighbours stay home from an open-air festa, none from one in the hall,
+// and neighbours at a mutirão work at half pace. The form's estimate is the dry-day share.
+{const api={say(){},ready:()=>true},village=(key)=>({time:8.5*HOUR,stage:'playing',mode:'story',rain:true,landSeed:3,wood:9,materials:{meals:40},foodStorage:{version:1,lots:{meals:[{n:40,expires:1e9}]},spoiled:{}},
+  people:[{id:'luz',name:'Luz',needs:{hunger:20}}],projects:[{id:1,key,x:40,z:40,work:PROJECTS[key].work},{id:2,key:'house',x:50,z:50,work:0}],operations:[],log:[]});
+ for(const [key,expected] of [['fire-circle',3],['community-hall',6]]){const s=village(key);ensureCommunity(s).events.push({id:1,kind:'festa',site:1,day:0,guests:6,phase:'planned'});s.community.nextId=2;
+  communityStep(s,1,PROJECTS,api);const e=s.community.events[0];assert.equal(e.here,expected,key);assert.equal(s.materials.meals,40-expected-1);assert.equal(s.people[0].needs.hunger,90,'the friends have eaten at the festa');}
+ const wet=village('fire-circle'),dry=village('fire-circle');dry.rain=false;
+ for(const s of [wet,dry]){ensureCommunity(s).events.push({id:1,kind:'mutirao',site:2,day:0,guests:4,phase:'running',until:s.time+HOUR,centre:{x:50,z:50,radius:2},here:4,worked:0});s.community.nextId=2;for(let i=0;i<100;i++){s.time+=1;communityStep(s,1,PROJECTS,api);}}
+ assert(Math.abs(dry.projects[1].work-100*4*HELPER_PACE)<1e-6);assert(Math.abs(wet.projects[1].work-dry.projects[1].work*RAIN_PACE)<1e-6);
+ const house={key:'house',work:0};assert(Math.abs(mutiraoShare(house,4,PROJECTS)-8*HOUR*4*HELPER_PACE/PROJECTS.house.work)<1e-9);
+ assert.equal(mutiraoShare({key:'house',work:PROJECTS.house.work*.97},4,PROJECTS),0);}
+console.log('PASS course fees with and without lunch, an absent teacher, neighbours sent home hungry, goodwill fading, and rain');
