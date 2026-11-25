@@ -4,7 +4,6 @@ These are ideas to explore, not committed implementation scope. Keep planning me
 
 - **Community fridge:** shared leftovers, visitor produce and small social disagreements about food.
 - **Gambiarra engineering:** improvised barrel showers, bicycle washing machines, pallet furniture and repurposed batteries, with maintenance tradeoffs.
-- **Saturday mutirão:** invite neighbors to help with a big project; provide lunch, tools and space, then return the favor.
 - **Escaped goats:** open gates, eaten seedlings and residents coaxing animals home; temperament and fences matter.
 - **Village group chat:** observations tied to actual simulation conditions, with links to relevant actions.
 - **Traveling hardware truck:** limited secondhand supplies, reliability tradeoffs and physically visible stock.
@@ -16,5 +15,7 @@ These are ideas to explore, not committed implementation scope. Keep planning me
 - **Workshop clutter:** borrowed tools and unfinished work make storage and tool carts useful.
 - **Resident-made decorations:** pottery, signs, chimes, hammocks and mosaics emerge from hobbies; players choose placement.
 - **Roadside honesty stall:** passing traffic buys produce and crafts; freshness, placement and physical restocking matter.
+
+The Saturday mutirão is implemented, with weekend courses, festas and a weekly roda: see [village life](village-life.md).
 
 Capybaras are implemented as occasional ambient riverbank visitors. Crop damage and fence-aware wandering remain future extensions.

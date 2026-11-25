@@ -4,7 +4,7 @@ import {tmpdir} from 'node:os';
 import path from 'node:path';
 import {guideSnapshot,verifyGuide,GUIDE_DIR} from './guide-content.mjs';
 import {guideFacts} from '../web/v02/weekend/guide-facts.js';
-assert.equal(await verifyGuide(),27);
+assert.equal(await verifyGuide(),28);
 assert.deepEqual(guideFacts('crops',{crops:{test:{name:'Test crop',days:99}}}),['Test crop: 99 favorable growth days']);
 assert.deepEqual(guideFacts('compost',{recipes:{compost:{input:{scraps:7},output:{compost:3}}}}),['Composting: 7 kg residues → 3 kg mature compost']);
 assert.deepEqual(guideFacts('food',{crops:{test:{name:'Test crop'}},foodDays:{test:8}}),['Test crop: 8 days before ordinary spoilage']);

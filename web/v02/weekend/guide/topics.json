@@ -502,6 +502,25 @@
     "facts": null
   },
   {
+    "id": "neighbours-mutiroes-courses-and-festas",
+    "title": "Neighbours: mutirões, courses and festas",
+    "sources": [
+      "village-life.js",
+      "village-life-ui.js",
+      "visitors.js",
+      "outside-work.js",
+      "resident-needs.js"
+    ],
+    "tests": [
+      "village-life"
+    ],
+    "description": "Open Neighbours (O) to call a mutirão, offer a weekend course or hold a festa. The neighbours' goodwill decides how many people come.",
+    "diagram": "flowchart LR\n Goodwill[Neighbours' goodwill] --> Turnout[How many people come]\n Turnout --> Mutirao[Mutirão: neighbours work on one building]\n Turnout --> Course[Weekend course: a friend teaches paying visitors]\n Turnout --> Festa[Festa: friends and neighbours gather]\n Meals[Prepared meals in stores] --> Mutirao\n Meals --> Course\n Meals --> Festa\n Mutirao --> Owed[The village owes one day of work]\n Owed --> Return[A friend spends a day on a neighbour's land]\n Return --> Goodwill\n Festa --> Goodwill\n Course --> Fees[Fees into village savings]\n Roda[Sunday roda at a gathering place] --> Minutes[What the friends said is kept]",
+    "boundary": "Neighbours work only on a building whose materials are all on site, and leave the last touches to the friends. A mutirão or course happens on a Saturday or Sunday. The region fills one course a fortnight. Neighbours are not residents: they arrive for the event and leave after it.",
+    "tip": "Cook before you invite. Neighbours without lunch go home, and people sent home hungry think less of the village. Return the day of work you owe before you ask for help again.",
+    "facts": null
+  },
+  {
     "id": "asset-maintenance-and-replacement",
     "title": "Asset maintenance and replacement",
     "sources": [

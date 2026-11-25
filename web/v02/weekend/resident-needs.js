@@ -1,4 +1,5 @@
 import {hydrationStep,drinkWater} from './hydration.js';
+import {gatheringFor,attend} from './village-life.js';
 import {foodPortions,eatMeal} from './food-storage.js';
 import {profileFor} from './resident-personality.js';
 import {committed, conversationPartners, conversationFor, finishConversation, finishPersonalTime} from './resident-mind.js';
@@ -28,8 +29,9 @@ export function decayNeeds(s,r,i,dt) {
  for(const key of NEED_KEYS.filter(k=>k!=='hydration'))n[key]=clamp(n[key]-rates[key]*dt*(r.tentPhase==='inside'?.35:1)*(profileFor(r).rates[key]||1));
  if(r.tentPhase==='inside') {n.fun=clamp(n.fun+dt*.04);return;}
 }
-const ACTION={hydration:'drink',hunger:'eat',bladder:'toilet',bowels:'toilet',hygiene:'wash',social:'chat',fun:'play'};
-const DURATIONS={hydration:2,hunger:12,bladder:6,bowels:10,hygiene:14,social:18,fun:22};
+const ACTION={hydration:'drink',hunger:'eat',bladder:'toilet',bowels:'toilet',hygiene:'wash',social:'chat',fun:'play',gather:'chat'};
+// A stay at a gathering is renewed while the event lasts, so friends still break for needs.
+const DURATIONS={hydration:2,hunger:12,bladder:6,bowels:10,hygiene:14,social:18,fun:22,gather:160};
 function release(r) {
  r.needTask=null;r.walk=[];r.target=null;r.lookAt=null;
  r.toiletSite=null;r.washSite=null;r.toiletTime=0;r.washTime=0;r.action='idle';
@@ -63,6 +65,12 @@ export function chooseNeed(s,r,i,api) {
  const pending=NEED_KEYS.filter(k=>(!r.outsideWork || physical.includes(k)) && (r.energy>=25 || physical.includes(k)) && n[k]<threshold(k) &&
    (k!=='social' || (r.mind?.quietUntil||0)<=s.time))
    .sort((a,b)=>(physical.includes(b)&&n[b]<15?1:0)-(physical.includes(a)&&n[a]<15?1:0)||n[a]/threshold(a)-n[b]/threshold(b));
+ // A festa, the roda or a course to teach comes before work, after bodily needs.
+ const gathering=gatheringFor(s,r);
+ if(gathering && r.energy>=25 && !r.outsideWork && !pending.some(k=>physical.includes(k))){
+  const spot=api.groundSpot(r,gathering.centre,i+2);
+  if(spot){assign(s,r,'gather',spot,{gathering:gathering.id,label:gathering.label,animation:gathering.animation,facing:{x:gathering.centre.x,z:gathering.centre.z}});return;}
+ }
  if(!pending.length){r.needBlocked=null;return;}
  const nodes=Object.values(s.infrastructure.nodes);
  const free=node=>!s.people.some(p=>p!==r && p.needTask?.site===node.id);
@@ -147,6 +155,9 @@ export function advanceNeed(s,r,dt,api) {
   if(!partner?.needTask || partner.needTask.partner!==r.id){release(r);return false;}
   if(Math.hypot(partner.x-task.target.x,partner.z-task.target.z)>2.5 || partner.walk.length)return true;
  }
+ if(task.kind==='gather' && !attend(s,r,task.gathering,dt)){release(r);r.needRetryAt=s.time+3;return false;}
+ // Company and enjoyment build while they are there, not only when they leave.
+ if(task.kind==='gather'){r.needs.social=clamp(r.needs.social+dt*.5);r.needs.fun=clamp(r.needs.fun+dt*.4);}
  task.elapsed+=dt;
  if(r.action==='toilet')r.toiletTime=task.elapsed;
  if(r.action==='wash')r.washTime=task.elapsed;
@@ -170,6 +181,7 @@ export function advanceNeed(s,r,dt,api) {
   n.social=95;n.fun=clamp(n.fun+15);
   const partner=s.people.find(p=>p.id===task.partner);
   if(partner?.needTask?.partner===r.id){finishConversation(s,r,partner,task.conversation);partner.needs.social=95;partner.needs.fun=clamp(partner.needs.fun+15);release(partner);partner.needRetryAt=s.time+3;}
+ } else if(task.kind==='gather') {n.social=Math.max(n.social,90);n.fun=Math.max(n.fun,85);
  } else {n.fun=95;finishPersonalTime(s,r,task.label || 'Taking a break');}
  if(task.kind!=='social'){r.needHistory??={};r.needHistory[task.kind]=(r.needHistory[task.kind]||0)+1;}
  release(r);r.needRetryAt=s.time+3;

@@ -41,13 +41,15 @@ import {
   storedMaterials,
   storageCapacity,
   queueProduction,
-  queueWater, queuePurification, queueSanitation,
+  queueWater, queuePurification, queueSanitation, say,
 } from "./simulation.js";
 import { LIQUIDS, hasPowerService, canSwitchBuilding, switchBuilding } from "./infrastructure.js";
 import { illustrate } from "./ui-art.js";
+import { renderNeighbours, neighbourStats } from "./village-life-ui.js";
 const $ = (id) => document.getElementById(id);
 const titles = {
   finances: "Finances",
+  neighbours: "Neighbours",
   food: "Food",
   resources: "Resources",
   items: "Items & equipment",
@@ -59,6 +61,7 @@ const intros = {
   food: "Feed the village today, keep a reserve for tomorrow, and make the most of every harvest.",
   crafting: "Make useful things, care for shared tools, and follow work around the village.",
   items: "Keep track of shared equipment and buy items from town. Open Crafting for resident-made items and repairs.",
+  neighbours: "Work, teach and celebrate with the people who live around you.",
   finances: "See what comes in, what goes out, and what keeps the village running. Click Savings at any time to return here.",
   resources:
     "Keep the essentials close, turn local materials into something useful, and plan the next trip to town.",
@@ -282,8 +285,10 @@ export function createManagement({
     document.querySelector('label[for="purchase"]').textContent = view === 'items' ? 'Town store · items & equipment' : 'Town store · resources';
     $("resource-screen").hidden = !inventoryView;
     $("pantry-panel").hidden = !inventoryView;
-    $("network-screen").hidden = inventoryView || view === "finances" || view === "crafting";
+    $("network-screen").hidden = inventoryView || view === "finances" || view === "crafting" || view === "neighbours";
     $("finance-screen").hidden = view !== "finances";
+    $("neighbours-screen").hidden = view !== "neighbours";
+    if (view === "neighbours") renderNeighbours(s, $("neighbours-screen"), PROJECTS, {notify, refresh, say});
     $('crafting-screen').hidden = view !== 'crafting';
     if(view==='crafting')renderCrafting(s,$('crafting-screen'),notify,refresh);
     $("utility-panel").hidden = true;
@@ -305,7 +310,8 @@ export function createManagement({
         ? "Generation, storage & demand"
         : "Sources, tanks & treatment";
     let stats;
-    if(view === "finances") {
+    if (view === "neighbours") stats = neighbourStats(s);
+    else if(view === "finances") {
       const f=financeSummary(s), money=n=>`${brl(n)}`;
       stats=[["Shared savings",money(f.balance)],["Income recorded",money(f.income)],["Expenses recorded",money(f.expenses)],["Net change",`${f.net>=0?'+':'−'}${money(Math.abs(f.net))}`]];
       const screen=$("finance-screen");screen.replaceChildren();
@@ -360,7 +366,7 @@ export function createManagement({
         const supplies=add('button','Manage service supplies',jobs);supplies.onclick=()=>open('resources');
       }
       add('h3','Where the money goes');
-      const groups={outsideWork:'Outside work',commuting:'Commuting',transport:'Transport',sales:'Surplus sales',construction:'Building materials',purchases:'Operating supplies',household:'Household food',electricity:'Grid electricity'};
+      const groups={outsideWork:'Outside work',courses:'Courses taught',commuting:'Commuting',transport:'Transport',sales:'Surplus sales',construction:'Building materials',purchases:'Operating supplies',household:'Household food',electricity:'Grid electricity'};
       for(const [key,label] of Object.entries(groups))add('p',`${label}: ${money(Math.abs(f.categories[key]||0))}`);
       add('h3','Recent transactions');
       if(!f.entries.length)add('p','No transactions recorded yet.');

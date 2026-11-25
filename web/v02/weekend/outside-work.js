@@ -6,6 +6,7 @@ import {tripEstimate} from './economy-reference.js';
 import {clearDowntime} from './resident-downtime.js';
 import {calendar, HOUR} from './weather.js';
 import {CELL_MIN} from './map-size.js';
+import {settleFavour} from './village-life.js';
 
 // Scenario contracts for the residents' trades. Day shifts use the same hourly rates.
 export const OUTSIDE_JOBS = {
@@ -68,7 +69,7 @@ export function atTownJob(r) {
 }
 
 export function dayShiftDue(s, r) {
-  return !!r.dayShiftBooked && departureMorning(r, calendar(s.time));
+  return !!(r.dayShiftBooked || r.favourBooked) && departureMorning(r, calendar(s.time));
 }
 
 export function dayShiftOffer(s, r) {
@@ -114,18 +115,24 @@ export function cancelDayShift(s, r) {
 }
 
 export function startOutsideWork(s, r, route) {
-  if ((!r.dayShiftBooked && !r.outsideJobEnabled) || r.outsideWork || s.mode === 'sandbox' || s.stage !== 'playing') return;
+  if ((!r.dayShiftBooked && !r.outsideJobEnabled && !r.favourBooked) || r.outsideWork || (s.mode === 'sandbox' && !r.favourBooked) || s.stage !== 'playing') return;
   const clock = calendar(s.time);
-  if (!departureMorning(r, clock) || (!r.dayShiftBooked && clock.absoluteDay % 7 >= 5) || departureBlocker(s, r)) return;
+  if (!departureMorning(r, clock) || (!r.dayShiftBooked && !r.favourBooked && clock.absoluteDay % 7 >= 5) || departureBlocker(s, r)) return;
   const path = route(s, r, BUS_STOP);
   if (!path) {
     r.outsideWorkBlocked = 'No walking route to the entrance.';
     return;
   }
-  const fareDue = spendableMoney(s) < COMMUTE_FARE;
-  if (!fareDue) transact(s, -COMMUTE_FARE, 'commuting', `${r.name}: return bus fare`);
+  // A day returned to a neighbour: they come by with a lift, and nobody is paid.
+  const favour = !!r.favourBooked;
+  const fareDue = !favour && spendableMoney(s) < COMMUTE_FARE;
+  if (!favour && !fareDue) transact(s, -COMMUTE_FARE, 'commuting', `${r.name}: return bus fare`);
   r.outsideWork = {phase: 'outbound', day: clock.absoluteDay, exit: BUS_STOP, fareDue};
-  if (r.dayShiftBooked) {
+  if (favour) {
+    r.outsideWork.fullDay = true;
+    r.outsideWork.favour = true;
+    delete r.favourBooked;
+  } else if (r.dayShiftBooked) {
     r.outsideWork.fullDay = true;
     delete r.dayShiftBooked;
   }
@@ -171,6 +178,12 @@ export function outsideWorkStep(s, r, dt, go, say) {
   } else {
     r.action = 'walk';
     if (!go(s, r, s.stock)) return;
+    if (work.favour) {
+      r.outsideWork = null;
+      r.action = 'idle';
+      settleFavour(s, r, say);
+      return;
+    }
     const paid = shiftPay(job, work.fullDay) - (work.fareDue ? COMMUTE_FARE : 0);
     transact(s, paid, 'outsideWork', `${r.name}: ${job.name}${work.fareDue ? ' (bus fare deducted by employer)' : ''}`);
     r.outsideWork = null;
@@ -185,12 +198,14 @@ export function validOutsideWork(s) {
     if (r.outsideJobEnabled !== undefined && typeof r.outsideJobEnabled !== 'boolean') return false;
     if (r.dayShiftBooked !== undefined && typeof r.dayShiftBooked !== 'boolean') return false;
     if (r.dayShiftBooked && (r.outsideWork || s.mode === 'sandbox')) return false;
+    if (r.favourBooked && r.outsideWork) return false;
     if (r.lastOutsideDay !== undefined && (!Number.isInteger(r.lastOutsideDay) || r.lastOutsideDay < 0 || r.lastOutsideDay > absoluteDay)) return false;
     const work = r.outsideWork;
     if (!work) return true;
     if (activeTrips(s).some(t => t.person === r.id)) return false;
     if (work.fullDay !== undefined && typeof work.fullDay !== 'boolean') return false;
     if (work.fareDue !== undefined && typeof work.fareDue !== 'boolean') return false;
+    if (work.favour !== undefined && typeof work.favour !== 'boolean') return false;
     if (!Number.isInteger(work.day) || work.day !== r.lastOutsideDay || work.exit?.x !== BUS_STOP.x || work.exit?.z !== BUS_STOP.z) return false;
     if (work.phase === 'outbound') return true;
     return ['away', 'inbound'].includes(work.phase) && Number.isFinite(work.until) && work.until >= 0

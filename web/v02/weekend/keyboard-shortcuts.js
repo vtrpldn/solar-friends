@@ -59,6 +59,7 @@ export const BINDINGS = [
     hint: '#build-search, #resource-search'},
 
   {id: 'finances', group: 'Almanac', label: 'M', text: 'Finances', key: ['m'], screen: 'finances', modal: 'management', hint: '[data-manage="finances"], [data-panel="finances"]'},
+  {id: 'neighbours', group: 'Almanac', label: 'O', text: 'Neighbours: mutirões, courses and festas', key: ['o'], screen: 'neighbours', modal: 'management', hint: '[data-manage="neighbours"]'},
   {id: 'items', group: 'Almanac', label: 'K', text: 'Items & equipment', key: ['k'], screen: 'items', modal: 'management', hint: '[data-manage="items"]'},
   {id: 'crafting', group: 'Almanac', label: 'C', text: 'Crafting & repairs', key: ['c'], screen: 'crafting', modal: 'management', hint: '[data-manage="crafting"]'},
   {id: 'food', group: 'Almanac', label: 'Y', text: 'Food', key: ['y'], screen: 'food', modal: 'management', hint: '[data-manage="food"]'},

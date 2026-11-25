@@ -24,6 +24,7 @@ import {upkeepStep,performUpkeep,recordVehicleDistance,validUpkeep,serviceParts,
 import {tripEstimate,STARTING_CAPITAL} from "./economy-reference.js";
 import {CROP_CARE,BIOLOGY,beginBiology,biologicalStep,harvestOutput,validBiology} from "./biological-production.js";
 import {atTownJob, dayShiftDue, startOutsideWork, outsideWorkStep, validOutsideWork} from "./outside-work.js";
+import {communityStep, validCommunity} from "./village-life.js";
 import {coolStoredFood} from './cold-storage.js';
 import {refreshSandboxFood,foodChange,takeFoodLots,freshLots,foodStorageStep,validFoodStorage,returnUnsoldFood,FOOD_DAYS} from './food-storage.js';
 import {recordProduction,validProductionAccounting} from './production-accounting.js';
@@ -2589,6 +2590,7 @@ function tickUncached(s, dt) {
   // Upkeep can reduce battery capacity and service quality before power is allocated.
   const herds=s.projects.filter(p=>p.animalCare).map(p=>[p,p.animalHealth??100]);
   upkeepStep(s, PROJECTS, dt, project => syncProjectNode(sys, project, PROJECTS));
+  communityStep(s, dt, PROJECTS, {say, ready: p => p.delivered >= requiredLoads(p)});
   // Animals going without feed or water are easy to miss; say so as it happens.
   for(const [p,before] of herds){
     const now=p.animalHealth??100;
@@ -2814,7 +2816,7 @@ function tickUncached(s, dt) {
     if (r.energy < 25 && r.job && !r.cargo && !r.needTask) {
       r.walk=[]; r.target=null; r.job=null; r.supplyGoal=null;
     }
-    if (r.dayShiftBooked) startOutsideWork(s,r,route);
+    if (r.dayShiftBooked || r.favourBooked) startOutsideWork(s,r,route);
     if (r.walk.length) {
       const next = r.walk[0],
         dx = next.x - r.x,
@@ -3422,7 +3424,7 @@ export function restore(text) {
     if(s.foodPurchaseBudget!==undefined&&(!Number.isFinite(s.foodPurchaseBudget)||s.foodPurchaseBudget<0||s.foodPurchaseBudget>100000))return null;
     if(s.foodStorage?.lots)for(const id of Object.keys(CROPS))if(s.foodStorage.lots[id]===undefined&&s.materials[id]===0)s.foodStorage.lots[id]=[];
     refreshSandboxFood(s);
-    if (!validFoodPolicy(s) || !validAnimalCare(s,PROJECTS) || !validHydrology(s) || !validWeather(s) || !validCultivation(s) || !validSuppliers(s,MATERIALS) || !validMaterialLedger(s,MATERIALS) || !validProductionHauling(s,PROCESSES) || !validLogisticsPolicy(s) || !validRemovals(s,PROJECTS,MATERIALS) || !validDelivery(s,MATERIALS) || !validUpkeep(s) || !validBiology(s,PROCESSES) || !validOutsideWork(s) || !validFoodStorage(s,PROCESSES,MATERIALS) || !validProductionAccounting(s,PROCESSES) || !validInfrastructure(s) || !validatePolicies(s,MATERIALS) || !validTrade(s,MATERIALS) || !validFinances(s)) return null;
+    if (!validFoodPolicy(s) || !validAnimalCare(s,PROJECTS) || !validHydrology(s) || !validWeather(s) || !validCultivation(s) || !validSuppliers(s,MATERIALS) || !validMaterialLedger(s,MATERIALS) || !validProductionHauling(s,PROCESSES) || !validLogisticsPolicy(s) || !validRemovals(s,PROJECTS,MATERIALS) || !validDelivery(s,MATERIALS) || !validUpkeep(s) || !validBiology(s,PROCESSES) || !validOutsideWork(s) || !validCommunity(s,PROJECTS) || !validFoodStorage(s,PROCESSES,MATERIALS) || !validProductionAccounting(s,PROCESSES) || !validInfrastructure(s) || !validatePolicies(s,MATERIALS) || !validTrade(s,MATERIALS) || !validFinances(s)) return null;
     if (
       s.infrastructure &&
       Object.values(s.infrastructure.nodes).some(

@@ -86,6 +86,11 @@ export function finishConversation(s, a, b, conversation) {
   }
 }
 
+// A day the whole village shared: a mutirão, a festa, a course taught.
+export function rememberShared(s, r, text) {
+  remember(s, r, 'milestone', text);
+}
+
 export function finishPersonalTime(s, r, label) {
   remember(s, r, 'personal', `${label}. ${profileFor(r).reflection}`);
   ensureMind(r).quietUntil = s.time + (100 - profileFor(r).temperament.acceptsAt);
