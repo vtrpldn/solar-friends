@@ -11,11 +11,21 @@ export function createLandSurface(){
  texture.minFilter=texture.magFilter=THREE.LinearFilter;
  texture.needsUpdate=true;
  let previous='';
- return {texture,update(projects,defs,footprint){
+ return {texture,update(projects,defs,footprint,stumps=false){
   const signature=projects.map(p=>`${p.id}:${p.key}:${p.x}:${p.z}:${p.rotation||0}:${!!p.felled}`).join('|');
   if(signature===previous)return false;
   previous=signature;data.fill(0);
   for(const p of projects){
+   // Organic look: a felled tree leaves a small patch of bare, trodden earth.
+   if(p.felled&&stumps&&defs[p.key].kind==='wild-tree'){
+    const cx=(p.x-32)*2,cz=(p.z-32)*2;
+    for(let z=Math.max(0,Math.floor(cz-2+MAP_HALF));z<Math.min(SIZE,cz+2+MAP_HALF);z++)
+     for(let x=Math.max(0,Math.floor(cx-2+MAP_HALF));x<Math.min(SIZE,cx+2+MAP_HALF);x++){
+      const dx=(x+.5-MAP_HALF-cx)/2,dz=(z+.5-MAP_HALF-cz)/2,i=(z*SIZE+x)*4;
+      data[i+2]=Math.max(data[i+2],Math.round(Math.max(0,1-dx*dx-dz*dz)*150));
+     }
+    continue;
+   }
    if(p.felled)continue;
    const def=defs[p.key],[w,d]=footprint(p),tree=def.kind==='wild-tree';
    const cx=(p.x+(w-1)/2-32)*2,cz=(p.z+(d-1)/2-32)*2;

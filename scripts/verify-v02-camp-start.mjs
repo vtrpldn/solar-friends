@@ -54,7 +54,9 @@ for(const seed of [1,777]){
   assert.equal(campPlacementError(s,s.stock.x,s.stock.z,0)!==null,true,'the unloading point stays clear');
   assert.equal(campPlacementError(s,10,10,4)!==null,true,'only quarter turns exist');
   const padsBefore=s.terrainPads.length;
-  const [first]=openSites(s,1,1);
+  // A site whose ground is also free a quarter turn round.
+  const first=openSites(s,1,3).find(o=>!campPlacementError(s,o.x,o.z,0));
+  assert(first,'some open site can take the camp either way round');
   assert.equal(chooseCamp(s,first,{unpack:true}),true);
   assert.equal(s.stage,'playing');assert.deepEqual(s.unpack.delivered,[]);assert.equal(s.campSite.rotation,1);
   assert.equal(canRepitchCamp(s),true,'a fresh camp can still move');

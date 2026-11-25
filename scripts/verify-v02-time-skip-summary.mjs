@@ -38,7 +38,9 @@ for(const [key,label] of [['household','Food bought'],['transport','Trips to tow
   assert.equal(cents(money.rows.find(row=>row.label===label).value),Math.round(s.finances.categories[key]*100),`${key} matches the Finances ledger`);
 assert(money.rows.every(row=>row.tone===(cents(row.value)>0?'gain':'loss')));
 const stores=find(summary,'stores');
-assert.equal(stores.rows.find(row=>row.label==='Food portions').value,`${start.portions} → ${foodPortions(s)}`);
+// A reserve that ends where it began is not a change and gets no row.
+if(foodPortions(s)===start.portions)assert.equal(stores.rows.some(row=>row.label==='Food portions'),false);
+else assert.equal(stores.rows.find(row=>row.label==='Food portions').value,`${start.portions} → ${foodPortions(s)}`);
 assert.equal(stores.rows.find(row=>row.label==='Drinking water').value,`${Math.round(start.water)} → ${Math.round(water(s))} L`);
 const notes=find(summary,'notes'),runs=notes.rows.find(row=>row.label==='Emergency food runs');
 assert.equal(runs.value,`${s.events.filter(e=>e.text.includes('emergency ingredients')).length} trips`);assert.equal(runs.screen,'resources');

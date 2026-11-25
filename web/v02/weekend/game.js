@@ -45,6 +45,7 @@ import { disabledReason, installDisabledInfo } from './disabled-info.js';
 import { protectedEquipment } from './equipment.js';
 import {loadVillage} from './load-village.js';
 import {ensureNaturalLand,TREE_SPECIES} from './natural-resources.js';
+import {natureLook,naturePreview,naturePreviewFocus,prepareNaturePreview,natureScatter,treeLook,applyTreeLook,shapeTree,depositStep,depositModel,stumpModel,stumpIsFresh} from './natural-look.js';
 import {createFoliageWind} from './foliage-wind.js';
 import {saveSlots} from "./save-slots.js";
 import {installSaveDialog} from "./save-dialog.js";
@@ -176,11 +177,12 @@ const restPreview = new URLSearchParams(location.search).has("rest-preview");
 const truckPreview = new URLSearchParams(location.search).has("truck-preview");
 const arrivalPreview =
   scalePreview ||
+  naturePreview ||
   wildlifePreview ||
   utilitiesPreview ||
   restPreview ||
   new URLSearchParams(location.search).has("arrival-preview");
-let s = scalePreview ? createScalePreview(false,new URLSearchParams(location.search).get("scale-preview")) : utilitiesPreview
+let s = naturePreview ? createSandbox(Number(new URLSearchParams(location.search).get("land-seed")) >>> 0 || 7) : scalePreview ? createScalePreview(false,new URLSearchParams(location.search).get("scale-preview")) : utilitiesPreview
   ? createUtilitiesPreview(
       new URLSearchParams(location.search).has("interactions"),
       Number(new URLSearchParams(location.search).get("land-seed")) >>> 0,
@@ -405,12 +407,14 @@ function prop(id, x, z, rotation = 0) {
 }
 // Natural trees and deposits are persistent, selectable world objects.
 ensureNaturalLand(s,PROJECTS);
+// ?nature-preview lines up every deposit stage and part-fells a grove.
+const natureFocus = naturePreview ? prepareNaturePreview(s,PROJECTS,PROCESSES) : null;
 const scenery = new THREE.Group();scene.add(scenery);
 // Keep low vegetation biome-specific; harvestable trees live in the simulation.
 const undergrowthRandom=landRandom(s.landSeed^0x51f92);
 const undergrowth=BIOMES[settingsFor(s.landSeed).biome].trees.filter(id=>!PROJECTS[`wild-${id}`]);
 const groundPlants=undergrowth.length?undergrowth:['landscape-7','landscape-0'];
-for(let i=0;i<100;i++){
+for(let i=0;i<100&&!natureLook;i++){
   const x=32+(undergrowthRandom()-.5)*120,z=32+(undergrowthRandom()-.5)*120;
   if(Math.hypot(x-s.stock.x,z-s.stock.z)<9 || riverBankAt(x,z,1,s.landSeed)||accessRoadAt(x,z,2))continue;
   scenery.add(prop(groundPlants[Math.floor(undergrowthRandom()*groundPlants.length)],x,z,undergrowthRandom()*Math.PI*2));
@@ -420,6 +424,42 @@ scenery.add(prop("garden-bench", s.stock.x - 2, s.stock.z + 1));
 let sceneryMesh = compactModel(scenery);
 scene.add(sceneryMesh);
 scene.remove(scenery);
+// Organic look: growth and loose stone gathered around groves and outcrops.
+// Pieces a building or road now covers are left out when the batch is rebuilt.
+const natureItems = [];
+let natureMesh = null, natureSignature = null;
+if (natureLook) {
+  const known = new Set(ASSETS.map(a => a.id));
+  for (const item of natureScatter(s, PROJECTS, settingsFor(s.landSeed).biome, id => known.has(id))) {
+    let model;
+    if (item.asset) model = prop(item.asset, item.x, item.z, item.rotation);
+    else {
+      const raw = item.build();
+      paintVillageModel(raw);
+      model = compactModel(raw);
+      model.rotation.y = item.rotation;
+    }
+    model.scale.multiplyScalar(item.scale);
+    scene.remove(model);
+    natureItems.push({...item, model});
+  }
+}
+function syncNatureScatter() {
+  if (!natureLook) return;
+  const built = s.projects.filter(p => !p.natural && !PROJECTS[p.key].natural && !p.felled);
+  const signature = built.map(p => `${p.id}:${p.x}:${p.z}:${p.rotation || 0}`).join('|') + `|${s.terrainPads?.length || 0}`;
+  if (signature === natureSignature) return;
+  natureSignature = signature;
+  if (natureMesh) { scene.remove(natureMesh); natureMesh.traverse(o => o.geometry?.dispose()); }
+  const staging = new THREE.Group();
+  for (const item of natureItems) {
+    if (built.some(p => { const [w, d] = footprint(p); return item.x > p.x - 1 && item.x < p.x + w && item.z > p.z - 1 && item.z < p.z + d; })) continue;
+    item.model.position.copy(world(item.x, item.z));
+    staging.add(item.model);
+  }
+  natureMesh = compactModel(staging);
+  scene.add(natureMesh);
+}
 // A simple arrival car and camping tents use the same flat materials and metre scale.
 function box(g, w, h, d, color, x, y, z) {
   const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat(color));
@@ -675,6 +715,16 @@ function syncTerrain() {
     campGroup.position.copy(world(c.x, c.z));
   }
 }
+// Deposits and stumps are built per site, resting each piece on the ground.
+function natureModel(p, def, depositKind) {
+  const [w, d] = footprint(p), centre = world(p.x + (w - 1) / 2, p.z + (d - 1) / 2);
+  const ground = (x, z) => elevationAt(centre.x + x, centre.z + z, s.elevationSeed, s.terrainPads) - centre.y;
+  const raw = depositKind ? depositModel(depositKind, s.landSeed, p, depositStep(s.landSeed, p, PROCESSES[depositKind]), ground) : stumpModel(s, p, def.asset);
+  paintVillageModel(raw);
+  const root = compactModel(raw);
+  scene.add(root);
+  return root;
+}
 function syncBuildings() {
   const ids = new Set(s.projects.map(p => p.id));
   for (const [id, entry] of buildings) if (!ids.has(id)) {
@@ -683,7 +733,8 @@ function syncBuildings() {
     buildings.delete(id);
   }
   syncTerrain();
-  ground.userData.surface.update(s.projects,PROJECTS,footprint);
+  ground.userData.surface.update(s.projects,PROJECTS,footprint,natureLook);
+  syncNatureScatter();
   groundWear?.settle(s.projects,PROJECTS,footprint,s.landSeed);
   autoConnectUtilities(s, PROJECTS);
   for (const p of s.projects) {
@@ -695,6 +746,12 @@ function syncBuildings() {
       p.key === "gathering" && fraction < 0.35 ? "produce-crates" : def.asset;
     if(GATHERING[p.key]&&(p.readyAt>s.time||(GATHERING[p.key].gatherLimit&&(p.extracted||0)>=GATHERING[p.key].gatherLimit)))id+='-gathered';
     if (p.key === "goat-pasture-empty" && p.stocked) id = "goat_pasture";
+    // Organic look: deposits show how far they have been worked, and a felled
+    // tree leaves its stump unless something has since been built over it.
+    const depositKind = natureLook && p.natural ? {'supply-2':'earth','supply-3':'stone'}[p.key] : null;
+    const stump = natureLook && p.felled && def.kind === 'wild-tree';
+    if (depositKind) id += `@${depositStep(s.landSeed, p, PROCESSES[depositKind])}`;
+    if (stump) id += stumpIsFresh(s, p) ? '@fresh-stump' : '@stump';
     if (
       fraction < 1 &&
       assets.has(`${id}-construction-${fraction < 0.5 ? 0 : 1}`)
@@ -712,7 +769,7 @@ function syncBuildings() {
         scene.remove(entry.root);
         disposeModel(entry.root);
       }
-      const root = cultivation ? createCultivationModel(p,s) : prop(
+      const root = cultivation ? createCultivationModel(p,s) : depositKind || stump ? natureModel(p, def, depositKind) : prop(
         id,
         p.x + (footprint(p)[0] - 1) / 2,
         p.z + (footprint(p)[1] - 1) / 2,
@@ -745,6 +802,17 @@ function syncBuildings() {
     entry.root.scale.z = bridgeWidthScale(p);
     entry.root.rotation.y = ((p.rotation || 0) * Math.PI) / 2;
     entry.root.visible=!p.felled&&!plannedSites.hidesModel(p,def);
+    if (natureLook && def.kind === 'wild-tree') {
+      const look = treeLook(s, PROJECTS, p);
+      applyTreeLook(entry.root, look, (x, z) => elevationAt(x, z, s.elevationSeed, s.terrainPads));
+      if (!p.felled && !entry.shaped) { shapeTree(entry.root, look); entry.shaped = true; }
+      if (p.felled) {
+        // A stump is scenery: it is not selectable and gives way to buildings.
+        entry.root.userData.projectId = undefined;
+        entry.root.rotation.set(0, look.yaw, 0);
+        entry.root.visible = !s.projects.some(q => q !== p && !q.felled && p.x >= q.x && p.z >= q.z && p.x < q.x + footprint(q)[0] && p.z < q.z + footprint(q)[1]);
+      }
+    }
 
     if (def.asset === "fire-circle") {
       if (fraction >= 1 && !entry.fire) {
@@ -843,7 +911,7 @@ function focus(c) {
   camera.updateProjectionMatrix();
   controls.update();
 }
-focus(truckPreview ? s.stock : scalePreview ? (previewCollection==="farm"?{x:53,z:54}:new URLSearchParams(location.search).get("scale-preview")==="new-homes"?{x:62,z:53}:new URLSearchParams(location.search).get("scale-preview")==="homes"?{x:63,z:52}:{x:56,z:57}) : s.arrivalAnimating ? s.stock : campLocation(s));
+focus(natureFocus ? natureFocus[naturePreviewFocus] || natureFocus.deposits : truckPreview ? s.stock : scalePreview ? (previewCollection==="farm"?{x:53,z:54}:new URLSearchParams(location.search).get("scale-preview")==="new-homes"?{x:62,z:53}:new URLSearchParams(location.search).get("scale-preview")==="homes"?{x:63,z:52}:{x:56,z:57}) : s.arrivalAnimating ? s.stock : campLocation(s));
 if (savedView) {
   camera.position.fromArray(savedView.position);
   controls.target.fromArray(savedView.target);

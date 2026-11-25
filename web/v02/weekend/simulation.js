@@ -1120,7 +1120,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     recordProduction(s,op.recipe,recipe);
     op.foodOutput=Object.fromEntries(Object.entries(op.harvestOutput||recipe.output).filter(([id,n])=>FOOD_DAYS[id]&&n>0).map(([id,n])=>[id,freshLots(s,id,n,recipe)]));
     if(animalCollection)op.foodOutput[op.recipe]=animalCollection.lots;
-    if(recipe.kind==='wild-tree'){p.felled=true;invalidateNavigation(s);}
+    if(recipe.kind==='wild-tree'){p.felled=true;p.felledAt=s.time;invalidateNavigation(s);}
     if(op.recipe==='cold_storage'){p.coldStorage=true;p.coolingEnabled=true;}
     if(op.recipe==='solar_upgrade')p.solarUpgrade=true;
     op.phase = "return";

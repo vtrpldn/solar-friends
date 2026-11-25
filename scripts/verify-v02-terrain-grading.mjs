@@ -17,6 +17,8 @@ import {
 } from "../web/v02/weekend/elevation.js";
 import { createTerrain, updateTerrain } from "../web/v02/weekend/terrain.js";
 const s = createSandbox(42);
+// Bare land: this fixture places buildings at fixed cells, before any grove could grow there.
+s.naturalLandVersion = s.gatheringLandVersion = 1;
 let site;
 for (let x = 55; x < 85 && !site; x += 3)
   for (let z = 45; z < 80; z += 3) {
