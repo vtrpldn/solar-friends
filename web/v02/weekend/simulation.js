@@ -1289,7 +1289,7 @@ export function createSandbox(landSeed = 0) {
   s.mode = "sandbox";
   s.instantBuild = true;
   s.arrivalElapsed = ARRIVAL_DURATION;
-  chooseCamp(s, "clearing");
+  chooseCamp(s, "entrance");
   sandboxSupplies(s);
   delete s.events;
   s.log = [
