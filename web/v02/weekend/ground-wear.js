@@ -7,6 +7,12 @@ import {riverBankAt} from './river-layout.js';
 const SIZE = 512, TEXELS = SIZE / (MAP_HALF * 2);
 const FACING = [[0, 1], [1, 0], [0, -1], [-1, 0]];
 const metres = cell => (cell - 32) * 2;
+// Days of use before a new building's predicted paths are fully worn in.
+const WEAR_IN_DAYS = 8;
+// One stamp per STRIDE metres walked. A crossing adds about 0.003 to the middle
+// of the track: grass yellows after some twenty crossings and only gives way to
+// packed earth after seventy or more.
+const STRIDE = .5, FOOTFALL = .0016;
 const hasWalls = asset => /^(home-|adobe-|house|kitchen|warehouse|workshop|reading-room|community-hall|outdoor-classroom|eco_toilet|coop|shed|groundwater-well)/.test(asset);
 
 export function createGroundWear() {
@@ -14,16 +20,21 @@ export function createGroundWear() {
   const texture = new THREE.DataTexture(data, SIZE, SIZE);
   texture.minFilter = texture.magFilter = THREE.LinearFilter;
   texture.needsUpdate = true;
-  let settled = '', dirty = false;
+  // Wear is kept as fractions so single footsteps, far below one texture level,
+  // still add up. `laid` is the predicted network, `walked` real footfall.
+  const laid = new Float32Array(SIZE * SIZE), walked = new Float32Array(SIZE * SIZE);
+  const since = new Map(), strides = new Map();
+  let settled = '', dirty = false, first = true;
 
-  function stamp(x, z, radius, channel, amount) {
+  function stamp(x, z, radius, layer, amount) {
     const cx = (x + MAP_HALF) * TEXELS, cz = (z + MAP_HALF) * TEXELS, r = radius * TEXELS;
     for (let tz = Math.max(0, Math.floor(cz - r)); tz <= Math.min(SIZE - 1, cz + r); tz++)
       for (let tx = Math.max(0, Math.floor(cx - r)); tx <= Math.min(SIZE - 1, cx + r); tx++) {
         const d = Math.hypot(tx + .5 - cx, tz + .5 - cz) / r;
         if (d >= 1) continue;
-        const i = (tz * SIZE + tx) * 4 + channel;
-        data[i] = Math.min(255, data[i] + amount * (1 - d * d) * 255);
+        const i = tz * SIZE + tx;
+        layer[i] = Math.min(1, layer[i] + amount * (1 - d * d));
+        data[i * 4] = Math.min(255, Math.round((laid[i] + walked[i]) * 255));
       }
     dirty = true;
   }
@@ -95,22 +106,28 @@ export function createGroundWear() {
       const length = Math.hypot(bx - ax, bz - az), steps = Math.max(1, Math.ceil(length / .5));
       for (let n = 0; n < steps; n++) {
         const t = n / steps;
-        stamp(ax + (bx - ax) * t + sway * (bz - az) / (length || 1), az + (bz - az) * t - sway * (bx - ax) / (length || 1), .75, 0, amount);
+        stamp(ax + (bx - ax) * t + sway * (bz - az) / (length || 1), az + (bz - az) * t - sway * (bx - ax) / (length || 1), .75, laid, amount);
       }
     }
   }
 
   return {
     texture,
-    // Rebuilds yards and paths when the built village changes.
-    settle(projects, defs, footprint, seed) {
+    // Rebuilds yards and paths when the built village changes or a day passes.
+    // Paths to a new building wear in over its first days; `day` is game days.
+    settle(projects, defs, footprint, seed, day = 0) {
       const built = projects.filter(p => !p.natural && !defs[p.key].natural && defs[p.key].kind !== 'wild-tree' &&
         !p.felled && p.work >= defs[p.key].work &&
         !['road', 'bridge'].includes(p.key));
-      const signature = built.map(p => `${p.id}:${p.x}:${p.z}:${p.rotation || 0}`).join('|');
+      // Buildings already standing when the village loads count as long used.
+      for (const p of built) if (!since.has(p.id)) since.set(p.id, first ? -Infinity : day);
+      first = false;
+      const use = p => Math.min(WEAR_IN_DAYS, Math.max(0, Math.floor(day - since.get(p.id)))) / WEAR_IN_DAYS;
+      const signature = built.map(p => `${p.id}:${p.x}:${p.z}:${p.rotation || 0}:${use(p)}`).join('|');
       if (signature === settled) return;
       settled = signature;
-      data.fill(0);
+      laid.fill(0);
+      for (let i = 0; i < walked.length; i++) { data[i * 4] = Math.min(255, Math.round(walked[i] * 255)); data[i * 4 + 1] = 0; }
       if (!built.length) { texture.needsUpdate = true; return; }
       let state = (seed ^ 0x7f4a7c15) >>> 0;
       const random = () => ((state = (Math.imul(state, 1664525) + 1013904223) >>> 0) / 4294967296);
@@ -129,24 +146,36 @@ export function createGroundWear() {
         const door = [Math.round(cx + facing[0] * (w / 2 + .5)), Math.round(cz + facing[1] * (d / 2 + .5))];
         if (def.asset === 'square' || (def.asset === 'fire-circle' && !hub)) hub = [Math.round(cx), Math.round(cz)];
         if (hasWalls(def.asset)) yard(metres(cx), metres(cz), w, d, facing);
-        else if (!open) stamp(metres(door[0]), metres(door[1]), 1.8, 0, .5);
-        if (!open) doors.push(door);
+        else if (!open) stamp(metres(door[0]), metres(door[1]), 1.8, laid, .5 * use(p));
+        if (!open) { door.use = use(p); doors.push(door); }
       }
       hub ??= doors.reduce((sum, door) => [sum[0] + door[0] / doors.length, sum[1] + door[1] / doors.length], [0, 0]).map(Math.round);
       const distance = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
       doors.sort((a, b) => distance(a, hub) - distance(b, hub));
-      for (const door of doors) tread(route(door, hub, blocked, worn, grain), .34, random);
+      for (const door of doors) tread(route(door, hub, blocked, worn, grain), .34 * door.use, random);
       // Neighbours also visit each other directly.
       for (const door of doors) {
         const neighbour = doors.filter(other => other !== door && distance(other, door) > 2)
           .sort((a, b) => distance(a, door) - distance(b, door))[0];
-        if (neighbour && distance(neighbour, door) < 12) tread(route(door, neighbour, blocked, worn, grain), .2, random);
+        if (neighbour && distance(neighbour, door) < 12) tread(route(door, neighbour, blocked, worn, grain), .2 * Math.min(door.use, neighbour.use), random);
       }
       texture.needsUpdate = true;
       dirty = false;
     },
-    // A resident's footstep; positions are map cells.
-    step(x, z) { stamp(metres(x), metres(z), .7, 0, .012); },
+    // A walking resident; positions are map cells. Wear follows the distance
+    // covered, so it does not depend on frame rate or game speed.
+    step(who, x, z) {
+      x = metres(x); z = metres(z);
+      const last = strides.get(who);
+      if (!last) { strides.set(who, {x, z, due: 0}); return; }
+      const length = Math.hypot(x - last.x, z - last.z);
+      // A jump is not a walk: someone was carried, or arrived from off the map.
+      if (length < 8) for (last.due += length; last.due >= STRIDE; last.due -= STRIDE) {
+        const t = 1 - (last.due - STRIDE) / (length || 1);
+        stamp(last.x + (x - last.x) * Math.max(0, t), last.z + (z - last.z) * Math.max(0, t), .7, walked, FOOTFALL);
+      }
+      last.x = x; last.z = z;
+    },
     flush() { if (dirty) { texture.needsUpdate = true; dirty = false; } },
   };
 }
