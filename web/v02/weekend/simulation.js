@@ -579,7 +579,8 @@ const farmProducts = {orchard:'fruit', grove:'bananas', apiary:'honey', coop:'eg
 function scheduleFarmWork(s) {
   if (s.stage !== 'playing') return;
   const pending = (s.operations || []).filter(op => !op.done);
-  let needsForage = !pending.some(op => op.recipe === 'gather-wild-forage') &&
+  // A forage patch nobody can reach must not stop gathering from the others.
+  let needsForage = !pending.some(op => op.recipe === 'gather-wild-forage' && !op.accessRetryAt) &&
     s.upkeep?.jobs.some(job => !job.done && job.care && !job.partsPaid &&
       materialCount(s,'fodder') < ANIMAL_CARE[job.care].fodder);
   const bedJobs = [];
@@ -674,9 +675,19 @@ function maintainFood(s) {
   const day = Math.floor((540 + s.time * .45) / 1440);
   const spent = s.foodPurchases?.day === day ? s.foodPurchases.spent : 0;
   const cost = MATERIALS.food.price + pickupFare(s);
+  if (spendableMoney(s) < cost) {
+    // Going hungry for want of money should not pass in silence.
+    const broke='Food reserve is low, but savings cannot cover an emergency food run.';
+    if(!s.log.includes(broke))say(s,broke);
+    return;
+  }
   if (Math.round((spent + cost) * 100) <= Math.round((s.foodPurchaseBudget ?? 150) * 100) && supplyRun(s,'food')) {
     s.foodPurchases = {day, spent: Math.round((spent + cost) * 100) / 100};
-    say(s,'Food reserve is low: the community bought emergency ingredients. Change this policy in Resources.');
+    // The trip itself is logged on departure and return. Every run is still
+    // recorded for the day recap, but the policy hint is only repeated in the
+    // log once it has scrolled out of the recent lines.
+    const hint='Food reserve is low: the community bought emergency ingredients. Change this policy in Resources.';
+    if(s.log.includes(hint))recordEvent(s,hint,null);else say(s,hint);
   }
 }
 export function maintainWater(s) {
@@ -958,7 +969,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     r.operation = null;
     r.cargo = false;
     if(recipe.equipmentRepair)repairEquipment(s,recipe.equipmentRepair);
-    say(s, op.recipe === "solar_upgrade" ? `Solar upgrade installed at ${projectLabel(p,PROJECTS)}.` : `${recipe.name}: supplies delivered to storage from ${projectLabel(p,PROJECTS)}.`);
+    say(s, op.recipe === "solar_upgrade" ? `Solar upgrade installed at ${projectLabel(p,PROJECTS)}.` : op.farm ? `${projectLabel(p,PROJECTS)}: ${op.farm.action==='harvest'?'harvest':'residues'} from bed ${op.farm.bed+1} delivered to storage.` : `${recipe.name}: supplies delivered to storage from ${projectLabel(p,PROJECTS)}.`);
     return true;
   }
 
@@ -1004,7 +1015,9 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
         !["kitchen", "goat_pasture", "coop"].includes(recipe.kind),
       )
     ) {
-      op.status = "Waiting for usable water";
+      // Water may be on hand while the used-water tank has no room left.
+      op.status = node.capacity[2] - node.water[2] < recipe.water * .8 && node.water[0] >= recipe.water
+        ? "Greywater tank is full; waiting for it to be emptied" : "Waiting for usable water";
       r.action = "blocked";
       return true;
     }
@@ -1064,6 +1077,13 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     p.readyAt = s.time + (BIOLOGY[op.recipe] ? 0 : recipe.renew || 0);
     p.extracted = (p.extracted || 0) + output;
     op.work = recipe.work;
+    // Preparing, planting or amending a bed leaves nothing to carry back, so
+    // the job ends at the bed instead of with an empty-handed walk to storage.
+    if(op.farm&&!Object.values(op.harvestOutput||{}).some(n=>n>0)){
+      op.done=true;r.operation=null;r.cargo=false;
+      const result={prepare:'prepared',plant:`planted with ${CROPS[op.farm.crop]?.name||'a crop'}`,amend:'amended with compost',collect:'had no residues worth collecting',clear:'cleared',harvest:'gave nothing worth carrying'}[op.farm.action];
+      say(s,`${projectLabel(p,PROJECTS)}: bed ${op.farm.bed+1} ${result}.`);
+    }
   }
   return true;
 }
@@ -2508,7 +2528,14 @@ function tickUncached(s, dt) {
   weatherStep(s,dt);
   const sys = autoConnectUtilities(s, PROJECTS);
   // Upkeep can reduce battery capacity and service quality before power is allocated.
+  const herds=s.projects.filter(p=>p.animalCare).map(p=>[p,p.animalHealth??100]);
   upkeepStep(s, PROJECTS, dt, project => syncProjectNode(sys, project, PROJECTS));
+  // Animals going without feed or water are easy to miss; say so as it happens.
+  for(const [p,before] of herds){
+    const now=p.animalHealth??100;
+    if(before>=50&&now<50)say(s,`${projectLabel(p,PROJECTS)}: the animals are going hungry. They need fodder and drinking water every day.`);
+    else if(before>0&&now<=0)say(s,`${projectLabel(p,PROJECTS)}: the animals are starving and have stopped producing.`);
+  }
   infrastructureStep(s, PROJECTS, dt, sys);
   biologicalStep(s,dt,useWater);
   cultivationStep(s,dt,useWater,PROJECTS);
@@ -2522,7 +2549,12 @@ function tickUncached(s, dt) {
     }
   }
   coolStoredFood(s,dt);
+  const spoiledBefore={...s.foodStorage?.spoiled};
   foodStorageStep(s,PROCESSES,MATERIALS);
+  for(const [id,n] of Object.entries(s.foodStorage?.spoiled||{})){
+    const lost=n-(spoiledBefore[id]||0);
+    if(lost>0)say(s,`${materialText(id,lost)} spoiled before it could be used.`);
+  }
   if (s.delivery || s.truckLeaving) {
     const freight = s.delivery || {};
     deliveryStep(s, dt, MATERIALS, changeMaterial, storedMaterials(s), storageCapacity(s));
