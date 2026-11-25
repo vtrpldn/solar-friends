@@ -437,7 +437,7 @@
     "description": "Goods can be in stores, committed, carried, processed or installed.",
     "diagram": "flowchart LR\n Stores[Available stores] --> Reserve[Construction / recipe / export commitments]\n Reserve --> Cargo[Resident or vehicle cargo]\n Cargo --> Site[Staged site inputs]\n Site --> Process[Construction or processing]\n Process --> Output[Resolved output awaiting delivery]\n Output --> Stores\n Process --> Loss[Recorded conversion losses and consumption]\n Sources[Purchases and environmental / biological inputs] --> Stores\n Stores --> Ledger[Material movements and ownership]\n Cargo --> Ledger\n Site --> Ledger\n Output --> Ledger\n Units[Item-specific mass and volume] --> Capacity[Cargo and displayed physical quantities]",
     "boundary": "Ledger entries explain movement; they are not a second stockpile.",
-    "tip": "Check goods already reserved or in transit before buying more. A manifest is not extra stock.",
+    "tip": "Check goods already reserved or in transit before buying more. A manifest is not extra stock. Organic residues sit in a heap outdoors and take no storage room; a compost station turns them into compost.",
     "facts": null
   },
   {

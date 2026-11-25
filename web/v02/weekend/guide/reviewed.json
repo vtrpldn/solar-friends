@@ -80,7 +80,7 @@
     "web/v02/weekend/food-planning.js": "05c63dabba15d6cc1ba86bea47d6e03c89781627e900fcb52be492987bb06687",
     "web/v02/weekend/food-policy.js": "ac870727048ab7b50b4a5ea25d23428d71978044a11e2ffa008717c4ef3f17cc",
     "web/v02/weekend/food-storage.js": "79087519f58dec70bf80f2e7300c4f3b08a2575437d6805ab74e2d39e6e19a85",
-    "web/v02/weekend/game.js": "e7d7098e71d4ecb4caef614e66fa4d32456c1645e68ad7219995b157b8974c95",
+    "web/v02/weekend/game.js": "4e3ec360d60c98df30837bee812260269c756a1263dcd7bab99a06e069328c93",
     "web/v02/weekend/gathering.js": "584f988c2bca6a36a42bb5d5a1734102668e1af41a58e5f71d8dc251627603e1",
     "web/v02/weekend/greenhouse-model.js": "ea687b73db7d6c1d17fe8100ef4474b57b4cfedb1d749d38352ead32627a985d",
     "web/v02/weekend/ground-wear.js": "3c8907603ea422b79f14d0f2f8db94dd602486ea4d671e97bb32382780865c5a",
@@ -97,7 +97,7 @@
     "web/v02/weekend/lab.js": "941b40cc9ee473ef6e83ac7033d5b5e3aed4846b6e8cdbfc86ab5a85eeffe9ee",
     "web/v02/weekend/land-layout.js": "19ba1c542111ea64c453e6da9f004575f5a61c8ddef74e33dee8d7b274af36e6",
     "web/v02/weekend/land-surface.js": "a27626831759a9259264515a143e0fb4e1cd606512ceae1d8b581392b1fcca11",
-    "web/v02/weekend/lens-data.js": "1f0197def760691470268c65b7e93744d7e7be9962930611e850833aefcea592",
+    "web/v02/weekend/lens-data.js": "01e87f1004f23c81dbd682f479630ef1c2369c2bfe47fd8e8bd9a7f68ddc2bf2",
     "web/v02/weekend/lenses.js": "d9caeefce887c5293c06da41a67a1ee3b3021fce94e482e6456efdfd6a8c6b45",
     "web/v02/weekend/load-village.js": "d58fe3540bf1d2f23a2954a8c2ede4dc59bd2cf9996856bf0a0ae72cdeb98133",
     "web/v02/weekend/local-market.js": "29eb3ff2024c706c069e0c986dba83a0ba10e8135a6a08ba9eb383d671f89590",
@@ -144,7 +144,7 @@
     "web/v02/weekend/save-slots.js": "6655ca221ac0cbf69d2f2ed717c96d8641e14b0739b1bb47ddbd87ce7d74f94d",
     "web/v02/weekend/scale-preview.js": "7eb9d68fdcc13f812baee6ceeb0ce1e586d4594d6be4b0cc006630af78789be4",
     "web/v02/weekend/session-ui.js": "e794cfe328367321a212d99d509a6f4ebd0312fb13ef96b1d99089ce1007ad5a",
-    "web/v02/weekend/simulation.js": "8d11c99e934ff5f345206f17c205855d934420ba6f06102fc8669fdd17787e32",
+    "web/v02/weekend/simulation.js": "aed245fcdf4c2c1e74f251e445788931dbfbd041f1b0124545f2564440ed38ac",
     "web/v02/weekend/site-space.js": "45e89f832a9dcb468d476338477b6da9ce470239ae517bab2a3749a09b089498",
     "web/v02/weekend/sunlight.js": "36bba103b290454fb88ba79bff1cc03dceb0e094cf07a9620d235d4e1eaab145",
     "web/v02/weekend/supplier-stock.js": "ba63573d4e6bc873098e200c6c29a6a12514e3f0457cb567a3337fc1013f7af1",
@@ -165,7 +165,7 @@
     "web/v02/workshop/models.js": "4c403f76f3b1ba786be6c84c1c9129de92804ed77b8b8e80c8e76d21c12067d1"
   },
   "content": {
-    "topics": "6102a1a578a5e8668127d74fd5d6101c83eeee5fe6e005b56d3aac8abd6f25ff",
+    "topics": "586eaebf83d2e71f5358a507040704886ad7cf7f41c788977983fb28fe601e1e",
     "facts": "03cf765ea4fd7e4e74ad53972f0338d2b35bf102c44615c0b8c6c9390e6c360a",
     "renderer": "8bd634ddece8c801ba064fe84a4d11adbf769b0ce6a9f7a299f6e0e2dd83dcca",
     "dependencies": "9cc183f2db674fa60fb2a2969ed46747343f550c3ae5e9395aab3532a841eb7a"

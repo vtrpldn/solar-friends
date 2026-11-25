@@ -38,7 +38,7 @@ export function lensData(s,id,{liquid='fresh',material='wood'}={}) {
   const workTone=p=>{
     if(sys.nodes[p.id]?.enabled===false)return 'muted';
     const jobs=ops.filter(o=>o.site===p.id);
-    if(jobs.some(o=>['Building switched off','Waiting for usable water','Greywater tank is full; waiting for it to be emptied','Waiting for power','Storage full','Storage full; output is still carried','Destination full; water remains in the sealed carrier.'].includes(o.status)))return 'bad';
+    if(jobs.some(o=>['Building switched off','Waiting for usable water','Greywater tank is full; waiting for it to be emptied','Waiting for power','Storage full','Storage full; the load waits beside the stores','Destination full; water remains in the sealed carrier.'].includes(o.status)))return 'bad';
     return jobs.length?'good':'warn';
   };
   if(['power','water','sanitation'].includes(id)) {

@@ -2419,7 +2419,7 @@ function renderUI() {
       : !missing.length ? `Materials in stock · ${footprint}`
       : s.autoBuy === false ? `Missing materials · auto-buy off · ${footprint}`
       : !purchase.cost ? `Needs local materials · ${footprint}`
-      : blocked && total + (s.expansionReserve ?? 0) > s.money ? `${brl(total)} · not enough savings · ${footprint}`
+      : blocked && total + (s.expansionReserve ?? 0) > s.money ? `${brl(total)} · ${brl(total + (s.expansionReserve ?? 0) - s.money)} short · ${footprint}`
       : blocked ? `${brl(total)} · supplies unavailable · ${footprint}`
       : `${brl(total)} to buy · ${footprint}`;
     buildMaterialTooltip.update(b, missing, blocked ? purchase.error : "");

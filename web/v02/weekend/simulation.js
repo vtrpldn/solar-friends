@@ -245,8 +245,12 @@ export function storageCapacity(s) {
       600
   );
 }
+// Organic residues lie in a heap outdoors and take no room in the stores.
+// Counted against capacity, they grew without limit (spoilage, kitchen and
+// harvest leavings) until nothing else could be brought in: no harvest, no
+// fodder, no food from town.
 export function storedMaterials(s) {
-  return s.wood + Object.values(s.materials).reduce((a, b) => a + b, 0) + pendingExports(s).reduce((n,o)=>n+o.quantity,0);
+  return s.wood + Object.values(s.materials).reduce((a, b) => a + b, 0) - (s.materials.scraps || 0) + pendingExports(s).reduce((n,o)=>n+o.quantity,0);
 }
 function changeMaterial(s,id,n,lots,reason='transfer'){return foodChange(s,id,n,lots,reason);}
 export function sellMaterial(s, id, holdForPickup=false) {
@@ -994,9 +998,13 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     if(bulk&&!Object.keys(returned).length&&Object.values(op.haulRemaining).some(n=>n>0)){
       op.status="Output exceeds hand-carry capacity";return true;
     }
-    const total = Object.values(returned).reduce((a, b) => a + b, 0);
+    const total = Object.entries(returned).reduce((a, [id, n]) => a + (id === 'scraps' ? 0 : n), 0);
     if (storedMaterials(s) + total > storageCapacity(s)) {
-      op.status = "Storage full; output is still carried";
+      // Set the load down beside the stores. A carrier who kept hold of it
+      // could not eat, drink or rest for as long as the stores stayed full.
+      op.status = "Storage full; the load waits beside the stores";
+      (op.accessRetryAt??={})[r.id]=s.time+30;
+      r.cargo=false;r.operation=null;r.target=null;r.walk=[];r.action='idle';
       return true;
     }
     for (const [id, n] of Object.entries(returned))

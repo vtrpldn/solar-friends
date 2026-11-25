@@ -46,3 +46,29 @@ const restored=restore(save(endurance));
 assert(restored,'six days of resident activity restore');
 assert.equal(restored.time,endurance.time);assert.deepEqual(restored.materials,endurance.materials);
 console.log('PASS Day 7 save round trip retains time and materials');
+{
+ // Organic residues once filled the stores and froze the village: carriers
+ // stood holding loads they could not put down, with every need at zero.
+ const sim=await import('../web/v02/weekend/simulation.js');
+ const {createWeekend:fresh,chooseCamp:camp,tick:step,storedMaterials:stored,storageCapacity:capacity,queueProduction:queue,enableFastNavigation:fast}=sim;
+ const v=fresh(42);camp(v,'entrance');fast(v);for(let i=0;i<20;i++)step(v,.1);
+ const base=stored(v);v.materials.scraps=(v.materials.scraps||0)+5000;
+ assert.equal(stored(v),base,'residues take no room in the stores');
+ // Stores that really are full: the load is set down and the carrier is released.
+ const site=v.projects.find(p=>p.natural&&!queue(v,p.id,'earth'))||v.projects.find(p=>v.operations?.some(o=>o.site===p.id&&o.recipe==='earth'));
+ assert(site,'an earth deposit accepts a job');
+ const op=v.operations.find(o=>o.site===site.id&&!o.done&&!o.water);
+ let returning=false;
+ for(let i=0;i<60000&&!returning;i++){step(v,.1);returning=op.phase==='return';}
+ assert(returning,'the job reaches its carry-home phase');
+ v.materials.stone=capacity(v);
+ let setDown=false;
+ for(let i=0;i<6000&&!setDown;i++){step(v,.1);setDown=/load waits beside the stores/.test(op.status||'');}
+ assert(setDown,'a full store makes the carrier set the load down');
+ assert(v.people.every(r=>r.operation!==op.id),'nobody is left holding the load');
+ assert(sim.restore(sim.save(v)),'the waiting load survives a save');
+ v.materials.stone=0;
+ for(let i=0;i<120000&&!op.done;i++)step(v,.1);
+ assert(op.done,'the load is stored once there is room');
+ console.log('PASS residues take no storage room; a full store releases its carriers and the load is stored later');
+}
