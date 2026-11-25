@@ -39,7 +39,7 @@ for (const asset of ASSETS) {
   // reserved cell (which includes yards). Crops/trees have per-plant budgets.
   const budget=functional && shell ? Math.max(5000,shell[0]*shell[1]*450+2000)
     : ['garden','greenhouse'].includes(asset.id)?8000
-    : ['orchard','supply-0'].includes(asset.id)?12000
+    : ['orchard','supply-0'].includes(asset.id)||asset.id.startsWith('orchard-')?12000
     : ['grove','banana_treatment'].includes(asset.id)?8000
     : asset.id==='picnic-table'?5000:budgets[asset.category];
   assert(triangles<=budget,`${asset.id}: ${triangles} triangles exceeds budget ${budget}`);

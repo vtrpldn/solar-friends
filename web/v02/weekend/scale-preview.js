@@ -3,12 +3,15 @@ import { createSandbox, plan, placementError, PROJECTS, requiredLoads } from './
 import { isBuildOption } from './build-categories.js';
 import { foundationPad } from './elevation.js';
 import { ensureCultivation } from './cultivation.js';
+import { BIOMES, applySettings } from './world-settings.js';
 
 // Isolated desktop fixture, never loaded from or autosaved over a village.
 // The test validates the layout through plan(); the browser seeds those same
 // sites directly so a visual inspection does not wait on dozens of path searches.
-export function createScalePreview(validate = false, collection = 'village') {
+// `biome` shows the same layout on another land, e.g. ?scale-preview&biome=caatinga.
+export function createScalePreview(validate = false, collection = 'village', biome = null) {
   const s = createSandbox(42);
+  if (BIOMES[biome]) applySettings(s, {...s.worldSettings, biome});
   function place(key,x,z) {
     if(validate) {
       const error=plan(s,key,x,z);
@@ -75,6 +78,8 @@ export function createScalePreview(validate = false, collection = 'village') {
     add('garden', 46, 60).forEach((b, i) => grow(b, ['greens', 'beans', 'corn', 'greens'][i], [1, .6, 1, .2][i]));
     add('greenhouse', 52, 60).forEach((b, i) => grow(b, ['greens', 'beans'][i], 1));
     add('house', 60, 60);
+    // Perennials: with &biome=cerrado or caatinga the orchard is the native fruit tree.
+    add('orchard', 46, 68); add('grove', 53, 68);
     s.people.forEach((r, i) => { r.x = 50 + i; r.z = 57; r.walk = []; r.target = null; });
     s.time = 400; s.rain = false; s.rainSeen = true; s.rainResolved = true;
     s.log = ['Farm look preview · every bed state. This scene never autosaves.'];

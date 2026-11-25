@@ -6,7 +6,7 @@ import {FOOD_DAYS,freshLots} from '../web/v02/weekend/food-storage.js';
 import {materialMass} from '../web/v02/weekend/material-measures.js';
 import {buyerFor,supplierFor} from '../web/v02/weekend/local-market.js';
 import {recipeBalance} from '../web/v02/weekend/production-accounting.js';
-import {GAME_DAY,seasonAt} from '../web/v02/weekend/biological-production.js';
+import {GAME_DAY,seasonAt,biologicalStep,biologyText,orchardPlanting,NATIVE_ORCHARDS} from '../web/v02/weekend/biological-production.js';
 
 // Every crop in the table is a complete stock item: product, planting stock,
 // shelf life, measure, buyer, supplier and a cooking recipe that loses mass.
@@ -62,4 +62,35 @@ const loaded=restore(JSON.stringify(legacy));assert(loaded,'older village loads'
  assert.deepEqual(r.input,{cassava:8});assert.equal(balance.lossKg,2);
  const [lot]=freshLots({time:0},'meals',4,r);assert(lot.preserved);assert.equal(lot.expires,30*GAME_DAY);
  assert.equal(freshLots({time:0},'meals',4,PROCESSES.preserve_meals)[0].expires,10*GAME_DAY);}
-console.log('PASS Brazilian staple crops: complete stock items, drought tolerance, dry-season growth, farinha and older saves');
+
+// An orchard is planted with the native fruit tree of a dry biome: pequi in the
+// Cerrado, umbu in the Caatinga. Natives drink less, outlast dry soil and keep
+// growing through the dry season; the Mata Atlântica orchard is unchanged.
+{const orchard=(biome,season)=>{
+  const s={time:0,mode:'story',worldSettings:{biome},projects:[{id:1,soilMoisture:.75,soilFertility:1}],
+   operations:[{site:1,recipe:'fruit',phase:'growing',planted:true,growthRemaining:120*GAME_DAY}]};
+  while(seasonAt(s.time)!==season)s.time+=GAME_DAY;
+  return s;
+ };
+ const days=(s,n,moisture,water=()=>false)=>{for(let d=0;d<n;d++){s.time+=GAME_DAY;if(moisture!==undefined)s.projects[0].soilMoisture=moisture;biologicalStep(s,GAME_DAY,water);}return s.operations[0];};
+ assert.equal(orchardPlanting({worldSettings:{biome:'mata-atlantica'}}),null);assert.equal(orchardPlanting({}),null);
+ assert.equal(orchardPlanting({worldSettings:{biome:'cerrado'}}).species,'pequi');assert.equal(orchardPlanting({worldSettings:{biome:'caatinga'}}).species,'umbuzeiro');
+ // Ten well-watered winter days: umbu grows eight days' worth, where the seasonal factor alone allows three.
+ const grown=op=>120-op.growthRemaining/GAME_DAY;
+ assert(Math.abs(grown(days(orchard('caatinga','Winter'),10,.75))-8)<.01);
+ assert(Math.abs(grown(days(orchard('mata-atlantica','Winter'),10,.75))-7)<.01);
+ assert(Math.abs(grown(days(orchard('cerrado','Summer'),10,.75))-10)<.01,'no bonus in the growing season');
+ // Ten days of dry soil kill a Mata Atlântica orchard crop and leave umbu and pequi unharmed.
+ assert.equal(days(orchard('mata-atlantica','Summer'),10,0).status,'Crop failed · resident clearing work remains');
+ for(const biome of ['cerrado','caatinga']){const op=days(orchard(biome,'Summer'),10,0);assert.equal(op.phase,'growing');assert(!op.droughtDamage);}
+ assert.match(days(orchard('caatinga','Summer'),80,0).status,/failed/,'two dry months still kill a native orchard');
+ // Irrigation drawn in one dry day, from the same starting moisture.
+ const drawn=biome=>{let liters=0;const s=orchard(biome,'Summer');s.projects[0].soilMoisture=.5;days(s,1,undefined,(_,__,n)=>{liters+=n;return true;});return liters;};
+ const usual=drawn('mata-atlantica');assert(Math.abs(drawn('caatinga')-(usual-32*.75))<1e-6&&Math.abs(drawn('cerrado')-(usual-32*.5))<1e-6,'natives need a fraction of the irrigation');
+ assert.match(days(orchard('cerrado','Summer'),1,.75).status,/^Pequi · Growing/);
+ assert.match(biologyText('fruit',{worldSettings:{biome:'caatinga'}}),/planted with umbu/);assert.doesNotMatch(biologyText('fruit',{worldSettings:{biome:'mata-atlantica'}}),/native/);
+ assert.equal(biologyText('bananas',{worldSettings:{biome:'caatinga'}}),biologyText('bananas'));
+ // Each native orchard has its own model in the shared library.
+ const {ASSETS}=await import('../web/v02/library/catalog.js');
+ for(const n of Object.values(NATIVE_ORCHARDS))assert(ASSETS.some(a=>a.id===`orchard-${n.species}`),`orchard-${n.species} model`);}
+console.log('PASS Brazilian staple crops: complete stock items, drought tolerance, dry-season growth, farinha, native orchards and older saves');

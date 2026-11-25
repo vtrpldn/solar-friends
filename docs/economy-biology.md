@@ -49,6 +49,8 @@ Garden and greenhouse harvests now use 2 kg of edible produce per square meter: 
 
 A new orchard's first cycle includes 610 establishment days plus its 120-day productive cycle: two years before the first harvest under favorable conditions. Later cycles use 120 days. This is an authored representative fruit-tree assumption; species-specific juvenile periods vary. Existing orchards migrate as established, preserving their current productive state. Timber stands consume two replacement seedlings after their first harvest; the original planting is included in the building bill. Bamboo is retained as a managed perennial stand, not replanted after each cut.
 
+An orchard is planted with the fruit tree that belongs to its land (`NATIVE_ORCHARDS` in `biological-production.js`). In the Mata Atlântica it stays a mixed fruit orchard. In the Cerrado it is pequi and in the Caatinga umbu: the same two-year establishment, 120-day cycle and 12 kg harvest, but the trees draw 50% (pequi) or 25% (umbu) of the usual irrigation, survive 14 days of dry soil before damage and 60 more before total loss, as managed timber does, and keep at least 80% of their growth rate through the dry season. These factors are authored to express drought adaptation; they are not measured figures for either species, and real pequi and umbu trees take longer than two years to bear. Orchards in existing Cerrado and Caatinga villages become native orchards on load.
+
 
 ## Timber yield calibration
 

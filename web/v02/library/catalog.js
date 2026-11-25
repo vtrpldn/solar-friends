@@ -2033,6 +2033,13 @@ for(const def of ASSETS.filter(a=>a.id==='road'||['Homes','Buildings'].includes(
     add(`${def.id}-construction-${stage}`,`${def.name} · ${stage?'assembly':'groundwork'}`,"Construction",def.footprint,()=>construction(def,stage));
     ASSETS.at(-1).constructionOf=def.id;
   }
+// Orchards of the native fruit tree of each drier biome. They are looks of the
+// one buildable orchard, not buildings of their own, so they have no
+// construction stages: an orchard being built is the same in every biome.
+for(const [species,name] of [['pequi','Pequi orchard'],['umbuzeiro','Umbu orchard']]){
+  add(`orchard-${species}`,name,"Building variants",FUNCTIONAL_PROGRAM.orchard.site,()=>functionalFacility('orchard',{plant,tree,goat,chicken},2,species));
+  ASSETS.at(-1).description=`Four young ${name.split(' ')[0].toLowerCase()} trees spaced four metres apart, with access for tending and harvest.`;
+}
 for (const animal of LIVESTOCK) add(animal.id,animal.name,"Animals",[1,1],animal.build);
 ASSETS.find(asset => asset.id === "piglet").revision = 2;
 add("canvas-tent-teal", "Sage canvas tent", "Props", [2, 2], () => createTent(0));

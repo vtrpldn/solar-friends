@@ -22,6 +22,16 @@ export function growthRate(s,recipe){
  const factors=biome==='caatinga'?{Summer:1,Autumn:.8,Winter:.3,Spring:.45}:biome==='cerrado'?{Summer:1,Autumn:.8,Winter:.45,Spring:.8}:{Summer:1,Autumn:.9,Winter:.7,Spring:1};
  return factors[season];
 }
+// An orchard is planted with the fruit tree that belongs to its land. Pequi and
+// umbu are adapted to a long dry season: they need a fraction of the irrigation,
+// sit out dry soil like timber does and keep most of their growth through it.
+// Authored factors, not agronomic figures; see docs/economy-biology.md.
+export const NATIVE_ORCHARDS={
+ cerrado:{species:'pequi',fruit:'Pequi',water:.5,season:.8,dry:{graceDays:14,lossDays:60}},
+ caatinga:{species:'umbuzeiro',fruit:'Umbu',water:.25,season:.8,dry:{graceDays:14,lossDays:60}},
+};
+export const orchardPlanting=s=>NATIVE_ORCHARDS[s?.worldSettings?.biome]||null;
+const nativeFor=(s,recipe)=>recipe==='fruit'?orchardPlanting(s):null;
 export function biologyLabel(recipe){return ['eggs','milk','honey'].includes(recipe)?'Next collection':recipe==='compost'?'Composting':'Growing';}
 export const IRRIGATION_POLICIES={balanced:'Balanced · maintain 75% soil moisture',conserve:'Conserve water · maintain 40% soil moisture',rainfed:'Rain-fed · no stored water'};
 export function beginBiology(s,op,r){
@@ -39,7 +49,7 @@ export function biologicalStep(s,dt,useWater){
  for(const p of s.projects||[])if(!p.cultivation&&p.soilFertility!==undefined&&!active.has(p.id))p.soilFertility=Math.min(1,p.soilFertility+dt/(180*GAME_DAY));
  for(const op of s.operations||[]){
   if(op.done||!(op.phase==='growing'||op.phase==='process'&&op.ripeAt!==undefined))continue;
-  const crop=CROP_CARE[op.recipe],site=s.projects?.find(p=>p.id===op.site);
+  const native=nativeFor(s,op.recipe),care=CROP_CARE[op.recipe],crop=care&&native?{...care,liters:care.liters*native.water}:care,site=s.projects?.find(p=>p.id===op.site);
   let moisture=1,fertility=1;
   if(crop&&site){
    site.soilMoisture??=.75;site.soilFertility??=1;
@@ -51,12 +61,12 @@ export function biologicalStep(s,dt,useWater){
    site.soilMoisture=Math.max(0,Math.min(1,site.soilMoisture+(rain+(irrigated?refill:0)-need)/(crop.area*16)));
    moisture=site.soilMoisture<.1?0:Math.min(1,site.soilMoisture/.4);
    fertility=.5+.5*site.soilFertility;
-   if(cropStress(op,site.soilMoisture,dt,op.recipe==='wood'?{graceDays:14,lossDays:60}:undefined)==='failed'){op.growthRemaining=0;op.phase='process';op.ripeAt??=s.time;op.status='Crop failed · resident clearing work remains';continue;}
+   if(cropStress(op,site.soilMoisture,dt,op.recipe==='wood'?{graceDays:14,lossDays:60}:native?.dry)==='failed'){op.growthRemaining=0;op.phase='process';op.ripeAt??=s.time;op.status='Crop failed · resident clearing work remains';continue;}
   }
   if(op.phase!=='growing')continue;
-  op.growthRemaining=Math.max(0,op.growthRemaining-dt*growthRate(s,op.recipe)*moisture*fertility);
+  op.growthRemaining=Math.max(0,op.growthRemaining-dt*Math.max(native?.season||0,growthRate(s,op.recipe))*moisture*fertility);
   const days=op.growthRemaining/GAME_DAY;
-  op.status=`${biologyLabel(op.recipe)}: ${days.toFixed(1)} game days remaining · ${seasonAt(s.time)}${crop&&site?` · soil moisture ${Math.round(site.soilMoisture*100)}% · fertility ${Math.round(site.soilFertility*100)}% · up to ${crop.liters} L/day irrigation · ${IRRIGATION_POLICIES[site.irrigationPolicy||'balanced']}`:""}`;
+  op.status=`${native?`${native.fruit} · `:''}${biologyLabel(op.recipe)}: ${days.toFixed(1)} game days remaining · ${seasonAt(s.time)}${crop&&site?` · soil moisture ${Math.round(site.soilMoisture*100)}% · fertility ${Math.round(site.soilFertility*100)}% · up to ${crop.liters} L/day irrigation · ${IRRIGATION_POLICIES[site.irrigationPolicy||'balanced']}`:""}`;
   if(!op.growthRemaining){if(crop&&site)site.soilFertility=Math.max(0,site.soilFertility-.1);op.phase='process';op.ripeAt=s.time;op.status=['eggs','milk','honey'].includes(op.recipe)?'Ready for resident collection':'Ready for resident harvest work';}
  }
 }
@@ -68,7 +78,7 @@ export function harvestOutput(s,op,recipe){
  const result={...recipe.output};for(const id of Object.keys(result))if(result[id])result[id]=Math.floor(result[id]*factor+1e-8);
  return result;
 }
-export function biologyText(recipe){const b=BIOLOGY[recipe];if(recipe==='wood')return ' · Four trees on 36 m²; six favorable growing years, longer in dry or cool conditions · 288 kg raw logs at full health, requiring processing before construction · Four replacement seedlings per later rotation · Planting, felling and hauling require resident work';return b?` · ${b.days} game days ${['eggs','milk','honey'].includes(recipe)?'between collections':'of growth/curing'}, separate from resident work${b.seasonal?'; slower in unfavorable seasons':''}${Number.isFinite(b.window)?`; ${['eggs','milk','honey'].includes(recipe)?'collect':'harvest'} within ${b.window} days before gradual ${['eggs','milk','honey'].includes(recipe)?'uncollected output':'field'} losses`:''}`:'';}
+export function biologyText(recipe,s){const b=BIOLOGY[recipe],native=nativeFor(s,recipe);if(native)return `${biologyText(recipe)} · On this land the orchard is planted with ${native.fruit.toLowerCase()}, a native tree that needs ${Math.round(native.water*100)}% of the usual irrigation, survives two dry weeks and keeps growing through the dry season`;if(recipe==='wood')return ' · Four trees on 36 m²; six favorable growing years, longer in dry or cool conditions · 288 kg raw logs at full health, requiring processing before construction · Four replacement seedlings per later rotation · Planting, felling and hauling require resident work';return b?` · ${b.days} game days ${['eggs','milk','honey'].includes(recipe)?'between collections':'of growth/curing'}, separate from resident work${b.seasonal?'; slower in unfavorable seasons':''}${Number.isFinite(b.window)?`; ${['eggs','milk','honey'].includes(recipe)?'collect':'harvest'} within ${b.window} days before gradual ${['eggs','milk','honey'].includes(recipe)?'uncollected output':'field'} losses`:''}`:'';}
 export function validBiology(s,recipes){if(!(s.projects||[]).every(p=>p.irrigationPolicy===undefined||Object.hasOwn(IRRIGATION_POLICIES,p.irrigationPolicy)))return false;if(!(s.projects||[]).every(p=>[p.soilMoisture,p.soilFertility].every(n=>n===undefined||(Number.isFinite(n)&&n>=0&&n<=1))))return false;if(!(s.projects||[]).every(p=>(p.starterSeedlingsUsed===undefined||typeof p.starterSeedlingsUsed==='boolean')&&(p.orchardEstablished===undefined||typeof p.orchardEstablished==='boolean')&&(p.harvestCount===undefined||(Number.isInteger(p.harvestCount)&&p.harvestCount>=0))))return false;return (s.operations||[]).every(o=>{
  if(!validCropStress(o))return false;
  if(o.farm)return true;

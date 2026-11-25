@@ -2,7 +2,7 @@ import { brl } from "./money.js";
 import { DREAM_LIGHTS, lightingAt } from "./dream-lighting.js";
 import {createPaintedView, paintVillageModel, villageClouds} from "./painted-village.js";
 import {createGroundWear} from './ground-wear.js';
-import {GAME_DAY} from './biological-production.js';
+import {GAME_DAY,orchardPlanting} from './biological-production.js';
 import "./keyboard-focus.js";
 import {renderDevTools} from './dev-tools.js';
 renderDevTools(document.getElementById('dev-tools'));
@@ -183,7 +183,7 @@ const arrivalPreview =
   utilitiesPreview ||
   restPreview ||
   new URLSearchParams(location.search).has("arrival-preview");
-let s = naturePreview ? createSandbox(Number(new URLSearchParams(location.search).get("land-seed")) >>> 0 || 7) : scalePreview ? createScalePreview(false,new URLSearchParams(location.search).get("scale-preview")) : utilitiesPreview
+let s = naturePreview ? createSandbox(Number(new URLSearchParams(location.search).get("land-seed")) >>> 0 || 7) : scalePreview ? createScalePreview(false,new URLSearchParams(location.search).get("scale-preview"),new URLSearchParams(location.search).get("biome")) : utilitiesPreview
   ? createUtilitiesPreview(
       new URLSearchParams(location.search).has("interactions"),
       Number(new URLSearchParams(location.search).get("land-seed")) >>> 0,
@@ -748,6 +748,8 @@ function syncBuildings() {
       p.key === "gathering" && fraction < 0.35 ? "produce-crates" : def.asset;
     if(GATHERING[p.key]&&(p.readyAt>s.time||(GATHERING[p.key].gatherLimit&&(p.extracted||0)>=GATHERING[p.key].gatherLimit)))id+='-gathered';
     if (p.key === "goat-pasture-empty" && p.stocked) id = "goat_pasture";
+    // A finished orchard shows the native fruit tree of its land.
+    if (id === "orchard" && fraction >= 1 && orchardPlanting(s)) id = `orchard-${orchardPlanting(s).species}`;
     // Organic look: deposits show how far they have been worked, and a felled
     // tree leaves its stump unless something has since been built over it.
     const depositKind = natureLook && p.natural ? {'supply-2':'earth','supply-3':'stone'}[p.key] : null;
