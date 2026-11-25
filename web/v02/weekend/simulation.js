@@ -31,6 +31,7 @@ import {applyConstructionSpecs,migrateConstructionLabor,CONSTRUCTION_LABOR_VERSI
 import {collectionBudget,spendableMoney} from './procurement-budget.js';
 import {returnPickup,pickupFare,reserveExport,pendingExports,loadExports,settleExports,validTrade,transportCost,fitsCargo,blueprintManifest,receiveBlueprintShipment,projectFreight} from './physical-trade.js';
 import {recordEvent} from './event-history.js';
+import {footfallBefore,recordFootfall,repairFootfall} from './footfall.js';
 import { unrotatedSiteSize, validSiteVersion } from './site-space.js';
 import { accessGeometry, insideSolid, segmentHitsSolid, BODY_RADIUS } from './building-access.js';
 import { craftingBlocker, craftStage, practiceCraft, validCraftSkills } from './crafting.js';
@@ -2561,7 +2562,9 @@ export function endWeekend(s) {
   return true;
 }
 export function tick(s,dt){
-  try { return tickWithNavigation(s,dt); } finally { releaseEquipment(s); }
+  // Nobody has set foot on the land until the arrival is over.
+  const before=s.stage==='arrival'||s.arrivalAnimating?null:footfallBefore(s);
+  try { return tickWithNavigation(s,dt); } finally { releaseEquipment(s); if(before&&dt>0)recordFootfall(s,before,dt); }
 }
 function tickWithNavigation(s,dt){
   if(!fastNavigationStates.has(s))return tickUncached(s,dt);
@@ -3100,6 +3103,7 @@ export function restore(text) {
     if(s.weather===undefined)weatherStep(s);
     if(!validGathering(s))return null;
     restoreHomeAssignments(s);
+    repairFootfall(s);
     numberProjects(s, PROJECTS);
     // Saves predating narrow footbridges retain their exact 8×2 occupancy,
     // centre, rotations and deck width. New plans explicitly write version 1.

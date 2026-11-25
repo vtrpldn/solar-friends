@@ -2,7 +2,6 @@ import { brl } from "./money.js";
 import { DREAM_LIGHTS, lightingAt } from "./dream-lighting.js";
 import {createPaintedView, paintVillageModel, villageClouds} from "./painted-village.js";
 import {createGroundWear} from './ground-wear.js';
-import {GAME_DAY} from './biological-production.js';
 import "./keyboard-focus.js";
 import {renderDevTools} from './dev-tools.js';
 renderDevTools(document.getElementById('dev-tools'));
@@ -337,7 +336,7 @@ function updateSunlight(time, dt) {
 const mat = (color) =>
   new THREE.MeshStandardMaterial({ color, roughness: 1, flatShading: true });
 const groundWear = livedLook ? createGroundWear() : null;
-let wearDay = -1;
+let wearPainted = -Infinity;
 const ground = createTerrain(s.landSeed, s.elevationSeed, s.terrainPads, groundWear?.texture);
 scene.add(ground);
 let accessRoad = compactModel(createAccessRoad(s.elevationSeed, s.terrainPads));
@@ -737,7 +736,7 @@ function syncBuildings() {
   syncTerrain();
   ground.userData.surface.update(s.projects,PROJECTS,footprint,natureLook);
   syncNatureScatter();
-  groundWear?.settle(s.projects,PROJECTS,footprint,s.landSeed,s.time/GAME_DAY);
+  groundWear?.settle(s.projects,PROJECTS,footprint);
   autoConnectUtilities(s, PROJECTS);
   for (const p of s.projects) {
     const def = PROJECTS[p.key],
@@ -2975,10 +2974,8 @@ function frame(now) {
     villageClouds.offset.value.y += dt * 1.1;
     // Cloud shadows need a sun to cast them: none at night or under overcast.
     villageClouds.strength.value = .46 * lightingAt(visual.time).sun.daylight * (1 - cloudCover);
-    if (!paused) visual.people.forEach((r, i) => { if (s.people[i].walk?.length) groundWear.step(i, r.x, r.z); });
-    // New paths wear in a little more with each day of use.
-    if (Math.floor(s.time / GAME_DAY) !== wearDay) { wearDay = Math.floor(s.time / GAME_DAY); groundWear.settle(s.projects, PROJECTS, footprint, s.landSeed, s.time / GAME_DAY); }
-    groundWear.flush();
+    // Paths change slowly; redrawing them once a second is plenty.
+    if (now - wearPainted > 1000) { wearPainted = now; groundWear.paint(s.footfall, s.landSeed); }
   }
   // Keep the shadow volume over the viewed land, not the world origin.
   // Moving light and target together preserves the time-of-day sun direction.
