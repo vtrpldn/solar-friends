@@ -889,6 +889,13 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
       return true;
     }
     if (op.phase === "pickup") {
+      // Nobody sets out for water that has nowhere to be poured.
+      if (!r.target && !utilitySpot(s, node, r)) {
+        op.status="Waiting for an accessible work position";
+        (op.accessRetryAt??={})[r.id]=s.time+30;
+        r.operation=null;r.walk=[];r.action='idle';
+        return false;
+      }
       let start;
       if (w.from === -1) {
         start = w.sourcePoint || (w.sourcePoint=nearestRiverAccess(s,r));
@@ -919,7 +926,14 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     r.action = "carry";
     r.cargo = true;
     const dest = utilitySpot(s, node, r);
-    if (!dest) {op.status="Waiting for an accessible work position";r.action="blocked";return true;}
+    if (!dest) {
+      // Set the water down. A carrier left holding it could not eat, drink or
+      // rest for as long as the way to the tank stayed shut.
+      op.status="Waiting for an accessible work position";
+      w.stagedAt={x:r.x,z:r.z};(op.accessRetryAt??={})[r.id]=s.time+30;
+      r.cargo=false;r.operation=null;r.target=null;r.walk=[];r.action='idle';
+      return false;
+    }
   if (!go(s, r, dest)) return true;
     const n = Math.min(w.amount, node.capacity[index] - node.water[index]);
     node.water[index] += n;

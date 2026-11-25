@@ -41,7 +41,7 @@ const stores=find(summary,'stores');
 // A reserve that ends where it began is not a change and gets no row.
 if(foodPortions(s)===start.portions)assert.equal(stores.rows.some(row=>row.label==='Food portions'),false);
 else assert.equal(stores.rows.find(row=>row.label==='Food portions').value,`${start.portions} → ${foodPortions(s)}`);
-assert.equal(stores.rows.find(row=>row.label==='Drinking water').value,`${Math.round(start.water)} → ${Math.round(water(s))} L`);
+assert.equal(stores.rows.find(row=>row.label==='Clean water').value,`${Math.round(start.water)} → ${Math.round(water(s))} L`);
 const notes=find(summary,'notes'),runs=notes.rows.find(row=>row.label==='Emergency food runs');
 assert.equal(runs.value,`${s.events.filter(e=>e.text.includes('emergency ingredients')).length} trips`);assert.equal(runs.screen,'resources');
 assert(!notes.rows.some(row=>/purified|heading to the car|unloaded/.test(row.value)),'routine log lines are folded into counts');

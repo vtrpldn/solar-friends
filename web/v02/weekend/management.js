@@ -129,7 +129,7 @@ export function createManagement({
     $("utility-kind").innerHTML = (view === "power" ? ["power"] : LIQUIDS)
       .map(
         (k) =>
-          `<option value="${k}">${k === "power" ? "Power cable" : k === "fresh" ? "Drinking water" : k === "greywater" ? "Greywater" : "Sealed sewage"}</option>`,
+          `<option value="${k}">${k === "power" ? "Power cable" : k === "fresh" ? "Clean water" : k === "greywater" ? "Greywater" : "Sealed sewage"}</option>`,
       )
       .join("");
     $("management-message").textContent = "";
@@ -181,11 +181,12 @@ export function createManagement({
         detail.append(line, meter);
       }
     } else {
+      // The river is a place to fill buckets, not a tank with a level.
       for (const [i, k] of LIQUIDS.map(k => [liquidIndex(k), k]))
-        if (n.capacity[i]) {
+        if (n.capacity[i] && n.kind !== "river") {
           const line = document.createElement("div");
           line.className = `water-level ${k}`;
-          line.textContent = `${{ fresh: "Drinking water", greywater: "Greywater", sewage: "Sewage" }[k]} · ${n.water[i].toFixed(1)} / ${n.capacity[i]} L`;
+          line.textContent = `${{ fresh: "Clean water", greywater: "Greywater", sewage: "Sewage" }[k]} · ${n.water[i].toFixed(1)} / ${n.capacity[i]} L`;
           const meter = document.createElement("progress");
           meter.max = n.capacity[i];
           meter.value = n.water[i];
@@ -221,7 +222,8 @@ export function createManagement({
       if (canSwitchBuilding(state().infrastructure,n)) actions.append(toggle);
       el.append(actions);
     }
-    if(view==='water' && n.id!==-1 && n.capacity[0] && !['groundwater-well','rain-barrel','water-pump'].includes(n.kind)) {
+    // Tanks and crop sites can be topped up by hand; taps fed from them cannot.
+    if(view==='water' && n.capacity[0] && ['camp','well','water-storage','garden','greenhouse','orchard','grove'].includes(n.kind)) {
       const actions=document.createElement('div');actions.className='node-actions';
       const waterJob=(state().operations||[]).find(o=>!o.done && o.water && o.site===n.id);
       const pending=!!waterJob,full=n.water[0]>=n.capacity[0];
@@ -417,7 +419,7 @@ export function createManagement({
     else
       stats = LIQUIDS.map(k => [k, liquidIndex(k)]).map(([k, i]) => [
         {
-          fresh: "Drinking water",
+          fresh: "Clean water",
           greywater: "Greywater",
           sewage: "Sewage",
         }[k],

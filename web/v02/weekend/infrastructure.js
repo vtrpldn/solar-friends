@@ -409,14 +409,12 @@ export function infrastructureStep(s, defs, dt, sys = syncInfrastructure(s, defs
     }
     if(catchments.has(n.id))captureRain(s,n,catchments.get(n.id),dt);
     if (n.enabled && n.kind === "wetland") {
-      const amount = Math.min(
-        n.water[2],
-        (n.capacity[0] - n.water[0]) / 0.85,
-        10 * hours,
-      );
+      // A full reed bed keeps treating: what it cannot hold seeps away.
+      const amount = Math.min(n.water[2], 10 * hours),
+        kept = Math.min(amount * 0.85, n.capacity[0] - n.water[0]);
       n.water[2] -= amount;
-      n.water[0] += amount * 0.85;
-      sys.account.waterLost += amount * 0.15;
+      n.water[0] += kept;
+      sys.account.waterLost += amount - kept;
     }
     if (n.enabled && ["banana_treatment", "biodigester"].includes(n.kind)) {
       const amount = Math.min(n.water[3], 8 * hours);

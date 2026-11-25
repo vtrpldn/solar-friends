@@ -40,7 +40,7 @@ export function stopReason(s,condition){
  if(condition==='harvest'&&beds.some(b=>b.stage==='harvestable'&&!harvestExpired(b,s.time)))return 'A crop is ready to harvest.';
  if(condition==='crop-failed'&&beds.some(b=>b.stage==='failed'||harvestExpired(b,s.time)))return 'A crop has failed or expired.';
  if(condition==='hydration'&&s.people.some(r=>r.needs.hydration<20))return 'A resident has urgent thirst.';
- if(condition==='water'&&Object.values(s.infrastructure.nodes).reduce((n,a)=>n+a.water[0],0)<.5)return 'Less than 0.5 L of potable water remains.';
+ if(condition==='water'&&Object.values(s.infrastructure.nodes).reduce((n,a)=>n+a.water[0],0)<.5)return 'Less than 0.5 L of clean water remains.';
  if(condition==='blocked'&&(s.operations||[]).some(o=>!o.done&&o.accessRetryAt&&Object.values(o.accessRetryAt).some(t=>t>s.time)))return 'A job is waiting for access.';
  return '';
 }

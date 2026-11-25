@@ -1874,7 +1874,7 @@ function renderUtilityUI() {
     (l) => (management?.view === "power") === (l.kind === "power"),
   )) {
     const b = document.createElement("button");
-    b.textContent = `${{ power: "Power", fresh: "Drinking water", greywater: "Greywater", sewage: "Sewage" }[l.kind]} · ${labels.find(([id]) => id === l.from)?.[1]} → ${labels.find(([id]) => id === l.to)?.[1]}: ${l.work < l.required ? Math.floor((l.work / l.required) * 100) + "% installed" : l.enabled ? "on" : "off"}`;
+    b.textContent = `${{ power: "Power", fresh: "Clean water", greywater: "Greywater", sewage: "Sewage" }[l.kind]} · ${labels.find(([id]) => id === l.from)?.[1]} → ${labels.find(([id]) => id === l.to)?.[1]}: ${l.work < l.required ? Math.floor((l.work / l.required) * 100) + "% installed" : l.enabled ? "on" : "off"}`;
     b.setAttribute("aria-pressed", String(l.enabled));
     b.title = l.enabled
       ? "Switch this connection off"
@@ -1932,7 +1932,7 @@ function renderUtilityUI() {
     ? `${hasPowerService(sys,node) ? node.enabled === false ? "Switched off" : node.power >= .995 ? "Powered" : `Getting ${(node.power * 100).toFixed(0)}% of the power it needs` : ""}${node.battery ? ` · Battery ${node.charge.toFixed(1)}/${node.battery} kWh` : ""}${hasPowerService(sys,node) ? ". " : ""}${LIQUIDS.map(k => [k, liquidSlot(k)]).map(
         ([k, i]) =>
           node.capacity[i]
-            ? `${{ fresh: "Drinking water", greywater: "Greywater", sewage: "Sewage" }[k]}: ${node.water[i].toFixed(1)}/${node.capacity[i]} L`
+            ? `${{ fresh: "Clean water", greywater: "Greywater", sewage: "Sewage" }[k]}: ${node.water[i].toFixed(1)}/${node.capacity[i]} L`
             : "",
       )
         .filter(Boolean)

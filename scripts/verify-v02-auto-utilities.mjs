@@ -47,16 +47,17 @@ const link = (kind, from, to) =>
   sys.links.find((l) => l.kind === kind && l.from === from && l.to === to);
 assert.ok(!sys.links.some(l=>l.from===-1), 'no invisible river pumping');
 const pump=add('water-pump',43,46),groundwater=add('groundwater-well',47,46);
-autoConnectUtilities(s,PROJECTS);sys.nodes[groundwater.id].water[1]=40;
-assert.ok(link('irrigation',pump.id,well.id));
+autoConnectUtilities(s,PROJECTS);sys.nodes[groundwater.id].water[0]=40;
+assert.ok(link('fresh',pump.id,well.id));
+assert.ok(!sys.links.some(l=>l.kind!=='power'&&[pump.id,groundwater.id,-1].includes(l.to)),'nothing is piped back into a source');
 assert.ok(link("fresh", well.id, home.id));
 assert.ok(link("greywater", home.id, reed.id));
 assert.ok(link("sewage", toilet.id, treatment.id));
 assert.ok(sys.links.every((l) => l.work === l.required && l.automatic));
 for (let i = 0; i < 600; i++) infrastructureStep(s, PROJECTS, 0.1);
-assert.ok(sys.nodes[well.id].power > 0.99);
-assert.ok(sys.nodes[home.id].water[0] > 0, "cistern delivers treated water");
-assert.ok(sys.nodes[garden.id].water[1] > 0, "plants get irrigation");
+assert.ok(sys.nodes[pump.id].power > 0.99);
+assert.ok(sys.nodes[home.id].water[0] > 0, "cistern delivers water");
+assert.ok(sys.nodes[garden.id].water[0] > 0, "plants get irrigation");
 assert.ok(sys.account.waterReceived >= 40);
 const count = sys.links.length;
 autoConnectUtilities(s, PROJECTS);
@@ -90,5 +91,5 @@ autoConnectUtilities(s, PROJECTS);
 assert.equal(sys.nodes[home.id].x, 60);
 assert.ok(validInfrastructure(s));
 console.log(
-  "PASS: automatic compatible networks, completed buildings only, powered filtration and delivery, separate wastewater, no extra material charge, idempotence, switches, moves and saves.",
+  "PASS: automatic compatible networks, completed buildings only, powered pumping and delivery, separate wastewater, no extra material charge, idempotence, switches, moves and saves.",
 );

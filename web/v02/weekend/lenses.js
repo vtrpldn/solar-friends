@@ -36,7 +36,7 @@ export function installLenses({state,camera,world,focus,inspect}) {
     $('lens-toggle-label').textContent=id?`◉ ${lens.name}`:'◉ Lenses';
     $('lens-filter-label').hidden=!['water','chains'].includes(id);
     const filter=$('lens-filter');filter.replaceChildren();
-    const options=id==='water'?[['fresh','Drinking water'],['greywater','Greywater'],['sewage','Sewage']]:Object.entries(MATERIALS).map(([k,v])=>[k,v.name]);
+    const options=id==='water'?[['fresh','Clean water'],['greywater','Greywater'],['sewage','Sewage']]:Object.entries(MATERIALS).map(([k,v])=>[k,v.name]);
     for(const [value,name] of options){const o=document.createElement('option');o.value=value;o.textContent=name;filter.append(o);}filter.value=id==='water'?liquid:material;
     $('lens-key').replaceChildren();
     const key=id==='water'?(['greywater','sewage'].includes(liquid)?[['good','Space available'],['bad','Full'],['warn','Pipe under construction'],['muted','Off']]:[['good','Water stored'],['warn','Empty / pipe unfinished'],['muted','Off']]):id==='land'?[['good','Gentle < 10°'],['warn','Slope 10–25°'],['bad','Steep > 25°']]:id==='chains'?[['good','Producer'],['warn','Consumer'],['info','Inputs / shared stock']]:id==='ecology'?[['good','Standing / cultivated'],['warn','Felling queued'],['muted','Cleared']]:id==='power'?[['good','Available / no demand'],['bad','Unmet demand'],['warn','Line under construction'],['muted','Off']]:id==='sanitation'?[['good','Space available'],['bad','Full'],['warn','Pipe under construction'],['muted','Off']]:[['good','Ready / active'],['warn','Waiting / limited'],['bad','Needs attention'],['info','Location'],['muted','Inactive']];

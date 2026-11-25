@@ -69,3 +69,18 @@ console.log('PASS legacy homes migrate sanitation and honor the saved preference
  assert.deepEqual(JSON.parse(save(restore(save(old)))),JSON.parse(save(old)),'the migration runs once');
  console.log('PASS villages saved with untreated water migrate to clean water without losing any');
 }
+{
+ // A tank nobody can reach must not hold its water carrier hostage: this
+ // village's storage tank is boxed in, and carriers used to stand beside it
+ // with a full bucket until they collapsed.
+ const {readFileSync}=await import('node:fs');
+ const {enableFastNavigation}=await import('../web/v02/weekend/simulation.js');
+ const v=restore(readFileSync(new URL('../docs/balance/evidence/2026-11-17-starved-catalog-save.json',import.meta.url),'utf8'));
+ assert(v,'the boxed-in village loads');enableFastNavigation(v);
+ let held=0;
+ for(let t=0;t<3200*3;t++){tick(v,1);if(v.people.some(r=>r.cargo&&r.action==='blocked'&&v.operations.some(o=>o.id===r.operation&&o.water)))held++;}
+ assert.equal(held,0,'no resident stands blocked while holding water');
+ assert(v.people.every(r=>r.needs.hydration>40&&r.energy>5),'everyone keeps drinking and resting');
+ assert(restore(save(v)),'the village still saves');
+ console.log('PASS an unreachable tank releases its water carriers');
+}
