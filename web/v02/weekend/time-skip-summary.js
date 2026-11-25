@@ -57,8 +57,11 @@ const DIGEST = [
   [/returned from work and deposited/, 'Paid shifts worked', 'shift', 'Residents worked outside the village and brought their pay home.', 'finances'],
   [/returned from selling the village surplus/, 'Selling trips', 'trip', 'Residents took surplus to town and sold it.', 'finances'],
   [/the purchased food spoiled during the trip/, 'Shopping spoiled on the way home', 'trip', 'The food bought in town went off before it reached the stores.', 'food'],
+  [/serviced the sealed waste tanks/, 'Waste tanks emptied', 'time', 'Residents emptied full toilet and greywater tanks for treatment off site.', 'water'],
 ];
-const ROUTINE = [/purified .* for drinking/, /is heading to the car for town/, /unloaded .* from the car/, /to the existing town trip/];
+// Everyday chores and deliveries: their results are in the sections above.
+const ROUTINE = [/purified .* for drinking/, /is heading to the car for town/, /unloaded .* from the car/, /to the existing town trip/,
+  /supplies delivered to storage from/, /: bed \d+ (prepared|planted with|amended with|cleared)/, /from bed \d+ delivered to storage/];
 
 export function summarizeSkip(before, s, {
   projects = {}, materials = {}, recipes = {},

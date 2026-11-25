@@ -94,3 +94,17 @@ const sandbox=createSandbox(42),sandboxBefore=snapshotVillage(sandbox);sandbox.t
 const free=summarizeSkip(sandboxBefore,sandbox,options);
 assert(!find(free,'money')&&!find(free,'supplies'));assert.equal(free.title,'1 day later');
 console.log('PASS advance-days summary: real savings, food, water, building, harvest and log differences; quiet, stopped-early and sandbox states; read-only.');
+{
+ // Chores that fill the log every day become one count, not six identical notes.
+ const v=fresh(),start=snapshotVillage(v);v.time+=DAY;
+ const note=(text,count=1)=>v.events.unshift({text,time:v.time-10,count});
+ v.events??=[];
+ note('Iara serviced the sealed waste tanks for off-site treatment.',3);note('Nina serviced the sealed waste tanks for off-site treatment.');
+ note('Cook a meal batch: supplies delivered to storage from Community kitchen 1.',2);note('Vegetable garden 1: bed 2 planted with Leafy greens.');
+ note('A storm broke the fence.');
+ const rows=find(summarizeSkip(start,v,options),'notes').rows;
+ assert.equal(rows.find(r=>r.label==='Waste tanks emptied').value,'4 times');
+ assert(!rows.some(r=>/serviced the sealed|supplies delivered|bed 2 planted/.test(r.value)),'chores are not repeated as notes');
+ assert(rows.some(r=>/storm broke the fence/.test(r.value)),'unusual events are still quoted');
+ console.log('PASS recap folds waste servicing, deliveries and bed work out of the notes');
+}
