@@ -18,7 +18,8 @@ try{
  const dialog=page.locator('#management');
  for(const view of ['resources','items','crafting','water','power','finances']){
   if(view==='finances')await page.locator('[data-manage="resources"]').first().click();
-  await page.locator(`[data-manage="${view}"]:visible`).first().click();assert(await dialog.isVisible());
+  // Finances is reached through the open Almanac's own tab; the dock button of the same name sits under the modal.
+  await (view==='finances'?dialog:page).locator(`[data-manage="${view}"]:visible`).first().click();assert(await dialog.isVisible());
   if(view==='resources'){assert(await page.locator('#production-sites').isVisible());assert((await dialog.innerText()).includes('Cold storage')||(await dialog.innerText()).includes('Processing record'));}
   if(view==='items'){assert((await dialog.innerText()).includes('Garden tools'));assert(!(await page.locator('#production-sites').isVisible()));}
   if(view==='crafting'){assert(await dialog.getByRole('button',{name:'Make',exact:true}).isVisible());assert(await dialog.getByRole('button',{name:'Repair',exact:true}).isVisible());assert(await page.locator('.craft-entry').count()>3);}
