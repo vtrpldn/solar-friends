@@ -50,6 +50,7 @@ const recipes = {
     hardware: 2,
   },
   grove: { earth: 6, wood: 2, tree_starts: 2 },
+  coffee: { earth: 8, compost: 4, wood: 4, coffee_starts: 40 },
   compost: { earth: 2, wood: 4, hardware: 1 },
   square: { stone: 10, earth: 4, frames: 4, wood: 4, hardware: 2 },
   workshop: {
@@ -130,6 +131,8 @@ const extraMaterials = {
   seedlings: ["Vegetable seedlings", 4, 8, 24],
   tree_starts: ["Timber seedlings", 2, 4, 40],
   bamboo_starts: ["Bamboo starts", 2, 4, 80],
+  coffee_starts: ["Coffee seedlings", 10, 10, 60],
+  coffee: ["Dried coffee", 4, 10, 600],
   fodder: ["Dry fodder", 4, 12, 24],
   milk: ["Fresh milk", 4, 6, 42],
   honey: ["Honey", 4, 4, 48],
@@ -199,6 +202,7 @@ export function expandProjects(projects) {
               : [
                     "garden",
                     "grove",
+                    "coffee",
                     "greenhouse",
                     "orchard",
                     "coop",
@@ -229,7 +233,7 @@ export function expandProjects(projects) {
         : COMMUNITY[model.id]?.category || category,
       repeatable: true,
       description:
-        ({carport:'An open timber shelter with a lean-to roof, built over the two parking spaces. Cars left in the open weather in sun and rain and need a service about once a year even when they are not driven; under this roof they weather three times more slowly. It stands where the cars park and cannot be moved.',
+        ({coffee:'A cash crop, not food. About forty coffee shrubs under shade trees give their first crop in the third year and one a year after that: 24 kg of dried coffee, picked and sun-dried here by residents. Dried coffee keeps, and the town café buys it.',carport:'An open timber shelter with a lean-to roof, built over the two parking spaces. Cars left in the open weather in sun and rain and need a service about once a year even when they are not driven; under this roof they weather three times more slowly. It stands where the cars park and cannot be moved.',
           'supply-5':'A hand-saw workbench. Residents turn felled raw wood into timber, then saw timber into planks. They also weave baskets, fit garden-tool handles, make crates, assemble wheelbarrows with purchased parts, and repair shared equipment. No electricity required.', 'well':'A cistern storing 1,000 liters of clean and 1,000 liters of untreated water. Collects rainwater and filters supplied untreated water at 25 per hour while powered.', 'groundwater-well':'A covered groundwater well. Recharges up to 8 untreated water per hour (less in dry conditions), storing 40. Residents can carry it to a cistern for filtering; no electricity needed.',
           'water-pump':'An electric intake beside a river or within 6 cells of a completed water well. Draws up to 600 liters of untreated water per hour and feeds cisterns and irrigation. Requires power; well recharge can limit supply.'}[model.id]) ||
         COMMUNITY[model.id]?.description ||
@@ -380,6 +384,16 @@ export const PROCESSES = {
     kind: "grove",
     work: 35,
     water: 4,
+    renew: 600,
+  },
+  // Picked by hand, pulped and sun-dried on the grove's own drying beds.
+  coffee: {
+    name: "Pick and dry coffee",
+    input: {},
+    output: { coffee: 24, scraps: 12 },
+    kind: "coffee",
+    work: 960,
+    water: 8,
     renew: 600,
   },
   eggs: {

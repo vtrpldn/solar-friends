@@ -159,6 +159,8 @@ const $ = (id) => document.getElementById(id),
   SAVE = saveKey(new URLSearchParams(location.search).get("mode"));
 const scalePreview = new URLSearchParams(location.search).has("scale-preview");
 const previewCollection = new URLSearchParams(location.search).get("scale-preview");
+// &look=x,z centres a scale preview on a cell, e.g. ?scale-preview=farm&look=58,70.
+const previewLook = (([x, z]) => Number.isFinite(x) && Number.isFinite(z) ? {x, z} : null)((new URLSearchParams(location.search).get("look") || "").split(",").map(Number));
 const dreamPreview = previewCollection === "dream" || previewCollection === "lived";
 // The lived-in look is the game's look. The catalog preview can still switch it
 // off with ?look=plain to compare against the plain ground.
@@ -915,7 +917,7 @@ function focus(c) {
   camera.updateProjectionMatrix();
   controls.update();
 }
-focus(natureFocus ? natureFocus[naturePreviewFocus] || natureFocus.deposits : truckPreview ? s.stock : scalePreview ? (previewCollection==="farm"?{x:53,z:54}:new URLSearchParams(location.search).get("scale-preview")==="new-homes"?{x:62,z:53}:new URLSearchParams(location.search).get("scale-preview")==="homes"?{x:63,z:52}:{x:56,z:57}) : s.arrivalAnimating ? s.stock : campLocation(s));
+focus(natureFocus ? natureFocus[naturePreviewFocus] || natureFocus.deposits : truckPreview ? s.stock : scalePreview ? (previewLook||(previewCollection==="farm"?{x:53,z:54}:new URLSearchParams(location.search).get("scale-preview")==="new-homes"?{x:62,z:53}:new URLSearchParams(location.search).get("scale-preview")==="homes"?{x:63,z:52}:{x:56,z:57})) : s.arrivalAnimating ? s.stock : campLocation(s));
 if (savedView) {
   camera.position.fromArray(savedView.position);
   controls.target.fromArray(savedView.target);
@@ -2898,6 +2900,7 @@ function frame(now) {
         "greenhouse",
         "orchard",
         "grove",
+        "coffee",
         "coop",
         "goat_pasture",
         "compost",

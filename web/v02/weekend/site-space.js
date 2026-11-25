@@ -40,6 +40,7 @@ Object.assign(SITE_SPACE,{
   greenhouse:{object:[6,10],productiveArea:19.2,note:'Two 1.2 × 8 m beds; 19.2 m² planted, a 1 m central aisle and 1 m end access.'},
   orchard:{object:[10,10],note:'Four compact fruit trees on 4 m centres. Mature size and yield remain species-dependent.'},
   grove:{object:[8,8],note:'Four banana clumps on 3 m centres, with harvesting access.'},
+  coffee:{object:[12,12],note:'About forty coffee shrubs in four rows 3 m apart, under two shade trees, with a raised drying bed.'},
   solar_farm:{object:[5.2,5.4],note:'Six 1.1 × 1.8 m panels: 11.88 m² panel surface, with row and service access. Rated output is separate.'},
   goat_pasture:{object:[11,9],note:'Two-goat pen with a 9 m² shelter and 90 m² outdoor area. Supplied feed or separate grazing is needed.'},
   'goat-pasture-empty':{object:[11,9],note:'Empty pen with a 9 m² shelter and 90 m² outdoor area. This does not include grazing land.'},
@@ -53,7 +54,7 @@ export function siteDescription(asset, size) {
   const space = asset === "bridge" && size[1] === 2
     ? {object: [16, 3.92], note: "Existing wide bridge: 3.5 m walking deck. Legacy site and centre retained."}
     : SITE_SPACE[asset];
-  return `Reserved site: ${siteDimensions(size)} (${size.join(' × ')} cells).${space ? ` ${space.object.join(' × ')} m ${['orchard','grove'].includes(asset) ? 'plot' : space.label || 'physical footprint'}. ${space.note}` : ' Includes the object and placement clearance.'} Access uses reachable neighboring cells; it is not extra productive land.`;
+  return `Reserved site: ${siteDimensions(size)} (${size.join(' × ')} cells).${space ? ` ${space.object.join(' × ')} m ${['orchard','grove','coffee'].includes(asset) ? 'plot' : space.label || 'physical footprint'}. ${space.note}` : ' Includes the object and placement clearance.'} Access uses reachable neighboring cells; it is not extra productive land.`;
 }
 
 // Only this known historical layout is supported, not arbitrary saved dimensions.

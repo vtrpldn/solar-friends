@@ -15,6 +15,7 @@ The calendar is shared with needs, billing and travel: 3,200 simulation seconds 
 | Garden vegetables | 45 | Lower end of Embrapa's 45–60 day lettuce production reference; a representative crop group, not every vegetable |
 | Greenhouse vegetables | 40 | Engineering/game assumption |
 | Orchard fruit | 120 | Representative productive-tree interval; establishment age still needs refinement |
+| Coffee | 330 | One crop a year after a two-year establishment; authored smallholder estimate |
 | Bananas | 270 | Engineering/game assumption |
 | Planted timber | 2,190 | Six-year plantation assumption; standing natural trees remain immediately selectable for cutting |
 | Bamboo | 365 | Annual managed stand assumption |
@@ -50,6 +51,8 @@ Garden and greenhouse harvests now use 2 kg of edible produce per square meter: 
 A new orchard's first cycle includes 610 establishment days plus its 120-day productive cycle: two years before the first harvest under favorable conditions. Later cycles use 120 days. This is an authored representative fruit-tree assumption; species-specific juvenile periods vary. Existing orchards migrate as established, preserving their current productive state. Timber stands consume two replacement seedlings after their first harvest; the original planting is included in the building bill. Bamboo is retained as a managed perennial stand, not replanted after each cut.
 
 An orchard is planted with the fruit tree that belongs to its land (`NATIVE_ORCHARDS` in `biological-production.js`). In the Mata Atlântica it stays a mixed fruit orchard. In the Cerrado it is pequi and in the Caatinga umbu: the same two-year establishment, 120-day cycle and 12 kg harvest, but the trees draw 50% (pequi) or 25% (umbu) of the usual irrigation, survive 14 days of dry soil before damage and 60 more before total loss, as managed timber does, and keep at least 80% of their growth rate through the dry season. These factors are authored to express drought adaptation; they are not measured figures for either species, and real pequi and umbu trees take longer than two years to bear. Orchards in existing Cerrado and Caatinga villages become native orchards on load.
+
+A coffee grove (`coffee` in `catalog-rules.js`) is a 12 × 12 m plot of about forty shrubs under two shade trees. It is a cash crop, not food. The first crop comes after 730 establishment days plus a 330-day cycle, so in the third year; later crops take 330 favorable days, about one a year. A crop is 24 kg of dried coffee and 12 kg of residues, picked and sun-dried on the grove's own bed as one job of resident work. Dried coffee does not spoil. The town café buys it at half its R$60/kg retail price, so a full crop is worth about R$720 before transport. The yield follows a smallholder arabica figure of roughly 1.7 t of green coffee per hectare; that, the price, the 72 L/day dry-weather irrigation and the timings are authored estimates without a cited source. Pulping, roasting and drinking coffee in the village are not modeled.
 
 
 ## Timber yield calibration

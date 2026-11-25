@@ -79,7 +79,7 @@ export function createScalePreview(validate = false, collection = 'village', bio
     add('greenhouse', 52, 60).forEach((b, i) => grow(b, ['greens', 'beans'][i], 1));
     add('house', 60, 60);
     // Perennials: with &biome=cerrado or caatinga the orchard is the native fruit tree.
-    add('orchard', 46, 68); add('grove', 53, 68);
+    add('orchard', 46, 68); add('grove', 53, 68); add('coffee', 59, 68);
     s.people.forEach((r, i) => { r.x = 50 + i; r.z = 57; r.walk = []; r.target = null; });
     s.time = 400; s.rain = false; s.rainSeen = true; s.rainResolved = true;
     s.log = ['Farm look preview · every bed state. This scene never autosaves.'];

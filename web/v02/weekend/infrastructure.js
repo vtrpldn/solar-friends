@@ -51,6 +51,7 @@ const CAPACITY = {
   greenhouse: [4, 12, 0, 0],
   orchard: [4, 12, 0, 0],
   grove: [4, 12, 0, 0],
+  coffee: [4, 12, 0, 0],
   goat_pasture: [40, 0, 0, 0],
   coop: [6, 0, 0, 0],
   wetland: [0, 60, 24, 0],

@@ -6,11 +6,13 @@ export const GAME_DAY=1440/.45;
 export const BIOLOGY={
  baby_greens:{days:21,window:3,seasonal:true},
  vegetables:{days:45,window:7,seasonal:true},greenhouse:{days:40,window:7,seasonal:false},
- fruit:{days:120,window:14,seasonal:true},bananas:{days:270,window:14,seasonal:true},
+ fruit:{days:120,window:14,seasonal:true,establish:610},bananas:{days:270,window:14,seasonal:true},
  wood:{days:6*365,window:Infinity,seasonal:true,plantingFraction:.1},bamboo:{days:365,window:Infinity,seasonal:true},
  compost:{days:60,window:Infinity,seasonal:false},
  eggs:{days:3,window:3,seasonal:false},milk:{days:1,window:1,seasonal:false},
  honey:{days:90,window:30,seasonal:true},
+ // One crop a year; the first comes in the third year.
+ coffee:{days:330,window:21,seasonal:true,establish:730},
 };
 export function seasonAt(time){
  const day=(304+(540+time*.45)/1440)%365;
@@ -39,11 +41,11 @@ export function beginBiology(s,op,r){
  const b=BIOLOGY[op.recipe];if(!b||op.planted||s.mode==='sandbox')return false;
  op.planted=true;op.phase='growing';op.growthRemaining=b.days*GAME_DAY;
  const site=s.projects?.find(p=>p.id===op.site);
- if(op.recipe==='fruit'&&site&&!site.orchardEstablished){op.establishmentDays=610;op.growthRemaining+=610*GAME_DAY;site.orchardEstablished=true;}
+ if(b.establish&&site&&!site.orchardEstablished){op.establishmentDays=b.establish;op.growthRemaining+=b.establish*GAME_DAY;site.orchardEstablished=true;}
  op.status=`${biologyLabel(op.recipe)}: ${b.days} game days before collection work`;
  r.operation=null;r.cargo=false;r.action='idle';r.target=null;r.walk=[];return true;
 }
-export const CROP_CARE={wood:{kind:"supply-0",area:36,liters:36},bamboo:{kind:"supply-1",area:16,liters:24},baby_greens:{kind:"garden",area:8,liters:24},vegetables:{kind:"garden",area:16,liters:48},greenhouse:{kind:"greenhouse",area:24,liters:48},fruit:{kind:"orchard",area:64,liters:32},bananas:{kind:"grove",area:32,liters:48}};
+export const CROP_CARE={wood:{kind:"supply-0",area:36,liters:36},bamboo:{kind:"supply-1",area:16,liters:24},baby_greens:{kind:"garden",area:8,liters:24},vegetables:{kind:"garden",area:16,liters:48},greenhouse:{kind:"greenhouse",area:24,liters:48},fruit:{kind:"orchard",area:64,liters:32},bananas:{kind:"grove",area:32,liters:48},coffee:{kind:"coffee",area:144,liters:72}};
 export function biologicalStep(s,dt,useWater){
  const active=new Set((s.operations||[]).filter(o=>!o.done&&o.phase==='growing'&&CROP_CARE[o.recipe]).map(o=>o.site));
  for(const p of s.projects||[])if(!p.cultivation&&p.soilFertility!==undefined&&!active.has(p.id))p.soilFertility=Math.min(1,p.soilFertility+dt/(180*GAME_DAY));
@@ -82,7 +84,7 @@ export function biologyText(recipe,s){const b=BIOLOGY[recipe],native=nativeFor(s
 export function validBiology(s,recipes){if(!(s.projects||[]).every(p=>p.irrigationPolicy===undefined||Object.hasOwn(IRRIGATION_POLICIES,p.irrigationPolicy)))return false;if(!(s.projects||[]).every(p=>[p.soilMoisture,p.soilFertility].every(n=>n===undefined||(Number.isFinite(n)&&n>=0&&n<=1))))return false;if(!(s.projects||[]).every(p=>(p.starterSeedlingsUsed===undefined||typeof p.starterSeedlingsUsed==='boolean')&&(p.orchardEstablished===undefined||typeof p.orchardEstablished==='boolean')&&(p.harvestCount===undefined||(Number.isInteger(p.harvestCount)&&p.harvestCount>=0))))return false;return (s.operations||[]).every(o=>{
  if(!validCropStress(o))return false;
  if(o.farm)return true;
- if(o.establishmentDays!==undefined&&(o.recipe!=='fruit'||o.establishmentDays!==610))return false;
+ if(o.establishmentDays!==undefined&&o.establishmentDays!==BIOLOGY[o.recipe]?.establish)return false;
  if(o.planted!==undefined&&typeof o.planted!=='boolean')return false;
  if(o.phase==='growing'&&(!BIOLOGY[o.recipe]||!o.planted||!Number.isFinite(o.growthRemaining)))return false;
  if(o.growthRemaining!==undefined&&(!BIOLOGY[o.recipe]||!Number.isFinite(o.growthRemaining)||o.growthRemaining<0||o.growthRemaining>(BIOLOGY[o.recipe].days+(o.establishmentDays||0))*GAME_DAY))return false;

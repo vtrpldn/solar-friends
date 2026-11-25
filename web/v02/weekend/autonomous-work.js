@@ -11,7 +11,7 @@ export const STORAGE_SHARE = .8;
 // Farther sites cost more walking than work between meals; the player can still order them.
 export const MAX_WALK = 60;
 // Food plots, animals and kitchens follow the food and farm schedulers.
-const SCHEDULED_ELSEWHERE = ['kitchen','wild-tree','orchard','grove','apiary','coop','goat_pasture','cultivation'];
+const SCHEDULED_ELSEWHERE = ['kitchen','wild-tree','orchard','grove','coffee','apiary','coop','goat_pasture','cultivation'];
 
 const pendingOutput = (s,recipes,id) => (s.operations||[]).reduce((n,o) => n + (o.done || o.water || o.farm ? 0 :
   (o.haulRemaining||o.returnItems||o.harvestOutput||recipes[o.recipe]?.output||{})[id] || 0), 0);

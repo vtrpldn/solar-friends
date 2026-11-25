@@ -14,7 +14,7 @@ export const PROFILES = {
     growth: 'Learning that sharing responsibility is also a way of caring.',
     hobby: 'Time in the garden', favorites: ['garden-bench', 'square', 'picnic-table'],
     rates: {fun: .8, hygiene: .8},
-    strengths: ['garden', 'grove', 'orchard', 'greenhouse', 'compost', 'supply-0', 'supply-1'],
+    strengths: ['garden', 'grove', 'coffee', 'orchard', 'greenhouse', 'compost', 'supply-0', 'supply-1'],
     effect: 'Gets dirty more slowly and needs recreation less often.',
     interests: ['growing', 'food', 'nature'],
     aspiration: {label: 'A village orchard', key: 'orchard', reason: 'Plant something that will feed us for years.'},

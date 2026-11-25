@@ -285,6 +285,18 @@ export const FUNCTIONAL_PROGRAM = {
     },
     "requirements": "Separate preparation, cooking, washing, pantry and dining zones; access routes do not cross appliances."
   },
+  "coffee": {
+    "site": [
+      6,
+      6
+    ],
+    "shell": null,
+    "targetUsableArea": null,
+    "capacity": {
+      "shrubs": 40
+    },
+    "requirements": "Rows 3m apart with shrubs about 1m apart; shade trees; a raised drying bed. Do not imply a crop before the third year."
+  },
   "grove": {
     "site": [
       4,
@@ -757,6 +769,7 @@ export const FUNCTIONAL_DESCRIPTIONS = {
   'community-hall': 'Open-front community hall with six tables and seating for twenty-four.',
   orchard: 'Four compact fruit trees spaced four metres apart, with access for tending and harvest.',
   grove: 'Four banana clumps spaced three metres apart, with harvesting paths between them.',
+  coffee: 'About forty coffee shrubs in four rows under two shade trees, with a raised bed for drying the harvest.',
   garden: 'Four growing beds with central and end aisles. 19.2 square metres are planted.',
   greenhouse: 'Walk-in greenhouse with two long growing beds, a central aisle and access at both ends. 19.2 square metres are planted.',
   goat_pasture: 'Shelter and exercise pen for two goats, with a feeding trough and water. Grazing land is separate.',

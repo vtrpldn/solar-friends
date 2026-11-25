@@ -36,7 +36,7 @@ export function autoConnectUtilities(s, defs) {
     if (n.kind === "well") add("irrigation", nearest(n,pumps), n);
     else if(n.kind === "water-storage") {add("fresh",nearest(n,suppliers),n);add("irrigation",nearest(n,pumps),n);}
     else if (n.capacity[0]) add("fresh", nearest(n, fresh), n);
-    if (["garden", "greenhouse", "orchard", "grove"].includes(n.kind)) {
+    if (["garden", "greenhouse", "orchard", "grove", "coffee"].includes(n.kind)) {
       add(
         "irrigation",
         nearest(

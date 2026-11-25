@@ -1556,6 +1556,7 @@ const names = {
   streetlight: "Street light",
   kitchen: "Community kitchen",
   grove: "Banana grove",
+  coffee: "Coffee grove",
   garden: "Vegetable garden",
   greenhouse: "Greenhouse",
   well: "Cistern",
@@ -1585,6 +1586,8 @@ for (const [id, name] of Object.entries(names)) {
       ? [3, 3]
       : id === "compost"
       ? [3, 1]
+      : id === "coffee"
+      ? [6, 6]
       : id === "goat_pasture" || id === "solar_farm"
         ? [3, 2]
         : ["apiary", "streetlight", "eco_toilet"].includes(id)

@@ -35,6 +35,7 @@ export const RESOURCE_GROUPS = [
       "eggs",
       "milk",
       "honey",
+      "coffee",
       "fodder",
       "compost",
       "scraps",
@@ -42,7 +43,7 @@ export const RESOURCE_GROUPS = [
   },
   {
     name: "Plants & animals",
-    ids: [...SEED_IDS, "seedlings", "tree_starts", "bamboo_starts", "goats", "bees", "hens"],
+    ids: [...SEED_IDS, "seedlings", "tree_starts", "bamboo_starts", "coffee_starts", "goats", "bees", "hens"],
   },
 ];
 

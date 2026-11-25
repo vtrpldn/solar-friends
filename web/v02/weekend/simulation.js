@@ -620,7 +620,7 @@ export function nearestRiverAccess(s,origin) {
   points.sort((a,b)=>Math.hypot(a.x-origin.x,a.z-origin.z)-Math.hypot(b.x-origin.x,b.z-origin.z));
   return points.find(p=>p.x>CELL_MIN&&p.x<CELL_MAX&&!occupied(s,p.x,p.z)&&route(s,origin,p))||null;
 }
-const farmProducts = {orchard:'fruit', grove:'bananas', apiary:'honey', coop:'eggs', goat_pasture:'milk'};
+const farmProducts = {orchard:'fruit', grove:'bananas', coffee:'coffee', apiary:'honey', coop:'eggs', goat_pasture:'milk'};
 
 function scheduleFarmWork(s) {
   if (s.stage !== 'playing') return;

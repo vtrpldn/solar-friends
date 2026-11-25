@@ -89,7 +89,7 @@ function fence(g,w,d,height=1.25){
   for(const y of [.4,.85,1.2])box(gate,1.15,.07,.07,'teal',.575,y,0);
 }
 export const REMODELED_FACILITIES=new Set(['shed','workshop','kitchen','warehouse','reading-room','outdoor-classroom','community-hall',
-  'orchard','grove','garden','greenhouse','goat_pasture','goat-pasture-empty','coop','apiary','solar_farm',
+  'orchard','grove','coffee','garden','greenhouse','goat_pasture','goat-pasture-empty','coop','apiary','solar_farm',
   'banana_treatment','wetland','compost','square','exercise-garden','volleyball-court','supply-0','supply-1','eco_toilet']);
 
 export function functionalFacility(id,{plant,tree,goat,chicken},stage=2,species=null){
@@ -179,6 +179,29 @@ export function functionalFacility(id,{plant,tree,goat,chicken},stage=2,species=
       for(const x of [-1.3,1.3])box(g,.09,2.35,.09,'timber',x,1.175,-d/2+.4);
     }else table(g,-1,0,2,.85,.9);
     g.userData.shell=p.shell;g.userData.clearFloorArea=Number((['shed','outdoor-classroom'].includes(id)?w*d:w*d-(.4*d+.4*w-.64)).toFixed(2));
+  }else if(id==='coffee'){
+    // Shaded coffee: four rows of glossy shrubs under two fruit trees,
+    // and a raised mesh bed where the picked cherries dry in the sun.
+    const shrub=(x,z,n)=>{
+      const s=group(),h=1.25+(n%3)*.15;
+      cylinder(s,.035,.05,h*.5,'timber',0,h*.25,0,5);
+      const body=ball(s,.5,n%2?'leaf':'leafDark',0,h*.55,0,[1,1.15,1],0);body.rotation.y=n*1.3;
+      ball(s,.34,'leaf',.06,h*.95,-.04,[1,.9,1],0).rotation.y=n*.7;
+      if(stage===2)for(let k=0;k<2;k++){const a=n+k*2.1;const cherry=ball(s,.07,'tile',Math.sin(a)*.42,h*(.45+k*.14),Math.cos(a)*.42,[1,1,1],0);cherry.material=cherry.material.clone();cherry.material.color.set(k%2?'#b3372c':'#c9532f');}
+      placed(g,s,x,z);
+    };
+    let n=0;
+    for(const x of [-4.5,-1.5,1.5,4.5])for(let i=0;i<10;i++){
+      const z=-4.95+i*1.1;
+      // The drying bed takes the place of the last shrubs in one corner.
+      if(x===4.5&&i>6)continue;
+      shrub(x+((n*7)%5-2)*.05,z,n++);
+    }
+    for(const [x,z] of [[-3,-2.6],[3,1.4]]){const shade=tree('orchard',1);shade.scale.set(1.25,1.7,1.25);placed(g,shade,x,z);}
+    for(const dx of [-.55,.55])for(const dz of [-1.2,1.2])box(g,.07,.8,.07,'timber',4.5+dx,.4,4.3+dz);
+    box(g,1.25,.06,2.6,'timberLight',4.5,.82,4.3);
+    if(stage===2){const drying=box(g,1.1,.04,2.4,'earth',4.5,.87,4.3);drying.material=drying.material.clone();drying.material.color.set('#b08a5a');}
+    g.userData.plantCount=n;g.userData.plantSpacing=1.1;
   }else if(['orchard','grove','supply-0','supply-1'].includes(id)){
     if(id==='supply-1'){
       for(let n=0;n<12;n++){const a=n*2.4,r=.4+(n%3)*.35,x=Math.sin(a)*r,z=Math.cos(a)*r,h=3.2+(n%4)*.3; cylinder(g,.05,.07,h,'leaf',x,h/2,z,7);for(let y=.4;y<h;y+=.7)cylinder(g,.075,.075,.035,'leafLight',x,y,z,4);for(let k=0;k<3;k++){const leaf=box(g,.08,.02,.7,'leaf',x+Math.sin(a+k)*.3,h-.3-k*.35,z+Math.cos(a+k)*.3);leaf.rotation.y=a+k;}}

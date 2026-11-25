@@ -53,7 +53,7 @@ export function productionEquipment(recipe) {
   if(recipe.equipmentRepair)return null;
   if(recipe.gathering)return 'harvest-basket';
   if(['garden','greenhouse','compost','cultivation'].includes(recipe.kind))return 'garden-tools';
-  if(['orchard','grove'].includes(recipe.kind))return 'harvest-basket';
+  if(['orchard','grove','coffee'].includes(recipe.kind))return 'harvest-basket';
   if(recipe.kind==='supply-5' && !recipe.output['harvest-basket'])return 'carpentry-tools';
   return null;
 }

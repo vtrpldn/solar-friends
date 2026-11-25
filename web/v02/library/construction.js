@@ -115,7 +115,7 @@ export function construction(def, stage) {
     return g;
   }
   const tank=['biodigester','well','eco_toilet','hydro'].includes(def.id);
-  const bed=['garden','grove','orchard','wetland','banana_treatment','compost','square'].includes(def.id);
+  const bed=['garden','grove','coffee','orchard','wetland','banana_treatment','compost','square'].includes(def.id);
   const solar=def.id==='solar_farm';
   if(def.id==='goat_pasture'||def.id==='goat-pasture-empty'){
     for(const x of [-w/2,w/2])for(const z of [-d/2,d/2])box(g,.12,stage?.85:.35,.12,'timber',x,stage?.425:.175,z);

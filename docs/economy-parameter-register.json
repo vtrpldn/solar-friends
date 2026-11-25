@@ -654,6 +654,28 @@
       "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
       "physicalBasis": "Engineering pack estimate; equipment specifications vary"
     },
+    "coffee_starts": {
+      "name": "Coffee seedlings",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 10,
+      "retailPackPriceReais": 60,
+      "kg": 0.3,
+      "m3": 0.002,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "coffee": {
+      "name": "Dried coffee",
+      "canonicalUnit": "kg",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 10,
+      "retailPackPriceReais": 600,
+      "kg": 1,
+      "m3": 0.0015,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
     "fodder": {
       "name": "Dry fodder",
       "canonicalUnit": "kg",
@@ -741,7 +763,8 @@
       "fruit": {
         "days": 120,
         "window": 14,
-        "seasonal": true
+        "seasonal": true,
+        "establish": 610
       },
       "bananas": {
         "days": 270,
@@ -778,6 +801,12 @@
         "days": 90,
         "window": 30,
         "seasonal": true
+      },
+      "coffee": {
+        "days": 330,
+        "window": 21,
+        "seasonal": true,
+        "establish": 730
       }
     },
     "carePerGrowingArea": {
@@ -815,6 +844,11 @@
         "kind": "grove",
         "area": 32,
         "liters": 48
+      },
+      "coffee": {
+        "kind": "coffee",
+        "area": 144,
+        "liters": 72
       }
     },
     "animalCare": {
@@ -1067,6 +1101,16 @@
       },
       "residentHours": 0.2625,
       "growthDays": 270,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "coffee": {
+      "input": {},
+      "output": {
+        "coffee": 24,
+        "scraps": 12
+      },
+      "residentHours": 7.2,
+      "growthDays": 330,
       "basis": "Authored aggregate transformation; named mass losses tracked separately"
     },
     "eggs": {
@@ -2870,6 +2914,20 @@
         "tree_starts": 2
       },
       "residentHours": 1.65,
+      "economicSpec": null
+    },
+    "coffee": {
+      "footprint": [
+        6,
+        6
+      ],
+      "materials": {
+        "earth": 8,
+        "compost": 4,
+        "wood": 4,
+        "coffee_starts": 40
+      },
+      "residentHours": 9.24,
       "economicSpec": null
     },
     "garden": {

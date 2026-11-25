@@ -110,6 +110,12 @@ export const BUILDING_MODELS = [
     size: [2, 2],
   },
   {
+    id: "coffee",
+    name: "Coffee grove",
+    category: "Buildings",
+    size: [6, 6],
+  },
+  {
     id: "garden",
     name: "Vegetable garden",
     category: "Buildings",

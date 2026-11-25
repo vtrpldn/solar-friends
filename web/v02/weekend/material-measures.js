@@ -18,6 +18,7 @@ export const MATERIAL_UNITS=Object.freeze({
  food:['kg ingredients',1,.002],meals:['meal portion',1,.002],eggs:['egg',.06,.0001],
  milk:['liter milk (rounded mass)',1,.002],honey:['kg honey',1,.002],fodder:['kg dry fodder',1,.002],
  compost:['kg compost',1,.002],scraps:['kg organic residues',1,.002],
+ coffee:['kg dried coffee',1,.0015],coffee_starts:['coffee seedling',.3,.002],
  seedlings:['seedling pack',2,.01],tree_starts:['tree seedling',2,.01],bamboo_starts:['bamboo start',2,.01],
 });
 export function materialMeasure(id){
@@ -30,7 +31,7 @@ export function materialMass(items){return Object.entries(items).reduce((sum,[id
 // Physical read/write boundary. Old saves encode bulk goods as fixed packs;
 // player controls and accounting can use canonical mass without reinterpreting
 // an existing paid manifest. Discrete equipment remains a count, milk is liters.
-const BULK=new Set([...Object.keys(CROPS),'wood','logs','earth','stone','walls','tiles','food','fodder','compost','scraps','honey']);
+const BULK=new Set([...Object.keys(CROPS),'wood','logs','earth','stone','walls','tiles','food','fodder','compost','scraps','honey','coffee']);
 export function physicalUnit(id){const [name,kg]=MATERIAL_UNITS[id];return {unit:BULK.has(id)?'kg':id==='milk'?'L':'units',factor:BULK.has(id)?kg:1,name};}
 export function physicalQuantity(id,stockUnits){const {unit,factor}=physicalUnit(id);return {amount:stockUnits*factor,unit};}
 export function stockQuantity(id,physicalAmount){return Math.max(0,Math.floor((physicalAmount+1e-8)/physicalUnit(id).factor));}

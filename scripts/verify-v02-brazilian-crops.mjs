@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
-import {MATERIALS,PROCESSES,PROJECTS,createSandbox,save,restore} from '../web/v02/weekend/simulation.js';
+import {MATERIALS,PROCESSES,PROJECTS,createSandbox,save,restore,plan,enableFastNavigation} from '../web/v02/weekend/simulation.js';
 import {CROPS,cultivationStep,ensureCultivation,validCultivation} from '../web/v02/weekend/cultivation.js';
 import {seedId,cropFacts} from '../web/v02/weekend/crops.js';
 import {FOOD_DAYS,freshLots} from '../web/v02/weekend/food-storage.js';
 import {materialMass} from '../web/v02/weekend/material-measures.js';
 import {buyerFor,supplierFor} from '../web/v02/weekend/local-market.js';
 import {recipeBalance} from '../web/v02/weekend/production-accounting.js';
-import {GAME_DAY,seasonAt,biologicalStep,biologyText,orchardPlanting,NATIVE_ORCHARDS} from '../web/v02/weekend/biological-production.js';
+import {BIOLOGY,CROP_CARE,GAME_DAY,seasonAt,validBiology,beginBiology,biologicalStep,biologyText,orchardPlanting,NATIVE_ORCHARDS} from '../web/v02/weekend/biological-production.js';
 
 // Every crop in the table is a complete stock item: product, planting stock,
 // shelf life, measure, buyer, supplier and a cooking recipe that loses mass.
@@ -93,4 +93,20 @@ const loaded=restore(JSON.stringify(legacy));assert(loaded,'older village loads'
  // Each native orchard has its own model in the shared library.
  const {ASSETS}=await import('../web/v02/library/catalog.js');
  for(const n of Object.values(NATIVE_ORCHARDS))assert(ASSETS.some(a=>a.id===`orchard-${n.species}`),`orchard-${n.species} model`);}
-console.log('PASS Brazilian staple crops: complete stock items, drought tolerance, dry-season growth, farinha, native orchards and older saves');
+
+// Coffee is a cash crop: a grove of its own, one crop a year from the third
+// year, sold dried to the town café rather than eaten.
+{assert.equal(PROJECTS.coffee.name,'Coffee grove');assert.deepEqual(PROJECTS.coffee.size,[6,6]);assert.equal(PROJECTS.coffee.materials.coffee_starts,40);
+ assert.deepEqual(BIOLOGY.coffee,{days:330,window:21,seasonal:true,establish:730});assert.equal(CROP_CARE.coffee.kind,'coffee');
+ assert.equal(buyerFor('coffee').name,'Local café');assert.equal(supplierFor('coffee_starts'),'Agricultural supply store');
+ assert(!FOOD_DAYS.coffee,'dried coffee does not spoil');assert.equal(materialMass({coffee:24}),24);
+ // Planting work done, the grove grows on its own for three years.
+ const site={id:1,key:'coffee'},op={site:1,recipe:'coffee',phase:'process',work:500},s={time:0,mode:'story',projects:[site],operations:[op]};
+ assert(beginBiology(s,op,{}));assert.equal(op.phase,'growing');assert.equal(op.establishmentDays,730);
+ assert.equal(op.growthRemaining,(330+730)*GAME_DAY,'the first crop waits for the third year');assert(site.orchardEstablished);assert(validBiology(s,PROCESSES));
+ const next={site:1,recipe:'coffee',phase:'process',work:500};assert(beginBiology(s,next,{}));assert.equal(next.growthRemaining,330*GAME_DAY,'later crops take one season');
+ op.establishmentDays=610;assert(!validBiology(s,PROCESSES),'a tampered establishment period is rejected');
+ // The grove is a normal building: it can be planned on open land and saved.
+ const land=createSandbox(42);enableFastNavigation(land);let placed='none';for(let z=40;z<70&&placed;z++)for(let x=40;x<70&&placed;x++)placed=plan(land,'coffee',x,z);
+ assert.equal(placed,'');assert(restore(save(land)));}
+console.log('PASS Brazilian staple crops: complete stock items, drought tolerance, dry-season growth, farinha, native orchards, coffee and older saves');

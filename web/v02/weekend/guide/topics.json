@@ -311,7 +311,7 @@
     "description": "Trees, perennial crops and compost develop while residents do other work.",
     "diagram": "flowchart TD\n Inputs[Recipe inputs and initial resident work] --> Wait[Biology continues without a worker]\n First[First orchard establishment delay] --> Wait\n Factors[Recipe-specific season, moisture and fertility] --> Wait\n Wait --> Ready[Ready for resident collection or processing]\n Ready --> Delay[Delay after maturity]\n Delay --> Loss[Perishable output may decline]\n Ready --> Work[Resident collection work]\n Health[Animal health where applicable] --> Yield[Available output]\n Work --> Yield\n Loss --> Yield\n Yield --> Store[Physical hauling to storage]\n Store --> Repeat[Repeat if resources and policy allow]",
     "boundary": "",
-    "tip": "Managed timber needs six favorable growing years, longer in dry or cool conditions. Each later rotation consumes four replacement seedlings; residents plant, fell and haul raw logs for processing. An orchard grows the fruit tree of its land: pequi in the Cerrado and umbu in the Caatinga need far less irrigation and sit out dry spells.",
+    "tip": "Managed timber needs six favorable growing years, longer in dry or cool conditions. Each later rotation consumes four replacement seedlings; residents plant, fell and haul raw logs for processing. An orchard grows the fruit tree of its land: pequi in the Cerrado and umbu in the Caatinga need far less irrigation and sit out dry spells. A coffee grove gives its first crop in the third year and one a year after that; dried coffee keeps and sells to the town café.",
     "facts": null
   },
   {
