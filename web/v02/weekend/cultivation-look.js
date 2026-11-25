@@ -91,9 +91,76 @@ function tuft(){
  for(let i=0;i<4;i++)b.tri(top,ring[(i+1)%4],ring[i],'#ffffff',.82+i*.08);
  return b.build();
 }
+function cassava(mature){
+ const b=builder();
+ // Bare knobbly cane that forks high up; each fork carries a parasol of
+ // long-stalked, deeply fingered leaves.
+ b.stem(1.05,.045,.03,'#8a7256');
+ const forks=mature?3:2;
+ for(let f=0;f<forks;f++){
+  const a=.5+f*Math.PI*2/forks,foot=new THREE.Vector3(0,1,0),head=new THREE.Vector3(Math.cos(a)*.3,1.6+f%2*.14,Math.sin(a)*.3);
+  b.spindle(foot,head,.032,'#93795a');
+  for(let i=0;i<5;i++){
+   // Reddish stalk out to a hand of drooping fingers.
+   const la=a+(i-2)*.95,hub=head.clone().add(new THREE.Vector3(Math.cos(la)*.3,.12-Math.abs(i-2)*.08,Math.sin(la)*.3));
+   b.spindle(head,hub,.014,'#a8584a');
+   for(let k=-2;k<=2;k++)b.leaf({angle:la+k*.5,from:Math.hypot(hub.x,hub.z)-.02,y:hub.y,length:.34-Math.abs(k)*.05,width:.1,rise:-.1,arch:.04,cup:.012,hex:(i+k)%2?'#4f8a3c':'#5d9944'});
+  }
+ }
+ return b.build();
+}
+function sweetPotato(mature){
+ const b=builder();
+ // Runners creep out flat and carry heart-shaped leaves on short stalks.
+ const runners=mature?6:4;
+ for(let i=0;i<runners;i++){
+  const a=i*Math.PI*2/runners+.3,reach=mature?.5:.3;
+  b.spindle(new THREE.Vector3(0,.02,0),new THREE.Vector3(Math.cos(a)*reach,.03,Math.sin(a)*reach),.01,'#7a5a6a');
+  for(let k=1;k<=3;k++){
+   const r=reach*k/3.2,turn=a+(k%2?.5:-.5);
+   b.leaf({angle:turn,from:r,y:.05+k%2*.04,length:.19,width:.2,rise:.03,arch:.03,cup:.012,hex:k===3?'#6c8a5c':k%2?'#4c8a44':'#5a9a4c'});
+  }
+ }
+ for(let i=0;i<4;i++)b.leaf({angle:.4+i*Math.PI/2,from:.01,y:.06,length:.13,width:.14,rise:.08,arch:.03,cup:.012,hex:i%2?'#63a352':'#559548'});
+ return b.build();
+}
+function pumpkin(mature){
+ const b=builder();
+ // Broad rough leaves held up on stalks over a trailing vine.
+ for(let i=0;i<7;i++){
+  const a=i*GOLDEN,r=.1+i*.085,y=.22+(i%3)*.09;
+  b.spindle(new THREE.Vector3(Math.cos(a)*r*.6,.02,Math.sin(a)*r*.6),new THREE.Vector3(Math.cos(a)*r,y,Math.sin(a)*r),.012,'#7f9a52');
+  b.leaf({angle:a,from:r-.05,y,length:.4,width:.44,rise:.02,arch:.05,cup:.03,hex:i%2?'#4e8840':'#5c9648'});
+ }
+ for(const a of [1.2,3.6])b.spindle(new THREE.Vector3(0,.03,0),new THREE.Vector3(Math.cos(a)*.6,.03,Math.sin(a)*.6),.012,'#7f9a52');
+ if(mature){
+  // One ribbed fruit beside the crown, and a yellow flower on the vine.
+  const fruit=new THREE.Vector3(.36,.16,-.26);
+  for(let i=0;i<3;i++){const a=i*Math.PI/3,off=new THREE.Vector3(Math.cos(a)*.19,0,Math.sin(a)*.19);b.spindle(fruit.clone().sub(off),fruit.clone().add(off),.16,i===1?'#d9862f':'#cf7a2a');}
+  b.spindle(fruit.clone().add(new THREE.Vector3(0,.13,0)),fruit.clone().add(new THREE.Vector3(.02,.23,0)),.02,'#6f7f3f');
+  for(let i=0;i<5;i++)b.leaf({angle:i*1.257,from:.42,y:.06,length:.07,width:.06,rise:.05,arch:.01,cup:0,hex:'#f0c13a'});
+ }
+ return b.build();
+}
+function cowpea(mature){
+ const b=builder();
+ // Looser and more sprawling than bush beans, with long pods held above the leaves.
+ b.stem(.5,.02,.01,'#6f8f4c');
+ const tiers=[[.12,5,.3,.13],[.3,4,.27,.12],[.48,3,.2,.1]];
+ tiers.forEach(([y,count,length,width],tier)=>{
+  for(let i=0;i<count;i++)b.leaf({angle:tier*1.1+i*Math.PI*2/count,from:.03,y,length,width,rise:.02+tier*.02,arch:.06,cup:.015,hex:tier===2?'#74ab52':i%2?'#5f9a47':'#528c40'});
+ });
+ if(mature)for(let i=0;i<5;i++){
+  const a=.2+i*1.257,foot=new THREE.Vector3(Math.cos(a)*.06,.52,Math.sin(a)*.06);
+  b.spindle(foot,foot.clone().add(new THREE.Vector3(Math.cos(a)*.2,.12-i%2*.2,Math.sin(a)*.2)),.013,i%2?'#d8cf8c':'#b9c873');
+ }
+ return b.build();
+}
+const MODELS={greens,beans,corn,cassava,sweet_potato:sweetPotato,pumpkin,cowpea};
 const geometry={};
-const cropGeometry=(id,mature)=>geometry[`${id}:${mature}`]??=(id==='greens'?greens():id==='beans'?beans(mature):corn(mature));
-const FAR={greens:['#74a745',.19,.2],beans:['#51893c',.2,.62],corn:['#688f42',.26,1.9]};
+const cropGeometry=(id,mature)=>geometry[`${id}:${mature}`]??=MODELS[id](mature);
+// Far tufts: colour, radius, height.
+const FAR={greens:['#74a745',.19,.2],beans:['#51893c',.2,.62],corn:['#688f42',.26,1.9],cassava:['#548d40',.42,1.8],sweet_potato:['#52904a',.3,.16],pumpkin:['#548f44',.48,.4],cowpea:['#5a9545',.24,.6]};
 const dummy=new THREE.Object3D(),tint=new THREE.Color();
 const noise=n=>{const v=Math.sin(n*127.1+311.7)*43758.5453;return v-Math.floor(v);};
 function instanced(geo,material,items,place){
@@ -151,7 +218,7 @@ export function createCultivationModel(p,state){
   for(let i=0;i<3;i++){earth.tri(a[i],b[i],a[i+1],hex,tone);earth.tri(a[i+1],b[i],b[i+1],hex,tone);}
   for(const end of [capA&&a,capB&&b])if(end){earth.tri(end[0],end[1],end[2],hex,tone);earth.tri(end[0],end[2],end[3],hex,tone);}
  };
- const stubble=[],plants={greens:[],beans:[],corn:[]},boxes={userData:{}};
+ const stubble=[],plants=Object.fromEntries(Object.keys(CROPS).map(id=>[id,[]])),boxes={userData:{}};
  for(const b of beds){
   const job=(state.operations||[]).find(o=>!o.done&&o.site===p.id&&o.farm?.bed===b.id);
   const fraction=job?Math.min(1,job.work/job.farm.work):0,tone=.94+noise(p.id*17+b.id)*.12;

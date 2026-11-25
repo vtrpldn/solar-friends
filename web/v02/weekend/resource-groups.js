@@ -1,3 +1,4 @@
+import {CROPS,SEED_IDS} from './crops.js';
 // Shared inventory and trade ordering; processing location does not determine type.
 export const RESOURCE_GROUPS = [
   {name:'Items & equipment',ids:['bucket','garden-tools','carpentry-tools','harvest-basket','cleaning-kit','watering-can','wheelbarrow','bicycle','produce-crates','tools']},
@@ -29,7 +30,7 @@ export const RESOURCE_GROUPS = [
   {
     name: "Food & farm supplies",
     ids: [
-      "food", "greens", "beans", "corn",
+      "food", ...Object.keys(CROPS),
       "meals",
       "eggs",
       "milk",
@@ -41,12 +42,12 @@ export const RESOURCE_GROUPS = [
   },
   {
     name: "Plants & animals",
-    ids: ["greens_seed", "beans_seed", "corn_seed", "seedlings", "tree_starts", "bamboo_starts", "goats", "bees", "hens"],
+    ids: [...SEED_IDS, "seedlings", "tree_starts", "bamboo_starts", "goats", "bees", "hens"],
   },
 ];
 
 export const EQUIPMENT_IDS = new Set(RESOURCE_GROUPS[0].ids);
 export function inventoryGroups(view) {
-  if(view==='food')return [{name:'Food from town & the village',ids:['food','greens','beans','corn','meals','eggs','milk','honey']}];
+  if(view==='food')return [{name:'Food from town & the village',ids:['food',...Object.keys(CROPS),'meals','eggs','milk','honey']}];
   return RESOURCE_GROUPS.filter(group => (view === 'items') === group.ids.some(id => EQUIPMENT_IDS.has(id)));
 }

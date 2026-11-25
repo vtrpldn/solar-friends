@@ -363,7 +363,7 @@ function incomingSeeds(s,id) {
  return [...activeTrips(s),s.delivery].filter(t=>t&&!t.project&&!t.shipments&&!t.saleOnly&&t.material===id)
   .reduce((n,t)=>n+(t.quantity??MATERIALS[id].quantity),0);
 }
-const inputText=id=>id==='compost'?'compost':'seed packets';
+const inputText=id=>id==='compost'?'compost':MATERIALS[id].name.toLowerCase();
 // Quotes the missing seeds or compost for one bed job. `waitingSeeds` marks either input.
 export function plantingPurchase(s,b,p=null,action='plant') {
  const [id,n]=Object.entries(farmJobSpec(b,action).input)[0];
@@ -3420,7 +3420,7 @@ export function restore(text) {
     if(s.foodPurchases!==undefined && (!s.foodPurchases || !Number.isSafeInteger(s.foodPurchases.day) || s.foodPurchases.day<0 ||
       !Number.isFinite(s.foodPurchases.spent) || s.foodPurchases.spent<0 || s.foodPurchases.spent>100000))return null;
     if(s.foodPurchaseBudget!==undefined&&(!Number.isFinite(s.foodPurchaseBudget)||s.foodPurchaseBudget<0||s.foodPurchaseBudget>100000))return null;
-    if(s.foodStorage?.lots)for(const id of ['greens','beans','corn'])if(s.foodStorage.lots[id]===undefined&&s.materials[id]===0)s.foodStorage.lots[id]=[];
+    if(s.foodStorage?.lots)for(const id of Object.keys(CROPS))if(s.foodStorage.lots[id]===undefined&&s.materials[id]===0)s.foodStorage.lots[id]=[];
     refreshSandboxFood(s);
     if (!validFoodPolicy(s) || !validAnimalCare(s,PROJECTS) || !validHydrology(s) || !validWeather(s) || !validCultivation(s) || !validSuppliers(s,MATERIALS) || !validMaterialLedger(s,MATERIALS) || !validProductionHauling(s,PROCESSES) || !validLogisticsPolicy(s) || !validRemovals(s,PROJECTS,MATERIALS) || !validDelivery(s,MATERIALS) || !validUpkeep(s) || !validBiology(s,PROCESSES) || !validOutsideWork(s) || !validFoodStorage(s,PROCESSES,MATERIALS) || !validProductionAccounting(s,PROCESSES) || !validInfrastructure(s) || !validatePolicies(s,MATERIALS) || !validTrade(s,MATERIALS) || !validFinances(s)) return null;
     if (

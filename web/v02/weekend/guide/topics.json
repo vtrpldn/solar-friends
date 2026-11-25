@@ -272,7 +272,7 @@
     "description": "Manage a whole planting area or inspect one bed. Each bed keeps its own crop, care and harvest cycle.",
     "diagram": "flowchart TB\n Soil[Unprepared soil] -->|Resident preparation| Ready[Prepared bed]\n Ready -->|Seeds + planting work| Planted[Planted crop]\n Planted -->|Normal mode| Growth[Growing]\n Planted -->|Sandbox: instant growth| Mature[Harvestable]\n Growth -->|Accumulated growing conditions| Mature\n Mature -->|Resident harvesting| Harvest[Harvested bed + residues]\n Growth -->|Explicit clearing: residues only| Harvest\n Mature -->|Explicit clearing: residues only| Harvest\n Harvest -->|Prepare next planting| Ready\n Harvest --> Residues[Leave cover or collect residues]\n classDef soil fill:#f2e5d6,stroke:#c8af90,color:#654c35;\n classDef growing fill:#e9efd9,stroke:#b5c49a,color:#485d32;\n classDef mature fill:#d4e6d0,stroke:#88a67c,color:#2d5136;\n class Soil,Ready,Harvest soil;\n class Planted,Growth growing;\n class Mature,Residues mature;\n",
     "boundary": "Harvest quantities resolve once. Delayed harvest can reduce yield; clearing returns residues only. Fields snap to 2 m map cells.",
-    "tip": "Residents prepare beds, plant the selected crop with stored seeds, and harvest ripe beds automatically. With Auto-buy on, residents order missing seed packets when shared savings can cover them and collection; each field, garden and greenhouse has its own Auto-buy seeds & compost switch, which also covers compost for Apply compost work. Keep water, work access and storage available.",
+    "tip": "Residents prepare beds, plant the selected crop with stored seeds, and harvest ripe beds automatically. With Auto-buy on, residents order missing seeds or cuttings when shared savings can cover them and collection; each field, garden and greenhouse has its own Auto-buy seeds & compost switch, which also covers compost for Apply compost work. Keep water, work access and storage available.",
     "facts": "crops"
   },
   {
@@ -292,7 +292,7 @@
     "description": "Water, fertility, cover and accumulated stress determine crop development.",
     "diagram": "flowchart LR\n Rain[Outdoor rain] --> Moisture[Soil moisture]\n Supply[Withdrawn irrigation water] --> Moisture\n Cover[Residue surface cover] --> Evap[Reduced evaporation demand]\n Evap --> Moisture\n Moisture --> Conditions[Growth conditions and accumulated stress]\n Fertility[Available fertility] --> Conditions\n Density[Plant density and competition] --> Conditions\n Season[Outdoor season factor] --> Conditions\n Conditions --> Biomass[Growth and standing biomass]\n Biomass --> Harvest[Harvest or clearing]\n Harvest --> Export[Crop output removes fertility]\n Harvest --> Residue[Recoverable residues]\n Residue --> Cover\n Residue --> Collect[Collect once for compost ingredients]\n Compost[Applied compost] --> Decay[Decomposition over time]\n Residue --> Decay\n Decay --> Fertility\n Decay --> Organic[Retained organic matter]\n Decay --> Gas[Accounted decomposition losses]\n Conditions --> Damage[Cumulative drought damage]\n Damage --> Failure[Failed crop: clear and replant]\n",
     "boundary": "Late watering cannot erase drought damage. Failed or expired crops must be cleared.",
-    "tip": "Leave cover or compost collected residues. Both return material with losses; neither guarantees soil balance.",
+    "tip": "Leave cover or compost collected residues. Both return material with losses; neither guarantees soil balance. Cassava, sweet potato and cowpeas survive dry soil longer than the other crops and keep growing through the dry season.",
     "facts": "compost"
   },
   {
@@ -415,7 +415,7 @@
     ],
     "description": "Food keeps its identity and age during storage, processing and transport.",
     "diagram": "flowchart TD\n Crop[Named harvested crop or purchased food] --> Lots[Inventory with expiry-bearing lots]\n Lots --> Cook[Explicit ingredient recipe and resident work]\n Cook --> Meals[Prepared meal lots]\n Lots --> Preserve[Preservation recipe]\n Preserve --> Long[Longer-lived food lots]\n Power[Powered refrigeration] --> Slow[Slow ageing of eligible stored food]\n Slow --> Lots\n Lots --> Expired{Expired?}\n Meals --> Expired\n Long --> Expired\n Expired -->|Yes| Waste[Remove spoiled food and account organic waste]\n Expired -->|No| Use[Eating, recipe input or trade]\n Use --> Transit[Preserve batch age in cargo and reservations]\n Lots --> Forecast[Expiry-aware pantry forecast]\n Forecast --> Policy[Optional fresh-meal and provision policies]\n Policy --> Cook\n",
-    "boundary": "Refrigeration capacity is measured in liters. Uncooked greens, beans and corn do not count as ready portions.",
+    "boundary": "Refrigeration capacity is measured in liters. Uncooked crops do not count as ready portions.",
     "tip": "Use the Food Almanac to inspect expiry, fresh meals, dried provisions and refrigeration. Automatic kitchens can cook harvested crops even when the pantry is empty. With automatic food management on, residents sell food that would spoil before the village could eat it. Recipes that consume ready-to-eat food protect a one-day reserve.",
     "facts": "food"
   },

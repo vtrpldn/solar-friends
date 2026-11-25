@@ -2,7 +2,8 @@ import {recordMaterial} from './material-ledger.js';
 import {materialMass} from './material-measures.js';
 import {activeTrips} from "./trip-state.js";
 // Authored game shelf lives, not food-safety guidance. One day is 3200 sim seconds.
-export const FOOD_DAYS={greens:3,beans:5,corn:3,food:3,meals:2,eggs:7,milk:1};
+import {CROPS} from './crops.js';
+export const FOOD_DAYS={...Object.fromEntries(Object.entries(CROPS).map(([id,c])=>[id,c.shelf])),food:3,meals:2,eggs:7,milk:1};
 const day=3200;
 export function freshLots(s,id,n,recipe){const duration=recipe?.preservedDays?.[id]||FOOD_DAYS[id];return duration&&n>0?[{n,expires:s.time+duration*day,...(recipe?.preservedDays?.[id]?{preserved:true}:{})}]:[];}
 export function refreshSandboxFood(s){
@@ -93,7 +94,7 @@ export function foodStorageText(s){
  if(s.mode==='sandbox')return 'Food spoilage is disabled in sandbox.';
  const f=ensureFoodStorage(s),next=Object.values(f.lots).flat().reduce((n,l)=>Math.min(n,l.expires),Infinity),lost=Object.values(f.spoiled).reduce((n,q)=>n+q,0);
  const preserved=(f.lots.meals||[]).filter(l=>l.preserved).reduce((n,l)=>n+l.n,0);
- return `Residents use oldest food first. One camp serving: 1 meal, 1 kg ingredients, 4 cooked eggs or 2 L milk (simplified food portions). Greens and corn: 3 days; beans: 5. Cook these crops into meals at a kitchen. Ingredients: 3 days; fresh meals: 2; dried provisions: 10; eggs: 7; milk: 1. ${preserved} of the meals in stores are dried provisions. ${Number.isFinite(next)?`Next stored batch expires in ${Math.max(0,(next-s.time)*.45/60).toFixed(1)} game hours.`:'No perishable food in stores.'} ${lost} units spoiled into organic residues. Reserved and carried food also ages.`;
+ return `Residents use oldest food first. One camp serving: 1 meal, 1 kg ingredients, 4 cooked eggs or 2 L milk (simplified food portions). Crops keep from 3 days (greens, corn, cassava) to 30 (pumpkin); cook them into meals at a kitchen. Ingredients: 3 days; fresh meals: 2; dried provisions: 10; eggs: 7; milk: 1. ${preserved} of the meals in stores are dried provisions. ${Number.isFinite(next)?`Next stored batch expires in ${Math.max(0,(next-s.time)*.45/60).toFixed(1)} game hours.`:'No perishable food in stores.'} ${lost} units spoiled into organic residues. Reserved and carried food also ages.`;
 }
 
 export function returnUnsoldFood(s,trip){

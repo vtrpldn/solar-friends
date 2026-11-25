@@ -1,5 +1,6 @@
 import {materialMass} from './material-measures.js';
-const sinks={corn_feed:'Drying moisture losses',cook_greens:'Cooking evaporation',cook_beans:'Cooking evaporation',cook_corn:'Cooking evaporation',preserve_meals:'Drying moisture losses',saw_timber:'Uncollected wood offcuts and sawdust',saw_planks:'Uncollected wood offcuts and sawdust',frames:'Joinery offcuts and fastening waste',walls:'Unrecovered earth trimmings',tiles:'Firing moisture and fuel losses',meals:'Cooking evaporation',compost:'Composting gas and moisture'};
+import {CROPS} from './crops.js';
+const sinks={corn_feed:'Drying moisture losses',...Object.fromEntries(Object.keys(CROPS).map(id=>[`cook_${id}`,'Cooking evaporation'])),preserve_meals:'Drying moisture losses',saw_timber:'Uncollected wood offcuts and sawdust',saw_planks:'Uncollected wood offcuts and sawdust',frames:'Joinery offcuts and fastening waste',walls:'Unrecovered earth trimmings',tiles:'Firing moisture and fuel losses',meals:'Cooking evaporation',compost:'Composting gas and moisture'};
 export function recipeBalance(id,recipe){
  if(!sinks[id])return null;
  const inputKg=materialMass(recipe.input)+(recipe.water||0),outputKg=materialMass(recipe.output);

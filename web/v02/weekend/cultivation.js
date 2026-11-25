@@ -2,13 +2,8 @@ import {rainfallRate} from './weather.js';
 import {cropStress,validCropStress} from './crop-stress.js';
 import {materialMass} from './material-measures.js';
 import {GAME_DAY,growthRate} from './biological-production.js';
-// Calendar ranges: UMN Extension vegetable planning; other coefficients are
-// explicit simulation estimates, not agronomic prescriptions. See docs/farming.md.
-export const CROPS={
- greens:{name:'Leafy greens',days:45,window:4,plants:12,yieldKg:2,water:3,residue:.3,height:.28},
- beans:{name:'Bush beans',days:60,window:7,plants:8,yieldKg:1.2,water:3,residue:.6,height:.65},
- corn:{name:'Sweet corn',days:85,window:5,plants:4,yieldKg:1.5,water:4,residue:1,height:2},
-};
+import {CROPS,SEED_IDS} from './crops.js';
+export {CROPS};
 // Use the same timing and yield calculation for settlement, care and inspection.
 export function harvestFactor(b,time){
  const crop=CROPS[b.crop];
@@ -121,13 +116,13 @@ export function cultivationStep(s,dt,useWater,defs){
     b.evaporated+=Math.min(available,demand);b.drained+=Math.max(0,available-demand-capacity);
     b.moisture=Math.max(0,Math.min(1,(available-demand)/capacity));
     if(!standing)continue;
-    if(cropStress(b,b.moisture,step)==='failed'){b.stage='failed';continue;}
+    if(cropStress(b,b.moisture,step,crop.dry&&{graceDays:crop.dry[0],lossDays:crop.dry[1]})==='failed'){b.stage='failed';continue;}
     const moisture=Math.min(1,b.moisture/.4),fertility=.3+.7*b.fertility,crowd=1/(1+Math.max(0,b.density-1));
     const condition=moisture*fertility*crowd;
     b.elapsed+=step;b.stress+=step*(1-condition);
     if(!growing)continue;
     const before=b.growth;
-    b.growth=Math.min(1,b.growth+days/crop.days*condition*(p.key==='greenhouse'?1:growthRate(s,'vegetables')));
+    b.growth=Math.min(1,b.growth+days/crop.days*condition*(p.key==='greenhouse'?1:Math.max(crop.season||0,growthRate(s,'vegetables'))));
     const biomass=(b.growth-before)*potentialBiomass(b);b.grownBiomassKg+=biomass;b.standingBiomassKg+=biomass;
     if(b.growth>=1){b.stage='harvestable';b.ripeAt=s.time;}
    }
@@ -158,7 +153,7 @@ export function validCultivation(s){
   const spec=farmJobSpec({...b,crop:o.farm.crop,density:o.farm.density},o.farm.action);
   if(spec.work!==o.farm.work||JSON.stringify(spec.input)!==JSON.stringify(o.input))return false;
   if(o.waitingSeeds!==undefined&&(o.waitingSeeds!==true||o.done||!['plant','amend'].includes(o.farm.action)||o.phase!=='pickup'||o.work!==0))return false;
-  if(!o.input||Object.entries(o.input).some(([id,n])=>!['compost',...Object.keys(CROPS).map(c=>`${c}_seed`)].includes(id)||!Number.isInteger(n)||n<0||n>100))return false;
+  if(!o.input||Object.entries(o.input).some(([id,n])=>!['compost',...SEED_IDS].includes(id)||!Number.isInteger(n)||n<0||n>100))return false;
   if(o.harvestOutput&&Object.entries(o.harvestOutput).some(([id,n])=>![o.farm.crop,'scraps'].includes(id)||!Number.isInteger(n)||n<0||n>(id==='scraps'?1000000:b.w*b.d*CROPS[o.farm.crop].yieldKg*1.2)))return false;
  }
  return true;

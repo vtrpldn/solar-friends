@@ -104,6 +104,160 @@
       "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
       "physicalBasis": "Engineering pack estimate; equipment specifications vary"
     },
+    "greens": {
+      "name": "Leafy greens",
+      "canonicalUnit": "kg",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 10,
+      "retailPackPriceReais": 30,
+      "kg": 1,
+      "m3": 0.004,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "greens_seed": {
+      "name": "Leafy greens seed packets",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 5,
+      "retailPackPriceReais": 10,
+      "kg": 0.02,
+      "m3": 0.00004,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "beans": {
+      "name": "Bush beans",
+      "canonicalUnit": "kg",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 10,
+      "retailPackPriceReais": 30,
+      "kg": 1,
+      "m3": 0.002,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "beans_seed": {
+      "name": "Bush beans seed packets",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 5,
+      "retailPackPriceReais": 10,
+      "kg": 0.1,
+      "m3": 0.0002,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "corn": {
+      "name": "Sweet corn",
+      "canonicalUnit": "kg",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 10,
+      "retailPackPriceReais": 30,
+      "kg": 1,
+      "m3": 0.003,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "corn_seed": {
+      "name": "Sweet corn seed packets",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 5,
+      "retailPackPriceReais": 10,
+      "kg": 0.1,
+      "m3": 0.0002,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "cassava": {
+      "name": "Cassava",
+      "canonicalUnit": "kg",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 10,
+      "retailPackPriceReais": 45,
+      "kg": 1,
+      "m3": 0.002,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "cassava_seed": {
+      "name": "Cassava cutting bundles",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 5,
+      "retailPackPriceReais": 8,
+      "kg": 0.5,
+      "m3": 0.001,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "sweet_potato": {
+      "name": "Sweet potato",
+      "canonicalUnit": "kg",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 10,
+      "retailPackPriceReais": 45,
+      "kg": 1,
+      "m3": 0.002,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "sweet_potato_seed": {
+      "name": "Sweet potato slip bundles",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 5,
+      "retailPackPriceReais": 12,
+      "kg": 0.25,
+      "m3": 0.0005,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "pumpkin": {
+      "name": "Pumpkin",
+      "canonicalUnit": "kg",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 10,
+      "retailPackPriceReais": 35,
+      "kg": 1,
+      "m3": 0.002,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "pumpkin_seed": {
+      "name": "Pumpkin seed packets",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 5,
+      "retailPackPriceReais": 10,
+      "kg": 0.05,
+      "m3": 0.0001,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "cowpea": {
+      "name": "Cowpeas",
+      "canonicalUnit": "kg",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 10,
+      "retailPackPriceReais": 80,
+      "kg": 1,
+      "m3": 0.002,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "cowpea_seed": {
+      "name": "Cowpeas seed packets",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": 5,
+      "retailPackPriceReais": 10,
+      "kg": 0.1,
+      "m3": 0.0002,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
     "bucket": {
       "name": "Bucket",
       "canonicalUnit": "units",
@@ -569,6 +723,11 @@
   },
   "biology": {
     "parameters": {
+      "baby_greens": {
+        "days": 21,
+        "window": 3,
+        "seasonal": true
+      },
       "vegetables": {
         "days": 45,
         "window": 7,
@@ -592,7 +751,8 @@
       "wood": {
         "days": 2190,
         "window": null,
-        "seasonal": true
+        "seasonal": true,
+        "plantingFraction": 0.1
       },
       "bamboo": {
         "days": 365,
@@ -621,6 +781,21 @@
       }
     },
     "carePerGrowingArea": {
+      "wood": {
+        "kind": "supply-0",
+        "area": 36,
+        "liters": 36
+      },
+      "bamboo": {
+        "kind": "supply-1",
+        "area": 16,
+        "liters": 24
+      },
+      "baby_greens": {
+        "kind": "garden",
+        "area": 8,
+        "liters": 24
+      },
       "vegetables": {
         "kind": "garden",
         "area": 16,
@@ -647,13 +822,21 @@
         "days": 3,
         "fodder": 1,
         "water": 2,
-        "work": 25
+        "work": 25,
+        "product": "eggs",
+        "dailyOutput": 2,
+        "batch": 6,
+        "shelfDays": 7
       },
       "goat_pasture": {
         "days": 1,
         "fodder": 3,
         "water": 16,
-        "work": 35
+        "work": 35,
+        "product": "milk",
+        "dailyOutput": 4,
+        "batch": 4,
+        "shelfDays": 1
       }
     },
     "basis": "Mixed published cycle/yield references and engineering assumptions, documented in economy-biology.md; not species-specific yield forecasts"
@@ -787,7 +970,7 @@
       "output": {
         "logs": 48
       },
-      "residentHours": 1.8,
+      "residentHours": 5.4,
       "growthDays": 2190,
       "basis": "Authored aggregate transformation; named mass losses tracked separately"
     },
@@ -816,6 +999,18 @@
       },
       "residentHours": 0.375,
       "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "baby_greens": {
+      "input": {
+        "seedlings": 1
+      },
+      "output": {
+        "food": 6,
+        "scraps": 1
+      },
+      "residentHours": 0.2625,
+      "growthDays": 21,
       "basis": "Authored aggregate transformation; named mass losses tracked separately"
     },
     "vegetables": {
@@ -979,6 +1174,290 @@
       },
       "output": {},
       "residentHours": 0.9,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "farm_prepare": {
+      "input": {
+        "compost": 100,
+        "greens_seed": 100,
+        "beans_seed": 100,
+        "corn_seed": 100,
+        "cassava_seed": 100,
+        "sweet_potato_seed": 100,
+        "pumpkin_seed": 100,
+        "cowpea_seed": 100
+      },
+      "output": {
+        "greens": 100,
+        "beans": 100,
+        "corn": 100,
+        "cassava": 100,
+        "sweet_potato": 100,
+        "pumpkin": 100,
+        "cowpea": 100,
+        "scraps": 1000000
+      },
+      "residentHours": 0.007500000000000001,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "farm_plant": {
+      "input": {
+        "compost": 100,
+        "greens_seed": 100,
+        "beans_seed": 100,
+        "corn_seed": 100,
+        "cassava_seed": 100,
+        "sweet_potato_seed": 100,
+        "pumpkin_seed": 100,
+        "cowpea_seed": 100
+      },
+      "output": {
+        "greens": 100,
+        "beans": 100,
+        "corn": 100,
+        "cassava": 100,
+        "sweet_potato": 100,
+        "pumpkin": 100,
+        "cowpea": 100,
+        "scraps": 1000000
+      },
+      "residentHours": 0.007500000000000001,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "farm_harvest": {
+      "input": {
+        "compost": 100,
+        "greens_seed": 100,
+        "beans_seed": 100,
+        "corn_seed": 100,
+        "cassava_seed": 100,
+        "sweet_potato_seed": 100,
+        "pumpkin_seed": 100,
+        "cowpea_seed": 100
+      },
+      "output": {
+        "greens": 100,
+        "beans": 100,
+        "corn": 100,
+        "cassava": 100,
+        "sweet_potato": 100,
+        "pumpkin": 100,
+        "cowpea": 100,
+        "scraps": 1000000
+      },
+      "residentHours": 0.007500000000000001,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "farm_clear": {
+      "input": {
+        "compost": 100,
+        "greens_seed": 100,
+        "beans_seed": 100,
+        "corn_seed": 100,
+        "cassava_seed": 100,
+        "sweet_potato_seed": 100,
+        "pumpkin_seed": 100,
+        "cowpea_seed": 100
+      },
+      "output": {
+        "greens": 100,
+        "beans": 100,
+        "corn": 100,
+        "cassava": 100,
+        "sweet_potato": 100,
+        "pumpkin": 100,
+        "cowpea": 100,
+        "scraps": 1000000
+      },
+      "residentHours": 0.007500000000000001,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "farm_amend": {
+      "input": {
+        "compost": 100,
+        "greens_seed": 100,
+        "beans_seed": 100,
+        "corn_seed": 100,
+        "cassava_seed": 100,
+        "sweet_potato_seed": 100,
+        "pumpkin_seed": 100,
+        "cowpea_seed": 100
+      },
+      "output": {
+        "greens": 100,
+        "beans": 100,
+        "corn": 100,
+        "cassava": 100,
+        "sweet_potato": 100,
+        "pumpkin": 100,
+        "cowpea": 100,
+        "scraps": 1000000
+      },
+      "residentHours": 0.007500000000000001,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "farm_collect": {
+      "input": {
+        "compost": 100,
+        "greens_seed": 100,
+        "beans_seed": 100,
+        "corn_seed": 100,
+        "cassava_seed": 100,
+        "sweet_potato_seed": 100,
+        "pumpkin_seed": 100,
+        "cowpea_seed": 100
+      },
+      "output": {
+        "greens": 100,
+        "beans": 100,
+        "corn": 100,
+        "cassava": 100,
+        "sweet_potato": 100,
+        "pumpkin": 100,
+        "cowpea": 100,
+        "scraps": 1000000
+      },
+      "residentHours": 0.007500000000000001,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "cook_greens": {
+      "input": {
+        "greens": 4
+      },
+      "output": {
+        "meals": 4
+      },
+      "residentHours": 0.3,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "cook_beans": {
+      "input": {
+        "beans": 4
+      },
+      "output": {
+        "meals": 4
+      },
+      "residentHours": 0.3,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "cook_corn": {
+      "input": {
+        "corn": 4
+      },
+      "output": {
+        "meals": 4
+      },
+      "residentHours": 0.3,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "cook_cassava": {
+      "input": {
+        "cassava": 4
+      },
+      "output": {
+        "meals": 4
+      },
+      "residentHours": 0.3,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "cook_sweet_potato": {
+      "input": {
+        "sweet_potato": 4
+      },
+      "output": {
+        "meals": 4
+      },
+      "residentHours": 0.3,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "cook_pumpkin": {
+      "input": {
+        "pumpkin": 4
+      },
+      "output": {
+        "meals": 4
+      },
+      "residentHours": 0.3,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "cook_cowpea": {
+      "input": {
+        "cowpea": 4
+      },
+      "output": {
+        "meals": 4
+      },
+      "residentHours": 0.3,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "corn_feed": {
+      "input": {
+        "corn": 4
+      },
+      "output": {
+        "fodder": 1,
+        "scraps": 1
+      },
+      "residentHours": 0.225,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "gather-wild-fruit": {
+      "input": {},
+      "output": {
+        "food": 4
+      },
+      "residentHours": 0.4125,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "gather-fallen-wood": {
+      "input": {},
+      "output": {
+        "logs": 3
+      },
+      "residentHours": 0.3375,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "gather-wild-bamboo": {
+      "input": {},
+      "output": {
+        "bamboo": 3
+      },
+      "residentHours": 0.675,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "gather-wild-forage": {
+      "input": {},
+      "output": {
+        "fodder": 6
+      },
+      "residentHours": 0.4125,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "gather-loose-stone": {
+      "input": {},
+      "output": {
+        "stone": 2
+      },
+      "residentHours": 0.4875,
       "growthDays": 0,
       "basis": "Authored aggregate transformation; named mass losses tracked separately"
     }
@@ -1922,6 +2401,20 @@
         "legacyWork": 20,
         "packWork": 45.333333333333336
       }
+    },
+    "carport": {
+      "footprint": [
+        4,
+        3
+      ],
+      "materials": {
+        "stone": 6,
+        "wood": 40,
+        "hardware": 6,
+        "roofing": 21
+      },
+      "residentHours": 12.045,
+      "economicSpec": null
     },
     "bridge": {
       "footprint": [
@@ -3058,6 +3551,15 @@
         "hardware": 4
       },
       "residentHours": 5.61,
+      "economicSpec": null
+    },
+    "field": {
+      "footprint": [
+        2,
+        2
+      ],
+      "materials": {},
+      "residentHours": 0.007500000000000001,
       "economicSpec": null
     },
     "rain-tent": {

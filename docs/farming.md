@@ -6,15 +6,27 @@ Fields reserve 2–32 cells per side. A cell is 2 m. Beds are 1.2 m wide with 0.
 
 ## Biological model
 
-One game day is 3,200 simulation seconds. `cultivation.js` contains the crop definitions. Current standard-density values are:
+One game day is 3,200 simulation seconds. `crops.js` is the only place a crop is defined; stock items, planting stock, shelf life, cooking recipes, trade and models read that table. Current standard-density values are:
 
-| Crop | Growth days | Plants/m² | Potential fresh harvest kg/m² | Dry-weather demand L/m²/day | Harvest window days |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Leafy greens | 45 | 12 | 2 | 3 | 4 |
-| Bush beans | 60 | 8 | 1.2 | 3 | 7 |
-| Sweet corn | 85 | 4 | 1.5 | 4 | 5 |
+| Crop | Growth days | Plants/m² | Potential fresh harvest kg/m² | Dry-weather demand L/m²/day | Harvest window days | Keeps (days) |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Leafy greens (couve e alface) | 45 | 12 | 2 | 3 | 4 | 3 |
+| Bush beans (feijão) | 60 | 8 | 1.2 | 3 | 7 | 5 |
+| Sweet corn (milho verde) | 85 | 4 | 1.5 | 4 | 5 | 3 |
+| Cassava (mandioca) | 270 | 1 | 2 | 1.5 | 60 | 3 |
+| Sweet potato (batata-doce) | 120 | 4 | 1.5 | 2.5 | 21 | 14 |
+| Pumpkin (abóbora) | 100 | 1 | 1.5 | 3.5 | 14 | 30 |
+| Cowpeas (feijão-de-corda) | 70 | 6 | 0.5 | 2 | 7 | 4 |
 
-Calendar choices lie within the broad ranges in [University of Minnesota Extension's vegetable climate resources](https://extension.umn.edu/agriculture/specialty-crops/vegetable-farming/climate-resilience-resources-for-vegetable-growers-in-minnesota). The [University of Maryland sweet-corn guide](https://extension.umd.edu/resource/growing-sweet-corn-home-garden) provides a spacing reference. These sources do not establish local Brazilian crop performance: cultivar, soil and climate vary.
+Calendar choices for the first three crops lie within the broad ranges in [University of Minnesota Extension's vegetable climate resources](https://extension.umn.edu/agriculture/specialty-crops/vegetable-farming/climate-resilience-resources-for-vegetable-growers-in-minnesota). The [University of Maryland sweet-corn guide](https://extension.umd.edu/resource/growing-sweet-corn-home-garden) provides a spacing reference. These sources do not establish local Brazilian crop performance: cultivar, soil and climate vary.
+
+Cassava, sweet potato, pumpkin and cowpeas are staples of Brazilian smallholdings. Their cycle lengths, yields, water demand, shelf lives and town prices are authored estimates in the range commonly quoted for family farming (an eight-to-twelve-month cassava cycle, a four-month sweet potato); none has a cited reference in the calibration register yet. Three of them differ from the first crops in kind, not only in numbers:
+
+- **Drought tolerance.** `dry` gives the days of dry soil a crop survives before damage and the further days to total loss. The default is 1 and 6; cassava has 8 and 24, sweet potato and cowpeas 3 and 10.
+- **Dry-season growth.** `season` is the lowest seasonal growth factor the crop accepts. Cassava keeps at least 70% of its rate and sweet potato and cowpeas 60% through the Caatinga and Cerrado dry season, which slows the other crops to as little as 30%.
+- **Planting stock.** Cassava is planted from cutting bundles and sweet potato from slip bundles, bought from the agricultural supplier like seed packets.
+
+Cassava also waits in the ground: its harvest window is 60 days. Fresh roots still spoil in three days once lifted, so it is harvested as it is cooked. Processing into farinha or other stored products is not modeled.
 
 Density, fresh yield, water demand, residue production, labor and seed-packet coverage are explicit simulation estimates. Half, standard and dense planting scale seed use and water demand. Dense planting incurs competition; it cannot multiply output without consequence. Outdoor growth uses the existing biome/season multiplier. Greenhouses exclude rain and that seasonal multiplier, but still need water and fertile soil. Temperature, ventilation and solar transmission are not modeled yet; the enclosure is a simplified environmental treatment, not a universally superior farming tier.
 
@@ -28,7 +40,7 @@ Residues decompose exponentially with a 60-day time constant; applied compost us
 
 The bed ledger records seeds, simulated biological biomass input, applied compost, standing biomass, harvested products, collected residues, remaining amendments, retained organic matter, decomposition losses and field losses. Biological input represents environmental uptake; harvest is not treated as a closed transformation of seed mass alone. Inventory stays in whole stock units; uncollected fractional residues remain on the bed. Existing food-batch accounting handles subsequent spoilage.
 
-Greens, fresh beans and sweet corn remain distinct stock items, measured in kg, with authored shelf lives of 3, 5 and 3 days. Each has an explicit cooking recipe. A corn-feed supplement recipe yields 1 kg dry fodder and 1 kg residues from 4 kg fresh corn, recording the other 2 kg as moisture loss. This is a simplified feed-processing model, not a balanced livestock diet specification.
+Every crop is a distinct stock item, measured in kg, with the authored shelf life in the table above. Each has an explicit cooking recipe. A corn-feed supplement recipe yields 1 kg dry fodder and 1 kg residues from 4 kg fresh corn, recording the other 2 kg as moisture loss. This is a simplified feed-processing model, not a balanced livestock diet specification.
 
 ## Persistence and limits
 

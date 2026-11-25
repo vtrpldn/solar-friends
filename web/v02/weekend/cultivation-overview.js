@@ -1,4 +1,5 @@
 import {CROPS,farmAutoBuy,farmJobError,harvestExpired} from './cultivation.js';
+import {cropLabel,cropFacts} from './crops.js';
 import {configureBed,queueBedJob} from './simulation.js';
 
 export function configureCultivation(s,p,settings){
@@ -26,7 +27,7 @@ export function autoBuyToggle(s,p,changed,bedView=false){
  button.id='farm-auto-buy';button.className='farm-auto-buy';button.setAttribute('aria-pressed',String(on));
  button.textContent=`Auto-buy seeds & compost: ${on?'on':'off'}`;
  note.className='farm-care-note';
- note.textContent=(on?'Residents order missing seed packets and compost when savings cover them and collection. Work starts after they arrive.':'Planting and compost work need stock in stores. Buy seed packets and compost in Resources.')+(bedView?' Applies to every bed here.':'');
+ note.textContent=(on?'Residents order missing seeds, cuttings and compost when savings cover them and collection. Work starts after they arrive.':'Planting and compost work need stock in stores. Buy seeds, cuttings and compost in Resources.')+(bedView?' Applies to every bed here.':'');
  button.onclick=()=>{p.autoBuyInputs=!on;changed();};
  return [button,note];
 }
@@ -45,7 +46,7 @@ export function renderCultivationOverview({content,s,p,changed,message,inspect,f
  <div class="farm-stage-list">${Object.entries(stages).filter(([stage])=>count(stage)).map(([stage,label])=>`<div><span>${label}</span><strong>${count(stage)}</strong></div>`).join('')}</div>
  <p class="farm-intro">Manage this entire planting area. Residents work through queued beds as they become available.</p><div id="farm-bulk-actions"></div><p id="farm-feedback" role="status"></p></section>
  <section class="farm-settings"><h4>Planting & care</h4><p class="farm-intro">Crop and spacing apply to ${planting.length} empty, available beds. Growing crops and busy beds stay unchanged.</p>
- <div class="farm-control-pair"><label>Crop<select id="farm-crop" ${planting.length?'':'disabled'}>${options(planting,'crop',Object.entries(CROPS).map(([id,c])=>[id,c.name]))}</select></label><label>Spacing<select id="farm-density" ${planting.length?'':'disabled'}>${options(planting,'density',[[.5,'Wide'],[1,'Standard'],[1.5,'Dense']])}</select></label></div>
+ <div class="farm-control-pair"><label>Crop<select id="farm-crop" ${planting.length?'':'disabled'}>${options(planting,'crop',Object.keys(CROPS).map(id=>[id,cropLabel(id)]))}</select></label><label>Spacing<select id="farm-density" ${planting.length?'':'disabled'}>${options(planting,'density',[[.5,'Wide'],[1,'Standard'],[1.5,'Dense']])}</select></label></div>${CROPS[common(planting,'crop')]?`<p class="farm-crop-facts">${cropFacts(common(planting,'crop'))}</p>`:''}
  <label class="farm-check"><input id="farm-irrigation" type="checkbox" ${care.length?'':'disabled'}><span>Irrigate from village supplies</span></label>
  <label class="farm-residues-label">After harvest<select id="farm-residues" ${care.length?'':'disabled'}>${options(care,'residues',[['leave','Leave residues as cover'],['collect','Collect for compost']])}</select></label>
  <p class="farm-care-note">Care settings apply to ${care.length} beds without queued work.</p><div id="farm-auto-buy-slot"></div></section>

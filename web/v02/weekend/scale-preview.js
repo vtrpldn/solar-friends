@@ -66,11 +66,12 @@ export function createScalePreview(validate = false, collection = 'village') {
       b => grow(b, 'greens', .2), b => grow(b, 'greens', .6), b => grow(b, 'greens', 1),
       b => grow(b, 'beans', .2), b => grow(b, 'beans', .6), b => grow(b, 'beans', 1),
       b => grow(b, 'corn', .2), b => grow(b, 'corn', .6), b => grow(b, 'corn', 1),
+      ...['cassava', 'sweet_potato', 'pumpkin', 'cowpea'].flatMap(crop => [b => grow(b, crop, .2), b => grow(b, crop, .6), b => grow(b, crop, 1)]),
       b => grow(b, 'corn', .8, {stage: 'failed', droughtDamage: .9, moisture: .05}),
       b => Object.assign(b, {stage: 'harvested', cover: .8, residueKg: 1, moisture: .5}),
     ];
     add('field', 44, 50, {fieldSize: [columns.length, 6]}).forEach((b, i) => columns[Math.floor(i / 5)](b));
-    add('field', 62, 50, {fieldSize: [10, 6]}).forEach((b, i) => grow(b, ['corn', 'beans', 'greens'][Math.floor(i / 15) % 3] || 'greens', 1));
+    add('field', 74, 50, {fieldSize: [10, 6]}).forEach((b, i) => grow(b, ['corn', 'beans', 'greens'][Math.floor(i / 15) % 3] || 'greens', 1));
     add('garden', 46, 60).forEach((b, i) => grow(b, ['greens', 'beans', 'corn', 'greens'][i], [1, .6, 1, .2][i]));
     add('greenhouse', 52, 60).forEach((b, i) => grow(b, ['greens', 'beans'][i], 1));
     add('house', 60, 60);

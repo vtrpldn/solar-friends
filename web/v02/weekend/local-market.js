@@ -1,4 +1,5 @@
 import {quantityText} from './material-measures.js';
+import {CROPS,SEED_IDS} from './crops.js';
 // Authored local trading terms, not a claimed live commodity-price feed.
 export const BUYERS={
  produce:{name:'Town produce stall',batches:8,fullPriceBatches:4,ratio:.5,bulkRatio:.4},
@@ -8,7 +9,7 @@ export const BUYERS={
  equipment:{name:'Hardware resale counter',batches:2,fullPriceBatches:1,ratio:.4,bulkRatio:.3},
 };
 export function buyerFor(id){
- const key=['food','eggs','milk','honey','greens','beans','corn'].includes(id)?'produce':id==='meals'?'meals':['greens_seed','beans_seed','corn_seed','goats','hens','bees','fodder','seedlings','tree_starts','bamboo_starts','compost'].includes(id)?'livestock':['panels','batteries','pumps','cooling','tools','tank','sanitation','electrical','plumbing'].includes(id)?'equipment':'materials';
+ const key=['food','eggs','milk','honey',...Object.keys(CROPS)].includes(id)?'produce':id==='meals'?'meals':[...SEED_IDS,'goats','hens','bees','fodder','seedlings','tree_starts','bamboo_starts','compost'].includes(id)?'livestock':['panels','batteries','pumps','cooling','tools','tank','sanitation','electrical','plumbing'].includes(id)?'equipment':'materials';
  return {id:key,...BUYERS[key]};
 }
 export function buyerQuote(id,item,sold=0){
