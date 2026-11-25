@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {MATERIALS,PROCESSES,PROJECTS,createSandbox,save,restore} from '../web/v02/weekend/simulation.js';
 import {CROPS,cultivationStep,ensureCultivation,validCultivation} from '../web/v02/weekend/cultivation.js';
 import {seedId,cropFacts} from '../web/v02/weekend/crops.js';
-import {FOOD_DAYS} from '../web/v02/weekend/food-storage.js';
+import {FOOD_DAYS,freshLots} from '../web/v02/weekend/food-storage.js';
 import {materialMass} from '../web/v02/weekend/material-measures.js';
 import {buyerFor,supplierFor} from '../web/v02/weekend/local-market.js';
 import {recipeBalance} from '../web/v02/weekend/production-accounting.js';
@@ -56,4 +56,10 @@ const legacy=JSON.parse(save(createSandbox(42)));
 for(const id of ['cassava','sweet_potato','pumpkin','cowpea']){delete legacy.materials[id];delete legacy.materials[seedId(id)];if(legacy.foodStorage)delete legacy.foodStorage.lots[id];}
 legacy.mode='story';
 const loaded=restore(JSON.stringify(legacy));assert(loaded,'older village loads');
-console.log('PASS Brazilian staple crops: complete stock items, drought tolerance, dry-season growth and older saves');
+
+// Farinha turns a cassava harvest into provisions that keep a month, losing only moisture.
+{const r=PROCESSES.farinha,balance=recipeBalance('farinha',r);
+ assert.deepEqual(r.input,{cassava:8});assert.equal(balance.lossKg,2);
+ const [lot]=freshLots({time:0},'meals',4,r);assert(lot.preserved);assert.equal(lot.expires,30*GAME_DAY);
+ assert.equal(freshLots({time:0},'meals',4,PROCESSES.preserve_meals)[0].expires,10*GAME_DAY);}
+console.log('PASS Brazilian staple crops: complete stock items, drought tolerance, dry-season growth, farinha and older saves');

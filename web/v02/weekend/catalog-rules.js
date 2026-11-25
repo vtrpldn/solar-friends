@@ -296,6 +296,15 @@ export const PROCESSES = {
     preservedDays: {meals:10},
     biogas: .6,
   },
+  // Peeled, grated, pressed and toasted: the one way to keep a cassava harvest.
+  farinha: {
+    name: "Toast cassava into farinha provisions",
+    input: {cassava:8},
+    output: {meals:4,scraps:2},
+    kind: "kitchen",
+    work: 90,
+    preservedDays: {meals:30},
+  },
   cold_storage:{name:"Install kitchen cold storage",kind:"kitchen",input:{cooling:1,electrical:1,hardware:1},output:{},work:120,installation:true},
   compost: {
     name: "Turn compost",

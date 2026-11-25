@@ -943,6 +943,18 @@
       "growthDays": 0,
       "basis": "Authored aggregate transformation; named mass losses tracked separately"
     },
+    "farinha": {
+      "input": {
+        "cassava": 8
+      },
+      "output": {
+        "meals": 4,
+        "scraps": 2
+      },
+      "residentHours": 0.675,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
     "cold_storage": {
       "input": {
         "cooling": 1,

@@ -23,7 +23,7 @@ export const CROPS={
  corn:{name:'Sweet corn',local:'milho verde',days:85,window:5,plants:4,yieldKg:1.5,water:4,residue:1,height:2,shelf:3,price:30,start:['seed packets',.1,10],measure:['kg sweet corn',.003],
   note:'Tall and thirsty; spare ears can be dried into animal feed.'},
  cassava:{name:'Cassava',local:'mandioca',days:270,window:60,plants:1,yieldKg:2,water:1.5,residue:1.2,height:1.9,shelf:3,price:45,start:['cutting bundles',.5,8],measure:['kg cassava roots',.002],dry:[8,24],season:.7,
-  note:'Slow, but shrugs off dry spells and waits in the ground for months once ripe.'},
+  note:'Slow, but shrugs off dry spells and waits in the ground for months once ripe. A kitchen can toast it into farinha that keeps a month.'},
  sweet_potato:{name:'Sweet potato',local:'batata-doce',days:120,window:21,plants:4,yieldKg:1.5,water:2.5,residue:.8,height:.3,shelf:14,price:45,start:['slip bundles',.25,12],measure:['kg sweet potatoes',.002],dry:[3,10],season:.6,
   note:'Covers the soil with vines, tolerates dry weather and keeps for two weeks.'},
  pumpkin:{name:'Pumpkin',local:'abóbora',days:100,window:14,plants:1,yieldKg:1.5,water:3.5,residue:.7,height:.45,shelf:30,price:35,start:['seed packets',.05,10],measure:['kg pumpkin',.002],
