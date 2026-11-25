@@ -46,6 +46,8 @@ export function workNeed(s,recipe,recipes,defs,count) {
 export function autonomousWorkPlan(s,p,recipes,defs,api) {
   const def = defs[p.key];
   if (s.mode === 'sandbox') return {reason:'Residents wait for work orders in sandbox.'};
+  // Carrying the camp over from the cars comes first, and the camp can still move until a load lands.
+  if (s.unpack) return {reason:'Residents unpack the camp first.'};
   if (!def || p.removal || p.felled || p.cultivation || p.work < def.work || SCHEDULED_ELSEWHERE.includes(def.kind)) return {};
   if (s.infrastructure?.nodes[p.id]?.enabled === false) return {reason:'Switched off.'};
   if (s.operations?.some(o => !o.done && o.site === p.id && !o.water)) return {reason:'A job is in progress.'};
