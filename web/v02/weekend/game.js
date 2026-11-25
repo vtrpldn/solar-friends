@@ -21,7 +21,7 @@ import {ensureCultivation} from './cultivation.js';
 import {cultivationSignature,createCultivationModel} from './cultivation-models.js';
 import {installFarmingUI} from './cultivation-ui.js';
 import {GATHERING,gatheringStatus} from './gathering.js';
-import {returnPickup,pickupFare} from './physical-trade.js';
+import {returnPickup,pickupFare,projectFreight} from './physical-trade.js';
 import {foodPortions} from './food-storage.js';
 import {supplierError} from './supplier-stock.js';
 import {activeTrips} from "./trip-state.js";
@@ -1162,7 +1162,7 @@ function updatePlacementPreview() {
   if (placing) {
     const missing = moving ? [] : missingMaterials(s, placing);
     const purchase = blueprintPurchase(s, placing);
-    hint ||= missing.length ? purchase.error || `Place to buy missing materials for ${brl(purchase.cost)} · ${s.trip ? "Pickup queued after current trip" : "Resident pickup arranged automatically"}` : "";
+    hint ||= missing.length ? purchase.error || `Place to buy missing materials for ${brl(purchase.cost)} · ${projectFreight(s,[{pendingMaterials:purchase.items}]).truck ? "Too much for one car: a supplier truck delivers it" : s.trip ? "Pickup queued after current trip" : "Resident pickup arranged automatically"}` : "";
     if (placing === "road" && shiftPlacement && lastRoad) {
       const line = roadLine(lastRoad, cell);
       if (!line) hint = "Choose a shorter road route (up to 128 cells).";
