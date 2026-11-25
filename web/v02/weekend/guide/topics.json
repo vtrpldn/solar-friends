@@ -105,7 +105,7 @@
     "description": "Residents eat around breakfast, lunch and dinner, and sleep through the night. Urgent needs can interrupt work.",
     "diagram": "flowchart TD\n Time[Time, activity and personality] --> Decay[Needs and energy change]\n Decay --> Urgent{Need break, meal time or scheduled sleep?}\n Urgent -->|No| Available[Available for work or downtime]\n Urgent -->|Yes| Interrupt[Suspend or defer work safely]\n Interrupt --> Target{Suitable reachable service or rest place?}\n Target -->|Yes| Travel[Walk to service or assigned / available home]\n Target -->|No| Fallback[Try fallback or expose blocked need]\n Travel --> Consume[Consume food, water or service capacity as applicable]\n Consume --> Recover[Restore need or energy]\n Recover --> Resume[Reconsider unfinished work]\n Fallback --> Resume\n Resume --> Urgent\n Heat[Heat and active work] --> Thirst[Individual hydration demand]\n Thirst --> Target\n Fresh[Potable water and travel bottles] --> Consume\n",
     "boundary": "",
-    "tip": "Keep food, potable water and homes reachable. Residents seek drinks before thirst becomes urgent and normally sleep 7.5–9 hours; urgent bathroom breaks resume the same night’s rest.",
+    "tip": "Keep food, clean water and homes reachable. Residents seek drinks before thirst becomes urgent and normally sleep 7.5–9 hours; urgent bathroom breaks resume the same night’s rest.",
     "facts": null
   },
   {

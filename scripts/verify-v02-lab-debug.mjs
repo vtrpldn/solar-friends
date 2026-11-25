@@ -15,7 +15,7 @@ assert.match(labCommand(s,{type:'maintain',site:0,field:'water'}),/supported/);
  Object.assign(p.cultivation.beds[0],{stage:'harvestable',ripeAt:s.time});assert.match(stopReason(s,'harvest'),/ready/);p.cultivation.beds[0].stage='failed';assert.match(stopReason(s,'crop-failed'),/failed/);
 s=createWeekend(42);chooseCamp(s,'entrance');enableFastNavigation(s);tick(s,.1);
 const sample=labSample(s);assert.equal(sample.needs.hydration,Math.min(...s.people.map(r=>r.needs.hydration)));assert(sample.hydrology);assert(sample.weather.temperatureC);assert(sample.inventory);assert(sample.finance);assert(sample.residents.every(r=>Number.isFinite(r.needs.hydration)));
-const water=Object.values(s.infrastructure.nodes).map(n=>[n,n.water[0]]);for(const [n]of water)n.water[0]=0;assert.match(stopReason(s,'water'),/potable/);for(const [n,v]of water)n.water[0]=v;
+const water=Object.values(s.infrastructure.nodes).map(n=>[n,n.water[0]]);for(const [n]of water)n.water[0]=0;assert.match(stopReason(s,'water'),/clean water/);for(const [n,v]of water)n.water[0]=v;
  s.operations??=[];s.operations.push({done:false,accessRetryAt:{iara:s.time+30}});assert.match(stopReason(s,'blocked'),/access/);s.operations.pop();
  s.people[0].needs.hydration=0;assert.match(stopReason(s,'hydration'),/thirst/);assert.equal(stopReason(s,'none'),'');
 let n=0;const runner=new LabRunner(s,()=>{if(++n===3)runner.paused=true;});runner.paused=false;runner.advance(.25,Infinity,()=>0);assert.equal(n,3,'pause condition stops inside a CPU slice');

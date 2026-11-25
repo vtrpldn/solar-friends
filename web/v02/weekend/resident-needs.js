@@ -87,7 +87,7 @@ export function chooseNeed(s,r,i,api) {
  for(const kind of pending) {
   if(kind==='hydration'){
    const facility=choose(node=>node.water[0]>=.5&&!['coop','goat_pasture'].includes(node.kind));
-   if(facility){assign(s,r,kind,facility.spot,{site:facility.node.id,label:'Drinking potable water',animation:'eat'});return;}
+   if(facility){assign(s,r,kind,facility.spot,{site:facility.node.id,label:'Drinking water',animation:'eat'});return;}
    continue;
   }
   if(kind==='hunger') {
@@ -122,7 +122,7 @@ export function chooseNeed(s,r,i,api) {
    }
   }
  }
- r.needBlocked=pending.includes("hydration") ? "Needs reachable potable water; fetch and filter water" : pending.includes("hunger") && !(foodPortions(s)>0) ? "Hungry: no food in stores" : pending[0]==="social" ? "Waiting for a friend to have a break" : "Looking for somewhere to meet this need";
+ r.needBlocked=pending.includes("hydration") ? "Needs reachable clean water; carry some to a tank" : pending.includes("hunger") && !(foodPortions(s)>0) ? "Hungry: no food in stores" : pending[0]==="social" ? "Waiting for a friend to have a break" : "Looking for somewhere to meet this need";
  r.needRetryAt=s.time+12;
 }
 // Both needed and spontaneous conversations share the same consent, travel,
@@ -166,7 +166,7 @@ export function advanceNeed(s,r,dt,api) {
  const n=r.needs;
  if(task.kind==='hydration'){
   if(drinkWater(s,task.site,.5))n.hydration=Math.min(100,n.hydration+20);
-  else r.needBlocked='Drinking source emptied; fetch and filter water';
+  else r.needBlocked='Drinking source emptied; carry water to a tank';
  } else if(task.kind==='hunger') {
   if(eatMeal(s)){r.lastMealAt=s.time;n.hunger=90;n.bladder=clamp(n.bladder-5);n.bowels=clamp(n.bowels-4);}
  } else if(task.kind==='hygiene') {

@@ -108,7 +108,7 @@ export function summarizeSkip(before, s, {
       detail: b === 0 ? 'None left.' : undefined});
   };
   change('Food portions', before.portions, portions, '');
-  change('Drinking water', before.water, water, ' L');
+  change('Clean water', before.water, water, ' L');
   const spoiledParts = Object.entries(s.foodStorage?.spoiled || {})
     .map(([id, n]) => [id, n - (before.spoiled[id] || 0)]).filter(([, n]) => n > 1e-6)
     .map(([id, n]) => `${quantityText(id, n)} ${materialName(id).toLowerCase()}`);
