@@ -1,4 +1,4 @@
-import {PROJECTS,plan,planField,queueProduction,queueWater,queuePurification,queueSanitation,supplyRun,sellMaterial,queueBedJob,configureBed} from './simulation.js';
+import {PROJECTS,plan,planField,prioritize,queueProduction,queueWater,queuePurification,queueSanitation,supplyRun,sellMaterial,queueBedJob,configureBed} from './simulation.js';
 import {setOutsideWork} from './outside-work.js';
 import {harvestExpired,harvestYield} from './cultivation.js';
 export const SAMPLE_LIMIT=2160;
@@ -13,6 +13,7 @@ export function labCommand(s,m){
   const chosen=m.bed==='all'?beds:beds.filter(b=>b.id===m.bed);if(!chosen.length)return 'Choose a bed.';
   return chosen.map(b=>{const error=m.type==='bed'?queueBedJob(s,m.site,b.id,m.action):configureBed(s,m.site,b.id,m.settings||{});return `Bed ${b.id+1}: ${error||'accepted'}`;}).join(' · ');
  }
+ case 'prioritize':{const p=s.projects.find(p=>p.id===m.site);if(!p||p.natural||p.work>=PROJECTS[p.key].work)return 'Choose an unfinished construction project.';prioritize(s,p.id);return '';}
  case 'outside':{const r=s.people.find(r=>r.id===m.resident);if(!r||typeof m.enabled!=='boolean')return 'Choose a resident and employment setting.';setOutsideWork(s,r,m.enabled);return '';}
  case 'produce':return queueProduction(s,m.site,m.recipe);
  case 'repeat':return 'Automatic repeating has been removed. Queue one job at a time.';

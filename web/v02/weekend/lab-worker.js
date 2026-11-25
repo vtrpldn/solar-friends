@@ -45,7 +45,7 @@ function importReplay(report){
  if(!report.state||report.state.version!==2||!Number.isFinite(report.state.time))throw Error('Replay final state is invalid.');
  let previous=0;
  for(const c of report.commands){if(!Number.isSafeInteger(c.tick)||c.tick<previous||c.tick>report.endTick||!c.action||typeof c.action.type!=='string'||typeof c.result!=='string')throw Error('Invalid replay order history.');previous=c.tick;}
- start(0,report.initialState);replay={commands:report.commands,index:0,endTick:report.endTick,expected:report.state};replayCommands();event('Replay loaded; resume to replay recorded orders.');
+ start(0,report.initialState);replay={commands:report.commands,index:0,endTick:report.endTick,expected:report.state};replayCommands();event('Replay loaded; resume to replay recorded orders.');postMessage({type:'notice',text:'Replay loaded. Resume to replay the recorded orders; new orders stay disabled until it ends.'});
 }
 onmessage=({data:m})=>{try{
  if(m.type==='new')start(m.seed,undefined,m.settings);

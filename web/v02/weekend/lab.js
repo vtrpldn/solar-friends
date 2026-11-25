@@ -43,9 +43,10 @@ function render(){if(!s)return;
   `Available: ${stock} · Reserve: ${reserve} · After sale: ${stock-quote.quantity}${serving?` · Household food left: ${remaining} portions`:''} · ${brl((quote.cents/100))} gross · ${brl(fare)} dedicated fuel · ${brl((quote.cents/100-fare))} after fuel · Shared pickup adds no fuel cost.`;
  const siteList=[['0','Camp stores'],...s.projects.filter(p=>!p.felled).map(p=>[String(p.id),`${PROJECTS[p.key].name} #${p.id} (${p.x}, ${p.z})`])];if($('sites').options.length!==siteList.length){opts($('sites'),siteList);}$('sites').value=selected;
  const p=s.projects.find(p=>p.id===selected),n=s.infrastructure.nodes[selected],ops=s.operations?.filter(o=>o.site===selected&&!o.done)||[];
- const key=JSON.stringify([replaying,selected,p?.work,p?.readyAt,n?.water.map(v=>Math.floor(v)),n?.maintainFresh,n?.maintainSanitation,ops.map(o=>[o.id,o.status]),Math.floor(s.time/20),s.infrastructure.grid.enabled,s.emergencyFood]);
+ const key=JSON.stringify([replaying,selected,p?.work,p?.prioritized,p?.readyAt,n?.water.map(v=>Math.floor(v)),n?.maintainFresh,n?.maintainSanitation,ops.map(o=>[o.id,o.status]),Math.floor(s.time/20),s.infrastructure.grid.enabled,s.emergencyFood]);
  if(key!==inspectorKey&&!($('inspect').contains(document.activeElement)&&['SELECT','INPUT'].includes(document.activeElement.tagName))){inspectorKey=key;const panel=$('inspect');panel.replaceChildren();$('selection').textContent=selected===0?'Camp stores':p?`${PROJECTS[p.key].name} #${p.id}`:'Select a building';
  if(p){line(panel,`(${p.x}, ${p.z}) · ${Math.round(Math.hypot(p.x-s.stock.x,p.z-s.stock.z))} cells from stores · ${Math.round(100*p.work/PROJECTS[p.key].work)}% built`);
+ if(!p.natural&&p.work<PROJECTS[p.key].work){if(p.prioritized)line(panel,'Residents build this project first.');else button(panel,'Build this first','prioritize',{site:p.id});}
  if(p.cultivation)renderBeds(panel,p);
  if(p.animalCare)line(panel,animalCareText(p));
  if(!CULTIVATION_KEYS.includes(p.key))for(const [recipe,d]of Object.entries(PROCESSES).filter(([,d])=>d.kind===PROJECTS[p.key].kind)){button(panel,d.name,'produce',{site:p.id,recipe});}

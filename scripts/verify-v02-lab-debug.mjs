@@ -21,3 +21,14 @@ const water=Object.values(s.infrastructure.nodes).map(n=>[n,n.water[0]]);for(con
 let n=0;const runner=new LabRunner(s,()=>{if(++n===3)runner.paused=true;});runner.paused=false;runner.advance(.25,Infinity,()=>0);assert.equal(n,3,'pause condition stops inside a CPU slice');
 assert(restore(save(s)));
 console.log('PASS normal field/bed orders, partial bulk rejection, crop settings, employment, telemetry, policy allowlist and exact mid-slice pause');
+{
+ // The lab can put one project first, exactly as the game's own control does.
+ const {createWeekend,chooseCamp,plan:planProject}=await import('../web/v02/weekend/simulation.js');
+ const v=createWeekend();v.arrivalElapsed=17;chooseCamp(v,'clearing');v.money=100000;
+ assert.equal(planProject(v,'shelter',40,39),'');assert.equal(planProject(v,'gathering',29,35),'');
+ const second=v.projects.find(p=>p.key==='gathering');
+ assert.equal(labCommand(v,{type:'prioritize',site:second.id}),'');
+ assert.equal(v.projects.filter(p=>p.prioritized).length,1);assert.equal(second.prioritized,true);
+ assert.match(labCommand(v,{type:'prioritize',site:-5}),/unfinished/);
+ console.log('PASS lab project priority order');
+}
