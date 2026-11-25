@@ -41,9 +41,9 @@ import {
   storedMaterials,
   storageCapacity,
   queueProduction,
-  queueWater, queuePurification, queueSanitation, say, requiredLoads,
+  queueWater, queueSanitation, say, requiredLoads,
 } from "./simulation.js";
-import { LIQUIDS, hasPowerService, canSwitchBuilding, switchBuilding } from "./infrastructure.js";
+import { LIQUIDS, liquidIndex, hasPowerService, canSwitchBuilding, switchBuilding } from "./infrastructure.js";
 import { illustrate } from "./ui-art.js";
 import { renderNeighbours, neighbourStats } from "./village-life-ui.js";
 const $ = (id) => document.getElementById(id);
@@ -66,7 +66,7 @@ const intros = {
   resources:
     "Keep the essentials close, turn local materials into something useful, and plan the next trip to town.",
   water:
-    "Residents maintain drinking reserves and sanitation by default; you can switch either routine off. Wells and rain barrels are manual sources; a placed powered pump supplies pipes. Untreated water stays separate.",
+    "Residents maintain drinking reserves and sanitation by default; you can switch either routine off. Wells and rain barrels are manual sources; a placed powered pump supplies pipes.",
   power:
     "Balance generation, batteries and the buildings that depend on them. Completed buildings join the network automatically.",
 };
@@ -132,7 +132,7 @@ export function createManagement({
     $("utility-kind").innerHTML = (view === "power" ? ["power"] : LIQUIDS)
       .map(
         (k) =>
-          `<option value="${k}">${k === "power" ? "Power cable" : k === "fresh" ? "Drinking water" : k === "irrigation" ? "Irrigation water" : k === "greywater" ? "Greywater" : "Sealed sewage"}</option>`,
+          `<option value="${k}">${k === "power" ? "Power cable" : k === "fresh" ? "Drinking water" : k === "greywater" ? "Greywater" : "Sealed sewage"}</option>`,
       )
       .join("");
     $("management-message").textContent = "";
@@ -184,11 +184,11 @@ export function createManagement({
         detail.append(line, meter);
       }
     } else {
-      for (const [i, k] of LIQUIDS.entries())
+      for (const [i, k] of LIQUIDS.map(k => [liquidIndex(k), k]))
         if (n.capacity[i]) {
           const line = document.createElement("div");
           line.className = `water-level ${k}`;
-          line.textContent = `${{ fresh: "Drinking water", irrigation: "Irrigation water", greywater: "Greywater", sewage: "Sewage" }[k]} · ${n.water[i].toFixed(1)} / ${n.capacity[i]} L`;
+          line.textContent = `${{ fresh: "Drinking water", greywater: "Greywater", sewage: "Sewage" }[k]} · ${n.water[i].toFixed(1)} / ${n.capacity[i]} L`;
           const meter = document.createElement("progress");
           meter.max = n.capacity[i];
           meter.value = n.water[i];
@@ -224,23 +224,17 @@ export function createManagement({
       if (canSwitchBuilding(state().infrastructure,n)) actions.append(toggle);
       el.append(actions);
     }
-    if(view==='water' && n.id!==-1 && n.capacity[1]) {
+    if(view==='water' && n.id!==-1 && n.capacity[0] && !['groundwater-well','rain-barrel','water-pump'].includes(n.kind)) {
       const actions=document.createElement('div');actions.className='node-actions';
       const waterJob=(state().operations||[]).find(o=>!o.done && o.water && o.site===n.id);
-      const pending=!!waterJob;
+      const pending=!!waterJob,full=n.water[0]>=n.capacity[0];
       const fetch=document.createElement('button');fetch.textContent='Carry river water';
-      disabledReason(fetch,pending ? "A water job is already queued here. Wait for it to finish." : "The untreated-water storage is full. Use water or add storage first.");
-      fetch.disabled=pending || n.water[1]>=n.capacity[1];
-      fetch.onclick=()=>{notify(queueWater(state(),-1,n.id,'irrigation')||'Water collection queued for the next available resident.');refresh();render();};actions.append(fetch);
-      if(n.capacity[0]) {
-        const purify=document.createElement('button');purify.textContent='Purify by hand';
-        disabledReason(purify,pending ? "A water job is already queued here. Wait for it to finish." : n.water[1]<1 ? "Collect untreated water before purifying it." : "Drinking-water storage is full. Use water or add storage first.");
-        purify.disabled=pending || n.water[1]<1 || n.capacity[0]-n.water[0]<1;
-        purify.onclick=()=>{notify(queuePurification(state(),n.id)||'Purification queued for the next available resident.');refresh();render();};actions.append(purify);
-      }
-      if(n.capacity[0]) {const maintain=document.createElement('button');maintain.textContent=n.maintainFresh?'Maintain drinking reserve: on':'Maintain drinking reserve: off';maintain.setAttribute('aria-pressed',String(!!n.maintainFresh));maintain.onclick=()=>{n.maintainFresh=!n.maintainFresh;refresh();render();};actions.append(maintain);}
-      const sources=Object.values(state().infrastructure.nodes).filter(a=>a.id!==n.id && ['groundwater-well','rain-barrel','water-pump'].includes(a.kind) && a.water[1]>=1);
-      for(const source of sources){const carry=document.createElement('button');carry.textContent=`Carry from ${label(source)}`;disabledReason(carry,pending ? "Wait for the current water job to finish." : "The receiving reservoir is full.");carry.disabled=pending||n.water[1]>=n.capacity[1];carry.onclick=()=>{notify(queueWater(state(),source.id,n.id,'irrigation')||'Water collection queued.');refresh();render();};actions.append(carry);}
+      disabledReason(fetch,pending ? "A water job is already queued here. Wait for it to finish." : "This tank is full. Use water or add storage first.");
+      fetch.disabled=pending || full;
+      fetch.onclick=()=>{notify(queueWater(state(),-1,n.id)||'Water collection queued for the next available resident.');refresh();render();};actions.append(fetch);
+      if(n.maintainFresh!==undefined) {const maintain=document.createElement('button');maintain.textContent=n.maintainFresh?'Maintain drinking reserve: on':'Maintain drinking reserve: off';maintain.setAttribute('aria-pressed',String(!!n.maintainFresh));maintain.onclick=()=>{n.maintainFresh=!n.maintainFresh;refresh();render();};actions.append(maintain);}
+      const sources=Object.values(state().infrastructure.nodes).filter(a=>a.id!==n.id && ['groundwater-well','rain-barrel','water-pump'].includes(a.kind) && a.water[0]>=1);
+      for(const source of sources){const carry=document.createElement('button');carry.textContent=`Carry from ${label(source)}`;disabledReason(carry,pending ? "Wait for the current water job to finish." : "The receiving tank is full.");carry.disabled=pending||full;carry.onclick=()=>{notify(queueWater(state(),source.id,n.id)||'Water collection queued.');refresh();render();};actions.append(carry);}
       el.append(actions);
     }
     if(view==='water' && (n.capacity[2] || n.capacity[3]) && !['wetland','biodigester','banana_treatment'].includes(n.kind)) {
@@ -253,7 +247,7 @@ export function createManagement({
       const job=state().operations?.find(o=>!o.done&&o.water&&o.site===n.id);
       if(job){
         const status=document.createElement('p'),worker=state().people.find(r=>r.operation===job.id);
-        const duration=job.water.service?45:job.water.purify?30:0;
+        const duration=job.water.service?45:0;
         status.textContent=`${worker?worker.name:'Awaiting a rested resident'} · ${job.status||'Queued'}${job.water.amount?` · ${job.water.amount.toFixed(0)} water carried`:''}${duration?` · ${Math.min(100,Math.round(job.work/duration*100))}%`:''}`;
         el.append(status);
       }
@@ -304,7 +298,7 @@ export function createManagement({
     $("connection-hint").textContent =
       view === "power"
         ? "Completed buildings connect automatically. Generation and battery capacity still determine whether the village has enough power."
-        : "Completed buildings connect to compatible sources and treatment automatically. Place a water pump by a river or well for automatic supply; cisterns filter incoming untreated water. Greywater and sewage stay separate.";
+        : "Completed buildings connect to compatible sources and treatment automatically. Place a water pump by a river or well for automatic supply; cisterns store it and collect rain. Greywater and sewage stay separate.";
     $("network-title").textContent =
       view === "power"
         ? "Generation, storage & demand"
@@ -427,10 +421,9 @@ export function createManagement({
         ],
       ];
     else
-      stats = LIQUIDS.map((k, i) => [
+      stats = LIQUIDS.map(k => [k, liquidIndex(k)]).map(([k, i]) => [
         {
           fresh: "Drinking water",
-          irrigation: "Irrigation water",
           greywater: "Greywater",
           sewage: "Sewage",
         }[k],

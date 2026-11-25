@@ -199,7 +199,7 @@
     "description": "Inputs travel to work sites. Finished output travels back to storage.",
     "diagram": "flowchart TD\n Queue[Queue recipe or bed job] --> Validate{Site, input and job constraints pass?}\n Validate -->|No| Block[Explain missing condition]\n Validate -->|Yes| Pickup[Acquire inputs from stores]\n Pickup --> Travel[Carry inputs to reachable work position]\n Travel --> Biology{Biological waiting required?}\n Biology -->|Yes| Grow[Release worker while biology advances]\n Grow --> Process[Resident processing or collection work]\n Biology -->|No| Process\n Process --> Resolve[Finished crop or recipe output]\n Resolve --> Loads[Split output into physical loads]\n Loads --> Carry[Carry to available storage]\n Carry --> Remaining{Output remaining?}\n Remaining -->|Yes| Loads\n Remaining -->|No| Done[Mark operation complete]\n Target[Repeat target and protected reserves] --> Queue",
     "boundary": "Planting beds, perennial crops and recipes have different waiting and harvest rules.",
-    "tip": "Residents start work at nearby sites themselves when stores fall below two batches and inputs and storage are ready. Queue work yourself for distant sites, tree felling and installations; your orders come first. Use Food Almanac policies to manage kitchen reserves.",
+    "tip": "Residents start work at nearby sites themselves when stores fall below two batches and inputs and storage are ready. With two or more residents at leisure and nothing else to make, they build the reserve up to four batches, one job at a time. Queue work yourself for distant sites, tree felling and installations; your orders come first. Use Food Almanac policies to manage kitchen reserves.",
     "facts": null
   },
   {
@@ -350,8 +350,8 @@
       "full-water-carrier",
       "realism-water"
     ],
-    "description": "Collect or pump water, store it, and purify drinking water.",
-    "diagram": "flowchart LR\n River[River] --> Carry[Resident collection and hauling]\n River --> Pump[Powered pump]\n Ground[Groundwater well] --> Pump\n Rain[Rain collection] --> Untreated[Untreated water storage]\n Carry --> Untreated\n Pump --> Untreated\n Untreated --> Purify[Manual purification or powered filtering]\n Purify --> Fresh[Fresh water]\n Fresh --> Needs[Drinking and hygiene]\n Untreated --> Irrigate[Crop irrigation withdrawal]\n Fresh --> Irrigate\n Links[Completed compatible water links] --> Transfer[Capacity-limited transfers]\n Fresh --> Transfer\n Untreated --> Transfer\n Transfer --> Users[Connected storage and services]\n Capacity[Storage capacity and source exhaustion] --> Block[Transfer or task waits]\n Weather[Seasonal rainfall] --> Recharge[Shared watershed recharge]\n Recharge --> River\n Recharge --> Ground\n Pump --> Drawdown[Shared source withdrawal]\n Carry --> Drawdown\n Drawdown --> Capacity\n",
+    "description": "Collect or pump water and store it for drinking, washing and crops.",
+    "diagram": "flowchart LR\n River[River] --> Carry[Resident collection and hauling]\n River --> Pump[Powered pump]\n Ground[Groundwater well] --> Pump\n Rain[Rain collection] --> Fresh[Clean water storage]\n Carry --> Fresh\n Pump --> Fresh\n Fresh --> Needs[Drinking and hygiene]\n Fresh --> Irrigate[Crop irrigation withdrawal]\n Links[Completed compatible water links] --> Transfer[Capacity-limited transfers]\n Fresh --> Transfer\n Transfer --> Users[Connected storage and services]\n Capacity[Storage capacity and source exhaustion] --> Block[Transfer or task waits]\n Weather[Seasonal rainfall] --> Recharge[Shared watershed recharge]\n Recharge --> River\n Recharge --> Ground\n Pump --> Drawdown[Shared source withdrawal]\n Carry --> Drawdown\n Drawdown --> Capacity\n",
     "boundary": "A river connection alone is not an automatic pump.",
     "tip": "Watch source reserves through the dry season. A dry world is a drought year with fewer rainy days, and Caatinga land returns little of its rain to rivers and wells. Rain recharges the watershed; pumps and manual collection draw from the same finite supply.",
     "facts": null
@@ -369,10 +369,10 @@
       "connections",
       "utility-capacity"
     ],
-    "description": "Waste treatment frees capacity and can recover irrigation water.",
-    "diagram": "flowchart LR\n Hygiene[Washing and hygiene] --> Grey[Greywater]\n Toilet[Toilet use] --> Sewage[Sewage / sealed waste]\n Grey --> Wetland[Wetland treatment]\n Wetland --> Reuse[85 percent to irrigation water]\n Wetland --> Loss[15 percent accounted loss]\n Sewage --> Banana[Banana treatment]\n Sewage --> Digester[Biodigester]\n Banana --> Removed[Accounted water removal]\n Digester --> Removed\n Digester --> Gas[Biogas counter]\n Sewage --> Service[Resident sanitation service]\n Full[Full or inaccessible service] --> Block[Blocked use or servicing need]\n Gas --> Cooking[Kitchen fallback when electricity is unavailable]\n",
+    "description": "Waste treatment frees capacity and can recover usable water.",
+    "diagram": "flowchart LR\n Hygiene[Washing and hygiene] --> Grey[Greywater]\n Toilet[Toilet use] --> Sewage[Sewage / sealed waste]\n Grey --> Wetland[Wetland treatment]\n Wetland --> Reuse[85 percent back as clean water]\n Wetland --> Loss[15 percent accounted loss]\n Sewage --> Banana[Banana treatment]\n Sewage --> Digester[Biodigester]\n Banana --> Removed[Accounted water removal]\n Digester --> Removed\n Digester --> Gas[Biogas counter]\n Sewage --> Service[Resident sanitation service]\n Full[Full or inaccessible service] --> Block[Blocked use or servicing need]\n Gas --> Cooking[Kitchen fallback when electricity is unavailable]\n",
     "boundary": "The biogas balance can fuel kitchen work; it is not a bounded gas network or electricity generator.",
-    "tip": "Keep waste capacity available. Wetlands recover irrigation water, not drinking water.",
+    "tip": "Keep waste capacity available. A wetland turns greywater back into clean water; sewage is never recovered.",
     "facts": null
   },
   {

@@ -46,11 +46,13 @@ export function createLandSurface(){
 
 // `wear` (see ground-wear.js) switches on the lived-in ground: colour follows the
 // lie of the land, and yards, footpaths and wildflowers replace the noise patches.
+// How rain-soaked the ground is, from 0 (dry) to 1; game.js follows the weather.
+export const landWet={value:0};
 export function terrainMaterial(seed,palette,surface,wear=null){
  const material=new THREE.MeshStandardMaterial({roughness:1});
  material.customProgramCacheKey=()=> wear?'solar-land-surface-lived':'solar-land-surface-v1';
  material.onBeforeCompile=shader=>{
-  if(wear){shader.uniforms.landWear={value:wear};useVillageClouds(shader);}
+  if(wear){shader.uniforms.landWear={value:wear};shader.uniforms.landWet=landWet;useVillageClouds(shader);}
   Object.assign(shader.uniforms,{
    landSurface:{value:surface.texture},landSeed:{value:(seed%997)*.071},
    landGrass:{value:new THREE.Color(palette[0])},landDry:{value:new THREE.Color(palette[1])},
@@ -69,6 +71,7 @@ export function terrainMaterial(seed,palette,surface,wear=null){
    uniform sampler2D landSurface;
    uniform sampler2D landWear;
    uniform float landSeed;
+   uniform float landWet;
    ${wear?CLOUD_GLSL:''}
    uniform vec3 landGrass,landDry,landLush,landSoil,landRock;
    varying vec3 landPosition,landNormal;
@@ -128,8 +131,13 @@ export function terrainMaterial(seed,palette,surface,wear=null){
    // Linear-light values: red earth underfoot, paler where yards are swept daily.
    vec3 trodden=mix(vec3(.40,.13,.06),vec3(.50,.19,.09),mottle);
    vec3 swept=mix(vec3(.62,.37,.2),vec3(.72,.47,.27),mottle);
+   // Rain turns bare earth to dark mud and stands in the hollows of a path.
+   trodden=mix(trodden,vec3(.2,.085,.05)*(.85+mottle*.3),landWet*.8);
+   swept=mix(swept,swept*.6,landWet*.75);
+   float puddle=smoothstep(.6,.72,landNoise(p*.85+11.3))*smoothstep(.45,.9,landWet)*path*(1.0-yard);
    lived=mix(lived,trodden*(.94+fine*.12),path*.92*(1.0-yard));
    lived=mix(lived,swept*(.95+fine*.1),yard);
+   lived=mix(lived,vec3(.2,.25,.28),puddle*.85);
    lived*=mix(.9,1.1,crest);
    diffuseColor.rgb*=lived*(1.0-habitat.r*.1*(1.0-yard)-damp*.06);
    `:'diffuseColor.rgb*=turf*(1.0-habitat.r*.25-damp*.06);'}

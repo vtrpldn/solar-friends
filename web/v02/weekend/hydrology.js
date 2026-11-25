@@ -47,8 +47,8 @@ export function rainCatchments(s, defs, candidates = Object.values(s.infrastruct
  return result;
 }
 export function captureRain(s,n,area,dt){
- const h=ensureHydrology(s),rain=area*rainfallRate(s)*dt/DAY*24,amount=Math.min(n.capacity[1]-n.water[1],rain*.8),overflow=rain-amount;
- n.water[1]+=amount;h.runoff+=overflow;h.account.catchmentRain+=rain;h.account.captured+=amount;h.account.catchmentOverflow+=overflow;
+ const h=ensureHydrology(s),rain=area*rainfallRate(s)*dt/DAY*24,amount=Math.min(n.capacity[0]-n.water[0],rain*.8),overflow=rain-amount;
+ n.water[0]+=amount;h.runoff+=overflow;h.account.catchmentRain+=rain;h.account.captured+=amount;h.account.catchmentOverflow+=overflow;
  s.infrastructure.account.waterReceived+=amount;
 }
 export function hydrologyText(s){const h=ensureHydrology(s);return `Groundwater ${Math.round(h.groundwater).toLocaleString()} / ${Math.round(h.capacity).toLocaleString()} L · river reserve ${Math.round(h.river).toLocaleString()} L · flow ${Math.round(h.flowLitersPerDay).toLocaleString()} L/day. Wells share the aquifer; rainfall recharges it gradually.`;}

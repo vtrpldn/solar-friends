@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {createWeekend,chooseCamp,enableFastNavigation,PROJECTS,PROCESSES,productionBlocker,storedMaterials,storageCapacity,materialCount,residentWorkPlan,buildingOperatingStatus,tick,save,restore} from '../web/v02/weekend/simulation.js';
-import {autonomousWorkPlan,workNeed,WORKING_BATCHES,MAX_WALK} from '../web/v02/weekend/autonomous-work.js';
+import {autonomousWorkPlan,startAutonomousWork,workNeed,WORKING_BATCHES,SPARE_BATCHES,MAX_WALK} from '../web/v02/weekend/autonomous-work.js';
 import {foodPolicy} from '../web/v02/weekend/food-policy.js';
 import {foodChange} from '../web/v02/weekend/food-storage.js';
 import {syncInfrastructure} from '../web/v02/weekend/infrastructure.js';
@@ -40,6 +40,21 @@ assert.equal(foodPolicy(createWeekend(1)).automatic,true,'residents cook for the
  assert.equal(residentWorkPlan(s,shop).recipe,'saw_timber');
  s.wood=batch*WORKING_BATCHES;
  assert.notEqual(residentWorkPlan(s,shop).recipe,'saw_timber','a working stock is enough');
+ // With two residents at leisure and nothing else to make, they stock up further, one job at a time.
+ const queued=[],spare={...api,queue:(village,site,recipe)=>{queued.push(recipe);village.operations.push({id:-queued.length,site,recipe,auto:true,done:false});return '';}};
+ s.operations??=[];const only={saw_timber:PROCESSES.saw_timber};
+ for(const r of s.people){r.action='produce';r.operation=null;r.energy=80;}
+ startAutonomousWork(s,only,PROJECTS,spare);
+ assert.deepEqual(queued,[],'busy residents keep to the working stock');
+ s.people[0].action=s.people[1].action='relax';
+ startAutonomousWork(s,only,PROJECTS,spare);
+ assert.deepEqual(queued,['saw_timber'],'residents at leisure build a deeper reserve');
+ startAutonomousWork(s,only,PROJECTS,spare);
+ assert.equal(queued.length,1,'only one spare-time job at a time');
+ s.operations=s.operations.filter(o=>o.id>=0);s.wood=batch*SPARE_BATCHES;
+ startAutonomousWork(s,only,PROJECTS,spare);
+ assert.equal(queued.length,1,'the deeper reserve has a limit too');
+ s.wood=batch*WORKING_BATCHES;
  assert.equal(workNeed(s,PROCESSES.repair_bucket,PROCESSES,PROJECTS,materialCount),null,'sound tools are left alone');
  foodChange(s,'bucket',1);foodChange(s,'repair_supplies',1);foodChange(s,'carpentry-tools',1);equipmentState(s).wear.bucket=EQUIPMENT_LIFE;
  assert.equal(residentWorkPlan(s,shop).recipe,'repair_bucket','worn tools are repaired first');

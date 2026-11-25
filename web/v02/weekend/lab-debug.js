@@ -1,4 +1,4 @@
-import {PROJECTS,plan,planField,prioritize,queueProduction,queueWater,queuePurification,queueSanitation,supplyRun,sellMaterial,queueBedJob,configureBed} from './simulation.js';
+import {PROJECTS,plan,planField,prioritize,queueProduction,queueWater,queueSanitation,supplyRun,sellMaterial,queueBedJob,configureBed} from './simulation.js';
 import {setOutsideWork} from './outside-work.js';
 import {harvestExpired,harvestYield} from './cultivation.js';
 export const SAMPLE_LIMIT=2160;
@@ -19,8 +19,7 @@ export function labCommand(s,m){
  case 'repeat':return 'Automatic repeating has been removed. Queue one job at a time.';
  case 'buy':return supplyRun(s,m.material)?'':'No resident, car, storage or savings available.';
  case 'sell':return sellMaterial(s,m.material,m.holdForPickup)?'':'Unable to reserve a sale batch.';
- case 'haul':return queueWater(s,-1,m.site,'irrigation');
- case 'purify':return queuePurification(s,m.site);
+ case 'haul':return queueWater(s,-1,m.site);
  case 'service':return queueSanitation(s,m.site);
  case 'maintain':{const n=s.infrastructure.nodes[m.site];if(!n||!['maintainFresh','maintainSanitation'].includes(m.field))return 'Choose a water facility and supported care setting.';n[m.field]=!n[m.field];return '';}
  case 'food-policy':s.emergencyFood=s.emergencyFood===false;return '';

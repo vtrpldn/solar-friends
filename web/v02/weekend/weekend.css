@@ -1144,9 +1144,6 @@ dialog button {
 .water-level.fresh progress::-webkit-progress-value {
   background: #7baeb7;
 }
-.water-level.irrigation progress::-webkit-progress-value {
-  background: #96b46a;
-}
 .water-level.greywater progress::-webkit-progress-value {
   background: #a6a6a0;
 }

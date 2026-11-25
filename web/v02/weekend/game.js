@@ -2,7 +2,8 @@ import { brl } from "./money.js";
 import { DREAM_LIGHTS, lightingAt } from "./dream-lighting.js";
 import {createPaintedView, paintVillageModel, villageClouds} from "./painted-village.js";
 import {createGroundWear} from './ground-wear.js';
-import {GAME_DAY,orchardPlanting} from './biological-production.js';
+import {orchardPlanting} from './biological-production.js';
+import {landWet} from './land-surface.js';
 import "./keyboard-focus.js";
 import {renderDevTools} from './dev-tools.js';
 renderDevTools(document.getElementById('dev-tools'));
@@ -87,7 +88,7 @@ import { resourceIcon, illustrateResources } from "./resource-icons.js";
 import { createManagement } from "./management.js";
 import { illustrate } from "./ui-art.js";
 import { createUtilitiesPreview } from "./utilities-preview.js";
-import { syncInfrastructure, LIQUIDS, hasPowerService, canSwitchBuilding, switchBuilding } from "./infrastructure.js";
+import { syncInfrastructure, LIQUIDS, liquidIndex as liquidSlot, hasPowerService, canSwitchBuilding, switchBuilding } from "./infrastructure.js";
 import { createAccessRoad } from "./access-road.js";
 import { captureMotion, interpolateMotion } from "./presentation.js";
 import { installCameraNavigation } from "./camera-navigation.js";
@@ -310,7 +311,17 @@ const overcastColor = new THREE.Color("#d6e3ef");
 const overcastFog = new THREE.Color("#aebcca");
 const lightingColor = new THREE.Color();
 const atmosphere = {gouache: false, bloom: 0, paint: 1, lamps: 0, shadowTint: new THREE.Color()};
+// About three millimetres of rain soaks the ground; it dries over half a day.
+let wetAt = s.time;
+landWet.value = !dreamPreview && s.rain ? 1 : 0;
+function updateGroundWetness() {
+  const elapsed = Math.max(0, Math.min(3200, s.time - wetAt));
+  wetAt = s.time;
+  const rain = dreamPreview ? 0 : s.weather?.rainMmPerHour || 0;
+  landWet.value = Math.max(0, Math.min(1, landWet.value + elapsed * (rain > .05 ? rain / 400 : -1 / 1600)));
+}
 function updateSunlight(time, dt) {
+  updateGroundWetness();
   const weatherCover = dreamPreview ? 0 : Math.max(s.weather?.cloudCover ?? 0, s.rain ? .7 : 0);
   cloudCover += (weatherCover - cloudCover) * (1 - Math.exp(-dt / 3));
   const {sun: solar, from, to, blend} = lightingAt(time);
@@ -340,7 +351,7 @@ function updateSunlight(time, dt) {
 const mat = (color) =>
   new THREE.MeshStandardMaterial({ color, roughness: 1, flatShading: true });
 const groundWear = livedLook ? createGroundWear() : null;
-let wearDay = -1;
+let wearPainted = -Infinity;
 const ground = createTerrain(s.landSeed, s.elevationSeed, s.terrainPads, groundWear?.texture);
 scene.add(ground);
 let accessRoad = compactModel(createAccessRoad(s.elevationSeed, s.terrainPads));
@@ -741,7 +752,7 @@ function syncBuildings() {
   syncTerrain();
   ground.userData.surface.update(s.projects,PROJECTS,footprint,natureLook);
   syncNatureScatter();
-  groundWear?.settle(s.projects,PROJECTS,footprint,s.landSeed,s.time/GAME_DAY);
+  groundWear?.settle(s.projects,PROJECTS,footprint);
   autoConnectUtilities(s, PROJECTS);
   for (const p of s.projects) {
     const def = PROJECTS[p.key],
@@ -1843,7 +1854,7 @@ function renderUtilityUI() {
         : projectLabel(s.projects.find((p) => p.id === n.id), PROJECTS),
   ]);
   const kind = $("utility-kind").value;
-  const liquidIndex = LIQUIDS.indexOf(kind);
+  const liquidIndex = liquidSlot(kind);
   const compatible = labels.filter(
     ([id]) => liquidIndex < 0 || sys.nodes[id].capacity[liquidIndex] > 0,
   );
@@ -1857,8 +1868,8 @@ function renderUtilityUI() {
     stored = nodes.reduce((a, n) => a + n.charge, 0),
     capacity = nodes.reduce((a, n) => a + n.battery, 0);
   const liquids = LIQUIDS.map(
-    (key, i) =>
-      `${Math.floor(nodes.reduce((a, n) => a + n.water[i], 0))} ${key}`,
+    (key) =>
+      `${Math.floor(nodes.reduce((a, n) => a + n.water[liquidSlot(key)], 0))} ${key}`,
   ).join(" · ");
   const warnings = nodes.flatMap(n => wasteWarnings(n).map(text => `${labels.find(([id])=>id===n.id)?.[1]}: ${text}`));
   $("tank-attention").hidden = !warnings.length;
@@ -1871,7 +1882,7 @@ function renderUtilityUI() {
     (l) => (management?.view === "power") === (l.kind === "power"),
   )) {
     const b = document.createElement("button");
-    b.textContent = `${{ power: "Power", fresh: "Drinking water", irrigation: "Irrigation water", greywater: "Greywater", sewage: "Sewage" }[l.kind]} · ${labels.find(([id]) => id === l.from)?.[1]} → ${labels.find(([id]) => id === l.to)?.[1]}: ${l.work < l.required ? Math.floor((l.work / l.required) * 100) + "% installed" : l.enabled ? "on" : "off"}`;
+    b.textContent = `${{ power: "Power", fresh: "Drinking water", greywater: "Greywater", sewage: "Sewage" }[l.kind]} · ${labels.find(([id]) => id === l.from)?.[1]} → ${labels.find(([id]) => id === l.to)?.[1]}: ${l.work < l.required ? Math.floor((l.work / l.required) * 100) + "% installed" : l.enabled ? "on" : "off"}`;
     b.setAttribute("aria-pressed", String(l.enabled));
     b.title = l.enabled
       ? "Switch this connection off"
@@ -1926,10 +1937,10 @@ function renderUtilityUI() {
   $("toggle-building").textContent = node?.enabled ? "Switch power off" : "Switch power on";
   const op = p && (s.operations || []).find((o) => o.site === p.id && !o.done && !o.water);
   $("building-service").textContent = node
-    ? `${hasPowerService(sys,node) ? node.enabled === false ? "Switched off" : node.power >= .995 ? "Powered" : `Getting ${(node.power * 100).toFixed(0)}% of the power it needs` : ""}${node.battery ? ` · Battery ${node.charge.toFixed(1)}/${node.battery} kWh` : ""}${hasPowerService(sys,node) ? ". " : ""}${LIQUIDS.map(
-        (k, i) =>
+    ? `${hasPowerService(sys,node) ? node.enabled === false ? "Switched off" : node.power >= .995 ? "Powered" : `Getting ${(node.power * 100).toFixed(0)}% of the power it needs` : ""}${node.battery ? ` · Battery ${node.charge.toFixed(1)}/${node.battery} kWh` : ""}${hasPowerService(sys,node) ? ". " : ""}${LIQUIDS.map(k => [k, liquidSlot(k)]).map(
+        ([k, i]) =>
           node.capacity[i]
-            ? `${{ fresh: "Drinking water", irrigation: "Irrigation water", greywater: "Greywater", sewage: "Sewage" }[k]}: ${node.water[i].toFixed(1)}/${node.capacity[i]} L`
+            ? `${{ fresh: "Drinking water", greywater: "Greywater", sewage: "Sewage" }[k]}: ${node.water[i].toFixed(1)}/${node.capacity[i]} L`
             : "",
       )
         .filter(Boolean)
@@ -2984,10 +2995,8 @@ function frame(now) {
     villageClouds.offset.value.y += dt * 1.1;
     // Cloud shadows need a sun to cast them: none at night or under overcast.
     villageClouds.strength.value = .46 * lightingAt(visual.time).sun.daylight * (1 - cloudCover);
-    if (!paused) visual.people.forEach((r, i) => { if (s.people[i].walk?.length) groundWear.step(i, r.x, r.z); });
-    // New paths wear in a little more with each day of use.
-    if (Math.floor(s.time / GAME_DAY) !== wearDay) { wearDay = Math.floor(s.time / GAME_DAY); groundWear.settle(s.projects, PROJECTS, footprint, s.landSeed, s.time / GAME_DAY); }
-    groundWear.flush();
+    // Paths change slowly; redrawing them once a second is plenty.
+    if (now - wearPainted > 1000) { wearPainted = now; groundWear.paint(s.footfall, s.landSeed); }
   }
   // Keep the shadow volume over the viewed land, not the world origin.
   // Moving light and target together preserves the time-of-day sun direction.

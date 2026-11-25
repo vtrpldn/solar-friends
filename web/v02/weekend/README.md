@@ -38,7 +38,7 @@ Nature look: wild trees grow as groves (`natural-resources.js`): clumps of close
 
 ## Water, power and sanitation
 
-Separate management screens show water, power, resources and finances. Residents carry river water and purify it automatically for camp/tank reserves by default; the Water screen can disable this routine. Sanitation maintenance also defaults to on. Wells and pumps provide other sources. Water quality and storage matter, and pending crop work does not prevent watering.
+Separate management screens show water, power, resources and finances. Residents carry river or well water to camp and tank reserves by default; the Water screen can disable this routine. Sanitation maintenance also defaults to on. Water is clean, grey or black: there is no untreated class and no purification step. A pump pipes water to cisterns, tanks and gardens. Storage matters, and pending crop work does not prevent watering.
 
 Completed applicable buildings connect automatically. Grid power costs money; solar and river generation support going off-grid. Machinery demand depends on productive work and necessary inputs; lights depend on night. A passive toilet or road does not incur an arbitrary machinery load. Sanitation includes toilet servicing, ecological treatment and biodigestion. House solar equipment is an optional upgrade rather than a mandatory early-house cost.
 

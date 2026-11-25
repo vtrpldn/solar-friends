@@ -7,10 +7,10 @@ const add=(key,x,z)=>{const p={id:s.nextId++,key,x,z,rotation:0,work:PROJECTS[ke
 const well=add('groundwater-well',50,50),pump=add('water-pump',53,50),tank=add('well',57,50);
 const sys=autoConnectUtilities(s,PROJECTS);sys.nodes[0].water[0]=0;
 const run=()=>{for(let i=0;i<2000;i++)infrastructureStep(s,PROJECTS,.1);};
-sys.grid.enabled=false;run();assert(sys.nodes[well.id].water[1]>0,'groundwater recharges without electricity');assert.equal(sys.nodes[pump.id].water[1],0,'pump cannot draw without power');assert.equal(sys.nodes[well.id].water[0],0,'well water is untreated');
-sys.grid.enabled=true;run();assert(sys.nodes[tank.id].water[0]+sys.nodes[0].water[0]>0,'powered pump supplies treatment');assert(sys.links.some(l=>l.from===pump.id&&l.to===tank.id&&l.kind==='irrigation'));
+sys.grid.enabled=false;run();assert(sys.nodes[well.id].water[0]>0,'groundwater recharges without electricity');assert.equal(sys.nodes[pump.id].water[0],0,'pump cannot draw without power');assert.equal(sys.nodes[tank.id].water[0],0,'nothing reaches the cistern without the pump');
+sys.grid.enabled=true;run();assert(sys.nodes[tank.id].water[0]+sys.nodes[0].water[0]>0,'powered pump supplies the cistern');assert(sys.links.some(l=>l.from===pump.id&&l.to===tank.id&&l.kind==='fresh'));assert(!sys.links.some(l=>l.kind!=='power'&&[well.id,pump.id,-1].includes(l.to)),'nothing is piped back into a source');
 const total=Object.values(sys.nodes).reduce((sum,n)=>sum+n.water.reduce((a,b)=>a+b,0),0);
 assert(Math.abs(total+sys.account.waterLost+sys.account.waterUsed-(sys.account.waterReceived-40))<1e-6,'water is conserved');
 assert(validInfrastructure(s));s.people=people;assert(restore(save(s)));assert(placementError(s,'water-pump',75,75).includes('6 cells'));
-sys.nodes[pump.id].enabled=false;const before=sys.nodes[pump.id].water[1];run();assert.equal(sys.nodes[pump.id].water[1],before,'disabled pump stops intake and delivery');
-console.log('PASS: groundwater recharge, power gating, automatic treatment supply, conservation, placement, switch and save/restore.');
+sys.nodes[pump.id].enabled=false;const before=sys.nodes[pump.id].water[0];run();assert.equal(sys.nodes[pump.id].water[0],before,'disabled pump stops intake and delivery');
+console.log('PASS: groundwater recharge, power gating, automatic piped supply, conservation, placement, switch and save/restore.');

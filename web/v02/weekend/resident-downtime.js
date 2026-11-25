@@ -61,10 +61,13 @@ export function idleActivity(s,r,i,dt,api) {
     }
     activity.elapsed+=dt;
     if(activity.kind!=='walk')r.needs.fun=Math.min(100,r.needs.fun+dt*.18);
-    if(activity.kind==='fire' && activity.elapsed>6 && r.needs.social<profileFor(r).temperament.acceptsAt &&
+    // Company found while relaxing starts a conversation: readily by the fire,
+    // now and then wherever two residents happen to be resting close by.
+    const fire=activity.kind==='fire';
+    if(activity.kind!=='walk' && activity.elapsed>6 && r.needs.social<profileFor(r).temperament.acceptsAt &&
        s.time>=(activity.nextInvitation||0)) {
-      activity.nextInvitation=s.time+12;
-      const center=activity.facing;
+      activity.nextInvitation=s.time+(fire?12:30);
+      const center=activity.facing||activity.target;
       if(inviteConversation(s,r,i,api,{center,near:center,idleOnly:true}))return;
     }
     if(activity.elapsed<activity.duration)return;

@@ -1,6 +1,6 @@
 import {GATHERING,gatheringStatus} from './gathering.js';
 import { PROJECTS, PROCESSES, footprint, requiredLoads, materialCount } from './simulation.js';
-import { hasPowerService, LIQUIDS } from './infrastructure.js';
+import { hasPowerService, liquidIndex } from './infrastructure.js';
 import { constructionStatus } from './construction-logistics.js';
 import { depositCapacity } from './land-layout.js';
 
@@ -44,7 +44,7 @@ export function lensData(s,id,{liquid='fresh',material='wood'}={}) {
   if(['power','water','sanitation'].includes(id)) {
     const kinds=id==='power'?['power']:id==='sanitation'?['greywater','sewage']:[liquid];
     for(const n of Object.values(sys.nodes)) {
-      const indices=kinds.map(k=>LIQUIDS.indexOf(k)).filter(i=>i>=0);
+      const indices=kinds.map(liquidIndex).filter(i=>i>=0);
       if(id==='power'?!hasPowerService(sys,n):!indices.some(i=>n.capacity[i]>0))continue;
       let tone='good',detail;
       if(!n.enabled)tone='muted';
@@ -55,7 +55,7 @@ export function lensData(s,id,{liquid='fresh',material='wood'}={}) {
         const waste=id==='sanitation'||['greywater','sewage'].includes(liquid);
         const full=indices.some(i=>n.capacity[i]>0&&n.water[i]>=n.capacity[i]-.01),empty=indices.every(i=>!n.water[i]);
         tone=!n.enabled?'muted':waste?(full?'bad':'good'):(empty?'warn':'good');
-        detail=indices.filter(i=>n.capacity[i]).map(i=>`${pretty(LIQUIDS[i])}: ${n.water[i].toFixed(1)}/${n.capacity[i]}`).join(' · ');
+        detail=indices.filter(i=>n.capacity[i]).map(i=>`${pretty(['fresh',,'greywater','sewage'][i])}: ${n.water[i].toFixed(1)}/${n.capacity[i]}`).join(' · ');
       }
       mark({...n,projectId:n.id>0?n.id:undefined},n.id===0?'Camp':n.id===-1?'River':PROJECTS[projects.find(p=>p.id===n.id)?.key]?.name||pretty(n.kind),detail,tone,2);
     }

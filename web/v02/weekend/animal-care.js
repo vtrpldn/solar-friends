@@ -30,6 +30,11 @@ export function animalStep(s,p,kind,dt){
  p.careUntil=s.time+Math.min(a.feed/feedRate,a.water/waterRate)*DAY;
 }
 export function animalAvailable(p){return p.animalCare?.lots.reduce((n,l)=>n+l.n,0)||0;}
+// Says whether an empty nest or udder is ordinary waiting or a missed ration.
+export function animalWaitText(p,product){
+ const a=p.animalCare,short=[a&&a.feed<=0&&'feed',a&&a.water<=0&&'drinking water'].filter(Boolean);
+ return short.length?`No ${product} today: the animals are out of ${short.join(' and ')}`:`Fed and watered; the next ${product} are not ready to collect yet`;
+}
 export function collectAnimal(s,p,recipe,limit){
  const a=p.animalCare;if(!a)return null;let left=Math.min(limit,Math.floor(animalAvailable(p))),quantity=left,lots=[];
  for(const l of a.lots){const n=Math.min(left,l.n);if(n){lots.push({...l,n});l.n-=n;left-=n;}}

@@ -74,7 +74,7 @@ export function createUtilitiesPreview(interactions = false, landSeed = 0) {
   }
   for (const [kind, from, to] of [
     ["fresh", ids.well, 0],
-    ["irrigation", ids.well, ids.garden],
+    ["fresh", ids.well, ids.garden],
     ["sewage", ids.eco_toilet, ids.banana_treatment],
   ]) {
     const error = connectUtility(s, kind, from, to);
@@ -85,7 +85,7 @@ export function createUtilitiesPreview(interactions = false, landSeed = 0) {
   s.projects.find(p=>p.id===ids.house).solarUpgrade=true;
   syncInfrastructure(s,PROJECTS);
   sys.nodes[ids.house].charge = 3;
-  sys.nodes[ids.well].water = [30, 40, 0, 0];
+  sys.nodes[ids.well].water = [70, 0, 0, 0];
   sys.nodes[ids.eco_toilet].water[3] = 10;
   sys.nodes[ids.wetland].water[2] = 12;
   if (interactions) {

@@ -31,7 +31,9 @@ try{
  assert.equal(was,Math.round(state.money*100));assert.equal(now,Math.round(after.money*100));
  assert.equal(cents(await page.locator('#supplies .resource b').first().textContent()),now,'recap matches the Savings counter');
  const food=sections.find(section=>section.title==='Food and water').rows.find(([label])=>label==='Food portions');
- assert.equal(food[1],`${foodPortions(state)} → ${foodPortions(after)}`);
+ // The recap lists only what changed; the pantry can end a quiet stretch where it began.
+ if(food)assert.equal(food[1],`${foodPortions(state)} → ${foodPortions(after)}`);
+ else assert.equal(foodPortions(after),foodPortions(state),'an unlisted pantry is an unchanged one');
  assert(after.view.paused,'village stays paused behind the recap');
  assert.equal(await page.evaluate(()=>document.activeElement.id),'skip-summary-close');
  const box=await summary.boundingBox();assert(box.y>=0&&box.y+box.height<=720&&box.x>=0&&box.x+box.width<=1280,'recap fits a 1280×720 window');

@@ -52,8 +52,8 @@ function render(){if(!s)return;
  if(!CULTIVATION_KEYS.includes(p.key))for(const [recipe,d]of Object.entries(PROCESSES).filter(([,d])=>d.kind===PROJECTS[p.key].kind)){button(panel,d.name,'produce',{site:p.id,recipe});}
  if(p.readyAt>s.time)line(panel,`Growing: ${Math.ceil((p.readyAt-s.time)*.45)} game minutes remaining.`);}
  if(n){line(panel,`Water: ${n.water.map(v=>v.toFixed(1)).join(' / ')} (clean / raw / grey / sewage)`);
- if(n.capacity[1])button(panel,'Carry river water','haul',{site:selected});
- if(n.capacity[0]&&n.capacity[1]){button(panel,'Purify by hand','purify',{site:selected});button(panel,`Drinking reserve: ${n.maintainFresh?'on':'off'}`,'maintain',{site:selected,field:'maintainFresh'});}
+ if(n.capacity[0])button(panel,'Carry river water','haul',{site:selected});
+ if(n.maintainFresh!==undefined){button(panel,`Drinking reserve: ${n.maintainFresh?'on':'off'}`,'maintain',{site:selected,field:'maintainFresh'});}
  if(n.capacity[2]||n.capacity[3]){button(panel,'Service waste','service',{site:selected});button(panel,`Sanitation upkeep: ${n.maintainSanitation?'on':'off'}`,'maintain',{site:selected,field:'maintainSanitation'});}}
  for(const o of ops)line(panel,o.status||'Queued');
  if(selected===0)button(panel,`Emergency food purchases: ${s.emergencyFood===false?'off':'on'}`,'food-policy');

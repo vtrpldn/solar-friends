@@ -1,6 +1,6 @@
 import { projectLabel, numberProject, numberProjects } from "./project-names.js";
 import { brl } from "./money.js";
-import {ensureAnimalCare,animalAvailable,collectAnimal,validAnimalCare} from './animal-care.js';
+import {ensureAnimalCare,animalAvailable,collectAnimal,validAnimalCare,animalWaitText} from './animal-care.js';
 import {packDrinkingWater,hydrationWorkFactor} from './hydration.js';
 import {ensureHydrology,extractWater,validHydrology} from './hydrology.js';
 import {weatherStep,validWeather} from './weather.js';
@@ -32,6 +32,7 @@ import {applyConstructionSpecs,migrateConstructionLabor,CONSTRUCTION_LABOR_VERSI
 import {collectionBudget,spendableMoney} from './procurement-budget.js';
 import {returnPickup,pickupFare,reserveExport,pendingExports,loadExports,settleExports,validTrade,transportCost,fitsCargo,blueprintManifest,receiveBlueprintShipment,projectFreight} from './physical-trade.js';
 import {recordEvent} from './event-history.js';
+import {footfallBefore,recordFootfall,repairFootfall,trodden} from './footfall.js';
 import { unrotatedSiteSize, validSiteVersion } from './site-space.js';
 import { accessGeometry, insideSolid, segmentHitsSolid, BODY_RADIUS } from './building-access.js';
 import { craftingBlocker, craftStage, practiceCraft, validCraftSkills } from './crafting.js';
@@ -65,6 +66,8 @@ import {
   connect,
   useWater,
   LIQUIDS,
+  liquidIndex,
+  retireUntreatedWater,
   validInfrastructure,
 } from "./infrastructure.js";
 import { expandMaterials, expandProjects, PROCESSES } from "./catalog-rules.js";
@@ -132,7 +135,7 @@ export const PROJECTS = {
     materials: { wood: 8, hardware: 1, tank: 1, plumbing: 1 },
     work: 267,
     description:
-      "An unpowered tank holding 250 liters of clean and 250 liters of untreated water in separate compartments. Residents can carry river water here and purify it by hand; no power needed. About 2 person-hours to assemble.",
+      "An unpowered tank holding 500 liters of water. Residents carry water here from the river, a well or a rain barrel; a pump fills it through a pipe. No power needed. About 2 person-hours to assemble.",
   },
   shelter: {
     name: "Basic shelter",
@@ -205,6 +208,8 @@ function roadAt(s,x,z){
   if(!cache.has(key))cache.set(key,roadAtUncached(s,x,z));
   return cache.get(key);
 }
+// Made roads and the tracks residents have worn: ground a walker keeps to.
+const pathAt=(s,x,z)=>roadAt(s,x,z)||trodden(s,x,z);
 function roadAtUncached(s, x, z) {
   return (
     accessRoadAt(x, z) ||
@@ -569,9 +574,7 @@ export function queueWater(s, from, to, kind = "fresh") {
     from === to
   )
     return "Choose valid water endpoints.";
-  if (from === -1 && kind !== "irrigation")
-    return "River water is irrigation water; filter it before drinking.";
-  const i = LIQUIDS.indexOf(kind),
+  const i = liquidIndex(kind),
     target = sys.nodes[to];
   if (!target.capacity[i])
     return "The destination cannot store that water class.";
@@ -590,16 +593,6 @@ export function queueWater(s, from, to, kind = "fresh") {
   });
   wakeHelpers(s);
   return "";
-}
-export function queuePurification(s,site) {
-  const node=syncInfrastructure(s,PROJECTS).nodes[site];
-  if(!node || !node.capacity[0] || !node.capacity[1])return 'Choose a reservoir with separate untreated and drinking-water storage.';
-  if(node.water[1]<1)return 'Bring untreated river water here first.';
-  if(node.capacity[0]-node.water[0]<1)return 'Drinking-water storage is full.';
-  s.operations??=[];
-  if(s.operations.some(o=>!o.done && o.water && o.site===site))return 'A water job is already queued here.';
-  s.operations.push({id:s.nextOperation=(s.nextOperation||0)+1,site,water:{from:site,to:site,kind:'irrigation',amount:0,purify:true},work:0,phase:'process',done:false});
-  wakeHelpers(s);return '';
 }
 export function queueSanitation(s,site) {
   const n=ensureInfrastructure(s).nodes[site];
@@ -745,34 +738,30 @@ function maintainFood(s) {
     if(s.log.includes(hint))recordEvent(s,hint,null);else say(s,hint);
   }
 }
+// The nearest built source holding water; otherwise the river.
+function waterSource(sys,n){
+  return Object.values(sys.nodes).filter(a=>a.id!==n.id&&['groundwater-well','rain-barrel','water-pump'].includes(a.kind)&&a.enabled&&a.water[0]>=1)
+    .sort((a,b)=>Math.hypot(a.x-n.x,a.z-n.z)-Math.hypot(b.x-n.x,b.z-n.z))[0]?.id??-1;
+}
 export function maintainWater(s) {
   const sys=ensureInfrastructure(s);
   for(const op of [...(s.operations||[])]) {
     const recipe=PROCESSES[op.recipe],n=sys.nodes[op.site];
     if(op.done||(op.waterPaid&&op.phase!=="growing")||!recipe?.water||!n||s.operations.some(o=>!o.done&&o.water&&o.site===n.id))continue;
-    const fresh=['kitchen','goat_pasture','coop'].includes(recipe.kind);
-    if((fresh?n.water[0]:Math.max(n.water[0],n.water[1]))>=recipe.water)continue;
-    if(fresh&&n.water[1]>=1&&n.capacity[0])queuePurification(s,n.id);
-    else if(n.capacity[1])queueWater(s,-1,n.id,'irrigation');
+    if(n.water[0]>=recipe.water)continue;
+    if(n.capacity[0])queueWater(s,waterSource(sys,n),n.id);
   }
   for(const p of s.projects){
-    const n=sys.nodes[p.id];if(!n||!n.enabled||!n.capacity[1]||n.water[1]>=Math.min(12,n.capacity[1]*.5)||s.operations?.some(o=>!o.done&&o.water&&o.site===p.id))continue;
+    const n=sys.nodes[p.id];if(!n||!n.enabled||!n.capacity[0]||n.water[0]>=Math.min(12,n.capacity[0]*.5)||s.operations?.some(o=>!o.done&&o.water&&o.site===p.id))continue;
     const growing=p.cultivation?.beds.some(b=>b.irrigation&&['growing','harvestable'].includes(b.stage)&&!harvestExpired(b,s.time))||s.operations?.some(o=>!o.done&&o.site===p.id&&CROP_CARE[o.recipe]&&['growing','process'].includes(o.phase)&&p.irrigationPolicy!=='rainfed');
-    if(growing)queueWater(s,-1,p.id,'irrigation');
+    if(growing)queueWater(s,waterSource(sys,n),p.id);
   }
   for(const job of s.upkeep?.jobs||[]){const care=ANIMAL_CARE[job.care],n=sys.nodes[job.target];if(!care||job.done||!n||n.water[0]>=care.water||s.operations?.some(o=>!o.done&&o.water&&o.site===n.id))continue;
     const source=Object.values(sys.nodes).filter(a=>a.id!==n.id&&a.water[0]>=1).sort((a,b)=>Math.hypot(a.x-n.x,a.z-n.z)-Math.hypot(b.x-n.x,b.z-n.z))[0];if(source)queueWater(s,source.id,n.id,'fresh');
   }
   for(const n of Object.values(sys.nodes)) {
-    if(n.maintainFresh && n.capacity[0] && n.capacity[1] && n.water[0]<drinkingReserve(s,n)-Math.min(12,drinkingReserve(s,n)*.25) &&
-      !s.operations?.some(o=>!o.done && o.water && o.site===n.id)) {
-      if(n.water[1]>=Math.min(12,n.capacity[0]-n.water[0]) || (n.water[0]<s.people.length*2 && n.water[1]>=1)) queuePurification(s,n.id);
-      else {
-        const source=Object.values(sys.nodes).filter(a=>a.id!==n.id && ['groundwater-well','rain-barrel','water-pump'].includes(a.kind) && a.water[1]>=1)
-          .sort((a,b)=>Math.hypot(a.x-n.x,a.z-n.z)-Math.hypot(b.x-n.x,b.z-n.z))[0];
-        queueWater(s,source?.id??-1,n.id,'irrigation');
-      }
-    }
+    if(n.maintainFresh && n.capacity[0] && n.water[0]<drinkingReserve(s,n)-Math.min(12,drinkingReserve(s,n)*.25) &&
+      !s.operations?.some(o=>!o.done && o.water && o.site===n.id)) queueWater(s,waterSource(sys,n),n.id);
     if(n.maintainSanitation && [2,3].some(i=>n.capacity[i]>0 && n.water[i]>=n.capacity[i]*.5))queueSanitation(s,n.id);
   }
 }
@@ -812,11 +801,11 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     if ((op.accessRetryAt?.[r.id]||0)>s.time) return false;
     if (op.done || op.waitingSeeds || op.phase==='growing' || reserved(op) || (waterOnly && !op.water) || (group === 'farm' ? !isFarmWork(s,op) : group && workGroup(op,PROCESSES)!==group)) return false;
     if(op.water?.stagedAt){
-      const destination=sys.nodes[op.site],index=LIQUIDS.indexOf(op.water.kind);
+      const destination=sys.nodes[op.site],index=liquidIndex(op.water.kind);
       if(!destination||destination.capacity[index]-destination.water[index]<=.00001)return false;
     }
     if (op.water || op.phase === "return") return true;
-    if(s.mode!=='sandbox'&&['eggs','milk'].includes(op.recipe)){const p=s.projects.find(p=>p.id===op.site);if(p&&!animalAvailable(p)){op.status='Waiting for daily animal production; feed and water are needed';return false;}}
+    if(s.mode!=='sandbox'&&['eggs','milk'].includes(op.recipe)){const p=s.projects.find(p=>p.id===op.site);if(p&&!animalAvailable(p)){op.status=animalWaitText(p,op.recipe);return false;}}
     const node = sys.nodes[op.site],
       recipe = farmRecipe(op,PROCESSES);
     if(recipe.craft && PROJECTS[s.projects.find(p=>p.id===op.site)?.key]?.kind!==recipe.kind) {op.status='Needs a compatible crafting workspace.';return false;}
@@ -829,12 +818,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     if (
       recipe.water &&
       !op.waterPaid &&
-      Math.max(
-        node.water[0],
-        ["kitchen", "goat_pasture", "coop"].includes(recipe.kind)
-          ? 0
-          : node.water[1],
-      ) < recipe.water
+      node.water[0] < recipe.water
     ) {
       op.status = "Waiting for usable water";
       return false;
@@ -905,27 +889,12 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
   }
   if (op.water) {
     const w = op.water,
-      index = LIQUIDS.indexOf(w.kind);
+      index = liquidIndex(w.kind);
     if(w.service) {
       const dest=utilitySpot(s,node,r);r.action='produce';op.status='Servicing sealed waste tanks';
       if(!dest || !go(s,r,dest))return true;
       op.work+=dt*useEquipment(s,r,'cleaning-kit',`op:${op.id}`,dt);r.energy=Math.max(0,r.energy-dt*.06);
       if(op.work>=45){const amount=node.water[2]+node.water[3];node.water[2]=0;node.water[3]=0;sys.account.wasteRemoved=(sys.account.wasteRemoved||0)+amount;op.done=true;r.operation=null;say(s,`${r.name} serviced the sealed waste tanks for off-site treatment.`);}
-      return true;
-    }
-    if(w.purify) {
-      const dest=utilitySpot(s,node,r);
-      // Name the walk: a resident left "idle" here is treated as at leisure
-      // and has this route cleared every tick while construction is pending.
-      r.action='walk';op.status='Walking to purify untreated water';
-      if(!dest || !go(s,r,dest))return true;
-      r.action='produce';op.status='Purifying untreated water';
-      op.work+=dt;r.work+=dt;r.energy=Math.max(0,r.energy-dt*.06);
-      if(op.work>=30) {
-        const amount=Math.min(12,node.water[1],node.capacity[0]-node.water[0]);
-        node.water[1]-=amount;node.water[0]+=amount;op.done=true;r.operation=null;
-        say(s,`${r.name} purified ${amount.toFixed(0)} water for drinking.`, "water-purified");
-      }
       return true;
     }
     if (op.phase === "pickup") {
@@ -934,7 +903,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
         start = w.sourcePoint || (w.sourcePoint=nearestRiverAccess(s,r));
       } else start = utilitySpot(s, sys.nodes[w.from], r);
       if (!start) return false;
-      op.status = "Walking to collect untreated water";
+      op.status = "Walking to collect water";
       r.action = "fetch-water";
       if (!go(s, r, start)) return true;
       const dest = sys.nodes[w.to];
@@ -2051,13 +2020,13 @@ export function walkSegmentClear(s, from, to) {
 
 function naturalPath(s, from, path) {
   const keepRoad =
-    roadAt(s, from.x, from.z) && path.every((p) => roadAt(s, p.x, p.z));
+    pathAt(s, from.x, from.z) && path.every((p) => pathAt(s, p.x, p.z));
   const roadClear = (a, b) => {
     if (!keepRoad) return true;
     const steps = Math.ceil(Math.hypot(a.x - b.x, a.z - b.z) * 3);
     for (let i = 0; i <= steps; i++) {
       const t = steps ? i / steps : 0;
-      if (!roadAt(s, a.x + (b.x - a.x) * t, a.z + (b.z - a.z) * t))
+      if (!pathAt(s, a.x + (b.x - a.x) * t, a.z + (b.z - a.z) * t))
         return false;
     }
     return true;
@@ -2244,9 +2213,9 @@ function routeUncached(s, from, to, step=1,reachOnly=false) {
       const result = [];
       let anchor = from,
         chunk = [],
-        onRoad = roadAt(s, from.x, from.z);
+        onRoad = pathAt(s, from.x, from.z);
       for (const point of path) {
-        const nextRoad = roadAt(s, point.x, point.z);
+        const nextRoad = pathAt(s, point.x, point.z);
         if (nextRoad !== onRoad && chunk.length) {
           result.push(...naturalPath(s, anchor, chunk));
           anchor = chunk.at(-1);
@@ -2277,7 +2246,8 @@ function routeUncached(s, from, to, step=1,reachOnly=false) {
         (x===start[0]&&z===start[1]&&!walkSegmentClear(s,from,{x:nx,z:nz}))
       )
         continue;
-      const nextCost = cost + step*(roadAt(s, nx, nz) ? 0.65 : 1);
+      // Walkers favour made roads, then tracks others have already worn.
+      const nextCost = cost + step*(roadAt(s, nx, nz) ? 0.65 : trodden(s, nx, nz) ? 0.8 : 1);
       if (nextCost >= (costs.get(k) ?? Infinity)) continue;
       costs.set(k, nextCost);
       parent.set(k, key(x, z));
@@ -2570,7 +2540,9 @@ export function endWeekend(s) {
   return true;
 }
 export function tick(s,dt){
-  try { return tickWithNavigation(s,dt); } finally { releaseEquipment(s); }
+  // Nobody has set foot on the land until the arrival is over.
+  const before=s.stage==='arrival'||s.arrivalAnimating?null:footfallBefore(s);
+  try { return tickWithNavigation(s,dt); } finally { releaseEquipment(s); if(before&&dt>0)recordFootfall(s,before,dt); }
 }
 function tickWithNavigation(s,dt){
   if(!fastNavigationStates.has(s))return tickUncached(s,dt);
@@ -3110,6 +3082,8 @@ export function restore(text) {
     if(s.weather===undefined)weatherStep(s);
     if(!validGathering(s))return null;
     restoreHomeAssignments(s);
+    repairFootfall(s);
+    retireUntreatedWater(s);
     numberProjects(s, PROJECTS);
     // Saves predating narrow footbridges retain their exact 8×2 occupancy,
     // centre, rotations and deck width. New plans explicitly write version 1.

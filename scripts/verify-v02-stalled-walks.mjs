@@ -1,26 +1,26 @@
 import assert from 'node:assert/strict';
-import {createWeekend,chooseCamp,PROJECTS,PROCESSES,queuePurification,plan,tick,enableFastNavigation,materialCount} from '../web/v02/weekend/simulation.js';
+import {createWeekend,chooseCamp,PROJECTS,PROCESSES,queueSanitation,plan,tick,enableFastNavigation,materialCount} from '../web/v02/weekend/simulation.js';
 import {syncInfrastructure} from '../web/v02/weekend/infrastructure.js';
 
-// An idle resident sent to purify water must keep walking while a building
+// An idle resident sent to service the waste tanks must keep walking while a building
 // site is also waiting for workers. The leisure interruption used to clear the
 // route every tick, freezing the resident in place with the job reserved.
 const s=createWeekend(42);chooseCamp(s,'shade');enableFastNavigation(s);s.rainSeen=true;s.rainResolved=true;
 const tank=syncInfrastructure(s,PROJECTS).nodes[0];
-tank.water=[0,12,0,0];tank.maintainFresh=false;
+tank.water=[40,0,60,0];tank.maintainFresh=false;tank.maintainSanitation=false;
 assert.equal(plan(s,'gathering',s.stock.x-14,s.stock.z),'','a construction site is pending');
 s.people.forEach(r=>{r.energy=90;for(const k in r.needs)r.needs[k]=95;});
 const r=s.people[0];
 Object.assign(r,{x:s.stock.x-8,z:s.stock.z+6,action:'idle',walk:[],target:null,job:null});
-assert.equal(queuePurification(s,0)||'','');
+assert.equal(queueSanitation(s,0)||'','');
 const op=s.operations.at(-1);r.operation=op.id;
 s.people.slice(1).forEach(o=>{o.sleepUntil=s.time+5000;o.action='rest';});
 const start={x:r.x,z:r.z};
 for(let i=0;i<3000&&!op.done;i++)tick(s,.1);
 assert(Math.hypot(r.x-start.x,r.z-start.z)>1,`resident walked to the tank (${r.action})`);
-assert(op.done,'purification finished');
-assert(tank.water[0]>0,'drinking water was produced');
-console.log('PASS purification walk survives pending construction');
+assert(op.done,'tank service finished');
+assert.equal(tank.water[2],0,'the greywater was taken away');
+console.log('PASS tank service walk survives pending construction');
 
 // A building planned over a felled tree must not strand the cut logs or the
 // resident sent back for the next load.
