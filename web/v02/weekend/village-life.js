@@ -1,7 +1,7 @@
 import {calendar, DAY, HOUR} from './weather.js';
 import {transact} from './finances.js';
-import {foodChange} from './food-storage.js';
-import {concern, rememberShared} from './resident-mind.js';
+import {foodChange, eatMeal} from './food-storage.js';
+import {sharedConcern, rememberShared} from './resident-mind.js';
 import {profileFor} from './resident-personality.js';
 import {brl} from './money.js';
 
@@ -14,7 +14,7 @@ export const EVENT_KINDS = {
   mutirao: {name: 'Mutirão', from: 8, to: 16, lunch: 12, weekend: true},
   course: {name: 'Weekend course', from: 9, to: 15, lunch: 12, weekend: true},
   festa: {name: 'Festa', from: 17, to: 21, lunch: 18, weekend: false},
-  roda: {name: 'Roda', from: 18, to: 19, weekend: true},
+  roda: {name: 'Roda', from: 18, to: 19.5, weekend: true},
 };
 export const COURSES = {
   iara: 'Agroecological gardening',
@@ -27,6 +27,8 @@ export const COURSE_FEE = 120, COURSE_FEE_NO_LUNCH = 95, COURSE_SEATS = 12, COUR
 export const FESTA_WOOD = 2, FESTA_GAP_DAYS = 14, FESTA_CORN = 4;
 // One neighbour adds this share of a resident's building pace: they do not know the site.
 export const HELPER_PACE = .7;
+// Left alone, goodwill settles here; each week it loses this share of what is above it.
+export const GOODWILL_REST = 30, GOODWILL_FADE = .08;
 const GATHERING_PLACES = ['square', 'fire-circle', 'community-hall'];
 const COURSE_PLACES = ['outdoor-classroom', 'community-hall'];
 const clamp = (n, low, high) => Math.max(low, Math.min(high, n));
@@ -43,7 +45,7 @@ export const maxHelpers = s => clamp(2 + Math.floor(ensureCommunity(s).goodwill 
 export const maxGuests = s => clamp(4 + Math.floor(ensureCommunity(s).goodwill / 10), 4, 14);
 export function goodwillText(goodwill) {
   return goodwill >= 80 ? 'The neighbours think of you as their own.' : goodwill >= 60 ? 'The neighbours are glad you came.'
-    : goodwill >= 35 ? 'The neighbours know you and are friendly.' : goodwill >= 15 ? 'The neighbours are wary; you have let them down.'
+    : goodwill >= 35 ? 'The neighbours know you and are friendly.' : goodwill >= 15 ? 'The neighbours know you by sight, and not much more.'
     : 'The neighbours keep their distance.';
 }
 const weekend = day => day % 7 >= 5;
@@ -83,7 +85,9 @@ export function planError(s, kind, {site, day, guests = 0, teacher} = {}, defs) 
   if (!Number.isInteger(day) || !eventDays(s, kind, 12).includes(day)) return rule.weekend ? 'Choose a Saturday or Sunday that has not started.' : 'Choose a day that has not started.';
   if (c.events.some(e => e.phase !== 'done' && e.day === day && e.kind !== 'roda')) return 'Something is already planned for that day.';
   if (kind === 'mutirao') {
-    if (c.owed >= 2) return 'You owe the neighbours two days of work. Return one before asking again.';
+    // Help already asked for counts: each mutirão will add a day to what is owed.
+    const asked = c.events.filter(e => e.kind === 'mutirao').length;
+    if (c.owed + asked >= 2) return c.owed >= 2 ? 'You owe the neighbours two days of work. Return one before asking again.' : 'With the help already asked for, you would owe more than two days of work. Return a day first.';
     if (!Number.isInteger(guests) || guests < 2 || guests > maxHelpers(s)) return `Ask between 2 and ${maxHelpers(s)} neighbours.`;
   }
   if (kind === 'course') {
@@ -126,7 +130,7 @@ export function bookFavour(s, r) {
 }
 export function settleFavour(s, r, say) {
   const c = ensureCommunity(s);
-  c.owed = Math.max(0, c.owed - 1); c.goodwill = clamp(c.goodwill + 5, 0, 100);
+  c.owed = Math.max(0, c.owed - 1); c.goodwill = clamp(c.goodwill + 3, 0, 100);
   rememberShared(s, r, 'Spent a day working on a neighbour’s land. They fed us well and sent their thanks.');
   say(s, `${r.name} is back from a day’s work on a neighbour’s land. ${c.owed ? `The village still owes ${c.owed} day${c.owed === 1 ? '' : 's'}.` : 'The village owes nothing now.'}`);
 }
@@ -157,7 +161,7 @@ export function communityVisitors(s) {
   for (const e of running(s)) {
     if (!e.centre || !e.here) continue;
     for (let k = 0; k < e.here; k++) {
-      const a = (k + .5) * Math.PI * 2 / e.here + e.id, ring = e.centre.radius + (e.kind === 'course' ? -.2 : (k % 2) * .5);
+      const a = (k + .5) * Math.PI * 2 / e.here + e.id, ring = e.kind === 'course' ? Math.max(.9, e.centre.radius - 1.9) + (k % 2) * .45 : e.centre.radius + (k % 2) * .5; // a class sits under the roof
       visitors.push({key: `${e.id}:${k}`, look: (e.id * 7 + k) % 6, x: e.centre.x + Math.sin(a) * ring, z: e.centre.z + Math.cos(a) * ring,
         facing: {x: e.centre.x, z: e.centre.z}, pose: e.kind === 'mutirao' ? (k % 3 ? 'work' : 'carry') : e.kind === 'course' ? 'listen' : 'chat'});
     }
@@ -165,9 +169,11 @@ export function communityVisitors(s) {
   return visitors;
 }
 
+// Guests eat as the friends do: a portion of whatever the stores hold, oldest first.
 function feed(s, people) {
-  const served = Math.min(people, Math.floor(s.mode === 'sandbox' ? people : s.materials.meals || 0));
-  if (served > 0 && s.mode !== 'sandbox') foodChange(s, 'meals', -served, undefined, 'meals for guests');
+  if (s.mode === 'sandbox') return people;
+  let served = 0;
+  while (served < people && eatMeal(s)) served++;
   return served;
 }
 function start(s, e, defs, say) {
@@ -225,16 +231,16 @@ function finish(s, e, defs, say) {
   if (e.kind === 'festa') {
     const hungry = s.people.length + e.guests - (e.fed || 0);
     const fresh = c.lastFestaDay === undefined || e.day - c.lastFestaDay >= FESTA_GAP_DAYS;
-    const gain = e.guests ? clamp((fresh ? 6 : 2) + (e.fire ? 1 : 0) + (e.corn ? 2 : 0) - hungry, -6, 9) : 0;
+    const gain = e.guests ? clamp((fresh ? 4 : 1) + (e.fire ? 1 : 0) + (e.corn ? 1 : 0) - hungry, -6, 6) : 0;
     c.goodwill = clamp(c.goodwill + gain, 0, 100); c.lastFestaDay = e.day;
     text = `The ${e.title} is over${e.guests ? `: ${e.guests} neighbours came` : ''}${hungry > 0 ? `, and there was food for only ${e.fed}` : ''}.${gain > 0 ? ' People will talk about it warmly.' : gain < 0 ? ' People went home hungry.' : ''}`;
     for (const r of s.people) if (e.present?.[r.id] > HOUR / 2) rememberShared(s, r, `The ${e.title}${e.fire ? ' by the fire' : ''}. ${profileFor(r).temperament.socialAt >= 45 ? 'I did not want it to end.' : 'I stayed longer than I meant to.'}`);
   }
   if (e.kind === 'roda') {
-    const present = s.people.filter(r => e.present?.[r.id] > HOUR / 4);
-    const said = present.map(r => ({id: r.id, text: concern(s, r)})).filter(v => v.text);
+    const present = s.people.filter(r => e.present?.[r.id] > HOUR / 6);
+    const said = present.map(r => ({id: r.id, text: sharedConcern(s, r)})).filter(v => v.text);
     c.minutes = {day: e.day, present: present.map(r => r.id), said};
-    text = present.length < 2 ? 'Too few friends were free for the roda this week.'
+    text = present.length < 2 ? 'The roda did not happen this week: the friends were at work, away or asleep.'
       : `Roda: ${present.length} friends sat together. ${said.length ? said.map(v => `${s.people.find(r => r.id === v.id).name}: “${v.text}”`).join(' ') : 'Nobody had a worry to raise.'}`;
   }
   e.phase = 'done'; delete e.centre; delete e.here; delete e.present;
@@ -246,6 +252,10 @@ function finish(s, e, defs, say) {
 export function communityStep(s, dt, defs, api) {
   if (s.stage !== 'playing') return;
   const c = ensureCommunity(s), now = clock(s.time);
+  // Goodwill is kept up, not banked: each week it drifts toward plain acquaintance.
+  const week = Math.floor(now.absoluteDay / 7);
+  if (c.week === undefined) c.week = week;
+  while (c.week < week) { c.week++; c.goodwill = clamp(c.goodwill > GOODWILL_REST ? c.goodwill - (c.goodwill - GOODWILL_REST) * GOODWILL_FADE : c.goodwill + 1, 0, 100); }
   if (c.roda && weekend(now.absoluteDay) && now.absoluteDay % 7 === 6 && c.lastRodaDay !== now.absoluteDay && now.hour >= EVENT_KINDS.roda.from && now.hour < EVENT_KINDS.roda.to &&
       !c.events.some(e => e.phase === 'running')) {
     const place = eventSites(s, 'festa', defs)[0];
@@ -280,7 +290,7 @@ export function validCommunity(s, defs) {
   if (c === undefined) return true;
   if (!c || c.version !== 1 || !Number.isFinite(c.goodwill) || c.goodwill < 0 || c.goodwill > 100 || !Number.isInteger(c.owed) || c.owed < 0 || c.owed > 50 ||
       typeof c.roda !== 'boolean' || !Number.isInteger(c.nextId) || c.nextId < 1 || !Array.isArray(c.events) || c.events.length > 40 || !Array.isArray(c.history) || c.history.length > 12) return false;
-  if (['lastCourseDay', 'lastFestaDay', 'lastRodaDay'].some(k => c[k] !== undefined && !Number.isInteger(c[k]))) return false;
+  if (['lastCourseDay', 'lastFestaDay', 'lastRodaDay', 'week'].some(k => c[k] !== undefined && !Number.isInteger(c[k]))) return false;
   if (!c.history.every(h => h && EVENT_KINDS[h.kind] && Number.isInteger(h.day) && typeof h.text === 'string' && h.text.length <= 900)) return false;
   if (c.minutes !== undefined && !(c.minutes && Number.isInteger(c.minutes.day) && Array.isArray(c.minutes.present) && Array.isArray(c.minutes.said) &&
       c.minutes.said.every(v => v && s.people.some(r => r.id === v.id) && typeof v.text === 'string' && v.text.length <= 300))) return false;

@@ -48,6 +48,11 @@ export function concern(s, r) {
   if (r.energy < 35) return 'I need to rest before I take on anything else.';
   if (r.needs?.hunger < 30) return 'It is hard to think about much until I have eaten.';
   if (Math.min(r.needs?.bladder ?? 100, r.needs?.bowels ?? 100) < 30) return 'I need a toilet break first.';
+  return sharedConcern(s, r);
+}
+// What a friend would say to the others: about the village and how they are, not a passing bodily need.
+export function sharedConcern(s, r) {
+  if (r.energy < 35) return 'I am worn out. I need the pace to ease for a while.';
   if (r.id === 'iara' && foodPortions(s) < s.people.length)
     return 'The pantry is getting low. I want us to have enough to share.';
   if (r.id === 'caua' && s.infrastructure?.thirst) return 'We need reliable drinking water. I want to help sort it out.';

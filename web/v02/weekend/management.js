@@ -41,7 +41,7 @@ import {
   storedMaterials,
   storageCapacity,
   queueProduction,
-  queueWater, queuePurification, queueSanitation, say,
+  queueWater, queuePurification, queueSanitation, say, requiredLoads,
 } from "./simulation.js";
 import { LIQUIDS, hasPowerService, canSwitchBuilding, switchBuilding } from "./infrastructure.js";
 import { illustrate } from "./ui-art.js";
@@ -288,7 +288,7 @@ export function createManagement({
     $("network-screen").hidden = inventoryView || view === "finances" || view === "crafting" || view === "neighbours";
     $("finance-screen").hidden = view !== "finances";
     $("neighbours-screen").hidden = view !== "neighbours";
-    if (view === "neighbours") renderNeighbours(s, $("neighbours-screen"), PROJECTS, {notify, refresh, say});
+    if (view === "neighbours") renderNeighbours(s, $("neighbours-screen"), PROJECTS, {notify, refresh, say, ready: p => p.delivered >= requiredLoads(p)});
     $('crafting-screen').hidden = view !== 'crafting';
     if(view==='crafting')renderCrafting(s,$('crafting-screen'),notify,refresh);
     $("utility-panel").hidden = true;

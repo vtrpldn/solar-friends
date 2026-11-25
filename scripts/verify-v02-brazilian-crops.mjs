@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {MATERIALS,PROCESSES,PROJECTS,createSandbox,save,restore,plan,enableFastNavigation} from '../web/v02/weekend/simulation.js';
+import {MATERIALS,PROCESSES,PROJECTS,createSandbox,save,restore,plan,enableFastNavigation,holdInGround} from '../web/v02/weekend/simulation.js';
 import {CROPS,cultivationStep,ensureCultivation,validCultivation} from '../web/v02/weekend/cultivation.js';
 import {seedId,cropFacts} from '../web/v02/weekend/crops.js';
 import {FOOD_DAYS,freshLots} from '../web/v02/weekend/food-storage.js';
@@ -109,4 +109,11 @@ const loaded=restore(JSON.stringify(legacy));assert(loaded,'older village loads'
  // The grove is a normal building: it can be planned on open land and saved.
  const land=createSandbox(42);enableFastNavigation(land);let placed='none';for(let z=40;z<70&&placed;z++)for(let x=40;x<70&&placed;x++)placed=plan(land,'coffee',x,z);
  assert.equal(placed,'');assert(restore(save(land)));}
+
+// Ripe cassava waits in the ground while the stores hold a kitchen batch, and is
+// lifted when they run low or its time in the ground is nearly up. Other crops never wait.
+{const s={time:20*GAME_DAY,materials:{cassava:8,beans:50}},bed=(crop,ripeDays)=>({crop,stage:'harvestable',ripeAt:s.time-ripeDays*GAME_DAY});
+ assert(holdInGround(s,bed('cassava',5)));assert(!holdInGround(s,bed('cassava',54)),'lifted before the window closes');
+ s.materials.cassava=7;assert(!holdInGround(s,bed('cassava',5)),'lifted when the stores run low');
+ assert(!holdInGround(s,bed('beans',1)));s.materials.sweet_potato=50;assert(!holdInGround(s,bed('sweet_potato',1)));}
 console.log('PASS Brazilian staple crops: complete stock items, drought tolerance, dry-season growth, farinha, native orchards, coffee and older saves');

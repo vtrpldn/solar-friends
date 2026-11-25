@@ -42,7 +42,7 @@ const helper=s.people[1];assert.equal(favourError(s,helper),'');assert(bookFavou
 assert.match(favourError(s,s.people[2]),/already going/);
 let left=false,away=0;for(let i=0;i<2*DAY&&s.community.owed;i++){tick(s,1);const gone=s.people[1].outsideWork?.favour===true;left||=gone;away+=gone?1:0;if(away===1500)reload();}
 assert(away>8*HOUR,'a full working day away');
-assert(left,'the friend left for the neighbour’s land');assert.equal(s.community.owed,0);assert.equal(s.community.goodwill,45);
+assert(left,'the friend left for the neighbour’s land');assert.equal(s.community.owed,0);assert.equal(s.community.goodwill,43);
 assert.match(favourError(s,s.people[1]),/owe the neighbours no work/);
 
 // Sunday roda: the friends sit together and what they say is kept.
@@ -54,14 +54,14 @@ assert.equal(planEvent(s,'festa',{site:fire.id,day:9,guests:6},PROJECTS),'');
 until(9,19);assert.equal(communityVisitors(s).length,6);
 const festa=s.community.events.find(e=>e.kind==='festa');assert(Object.keys(festa.present||{}).length>=3,'most friends came to the festa');
 let gathered=false;for(let i=0;i<60&&!gathered;i++){tick(s,1);gathered=s.people.some(r=>r.needTask?.kind==='gather');}assert(gathered,'friends keep returning to the festa between breaks');reload();
-until(9,21.2);assert.match(history().text,/festa is over: 6 neighbours came/);assert(s.community.goodwill>45);
+until(9,21.2);assert.match(history().text,/festa is over: 6 neighbours came/);assert(s.community.goodwill>44&&s.community.goodwill<50,'a festa adds a few points after a week of fading');
 const afterFesta=s.community.goodwill;
 
 // Weekend course: the teacher stays with the class and the fees reach savings.
 assert.equal(planEvent(s,'course',{site:classroom.id,day:12,teacher:'nina'},PROJECTS),'');
 assert.match(planError(s,'course',{site:classroom.id,day:13,teacher:'luz'},PROJECTS),/within a fortnight/);
 until(12,11);const course=s.community.events.find(e=>e.kind==='course');assert(course.here>=2&&course.here<=12);assert.equal(communityVisitors(s).length,course.here);
-until(12,15.2);assert.match(history().text,/Course finished: \d+ participants/);assert.equal(s.community.goodwill,afterFesta+1);
+until(12,15.2);assert.match(history().text,/Course finished: \d+ participants/);assert(Math.abs(s.community.goodwill-(afterFesta+1))<.01);
 assert.match(planError(s,'course',{site:classroom.id,day:19,teacher:'luz'},PROJECTS),/one course a fortnight/);
 console.log('PASS planning rules, mutirão work and debt, returned favour, weekly roda, festa and a taught course in a living village');
 
@@ -83,4 +83,10 @@ console.log('PASS planning rules, mutirão work and debt, returned favour, weekl
  communityStep(story,1,PROJECTS,api);const m=story.community.events.find(e=>e.id===3);assert.equal(m.here,2);assert.equal(m.unfed,3);assert.equal(story.materials.meals,0);
  story.time=m.until;communityStep(story,1,PROJECTS,api);assert.equal(story.community.owed,1);assert.equal(story.community.goodwill,89);
  assert(validCommunity(story,PROJECTS));story.community.goodwill=120;assert(!validCommunity(story,PROJECTS));}
-console.log('PASS course fees with and without lunch, an absent teacher, and neighbours sent home hungry');
+// Goodwill fades by the week toward plain acquaintance, and recovers slowly from a grudge.
+{const quiet={time:0,stage:'playing',mode:'story',people:[],projects:[],materials:{},log:[]},api={say(){},ready:()=>true};
+ ensureCommunity(quiet).goodwill=100;quiet.community.roda=false;communityStep(quiet,1,PROJECTS,api);
+ for(let w=1;w<=52;w++){quiet.time=w*7*DAY;communityStep(quiet,1,PROJECTS,api);if(w===1)assert(Math.abs(quiet.community.goodwill-94.4)<1e-9);}
+ assert(quiet.community.goodwill>30&&quiet.community.goodwill<32,'a year of neglect leaves acquaintance');
+ quiet.community.goodwill=10;quiet.time+=7*DAY;communityStep(quiet,1,PROJECTS,api);assert.equal(quiet.community.goodwill,11);assert(validCommunity(quiet,PROJECTS));}
+console.log('PASS course fees with and without lunch, an absent teacher, neighbours sent home hungry, and goodwill fading');

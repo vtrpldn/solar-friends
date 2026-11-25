@@ -22,7 +22,7 @@ import {orderDelivery,deliveryStep,validDelivery} from "./deliveries.js";
 import {activeTrips,uncollectedProjects} from "./trip-state.js";
 import {upkeepStep,performUpkeep,recordVehicleDistance,validUpkeep,serviceParts,ANIMAL_CARE} from "./asset-upkeep.js";
 import {tripEstimate,STARTING_CAPITAL} from "./economy-reference.js";
-import {CROP_CARE,BIOLOGY,beginBiology,biologicalStep,harvestOutput,validBiology} from "./biological-production.js";
+import {GAME_DAY,CROP_CARE,BIOLOGY,beginBiology,biologicalStep,harvestOutput,validBiology} from "./biological-production.js";
 import {atTownJob, dayShiftDue, startOutsideWork, outsideWorkStep, validOutsideWork} from "./outside-work.js";
 import {communityStep, validCommunity} from "./village-life.js";
 import {coolStoredFood} from './cold-storage.js';
@@ -621,6 +621,14 @@ export function nearestRiverAccess(s,origin) {
   points.sort((a,b)=>Math.hypot(a.x-origin.x,a.z-origin.z)-Math.hypot(b.x-origin.x,b.z-origin.z));
   return points.find(p=>p.x>CELL_MIN&&p.x<CELL_MAX&&!occupied(s,p.x,p.z)&&route(s,origin,p))||null;
 }
+// A crop that keeps for weeks in the bed but days in the pantry is lifted as it
+// is used: residents leave ripe beds alone while the stores hold a kitchen batch.
+export const IN_GROUND_WINDOW = 30, IN_GROUND_STOCK = 8, IN_GROUND_MARGIN = 7;
+export function holdInGround(s,b) {
+  const crop = CROPS[b.crop];
+  return crop.window >= IN_GROUND_WINDOW && crop.shelf < crop.window && materialCount(s,b.crop) >= IN_GROUND_STOCK &&
+    (s.time - b.ripeAt) / GAME_DAY < crop.window - IN_GROUND_MARGIN;
+}
 const farmProducts = {orchard:'fruit', grove:'bananas', coffee:'coffee', apiary:'honey', coop:'eggs', goat_pasture:'milk'};
 
 function scheduleFarmWork(s) {
@@ -646,7 +654,7 @@ function scheduleFarmWork(s) {
     for (const b of p.cultivation.beds) {
       if (pending.some(op => op.site === p.id && op.farm?.bed === b.id)) continue;
       let action;
-      if (b.stage === 'harvestable') action = harvestExpired(b,s.time) ? 'clear' : 'harvest';
+      if (b.stage === 'harvestable') action = harvestExpired(b,s.time) ? 'clear' : holdInGround(s,b) ? null : 'harvest';
       else if (b.stage === 'failed') action = 'clear';
       else if (b.stage === 'unprepared' || b.stage === 'harvested') action = 'prepare';
       else if (b.stage === 'prepared') action = 'plant';

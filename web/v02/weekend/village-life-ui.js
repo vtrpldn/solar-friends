@@ -1,5 +1,6 @@
 import {brl} from './money.js';
 import {projectLabel} from './project-names.js';
+import {foodPortions} from './food-storage.js';
 import {
   ensureCommunity, planEvent, planError, cancelEvent, eventSites, eventDays, bookFavour, favourError, maxHelpers, maxGuests,
   goodwillText, dayName, clock, EVENT_KINDS, COURSES, COURSE_FEE, COURSE_FEE_NO_LUNCH, COURSE_SEATS, FESTA_WOOD,
@@ -18,17 +19,17 @@ const dayText = (s, day) => {
   const ahead = day - clock(s.time).absoluteDay;
   return `${dayName(day)}${ahead === 0 ? ', today' : ahead === 1 ? ', tomorrow' : `, in ${ahead} days`}`;
 };
-const hours = kind => `${String(EVENT_KINDS[kind].from).padStart(2, '0')}:00–${EVENT_KINDS[kind].to}:00`;
+const hours = kind => `${String(EVENT_KINDS[kind].from).padStart(2, '0')}:00–${Math.floor(EVENT_KINDS[kind].to)}:${EVENT_KINDS[kind].to % 1 ? '30' : '00'}`;
 const choices = new Map();
 
 export function neighbourStats(s) {
   const c = ensureCommunity(s);
   return [['Neighbours’ goodwill', `${Math.round(c.goodwill)} / 100`], ['Days of work owed', c.owed], ['Planned', c.events.filter(e => e.kind !== 'roda').length]];
 }
-export function renderNeighbours(s, screen, defs, {notify, refresh, say}) {
+export function renderNeighbours(s, screen, defs, {notify, refresh, say, ready = () => true}) {
   const c = ensureCommunity(s), focused = document.activeElement?.dataset?.neighbour;
   screen.replaceChildren();
-  const again = () => { refresh(); renderNeighbours(s, screen, defs, {notify, refresh, say}); };
+  const again = () => { refresh(); renderNeighbours(s, screen, defs, {notify, refresh, say, ready}); };
   const card = (title) => { const section = el('section', undefined, screen, 'day-shift neighbour-card'); el('h3', title, section); return section; };
   const picker = (parent, label, key, options) => {
     const wrap = el('label', label, parent), select = el('select', undefined, wrap);
@@ -49,9 +50,9 @@ export function renderNeighbours(s, screen, defs, {notify, refresh, say}) {
       again();
     };
   };
-  const siteOptions = kind => eventSites(s, kind, defs).map(p => [p.id, kind === 'mutirao' ? `${projectLabel(p, defs)} · ${Math.round(p.work / defs[p.key].work * 100)}% built` : projectLabel(p, defs)]);
+  const siteOptions = kind => eventSites(s, kind, defs).map(p => [p.id, kind === 'mutirao' ? `${projectLabel(p, defs)} · ${Math.round(p.work / defs[p.key].work * 100)}% built · ${ready(p) ? 'materials on site' : 'waiting for materials'}` : projectLabel(p, defs)]);
   const dayOptions = kind => eventDays(s, kind).map(day => [day, dayText(s, day)]);
-  const meals = Math.floor(s.materials.meals || 0), unlimited = s.mode === 'sandbox';
+  const meals = foodPortions(s), unlimited = s.mode === 'sandbox';
 
   el('p', `${goodwillText(c.goodwill)} Goodwill decides how many people come. A festa or a returned day of work raises it; calling people out for nothing, or sending them home hungry, lowers it.`, screen);
 
@@ -80,17 +81,18 @@ export function renderNeighbours(s, screen, defs, {notify, refresh, say}) {
   }
 
   const mutirao = card('Call a mutirão');
-  el('p', `Neighbours come on a Saturday or Sunday, ${hours('mutirao')}, and work on one building whose materials are already on site. They expect lunch at 12:00, and one day of work from the village in return.`, mutirao);
+  el('p', `Neighbours come on a Saturday or Sunday, ${hours('mutirao')}, and work on one building whose materials are already on site. They expect lunch at 12:00 from the village stores, and one day of work from the village in return.`, mutirao);
   if (!siteOptions('mutirao').length) el('p', 'There is no building under construction to work on.', mutirao, 'neighbour-blocked');
   else {
     const site = picker(mutirao, 'Building', 'mutirao-site', siteOptions('mutirao')), day = picker(mutirao, 'Day', 'mutirao-day', dayOptions('mutirao'));
     const most = maxHelpers(s), count = picker(mutirao, 'Neighbours', 'mutirao-guests', Array.from({length: most - 1}, (_, i) => [i + 2, String(i + 2)]));
-    el('p', unlimited ? 'Sandbox stores always have lunch for them.' : `Lunch for ${count.value}: ${meals} prepared meals in stores now. Up to ${most} neighbours will come at this goodwill.`, mutirao);
+    el('p', unlimited ? 'Sandbox stores always have lunch for them.' : `Lunch for ${count.value}: ${meals} portions of food in stores now. Up to ${most} neighbours will come at this goodwill.`, mutirao);
+    if (!ready(s.projects.find(p => p.id === Number(site.value)))) el('p', 'Its materials are not all on site yet. Neighbours can only work once they are; if they are still missing on the day, the neighbours will have nothing to do.', mutirao, 'neighbour-blocked');
     call(mutirao, 'mutirao-call', 'Call the mutirão', 'mutirao', {site: Number(site.value), day: Number(day.value), guests: Number(count.value)});
   }
 
   const course = card('Offer a weekend course');
-  el('p', `A friend teaches their trade to paying visitors on a Saturday or Sunday, ${hours('course')}, and is away from other work that day. Each participant pays ${brl(COURSE_FEE)} with lunch from village meals, or ${brl(COURSE_FEE_NO_LUNCH)} if there is not lunch for everyone. Up to ${COURSE_SEATS} come, more as goodwill grows; the region fills one course a fortnight.`, course);
+  el('p', `A friend teaches their trade to paying visitors on a Saturday or Sunday, ${hours('course')}, and is away from other work that day. Each participant pays ${brl(COURSE_FEE)} with lunch from the village stores, or ${brl(COURSE_FEE_NO_LUNCH)} if there is not lunch for everyone. Up to ${COURSE_SEATS} come, more as goodwill grows; the region fills one course a fortnight.`, course);
   if (!siteOptions('course').length) el('p', 'A course needs a finished outdoor classroom or community hall.', course, 'neighbour-blocked');
   else {
     const site = picker(course, 'Place', 'course-site', siteOptions('course')), day = picker(course, 'Day', 'course-day', dayOptions('course'));
@@ -99,17 +101,17 @@ export function renderNeighbours(s, screen, defs, {notify, refresh, say}) {
   }
 
   const festa = card('Hold a festa');
-  el('p', `An evening together, ${hours('festa')}, at a gathering place. Everyone who comes eats a prepared meal; ${FESTA_WOOD} pieces of timber make the fire. In June it is a festa junina, and 4 kg of sweet corn makes it one to remember. Neighbours who are fed well think better of the village.`, festa);
+  el('p', `An evening together, ${hours('festa')}, at a gathering place. Everyone who comes eats a portion from the stores; ${FESTA_WOOD} pieces of timber make the fire. In June it is a festa junina, and 4 kg of sweet corn makes it one to remember. Neighbours who are fed well think better of the village.`, festa);
   if (!siteOptions('festa').length) el('p', 'A festa needs a finished gathering place, fire circle or community hall.', festa, 'neighbour-blocked');
   else {
     const site = picker(festa, 'Place', 'festa-site', siteOptions('festa')), day = picker(festa, 'Day', 'festa-day', dayOptions('festa'));
     const count = picker(festa, 'Neighbours invited', 'festa-guests', Array.from({length: maxGuests(s) + 1}, (_, i) => [i, i ? String(i) : 'Friends only']));
-    el('p', unlimited ? 'Sandbox stores always have food for everyone.' : `Meals for ${s.people.length + Number(count.value)}: ${meals} prepared meals in stores now.`, festa);
+    el('p', unlimited ? 'Sandbox stores always have food for everyone.' : `Food for ${s.people.length + Number(count.value)}: ${meals} portions in stores now.`, festa);
     call(festa, 'festa-call', 'Set the festa', 'festa', {site: Number(site.value), day: Number(day.value), guests: Number(count.value)});
   }
 
   const roda = card('The weekly roda');
-  el('p', 'On Sunday at 18:00 the friends who are free sit together for an hour at a gathering place and say what is on their minds.', roda);
+  el('p', 'On Sunday from 18:00 the friends who are free sit together for a while at a gathering place and say what is on their minds.', roda);
   const toggle = el('button', `Weekly roda: ${c.roda ? 'on' : 'off'}`, roda); toggle.type = 'button'; toggle.dataset.neighbour = 'roda'; toggle.setAttribute('aria-pressed', String(c.roda));
   toggle.onclick = () => { c.roda = !c.roda; again(); };
   if (c.minutes) {
@@ -122,5 +124,5 @@ export function renderNeighbours(s, screen, defs, {notify, refresh, say}) {
     el('h3', 'Lately', screen);
     for (const entry of c.history.slice(0, 6)) el('p', `${dayName(entry.day)} · ${entry.text}`, screen);
   }
-  if (focused) screen.querySelector(`[data-neighbour="${focused}"]`)?.focus({preventScroll: true});
+  if (focused) (screen.querySelector(`[data-neighbour="${focused}"]`) || screen.querySelector('[data-neighbour]'))?.focus({preventScroll: true});
 }
