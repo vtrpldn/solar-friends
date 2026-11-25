@@ -65,6 +65,8 @@ import {
   connect,
   useWater,
   LIQUIDS,
+  liquidIndex,
+  retireUntreatedWater,
   validInfrastructure,
 } from "./infrastructure.js";
 import { expandMaterials, expandProjects, PROCESSES } from "./catalog-rules.js";
@@ -132,7 +134,7 @@ export const PROJECTS = {
     materials: { wood: 8, hardware: 1, tank: 1, plumbing: 1 },
     work: 267,
     description:
-      "An unpowered tank holding 250 liters of clean and 250 liters of untreated water in separate compartments. Residents can carry river water here and purify it by hand; no power needed. About 2 person-hours to assemble.",
+      "An unpowered tank holding 500 liters of water. Residents carry water here from the river, a well or a rain barrel; a pump fills it through a pipe. No power needed. About 2 person-hours to assemble.",
   },
   shelter: {
     name: "Basic shelter",
@@ -571,9 +573,7 @@ export function queueWater(s, from, to, kind = "fresh") {
     from === to
   )
     return "Choose valid water endpoints.";
-  if (from === -1 && kind !== "irrigation")
-    return "River water is irrigation water; filter it before drinking.";
-  const i = LIQUIDS.indexOf(kind),
+  const i = liquidIndex(kind),
     target = sys.nodes[to];
   if (!target.capacity[i])
     return "The destination cannot store that water class.";
@@ -592,16 +592,6 @@ export function queueWater(s, from, to, kind = "fresh") {
   });
   wakeHelpers(s);
   return "";
-}
-export function queuePurification(s,site) {
-  const node=syncInfrastructure(s,PROJECTS).nodes[site];
-  if(!node || !node.capacity[0] || !node.capacity[1])return 'Choose a reservoir with separate untreated and drinking-water storage.';
-  if(node.water[1]<1)return 'Bring untreated river water here first.';
-  if(node.capacity[0]-node.water[0]<1)return 'Drinking-water storage is full.';
-  s.operations??=[];
-  if(s.operations.some(o=>!o.done && o.water && o.site===site))return 'A water job is already queued here.';
-  s.operations.push({id:s.nextOperation=(s.nextOperation||0)+1,site,water:{from:site,to:site,kind:'irrigation',amount:0,purify:true},work:0,phase:'process',done:false});
-  wakeHelpers(s);return '';
 }
 export function queueSanitation(s,site) {
   const n=ensureInfrastructure(s).nodes[site];
@@ -739,34 +729,30 @@ function maintainFood(s) {
     if(s.log.includes(hint))recordEvent(s,hint,null);else say(s,hint);
   }
 }
+// The nearest built source holding water; otherwise the river.
+function waterSource(sys,n){
+  return Object.values(sys.nodes).filter(a=>a.id!==n.id&&['groundwater-well','rain-barrel','water-pump'].includes(a.kind)&&a.enabled&&a.water[0]>=1)
+    .sort((a,b)=>Math.hypot(a.x-n.x,a.z-n.z)-Math.hypot(b.x-n.x,b.z-n.z))[0]?.id??-1;
+}
 export function maintainWater(s) {
   const sys=ensureInfrastructure(s);
   for(const op of [...(s.operations||[])]) {
     const recipe=PROCESSES[op.recipe],n=sys.nodes[op.site];
     if(op.done||(op.waterPaid&&op.phase!=="growing")||!recipe?.water||!n||s.operations.some(o=>!o.done&&o.water&&o.site===n.id))continue;
-    const fresh=['kitchen','goat_pasture','coop'].includes(recipe.kind);
-    if((fresh?n.water[0]:Math.max(n.water[0],n.water[1]))>=recipe.water)continue;
-    if(fresh&&n.water[1]>=1&&n.capacity[0])queuePurification(s,n.id);
-    else if(n.capacity[1])queueWater(s,-1,n.id,'irrigation');
+    if(n.water[0]>=recipe.water)continue;
+    if(n.capacity[0])queueWater(s,waterSource(sys,n),n.id);
   }
   for(const p of s.projects){
-    const n=sys.nodes[p.id];if(!n||!n.enabled||!n.capacity[1]||n.water[1]>=Math.min(12,n.capacity[1]*.5)||s.operations?.some(o=>!o.done&&o.water&&o.site===p.id))continue;
+    const n=sys.nodes[p.id];if(!n||!n.enabled||!n.capacity[0]||n.water[0]>=Math.min(12,n.capacity[0]*.5)||s.operations?.some(o=>!o.done&&o.water&&o.site===p.id))continue;
     const growing=p.cultivation?.beds.some(b=>b.irrigation&&['growing','harvestable'].includes(b.stage)&&!harvestExpired(b,s.time))||s.operations?.some(o=>!o.done&&o.site===p.id&&CROP_CARE[o.recipe]&&['growing','process'].includes(o.phase)&&p.irrigationPolicy!=='rainfed');
-    if(growing)queueWater(s,-1,p.id,'irrigation');
+    if(growing)queueWater(s,waterSource(sys,n),p.id);
   }
   for(const job of s.upkeep?.jobs||[]){const care=ANIMAL_CARE[job.care],n=sys.nodes[job.target];if(!care||job.done||!n||n.water[0]>=care.water||s.operations?.some(o=>!o.done&&o.water&&o.site===n.id))continue;
     const source=Object.values(sys.nodes).filter(a=>a.id!==n.id&&a.water[0]>=1).sort((a,b)=>Math.hypot(a.x-n.x,a.z-n.z)-Math.hypot(b.x-n.x,b.z-n.z))[0];if(source)queueWater(s,source.id,n.id,'fresh');
   }
   for(const n of Object.values(sys.nodes)) {
-    if(n.maintainFresh && n.capacity[0] && n.capacity[1] && n.water[0]<drinkingReserve(s,n)-Math.min(12,drinkingReserve(s,n)*.25) &&
-      !s.operations?.some(o=>!o.done && o.water && o.site===n.id)) {
-      if(n.water[1]>=Math.min(12,n.capacity[0]-n.water[0]) || (n.water[0]<s.people.length*2 && n.water[1]>=1)) queuePurification(s,n.id);
-      else {
-        const source=Object.values(sys.nodes).filter(a=>a.id!==n.id && ['groundwater-well','rain-barrel','water-pump'].includes(a.kind) && a.water[1]>=1)
-          .sort((a,b)=>Math.hypot(a.x-n.x,a.z-n.z)-Math.hypot(b.x-n.x,b.z-n.z))[0];
-        queueWater(s,source?.id??-1,n.id,'irrigation');
-      }
-    }
+    if(n.maintainFresh && n.capacity[0] && n.water[0]<drinkingReserve(s,n)-Math.min(12,drinkingReserve(s,n)*.25) &&
+      !s.operations?.some(o=>!o.done && o.water && o.site===n.id)) queueWater(s,waterSource(sys,n),n.id);
     if(n.maintainSanitation && [2,3].some(i=>n.capacity[i]>0 && n.water[i]>=n.capacity[i]*.5))queueSanitation(s,n.id);
   }
 }
@@ -806,7 +792,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     if ((op.accessRetryAt?.[r.id]||0)>s.time) return false;
     if (op.done || op.waitingSeeds || op.phase==='growing' || reserved(op) || (waterOnly && !op.water) || (group === 'farm' ? !isFarmWork(s,op) : group && workGroup(op,PROCESSES)!==group)) return false;
     if(op.water?.stagedAt){
-      const destination=sys.nodes[op.site],index=LIQUIDS.indexOf(op.water.kind);
+      const destination=sys.nodes[op.site],index=liquidIndex(op.water.kind);
       if(!destination||destination.capacity[index]-destination.water[index]<=.00001)return false;
     }
     if (op.water || op.phase === "return") return true;
@@ -823,12 +809,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     if (
       recipe.water &&
       !op.waterPaid &&
-      Math.max(
-        node.water[0],
-        ["kitchen", "goat_pasture", "coop"].includes(recipe.kind)
-          ? 0
-          : node.water[1],
-      ) < recipe.water
+      node.water[0] < recipe.water
     ) {
       op.status = "Waiting for usable water";
       return false;
@@ -899,27 +880,12 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
   }
   if (op.water) {
     const w = op.water,
-      index = LIQUIDS.indexOf(w.kind);
+      index = liquidIndex(w.kind);
     if(w.service) {
       const dest=utilitySpot(s,node,r);r.action='produce';op.status='Servicing sealed waste tanks';
       if(!dest || !go(s,r,dest))return true;
       op.work+=dt*useEquipment(s,r,'cleaning-kit',`op:${op.id}`,dt);r.energy=Math.max(0,r.energy-dt*.06);
       if(op.work>=45){const amount=node.water[2]+node.water[3];node.water[2]=0;node.water[3]=0;sys.account.wasteRemoved=(sys.account.wasteRemoved||0)+amount;op.done=true;r.operation=null;say(s,`${r.name} serviced the sealed waste tanks for off-site treatment.`);}
-      return true;
-    }
-    if(w.purify) {
-      const dest=utilitySpot(s,node,r);
-      // Name the walk: a resident left "idle" here is treated as at leisure
-      // and has this route cleared every tick while construction is pending.
-      r.action='walk';op.status='Walking to purify untreated water';
-      if(!dest || !go(s,r,dest))return true;
-      r.action='produce';op.status='Purifying untreated water';
-      op.work+=dt;r.work+=dt;r.energy=Math.max(0,r.energy-dt*.06);
-      if(op.work>=30) {
-        const amount=Math.min(12,node.water[1],node.capacity[0]-node.water[0]);
-        node.water[1]-=amount;node.water[0]+=amount;op.done=true;r.operation=null;
-        say(s,`${r.name} purified ${amount.toFixed(0)} water for drinking.`, "water-purified");
-      }
       return true;
     }
     if (op.phase === "pickup") {
@@ -928,7 +894,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
         start = w.sourcePoint || (w.sourcePoint=nearestRiverAccess(s,r));
       } else start = utilitySpot(s, sys.nodes[w.from], r);
       if (!start) return false;
-      op.status = "Walking to collect untreated water";
+      op.status = "Walking to collect water";
       r.action = "fetch-water";
       if (!go(s, r, start)) return true;
       const dest = sys.nodes[w.to];
@@ -3107,6 +3073,7 @@ export function restore(text) {
     if(!validGathering(s))return null;
     restoreHomeAssignments(s);
     repairFootfall(s);
+    retireUntreatedWater(s);
     numberProjects(s, PROJECTS);
     // Saves predating narrow footbridges retain their exact 8×2 occupancy,
     // centre, rotations and deck width. New plans explicitly write version 1.

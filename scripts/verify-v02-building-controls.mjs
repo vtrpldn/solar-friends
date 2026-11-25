@@ -15,7 +15,7 @@ for(const key of ['toilet','eco_toilet','road','bridge','garden','orchard','goat
  syncInfrastructure(s,PROJECTS);
  assert.equal(n.enabled,true,`${key}: old disabled save recovers`);
 }
-for(const key of ['streetlight','solar_farm','hydro','house','workshop','well','supply-6']) {
+for(const key of ['streetlight','solar_farm','hydro','house','workshop','supply-6']) {
  const n=node(key);
  n.demand=0;n.generation=0;n.power=0;
  assert(hasPowerService(sys,n),`${key}: capability survives zero demand`);
@@ -25,7 +25,7 @@ for(const key of ['streetlight','solar_farm','hydro','house','workshop','well','
 }
 const barrel=node('rain-barrel');
 assert(!canSwitchBuilding(sys,barrel));
-sys.links.push({from:barrel.id,to:node('garden').id,kind:'irrigation',enabled:false,work:1,required:1});
+sys.links.push({from:barrel.id,to:node('garden').id,kind:'fresh',enabled:false,work:1,required:1});
 assert(!hasPowerService(sys,barrel),'a passive pipe must not turn a barrel into an electric pump');
 assert(!canSwitchBuilding(sys,barrel));
 assert(!switchBuilding(sys,barrel.id));

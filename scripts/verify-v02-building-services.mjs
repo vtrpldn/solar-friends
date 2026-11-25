@@ -32,6 +32,6 @@ console.log('PASS resident washing and toilet use consume water or create waste 
 }
 {
  const s=fresh(),hydro=built(s,'hydro'),barrel=built(s,'rain-barrel');s.time=1800;s.rain=true;
- infrastructureStep(s,PROJECTS,60);assert(s.infrastructure.nodes[hydro.id].generation>0);assert(s.infrastructure.nodes[barrel.id].water[1]>0);assert.equal(s.infrastructure.nodes[barrel.id].water[0],0);
+ infrastructureStep(s,PROJECTS,60);assert(s.infrastructure.nodes[hydro.id].generation>0);assert(s.infrastructure.nodes[barrel.id].water[0]>0);assert.equal(s.infrastructure.nodes[barrel.id].water[1],0);
 }
-console.log('PASS battery isolation, actual biogas cooking, nighttime hydro and untreated rainwater collection');
+console.log('PASS battery isolation, actual biogas cooking, nighttime hydro and rainwater collection');

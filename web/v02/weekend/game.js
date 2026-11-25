@@ -87,7 +87,7 @@ import { resourceIcon, illustrateResources } from "./resource-icons.js";
 import { createManagement } from "./management.js";
 import { illustrate } from "./ui-art.js";
 import { createUtilitiesPreview } from "./utilities-preview.js";
-import { syncInfrastructure, LIQUIDS, hasPowerService, canSwitchBuilding, switchBuilding } from "./infrastructure.js";
+import { syncInfrastructure, LIQUIDS, liquidIndex as liquidSlot, hasPowerService, canSwitchBuilding, switchBuilding } from "./infrastructure.js";
 import { createAccessRoad } from "./access-road.js";
 import { captureMotion, interpolateMotion } from "./presentation.js";
 import { installCameraNavigation } from "./camera-navigation.js";
@@ -1846,7 +1846,7 @@ function renderUtilityUI() {
         : projectLabel(s.projects.find((p) => p.id === n.id), PROJECTS),
   ]);
   const kind = $("utility-kind").value;
-  const liquidIndex = LIQUIDS.indexOf(kind);
+  const liquidIndex = liquidSlot(kind);
   const compatible = labels.filter(
     ([id]) => liquidIndex < 0 || sys.nodes[id].capacity[liquidIndex] > 0,
   );
@@ -1860,8 +1860,8 @@ function renderUtilityUI() {
     stored = nodes.reduce((a, n) => a + n.charge, 0),
     capacity = nodes.reduce((a, n) => a + n.battery, 0);
   const liquids = LIQUIDS.map(
-    (key, i) =>
-      `${Math.floor(nodes.reduce((a, n) => a + n.water[i], 0))} ${key}`,
+    (key) =>
+      `${Math.floor(nodes.reduce((a, n) => a + n.water[liquidSlot(key)], 0))} ${key}`,
   ).join(" · ");
   const warnings = nodes.flatMap(n => wasteWarnings(n).map(text => `${labels.find(([id])=>id===n.id)?.[1]}: ${text}`));
   $("tank-attention").hidden = !warnings.length;
@@ -1874,7 +1874,7 @@ function renderUtilityUI() {
     (l) => (management?.view === "power") === (l.kind === "power"),
   )) {
     const b = document.createElement("button");
-    b.textContent = `${{ power: "Power", fresh: "Drinking water", irrigation: "Irrigation water", greywater: "Greywater", sewage: "Sewage" }[l.kind]} · ${labels.find(([id]) => id === l.from)?.[1]} → ${labels.find(([id]) => id === l.to)?.[1]}: ${l.work < l.required ? Math.floor((l.work / l.required) * 100) + "% installed" : l.enabled ? "on" : "off"}`;
+    b.textContent = `${{ power: "Power", fresh: "Drinking water", greywater: "Greywater", sewage: "Sewage" }[l.kind]} · ${labels.find(([id]) => id === l.from)?.[1]} → ${labels.find(([id]) => id === l.to)?.[1]}: ${l.work < l.required ? Math.floor((l.work / l.required) * 100) + "% installed" : l.enabled ? "on" : "off"}`;
     b.setAttribute("aria-pressed", String(l.enabled));
     b.title = l.enabled
       ? "Switch this connection off"
@@ -1929,10 +1929,10 @@ function renderUtilityUI() {
   $("toggle-building").textContent = node?.enabled ? "Switch power off" : "Switch power on";
   const op = p && (s.operations || []).find((o) => o.site === p.id && !o.done && !o.water);
   $("building-service").textContent = node
-    ? `${hasPowerService(sys,node) ? node.enabled === false ? "Switched off" : node.power >= .995 ? "Powered" : `Getting ${(node.power * 100).toFixed(0)}% of the power it needs` : ""}${node.battery ? ` · Battery ${node.charge.toFixed(1)}/${node.battery} kWh` : ""}${hasPowerService(sys,node) ? ". " : ""}${LIQUIDS.map(
-        (k, i) =>
+    ? `${hasPowerService(sys,node) ? node.enabled === false ? "Switched off" : node.power >= .995 ? "Powered" : `Getting ${(node.power * 100).toFixed(0)}% of the power it needs` : ""}${node.battery ? ` · Battery ${node.charge.toFixed(1)}/${node.battery} kWh` : ""}${hasPowerService(sys,node) ? ". " : ""}${LIQUIDS.map(k => [k, liquidSlot(k)]).map(
+        ([k, i]) =>
           node.capacity[i]
-            ? `${{ fresh: "Drinking water", irrigation: "Irrigation water", greywater: "Greywater", sewage: "Sewage" }[k]}: ${node.water[i].toFixed(1)}/${node.capacity[i]} L`
+            ? `${{ fresh: "Drinking water", greywater: "Greywater", sewage: "Sewage" }[k]}: ${node.water[i].toFixed(1)}/${node.capacity[i]} L`
             : "",
       )
         .filter(Boolean)

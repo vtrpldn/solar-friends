@@ -16,11 +16,10 @@ const night=structuredClone(s);night.time=1600;infrastructureStep(night,PROJECTS
 s.time=0;s.people.forEach(r=>{r.sleepUntil=0;r.energy=90;});
 const op=s.operations[0];op.phase='process';op.status='Working';s.people[0].operation=op.id;s.people[0].action='produce';infrastructureStep(s,PROJECTS,1);assert.equal(kitchen.demand,.45,'active equipment has cooking load');
 assert.equal(queueProduction(s,g.id,'vegetables'),'');
-assert.equal(queueWater(s,-1,g.id,'irrigation'),'','water delivery can unblock queued crop');
+assert.equal(queueWater(s,-1,g.id),'','water delivery can unblock queued crop');
 assert(restore(save(s)),'concurrent operations restore');
 const water=fresh();const construction=built(water,'house',45,45);construction.work=0;delete water.infrastructure.nodes[construction.id];const tank=syncInfrastructure(water,PROJECTS).nodes[0];tank.water=[0,0,0,0];water.infrastructure.grid.enabled=false;tank.maintainFresh=true;
 advance(water,()=>tank.water[0]>=12);
-assert(water.operations.some(o=>o.water?.purify&&o.done),'maintenance includes purification');
 assert(water.operations.some(o=>o.water?.from===-1&&o.done),'maintenance includes physical river haul while construction is pending');
 assert(restore(save(water)),'maintenance preferences and jobs restore');
 const toilet=built(water,'eco_toilet',39,39),waste=water.infrastructure.nodes[toilet.id];waste.water[3]=waste.capacity[3];waste.maintainSanitation=true;maintainWater(water);
@@ -38,7 +37,7 @@ const legacy=JSON.parse(save(water));delete legacy.homeEnergyVersion;legacy.proj
 assert(restore(JSON.stringify(legacy)),'legacy home with original equipment load restores');
 const totals=resourceSnapshot({money:1,wood:2,materials:{meals:3,food:4},infrastructure:{nodes:{a:{water:[8],charge:2},b:{water:[9],charge:3}}}});
 assert.equal(totals.meals,7);assert.equal(totals.water,17);assert.equal(totals.power,5);
-console.log('PASS blocked/active machinery, night lights, concurrent watering, automatic hauling/purification, sanitation, optional solar, old/new saves, whole-village HUD');
+console.log('PASS blocked/active machinery, night lights, concurrent watering, automatic hauling, sanitation, optional solar, old/new saves, whole-village HUD');
 
 const endurance=fresh();
 for(let i=0;i<6*3200;i++)tick(endurance,1);

@@ -129,21 +129,17 @@ const water = fresh(),
   banana = built(water, "banana_treatment", 44, 44),
   generator = built(water, "solar_farm", 36, 40);
 sys = syncInfrastructure(water, PROJECTS);
-sys.nodes[well.id].water[1] = 30;
+sys.nodes[well.id].water[0] = 30;
 infrastructureStep(water, PROJECTS, 10);
-assert.equal(sys.nodes[well.id].water[0], 0, "Filtering needs power");
-assert.equal(connectUtility(water, "power", generator.id, well.id), "");
-sys.links.forEach((l) => (l.work = l.required));
-infrastructureStep(water, PROJECTS, 60);
-assert(sys.nodes[well.id].water[0] > 0);
-assert(sys.nodes[well.id].water[1] < 30);
+assert(sys.nodes[well.id].water[0] > 0, "A cistern stores water without power");
+assert.equal(sys.nodes[well.id].water[1], 0, "No untreated compartment remains");
 assert.match(connectUtility(water, "sewage", toilet.id, well.id), /storage/);
-assert.match(queueWater(water, -1, 0, "fresh"), /filter/);
+assert.match(queueWater(water, -1, 0, "irrigation"), /valid water endpoints/);
 sys.nodes[0].water[2] = 10;
 assert.equal(transferWater(sys, 0, wetland.id, "greywater", 8), 8);
 infrastructureStep(water, PROJECTS, 60);
-assert(sys.nodes[wetland.id].water[1] > 0);
-assert.equal(sys.nodes[wetland.id].water[0], 0);
+assert(sys.nodes[wetland.id].water[0] > 0, "A wetland returns treated greywater as usable water");
+assert.equal(sys.nodes[wetland.id].water[1], 0);
 sys.nodes[banana.id].water[3] = 10;
 infrastructureStep(water, PROJECTS, 60);
 assert(sys.nodes[banana.id].water[3] < 10);
@@ -206,14 +202,14 @@ const hauling = fresh();
 hauling.rainSeen = true;
 for (const id of Object.keys(hauling.materials)) hauling.materials[id] = 0;
 const tank = built(hauling, "well", 40, 40);
-assert.equal(queueWater(hauling, -1, tank.id, "irrigation"), "");
+assert.equal(queueWater(hauling, -1, tank.id), "");
 finishJobs(hauling);
 assert.equal(
-  hauling.infrastructure.nodes[tank.id].water[1],
+  hauling.infrastructure.nodes[tank.id].water[0],
   12,
   "Resident actually fetches river water",
 );
-assert.equal(hauling.infrastructure.nodes[tank.id].water[0], 0);
+assert.equal(hauling.infrastructure.nodes[tank.id].water[1], 0);
 console.log("PASS: physical river-water pickup and delivery to a local tank.");
 
 // Stored water flows passively; extraction and filtration still require equipment.
@@ -279,26 +275,17 @@ const intake = fresh();
 intake.rainSeen = true;
 const intakeTank = built(intake, "well", 40, 40),
   intakeSolar = built(intake, "solar_farm", 44, 40);
-assert.equal(connectUtility(intake, "irrigation", -1, intakeTank.id), "");
+assert.equal(connectUtility(intake, "fresh", -1, intakeTank.id), "");
 let ins = intake.infrastructure;
 ins.links.forEach((l) => (l.work = l.required));
 infrastructureStep(intake, PROJECTS, 10);
-assert.equal(ins.nodes[intakeTank.id].water[1], 0);
+assert.equal(ins.nodes[intakeTank.id].water[0], 0);
 assert.equal(connectUtility(intake, "power", intakeSolar.id, -1), "");
 ins.links.forEach((l) => (l.work = l.required));
 infrastructureStep(intake, PROJECTS, 10);
-assert.equal(ins.nodes[intakeTank.id].water[1], 0, "a legacy river link cannot create an invisible pump");
-ins.nodes[intakeTank.id].water[1] = 12; // Delivered raw water.
-assert.equal(ins.nodes[intakeTank.id].water[0], 0);
-assert.equal(
-  connectUtility(intake, "power", intakeSolar.id, intakeTank.id),
-  "",
-);
-ins.links.forEach((l) => (l.work = l.required));
-infrastructureStep(intake, PROJECTS, 10);
-assert(ins.nodes[intakeTank.id].water[0] > 0);
+assert.equal(ins.nodes[intakeTank.id].water[0], 0, "a legacy river link cannot create an invisible pump");
 console.log(
-  "PASS: legacy river links do not pump; a powered cistern filters delivered raw water.",
+  "PASS: legacy river links do not pump.",
 );
 
 const auto = fresh();

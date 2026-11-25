@@ -33,19 +33,20 @@ export function autoConnectUtilities(s, defs) {
   const tanks=nodes.filter(n=>n.kind==="water-storage");
   const fresh = suppliers.length || tanks.length ? [...suppliers,...tanks] : [sys.nodes[0]];
   for (const n of nodes) {
-    if (n.kind === "well") add("irrigation", nearest(n,pumps), n);
-    else if(n.kind === "water-storage") {add("fresh",nearest(n,suppliers),n);add("irrigation",nearest(n,pumps),n);}
-    else if (n.capacity[0]) add("fresh", nearest(n, fresh), n);
+    if (n.kind === "well") add("fresh", nearest(n,pumps), n);
+    else if(n.kind === "water-storage") {add("fresh",nearest(n,suppliers),n);add("fresh",nearest(n,pumps),n);}
+    // The river, wells, pumps, barrels and wetlands give water; nothing is piped back into them.
+    else if (n.capacity[0] && !["river","groundwater-well","water-pump","rain-barrel","wetland"].includes(n.kind)) add("fresh", nearest(n, fresh), n);
     if (["garden", "greenhouse", "orchard", "grove"].includes(n.kind)) {
       add(
-        "irrigation",
+        "fresh",
         nearest(
           n,
           nodes.filter((a) => ["rain-barrel", "wetland"].includes(a.kind)),
         ),
         n,
       );
-      add("irrigation", nearest(n,pumps), n);
+      add("fresh", nearest(n,pumps), n);
     }
     if (n.capacity[2] && n.kind !== "wetland")
       add(

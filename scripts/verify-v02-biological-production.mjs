@@ -4,7 +4,7 @@ import {createWeekend,chooseCamp,PROJECTS,PROCESSES,queueProduction,tick,save,re
 import {syncInfrastructure} from '../web/v02/weekend/infrastructure.js';
 const s=createWeekend(42);chooseCamp(s,'entrance');enableFastNavigation(s);
 const p={id:s.nextId++,key:'garden',x:s.stock.x+3,z:s.stock.z+3,work:PROJECTS.garden.work,delivered:0};s.projects.push(p);s.materials.seedlings=2;
-const sys=syncInfrastructure(s,PROJECTS);sys.nodes[p.id].water[1]=12;
+const sys=syncInfrastructure(s,PROJECTS);sys.nodes[p.id].water[0]=12;
 assert.equal(queueProduction(s,p.id,'vegetables'),'');
 for(let i=0;i<8000&&!s.operations[0].planted;i++)tick(s,.1);
 const op=s.operations[0];assert(op.planted,'residents actually plant before growth starts');assert.equal(op.phase,'growing');
