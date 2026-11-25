@@ -1,4 +1,5 @@
 import {CLIMATE_PROFILES} from './climate-profiles.js';
+import {waterFactor} from './world-settings.js';
 export const DAY=3200, HOUR=DAY/24;
 const MONTH_DAYS=[31,28,31,30,31,30,31,31,30,31,30,31];
 export function calendar(time){
@@ -10,12 +11,15 @@ function random(seed,index,salt){let x=(seed|0)^Math.imul(index|0,0x45d9f3b)^sal
 export function weatherAt(s,time=s.time){
  const c=calendar(time),p=CLIMATE_PROFILES[s.worldSettings?.biome]||CLIMATE_PROFILES['mata-atlantica'];
  const seed=s.landSeed||0,monthDays=MONTH_DAYS[c.month];
+ // The station normals describe an ordinary year. The world's water setting
+ // makes it a drought year or a wet one by changing how often it rains.
+ const year=waterFactor(s.worldSettings?.water);
  // Three-day shared draws create persistence without mutable RNG or forecast side effects.
- const wet=random(seed,Math.floor(c.absoluteDay/3),17)<p.rainDays[c.month]/monthDays;
+ const wet=random(seed,Math.floor(c.absoluteDay/3),17)<Math.min(1,p.rainDays[c.month]/monthDays*year);
  const start=Math.floor(random(seed,c.absoluteDay,29)*19),hour=Math.floor(c.hour);
  const amount=p.rainDays[c.month]?p.rainMm[c.month]/p.rainDays[c.month]*(.5+random(seed,c.absoluteDay,47)):0;
  // Rounded zero rainy-day normals can still contain sub-1mm daily drizzle.
- const rainMmPerHour=p.rainDays[c.month]?(wet&&hour>=start&&hour<start+6?amount/6:0):p.rainMm[c.month]/monthDays/24;
+ const rainMmPerHour=p.rainDays[c.month]?(wet&&hour>=start&&hour<start+6?amount/6:0):p.rainMm[c.month]/monthDays/24*year;
  const cloudCover=rainMmPerHour>.05?.85:wet?.65:.15+.3*random(seed,Math.floor(c.absoluteDay/3),61);
  const temperatureC=p.temperatureC[c.month]+4*Math.sin((c.hour-9)*Math.PI/12)+(random(seed,c.absoluteDay,71)-.5)*4;
  return {version:1,hour:Math.floor(time/HOUR+9),rainMmPerHour,cloudCover,temperatureC};

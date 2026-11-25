@@ -110,7 +110,9 @@ export function cultivationStep(s,dt,useWater,defs){
     b.soilOrganicKg+=(decay+amend)*.2;b.decomposedGasKg+=(decay+amend)*.8;b.organic=Math.min(1,b.soilOrganicKg/(area*2));b.fertility=Math.min(1,b.fertility+(decay+amend)/(area*8));b.cover=Math.min(1,b.residueKg/(area*.5));
     if(s.mode==='sandbox')continue;
     const growing=b.stage==='growing',standing=growing||b.stage==='harvestable',crop=CROPS[b.crop],capacity=area*16;
-    const demand=area*(standing?crop.water*b.density:1)*(1-.4*b.cover)*days;
+    // Hot air dries soil faster: about 5% more water per degree above 22 °C.
+    const heat=Math.max(.7,Math.min(1.6,1+.05*((s.weather?.temperatureC??22)-22)));
+    const demand=area*(standing?crop.water*b.density:1)*(1-.4*b.cover)*heat*days;
     const rain=p.key!=='greenhouse'?area*rainfallRate(s)*24*days:0;
     const refill=Math.max(0,demand-rain)+area*2*days;
     const irrigate=standing&&!harvestExpired(b,s.time)&&b.irrigation&&s.infrastructure?.nodes[p.id]?.enabled!==false&&b.moisture<.75&&rain<demand&&useWater(s,p.id,refill,true)?refill:0;

@@ -7,7 +7,7 @@ import {weatherStep,validWeather} from './weather.js';
 import {harvestExpired,CROPS,fieldSizeValid,bedLayout,bedWorld,ensureCultivation,farmAutoBuy,farmRecipe,farmJobError,farmJobSpec,finishFarmJob,cultivationStep,validCultivation} from './cultivation.js';
 import {foodPolicy,validFoodPolicy,manageKitchens} from './food-policy.js';
 import {startAutonomousWork,autonomousWorkPlan} from './autonomous-work.js';
-import {pantryForecast} from './food-planning.js';
+import {pantryForecast,foodSurplus} from './food-planning.js';
 import {registerGathering,gatheringStatus,gatheringState,validGathering} from './gathering.js';
 import {biologyLabel} from './biological-production.js';
 import {foodPortions,FOOD_SERVINGS} from './food-storage.js';
@@ -272,6 +272,46 @@ export function automaticSales(s) {
     for(let n=0;n<offer.quantity;n+=MATERIALS[id].quantity){if(!sellMaterial(s,id))break;p.sold+=MATERIALS[id].quantity;}
   }
 }
+// Left to themselves, residents keep the food they can eat before it spoils
+// and set the rest aside for town while it is still worth something.
+export function sellFoodSurplus(s) {
+  if(s.stage!=='playing'||s.mode==='sandbox'||!foodPolicy(s).automatic)return;
+  const kitchen=s.projects.some(p=>PROJECTS[p.key].kind==='kitchen'&&p.work>=PROJECTS[p.key].work&&!p.removal&&s.infrastructure?.nodes[p.id]?.enabled!==false);
+  const cooking={};
+  if(kitchen)for(const r of Object.values(PROCESSES)){
+    if(r.kind!=='kitchen'||!r.output.meals)continue;
+    for(const [id,n] of Object.entries(r.input))if(FOOD_DAYS[id]&&!FOOD_SERVINGS[id])
+      cooking[id]={size:n/r.output.meals,keepDays:Math.min(FOOD_DAYS.meals,foodPolicy(s).freshDays||1)};
+  }
+  // For food the village does eat, less than one round of meals is within the
+  // error of the estimate. A crop nobody can cook is surplus down to the last kilo.
+  const worthSelling=Math.ceil(s.people.length*3/3);
+  for(const [id,surplus] of Object.entries(foodSurplus(s,cooking))){
+    const size=FOOD_SERVINGS[id]||cooking[id]?.size;
+    if(size&&surplus/size<worthSelling)continue;
+    let left=surplus,reserved=0;
+    while(left>0){
+      const stock=materialCount(s,id);
+      if(!reserveExport(s,id,MATERIALS,materialCount,changeMaterial,Math.max(protectedEquipment(s,id),stock-left)))break;
+      const order=s.trade.orders.at(-1);order.surplus=true;
+      left-=order.quantity;reserved+=order.quantity;
+    }
+    if(reserved)say(s,`${materialText(id,reserved)} is more than the village can eat before it spoils. Set aside to sell in town.`);
+  }
+  // A trip that costs more fuel than it earns is waste too: small lots wait
+  // for a car that is going to town anyway.
+  const waiting=pendingExports(s).filter(o=>o.surplus);
+  if(!waiting.length)return;
+  // While beds are still being harvested the car waits for the rest of the
+  // crop, unless what is already set aside has less than a day left.
+  const soonest=Math.min(...waiting.flatMap(o=>(o.foodLots||[]).map(l=>l.expires)));
+  const moreComing=s.operations?.some(o=>!o.done&&o.farm?.action==='harvest')&&soonest>s.time+3200;
+  // A dedicated trip should clearly pay for its fuel; with under a day left,
+  // covering the fuel is enough.
+  const value=waiting.reduce((n,o)=>n+o.cents,0),fuel=transportCost(s)*100;
+  const worthTrip=!moreComing&&value>=fuel*(soonest>s.time+3200?3:1);
+  for(const o of waiting){if(worthTrip)delete o.holdForPickup;else o.holdForPickup=true;}
+}
 function wakeHelpers(s) {
   for (const r of s.people)
     if (
@@ -420,6 +460,8 @@ export function productionBlocker(s, site, recipe) {
   if(recipe==='solar_upgrade' && p.solarUpgrade)return 'Rooftop solar is already installed.';
   if ((s.operations || []).some((o) => o.site === p.id && !o.done && !o.water))
     return "This site already has a job.";
+  if ((p.noAccessUntil || 0) > s.time)
+    return "Nobody can reach this site on foot. Residents will look again tomorrow.";
   if ((p.readyAt || 0) > s.time)
     return def.gathering ? gatheringStatus(s,p) : `Growing: ready in ${Math.ceil((p.readyAt-s.time)*.45)} game minutes.`;
   if(def.gatherLimit&&(p.extracted||0)>=def.gatherLimit)return 'This patch has been gathered out.';
@@ -996,6 +1038,15 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     // Retry per resident because another resident may be on the accessible side.
     (op.accessRetryAt??={})[r.id]=s.time+30;
     r.operation=null;r.cargo=false;r.target=null;r.walk=[];r.action='idle';
+    // Once everyone at home has tried and failed, a job with nothing reserved
+    // is dropped instead of waiting forever. The site is left alone for a day
+    // so the land can change (a bridge, a cleared path) before anyone retries.
+    if(!op.farm&&op.work===0&&!Object.values(op.input||{}).some(n=>n>0)&&
+       s.people.every(person=>person.outsideWork||atTownJob(person)||op.accessRetryAt[person.id]!==undefined)){
+      op.done=true;
+      if(p.noAccessUntil===undefined)say(s,`${projectLabel(p,PROJECTS)}: nobody can reach it on foot, so residents leave it be and look again each day.`);
+      p.noAccessUntil=s.time+3200;
+    }
     return false;
   }
   if(op.accessRetryAt)delete op.accessRetryAt[r.id];
@@ -2560,7 +2611,7 @@ function tickUncached(s, dt) {
     deliveryStep(s, dt, MATERIALS, changeMaterial, storedMaterials(s), storageCapacity(s));
     if (!s.delivery && freight.shipments) say(s, "The supplier truck unloaded the ordered building materials.");
   }
-  if(s.time>=(s.nextAutomaticSale||0)){automaticSales(s);s.nextAutomaticSale=s.time+1;}
+  if(s.time>=(s.nextAutomaticSale||0)){automaticSales(s);sellFoodSurplus(s);s.nextAutomaticSale=s.time+1;}
   arrangePlantingSeeds(s);
   const checkSupplies = s.time >= (s.nextFoodCheck || 0);
   if (checkSupplies) scheduleFarmWork(s);

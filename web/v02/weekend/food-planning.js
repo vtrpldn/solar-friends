@@ -1,4 +1,4 @@
-import {ensureFoodStorage,FOOD_SERVINGS,foodPortions} from './food-storage.js';
+import {ensureFoodStorage,FOOD_SERVINGS,FOOD_DAYS,foodPortions} from './food-storage.js';
 
 const DAY=3200;
 // Estimate evenly spaced portions, without future harvests, shopping or cooling.
@@ -28,4 +28,30 @@ export function productionStock(s,recipe,recipes){
  const matches=r=>!!r?.output[id]&&(id!=='meals'||!!r.preservedDays?.[id]===preserved);
  const stored=id==='meals'?ensureFoodStorage(s).lots.meals.filter(l=>!!l.preserved===preserved).reduce((n,l)=>n+l.n,0):(id==='wood'?s.wood:s.materials[id]||0);
  return stored+(s.operations||[]).filter(o=>!o.done&&matches(recipes[o.recipe])).reduce((n,o)=>n+((o.haulRemaining||o.returnItems||o.harvestOutput||recipes[o.recipe].output)[id]||0),0);
+}
+
+// What the village cannot eat before it spoils, per food, in stock units.
+// Batches are eaten earliest-expiry first at three portions a person a day;
+// whatever would still be on the shelf when its batch expires is surplus.
+// Raw crops only count as food when a kitchen can cook them: `cooking` maps a
+// crop to {size: units per portion, keepDays: how long the cooked meal lasts}.
+export function foodSurplus(s,cooking={}){
+ const storage=ensureFoodStorage(s),perDay=s.people.length*3,lots=[],surplus={};
+ for(const id of Object.keys(FOOD_DAYS)){
+  const size=FOOD_SERVINGS[id]||cooking[id]?.size,extra=FOOD_SERVINGS[id]?0:(cooking[id]?.keepDays||0)*DAY;
+  for(const lot of storage.lots[id]||[]){
+   if(lot.n<=0)continue;
+   if(size)lots.push({id,size,n:lot.n,deadline:lot.expires+extra});
+   else surplus[id]=(surplus[id]||0)+lot.n;
+  }
+ }
+ lots.sort((a,b)=>a.deadline-b.deadline);
+ let eaten=0;
+ for(const lot of lots){
+  const room=Math.max(0,perDay*(lot.deadline-s.time)/DAY-eaten),kept=Math.min(lot.n/lot.size,room);
+  eaten+=kept;
+  const left=lot.n-kept*lot.size;
+  if(left>1e-8)surplus[lot.id]=(surplus[lot.id]||0)+left;
+ }
+ return Object.fromEntries(Object.entries(surplus).map(([id,n])=>[id,Math.floor(n+1e-8)]).filter(([,n])=>n>0));
 }

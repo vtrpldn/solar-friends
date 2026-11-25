@@ -250,7 +250,7 @@
     ],
     "description": "Gathering sites are either finite or recover over time.",
     "diagram": "flowchart TD\n Site[Generated patch, tree or deposit] --> Ready{Accessible and available?}\n Ready -->|No| Reason[Depleted, recovering or inaccessible]\n Ready -->|Yes| Gather[Resident gathers, cuts or extracts]\n Gather --> Output[Carry gathered output to stores]\n Output --> Kind{Resource behavior}\n Kind -->|Finite| Deplete[Advance extraction or felling state]\n Kind -->|Renewable patch| Cooldown[Set next ready time]\n Cooldown --> Ready\n Deplete --> Left{Capacity remains?}\n Left -->|Yes| Ready\n Left -->|No| Exhausted[No further extraction]",
-    "boundary": "Wild fruit, bamboo and forage take time to recover after gathering.",
+    "boundary": "Wild fruit, bamboo and forage take time to recover after gathering. A site nobody can reach on foot is left alone and checked again each day.",
     "tip": "Rotate renewable gathering sites. Finite deposits will eventually run out.",
     "facts": null
   },
@@ -353,7 +353,7 @@
     "description": "Collect or pump water, store it, and purify drinking water.",
     "diagram": "flowchart LR\n River[River] --> Carry[Resident collection and hauling]\n River --> Pump[Powered pump]\n Ground[Groundwater well] --> Pump\n Rain[Rain collection] --> Untreated[Untreated water storage]\n Carry --> Untreated\n Pump --> Untreated\n Untreated --> Purify[Manual purification or powered filtering]\n Purify --> Fresh[Fresh water]\n Fresh --> Needs[Drinking and hygiene]\n Untreated --> Irrigate[Crop irrigation withdrawal]\n Fresh --> Irrigate\n Links[Completed compatible water links] --> Transfer[Capacity-limited transfers]\n Fresh --> Transfer\n Untreated --> Transfer\n Transfer --> Users[Connected storage and services]\n Capacity[Storage capacity and source exhaustion] --> Block[Transfer or task waits]\n Weather[Seasonal rainfall] --> Recharge[Shared watershed recharge]\n Recharge --> River\n Recharge --> Ground\n Pump --> Drawdown[Shared source withdrawal]\n Carry --> Drawdown\n Drawdown --> Capacity\n",
     "boundary": "A river connection alone is not an automatic pump.",
-    "tip": "Watch source reserves through the dry season. Rain recharges the watershed; pumps and manual collection draw from the same finite supply.",
+    "tip": "Watch source reserves through the dry season. A dry world is a drought year with fewer rainy days, and Caatinga land returns little of its rain to rivers and wells. Rain recharges the watershed; pumps and manual collection draw from the same finite supply.",
     "facts": null
   },
   {
@@ -416,7 +416,7 @@
     "description": "Food keeps its identity and age during storage, processing and transport.",
     "diagram": "flowchart TD\n Crop[Named harvested crop or purchased food] --> Lots[Inventory with expiry-bearing lots]\n Lots --> Cook[Explicit ingredient recipe and resident work]\n Cook --> Meals[Prepared meal lots]\n Lots --> Preserve[Preservation recipe]\n Preserve --> Long[Longer-lived food lots]\n Power[Powered refrigeration] --> Slow[Slow ageing of eligible stored food]\n Slow --> Lots\n Lots --> Expired{Expired?}\n Meals --> Expired\n Long --> Expired\n Expired -->|Yes| Waste[Remove spoiled food and account organic waste]\n Expired -->|No| Use[Eating, recipe input or trade]\n Use --> Transit[Preserve batch age in cargo and reservations]\n Lots --> Forecast[Expiry-aware pantry forecast]\n Forecast --> Policy[Optional fresh-meal and provision policies]\n Policy --> Cook\n",
     "boundary": "Refrigeration capacity is measured in liters. Uncooked greens, beans and corn do not count as ready portions.",
-    "tip": "Use the Food Almanac to inspect expiry, fresh meals, dried provisions and refrigeration. Automatic kitchens can cook harvested crops even when the pantry is empty. Recipes that consume ready-to-eat food protect a one-day reserve.",
+    "tip": "Use the Food Almanac to inspect expiry, fresh meals, dried provisions and refrigeration. Automatic kitchens can cook harvested crops even when the pantry is empty. With automatic food management on, residents sell food that would spoil before the village could eat it. Recipes that consume ready-to-eat food protect a one-day reserve.",
     "facts": "food"
   },
   {

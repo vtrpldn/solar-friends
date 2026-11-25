@@ -36,3 +36,36 @@ for(const [repeat,stockRecipe] of [['preserve_meals',null],['meals',PROCESSES.pr
  assert(!v.operations?.some(o=>o.recipe===repeat&&!o.done),`legacy ${repeat} must not restart automatically`);
 }
 console.log('PASS generic repeating recipes stay removed');
+{
+ // Surplus is what cannot be eaten before it spoils, at three portions a person a day.
+ const {foodSurplus}=await import('../web/v02/weekend/food-planning.js');
+ const {createWeekend:fresh,chooseCamp:camp,tick:step,sellFoodSurplus,PROJECTS:defs}=await import('../web/v02/weekend/simulation.js');
+ const DAY=3200,lots=o=>({greens:[],beans:[],corn:[],food:[],meals:[],eggs:[],milk:[],...o});
+ const village=o=>({time:0,people:Array(5).fill({}),materials:{},foodStorage:{version:1,lots:lots(o),spoiled:{}}});
+ // Five people eat 15 portions a day: 30 two-day meals are all eaten, 40 leave 10.
+ assert.deepEqual(foodSurplus(village({meals:[{n:30,expires:2*DAY}]})),{});
+ assert.deepEqual(foodSurplus(village({meals:[{n:40,expires:2*DAY}]})),{meals:10});
+ // Earlier batches use up the appetite that later ones would need.
+ assert.deepEqual(foodSurplus(village({meals:[{n:30,expires:2*DAY}],food:[{n:30,expires:3*DAY}]})),{food:15});
+ // A crop nobody can cook is all surplus; with a kitchen it feeds the village first.
+ assert.deepEqual(foodSurplus(village({greens:[{n:100,expires:3*DAY}]})),{greens:100});
+ assert.deepEqual(foodSurplus(village({greens:[{n:100,expires:3*DAY}]}),{greens:{size:1,keepDays:1}}),{greens:40});
+ // Left unattended, residents set the surplus aside for town and keep the rest.
+ const s=fresh();s.arrivalElapsed=17;camp(s,'clearing');for(let i=0;i<5;i++)step(s,.1);
+ for(const id of Object.keys(s.materials))if(s.foodStorage.lots[id]){s.materials[id]=0;s.foodStorage.lots[id]=[];}
+ s.materials.greens=60;s.foodStorage.lots.greens=[{n:60,expires:s.time+3*DAY}];
+ s.materials.meals=20;s.foodStorage.lots.meals=[{n:20,expires:s.time+2*DAY}];
+ sellFoodSurplus(s);
+ const orders=s.trade.orders.filter(o=>o.surplus);
+ assert.equal(orders.reduce((n,o)=>n+o.quantity,0),60,'uncookable greens are all set aside');
+ assert(orders.every(o=>o.material==='greens'&&o.status==='queued'));
+ assert.equal(s.materials.greens,0);assert.equal(s.materials.meals,20,'food the village can eat stays');
+ assert(s.log.some(line=>/more than the village can eat before it spoils/.test(line)));
+ sellFoodSurplus(s);assert.equal(s.trade.orders.filter(o=>o.surplus).length,orders.length,'nothing is sold twice');
+ // Turning automatic food management off leaves the decision to the player.
+ const manual=fresh();manual.arrivalElapsed=17;camp(manual,'clearing');for(let i=0;i<5;i++)step(manual,.1);
+ manual.foodPolicy={version:1,automatic:false,freshDays:1,provisionDays:2,coolingPriority:'expiry'};
+ manual.materials.greens=60;manual.foodStorage.lots.greens=[{n:60,expires:manual.time+3*DAY}];
+ sellFoodSurplus(manual);assert.equal(manual.trade?.orders?.length||0,0);
+ console.log('PASS surplus is what spoils before it can be eaten; residents sell it and keep their own food');
+}

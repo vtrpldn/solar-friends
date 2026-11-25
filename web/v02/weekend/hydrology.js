@@ -3,18 +3,26 @@ import {CLIMATE_PROFILES} from './climate-profiles.js';
 import {waterFactor} from './world-settings.js';
 // An off-map recharge catchment represents the watershed beyond the playable land.
 // All coefficients below are disclosed game assumptions, not aquifer measurements.
+// Little of the rain on dry land reaches a stream or an aquifer: most of it
+// evaporates first. The share that does scales with the biome's yearly rain,
+// so Caatinga rivers run thin and its groundwater refills slowly.
+export function watershedYield(s){
+ const p=CLIMATE_PROFILES[s.worldSettings?.biome]||CLIMATE_PROFILES['mata-atlantica'];
+ return Math.max(.25,Math.min(1,p.rainMm.reduce((a,b)=>a+b,0)/1500));
+}
 export function ensureHydrology(s){
  if(s.hydrology)return s.hydrology;
  const f=waterFactor(s.worldSettings?.water),p=CLIMATE_PROFILES[s.worldSettings?.biome]||CLIMATE_PROFILES['mata-atlantica'];
  const season=p.rainMm[calendar(s.time).month]/Math.max(...p.rainMm),capacity=120000*f;
- const groundwater=capacity*(.35+.4*season),river=8000*f*(.15+.85*season);
+ const land=watershedYield(s);
+ const groundwater=capacity*(.35+.4*season)*(.5+.5*land),river=8000*f*land*(.15+.85*season);
  return s.hydrology={version:1,capacity,groundwater,river,runoff:0,flowLitersPerDay:river,account:{initial:groundwater+river,rain:0,upstream:0,recharged:0,baseflow:0,groundwaterExtracted:0,riverExtracted:0,outflow:0,catchmentRain:0,captured:0,catchmentOverflow:0}};
 }
 export function hydrologyStep(s,dt){
  const h=ensureHydrology(s),f=waterFactor(s.worldSettings?.water),p=CLIMATE_PROFILES[s.worldSettings?.biome]||CLIMATE_PROFILES['mata-atlantica'];
- const season=p.rainMm[calendar(s.time).month]/Math.max(...p.rainMm);
+ const season=p.rainMm[calendar(s.time).month]/Math.max(...p.rainMm),land=watershedYield(s);
  for(let left=dt;left>1e-8;){const step=Math.min(left,DAY/24),days=step/DAY;left-=step;
-  const rain=rainfallRate(s)*24*days*4000,upstream=8000*f*(.15+.85*season)*days;
+  const rain=rainfallRate(s)*24*days*4000*land,upstream=8000*f*land*(.15+.85*season)*days;
   h.account.rain+=rain;h.account.upstream+=upstream;h.runoff+=rain;
   const released=h.runoff*(1-Math.exp(-days/2));h.runoff-=released;
   const recharge=Math.min(h.capacity-h.groundwater,released*.6);h.groundwater+=recharge;h.account.recharged+=recharge;

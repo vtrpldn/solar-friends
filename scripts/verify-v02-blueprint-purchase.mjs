@@ -7,7 +7,7 @@ function fresh(){
  const s=createWeekend();s.arrivalElapsed=17;chooseCamp(s,'clearing');
  ensureInfrastructure(s).grid.enabled=false;
  s.money=10000;s.wood=0;for(const id of Object.keys(s.materials))s.materials[id]=0;
- s.materials.food=50;s.materials.meals=50;
+ s.materials.food=15;s.materials.meals=25;
  return s;
 }
 const s=fresh(), quote=blueprintPurchase(s,'shelter');
