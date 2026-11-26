@@ -15,7 +15,7 @@ Sessions work on a `claude/*` branch in a worktree and land it on `main` like th
 1. Commit on the branch.
 2. `git fetch origin && git merge origin/main` (merge, don't rebase; other sessions are pushing too).
 3. Run `npm run check:changed`, then `git push origin HEAD:main`.
-4. Netlify deploys `main`. A push is not proof of publication; for releases, check the live site (`scripts/check-production-release.mjs`).
+4. The `Deploy site` workflow (`.github/workflows/deploy.yml`) builds `main` and uploads it to Netlify; Netlify itself doesn't build, because its build minutes are limited. A push is not proof of publication: compare the live `/v2/build-info.js` revision with `main`, and for releases run `scripts/check-production-release.mjs`.
 
 Land each piece as soon as it passes. Long-lived branches collide with the many parallel sessions on the hub files.
 
