@@ -47,28 +47,17 @@ import { LIQUIDS, liquidIndex, hasPowerService, canSwitchBuilding, switchBuildin
 import { illustrate } from "./ui-art.js";
 import { renderNeighbours, neighbourStats } from "./village-life-ui.js";
 const $ = (id) => document.getElementById(id);
-const titles = {
-  finances: "Finances",
-  neighbours: "Neighbours",
-  food: "Food",
-  resources: "Resources",
-  items: "Items & equipment",
-  crafting: "Crafting & repairs",
-  water: "Water & sanitation",
-  power: "Power",
-};
-const intros = {
-  food: "Feed the village today, keep a reserve for tomorrow, and make the most of every harvest.",
-  crafting: "Make useful things, care for shared tools, and follow work around the village.",
-  items: "Keep track of shared equipment and buy items from town. Open Crafting for resident-made items and repairs.",
-  neighbours: "Work, teach and celebrate with the people who live around you.",
-  finances: "See what comes in, what goes out, and what keeps the village running. Click Savings at any time to return here.",
-  resources:
-    "Keep the essentials close, turn local materials into something useful, and plan the next trip to town.",
-  water:
-    "Residents maintain drinking reserves and sanitation by default; you can switch either routine off. Wells and rain barrels are manual sources; a placed powered pump supplies pipes.",
-  power:
-    "Balance generation, batteries and the buildings that depend on them. Completed buildings join the network automatically.",
+// Every management screen. Adding one also needs a data-manage button in both rows of index.html,
+// a keyboard binding in keyboard-shortcuts.js and a branch in render(); verify-v02-screens.mjs checks they agree.
+export const SCREENS = {
+  finances: {title: "Finances", intro: "See what comes in, what goes out, and what keeps the village running. Click Savings at any time to return here."},
+  neighbours: {title: "Neighbours", intro: "Work, teach and celebrate with the people who live around you."},
+  food: {title: "Food", intro: "Feed the village today, keep a reserve for tomorrow, and make the most of every harvest."},
+  resources: {title: "Resources", intro: "Keep the essentials close, turn local materials into something useful, and plan the next trip to town."},
+  items: {title: "Items & equipment", intro: "Keep track of shared equipment and buy items from town. Open Crafting for resident-made items and repairs."},
+  crafting: {title: "Crafting & repairs", intro: "Make useful things, care for shared tools, and follow work around the village."},
+  water: {title: "Water & sanitation", intro: "Residents maintain drinking reserves and sanitation by default; you can switch either routine off. Wells and rain barrels are manual sources; a placed powered pump supplies pipes."},
+  power: {title: "Power", intro: "Balance generation, batteries and the buildings that depend on them. Completed buildings join the network automatically."},
 };
 export function createManagement({
   build,
@@ -261,8 +250,8 @@ export function createManagement({
     const s = state(),
       nodes = Object.values(s.infrastructure.nodes);
     dialog.dataset.screen = view;
-    $("management-title").textContent = titles[view];
-    $("management-intro").textContent = intros[view];
+    $("management-title").textContent = SCREENS[view].title;
+    $("management-intro").textContent = SCREENS[view].intro;
     document.querySelectorAll(".management-tabs [data-manage]").forEach((b) => {
       b.classList.toggle("active", b.dataset.manage === view);
       b.setAttribute("aria-pressed", String(b.dataset.manage === view));
