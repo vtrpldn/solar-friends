@@ -887,133 +887,9 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     op.done = true;
     return false;
   }
-  if (op.water) {
-    const w = op.water,
-      index = liquidIndex(w.kind);
-    if(w.service) {
-      const dest=utilitySpot(s,node,r);r.action='produce';op.status='Servicing sealed waste tanks';
-      if(!dest || !go(s,r,dest))return true;
-      op.work+=dt*useEquipment(s,r,'cleaning-kit',`op:${op.id}`,dt);r.energy=Math.max(0,r.energy-dt*.06);
-      if(op.work>=45){const amount=node.water[2]+node.water[3];node.water[2]=0;node.water[3]=0;sys.account.wasteRemoved=(sys.account.wasteRemoved||0)+amount;op.done=true;r.operation=null;say(s,`${r.name} serviced the sealed waste tanks for off-site treatment.`);}
-      return true;
-    }
-    if (op.phase === "pickup") {
-      // Nobody sets out for water that has nowhere to be poured.
-      if (!r.target && !utilitySpot(s, node, r)) {
-        op.status="Waiting for an accessible work position";
-        (op.accessRetryAt??={})[r.id]=s.time+30;
-        r.operation=null;r.walk=[];r.action='idle';
-        return false;
-      }
-      let start;
-      if (w.from === -1) {
-        start = w.sourcePoint || (w.sourcePoint=nearestRiverAccess(s,r));
-      } else start = utilitySpot(s, sys.nodes[w.from], r);
-      if (!start) return false;
-      op.status = "Walking to collect water";
-      r.action = "fetch-water";
-      if (!go(s, r, start)) return true;
-      const dest = sys.nodes[w.to];
-      w.amount = Math.min(
-        12,
-        dest.capacity[index] - dest.water[index],
-        w.from === -1 ? 12 : sys.nodes[w.from].water[index],
-      );
-      if (w.from === -1){w.amount=extractWater(s,"river",w.amount);sys.account.waterReceived += w.amount;if(w.amount<=1e-8){op.status="River reserve is low; waiting for flow";return true;}}
-      else sys.nodes[w.from].water[index] -= w.amount;
-      useEquipment(s,r,"bucket",`op:${op.id}`,0);
-      op.phase = "deliver";
-      r.target = null;
-    }
-    if(w.stagedAt){
-      r.cargo=false;r.action='fetch-water';op.status='Collecting the sealed carrier beside the reservoir';
-      if(!go(s,r,w.stagedAt))return true;
-      delete w.stagedAt;
-    }
-    useEquipment(s,r,"bucket",`op:${op.id}`,0);
-    op.status = "Carrying water to the reservoir";
-    r.action = "carry";
-    r.cargo = true;
-    const dest = utilitySpot(s, node, r);
-    if (!dest) {
-      // Set the water down. A carrier left holding it could not eat, drink or
-      // rest for as long as the way to the tank stayed shut.
-      op.status="Waiting for an accessible work position";
-      w.stagedAt={x:r.x,z:r.z};(op.accessRetryAt??={})[r.id]=s.time+30;
-      r.cargo=false;r.operation=null;r.target=null;r.walk=[];r.action='idle';
-      return false;
-    }
-  if (!go(s, r, dest)) return true;
-    const n = Math.min(w.amount, node.capacity[index] - node.water[index]);
-    node.water[index] += n;
-    w.amount -= n;
-    if (w.amount > 0.00001) {
-      // Keep the undelivered water physically at the destination without
-      // forcing its carrier to wait through meals, sleep and bathroom breaks.
-      w.stagedAt={x:r.x,z:r.z};
-      r.cargo=false;r.operation=null;r.target=null;
-      op.status = "Destination full; sealed water waits beside the reservoir.";
-      return true;
-    }
-    r.cargo = false;
-    op.done = true;
-    r.operation = null;
-    return true;
-  }
+  if (op.water) return waterOperation(s, r, dt, op, node, sys);
   const recipe = farmRecipe(op,PROCESSES);
-  if (op.phase === "return") {
-    r.action = "carry";
-    r.cargo = true;
-    op.status = op.returnItems ? "Returning usable remains after spoilage" : op.recipe === "solar_upgrade" ? "Returning after installing solar" : "Carrying output to storage";
-    const output=op.returnItems||op.harvestOutput||recipe.output;
-    if(output.wheelbarrow)op.status="Moving the assembled wheelbarrow to storage";
-    const bulk=true;
-    if(bulk){
-      op.haulRemaining??={...output};op.returningToSite??=false;
-      if(op.returningToSite){
-        r.cargo=false;r.action="walk";op.status="Returning for the next production load";
-        // A building may now stand over a felled tree. The cut logs stay
-        // reachable from the nearest open ground beside it.
-        const source=utilitySpot(s,node,r)||(p?.felled&&nearestOpenGround(s,p,r));
-        if(!source){
-          op.status="Waiting for an accessible route to the remaining output";
-          (op.accessRetryAt??={})[r.id]=s.time+30;
-          r.operation=null;r.target=null;r.walk=[];r.action='idle';
-          return false;
-        }
-        if(!go(s,r,source))return true;
-        op.returningToSite=false;r.target=null;
-      }
-    }
-    if (!go(s, r, supplySpot(s, r, i))) return true;
-    const returned=bulk?productionLoad(op.haulRemaining):output;
-    if(bulk&&!Object.keys(returned).length&&Object.values(op.haulRemaining).some(n=>n>0)){
-      op.status="Output exceeds hand-carry capacity";return true;
-    }
-    const total = Object.entries(returned).reduce((a, [id, n]) => a + (id === 'scraps' ? 0 : n), 0);
-    if (storedMaterials(s) + total > storageCapacity(s)) {
-      // Set the load down beside the stores. A carrier who kept hold of it
-      // could not eat, drink or rest for as long as the stores stayed full.
-      op.status = "Storage full; the load waits beside the stores";
-      (op.accessRetryAt??={})[r.id]=s.time+30;
-      r.cargo=false;r.operation=null;r.target=null;r.walk=[];r.action='idle';
-      return true;
-    }
-    for (const [id, n] of Object.entries(returned))
-      changeMaterial(s,id,n,op.foodOutput?.[id]?takeFoodLots(op.foodOutput[id],n):undefined,'production delivery');
-    if(bulk){
-      for(const [id,n]of Object.entries(returned))op.haulRemaining[id]-=n;
-      if(Object.values(op.haulRemaining).some(n=>n>0)){
-        op.returningToSite=true;r.cargo=false;r.target=null;return true;
-      }
-    }
-    op.done = true;
-    r.operation = null;
-    r.cargo = false;
-    if(recipe.equipmentRepair)repairEquipment(s,recipe.equipmentRepair);
-    say(s, op.recipe === "solar_upgrade" ? `Solar upgrade installed at ${projectLabel(p,PROJECTS)}.` : op.farm ? `${projectLabel(p,PROJECTS)}: ${op.farm.action==='harvest'?'harvest':'residues'} from bed ${op.farm.bed+1} delivered to storage.` : `${recipe.name}: supplies delivered to storage from ${projectLabel(p,PROJECTS)}.`);
-    return true;
-  }
+  if (op.phase === "return") return returnOperation(s, r, i, op, node, p, recipe);
 
   if(recipe.craft && craftingBlocker(s,recipe,r)) {op.status=craftingBlocker(s,recipe,r);r.action='blocked';return false;}
   if (op.phase === "pickup") {
@@ -1137,6 +1013,136 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     }
   }
   return true;
+}
+
+// A water job: service sealed tanks, or fetch water and pour it into a reservoir. Returns busy.
+function waterOperation(s, r, dt, op, node, sys) {
+    const w = op.water,
+      index = liquidIndex(w.kind);
+    if(w.service) {
+      const dest=utilitySpot(s,node,r);r.action='produce';op.status='Servicing sealed waste tanks';
+      if(!dest || !go(s,r,dest))return true;
+      op.work+=dt*useEquipment(s,r,'cleaning-kit',`op:${op.id}`,dt);r.energy=Math.max(0,r.energy-dt*.06);
+      if(op.work>=45){const amount=node.water[2]+node.water[3];node.water[2]=0;node.water[3]=0;sys.account.wasteRemoved=(sys.account.wasteRemoved||0)+amount;op.done=true;r.operation=null;say(s,`${r.name} serviced the sealed waste tanks for off-site treatment.`);}
+      return true;
+    }
+    if (op.phase === "pickup") {
+      // Nobody sets out for water that has nowhere to be poured.
+      if (!r.target && !utilitySpot(s, node, r)) {
+        op.status="Waiting for an accessible work position";
+        (op.accessRetryAt??={})[r.id]=s.time+30;
+        r.operation=null;r.walk=[];r.action='idle';
+        return false;
+      }
+      let start;
+      if (w.from === -1) {
+        start = w.sourcePoint || (w.sourcePoint=nearestRiverAccess(s,r));
+      } else start = utilitySpot(s, sys.nodes[w.from], r);
+      if (!start) return false;
+      op.status = "Walking to collect water";
+      r.action = "fetch-water";
+      if (!go(s, r, start)) return true;
+      const dest = sys.nodes[w.to];
+      w.amount = Math.min(
+        12,
+        dest.capacity[index] - dest.water[index],
+        w.from === -1 ? 12 : sys.nodes[w.from].water[index],
+      );
+      if (w.from === -1){w.amount=extractWater(s,"river",w.amount);sys.account.waterReceived += w.amount;if(w.amount<=1e-8){op.status="River reserve is low; waiting for flow";return true;}}
+      else sys.nodes[w.from].water[index] -= w.amount;
+      useEquipment(s,r,"bucket",`op:${op.id}`,0);
+      op.phase = "deliver";
+      r.target = null;
+    }
+    if(w.stagedAt){
+      r.cargo=false;r.action='fetch-water';op.status='Collecting the sealed carrier beside the reservoir';
+      if(!go(s,r,w.stagedAt))return true;
+      delete w.stagedAt;
+    }
+    useEquipment(s,r,"bucket",`op:${op.id}`,0);
+    op.status = "Carrying water to the reservoir";
+    r.action = "carry";
+    r.cargo = true;
+    const dest = utilitySpot(s, node, r);
+    if (!dest) {
+      // Set the water down. A carrier left holding it could not eat, drink or
+      // rest for as long as the way to the tank stayed shut.
+      op.status="Waiting for an accessible work position";
+      w.stagedAt={x:r.x,z:r.z};(op.accessRetryAt??={})[r.id]=s.time+30;
+      r.cargo=false;r.operation=null;r.target=null;r.walk=[];r.action='idle';
+      return false;
+    }
+  if (!go(s, r, dest)) return true;
+    const n = Math.min(w.amount, node.capacity[index] - node.water[index]);
+    node.water[index] += n;
+    w.amount -= n;
+    if (w.amount > 0.00001) {
+      // Keep the undelivered water physically at the destination without
+      // forcing its carrier to wait through meals, sleep and bathroom breaks.
+      w.stagedAt={x:r.x,z:r.z};
+      r.cargo=false;r.operation=null;r.target=null;
+      op.status = "Destination full; sealed water waits beside the reservoir.";
+      return true;
+    }
+    r.cargo = false;
+    op.done = true;
+    r.operation = null;
+    return true;
+}
+
+// Carry a finished job's output back to storage, in hand-carried loads. Returns busy.
+function returnOperation(s, r, i, op, node, p, recipe) {
+    r.action = "carry";
+    r.cargo = true;
+    op.status = op.returnItems ? "Returning usable remains after spoilage" : op.recipe === "solar_upgrade" ? "Returning after installing solar" : "Carrying output to storage";
+    const output=op.returnItems||op.harvestOutput||recipe.output;
+    if(output.wheelbarrow)op.status="Moving the assembled wheelbarrow to storage";
+    const bulk=true;
+    if(bulk){
+      op.haulRemaining??={...output};op.returningToSite??=false;
+      if(op.returningToSite){
+        r.cargo=false;r.action="walk";op.status="Returning for the next production load";
+        // A building may now stand over a felled tree. The cut logs stay
+        // reachable from the nearest open ground beside it.
+        const source=utilitySpot(s,node,r)||(p?.felled&&nearestOpenGround(s,p,r));
+        if(!source){
+          op.status="Waiting for an accessible route to the remaining output";
+          (op.accessRetryAt??={})[r.id]=s.time+30;
+          r.operation=null;r.target=null;r.walk=[];r.action='idle';
+          return false;
+        }
+        if(!go(s,r,source))return true;
+        op.returningToSite=false;r.target=null;
+      }
+    }
+    if (!go(s, r, supplySpot(s, r, i))) return true;
+    const returned=bulk?productionLoad(op.haulRemaining):output;
+    if(bulk&&!Object.keys(returned).length&&Object.values(op.haulRemaining).some(n=>n>0)){
+      op.status="Output exceeds hand-carry capacity";return true;
+    }
+    const total = Object.entries(returned).reduce((a, [id, n]) => a + (id === 'scraps' ? 0 : n), 0);
+    if (storedMaterials(s) + total > storageCapacity(s)) {
+      // Set the load down beside the stores. A carrier who kept hold of it
+      // could not eat, drink or rest for as long as the stores stayed full.
+      op.status = "Storage full; the load waits beside the stores";
+      (op.accessRetryAt??={})[r.id]=s.time+30;
+      r.cargo=false;r.operation=null;r.target=null;r.walk=[];r.action='idle';
+      return true;
+    }
+    for (const [id, n] of Object.entries(returned))
+      changeMaterial(s,id,n,op.foodOutput?.[id]?takeFoodLots(op.foodOutput[id],n):undefined,'production delivery');
+    if(bulk){
+      for(const [id,n]of Object.entries(returned))op.haulRemaining[id]-=n;
+      if(Object.values(op.haulRemaining).some(n=>n>0)){
+        op.returningToSite=true;r.cargo=false;r.target=null;return true;
+      }
+    }
+    op.done = true;
+    r.operation = null;
+    r.cargo = false;
+    if(recipe.equipmentRepair)repairEquipment(s,recipe.equipmentRepair);
+    say(s, op.recipe === "solar_upgrade" ? `Solar upgrade installed at ${projectLabel(p,PROJECTS)}.` : op.farm ? `${projectLabel(p,PROJECTS)}: ${op.farm.action==='harvest'?'harvest':'residues'} from bed ${op.farm.bed+1} delivered to storage.` : `${recipe.name}: supplies delivered to storage from ${projectLabel(p,PROJECTS)}.`);
+    return true;
 }
 export function materialText(id, n) {
   return `${quantityText(id,n)} ${MATERIALS[id].name.replace(/ pieces| packs| bundles/g, "")}`;
