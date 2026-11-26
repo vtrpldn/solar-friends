@@ -1,0 +1,19 @@
+# Search-only exclusions for ripgrep (and so for coding agents' search).
+# Git ignores this file. Checks still read several of these paths, so nothing
+# here may be moved or deleted on this file's account. `rg -uu` searches everything.
+
+# Vendored Three.js and generated model exports
+web/v02/workshop/vendor/
+web/v02/workshop/exports/*.json
+
+# Dated evidence: history, not the current specification
+docs/balance/
+docs/releases/
+docs/playtests/
+docs/v02/
+
+# Review captures and audits (workflows stay searchable)
+.github/*/
+!.github/workflows/
+
+package-lock.json
