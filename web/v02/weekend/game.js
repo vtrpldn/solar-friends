@@ -2141,11 +2141,34 @@ function renderUI() {
   ]);
   if (signature === uiSignature) return;
   uiSignature = signature;
-  const active = s.stage !== "arrival" && !s.arrivalAnimating;
+  // The HUD, top to bottom. A new HUD area gets its own render function, called here.
+  renderArrivalMessages();
+  renderVillageControls();
+  renderSupplyCounters();
+  renderClockAndWeather();
+  renderProjectLists();
+  renderResidents();
+  renderTownAndTrade();
+  renderLog();
+  renderBuildCatalog();
+  renderScreens();
+  renderSelection();
+}
+
+function uiActive() { return s.stage !== "arrival" && !s.arrivalAnimating; }
+
+// Arrival prompts while the friends arrive and choose a camp.
+function renderArrivalMessages() {
+  const active = uiActive();
   if (active && arrivalMessageShown) message("");
   arrivalMessageShown = !active;
   if(s.arrivalAnimating) message("Our friends are arriving…");
   else if(s.stage === "arrival") message("Move over the land to try a camp site. R turns it; click to pitch the tents.");
+}
+
+// Auto-buy and sandbox toggles, dock buttons and which side panel is open.
+function renderVillageControls() {
+  const active = uiActive();
   $("auto-buy").hidden=s.mode==='sandbox';
   $("auto-buy").textContent=`Auto-buy: ${s.autoBuy===false?'off':'on'}`;
   $("auto-buy").setAttribute('aria-pressed',String(s.autoBuy!==false));
@@ -2169,6 +2192,11 @@ function renderUI() {
 
   $("build").hidden =
     !active || s.stage === "evening" || openPanel !== "build" || !!selected;
+}
+
+// The resource counters in the header, with trends and basic needs.
+function renderSupplyCounters() {
+  const active = uiActive();
   const trends=resourceTrends(s.time,resourceSnapshot(s));
   const counters = [
     ["money", `${brl(s.money)}`, "Savings", "finances"],
@@ -2208,6 +2236,10 @@ function renderUI() {
     button.disabled = !active;
   });
   renderBasicNeeds($("supplies"),s);
+}
+
+// Clock, calendar, forecast, weather and temperature.
+function renderClockAndWeather() {
   const minutes = 9 * 60 + Math.floor(s.time * 0.45);
   $("clock").textContent =
     s.stage === "evening"
@@ -2220,6 +2252,10 @@ function renderUI() {
   $("weather").textContent=`${environment.icon} ${environment.weather}`;
   $("temperature").textContent=`${environment.temperature}°C`;
   $("temperature").setAttribute('aria-label',`Simulated temperature ${environment.temperature} degrees Celsius`);
+}
+
+// Projects panel: planned work and the buildings around the village.
+function renderProjectLists() {
   $("tasks").replaceChildren();
   $("completed-tasks").replaceChildren();
   const builtCount = s.projects.filter(
@@ -2268,6 +2304,10 @@ function renderUI() {
     }
     (p.key === "road" ? roadGroup : $(done ? "completed-tasks" : "tasks")).append(div);
   }
+}
+
+// Residents panel: the roster and the selected resident's tabs.
+function renderResidents() {
   $("roster").replaceChildren();
   $("resident-detail").replaceChildren();
   for (const r of s.people) {
@@ -2447,6 +2487,10 @@ function renderUI() {
     }
     $("roster").append(div);
   }
+}
+
+// Town trips, purchases, sales and journeys under way.
+function renderTownAndTrade() {
   const purchase = MATERIALS[$("purchase").value];
   $("town").textContent =
     `${s.deliveryOnly?"Order delivery:":"Fetch"} ${materialText($("purchase").value, purchase.quantity)} · ${brl((purchase.price + pickupFare(s)))} ${returnPickup(s)?"· existing trip, no extra fuel":"incl. transport"}`;
@@ -2473,6 +2517,10 @@ function renderUI() {
   $("rain").hidden = !s.rainSeen || s.rainResolved;
   disabledReason($("boards"), `You need 2 timber pieces to protect the supplies; ${s.wood} are available.`);
   $("boards").disabled = s.wood < 2;
+}
+
+// The village message log.
+function renderLog() {
   $("log").replaceChildren(
     ...eventHistory(s).map((event) => {
       const li = document.createElement("li");
@@ -2482,6 +2530,10 @@ function renderUI() {
       return li;
     }),
   );
+}
+
+// Build catalog buttons: prices, blockers and the plan being placed.
+function renderBuildCatalog() {
   for (const key of Object.keys(PROJECTS)) {
     const b = $(`build-${key}`);
     if(!b)continue;
@@ -2508,8 +2560,16 @@ function renderUI() {
     b.classList.toggle("active", placing === key);
     b.classList.toggle("needs-materials", blocked);
   }
+}
+
+// Utility controls for the selected building and the open management screen.
+function renderScreens() {
   renderUtilityUI();
   management?.render();
+}
+
+// The selected building panel.
+function renderSelection() {
   const p = s.projects.find((p) => p.id === selected);
   $("selection").hidden = !p || s.stage === "evening";
   if (p) {
