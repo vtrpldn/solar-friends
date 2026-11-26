@@ -2819,328 +2819,336 @@ function residentsStep(s, ctx) {
   const operationsPending = s.operations?.some(o => !o.done);
   const animalCarePending = s.upkeep?.jobs.some(job => job.care && !job.done);
   const farmJobsPending = operationsPending && s.operations.some(op => !op.done && !op.waitingSeeds && op.phase !== 'growing' && isFarmWork(s,op));
-  for (const [i, r] of s.people.entries()) {
-    if(downtimeInvalid(s,r,PROJECTS)){clearDowntime(r);r.walk=[];r.target=null;}
-    if(r.downtime && (r.job!=null || r.operation!=null || r.linkJob!=null || r.needTask || r.cargo || r.tentPhase || r.sleepUntil || r.outsideWork || r.action==='town'))clearDowntime(r);
-    if (r.action === "town") continue;
-    if(atTownJob(r)){outsideWorkStep(s,r,dt,go,say);continue;}
-    const canDrink=r.needs.hydration<10&&Object.values(s.infrastructure.nodes).some(n=>{
-      if(!n.enabled||n.water[0]<.5||['coop','goat_pasture'].includes(n.kind))return false;
-      const spot=utilitySpot(s,n,r);return spot&&route(s,r,spot);
-    });
-    const urgent=Math.min(r.needs.bladder,r.needs.bowels)<10 || canDrink || (r.needs.hunger<15 && foodPortions(s)>=1);
-    if((r.sleepUntil || r.tentPhase==='inside') && urgent) {
-      if(r.sleepUntil)r.resumeSleepUntil=r.sleepUntil;
-      r.sleepUntil=null;
-      if(r.tentPhase){r.tentPhase='exit';r.tentAt=s.time;}
-      else {r.action='idle';r.walk=[];r.target=null;}
-    }
-    if(r.resumeSleepUntil && !r.needTask && !r.tentPhase && !r.cargo && !urgent && Math.min(r.needs.bladder,r.needs.bowels,r.needs.hydration)>30 && (r.needs.hunger>30 || foodPortions(s)<1)) {
-      if(r.resumeSleepUntil>s.time){r.sleepUntil=r.resumeSleepUntil;r.action='rest';r.walk=[];r.target=null;}
-      r.resumeSleepUntil=null;
-    }
-    if (!r.sleepUntil) chooseNeed(s,r,i,needApi);
-    if (r.tentPhase) {
-      r.action = "rest";
-      if (r.tentPhase === "enter" && s.time - r.tentAt >= 1.5)
-        r.tentPhase = "inside";
-      if (r.tentPhase === "inside") {
-        r.energy = Math.min(100, r.energy + dt * (r.sleepUntil ? .13 : .45));
-        const recovered = recoveryEnergy(s, r, constructionPending);
-        if ((r.sleepUntil ? s.time >= r.sleepUntil : r.energy >= recovered) || s.stage === "evening") {
-          r.sleepUntil=null;
-          r.tentPhase = "exit";
-          r.tentAt = s.time;
-        }
-      }
-      if (r.tentPhase === "exit" && s.time - r.tentAt >= 1.5) {
-        r.tentPhase = null;
-        r.restSite = null;
-        r.action = "idle";
-      }
-      continue;
-    }
-    // Leisure is interruptible: a newly available task beats finishing a stroll.
-    if (
-      s.stage === "playing" &&
-      !r.job &&
-      r.operation == null &&
-      r.linkJob == null &&
-      !r.needTask &&
-      r.energy >= 25 &&
-      [
-        "idle",
-        "relax",
-        "look",
-        "stretch",
-        "chat",
-        "stroll",
-        "breathe",
-      ].includes(r.action) &&
-      constructionPending && availableProject(s, r)
-    ) {
-      r.walk = [];
-      r.target = null;
-      clearDowntime(r);
-    }
-    if (r.energy < 25 && r.job && !r.cargo && !r.needTask) {
-      r.walk=[]; r.target=null; r.job=null; r.supplyGoal=null;
-    }
-    if (r.dayShiftBooked || r.favourBooked) startOutsideWork(s,r,route);
-    if (r.walk.length) {
-      const next = r.walk[0],
-        dx = next.x - r.x,
-        dz = next.z - r.z,
-        d = Math.hypot(dx, dz),
-        desiredSpeed =
-          (r.cargo ? 0.72 : 0.95) *
-          (r.cargo && s.equipment?.loans[r.id]?.item === "bucket" ? useEquipment(s,r,"bucket",s.equipment.loans[r.id].task,dt) : 1) *
-          (0.92 + i * 0.035) *
-          (r.energy < 35 ? 0.8 : 1),
-        braking = r.walk.length === 1 ? Math.max(0.25, Math.min(1, d * 2)) : 1;
-      r.moveSpeed = Math.min(
-        desiredSpeed * braking,
-        (r.moveSpeed || 0) + dt * 1.8,
-      );
-      const nearby = s.people.filter(
-        (other) =>
-          other !== r &&
-          other.action !== "town" && !atTownJob(other) &&
-          Math.hypot(other.x - r.x, other.z - r.z) < 0.75,
-      );
-      const step = dt * r.moveSpeed * (nearby.length ? 0.65 : 1);
-      const travel = Math.min(step, d);
-      const candidate = {
-        x: r.x + (d ? (dx / d) * travel : 0),
-        z: r.z + (d ? (dz / d) * travel : 0),
-      };
-      // A step that reaches the waypoint lands on it; sidestepping there orbits forever at large steps.
-      if (d > 0.1 && travel < d && nearby.length) {
-        const sidestep = {
-          x: candidate.x + (dz / d) * dt * 0.18,
-          z: candidate.z - (dx / d) * dt * 0.18,
-        };
-        if (
-          walkSegmentClear(s, r, sidestep) &&
-          walkSegmentClear(s, sidestep, next)
-        ) {
-          candidate.x = sidestep.x;
-          candidate.z = sidestep.z;
-        }
-      }
-      if (walkSegmentClear(s, r, candidate)) {
-        r.x = candidate.x;
-        r.z = candidate.z;
-        if (Math.hypot(r.x - next.x, r.z - next.z) < 0.015) r.walk.shift();
-      } else {
-        r.walk = route(s, r, r.target || next) || [];
-      }
-      r.energy = Math.max(0, r.energy - dt * 0.025);
-      continue;
-    }
-    r.moveSpeed = 0;
-    if (r.outsideWork) {
-      if (!advanceNeed(s,r,dt,needApi)) outsideWorkStep(s,r,dt,go,say);
-      continue;
-    }
-    if (s.stage === "evening") {
-      r.action = "meal";
-      go(s, r, restSpot(s, i));
-      continue;
-    }
-    if (advanceNeed(s,r,dt,needApi)) continue;
-    if (
-      !r.cargo && (r.sleepUntil || r.energy < 25 ||
-      (r.action === "rest" &&
-        r.energy <
-          recoveryEnergy(s, r, constructionPending)))
-    ) {
-      r.action = "rest";
-      r.job = null;
-      r.workSpot = null;
-      r.cargo = false;
-      chooseRestingPlace(s, r, i);
-      if (go(s, r, restingDoor(s, i))) {
-        r.tentPhase = "enter";
-        r.tentAt = s.time;
-        r.walk = [];
-        r.target = null;
-      }
-      continue;
-    }
-    if (s.unpack && unpackStep(s, r, dt)) continue;
-    if (
-      r.operation &&
-      s.operations?.some(
-        (o) =>
-          o.id === r.operation &&
-          !o.done &&
-          (o.phase === "return" || (o.water && o.phase === "deliver")),
-      )
-    ) {
-      if (operationalWork(s, r, i, dt)) continue;
-    }
-    if (!r.cargo && !r.operation && !r.outsideWork && !r.removalJob && r.action !== 'service') {
-      if (animalCarePending && performUpkeep(s,r,dt,go,changeMaterial,MATERIALS,carDoor,useWater,workSpot,true)) continue;
-      if (farmJobsPending && operationalWork(s,r,i,dt,false,'farm')) continue;
-    }
-    // Finish an assigned batch before reconsidering work categories. Otherwise
-    // changing availability can shuffle the reserved slots on every tick.
-    if (removalsPending && r.energy >= 25 && removalStep(s,r,dt,{defs:PROJECTS,recipes:PROCESSES,workSpot,go,stored:storedMaterials,capacity:storageCapacity,change:changeMaterial,invalidate:invalidateNavigation,say,placement:placementError,grade:gradeFoundation})) continue;
-    if (r.outsideJobEnabled && !r.dayShiftBooked && startOutsideWork(s,r,route)) {
-      outsideWorkStep(s,r,dt,go,say);
-      continue;
-    }
-    if(r.energy>=25&&performUpkeep(s,r,dt,go,changeMaterial,MATERIALS,carDoor,useWater,workSpot))continue;
-    const activeOperation = operationsPending && s.operations.find(o => o.id === r.operation && !o.done);
-    if(activeOperation && !r.job && operationalWork(s,r,i,dt,false,workGroup(activeOperation,PROCESSES))) continue;
-    // Needs and completed carrying trips always win. Reserve available people,
-    // not fixed residents who might be asleep, for essential and income work.
-    const priorities = economyPolicies(s).work;
-    if (operationsPending) {
-      const ready = s.people.filter(a => a.energy >= 25 && !a.tentPhase && !a.sleepUntil && !a.needTask && !a.cargo && a.action !== 'town' && !a.outsideWork);
-      const slot = ready.indexOf(r);
-      const essentialSlots = priorities.essentialWorkers ?? 1;
-      const essential = slot >= 0 && slot < essentialSlots;
-      const producer = slot >= 0 && slot >= essentialSlots && slot < essentialSlots + (priorities.productionWorkers ?? 1);
-      const groups = ['food', 'maintenance', 'production'].sort((a,b) => (priorities[b] ?? 2) - (priorities[a] ?? 2));
-      let serviced = false;
-      for (const group of groups) {
-        const urgent = group === 'food' && (s.infrastructure.hungry || s.infrastructure.thirst);
-        const reserved = group === 'production' ? producer : essential;
-        if (!r.cargo && (urgent || reserved || (priorities[group] ?? 2) > (priorities.construction ?? 2)) && operationalWork(s, r, i, dt, false, group)) {
-          serviced = true;
-          break;
-        }
-      }
-      if (serviced) continue;
-    }
-    let p = r.job != null && s.projects.find(
-      (p) => !p.removal && p.id === r.job && !p.pendingMaterials && p.work < PROJECTS[p.key].work,
-    );
-    if (!p) {
-      r.job = null;
-      r.workSpot = null;
-      r.cargo = false;
-      p = constructionPending && availableProject(s, r);
-      if (p) {
-        r.operation=null;
-        r.workSpot = workSpot(s, r, p);
-        r.job = p.id;
-        clearDowntime(r);
-        r.lookAt = null;
-        r.supplyGoal = null;
-        r.target = null;
-      }
-    }
-    if (!p) {
-      if (operationalWork(s, r, i, dt)) continue;
-      idleActivity(s, r, i, dt, {
-        ...needApi,catalog:PROJECTS,
-        projectSpot:(p,resident)=>leisureSpot(s,resident,p),
-        center:p=>({x:p.x+(footprint(p)[0]-1)/2,z:p.z+(footprint(p)[1]-1)/2}),
-        sheltered:kind=>['shed','rain-shelter'].includes(kind)||!!COMMUNITY[kind]?.sheltered,
+  const pending = {removalsPending, constructionPending, operationsPending, animalCarePending, farmJobsPending};
+  for (const [i, r] of s.people.entries()) residentTurn(s, r, i, dt, needApi, pending);
+}
+
+// One resident's turn. The rungs are tried in order and each `continue` ends the turn: the body is
+// a one-pass do…while so the ladder reads exactly as it did inside the residents loop.
+function residentTurn(s, r, i, dt, needApi, pending) {
+  const {removalsPending, constructionPending, operationsPending, animalCarePending, farmJobsPending} = pending;
+  do {
+      if(downtimeInvalid(s,r,PROJECTS)){clearDowntime(r);r.walk=[];r.target=null;}
+      if(r.downtime && (r.job!=null || r.operation!=null || r.linkJob!=null || r.needTask || r.cargo || r.tentPhase || r.sleepUntil || r.outsideWork || r.action==='town'))clearDowntime(r);
+      if (r.action === "town") continue;
+      if(atTownJob(r)){outsideWorkStep(s,r,dt,go,say);continue;}
+      const canDrink=r.needs.hydration<10&&Object.values(s.infrastructure.nodes).some(n=>{
+        if(!n.enabled||n.water[0]<.5||['coop','goat_pasture'].includes(n.kind))return false;
+        const spot=utilitySpot(s,n,r);return spot&&route(s,r,spot);
       });
-      // Leisure restores fun and social needs; it does not substitute for sleep.
-      continue;
-    }
-    if (!r.workSpot || occupied(s, r.workSpot.x, r.workSpot.z))
-      r.workSpot = workSpot(s, r, p);
-    if (!r.workSpot) {
-      r.job = null;
-      continue;
-    }
-    const dest = r.workSpot;
-    const loads = requiredLoads(p);
-    // Reserved supplies begin at the receiving stockpile. Storage only helps
-    // after a resident physically stages a larger batch there.
-    const transit = s.people.filter(other => other.job === p.id && other.cargo);
-    const inTransit = transit.reduce((n,other) => n + carriedLoads(other), 0);
-    const remaining = Math.max(0, loads - p.delivered - (p.staged || 0) - inTransit);
-    let depot = s.projects.find(other => other.id === p.depot && other.work >= PROJECTS[other.key].work);
-    if (!depot && !(p.staged > 0)) {
-      depot = s.projects.filter(other => other.id !== p.id && STORAGE_KINDS.includes(PROJECTS[other.key].kind) && other.work >= PROJECTS[other.key].work &&
-        Math.hypot(other.x-p.x,other.z-p.z) < 8 &&
-        Math.hypot(other.x-s.stock.x,other.z-s.stock.z)+Math.hypot(other.x-p.x,other.z-p.z) < Math.hypot(p.x-s.stock.x,p.z-s.stock.z)*1.35)
-        .sort((a,b)=>Math.hypot(a.x-p.x,a.z-p.z)-Math.hypot(b.x-p.x,b.z-p.z))
-        .find(other=>workSpot(s,r,other));
-      p.depot = depot?.id;
-    }
-    if (!r.cargo && p.delivered < loads) {
-      const staged = (p.staged || 0) > 0 && depot;
-      if (!staged && !remaining) {
-        r.job=null; r.workSpot=null; r.action='idle'; r.target=null;
-        continue;
+      const urgent=Math.min(r.needs.bladder,r.needs.bowels)<10 || canDrink || (r.needs.hunger<15 && foodPortions(s)>=1);
+      if((r.sleepUntil || r.tentPhase==='inside') && urgent) {
+        if(r.sleepUntil)r.resumeSleepUntil=r.sleepUntil;
+        r.sleepUntil=null;
+        if(r.tentPhase){r.tentPhase='exit';r.tentAt=s.time;}
+        else {r.action='idle';r.walk=[];r.target=null;}
       }
-      r.action = 'collect';
-      const source = staged ? workSpot(s,r,depot) : supplySpot(s,r,i);
-      if (!source) { r.job=null; continue; }
-      const sourceId=staged ? depot.id : 0;
-      if(r.supplySource!==sourceId){r.supplyGoal=null;r.walk=[];r.target=null;}
-      r.supplySource=sourceId;
-      if (!r.supplyGoal) r.supplyGoal=source;
-      if (go(s,r,r.supplyGoal)) {
-        r.haulLoads = Math.min(staged ? 2 : depot ? 4 : 1, staged ? p.staged : remaining);
-        r.haulStage = staged || !depot ? 'site' : 'storage';
-        if(staged) p.staged-=r.haulLoads;
-        r.supplyGoal=null; r.cargo=true; r.target=null;
+      if(r.resumeSleepUntil && !r.needTask && !r.tentPhase && !r.cargo && !urgent && Math.min(r.needs.bladder,r.needs.bowels,r.needs.hydration)>30 && (r.needs.hunger>30 || foodPortions(s)<1)) {
+        if(r.resumeSleepUntil>s.time){r.sleepUntil=r.resumeSleepUntil;r.action='rest';r.walk=[];r.target=null;}
+        r.resumeSleepUntil=null;
       }
-      continue;
-    }
-    r.action = r.cargo ? 'carry' : 'walk';
-    const delivery = r.cargo && r.haulStage==='storage' && depot ? workSpot(s,r,depot) : dest;
-    if(!delivery || !go(s,r,delivery)) continue;
-    if(r.cargo) {
-      if(r.haulStage==='storage' && depot) p.staged=(p.staged||0)+carriedLoads(r);
-      else p.delivered=Math.min(loads,p.delivered+carriedLoads(r));
-      r.cargo=false; r.haulLoads=0; r.haulStage=null;
-      r.target=null;
-      if(p.delivered<loads) continue;
-    }
-    if (p.delivered < loads || r.energy < 25) continue;
-    r.action = "build";
-    const before = p.work;
-    p.work = Math.min(
-      PROJECTS[p.key].work,
-      p.work +
-        dt *
-          workMultiplier(r,p.key) *
-          crewEfficiency(s.people.filter(other=>other.job===p.id&&other.action==='build').length) *
-          useEquipment(s,r,"carpentry-tools",`job:${p.id}`,dt,PROJECTS[p.key].work) *
-          (s.opening &&
-          !s.opening.complete &&
-          s.rain &&
-          !openingProgress(s, PROJECTS).shelter
-            ? 0.8
-            : 1) *
-          (r.needs.hunger<15 ? 0.65 : 1),
-    );
-    r.work += dt;
-    r.energy = Math.max(0, r.energy - dt * 0.16);
-    if (before < PROJECTS[p.key].work && p.work >= PROJECTS[p.key].work) {
-      invalidateNavigation(s);
-      if (s.opening && !s.opening.complete) {
-        const progress = openingProgress(s, PROJECTS);
-        for (const [key, line] of Object.entries({
-          gathering:
-            "Luz: Somewhere to sit together. This is starting to feel like our place.",
-          shelter:
-            "Nina: A dry place to take a break. We can stop rushing when the rain comes.",
-          supplies:
-            "Bento: Tools and supplies are protected. We can save the rest of our money for tomorrow.",
-        })) {
-          if (progress[key] && !s.opening[key]) {
-            s.opening[key] = true;
-            say(s, line);
+      if (!r.sleepUntil) chooseNeed(s,r,i,needApi);
+      if (r.tentPhase) {
+        r.action = "rest";
+        if (r.tentPhase === "enter" && s.time - r.tentAt >= 1.5)
+          r.tentPhase = "inside";
+        if (r.tentPhase === "inside") {
+          r.energy = Math.min(100, r.energy + dt * (r.sleepUntil ? .13 : .45));
+          const recovered = recoveryEnergy(s, r, constructionPending);
+          if ((r.sleepUntil ? s.time >= r.sleepUntil : r.energy >= recovered) || s.stage === "evening") {
+            r.sleepUntil=null;
+            r.tentPhase = "exit";
+            r.tentAt = s.time;
           }
         }
+        if (r.tentPhase === "exit" && s.time - r.tentAt >= 1.5) {
+          r.tentPhase = null;
+          r.restSite = null;
+          r.action = "idle";
+        }
+        continue;
       }
-      say(
-        s,
-        `${PROJECTS[p.key].name} is ready. ${p.key === "gathering" ? "Somewhere to sit together at last." : p.key === "shelter" ? "A roof for our first night." : p.key === "water" ? "Water close at hand." : PROJECTS[p.key].kind === "eco_toilet" ? "A little privacy goes a long way." : "Ready for the community to use."}`,
+      // Leisure is interruptible: a newly available task beats finishing a stroll.
+      if (
+        s.stage === "playing" &&
+        !r.job &&
+        r.operation == null &&
+        r.linkJob == null &&
+        !r.needTask &&
+        r.energy >= 25 &&
+        [
+          "idle",
+          "relax",
+          "look",
+          "stretch",
+          "chat",
+          "stroll",
+          "breathe",
+        ].includes(r.action) &&
+        constructionPending && availableProject(s, r)
+      ) {
+        r.walk = [];
+        r.target = null;
+        clearDowntime(r);
+      }
+      if (r.energy < 25 && r.job && !r.cargo && !r.needTask) {
+        r.walk=[]; r.target=null; r.job=null; r.supplyGoal=null;
+      }
+      if (r.dayShiftBooked || r.favourBooked) startOutsideWork(s,r,route);
+      if (r.walk.length) {
+        const next = r.walk[0],
+          dx = next.x - r.x,
+          dz = next.z - r.z,
+          d = Math.hypot(dx, dz),
+          desiredSpeed =
+            (r.cargo ? 0.72 : 0.95) *
+            (r.cargo && s.equipment?.loans[r.id]?.item === "bucket" ? useEquipment(s,r,"bucket",s.equipment.loans[r.id].task,dt) : 1) *
+            (0.92 + i * 0.035) *
+            (r.energy < 35 ? 0.8 : 1),
+          braking = r.walk.length === 1 ? Math.max(0.25, Math.min(1, d * 2)) : 1;
+        r.moveSpeed = Math.min(
+          desiredSpeed * braking,
+          (r.moveSpeed || 0) + dt * 1.8,
+        );
+        const nearby = s.people.filter(
+          (other) =>
+            other !== r &&
+            other.action !== "town" && !atTownJob(other) &&
+            Math.hypot(other.x - r.x, other.z - r.z) < 0.75,
+        );
+        const step = dt * r.moveSpeed * (nearby.length ? 0.65 : 1);
+        const travel = Math.min(step, d);
+        const candidate = {
+          x: r.x + (d ? (dx / d) * travel : 0),
+          z: r.z + (d ? (dz / d) * travel : 0),
+        };
+        // A step that reaches the waypoint lands on it; sidestepping there orbits forever at large steps.
+        if (d > 0.1 && travel < d && nearby.length) {
+          const sidestep = {
+            x: candidate.x + (dz / d) * dt * 0.18,
+            z: candidate.z - (dx / d) * dt * 0.18,
+          };
+          if (
+            walkSegmentClear(s, r, sidestep) &&
+            walkSegmentClear(s, sidestep, next)
+          ) {
+            candidate.x = sidestep.x;
+            candidate.z = sidestep.z;
+          }
+        }
+        if (walkSegmentClear(s, r, candidate)) {
+          r.x = candidate.x;
+          r.z = candidate.z;
+          if (Math.hypot(r.x - next.x, r.z - next.z) < 0.015) r.walk.shift();
+        } else {
+          r.walk = route(s, r, r.target || next) || [];
+        }
+        r.energy = Math.max(0, r.energy - dt * 0.025);
+        continue;
+      }
+      r.moveSpeed = 0;
+      if (r.outsideWork) {
+        if (!advanceNeed(s,r,dt,needApi)) outsideWorkStep(s,r,dt,go,say);
+        continue;
+      }
+      if (s.stage === "evening") {
+        r.action = "meal";
+        go(s, r, restSpot(s, i));
+        continue;
+      }
+      if (advanceNeed(s,r,dt,needApi)) continue;
+      if (
+        !r.cargo && (r.sleepUntil || r.energy < 25 ||
+        (r.action === "rest" &&
+          r.energy <
+            recoveryEnergy(s, r, constructionPending)))
+      ) {
+        r.action = "rest";
+        r.job = null;
+        r.workSpot = null;
+        r.cargo = false;
+        chooseRestingPlace(s, r, i);
+        if (go(s, r, restingDoor(s, i))) {
+          r.tentPhase = "enter";
+          r.tentAt = s.time;
+          r.walk = [];
+          r.target = null;
+        }
+        continue;
+      }
+      if (s.unpack && unpackStep(s, r, dt)) continue;
+      if (
+        r.operation &&
+        s.operations?.some(
+          (o) =>
+            o.id === r.operation &&
+            !o.done &&
+            (o.phase === "return" || (o.water && o.phase === "deliver")),
+        )
+      ) {
+        if (operationalWork(s, r, i, dt)) continue;
+      }
+      if (!r.cargo && !r.operation && !r.outsideWork && !r.removalJob && r.action !== 'service') {
+        if (animalCarePending && performUpkeep(s,r,dt,go,changeMaterial,MATERIALS,carDoor,useWater,workSpot,true)) continue;
+        if (farmJobsPending && operationalWork(s,r,i,dt,false,'farm')) continue;
+      }
+      // Finish an assigned batch before reconsidering work categories. Otherwise
+      // changing availability can shuffle the reserved slots on every tick.
+      if (removalsPending && r.energy >= 25 && removalStep(s,r,dt,{defs:PROJECTS,recipes:PROCESSES,workSpot,go,stored:storedMaterials,capacity:storageCapacity,change:changeMaterial,invalidate:invalidateNavigation,say,placement:placementError,grade:gradeFoundation})) continue;
+      if (r.outsideJobEnabled && !r.dayShiftBooked && startOutsideWork(s,r,route)) {
+        outsideWorkStep(s,r,dt,go,say);
+        continue;
+      }
+      if(r.energy>=25&&performUpkeep(s,r,dt,go,changeMaterial,MATERIALS,carDoor,useWater,workSpot))continue;
+      const activeOperation = operationsPending && s.operations.find(o => o.id === r.operation && !o.done);
+      if(activeOperation && !r.job && operationalWork(s,r,i,dt,false,workGroup(activeOperation,PROCESSES))) continue;
+      // Needs and completed carrying trips always win. Reserve available people,
+      // not fixed residents who might be asleep, for essential and income work.
+      const priorities = economyPolicies(s).work;
+      if (operationsPending) {
+        const ready = s.people.filter(a => a.energy >= 25 && !a.tentPhase && !a.sleepUntil && !a.needTask && !a.cargo && a.action !== 'town' && !a.outsideWork);
+        const slot = ready.indexOf(r);
+        const essentialSlots = priorities.essentialWorkers ?? 1;
+        const essential = slot >= 0 && slot < essentialSlots;
+        const producer = slot >= 0 && slot >= essentialSlots && slot < essentialSlots + (priorities.productionWorkers ?? 1);
+        const groups = ['food', 'maintenance', 'production'].sort((a,b) => (priorities[b] ?? 2) - (priorities[a] ?? 2));
+        let serviced = false;
+        for (const group of groups) {
+          const urgent = group === 'food' && (s.infrastructure.hungry || s.infrastructure.thirst);
+          const reserved = group === 'production' ? producer : essential;
+          if (!r.cargo && (urgent || reserved || (priorities[group] ?? 2) > (priorities.construction ?? 2)) && operationalWork(s, r, i, dt, false, group)) {
+            serviced = true;
+            break;
+          }
+        }
+        if (serviced) continue;
+      }
+      let p = r.job != null && s.projects.find(
+        (p) => !p.removal && p.id === r.job && !p.pendingMaterials && p.work < PROJECTS[p.key].work,
       );
-    }
-  }
+      if (!p) {
+        r.job = null;
+        r.workSpot = null;
+        r.cargo = false;
+        p = constructionPending && availableProject(s, r);
+        if (p) {
+          r.operation=null;
+          r.workSpot = workSpot(s, r, p);
+          r.job = p.id;
+          clearDowntime(r);
+          r.lookAt = null;
+          r.supplyGoal = null;
+          r.target = null;
+        }
+      }
+      if (!p) {
+        if (operationalWork(s, r, i, dt)) continue;
+        idleActivity(s, r, i, dt, {
+          ...needApi,catalog:PROJECTS,
+          projectSpot:(p,resident)=>leisureSpot(s,resident,p),
+          center:p=>({x:p.x+(footprint(p)[0]-1)/2,z:p.z+(footprint(p)[1]-1)/2}),
+          sheltered:kind=>['shed','rain-shelter'].includes(kind)||!!COMMUNITY[kind]?.sheltered,
+        });
+        // Leisure restores fun and social needs; it does not substitute for sleep.
+        continue;
+      }
+      if (!r.workSpot || occupied(s, r.workSpot.x, r.workSpot.z))
+        r.workSpot = workSpot(s, r, p);
+      if (!r.workSpot) {
+        r.job = null;
+        continue;
+      }
+      const dest = r.workSpot;
+      const loads = requiredLoads(p);
+      // Reserved supplies begin at the receiving stockpile. Storage only helps
+      // after a resident physically stages a larger batch there.
+      const transit = s.people.filter(other => other.job === p.id && other.cargo);
+      const inTransit = transit.reduce((n,other) => n + carriedLoads(other), 0);
+      const remaining = Math.max(0, loads - p.delivered - (p.staged || 0) - inTransit);
+      let depot = s.projects.find(other => other.id === p.depot && other.work >= PROJECTS[other.key].work);
+      if (!depot && !(p.staged > 0)) {
+        depot = s.projects.filter(other => other.id !== p.id && STORAGE_KINDS.includes(PROJECTS[other.key].kind) && other.work >= PROJECTS[other.key].work &&
+          Math.hypot(other.x-p.x,other.z-p.z) < 8 &&
+          Math.hypot(other.x-s.stock.x,other.z-s.stock.z)+Math.hypot(other.x-p.x,other.z-p.z) < Math.hypot(p.x-s.stock.x,p.z-s.stock.z)*1.35)
+          .sort((a,b)=>Math.hypot(a.x-p.x,a.z-p.z)-Math.hypot(b.x-p.x,b.z-p.z))
+          .find(other=>workSpot(s,r,other));
+        p.depot = depot?.id;
+      }
+      if (!r.cargo && p.delivered < loads) {
+        const staged = (p.staged || 0) > 0 && depot;
+        if (!staged && !remaining) {
+          r.job=null; r.workSpot=null; r.action='idle'; r.target=null;
+          continue;
+        }
+        r.action = 'collect';
+        const source = staged ? workSpot(s,r,depot) : supplySpot(s,r,i);
+        if (!source) { r.job=null; continue; }
+        const sourceId=staged ? depot.id : 0;
+        if(r.supplySource!==sourceId){r.supplyGoal=null;r.walk=[];r.target=null;}
+        r.supplySource=sourceId;
+        if (!r.supplyGoal) r.supplyGoal=source;
+        if (go(s,r,r.supplyGoal)) {
+          r.haulLoads = Math.min(staged ? 2 : depot ? 4 : 1, staged ? p.staged : remaining);
+          r.haulStage = staged || !depot ? 'site' : 'storage';
+          if(staged) p.staged-=r.haulLoads;
+          r.supplyGoal=null; r.cargo=true; r.target=null;
+        }
+        continue;
+      }
+      r.action = r.cargo ? 'carry' : 'walk';
+      const delivery = r.cargo && r.haulStage==='storage' && depot ? workSpot(s,r,depot) : dest;
+      if(!delivery || !go(s,r,delivery)) continue;
+      if(r.cargo) {
+        if(r.haulStage==='storage' && depot) p.staged=(p.staged||0)+carriedLoads(r);
+        else p.delivered=Math.min(loads,p.delivered+carriedLoads(r));
+        r.cargo=false; r.haulLoads=0; r.haulStage=null;
+        r.target=null;
+        if(p.delivered<loads) continue;
+      }
+      if (p.delivered < loads || r.energy < 25) continue;
+      r.action = "build";
+      const before = p.work;
+      p.work = Math.min(
+        PROJECTS[p.key].work,
+        p.work +
+          dt *
+            workMultiplier(r,p.key) *
+            crewEfficiency(s.people.filter(other=>other.job===p.id&&other.action==='build').length) *
+            useEquipment(s,r,"carpentry-tools",`job:${p.id}`,dt,PROJECTS[p.key].work) *
+            (s.opening &&
+            !s.opening.complete &&
+            s.rain &&
+            !openingProgress(s, PROJECTS).shelter
+              ? 0.8
+              : 1) *
+            (r.needs.hunger<15 ? 0.65 : 1),
+      );
+      r.work += dt;
+      r.energy = Math.max(0, r.energy - dt * 0.16);
+      if (before < PROJECTS[p.key].work && p.work >= PROJECTS[p.key].work) {
+        invalidateNavigation(s);
+        if (s.opening && !s.opening.complete) {
+          const progress = openingProgress(s, PROJECTS);
+          for (const [key, line] of Object.entries({
+            gathering:
+              "Luz: Somewhere to sit together. This is starting to feel like our place.",
+            shelter:
+              "Nina: A dry place to take a break. We can stop rushing when the rain comes.",
+            supplies:
+              "Bento: Tools and supplies are protected. We can save the rest of our money for tomorrow.",
+          })) {
+            if (progress[key] && !s.opening[key]) {
+              s.opening[key] = true;
+              say(s, line);
+            }
+          }
+        }
+        say(
+          s,
+          `${PROJECTS[p.key].name} is ready. ${p.key === "gathering" ? "Somewhere to sit together at last." : p.key === "shelter" ? "A roof for our first night." : p.key === "water" ? "Water close at hand." : PROJECTS[p.key].kind === "eco_toilet" ? "A little privacy goes a long way." : "Ready for the community to use."}`,
+        );
+      }
+  } while (false);
 }
 export function save(s) {
   return JSON.stringify(s);
