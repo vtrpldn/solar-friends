@@ -8,7 +8,6 @@ Separate current gameplay and operational guidance from historical plans and dat
 
 ## Current guides
 
-- [In-game Guide maintenance](guide-maintenance.md)
 - [Autonomy mechanics implementation plan](autonomy-implementation-plan.md)
 
 - [Project setup, routes, checks and deployment](../README.md)
@@ -44,4 +43,4 @@ Evidence is tied to the documented build and scenario. Historical successes do n
 
 ## Historical reference
 
-The [first-evening opening](v02/first-evening-opening.md) and [early interaction audit](v02/building-interaction-audit.md) record earlier v2 iterations. The playable guide supersedes their onboarding and catalog descriptions. Dated reports and saved evidence remain intact rather than being rewritten to imply newer tests were performed.
+The [first-evening opening](v02/first-evening-opening.md) and [early interaction audit](v02/building-interaction-audit.md) record earlier v2 iterations. The current game supersedes their onboarding and catalog descriptions. Dated reports and saved evidence remain intact rather than being rewritten to imply newer tests were performed.

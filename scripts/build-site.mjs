@@ -1,5 +1,3 @@
-import {verifyGuide} from './guide-content.mjs';
-await verifyGuide();
 import {execFileSync} from 'node:child_process';
 import { rewriteSiteText } from "./site-routes.mjs";
 import { cp, mkdir, readdir, readFile, writeFile, rm } from "node:fs/promises";

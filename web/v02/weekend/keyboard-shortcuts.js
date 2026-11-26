@@ -67,7 +67,6 @@ export const BINDINGS = [
   {id: 'water', group: 'Almanac', label: 'U', text: 'Water & sanitation', key: ['u'], screen: 'water', modal: 'management', hint: '[data-manage="water"]'},
   {id: 'power', group: 'Almanac', label: 'P', text: 'Power', key: ['p'], screen: 'power', modal: 'management', hint: '[data-manage="power"]'},
 
-  {id: 'guide', group: 'Help & options', label: 'H', text: 'Village guide', key: ['h'], modal: 'village-guide', hint: '#open-guide'},
   {id: 'view-options', group: 'Help & options', label: 'V', text: 'View & options: camera buttons, saves, sound', key: ['v'], hint: '.view-menu > summary'},
   {id: 'help', group: 'Help & options', label: '?', text: 'This list of keyboard and camera controls', key: ['?'], shift: 'any', modal: 'controls-dialog', quiet: '#show-controls'},
 

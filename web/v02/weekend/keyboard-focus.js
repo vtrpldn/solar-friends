@@ -3,7 +3,7 @@ const directions = {
   ArrowUp: [0, -1], ArrowDown: [0, 1],
 };
 const controls = 'button:not(:disabled), summary, a[href]';
-const groups = '[role="group"], [role="toolbar"], nav, #build-list, #roster, #resource-grid, #lens-list, #guide-topics, .menu-actions';
+const groups = '[role="group"], [role="toolbar"], nav, #build-list, #roster, #resource-grid, #lens-list, .menu-actions';
 const panels = 'dialog[open], #build, aside, #selection, #map-lenses, footer, header, .view-menu';
 
 document.addEventListener('keydown', event => {

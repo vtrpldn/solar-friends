@@ -12,8 +12,6 @@ import {skipDays} from './time-skip.js';
 import {snapshotVillage, summarizeSkip} from './time-skip-summary.js';
 import {renderSkipSummary} from './time-skip-summary-ui.js';
 import {basicNeeds,renderBasicNeeds} from './basic-needs.js';
-import {installGuide} from './guide.js';
-let guide;
 import {hydrationWarning} from './hydration.js';
 import {hydrologyText} from './hydrology.js';
 import {forecast,weatherText} from './weather.js';
@@ -987,7 +985,6 @@ function releasePause(resume) {
 }
 let pauseResume = false;
 function viewPauseState() {
-  if (guide?.isOpen) return guide.resumePaused;
   if (document.querySelector('.village-saves[open]')) return savesWasPaused;
   if ($('controls-dialog').open) return controlsWasPaused;
   if (management?.isOpen) return management.resumePaused;
@@ -1381,7 +1378,6 @@ $("cancel-project").onclick = () => {
   message(error || s.log[0]);
   uiSignature = ''; renderUI();
 };
-guide=installGuide({button:$('open-guide'),isPaused:()=>paused,savePauseState:()=>viewPauseState(),setPaused:value=>{paused=value;updatePauseButton();},holdPause,releasePause});
 let controlsWasPaused = false;
 $("copy-diagnostics").onclick = async () => {
   const button=$("copy-diagnostics"),status=$("diagnostics-status");
@@ -1556,7 +1552,6 @@ const shortcutActions = {
   resources: () => toggleScreen('resources'),
   water: () => toggleScreen('water'),
   power: () => toggleScreen('power'),
-  guide: () => { const dialog = $("village-guide"); if (dialog.open) dialog.close(); else $("open-guide").click(); },
   'view-options': () => {
     if ($("village-actions").hidden) return;
     viewMenu.open = !viewMenu.open;

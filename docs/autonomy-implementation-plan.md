@@ -1,5 +1,5 @@
 ---
-description: Implementation plan for local seed, propagation, manure, repair and biogas loops, with enforced Guide maintenance.
+description: Implementation plan for local seed, propagation, manure, repair and biogas loops.
 ---
 # Ecovillage autonomy implementation plan
 
@@ -7,7 +7,7 @@ description: Implementation plan for local seed, propagation, manure, repair and
 
 Reduce recurring imports through physical, understandable resource cycles. Progress comes from managing land, labor, time and losses. No technology unlocks, scripted milestones or sustainability score.
 
-The Guide ships first with current mechanics. The five mechanics below are planned, not implemented by the Guide change. Existing biology, production, inventories, hauling, equipment and utilities remain authoritative.
+The five mechanics below are planned, not implemented. Existing biology, production, inventories, hauling, equipment and utilities remain authoritative.
 
 ## Contents
 
@@ -18,21 +18,19 @@ The Guide ships first with current mechanics. The five mechanics below are plann
 - [Manure recovery](#3-manure-recovery-and-composting)
 - [Local repair](#4-locally-supportable-equipment-repair)
 - [Useful biogas](#5-useful-biogas)
-- [Guide freshness](#guide-freshness-contract)
 - [Release acceptance](#release-acceptance)
 
 ## Delivery order
 
 | Increment | Change | Observable result |
 | --- | --- | --- |
-| 0 | Diagram-first Guide and freshness checks | Players can inspect current flows and real import dependencies. |
 | 1 | Seed saving | A crop can supply a later planting, at a food-yield and labor cost. |
 | 2 | Tree and perennial propagation | Established plants can supply replacement starts through nursery work. |
 | 3 | Manure recovery | Actual animal feed/care produces collectable manure usable in compost. |
 | 4 | Local repairs | Compatible tools can be repaired with local materials; specialist parts remain imports. |
 | 5 | Useful biogas | Bounded, site-owned gas replaces the existing global cooking fallback. |
 
-Each increment must include the mechanic, persistence/migration, job and resource accounting, visible activity, Guide diagram/tip updates and regression evidence. Merge each PR only with explicit approval.
+Each increment must include the mechanic, persistence/migration, job and resource accounting, visible activity and regression evidence. Merge each PR only with explicit approval.
 
 ## Shared contracts
 
@@ -69,7 +67,7 @@ Use the existing biological waiting phase for nursery establishment and existing
 
 Add saved manure accumulation to livestock sites, driven by actual stocked animals and consumed feed/care, not building existence alone. Reconcile existing site-level care rates with headcounts before adding output. Define wet/dry mass and water conventions so feed, drinking water, animal products, manure and metabolic losses reconcile without counting water twice.
 
-Keep manure distinct from ready compost and ordinary crop scraps. Add explicit manure-plus-carbon compost recipes using recoverable plant residues and the existing compost biological phase. Collection is resident work with storage/hauling constraints. Uncollected manure must have a bounded capacity and a documented consequence; implement any health or sanitation penalty before mentioning it in the Guide. Do not imply pathogen safety or detailed nutrient chemistry.
+Keep manure distinct from ready compost and ordinary crop scraps. Add explicit manure-plus-carbon compost recipes using recoverable plant residues and the existing compost biological phase. Collection is resident work with storage/hauling constraints. Uncollected manure must have a bounded capacity and a documented consequence; implement any health or sanitation penalty before mentioning it in the game. Do not imply pathogen safety or detailed nutrient chemistry.
 
 **Acceptance:** empty site and unfed animals produce no free manure; animal count affects modeled output; collection and compost each charge inputs once; full storage; interrupted hauling; decomposition losses; animal/site removal; legacy zero initialization; application returns fertility only through the existing decomposition flow. Human sewage remains a separate material stream.
 
@@ -79,7 +77,7 @@ Keep manure distinct from ready compost and ordinary crop scraps. Add explicit m
 
 Extend the existing equipment repair recipes and wear ledger. Start with woven baskets and replaceable wooden handles/components. Bamboo and wood can repair those parts. Saw blades, metal tool heads, fasteners, pumps, electrical parts and battery cells retain explicit external dependencies until manufacturing actually exists.
 
-Define which wear a local repair can recover, material costs and any maximum recoverable condition. Prevent repeated partial repair from erasing more wear than its recipe permits. Existing imported repair kits remain valid alternatives and existing queued jobs keep their captured costs. Check the tool dependency chain: a local basket repair must not secretly require an otherwise unrepairable imported tool for every cycle unless the Guide states that dependency.
+Define which wear a local repair can recover, material costs and any maximum recoverable condition. Prevent repeated partial repair from erasing more wear than its recipe permits. Existing imported repair kits remain valid alternatives and existing queued jobs keep their captured costs. Check the tool dependency chain: a local basket repair must not secretly require an otherwise unrepairable imported tool for every cycle unless the game states that dependency.
 
 **Acceptance:** worn compatible tools return to use; incompatible damage is refused; simultaneous borrowers and repairs cannot duplicate availability; repairs consume materials once; interruption/reload; selling cannot erase repair obligations; imported kits remain compatible. Demonstrate an actual repeated local repair cycle, including the tools needed to perform it.
 
@@ -93,18 +91,9 @@ A kitchen with a compatible installed burner withdraws gas while a cooking job a
 
 **Acceptance:** input waste converts to bounded stored gas and losses; cooking consumes a measured amount; idle kitchens consume no cooking fuel; no fuel creates no meal; partial gas supplies and explicit fallback; disconnected links; storage full; leaks if implemented; saved in-flight cooking; demolition records lost stored gas. No renewable-electricity or fertilizer benefit is advertised unless separately implemented.
 
-## Guide freshness contract
+## Guide (removed)
 
-The Guide describes implemented behavior only. Each entry contains a diagram, concise operating explanation, autonomy tip and dependency boundary. Future mechanics stay in this plan until their acceptance checks pass.
-
-1. Keep editable diagram definitions and topic coverage in version control. Generate deployable SVGs locally; do not load a diagram CDN in the game.
-2. Derive numerical facts from exported crop, recipe, utility and shelf-life definitions. Read those definitions in the Guide rather than copying numbers into prose.
-3. Store a reviewed fingerprint of gameplay sources and a digest of Guide content/assets. Any source addition/change or generated asset mismatch fails the Guide verification check. Builds and CI run that check; neither silently regenerates approval fingerprints.
-4. Refresh requires an explicit command after reviewing affected flows and tips. Record the reviewed sources and regenerate diagrams in the same commit as a mechanic change. A hash proves a review gate was crossed, not that prose is semantically correct.
-5. Every new system requires a topic or an explicit mapping to an existing topic. Keep source/test references for maintainers outside the player-facing flow. Planned features must not appear as usable actions.
-6. Test open/close, pause restoration, Escape/focus behavior, search, diagram loading and desktop fit. Exercise live facts against changed definition values and prove freshness checks reject stale sources/content/assets.
-
-This makes stale Guide changes a blocking engineering failure. Semantic accuracy still requires source review and scenario tests; no automated fingerprint can guarantee that an explanation is true.
+An in-game Guide with generated diagrams and a source-fingerprint review gate shipped on 2026-11-17 and was removed on 2026-11-25: its upkeep cost outweighed its value. Mechanics are explained by in-context labels, the management screens and `web/v02/weekend/README.md`.
 
 ## Release acceptance
 

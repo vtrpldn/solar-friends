@@ -98,7 +98,7 @@ footer { bottom: var(--ui-gap); max-width: calc(100vw - 2 * var(--ui-gap)); }
 .time .weather-forecast summary { cursor: pointer; white-space: nowrap; margin: 0; padding: 4px; border: 0; }
 .weather-forecast p { position: absolute; z-index: 30; right: 0; top: calc(100% + 8px); white-space: normal; width: 24rem; max-width: 70vw; padding: 1rem; margin: 0; border: 1px solid #64765b; border-radius: .5rem; background: #f6f0dd; color: #273525; box-shadow: 0 6px 20px #0003; line-height: 1.5; }
 
-/* Selected building: sit below the Guide and Lenses buttons, stop above the
+/* Selected building: sit below the Lenses button, stop above the
    dock, and keep the header compact so its actions fit without scrolling. */
 html body #selection, html body[data-lens=""] #selection {
   top: 184px; width: 300px;

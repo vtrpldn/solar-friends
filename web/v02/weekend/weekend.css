@@ -1431,7 +1431,6 @@ body[data-tray="closed"] {
 #selection #close-selection,
 #management #close-management,
 #close-controls,
-#guide-close,
 #lens-close,
 #cultivation-panel #close-farm {
   width: 32px;

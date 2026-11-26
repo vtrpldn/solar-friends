@@ -63,14 +63,14 @@ for (const [name, source] of [['game.js', game], ['lenses.js', lensesSource]]) {
 
 // Hints: every control named by the table exists, and static markup agrees with it.
 const targets = [...hintTargets(), ...hintTargets(BINDINGS, 'quiet')];
-const dynamic = ['#lens-toggle', '[data-panel="finances"]', '#open-guide']; // created by scripts
+const dynamic = ['#lens-toggle', '[data-panel="finances"]']; // created by scripts
 for (const [selectors] of targets) for (const selector of selectors.split(',').map(s => s.trim())) {
   if (dynamic.includes(selector)) continue;
   const id = selector.match(/^#([\w-]+)$/)?.[1], attribute = selector.match(/^\[([\w-]+)="([^"]+)"\]$/);
   const found = id ? html.includes(`id="${id}"`) : attribute ? html.includes(`${attribute[1]}="${attribute[2]}"`) : selector === '.view-menu > summary' && /class="view-menu">\s*<summary>/.test(html);
   assert(found, `hint target ${selector} exists in index.html`);
 }
-assert(lensesSource.includes('id="lens-toggle"') && html.includes('id="open-guide"'));
+assert(lensesSource.includes('id="lens-toggle"'));
 const labels = new Set(targets.map(([, label]) => label));
 for (const [, label] of html.matchAll(/data-shortcut="([^"]+)"/g)) assert(labels.has(label), `static hint ${label} is in the table`);
 for (const tag of html.match(/<[^>]+data-shortcut="[^"]+"[^>]*>/g) || []) {

@@ -18,7 +18,6 @@ try{
  for(const width of [1440,1280]){
   await page.setViewportSize({width,height:width===1280?720:1000});
   const valid=await page.locator('#supplies').evaluate(e=>{const a=e.getBoundingClientRect(),b=document.querySelector('header > .time').getBoundingClientRect();return a.left>=0&&a.right<=b.left&&a.height<90&&e.scrollWidth<=e.clientWidth;});assert(valid,'inline status stays in existing counters without overlapping clock');
-  assert(await page.locator('#open-guide').evaluate(e=>e.getBoundingClientRect().top>=document.querySelector('header > .time').getBoundingClientRect().bottom),'Guide clears expanded clock');
   await page.screenshot({path:`/tmp/solar-needs/needs-${width}.png`});
  }
  for(const [id,title]of [['power','Power'],['water','Water & sanitation'],['food','Food']]){

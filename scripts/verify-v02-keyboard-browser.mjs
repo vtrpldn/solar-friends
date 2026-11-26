@@ -67,7 +67,7 @@ for(const b of BINDINGS.filter(b=>b.panel&&trays[b.id])){
   await press(b.key[0]);await press('Escape');assert(!await visible(trays[b.id]),`Esc closes ${b.text}`);
   assert.equal(await focused(),'world',`focus returns to the land after ${b.text}`);
 }
-const modals=[...BINDINGS.filter(b=>b.screen).map(b=>[b,'management']),[BINDINGS.find(b=>b.id==='residents'),'people'],[BINDINGS.find(b=>b.id==='guide'),'village-guide'],[BINDINGS.find(b=>b.id==='advance-days'),'time-skip-dialog']];
+const modals=[...BINDINGS.filter(b=>b.screen).map(b=>[b,'management']),[BINDINGS.find(b=>b.id==='residents'),'people'],[BINDINGS.find(b=>b.id==='advance-days'),'time-skip-dialog']];
 for(const [b,id] of modals){
   await press(b.key[0]);assert.equal(await openDialog(),id,`${b.label} opens ${b.text}`);
   if(b.screen)assert.equal(await page.locator(`.management-tabs [data-manage="${b.screen}"]`).getAttribute('aria-pressed'),'true');
