@@ -1,12 +1,11 @@
 // check-tier: soak
 import assert from 'node:assert/strict';
-import {createWeekend, chooseCamp, enableFastNavigation, planField, tick, save, restore} from '../web/v02/weekend/simulation.js';
+import {planField, tick, save, restore} from '../web/v02/weekend/simulation.js';
 import {setOutsideWork} from '../web/v02/weekend/outside-work.js';
-import {DAY} from '../web/v02/weekend/weather.js';
+import * as fixtures from './fixtures.mjs';
+const {DAY} = fixtures;
 
-const village = createWeekend();
-chooseCamp(village, 'clearing');
-enableFastNavigation(village);
+const {s: village} = fixtures.village({seed: 0, camp: 'clearing'});
 assert.equal(planField(village, 35, 24, [2, 2]), '');
 for (const resident of village.people.slice(0, 3)) setOutsideWork(village, resident, true);
 village.autoBuy = true;

@@ -4,6 +4,7 @@ import {createWeekend,chooseCamp,plan,placementError,tick,finished,canFinish,end
 import {ensureInfrastructure} from '../web/v02/weekend/infrastructure.js';
 import {transportCost} from '../web/v02/weekend/physical-trade.js';
 import {ROAD_SHIFT,PARK_Z,accessRoadAt} from '../web/v02/weekend/road-layout.js';
+import {advance} from './fixtures.mjs';
 import {arrivalPose,vehiclePose} from '../web/v02/weekend/arrival.js';
 function fresh(camp){const s=createWeekend(42);enableFastNavigation(s);ensureInfrastructure(s).grid.enabled=false;assert(chooseCamp(s,camp));return s;}
 function runUntil(s,seconds,done){for(let i=0;i<seconds*10&&!done();i++)tick(s,.1);assert(done(),'resident actions must finish within the scenario budget');}
@@ -34,10 +35,10 @@ for(const camp of ['shade','entrance','clearing']){
 const trip=fresh('entrance');trip.emergencyFood=false;
 const money=trip.money,wood=trip.wood,cost=MATERIALS.wood.price+transportCost(trip);
 assert(supplyRun(trip,'wood'));assert.equal(trip.money,money-cost);assert.equal(trip.wood,wood);
-for(let i=0;i<200;i++)tick(trip,.1);
+advance(trip,{seconds:20});
 const loaded=restore(save(trip));assert(loaded);enableFastNavigation(loaded);
 runUntil(loaded,900,()=>!loaded.trip);assert.equal(loaded.wood,wood+MATERIALS.wood.quantity);
-for(let i=0;i<600;i++)tick(loaded,.1);
+advance(loaded,{seconds:60});
 assert.equal(loaded.wood,wood+MATERIALS.wood.quantity,'no duplicate delivery after reload');
 const bad=JSON.parse(save(loaded));bad.materials.tank=-1;assert.equal(restore(JSON.stringify(bad)),null);assert.equal(restore('{broken'),null);
 console.log('PASS paid supply trip, in-flight restoration, exactly-once receipt and malformed-save rejection');

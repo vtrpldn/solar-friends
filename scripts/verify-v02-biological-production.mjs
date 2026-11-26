@@ -1,12 +1,13 @@
 import assert from 'node:assert/strict';
 import {BIOLOGY,GAME_DAY,biologicalStep,growthRate,harvestOutput,beginBiology} from '../web/v02/weekend/biological-production.js';
-import {createWeekend,chooseCamp,PROJECTS,PROCESSES,queueProduction,tick,save,restore,enableFastNavigation} from '../web/v02/weekend/simulation.js';
+import {PROJECTS,PROCESSES,queueProduction,save,restore} from '../web/v02/weekend/simulation.js';
 import {syncInfrastructure} from '../web/v02/weekend/infrastructure.js';
-const s=createWeekend(42);chooseCamp(s,'entrance');enableFastNavigation(s);
+import {village,advance} from './fixtures.mjs';
+const {s}=village();
 const p={id:s.nextId++,key:'garden',x:s.stock.x+3,z:s.stock.z+3,work:PROJECTS.garden.work,delivered:0};s.projects.push(p);s.materials.seedlings=2;
 const sys=syncInfrastructure(s,PROJECTS);sys.nodes[p.id].water[0]=12;
 assert.equal(queueProduction(s,p.id,'vegetables'),'');
-for(let i=0;i<8000&&!s.operations[0].planted;i++)tick(s,.1);
+advance(s,{seconds:800,until:()=>s.operations[0].planted});
 const op=s.operations[0];assert(op.planted,'residents actually plant before growth starts');assert.equal(op.phase,'growing');
 assert(!s.people.some(r=>r.operation===op.id),'growth does not occupy a resident');
 assert(restore(save(s)),'growing save restores');
@@ -30,7 +31,7 @@ console.log('PASS dry-soil stall, continuing irrigation demand, recovery and rai
 const orchard={id:1};const planting={time:0,projects:[orchard]},fruit={site:1,recipe:'fruit'};
 assert(beginBiology(planting,fruit,{}));assert.equal(fruit.growthRemaining,730*GAME_DAY,'new orchard has a juvenile establishment period');
 const repeat={site:1,recipe:'fruit'};assert(beginBiology(planting,repeat,{}));assert.equal(repeat.growthRemaining,120*GAME_DAY,'establishment does not recur for mature trees');
-const timber=createWeekend(44);chooseCamp(timber,'entrance');const stand={id:timber.nextId++,key:'supply-0',x:timber.stock.x+4,z:timber.stock.z+4,work:PROJECTS['supply-0'].work,delivered:0,harvestCount:1};timber.projects.push(stand);syncInfrastructure(timber,PROJECTS);
+const {s:timber}=village({seed:44,fast:false});const stand={id:timber.nextId++,key:'supply-0',x:timber.stock.x+4,z:timber.stock.z+4,work:PROJECTS['supply-0'].work,delivered:0,harvestCount:1};timber.projects.push(stand);syncInfrastructure(timber,PROJECTS);
 assert.match(queueProduction(timber,stand.id,'wood'),/tree_starts/);timber.materials.tree_starts=4;assert.equal(queueProduction(timber,stand.id,'wood'),'');assert.equal(timber.materials.tree_starts,0);assert(restore(save(timber)));
 console.log('PASS juvenile orchard, mature repeat cycle and paid timber replanting inputs');
 

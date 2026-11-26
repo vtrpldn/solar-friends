@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
-import {PROJECTS,createWeekend,chooseCamp,requiredLoads,save,restore} from '../web/v02/weekend/simulation.js';
+import {PROJECTS,createWeekend,requiredLoads,save,restore} from '../web/v02/weekend/simulation.js';
 import {migrateConstructionLabor,constructionSpecText} from '../web/v02/weekend/construction-specs.js';
+import {village} from './fixtures.mjs';
 for(const [key,d]of Object.entries(PROJECTS)){
  if(!d.construction)continue;
  const combined={};for(const p of d.construction.phases)for(const [id,q]of Object.entries(p.materials))combined[id]=(combined[id]||0)+q;
@@ -23,7 +24,7 @@ assert(PROJECTS['home-family'].work>PROJECTS.house.work);
 assert.equal(PROJECTS.shelter.work,1067,'keep first-camp recipe pacing');
 // Labor migration preserves a save using the current physical catalog. The
 // archived miniature-building replay predates the explicitly replaced catalog.
-const old=createWeekend(42);chooseCamp(old,'entrance');
+const old=village({fast:false}).s;
 old.projects.push({id:old.nextId++,key:'house',x:50,z:50,work:PROJECTS.house.construction.legacyWork,delivered:requiredLoads('house')});
 delete old.constructionLaborVersion;
 const cash=old.money,inventory=structuredClone(old.materials),delivered=old.projects.map(p=>p.delivered);

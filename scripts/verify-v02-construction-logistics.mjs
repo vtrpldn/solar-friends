@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
-import {createWeekend,chooseCamp,plan,tick,PROJECTS,requiredLoads,save,restore,prioritize} from '../web/v02/weekend/simulation.js';
+import {plan,tick,PROJECTS,requiredLoads,save,restore,prioritize} from '../web/v02/weekend/simulation.js';
 import {crewLimit,carriedLoads} from '../web/v02/weekend/construction-logistics.js';
-const s=createWeekend();chooseCamp(s,'clearing');
+import {village} from './fixtures.mjs';
+const {s}=village({seed:0,camp:'clearing',fast:false});
 s.wood=200;for(const k of Object.keys(s.materials))s.materials[k]=50;
 assert.equal(plan(s,'covered-stores',40,39),'');
 const depot=s.projects[0];depot.delivered=requiredLoads(depot.key);depot.work=PROJECTS[depot.key].work;

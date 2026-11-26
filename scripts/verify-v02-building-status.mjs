@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
-import {createSandbox,PROJECTS,productionBlocker,queueProduction,buildingOperatingStatus} from '../web/v02/weekend/simulation.js';
+import {PROJECTS,productionBlocker,queueProduction,buildingOperatingStatus} from '../web/v02/weekend/simulation.js';
 import {syncInfrastructure} from '../web/v02/weekend/infrastructure.js';
-const s=createSandbox(42);s.mode='story';
+import {village} from './fixtures.mjs';
+const s=village({sandbox:true,story:true,fast:false}).s;
 const p={id:s.nextId++,key:'supply-5',x:35,z:32,work:0};s.projects.push(p);
 assert.equal(buildingOperatingStatus(s,p).state,'Under construction');
 assert.match(productionBlocker(s,p.id,'craft_produce-crates'),/completed/);

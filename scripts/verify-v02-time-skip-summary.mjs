@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {brl} from '../web/v02/weekend/money.js';
-import {createWeekend,createSandbox,chooseCamp,save,enableFastNavigation,PROJECTS,MATERIALS} from '../web/v02/weekend/simulation.js';
+import {createSandbox,save,PROJECTS,MATERIALS} from '../web/v02/weekend/simulation.js';
+import {village} from './fixtures.mjs';
 import {PROCESSES} from '../web/v02/weekend/catalog-rules.js';
 import {DAY} from '../web/v02/weekend/weather.js';
 import {foodPortions} from '../web/v02/weekend/food-storage.js';
@@ -8,7 +9,7 @@ import {skipDays} from '../web/v02/weekend/time-skip.js';
 import {snapshotVillage,summarizeSkip} from '../web/v02/weekend/time-skip-summary.js';
 
 const options={projects:PROJECTS,materials:MATERIALS,recipes:PROCESSES};
-const fresh=()=>{const s=createWeekend(42);chooseCamp(s,'entrance');enableFastNavigation(s);return s;};
+const fresh=()=>village().s;
 // Money reads as pt-BR: "R$ 1.234,56".
 const cents=text=>Math.round(Number(text.replace('−','-').replace(/[^0-9,+-]/g,'').replace(',','.'))*100);
 const find=(summary,id)=>summary.sections.find(section=>section.id===id);

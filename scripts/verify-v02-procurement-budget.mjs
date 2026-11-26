@@ -2,7 +2,8 @@ import assert from 'node:assert/strict';
 import {collectionBudget,spendableMoney} from '../web/v02/weekend/procurement-budget.js';
 import {blueprintManifest,receiveBlueprintShipment,transportCost,projectFreight,TRUCK_LIMITS} from '../web/v02/weekend/physical-trade.js';
 import {transact,financeSummary} from '../web/v02/weekend/finances.js';
-import {createWeekend,chooseCamp,blueprintPurchase,PROJECTS,save,restore,supplyRun} from '../web/v02/weekend/simulation.js';
+import {blueprintPurchase,PROJECTS,save,restore,supplyRun} from '../web/v02/weekend/simulation.js';
+import * as fixtures from './fixtures.mjs';
 const s={time:0,money:100,projects:[{id:1,pendingMaterials:{stone:40}}]};
 // 800 kg of stone would need three car trips, so it is quoted as one supplier truck.
 assert.deepEqual(collectionBudget(s),{trips:1,cost:44.6,truck:true});
@@ -27,7 +28,7 @@ const heavy={money:100000,projects:[{id:1,pendingMaterials:{stone:260}}]};
 assert.deepEqual(collectionBudget(heavy),{trips:2,cost:52.36,truck:true},'a full truck leaves one car load behind');
 const legacy={money:100,projects:[{id:1,pendingMaterials:{stone:40}}],trip:{project:1}};
 assert.equal(collectionBudget(legacy).cost,0,'old full-order trip remains prepaid');
-const village=createWeekend(42);chooseCamp(village,'entrance');
+const {s:village}=fixtures.village({fast:false});
 const key=Object.keys(PROJECTS).find(k=>blueprintPurchase(village,k).cost>0);
 const quote=blueprintPurchase(village,key);village.money=quote.cost+quote.transport-.01;
 assert(blueprintPurchase(village,key).error,'full delivery budget required');

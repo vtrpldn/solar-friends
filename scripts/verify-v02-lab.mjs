@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import {LabRunner} from '../web/v02/weekend/lab-runner.js';
-import {createWeekend,chooseCamp,tick,save,enableFastNavigation,route,PROJECTS,requiredLoads} from '../web/v02/weekend/simulation.js';
-const a=createWeekend(42);chooseCamp(a,'shade');const b=structuredClone(a),runner=new LabRunner(a,tick);runner.paused=false;enableFastNavigation(a);
+import {tick,save,enableFastNavigation,route,PROJECTS,requiredLoads} from '../web/v02/weekend/simulation.js';
+import {village} from './fixtures.mjs';
+const {s:a}=village({camp:'shade',fast:false});const b=structuredClone(a),runner=new LabRunner(a,tick);runner.paused=false;enableFastNavigation(a);
 let advanced=0;for(let i=0;i<100;i++)advanced+=runner.advance(.01,Infinity,()=>0);
 for(let i=0;i<Math.round(advanced*10);i++)tick(b,.1);
 assert.equal(save(a),save(b),'128x scheduling preserves identical fixed-step simulation');
@@ -18,12 +19,12 @@ assert.deepEqual(route(a,a.stock,{x:40,z:40}),route(b,b.stock,{x:40,z:40}));
 console.log('PASS optional navigation cache matches baseline routes and invalidates on construction changes');
 
 for(const speed of [256,512,1024]){
- const state=createWeekend(42);chooseCamp(state,'entrance');const baseline=structuredClone(state);enableFastNavigation(state);enableFastNavigation(baseline);
+ const {s:state}=village({fast:false});const baseline=structuredClone(state);enableFastNavigation(state);enableFastNavigation(baseline);
  const fast=new LabRunner(state,tick);fast.speed=speed;fast.paused=false;const advanced=fast.advance(.1,Infinity,()=>0);
  for(let i=0;i<Math.round(advanced*10);i++)tick(baseline,.1);assert.equal(save(state),save(baseline));
 }
 console.log('PASS 256x, 512x and 1024x retain fixed-step equivalence');
-const cached=createWeekend(51);chooseCamp(cached,'entrance');enableFastNavigation(cached);
+const {s:cached}=village({seed:51});
 const ordinary=structuredClone(cached);
 for(const state of [cached,ordinary])state.projects.push({id:900,key:'shelter',x:38,z:10,rotation:0,work:0,delivered:0});
 for(const mutation of [p=>{},p=>p.x++,p=>p.z++,p=>p.rotation=1,p=>p.work=PROJECTS.shelter.work,p=>p.felled=true,p=>p.felled=false]){

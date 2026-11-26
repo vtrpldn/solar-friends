@@ -1,13 +1,15 @@
 import assert from 'node:assert/strict';
-import {createWeekend,chooseCamp,enableFastNavigation,PROJECTS,PROCESSES,productionBlocker,storedMaterials,storageCapacity,materialCount,residentWorkPlan,buildingOperatingStatus,tick,save,restore} from '../web/v02/weekend/simulation.js';
+import {createWeekend,PROJECTS,PROCESSES,productionBlocker,storedMaterials,storageCapacity,materialCount,residentWorkPlan,buildingOperatingStatus,save,restore} from '../web/v02/weekend/simulation.js';
 import {autonomousWorkPlan,startAutonomousWork,workNeed,WORKING_BATCHES,SPARE_BATCHES,MAX_WALK} from '../web/v02/weekend/autonomous-work.js';
 import {foodPolicy} from '../web/v02/weekend/food-policy.js';
 import {foodChange} from '../web/v02/weekend/food-storage.js';
 import {syncInfrastructure} from '../web/v02/weekend/infrastructure.js';
 import {equipmentState,EQUIPMENT_LIFE} from '../web/v02/weekend/equipment.js';
+import * as fixtures from './fixtures.mjs';
+const {advance}=fixtures;
 
 function village(...keys){
- const s=createWeekend(42);chooseCamp(s,'entrance');enableFastNavigation(s);s.rainSeen=s.rainResolved=true;s.emergencyFood=false;
+ const {s}=fixtures.village({emergencyFood:false});s.rainSeen=s.rainResolved=true;
  const sites=keys.map((key,i)=>{const p={id:s.nextId++,key,x:s.stock.x+4+i*6,z:s.stock.z+4,rotation:0,work:PROJECTS[key].work,delivered:0};s.projects.push(p);return p;});
  syncInfrastructure(s,PROJECTS);return {s,sites};
 }
@@ -17,9 +19,9 @@ const api={blocker:productionBlocker,stored:storedMaterials,capacity:storageCapa
 
 assert.equal(foodPolicy(createWeekend(1)).automatic,true,'residents cook for themselves by default');
 {
- const old=createWeekend(1);chooseCamp(old,'entrance');foodPolicy(old).automatic=false;delete old.autonomy;
+ const {s:old}=fixtures.village({seed:1,fast:false});foodPolicy(old).automatic=false;delete old.autonomy;
  assert.equal(restore(save(old)).foodPolicy.automatic,true,'older saves gain automatic cooking once');
- const chosen=createWeekend(1);chooseCamp(chosen,'entrance');foodPolicy(chosen).automatic=false;
+ const {s:chosen}=fixtures.village({seed:1,fast:false});foodPolicy(chosen).automatic=false;
  assert.equal(restore(save(chosen)).foodPolicy.automatic,false,'a later player choice survives reload');
 }
 {
@@ -27,11 +29,11 @@ assert.equal(foodPolicy(createWeekend(1)).automatic,true,'residents cook for the
  assert.match(residentWorkPlan(s,compost).reason,/Missing 4 scraps/,'no inputs, no job');
  foodChange(s,'scraps',12);
  assert.equal(residentWorkPlan(s,compost).recipe,'compost');
- for(let i=0;i<30&&!pending(s,'compost');i++)tick(s,1);
+ advance(s,{seconds:30,dt:1,until:()=>pending(s,'compost')});
  assert.equal(pending(s,'compost'),1,'residents start composting unprompted');
  assert.equal(s.materials.scraps,8,'inputs are charged once');
  assert.match(buildingOperatingStatus(s,compost).state,/Preparing|Working|Waiting|Composting|Developing/);
- for(let i=0;i<30;i++)tick(s,1);
+ advance(s,{seconds:30,dt:1});
  assert.equal(pending(s,'compost'),1,'one job per site');
 }
 {
@@ -79,7 +81,7 @@ assert.equal(foodPolicy(createWeekend(1)).automatic,true,'residents cook for the
  const {s}=village();const spot={x:s.stock.x+6,z:s.stock.z+6};
  for(const r of s.people){r.x=spot.x-3+s.people.indexOf(r)*.05;r.z=spot.z;r.walk=[{...spot}];r.target={...spot};r.energy=100;for(const k of Object.keys(r.needs||{}))r.needs[k]=100;}
  const walkers=s.people.slice(0,2);
- for(let i=0;i<20;i++)tick(s,1);
+ advance(s,{seconds:20,dt:1});
  assert(walkers.every(r=>!r.walk.some(w=>w.x===spot.x&&w.z===spot.z)),'crowded residents reach a shared waypoint in fast steps');
 }
 console.log('PASS residents start building work, cook, repair and reach shared waypoints unprompted');

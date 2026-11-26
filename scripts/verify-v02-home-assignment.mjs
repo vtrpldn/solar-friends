@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {createScalePreview} from '../web/v02/weekend/scale-preview.js';
-import {assignHome, availableHomes, homeResidents, PROJECTS, save, restore, tick} from '../web/v02/weekend/simulation.js';
+import {assignHome, availableHomes, homeResidents, PROJECTS, save, restore} from '../web/v02/weekend/simulation.js';
+import {advance} from './fixtures.mjs';
 const s=createScalePreview(false,'homes'), homes=availableHomes(s), home=homes.find(p=>(PROJECTS[p.key].beds||2)===2), [a,b,c]=s.people;
 assert(home);
 assert.equal(assignHome(s,a.id,home.id),'');
@@ -23,7 +24,7 @@ assert.equal(restore(JSON.stringify(missing)).people[0].home,null);
 // The assigned home wins over a nearer home, using the actual rest scheduler.
 const sleeper=s.people[1];sleeper.energy=10;sleeper.needs={hunger:100,bladder:100,bowels:100,hygiene:100,social:100,fun:100};
 sleeper.action='idle';sleeper.restSite=null;sleeper.cargo=false;
-for(let i=0;i<5 && !sleeper.restSite;i++)tick(s,.1);
+advance(s,{seconds:.5,until:()=>sleeper.restSite});
 assert.equal(sleeper.restSite,home.id);
 const previousRest=sleeper.restSite;
 assert.equal(assignHome(s,sleeper.id,null),'');
@@ -32,7 +33,7 @@ const reserved=createScalePreview(false,'homes'), cottage=availableHomes(reserve
 assert.equal(assignHome(reserved,reserved.people[0].id,cottage.id),'');
 const visitor=reserved.people[1];visitor.x=cottage.x;visitor.z=cottage.z+8;visitor.energy=10;
 visitor.needs={hunger:100,bladder:100,bowels:100,hygiene:100,social:100,fun:100};
-for(let i=0;i<5 && !visitor.restSite;i++)tick(reserved,.1);
+advance(reserved,{seconds:.5,until:()=>visitor.restSite});
 assert.notEqual(visitor.restSite,cottage.id,'An absent owner reserves their bed');
 reserved.infrastructure.nodes[cottage.id].enabled=false;
 assert.match(assignHome(reserved,reserved.people[2].id,cottage.id),/Reopen/);

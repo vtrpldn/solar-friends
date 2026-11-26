@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
-import {createSandbox,PROJECTS,requiredLoads,save,restore,placementError} from '../web/v02/weekend/simulation.js';
+import {PROJECTS,save,restore,placementError} from '../web/v02/weekend/simulation.js';
 import {autoConnectUtilities} from '../web/v02/weekend/auto-utilities.js';
 import {infrastructureStep,validInfrastructure} from '../web/v02/weekend/infrastructure.js';
-const s=createSandbox();s.rain=false;const people=s.people;s.people=[];
-const add=(key,x,z)=>{const p={id:s.nextId++,key,x,z,rotation:0,work:PROJECTS[key].work,delivered:requiredLoads(key)};s.projects.push(p);return p;};
+import {village,addSite} from './fixtures.mjs';
+const s=village({sandbox:true,seed:0,fast:false}).s;s.rain=false;const people=s.people;s.people=[];
+const add=(key,x,z)=>addSite(s,key,{x,z});
 const well=add('groundwater-well',50,50),pump=add('water-pump',53,50),tank=add('well',57,50);
 const sys=autoConnectUtilities(s,PROJECTS);sys.nodes[0].water[0]=0;
 const run=()=>{for(let i=0;i<2000;i++)infrastructureStep(s,PROJECTS,.1);};

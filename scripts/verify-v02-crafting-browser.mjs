@@ -3,15 +3,15 @@ import {mkdir} from 'node:fs/promises';
 import path from 'node:path';
 import {launchBrowser} from './browser.mjs';
 import {serve} from './serve.mjs';
-import {createWeekend,chooseCamp,PROJECTS,requiredLoads,save,restore} from '../web/v02/weekend/simulation.js';
+import {PROJECTS,save,restore} from '../web/v02/weekend/simulation.js';
 import {syncInfrastructure} from '../web/v02/weekend/infrastructure.js';
-import {STORY_SAVE} from '../web/v02/weekend/modes.js';
-const s=createWeekend(42);chooseCamp(s,'entrance');
+import {village,addSite,seedSave} from './fixtures.mjs';
+const {s}=village({fast:false});
 s.rainSeen=s.rainResolved=true;s.wood=30;
 Object.assign(s.materials,{planks:20,hardware:10,wheel_kit:2,bamboo:8,tool_heads:3,'carpentry-tools':1,'garden-tools':1,repair_supplies:3});
 s.equipment={wear:{'garden-tools':900},loans:{},soapLeft:0};
 for(const [key,x,z] of [['supply-5',40,39],['supply-5',44,39],['workshop',48,39]]) {
- s.projects.push({id:s.nextId++,key,x,z,work:PROJECTS[key].work,delivered:requiredLoads(key)});
+ addSite(s,key,{x,z});
 }
 syncInfrastructure(s,PROJECTS);
 s.view={speed:1,paused:true,position:[20,35,20],target:[1,2,3],zoom:1};
@@ -23,7 +23,7 @@ try {
  browser=await launchBrowser();
  const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=[];
  page.on('pageerror',e=>errors.push(e.message));
- await page.addInitScript(({key,snapshot})=>localStorage.setItem(key,snapshot),{key:STORY_SAVE,snapshot:save(s)});
+ await seedSave(page,s,{mute:false});
  await page.goto(`http://127.0.0.1:${server.address().port}/v2/?mode=story`);
  await page.locator('[data-manage="crafting"]').first().click();
  const root=page.locator('#crafting-screen');

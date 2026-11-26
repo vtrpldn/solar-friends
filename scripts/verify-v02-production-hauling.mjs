@@ -1,15 +1,16 @@
 import assert from 'node:assert/strict';
 import {productionLoad,HAND_LOAD} from '../web/v02/weekend/production-hauling.js';
 import {materialMass,materialMeasure} from '../web/v02/weekend/material-measures.js';
-import {createWeekend,chooseCamp,PROJECTS,PROCESSES,tick,save,restore,enableFastNavigation,materialCount} from '../web/v02/weekend/simulation.js';
+import {PROJECTS,PROCESSES,tick,save,restore,enableFastNavigation,materialCount} from '../web/v02/weekend/simulation.js';
 import {syncInfrastructure} from '../web/v02/weekend/infrastructure.js';
 import {inventoryOwnership} from '../web/v02/weekend/economy-inventory.js';
 import {MATERIALS} from '../web/v02/weekend/simulation.js';
+import {village} from './fixtures.mjs';
 for(const items of [{logs:12},{stone:8},{wood:20,planks:12}]){
  const load=productionLoad(items);assert(materialMass(load)<=HAND_LOAD.kg);
  assert(Object.entries(load).reduce((v,[id,n])=>v+materialMeasure(id).m3*n,0)<=HAND_LOAD.m3+1e-8);
 }
-let s=createWeekend(42);chooseCamp(s,'entrance');enableFastNavigation(s);
+let {s}=village();
 const site={id:s.nextId++,key:'supply-0',x:s.stock.x+6,z:s.stock.z+4,work:PROJECTS['supply-0'].work,delivered:0};
 s.projects.push(site);syncInfrastructure(s,PROJECTS);
 const op={id:1,site:site.id,recipe:'wood',phase:'return',work:PROCESSES.wood.work};s.operations=[op];s.nextOperation=2;
@@ -28,7 +29,7 @@ const invalid=JSON.parse(save(s));invalid.operations[0].haulRemaining.logs=PROCE
 console.log('PASS bounded hand loads, physical timber trips, partial-load ownership, reload and exact settlement');
 
 // A larger food harvest keeps its original expiry across partial deliveries.
-const food=createWeekend(43);chooseCamp(food,'entrance');enableFastNavigation(food);food.emergencyFood=false;
+const {s:food}=village({seed:43,emergencyFood:false});
 const greenhouse={id:food.nextId++,key:'greenhouse',x:food.stock.x+6,z:food.stock.z+4,work:PROJECTS.greenhouse.work,delivered:0};food.projects.push(greenhouse);syncInfrastructure(food,PROJECTS);
 const expiry=food.time+9600,foodJob={id:1,site:greenhouse.id,recipe:'greenhouse',phase:'return',work:PROCESSES.greenhouse.work,foodOutput:{food:[{n:48,expires:expiry}]}};food.operations=[foodJob];food.nextOperation=2;
 let split=false;for(let i=0;i<64000&&!foodJob.done;i++){tick(food,.1);if(foodJob.returningToSite){split=true;assert(restore(save(food)));}}

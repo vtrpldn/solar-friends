@@ -1,11 +1,10 @@
 import assert from 'node:assert/strict';
-import {createWeekend, createSandbox, chooseCamp, plan, cancelProject, cancelProjectError, PROJECTS, MATERIALS, PROCESSES, save, restore, say, queueProduction} from '../web/v02/weekend/simulation.js';
+import {createSandbox, plan, cancelProject, cancelProjectError, PROJECTS, MATERIALS, PROCESSES, save, restore, say, queueProduction} from '../web/v02/weekend/simulation.js';
 import {productionSearchText, productionActivity, residentProject} from '../web/v02/weekend/project-ui.js';
 import {eventHistory, eventTime} from '../web/v02/weekend/event-history.js';
+import {village} from './fixtures.mjs';
 function fresh() {
-  const s = createWeekend(42); s.arrivalElapsed=17; chooseCamp(s,'clearing');
-  s.money=10000; s.wood=7; for (const id of Object.keys(s.materials)) s.materials[id]=0;
-  return s;
+  return village({camp:'clearing', fast:false, money:10000, wood:7, zero:true}).s;
 }
 const s=fresh(), money=s.money, wood=s.wood;
 assert.equal(plan(s,'shelter',40,39),'');

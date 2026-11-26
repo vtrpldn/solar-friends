@@ -2,7 +2,8 @@ import assert from 'node:assert/strict';
 import {createSandbox,plan,planField,fieldPlacementError,queueBedJob,configureBed,resizeField,tick,save,restore,enableFastNavigation,PROJECTS} from '../web/v02/weekend/simulation.js';
 import {CROPS,cultivationStep,ensureCultivation,validCultivation,farmJobSpec,finishFarmJob} from '../web/v02/weekend/cultivation.js';
 import {GAME_DAY} from '../web/v02/weekend/biological-production.js';
-let s=createSandbox(42);enableFastNavigation(s);
+import {village,advance} from './fixtures.mjs';
+let s=village({sandbox:true}).s;
 let placed=false;
 for(let z=25;z<55&&!placed;z++)for(let x=24;x<55&&!placed;x++)if(!fieldPlacementError(s,x,z,[2,2])){assert.equal(planField(s,x,z,[2,2]),'');placed=true;}
 assert(placed);let p=s.projects.at(-1);
@@ -42,13 +43,13 @@ const legacy=JSON.parse(save(createSandbox(42)));for(const id of Object.keys(CRO
 assert(restore(JSON.stringify(legacy)));
 console.log('PASS regular biological duration, every crop/enclosure, occupied expansion/shrink and legacy product migration');
 
-const greenhouseState=createSandbox(42);enableFastNavigation(greenhouseState);assert.equal(plan(greenhouseState,'greenhouse',50,50),'');
+const {s:greenhouseState}=village({sandbox:true});assert.equal(plan(greenhouseState,'greenhouse',50,50),'');
 const gp=greenhouseState.projects.at(-1);ensureCultivation(greenhouseState,gp);
 for(const crop of Object.keys(CROPS)){
  assert.equal(configureBed(greenhouseState,gp.id,0,{crop}),'');greenhouseState.materials[`${crop}_seed`]=100;
  for(const action of ['prepare','plant','harvest']){
   assert.equal(queueBedJob(greenhouseState,gp.id,0,action),'');const op=greenhouseState.operations.at(-1);
-  for(let i=0;i<80000&&!op.done;i++)tick(greenhouseState,.1);
+  advance(greenhouseState,{seconds:8000,until:()=>op.done});
   assert(op.done,`${crop} greenhouse ${action}: ${op.status}`);assert(restore(save(greenhouseState)));
  }
 }
@@ -90,7 +91,7 @@ const amendJob={farm:{bed:0,action:'amend'},input:{compost:2}};finishFarmJob(cle
 console.log('PASS density-dependent seeds/labor, late harvest loss, explicit clearing and amendment decomposition');
 
 // An existing farm supplies its own work even with no reserved production workers.
-const autonomous=createSandbox(42);enableFastNavigation(autonomous);
+const {s:autonomous}=village({sandbox:true});
 assert.equal(planField(autonomous,50,50,[2,2]),'');
 const field=autonomous.projects.at(-1);
 autonomous.instantBuild=false;
@@ -102,6 +103,6 @@ assert(constructionQueued,'construction competes for workers');
 autonomous.materials.greens_seed=20;
 autonomous.foodReserveDays=0;
 autonomous.economyPolicies={sales:{},work:{food:0,maintenance:0,production:0,construction:3,essentialWorkers:0,productionWorkers:0}};
-for(let i=0;i<40000&&!autonomous.operations?.some(op=>op.farm?.action==='harvest'&&op.done);i++)tick(autonomous,.1);
+advance(autonomous,{seconds:4000,until:()=>autonomous.operations?.some(op=>op.farm?.action==='harvest'&&op.done)});
 assert(autonomous.operations.some(op=>op.farm?.action==='harvest'&&op.done),'residents prepare, plant, harvest and deliver without player orders');
 assert(field.cultivation.beds.some(b=>b.exportedKg>0));

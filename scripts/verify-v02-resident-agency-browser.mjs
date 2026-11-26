@@ -3,14 +3,13 @@ import {mkdir} from 'node:fs/promises';
 import path from 'node:path';
 import {launchBrowser} from './browser.mjs';
 import {serve} from './serve.mjs';
-import {createWeekend,chooseCamp,save,tick,enableFastNavigation} from '../web/v02/weekend/simulation.js';
 import {PROFILES} from '../web/v02/weekend/resident-personality.js';
-import {STORY_SAVE} from '../web/v02/weekend/modes.js';
+import {village,advance,seedSave} from './fixtures.mjs';
 
 // Generate the displayed memories through normal simulation, then load its save.
-const s=createWeekend(42);chooseCamp(s,'entrance');enableFastNavigation(s);
+const {s}=village();
 s.rainSeen=s.rainResolved=true;s.people[0].needs.social=5;s.people[1].needs.social=20;
-for(let i=0;i<3000 && !s.people.some(r=>r.mind?.memories.some(m=>m.kind==='conversation'));i++)tick(s,.1);
+advance(s,{seconds:300,until:()=>s.people.some(r=>r.mind?.memories.some(m=>m.kind==='conversation'))});
 const speaker=s.people.find(r=>r.mind?.memories.some(m=>m.kind==='conversation'));
 assert(speaker,'fixture conversation must really complete');
 s.view={speed:1,paused:true,position:[20,35,20],target:[1,2,3],zoom:1};
@@ -23,7 +22,7 @@ try {
  page.setDefaultTimeout(30000);
  page.on('pageerror',error=>errors.push(error.message));
  page.on('console',message=>{if(message.type()==='warning'||message.type()==='error')console.error(message.text());});
- await page.addInitScript(({key,snapshot})=>localStorage.setItem(key,snapshot),{key:STORY_SAVE,snapshot:save(s)});
+ await seedSave(page,s,{mute:false});
  await page.goto(`http://127.0.0.1:${server.address().port}/v2/?mode=story`);
  console.log('Loaded resident profile fixture');
  await page.locator('[data-panel-toggle="people"]').click();

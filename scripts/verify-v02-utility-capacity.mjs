@@ -1,13 +1,14 @@
 import assert from 'node:assert/strict';
-import {createWeekend,chooseCamp,PROJECTS,tick,enableFastNavigation,save,restore} from '../web/v02/weekend/simulation.js';
+import {PROJECTS,save,restore} from '../web/v02/weekend/simulation.js';
+import {village,advance} from './fixtures.mjs';
 import {syncInfrastructure,infrastructureStep} from '../web/v02/weekend/infrastructure.js';
 import {upkeep,upkeepStep} from '../web/v02/weekend/asset-upkeep.js';
-const s=createWeekend(42);chooseCamp(s,'entrance');enableFastNavigation(s);
+const {s}=village();
 const p={id:s.nextId++,key:'solar_farm',x:s.stock.x+5,z:s.stock.z+5,work:PROJECTS.solar_farm.work,delivered:0};s.projects.push(p);
 const sys=syncInfrastructure(s,PROJECTS);assert.equal(sys.nodes[p.id].battery,PROJECTS.solar_farm.materials.batteries*4);
 s.time=400;infrastructureStep(s,PROJECTS,1);assert(sys.nodes[p.id].generation<=PROJECTS.solar_farm.materials.panels*.6);
 p.batteryAgeDays=8*365;syncInfrastructure(s,PROJECTS);assert.equal(sys.nodes[p.id].battery,3.2);
 upkeep(s).dailyBudget=6500;s.materials.batteries=1;s.materials.electrical=1;upkeepStep(s,PROJECTS,0);assert(s.upkeep.jobs.some(j=>j.battery));assert(restore(save(s)));
-for(let i=0;i<30000&&p.batteryAgeDays>1;i++)tick(s,.1);
+advance(s,{seconds:3000,until:()=>!(p.batteryAgeDays>1)});
 assert(p.batteryAgeDays<1,'resident replaces aged equipment');assert.equal(s.materials.batteries,0);assert.equal(s.materials.electrical,0);syncInfrastructure(s,PROJECTS);assert(sys.nodes[p.id].battery>3.99);assert(restore(save(s)));
 console.log('PASS panel/battery quantity consistency, calendar degradation, paid replacement parts, resident installation and save state');

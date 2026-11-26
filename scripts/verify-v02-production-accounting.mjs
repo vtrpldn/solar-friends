@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
-import {createWeekend,chooseCamp,PROJECTS,PROCESSES,queueProduction,tick,save,restore,enableFastNavigation} from '../web/v02/weekend/simulation.js';
+import {PROJECTS,PROCESSES,queueProduction,tick,save,restore} from '../web/v02/weekend/simulation.js';
+import {village} from './fixtures.mjs';
 import {recipeBalance,productionSummary,validProductionAccounting} from '../web/v02/weekend/production-accounting.js';
 import {materialMass} from '../web/v02/weekend/material-measures.js';
 import {cargoSize} from '../web/v02/weekend/physical-trade.js';
@@ -10,7 +11,7 @@ for(const [id,r]of Object.entries(PROCESSES)){
  assert.equal(cargoSize(r.output).kg,materialMass(r.output),'cargo uses identical units');
 }
 assert.equal(recipeBalance('vegetables',PROCESSES.vegetables),null,'biological growth is not a closed material transformation');
-const s=createWeekend(42);chooseCamp(s,'entrance');enableFastNavigation(s);s.rainResolved=s.rainSeen=true;
+const {s}=village();s.rainResolved=s.rainSeen=true;
 // Diagnostic fixture: a completed workbench, then ordinary resident production.
 const site={id:s.nextId++,key:'supply-5',x:s.stock.x+3,z:s.stock.z+3,rotation:0,work:PROJECTS['supply-5'].work,delivered:0};s.projects.push(site);
 const wood=s.wood,planks=s.materials.planks;

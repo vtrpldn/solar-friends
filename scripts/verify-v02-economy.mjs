@@ -4,11 +4,8 @@ import {
   PROJECTS,
   PROCESSES,
   MATERIALS,
-  createWeekend,
-  chooseCamp,
   plan,
   tick,
-  requiredLoads,
   placementError,
   queueProduction,
   queueWater,
@@ -26,9 +23,7 @@ import {
   useWater,
   validInfrastructure,
 } from "../web/v02/weekend/infrastructure.js";
-const run = (s, seconds) => {
-  for (let i = 0; i < seconds * 10; i++) tick(s, 0.1);
-};
+import { village, addSite, advance } from "./fixtures.mjs";
 const finishJobs = (s) => {
   for (let i = 0; i < 64000; i++) {
     if (s.operations?.every((o) => o.done)) return;
@@ -37,9 +32,7 @@ const finishJobs = (s) => {
   assert.fail(`Jobs did not finish: ${JSON.stringify(s.operations)}`);
 };
 const fresh = () => {
-  const s = createWeekend();
-  s.arrivalElapsed = 17;
-  chooseCamp(s, "clearing");
+  const { s } = village({ seed: 0, camp: "clearing", fast: false });
   for (const id of Object.keys(MATERIALS))
     if (id !== "wood") s.materials[id] = 500;
   s.wood = 500;
@@ -47,15 +40,7 @@ const fresh = () => {
   return s;
 };
 const built = (s, key, x, z) => {
-  const p = {
-    id: s.nextId++,
-    key,
-    x,
-    z,
-    work: PROJECTS[key].work,
-    delivered: requiredLoads(key),
-  };
-  s.projects.push(p);
+  const p = addSite(s, key, { x, z });
   syncInfrastructure(s, PROJECTS);
   return p;
 };
@@ -170,7 +155,7 @@ assert(sellMaterial(jobs, "stone"));
 assert.equal(jobs.materials.stone, 0);
 const trees = built(jobs, "supply-0", 44, 40);
 assert.equal(queueProduction(jobs, trees.id, "wood"), "");
-for(let i=0;i<96000&&!jobs.operations.some(o=>o.site===trees.id&&o.phase==="growing");i++)tick(jobs,.1);
+advance(jobs,{seconds:9600,until:()=>jobs.operations.some(o=>o.site===trees.id&&o.phase==="growing")});
 assert(jobs.operations.some(o=>o.site===trees.id&&o.phase==="growing"), "new timber stand grows without occupying a worker");
 assert.equal(jobs.materials.logs,0,"new trees do not yield overnight wood");
 assert(storedMaterials(jobs) < storageCapacity(jobs));
@@ -186,7 +171,7 @@ labor.wood = 20;
 const panel = built(labor, "solar_farm", 40, 40),
   shop = built(labor, "workshop", 44, 40);
 assert.equal(connectUtility(labor, "power", panel.id, shop.id), "");
-run(labor, 100);
+advance(labor, { seconds: 100 });
 assert(
   labor.infrastructure.links[0].work === labor.infrastructure.links[0].required,
   "Resident installs line",
@@ -262,7 +247,7 @@ assert.equal(
 );
 const again = restore(save(pending));
 assert(again);
-run(again, 80);
+advance(again, { seconds: 80 });
 assert.equal(
   again.materials.walls,
   2,
@@ -297,9 +282,9 @@ assert.equal(queueProduction(auto,autoQuarry.id,'stone'),'');
 autoQuarry.repeat='stone';autoQuarry.stockTarget=24;
 const loaded=restore(save(auto));assert(loaded);assert.equal(loaded.projects.find(p=>p.id===autoQuarry.id).repeat,undefined);assert.equal(loaded.projects.find(p=>p.id===autoQuarry.id).stockTarget,undefined);
 assert.equal(loaded.operations.filter(o=>o.recipe==='stone').length,1,'migration retains the active order');
-for(let i=0;i<120000&&!loaded.operations.find(o=>o.recipe==='stone').done;i++)tick(loaded,.1);
+advance(loaded,{seconds:12000,until:()=>loaded.operations.find(o=>o.recipe==='stone').done});
 assert(loaded.operations.find(o=>o.recipe==='stone').done);
 assert.equal(loaded.materials.stone,PROCESSES.stone.output.stone);
-run(loaded,100);assert.equal(loaded.operations.filter(o=>o.recipe==='stone').length,1,'completed work never repeats');
+advance(loaded,{seconds:100});assert.equal(loaded.operations.filter(o=>o.recipe==='stone').length,1,'completed work never repeats');
 assert.equal(queueProduction(loaded,autoQuarry.id,'stone'),'','another manual order remains available');
 console.log('PASS legacy repeat settings retired, current work preserved and new production requires an order');

@@ -5,14 +5,14 @@ import {serve} from './serve.mjs';
 import {createSandbox,planField,plan,PROJECTS,save,restore} from '../web/v02/weekend/simulation.js';
 import {ensureAnimalCare} from '../web/v02/weekend/animal-care.js';
 import {weatherStep} from '../web/v02/weekend/weather.js';
-import {SANDBOX_SAVE} from '../web/v02/weekend/modes.js';
+import {seedSave} from './fixtures.mjs';
 const out=process.env.REALISM_SCREENSHOTS||'/tmp/solar-realism';await mkdir(out,{recursive:true});
 const s=createSandbox(42);assert.equal(planField(s,50,50,[4,4]),'');const field=s.projects.at(-1),bed=field.cultivation.beds[0];Object.assign(bed,{stage:'failed',growth:.5,droughtDamage:1,drySeconds:3200*7,moisture:0});
 assert.equal(plan(s,'coop',59,50),'');const coop=s.projects.at(-1);coop.work=PROJECTS.coop.work;coop.animalHealth=55;ensureAnimalCare(s,coop,'coop');
 s.view={speed:1,paused:true,position:[64,35,64],target:[44,0,40],zoom:1};weatherStep(s);assert(restore(save(s)));
 const server=await serve(0),browser=await launchBrowser();const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
 try{
- await page.addInitScript(({key,value})=>{if(!sessionStorage.getItem('realism-fixture')){localStorage.setItem(key,value);sessionStorage.setItem('realism-fixture','1');}},{key:SANDBOX_SAVE,value:save(s)});
+ await seedSave(page,s,{mode:'sandbox',mute:false,once:true});
  await page.goto(`http://127.0.0.1:${server.address().port}/v2/?mode=sandbox`);await page.waitForSelector('#weather-summary');await page.waitForTimeout(1500);
  await page.locator('#weather-summary').click();assert(await page.locator('#weather-forecast').isVisible());assert.match(await page.locator('#weather-forecast').innerText(),/Day 3/);await page.screenshot({path:`${out}/forecast.png`});await page.locator('#weather-summary').click();
  await page.locator('[data-panel-toggle="projects-panel"]').click();await page.locator('#completed-title').click();

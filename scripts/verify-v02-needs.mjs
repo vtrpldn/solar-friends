@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
-import {createWeekend,chooseCamp,PROJECTS,requiredLoads,tick,save,restore,plan,supplyRun} from '../web/v02/weekend/simulation.js';
+import {PROJECTS,tick,save,restore,plan,supplyRun} from '../web/v02/weekend/simulation.js';
+import {village,addSite} from './fixtures.mjs';
 import {syncInfrastructure} from '../web/v02/weekend/infrastructure.js';
 import {NEED_KEYS} from '../web/v02/weekend/resident-needs.js';
 const run=(s,seconds,done=()=>false)=>{for(let i=0;i<seconds*10;i++){tick(s,.1);if(done())return true;}return done();};
-function fresh(){const s=createWeekend();chooseCamp(s,'clearing');s.people.forEach((r,i)=>{r.needs=Object.fromEntries(NEED_KEYS.map(k=>[k,100]));r.x=30+i;r.z=-10;r.energy=90;});return s;}
-function built(s,key,x=40,z=39){const p={id:s.nextId++,key,x,z,work:PROJECTS[key].work,delivered:requiredLoads(key)};s.projects.push(p);syncInfrastructure(s,PROJECTS);return p;}
+function fresh(){const {s}=village({seed:0,camp:'clearing',fast:false});s.people.forEach((r,i)=>{r.needs=Object.fromEntries(NEED_KEYS.map(k=>[k,100]));r.x=30+i;r.z=-10;r.energy=90;});return s;}
+function built(s,key,x=40,z=39){const p=addSite(s,key,{x,z});syncInfrastructure(s,PROJECTS);return p;}
 {
  const s=fresh(),r=s.people[0];r.needs.hunger=10;
  const meals=s.materials.meals;

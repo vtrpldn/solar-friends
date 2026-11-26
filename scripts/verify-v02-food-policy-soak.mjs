@@ -1,12 +1,13 @@
 // check-tier: soak
 import assert from 'node:assert/strict';
-import {createWeekend,chooseCamp,enableFastNavigation,PROJECTS,PROCESSES,tick,save,restore} from '../web/v02/weekend/simulation.js';
+import {enableFastNavigation,PROJECTS,PROCESSES,tick,save,restore} from '../web/v02/weekend/simulation.js';
 import {foodPolicy} from '../web/v02/weekend/food-policy.js';
 import {ensureFoodStorage,foodChange} from '../web/v02/weekend/food-storage.js';
 import {syncInfrastructure} from '../web/v02/weekend/infrastructure.js';
 import {materialReconciliation} from '../web/v02/weekend/material-ledger.js';
+import {village} from './fixtures.mjs';
 // Established-kitchen diagnostic: finite starting supplies, real jobs and travel.
-let s=createWeekend(42);chooseCamp(s,'entrance');enableFastNavigation(s);ensureFoodStorage(s);foodPolicy(s).automatic=true;
+let s=village().s;ensureFoodStorage(s);foodPolicy(s).automatic=true;
 foodChange(s,'food',80);foodChange(s,'greens',8);
 const p={id:s.nextId++,key:'kitchen',x:s.stock.x+3,z:s.stock.z+3,rotation:0,work:PROJECTS.kitchen.work,delivered:0};s.projects.push(p);
 const sys=syncInfrastructure(s,PROJECTS);sys.nodes[p.id].water[0]=sys.nodes[p.id].capacity[0];sys.biogas=20;s.rainSeen=s.rainResolved=true;

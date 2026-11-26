@@ -2,11 +2,12 @@ import assert from 'node:assert/strict';
 import {foodPolicy,kitchenPlan,validFoodPolicy} from '../web/v02/weekend/food-policy.js';
 import {ensureFoodStorage,foodChange,freshLots,foodStorageStep} from '../web/v02/weekend/food-storage.js';
 import {coolStoredFood,coolingStatus} from '../web/v02/weekend/cold-storage.js';
-import {createWeekend,chooseCamp,enableFastNavigation,PROJECTS,PROCESSES,productionBlocker,storedMaterials,storageCapacity,tick,save,restore} from '../web/v02/weekend/simulation.js';
+import {PROJECTS,PROCESSES,productionBlocker,storedMaterials,storageCapacity,tick,save,restore} from '../web/v02/weekend/simulation.js';
 import {syncInfrastructure} from '../web/v02/weekend/infrastructure.js';
+import {village,advance} from './fixtures.mjs';
 const api={blocker:productionBlocker,stored:storedMaterials,capacity:storageCapacity};
 function fixture(){
- const s=createWeekend(42);chooseCamp(s,'entrance');enableFastNavigation(s);ensureFoodStorage(s);foodPolicy(s).automatic=true;
+ const {s}=village();ensureFoodStorage(s);foodPolicy(s).automatic=true;
  for(const id of ['food','meals','eggs','milk'])foodChange(s,id,-s.materials[id]);
  foodChange(s,'food',60);foodChange(s,'beans',8);foodChange(s,'greens',8,[{n:8,expires:500}]);
  const kitchens=[];
@@ -33,7 +34,7 @@ assert.equal(kitchenPlan(recovery.s,recovery.kitchens[0],PROCESSES,api).recipe,'
 tick(recovery.s,.1);
 const cropMeal=recovery.s.operations.find(op=>op.recipe==='cook_greens');
 assert(cropMeal,'a resident cooking job is queued');
-for(let i=0;i<16000&&!cropMeal.done;i++)tick(recovery.s,.1);
+advance(recovery.s,{seconds:1600,until:()=>cropMeal.done});
 assert(cropMeal.done,'a resident delivers the crop meals to storage');
 const dry=fixture();foodPolicy(dry.s).freshDays=0;assert.equal(kitchenPlan(dry.s,dry.kitchens[0],PROCESSES,api).recipe,'preserve_meals');
 const expiry=fixture();foodChange(expiry.s,'greens',-8);foodChange(expiry.s,'beans',-8);expiry.s.foodStorage.lots.food[0].expires=1;

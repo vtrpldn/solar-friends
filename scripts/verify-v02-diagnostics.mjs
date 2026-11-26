@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
 import {createDiagnostics,copyDiagnostics} from '../web/v02/weekend/diagnostics.js';
-import {createWeekend,chooseCamp,save,restore} from '../web/v02/weekend/simulation.js';
+import {save,restore} from '../web/v02/weekend/simulation.js';
+import {village} from './fixtures.mjs';
 let clock=0;const diagnostics=createDiagnostics({now:()=>clock,limit:2});
-const state=createWeekend(42);chooseCamp(state,'entrance');
+const {s:state}=village({fast:false});
 const before=save(state);diagnostics.observe(state);
 assert.equal(save(state),before,'Observation leaves simulation unchanged');
 state.people[0].walk=[{x:1,z:2}];clock=1000;diagnostics.observe(state);

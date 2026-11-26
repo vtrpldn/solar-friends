@@ -3,6 +3,7 @@ import {createWeekend,chooseCamp,PROJECTS,PROCESSES,tick,queueProduction,product
 import {ensureNaturalLand} from '../web/v02/weekend/natural-resources.js';
 import {GATHERING} from '../web/v02/weekend/gathering.js';
 import {registerWorld,DEFAULT_SETTINGS} from '../web/v02/weekend/world-settings.js';
+import {village} from './fixtures.mjs';
 for(const biome of ['mata-atlantica','cerrado','caatinga']){
  for(const seed of [42,123,918]){
   const s=createWeekend(seed);s.worldSettings={...DEFAULT_SETTINGS,biome};registerWorld(seed,s.worldSettings);chooseCamp(s,'entrance');ensureNaturalLand(s,PROJECTS);
@@ -13,11 +14,11 @@ for(const biome of ['mata-atlantica','cerrado','caatinga']){
  }
 }
 // Upgrade an established layout without moving or replacing any existing object.
-const old=createWeekend(42);chooseCamp(old,'entrance');ensureNaturalLand(old,PROJECTS);old.projects=old.projects.filter(p=>!GATHERING[p.key]);delete old.gatheringLandVersion;
+const {s:old}=village({fast:false});ensureNaturalLand(old,PROJECTS);old.projects=old.projects.filter(p=>!GATHERING[p.key]);delete old.gatheringLandVersion;
 const originals=JSON.stringify(old.projects);ensureNaturalLand(old,PROJECTS);assert.equal(JSON.stringify(old.projects.filter(p=>!GATHERING[p.key])),originals);assert(old.projects.some(p=>GATHERING[p.key]));
 // Complete each job through the ordinary simulation, including multi-load hauling.
 for(const [key,d] of Object.entries(GATHERING)){
- let s=createWeekend(42);chooseCamp(s,'entrance');s.naturalLandVersion=s.gatheringLandVersion=1;s.emergencyFood=false;s.rainSeen=s.rainResolved=true;enableFastNavigation(s);
+ let {s}=village({emergencyFood:false});s.naturalLandVersion=s.gatheringLandVersion=1;s.rainSeen=s.rainResolved=true;
  let p={id:s.nextId++,key,x:s.stock.x+4,z:s.stock.z+4,work:1,delivered:0,natural:true};s.projects.push(p);
  const recipe=`gather-${key}`,resource=Object.keys(d.output)[0],before=materialCount(s,resource);assert.equal(queueProduction(s,p.id,recipe),'');assert(productionBlocker(s,p.id,recipe),'duplicate job prevented');
  let carried=false,reloaded=false;
@@ -30,7 +31,7 @@ console.log('PASS three-biome generation, additive old-save migration, finite ga
 
 // Additive gathering migration must respect rotated and expanded saved fields.
 for(const rotation of [0,1,2,3]){
- const s=createWeekend(42);chooseCamp(s,'entrance');ensureNaturalLand(s,PROJECTS);
+ const {s}=village({fast:false});ensureNaturalLand(s,PROJECTS);
  const anchor=s.projects.find(p=>GATHERING[p.key]);s.projects=s.projects.filter(p=>!GATHERING[p.key]);delete s.gatheringLandVersion;
  const field={id:s.nextId++,key:'field',x:anchor.x-4,z:anchor.z-4,fieldSize:[8,12],rotation,work:1};s.projects.push(field);
  ensureNaturalLand(s,PROJECTS);const [w,d]=footprint(field);

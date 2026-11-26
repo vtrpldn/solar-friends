@@ -7,10 +7,10 @@ import {
   PROJECTS,
   save,
   restore,
-  tick,
   canFinish,
 } from "../web/v02/weekend/simulation.js";
 import { saveKey } from "../web/v02/weekend/modes.js";
+import { advance } from "./fixtures.mjs";
 const s = createSandbox();
 assert.equal(s.stage, "playing");
 assert(!s.opening);
@@ -23,7 +23,7 @@ assert.equal(s.projects[0].work, PROJECTS.shelter.work);
 s.instantBuild = false;
 assert.equal(plan(s, "gathering", 29, 35), "");
 assert.equal(s.projects[1].work, 0);
-for (let i = 0; i < 6000; i++) tick(s, 0.1);
+advance(s, { seconds: 600 });
 assert.equal(s.projects[1].work, PROJECTS.gathering.work);
 assert(!canFinish(s));
 const loaded = restore(save(s));

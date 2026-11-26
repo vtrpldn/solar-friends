@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
-import {createWeekend,chooseCamp,planField,queueBedJob,plantingPurchase,tick,save,restore,committedMaterials,enableFastNavigation,MATERIALS,PROJECTS,PROCESSES} from '../web/v02/weekend/simulation.js';
+import {planField,queueBedJob,plantingPurchase,tick,save,restore,committedMaterials,enableFastNavigation,MATERIALS,PROJECTS,PROCESSES} from '../web/v02/weekend/simulation.js';
 import {queueCultivation} from '../web/v02/weekend/cultivation-overview.js';
 import {inventoryOwnership} from '../web/v02/weekend/economy-inventory.js';
+import {village} from './fixtures.mjs';
 function fresh(){
- const s=createWeekend();chooseCamp(s,'clearing');enableFastNavigation(s);s.money=1000;s.autoBuy=true;s.autoFood=false;
+ const {s}=village({seed:0,camp:'clearing',money:1000});s.autoBuy=true;s.autoFood=false;
  for(let x=35;x<50&&!s.projects.some(p=>p.key==='field');x+=3)for(let z=24;z<45;z+=3){if(!planField(s,x,z,[2,2]))break;}
  const p=s.projects.find(p=>p.key==='field');assert(p);
  p.cultivation.beds.forEach(b=>b.stage='prepared');

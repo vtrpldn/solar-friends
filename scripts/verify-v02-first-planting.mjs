@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
-import {createWeekend,chooseCamp,plan,PROJECTS,PROCESSES,MATERIALS,queueProduction,save,restore,tick,enableFastNavigation} from '../web/v02/weekend/simulation.js';
+import {plan,PROJECTS,PROCESSES,MATERIALS,queueProduction,save,restore,tick} from '../web/v02/weekend/simulation.js';
 import {inventoryOwnership} from '../web/v02/weekend/economy-inventory.js';
 import {removalYield} from '../web/v02/weekend/building-lifecycle.js';
+import {village,advance} from './fixtures.mjs';
 // Focused accounting fixture; real blueprint procurement and resident assembly.
-const s=createWeekend(42);chooseCamp(s,'entrance');s.materials.seedlings=2;
-assert.equal(plan(s,'garden',34,39),'');const p=s.projects.at(-1);enableFastNavigation(s);for(let i=0;i<96000&&p.work<PROJECTS.garden.work;i++)tick(s,.1);assert.equal(p.work,PROJECTS.garden.work);tick(s,.1);
+const {s}=village({materials:{seedlings:2}});
+assert.equal(plan(s,'garden',34,39),'');const p=s.projects.at(-1);advance(s,{seconds:9600,until:()=>p.work>=PROJECTS.garden.work});assert.equal(p.work,PROJECTS.garden.work);tick(s,.1);
 assert(restore(save(s)),'completed garden restores before planting');s.materials.seedlings=0;
 assert(p.cultivation.beds.every(b=>b.stage==='unprepared'&&b.growth===0),'new beds do not grant a planting or harvest');
 assert.match(queueProduction(s,p.id,'vegetables'),/cultivation beds/);

@@ -1,6 +1,5 @@
 import assert from "node:assert/strict";
 import {
-  createSandbox,
   supplyRun,
   tick,
   save,
@@ -8,8 +7,8 @@ import {
   MATERIALS,
 } from "../web/v02/weekend/simulation.js";
 import { townCarPose } from "../web/v02/weekend/town-trip.js";
-const s = createSandbox(42);
-s.money = 3000;
+import { village } from "./fixtures.mjs";
+const s = village({ sandbox: true, fast: false, money: 3000 }).s;
 const wood = s.wood;
 assert.ok(supplyRun(s, "wood"));
 assert.equal(s.trip.phase, "boarding");

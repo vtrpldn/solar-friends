@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
-import {createWeekend,chooseCamp,tick,save,restore,enableFastNavigation} from '../web/v02/weekend/simulation.js';
+import {save,restore} from '../web/v02/weekend/simulation.js';
+import {village,advance} from './fixtures.mjs';
 import {footfallSquare,recordFootfall,wearLevel} from '../web/v02/weekend/footfall.js';
 import {GAME_DAY} from '../web/v02/weekend/biological-production.js';
 
@@ -26,8 +27,8 @@ import {GAME_DAY} from '../web/v02/weekend/biological-production.js';
 }
 // Residents going about their day leave footfall, including through a save and during fast time.
 {
-  const s=createWeekend(42);chooseCamp(s,'entrance');enableFastNavigation(s);
-  for(let n=0;n<GAME_DAY*2;n++)tick(s,1);
+  const s=village().s;
+  advance(s,{seconds:GAME_DAY*2,dt:1});
   const strides=Object.values(s.footfall.squares);
   assert(strides.length>50,'two days of camp life tread the ground');
   assert(strides.every(Number.isInteger),'footfall is stored as whole strides');
@@ -44,7 +45,7 @@ console.log('PASS footfall accumulates by distance, regrows, survives saves and 
 {
   const {route}=await import('../web/v02/weekend/simulation.js');
   const {trodden}=await import('../web/v02/weekend/footfall.js');
-  const s=createWeekend(42);chooseCamp(s,'entrance');
+  const s=village({fast:false}).s;
   // A track one cell to the side is worth the small detour over a long enough walk.
   const lines=[];
   for(const length of [16,20,24,28])for(const dz of [6,9,12,-6,-9])for(const dx of [-2,2+length]){

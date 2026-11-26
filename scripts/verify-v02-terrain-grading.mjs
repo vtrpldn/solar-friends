@@ -4,7 +4,6 @@ import {
   createSandbox,
   plan,
   moveProject,
-  tick,
   enableFastNavigation,
   save,
   restore,
@@ -16,6 +15,7 @@ import {
   foundationPad,
 } from "../web/v02/weekend/elevation.js";
 import { createTerrain, updateTerrain } from "../web/v02/weekend/terrain.js";
+import { advance } from "./fixtures.mjs";
 const s = createSandbox(42);
 // Bare land: this fixture places buildings at fixed cells, before any grove could grow there.
 s.naturalLandVersion = s.gatheringLandVersion = 1;
@@ -90,7 +90,7 @@ const moved = restore(save(s));
 const movedGarden = moved.projects.find(p=>p.key==="garden");
 assert.equal(moveProject(moved, movedGarden.id, site.x + 8, site.z + 8), "");
 enableFastNavigation(moved);
-for(let i=0;i<64000&&movedGarden.removal;i++)tick(moved,.1);
+advance(moved,{seconds:6400,until:()=>!movedGarden.removal});
 assert.ok(!movedGarden.removal, "residents finish relocation");
 assert.ok(footprintRelief(site.x + 8, site.z + 8, 2, 2, 42, moved.terrainPads) < 1e-8);
 assert.ok(restore(save(moved)), "moved foundations survive reload");

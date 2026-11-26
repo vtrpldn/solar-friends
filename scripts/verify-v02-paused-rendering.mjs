@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
 import {launchBrowser} from './browser.mjs';
 import {serve} from './serve.mjs';
-import {createWeekend,chooseCamp,save} from '../web/v02/weekend/simulation.js';
+import {save} from '../web/v02/weekend/simulation.js';
+import {village} from './fixtures.mjs';
 import {STORY_SAVE} from '../web/v02/weekend/modes.js';
-const s=createWeekend(42);chooseCamp(s,'entrance');s.weather={version:1,hour:9,rainMmPerHour:0,cloudCover:.2,temperatureC:22};s.rain=false;s.view={speed:1,paused:true,position:[20,35,20],target:[1,2,3],zoom:1};
+const {s}=village({fast:false});s.weather={version:1,hour:9,rainMmPerHour:0,cloudCover:.2,temperatureC:22};s.rain=false;s.view={speed:1,paused:true,position:[20,35,20],target:[1,2,3],zoom:1};
 const server=await serve(),browser=await launchBrowser();
 const initialize = ({key,value})=>{
   localStorage.setItem(key,value);localStorage.setItem('solar-friends-audio','{"music":0,"effects":0}');window.worldDraws=0;window.worldTextures=[];

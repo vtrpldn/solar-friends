@@ -1,8 +1,9 @@
 import assert from "node:assert/strict";
 import * as THREE from "three";
 import { createPlannedSites, plannedSiteState } from "../web/v02/weekend/planned-sites.js";
-import { createSandbox, plan, placementError, planRoadLine, moveProject, cancelProject, footprint, requiredLoads, PROJECTS } from "../web/v02/weekend/simulation.js";
+import { plan, placementError, planRoadLine, moveProject, cancelProject, footprint, requiredLoads, PROJECTS } from "../web/v02/weekend/simulation.js";
 import { ASSETS } from "../web/v02/library/catalog.js";
+import { village } from "./fixtures.mjs";
 
 // States are told apart by physical cues, not only by colour.
 const def = { work: 100 };
@@ -29,7 +30,7 @@ const layer = (s) => createPlannedSites({
 const parts = (sites) => Object.fromEntries(sites.group.children.map((child) => [child.isGroup ? "ghosts" : child.material.isMeshBasicMaterial ? "chalk" : "solid", child]));
 const vertices = (mesh) => mesh.visible ? mesh.geometry.getAttribute("position").count : 0;
 
-const s = createSandbox(42);
+const s = village({ sandbox: true, fast: false }).s;
 s.instantBuild = false;
 const sites = layer(s);
 assert.equal(sites.sync(s), true);
@@ -69,7 +70,7 @@ assert.equal(models, before);
 const home = s.projects.find((p) => PROJECTS[p.key].size[0] !== PROJECTS[p.key].size[1] && p.rotation === 1);
 assert(home, "a rotated oblong site is planned");
 const [w, d] = footprint(home);
-const one = createSandbox(42); one.instantBuild = false;
+const one = village({ sandbox: true, fast: false }).s; one.instantBuild = false;
 assert.equal(plan(one, home.key, home.x, home.z, 1), "");
 const single = layer(one); single.sync(one);
 const box = new THREE.Box3().setFromBufferAttribute(parts(single).chalk.geometry.getAttribute("position"));
@@ -102,7 +103,7 @@ assert.equal(single.sync(one), true);
 assert(!single.sites().some((site) => site.id === prop.id), "a cancelled plan leaves no markers");
 
 // Dozens of planned road tiles share one outline and no per-tile objects.
-const roads = createSandbox(42);
+const roads = village({ sandbox: true, fast: false }).s;
 assert.equal(planRoadLine(roads, { x: 50, z: 30 }, { x: 50, z: 90 }), "");
 const run = layer(roads); run.sync(roads);
 assert.equal(vertices(parts(run).chalk), (61 * 2 + 2) * 6, "a road run is outlined once, without lines between its tiles");

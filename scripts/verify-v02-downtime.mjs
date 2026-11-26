@@ -3,18 +3,19 @@ import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import {createResident,poseResident,animateResident} from '../web/v02/residents/rig.js';
 import {idleActivity,downtimeMotion,downtimeLabel,downtimeInvalid} from '../web/v02/weekend/resident-downtime.js';
-import {createWeekend,chooseCamp,tick,save,restore,PROJECTS,requiredLoads,enableFastNavigation,plan,footprint} from '../web/v02/weekend/simulation.js';
+import {tick,save,restore,PROJECTS,plan,footprint} from '../web/v02/weekend/simulation.js';
 import {syncInfrastructure} from '../web/v02/weekend/infrastructure.js';
 import {chooseNeed,inviteConversation} from '../web/v02/weekend/resident-needs.js';
+import {village,addSite,advance} from './fixtures.mjs';
 
 const fresh=()=>{
- const s=createWeekend(42);chooseCamp(s,'entrance');enableFastNavigation(s);s.rainSeen=s.rainResolved=true;s.time=1300;
+ const {s}=village();s.rainSeen=s.rainResolved=true;s.time=1300;
  s.people.forEach((r,i)=>{r.x=30+i;r.z=25;r.energy=95;r.needs={hunger:95,bladder:95,bowels:95,hygiene:95,social:95,fun:90};});
  // A stocked village leaves no self-started work, so residents are free for leisure.
  for(const id of ['earth','stone','logs','bamboo'])s.materials[id]=99;
  syncInfrastructure(s,PROJECTS);return s;
 };
-const fire=s=>{const p={id:s.nextId++,key:'fire-circle',x:34,z:25,work:PROJECTS['fire-circle'].work,delivered:requiredLoads('fire-circle')};s.projects.push(p);syncInfrastructure(s,PROJECTS);return p;};
+const fire=s=>{const p=addSite(s,'fire-circle',{x:34,z:25});syncInfrastructure(s,PROJECTS);return p;};
 const api={catalog:PROJECTS,center:p=>({x:p.x,z:p.z}),sheltered:()=>false,projectSpot:p=>({x:p.x-1,z:p.z}),camp:()=>({x:30,z:25}),groundSpot:(r,c)=>({x:c.x+2,z:c.z+2}),route:()=>[],go:()=>false};
 {
  const s=fresh(),r=s.people[1];fire(s);
@@ -57,7 +58,7 @@ const api={catalog:PROJECTS,center:p=>({x:p.x,z:p.z}),sheltered:()=>false,projec
  }
  assert(travel && seated,'walk to the fire then sit in the running simulation');assert(seen.size>=2,'do something else after visiting');
  assert.equal(plan(s,'gathering',40,40),'');
- for(let i=0;i<50 && !r.job;i++)tick(s,.1);
+ advance(s,{seconds:5,until:()=>r.job});
  assert(r.job,'available work interrupts casual leisure');assert.equal(r.downtime,null);
  assert(restore(save(s)));
 }
@@ -80,8 +81,7 @@ const api={catalog:PROJECTS,center:p=>({x:p.x,z:p.z}),sheltered:()=>false,projec
 {
  const s=fresh(),r=s.people[1];s.rain=true;s.rainAt=s.time;
  s.people.filter(p=>p!==r).forEach(p=>p.sleepUntil=10000);
- const p={id:s.nextId++,key:'reading-room',x:34,z:25,work:PROJECTS['reading-room'].work,delivered:requiredLoads('reading-room')};
- s.projects.push(p);syncInfrastructure(s,PROJECTS);
+ const p=addSite(s,'reading-room',{x:34,z:25});syncInfrastructure(s,PROJECTS);
  let indoors=false;
  for(let i=0;i<300;i++){
   tick(s,.1);

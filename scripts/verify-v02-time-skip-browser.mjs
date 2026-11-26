@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
 import {launchBrowser} from './browser.mjs';
 import {serve} from './serve.mjs';
-import {createWeekend,chooseCamp,save,restore} from '../web/v02/weekend/simulation.js';
+import {save,restore} from '../web/v02/weekend/simulation.js';
+import {village} from './fixtures.mjs';
 import {STORY_SAVE} from '../web/v02/weekend/modes.js';
-const state=createWeekend(1);chooseCamp(state,'entrance');state.weather={version:1,hour:9,rainMmPerHour:0,cloudCover:.2,temperatureC:22};state.rain=false;state.view={paused:true};
+const state=village({seed:1,fast:false}).s;state.weather={version:1,hour:9,rainMmPerHour:0,cloudCover:.2,temperatureC:22};state.rain=false;state.view={paused:true};
 const server=await serve(),browser=await launchBrowser();
 try{
  const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=[];page.on('pageerror',e=>errors.push(e.message));

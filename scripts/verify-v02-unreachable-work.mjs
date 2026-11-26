@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
-import {createWeekend,chooseCamp,tick,enableFastNavigation,queueProduction,utilitySpot,save,restore} from '../web/v02/weekend/simulation.js';
-let s=createWeekend(42);chooseCamp(s,'entrance');enableFastNavigation(s);tick(s,.1);
+import {tick,queueProduction,utilitySpot,save,restore} from '../web/v02/weekend/simulation.js';
+import {village,advance} from './fixtures.mjs';
+let s=village().s;tick(s,.1);
 const sites=s.projects.filter(p=>p.key==='wild-fruit');
 const inaccessible=sites.find(p=>s.people.every(r=>!utilitySpot(s,s.infrastructure.nodes[p.id],r)));
 assert(inaccessible,'seed reproduces unreachable fruit');
@@ -29,5 +30,5 @@ s.time=inaccessible.noAccessUntil+1;
 assert.doesNotMatch(queueProduction(s,inaccessible.id,'gather-wild-fruit'),/Nobody can reach/);
 const reachable=sites.find(p=>s.people.some(r=>utilitySpot(s,s.infrastructure.nodes[p.id],r))&&!s.operations.some(o=>!o.done&&o.site===p.id));
 assert(reachable);
-if(!queueProduction(s,reachable.id,'gather-wild-fruit')){const op=s.operations.at(-1);for(let i=0;i<20000&&!op.done;i++)tick(s,.1);assert(op.work>0,'reachable work still gets done');}
+if(!queueProduction(s,reachable.id,'gather-wild-fruit')){const op=s.operations.at(-1);advance(s,{seconds:2000,until:()=>op.done});assert(op.work>0,'reachable work still gets done');}
 console.log('PASS inaccessible work releases residents, is dropped once everyone has tried, pauses the site for a day and leaves reachable work alone');

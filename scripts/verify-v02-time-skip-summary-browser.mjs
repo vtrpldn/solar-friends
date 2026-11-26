@@ -1,12 +1,13 @@
 import assert from 'node:assert/strict';
 import {launchBrowser} from './browser.mjs';
 import {serve} from './serve.mjs';
-import {createWeekend,chooseCamp,save,restore} from '../web/v02/weekend/simulation.js';
+import {save,restore} from '../web/v02/weekend/simulation.js';
 import {foodPortions} from '../web/v02/weekend/food-storage.js';
 import {STORY_SAVE} from '../web/v02/weekend/modes.js';
+import {village} from './fixtures.mjs';
 // Optional: pass a path to keep a 1280×720 screenshot of the recap.
 const screenshot=process.argv[2];
-const state=createWeekend(42);chooseCamp(state,'entrance');state.view={paused:true};
+const {s:state}=village({fast:false});state.view={paused:true};
 const server=await serve(),browser=await launchBrowser();
 try{
  const page=await browser.newPage({viewport:{width:1280,height:720}}),errors=[];page.on('pageerror',e=>errors.push(e.message));

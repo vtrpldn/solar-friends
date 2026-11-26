@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
-import {createWeekend,chooseCamp,save,restore,sellMaterial,supplyRun,PROCESSES,say} from '../web/v02/weekend/simulation.js';
+import {save,restore,sellMaterial,supplyRun,PROCESSES,say} from '../web/v02/weekend/simulation.js';
 import {financeForecast,recordMoney} from '../web/v02/weekend/finances.js';
 import {productionActivity} from '../web/v02/weekend/project-ui.js';
 import {BIOLOGY} from '../web/v02/weekend/biological-production.js';
-const s=createWeekend(42);chooseCamp(s,'entrance');s.materials.stone=8;
+import {village} from './fixtures.mjs';
+const {s}=village({fast:false,materials:{stone:8}});
 assert(sellMaterial(s,'stone'));assert.equal(s.trade.orders[0].quantity,8);assert.equal(s.materials.stone,0);
 assert(restore(save(s)), 'Partial exports survive a normal save round trip');
 const log=[...s.log];say(s,'Purified water','water-purified');assert.deepEqual(s.log,log);

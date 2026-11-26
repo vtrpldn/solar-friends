@@ -1,10 +1,9 @@
 import assert from 'node:assert/strict';
 import {launchBrowser} from './browser.mjs';
 import {serve} from './serve.mjs';
-import {createWeekend,chooseCamp,save} from '../web/v02/weekend/simulation.js';
-import {STORY_SAVE} from '../web/v02/weekend/modes.js';
+import {village,seedSave} from './fixtures.mjs';
 
-const s=createWeekend(42);chooseCamp(s,'entrance');
+const {s}=village({fast:false});
 s.view={speed:1,paused:true,position:[20,35,20],target:[1,2,3],zoom:2};
 const server=await serve();let browser;
 try{
@@ -16,7 +15,7 @@ try{
   const response=await route.fetch();
   await route.fulfill({response,body:await response.text()+`\nwindow.residentPoint=(index)=>{controls.enableDamping=false;const actor=actors[index];const target=actor.position.clone();target.y+=.9;camera.position.copy(target).add(new THREE.Vector3(6,7,10));controls.target.copy(target);camera.zoom=5;camera.updateProjectionMatrix();controls.update();fitTerrainCamera(camera,controls.target,scene.fog);camera.updateMatrixWorld(true);scene.updateMatrixWorld(true);const point=target.clone().project(camera);return {x:(point.x+1)*innerWidth/2,y:(1-point.y)*innerHeight/2};};`});
  });
- await page.addInitScript(({key,value})=>localStorage.setItem(key,value),{key:STORY_SAVE,value:save(s)});
+ await seedSave(page,s,{mute:false});
  await page.goto(`http://127.0.0.1:${server.address().port}/v2/?mode=story`);
  await page.waitForFunction(()=>typeof window.residentPoint==='function');
  await page.waitForTimeout(1000);

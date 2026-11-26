@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import {brl, brlWhole} from '../web/v02/weekend/money.js';
 import {projectLabel, numberProject, numberProjects} from '../web/v02/weekend/project-names.js';
-import {createWeekend, chooseCamp, plan, placementError, restore, save, PROJECTS} from '../web/v02/weekend/simulation.js';
+import {plan, placementError, restore, save, PROJECTS} from '../web/v02/weekend/simulation.js';
+import {village} from './fixtures.mjs';
 
 const plain = text => text.replace(/ /g, ' ');
 assert.equal(plain(brl(10000)), 'R$ 10.000,00');
@@ -18,7 +19,7 @@ assert.equal(projectLabel(s.projects[0], defs), 'Mango tree', 'natural features 
 s.projects.splice(2, 1);
 assert.equal(numberProject(s, {key: 'hut'}, defs).number, 3, 'a removed building does not free its number');
 
-const game = createWeekend(42); chooseCamp(game, 'entrance');
+const game = village({fast: false}).s;
 let placed = 0;
 for (let x = 30; x < 60 && placed < 2; x += 5) for (let z = -10; z < 20 && placed < 2; z += 5)
   if (!placementError(game, 'gathering', x, z) && plan(game, 'gathering', x, z) === '') placed++;

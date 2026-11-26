@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
-import {createWeekend,chooseCamp,save,restore} from '../web/v02/weekend/simulation.js';
+import {save,restore} from '../web/v02/weekend/simulation.js';
+import {village} from './fixtures.mjs';
 import {logisticsPolicy,dispatchReady,validLogisticsPolicy} from '../web/v02/weekend/logistics-policy.js';
-const s=createWeekend(42);chooseCamp(s,'entrance');const policy=logisticsPolicy(s);assert.equal(dispatchReady(s),false);
+const s=village({fast:false}).s;const policy=logisticsPolicy(s);assert.equal(dispatchReady(s),false);
 s.projects.push({id:s.nextId++,key:'gathering',x:24,z:-15,work:0,delivered:0,pendingMaterials:{wood:1}});
 assert.equal(dispatchReady(s),true,'default immediate pickup');policy.minimumLoad=.75;policy.maxWaitHours=2;
 assert.equal(dispatchReady(s),false,'small load waits');s.time+=120/.45;assert.equal(dispatchReady(s),true,'maximum wait releases an incomplete load');

@@ -1,10 +1,11 @@
 import {STARTING_CAPITAL} from '../web/v02/weekend/economy-reference.js';
 import assert from 'node:assert/strict';
-import {createWeekend,chooseCamp,PROJECTS,PROCESSES,MATERIALS,requiredLoads,automaticSales,queueProduction,materialCount,tick,save,restore,enableFastNavigation} from '../web/v02/weekend/simulation.js';
+import {PROJECTS,PROCESSES,MATERIALS,automaticSales,queueProduction,materialCount,tick,save,restore} from '../web/v02/weekend/simulation.js';
 import {economyPolicies,salePreview} from '../web/v02/weekend/economy-policies.js';
 import {syncInfrastructure} from '../web/v02/weekend/infrastructure.js';
-const fresh=()=>{const s=createWeekend(42);chooseCamp(s,'entrance');enableFastNavigation(s);s.rainSeen=s.rainResolved=true;return s;};
-const built=(s,key,x,z)=>{const p={id:s.nextId++,key,x,z,work:PROJECTS[key].work,delivered:requiredLoads(key)};s.projects.push(p);syncInfrastructure(s,PROJECTS);return p;};
+import {village,addSite} from './fixtures.mjs';
+const fresh=()=>{const {s}=village();s.rainSeen=s.rainResolved=true;return s;};
+const built=(s,key,x,z)=>{const p=addSite(s,key,{x,z});syncInfrastructure(s,PROJECTS);return p;};
 const s=fresh(),pol=economyPolicies(s);s.materials.bamboo=100;pol.sales.bamboo={enabled:true,keep:24,above:48,daily:24};
 assert.equal(salePreview(s,'bamboo',MATERIALS,PROCESSES,materialCount).quantity,24);automaticSales(s);assert.equal(s.materials.bamboo,76);assert.equal(s.money,STARTING_CAPITAL.modest,'exports reserve goods rather than minting cash');automaticSales(s);assert.equal(s.materials.bamboo,76,'daily cap');
 s.time=3200;automaticSales(s);assert.equal(s.materials.bamboo,52,'daily cap resets');const restored=restore(save(s));assert(restored);automaticSales(restored);assert.equal(restored.money,s.money,'reload cannot duplicate daily sales');

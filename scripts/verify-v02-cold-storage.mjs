@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
-import {createWeekend,chooseCamp,PROJECTS,PROCESSES,MATERIALS,queueProduction,tick,save,restore,enableFastNavigation} from '../web/v02/weekend/simulation.js';
+import {PROJECTS,PROCESSES,MATERIALS,queueProduction,save,restore} from '../web/v02/weekend/simulation.js';
 import {coolStoredFood,coolingStatus,COLD_STORAGE} from '../web/v02/weekend/cold-storage.js';
 import {foodChange,ensureFoodStorage,foodStorageStep,freshLots} from '../web/v02/weekend/food-storage.js';
 import {syncInfrastructure,infrastructureStep} from '../web/v02/weekend/infrastructure.js';
+import {village as fixtureVillage,advance} from './fixtures.mjs';
 const state=()=>({time:0,materials:{food:60,meals:0,eggs:0,milk:0,scraps:0},infrastructure:{nodes:{1:{coldStorage:true,enabled:true,power:1}}}});
 const s=state();ensureFoodStorage(s);s.time=100;coolStoredFood(s,100);
 assert.equal(s.foodStorage.lots.food.filter(l=>l.chilled).reduce((n,l)=>n+l.n,0),40,'capacity caps actual stock');
@@ -12,12 +13,12 @@ s.infrastructure.nodes[1].power=0;const before=s.foodStorage.lots.food.map(l=>l.
 s.infrastructure.nodes[1].power=1;s.infrastructure.nodes[1].coolingEnabled=false;assert.equal(coolingStatus(s).capacity,0);
 const expired=state();ensureFoodStorage(expired);expired.time=9700;coolStoredFood(expired,10);foodStorageStep(expired,PROCESSES);assert.equal(expired.materials.food,0,'cooling cannot revive expired food');
 const dry=state();dry.materials.food=0;ensureFoodStorage(dry);foodChange(dry,'meals',12,freshLots(dry,'meals',12,PROCESSES.preserve_meals));dry.time=10;coolStoredFood(dry,10);assert.equal(dry.foodStorage.lots.meals[0].expires,32000,'provisions do not consume cooling capacity');
-let village=createWeekend(42);chooseCamp(village,'entrance');enableFastNavigation(village);village.rainSeen=village.rainResolved=true;
+let village=fixtureVillage().s;village.rainSeen=village.rainResolved=true;
 const site={id:village.nextId++,key:'kitchen',x:village.stock.x+3,z:village.stock.z+3,rotation:0,work:PROJECTS.kitchen.work,delivered:0};village.projects.push(site);
 // Diagnostic fixture supplies, followed by normal resident installation work.
 village.materials.cooling=1;village.materials.electrical=1;village.materials.hardware=1;
 assert.equal(queueProduction(village,site.id,'cold_storage'),'');assert.equal(village.materials.cooling,0);
-for(let i=0;i<16000&&!site.coldStorage;i++)tick(village,.1);
+advance(village,{seconds:1600,until:()=>site.coldStorage});
 assert(site.coldStorage,'resident completes installation without a powered kitchen');
 assert(queueProduction(village,site.id,'cold_storage').includes('already'));
 assert(restore(save(village)),'upgrade and lots persist');

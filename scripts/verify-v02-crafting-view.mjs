@@ -1,14 +1,11 @@
 import assert from 'node:assert/strict';
-import {createSandbox,PROJECTS,PROCESSES,requiredLoads,queueProduction,productionBlocker} from '../web/v02/weekend/simulation.js';
-import {syncInfrastructure} from '../web/v02/weekend/infrastructure.js';
+import {PROCESSES,queueProduction,productionBlocker} from '../web/v02/weekend/simulation.js';
+import {village} from './fixtures.mjs';
 import {craftSkills} from '../web/v02/weekend/crafting.js';
 import {craftEntries,chosenWorkspace,recipeStatus,craftJobStatus} from '../web/v02/weekend/crafting-view.js';
 function fixture() {
- const s=createSandbox(42);s.mode='story';s.wood=20;
- Object.assign(s.materials,{planks:20,hardware:10,tool_heads:3,bamboo:8,wheel_kit:1,'carpentry-tools':1,'garden-tools':1,repair_supplies:2});
- s.equipment={wear:{'garden-tools':900},loans:{},soapLeft:0};
- const sites=[40,44].map(x=>({id:s.nextId++,key:'supply-5',x,z:39,work:PROJECTS['supply-5'].work,delivered:requiredLoads('supply-5')}));
- s.projects.push(...sites);syncInfrastructure(s,PROJECTS);return {s,sites};
+ const {s,sites}=village({sandbox:true,story:true,fast:false,wood:20,materials:{planks:20,hardware:10,tool_heads:3,bamboo:8,wheel_kit:1,'carpentry-tools':1,'garden-tools':1,repair_supplies:2},buildings:[40,44].map(x=>({key:'supply-5',x,z:39}))});
+ s.equipment={wear:{'garden-tools':900},loans:{},soapLeft:0};return {s,sites};
 }
 function blocked(change,recipe='craft_garden-tools',pattern) {
  const {s,sites}=fixture();change(s,sites);

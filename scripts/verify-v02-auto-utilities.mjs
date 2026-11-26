@@ -1,12 +1,11 @@
 // check-tier: soak
 import assert from "node:assert/strict";
 import {
-  createSandbox, enableFastNavigation,
+  enableFastNavigation,
   PROJECTS,
   requiredLoads,
   save,
   restore,
-  tick,
   moveProject,
 } from "../web/v02/weekend/simulation.js";
 import { autoConnectUtilities } from "../web/v02/weekend/auto-utilities.js";
@@ -14,7 +13,8 @@ import {
   infrastructureStep,
   validInfrastructure,
 } from "../web/v02/weekend/infrastructure.js";
-const s = createSandbox();
+import { village, advance } from "./fixtures.mjs";
+const s = village({ sandbox: true, seed: 0, fast: false }).s;
 const add = (key, x, z, complete = true) => {
   const p = {
     id: s.nextId++,
@@ -85,7 +85,7 @@ enableFastNavigation(s);
 // Allow for travel, meals, rest and other jobs while residents perform the
 // current catalog's relocation labor. Stop immediately when the house moves.
 const relocationSteps = Math.ceil(home.removal.required * 10 / .1);
-for(let i=0;i<relocationSteps&&home.removal;i++)tick(s,.1);
+advance(s,{seconds:relocationSteps*.1,until:()=>!home.removal});
 assert(!home.removal,"resident relocation completes");
 autoConnectUtilities(s, PROJECTS);
 assert.equal(sys.nodes[home.id].x, 60);

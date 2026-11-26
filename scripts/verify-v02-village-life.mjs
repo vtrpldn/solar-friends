@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
-import {PROJECTS,createSandbox,plan,tick,save,restore,enableFastNavigation,requiredLoads} from '../web/v02/weekend/simulation.js';
+import {PROJECTS,plan,tick,save,restore,enableFastNavigation,requiredLoads} from '../web/v02/weekend/simulation.js';
 import {ensureCommunity,planEvent,planError,cancelEvent,eventSites,eventDays,communityVisitors,communityStep,clock as calendar,bookFavour,favourError,maxHelpers,maxGuests,validCommunity,COURSE_FEE,COURSE_FEE_NO_LUNCH,HELPER_PACE,RAIN_PACE,mutiraoShare} from '../web/v02/weekend/village-life.js';
 import {DAY,HOUR} from '../web/v02/weekend/weather.js';
+import {village} from './fixtures.mjs';
 
 // A sandbox village with a fire circle, a classroom and a house still to build.
-let s=createSandbox(42);enableFastNavigation(s);
+let {s}=village({sandbox:true});
 const place=(key)=>{let error='none';for(let z=30;z<60&&error;z++)for(let x=36;x<70&&error;x++)error=plan(s,key,x,z);assert.equal(error,'',key);return s.projects.at(-1);};
 const fire=place('fire-circle'),classroom=place('outdoor-classroom');
 s.instantBuild=false;const house=place('house');house.delivered=requiredLoads(house);

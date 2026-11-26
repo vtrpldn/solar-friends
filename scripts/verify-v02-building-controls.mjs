@@ -1,9 +1,8 @@
 import assert from 'node:assert/strict';
-import {createWeekend,PROJECTS,requiredLoads} from '../web/v02/weekend/simulation.js';
+import {PROJECTS} from '../web/v02/weekend/simulation.js';
+import {village} from './fixtures.mjs';
 import {syncInfrastructure,hasPowerService,canSwitchBuilding,switchBuilding} from '../web/v02/weekend/infrastructure.js';
-const s=createWeekend();
-for(const [key,def] of Object.entries(PROJECTS))s.projects.push({id:s.nextId++,key,x:40,z:40,work:def.work,delivered:requiredLoads(key)});
-const sys=syncInfrastructure(s,PROJECTS);
+const {s,sys}=village({seed:0,camp:false,fast:false,buildings:Object.keys(PROJECTS).map(key=>({key,x:40,z:40}))});
 const node=key=>sys.nodes[s.projects.find(p=>p.key===key).id];
 for(const key of ['toilet','eco_toilet','road','bridge','garden','orchard','goat_pasture','supply-1','supply-3','picnic-table','canvas-tent-teal','banana_treatment','biodigester']) {
  const n=node(key);

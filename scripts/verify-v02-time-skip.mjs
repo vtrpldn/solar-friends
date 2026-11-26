@@ -1,9 +1,10 @@
 // check-tier: soak
 import assert from 'node:assert/strict';
-import {createWeekend,chooseCamp,tick,save,restore,plan,placementError,finished,enableFastNavigation} from '../web/v02/weekend/simulation.js';
+import {createWeekend,tick,save,restore,plan,placementError,finished} from '../web/v02/weekend/simulation.js';
 import {DAY} from '../web/v02/weekend/weather.js';
 import {skipDays} from '../web/v02/weekend/time-skip.js';
-const fresh=()=>{const s=createWeekend(42);chooseCamp(s,'entrance');enableFastNavigation(s);return s;};
+import {village} from './fixtures.mjs';
+const fresh=()=>village().s;
 for (const days of [1,2]) {
   const natural=fresh(), skipped=fresh(), start=skipped.time;
   if (days === 1) {

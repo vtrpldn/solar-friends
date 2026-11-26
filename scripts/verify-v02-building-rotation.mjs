@@ -4,7 +4,6 @@ import {
   createSandbox,
   plan,
   moveProject,
-  tick,
   enableFastNavigation,
   footprint,
   buildingFront,
@@ -14,6 +13,7 @@ import {
   placementError,
 } from "../web/v02/weekend/simulation.js";
 import { footprintRelief } from "../web/v02/weekend/elevation.js";
+import { advance } from "./fixtures.mjs";
 for (const key of ["workshop","home-cottage","home-longhouse",...HOME_DESIGNS.map(d=>d.id)]) for (let rotation = 0; rotation < 4; rotation++) {
   const s = createSandbox(42);
   // Bare land: this fixture places buildings at fixed cells, before any grove could grow there.
@@ -42,7 +42,7 @@ for (const key of ["workshop","home-cottage","home-longhouse",...HOME_DESIGNS.ma
   // validate the reserved destination and its serialized rotation above.
   if(key==='workshop'&&rotation===0){
     enableFastNavigation(s);
-    for(let i=0;i<64000&&p.removal;i++)tick(s,.1);
+    advance(s,{seconds:6400,until:()=>!p.removal});
     assert.equal(p.removal, undefined, "residents finish relocation");
     assert.equal(p.rotation, (rotation + 1) % 4);
   }

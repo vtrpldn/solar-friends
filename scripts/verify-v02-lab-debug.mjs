@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
-import {createSandbox,createWeekend,chooseCamp,PROJECTS,save,restore,tick,enableFastNavigation} from '../web/v02/weekend/simulation.js';
+import {createSandbox,PROJECTS,save,restore,tick} from '../web/v02/weekend/simulation.js';
+import {village} from './fixtures.mjs';
 import {labCommand,labSample,stopReason} from '../web/v02/weekend/lab-debug.js';
 import {LabRunner} from '../web/v02/weekend/lab-runner.js';
 let s=createSandbox(42);
@@ -13,7 +14,7 @@ assert.match(labCommand(s,{type:'bed',site,bed:0,action:'plant'}),/pending/);
 assert.equal(labCommand(s,{type:'outside',resident:'iara',enabled:true}),'');assert(s.people[0].outsideJobEnabled);
 assert.match(labCommand(s,{type:'maintain',site:0,field:'water'}),/supported/);
  Object.assign(p.cultivation.beds[0],{stage:'harvestable',ripeAt:s.time});assert.match(stopReason(s,'harvest'),/ready/);p.cultivation.beds[0].stage='failed';assert.match(stopReason(s,'crop-failed'),/failed/);
-s=createWeekend(42);chooseCamp(s,'entrance');enableFastNavigation(s);tick(s,.1);
+s=village().s;tick(s,.1);
 const sample=labSample(s);assert.equal(sample.needs.hydration,Math.min(...s.people.map(r=>r.needs.hydration)));assert(sample.hydrology);assert(sample.weather.temperatureC);assert(sample.inventory);assert(sample.finance);assert(sample.residents.every(r=>Number.isFinite(r.needs.hydration)));
 const water=Object.values(s.infrastructure.nodes).map(n=>[n,n.water[0]]);for(const [n]of water)n.water[0]=0;assert.match(stopReason(s,'water'),/clean water/);for(const [n,v]of water)n.water[0]=v;
  s.operations??=[];s.operations.push({done:false,accessRetryAt:{iara:s.time+30}});assert.match(stopReason(s,'blocked'),/access/);s.operations.pop();

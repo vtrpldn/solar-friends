@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
-import {createWeekend,chooseCamp,plan,tick,save,restore,enableFastNavigation,placementError} from '../web/v02/weekend/simulation.js';
+import {plan,save,restore,placementError} from '../web/v02/weekend/simulation.js';
+import {village,advance} from './fixtures.mjs';
 import {materialLedger,materialReconciliation} from '../web/v02/weekend/material-ledger.js';
-const s=createWeekend(42);chooseCamp(s,'entrance');enableFastNavigation(s);materialLedger(s);
+const {s}=village();materialLedger(s);
 let site;for(let z=s.stock.z-8;z<s.stock.z+8&&!site;z++)for(let x=s.stock.x-8;x<s.stock.x+8&&!site;x++)if(!placementError(s,'gathering',x,z))site={x,z};
 assert(site);assert.equal(plan(s,'gathering',site.x,site.z),'');
-for(let i=0;i<96000;i++)tick(s,.1);
+advance(s,{seconds:9600});
 assert.deepEqual(materialReconciliation(s),{},'ordinary construction, meals, residues, food buying and spoilage reconcile');
 assert(s.materialLedger.entries.some(e=>e.reason==='construction reservation')||s.materialLedger.net.wood<0);
 assert(s.materialLedger.entries.length<=160);const loaded=restore(save(s));assert(loaded);assert.deepEqual(materialReconciliation(loaded),{});

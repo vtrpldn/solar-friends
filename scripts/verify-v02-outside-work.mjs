@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
 import {createWeekend,chooseCamp,tick,save,restore,enableFastNavigation,requiredLoads} from '../web/v02/weekend/simulation.js';
+import {village,advance} from './fixtures.mjs';
 import {setOutsideWork,requestDayShift,cancelDayShift,dayShiftOffer,OUTSIDE_JOBS,COMMUTE_FARE} from '../web/v02/weekend/outside-work.js';
 import {applySettings,DEFAULT_SETTINGS} from '../web/v02/weekend/world-settings.js';
 import {tripEstimate} from '../web/v02/weekend/economy-reference.js';
-const s=createWeekend(42);chooseCamp(s,'entrance');enableFastNavigation(s);
+const {s}=village();
 const r=s.people[0];setOutsideWork(s,r,true);
 const seen=new Set();let savedAway;
 for(let i=0;i<15000&&!(s.finances?.categories.outsideWork);i++){
@@ -14,13 +15,13 @@ assert.deepEqual([...seen].sort(),['away','inbound','outbound']);
 assert.equal(s.finances.categories.outsideWork,OUTSIDE_JOBS.iara.pay);assert.equal(s.finances.categories.commuting,-COMMUTE_FARE);
 assert.equal(r.outsideWork,null);assert(r.energy<85,'work consumes energy');
 const loaded=restore(savedAway);assert(loaded,'offsite save loads');enableFastNavigation(loaded);setOutsideWork(loaded,loaded.people[0],false);
-for(let i=0;i<15000&&loaded.people[0].outsideWork;i++)tick(loaded,.1);
+advance(loaded,{seconds:1500,until:()=>!loaded.people[0].outsideWork});
 assert.equal(loaded.finances.categories.outsideWork,80,'mid-shift reload settles once');
-for(let i=0;i<100;i++)tick(loaded,.1);assert.equal(loaded.finances.categories.outsideWork,80);
+advance(loaded,{seconds:10});assert.equal(loaded.finances.categories.outsideWork,80);
 const malformed=JSON.parse(savedAway);malformed.people[0].outsideWork.until=Infinity;assert.equal(restore(JSON.stringify(malformed)),null);
 console.log('PASS optional contract, walking commute, offsite work, deferred pay, energy, disable-after-shift and save settlement');
-const broke=createWeekend(42);chooseCamp(broke,'entrance');enableFastNavigation(broke);broke.money=0;setOutsideWork(broke,broke.people[0],true);
-for(let i=0;i<15000&&!broke.finances?.categories.outsideWork;i++)tick(broke,.1);
+const {s:broke}=village({money:0});setOutsideWork(broke,broke.people[0],true);
+advance(broke,{seconds:1500,until:()=>broke.finances?.categories.outsideWork});
 assert.equal(broke.finances.categories.outsideWork,72,'zero cash can recover through work with employer-deducted fare');
 console.log('PASS outside work recovers from zero savings without free money or an upfront fare deadlock');
 
@@ -86,15 +87,13 @@ assert(returned.projects[0].work > 0, 'residents who stay in camp can keep worki
 assert.equal(returned.finances.categories.outsideWork, netPay);
 assert.equal(returned.finances.entries.filter(e => e.category === 'outsideWork').length, 1);
 const paid = reload(returned);
-for (let i = 0; i < 30; i++) tick(paid, 1);
+advance(paid, {seconds: 30, dt: 1});
 assert.equal(paid.finances.categories.outsideWork, netPay, 'reloading after payday cannot earn the shift twice');
 assert(!paid.people[0].outsideWork, 'recurring contract cannot dispatch a second time that day');
 console.log('PASS one-off full day, cancellation before departure, recurring contract coexistence, village work exclusion and remote zero-cash settlement');
 
 // Book after Friday's departure window, then check Saturday's window in isolation.
-const friday = createWeekend(42);
-chooseCamp(friday, 'entrance');
-enableFastNavigation(friday);
+const {s: friday} = village();
 const at = (day, hour) => (day * 1440 + (hour - 9) * 60) / .45;
 friday.time = at(4, 11);
 const fridayWorker = friday.people[1];
@@ -113,7 +112,7 @@ const weekendIncome = saturday.finances.categories.outsideWork;
 assert.equal(weekendIncome, weekendPay, 'prepaid commute deposits the advertised gross wage');
 assert.equal(saturday.finances.categories.commuting, -COMMUTE_FARE);
 saturday.time = at(6, 9);
-for (let i = 0; i < 30; i++) tick(saturday, 1);
+advance(saturday, {seconds: 30, dt: 1});
 assert(!saturday.people[1].outsideWork, 'one-off booking does not repeat the following morning');
 assert.equal(saturday.finances.categories.outsideWork, weekendIncome);
 console.log('PASS late booking, saved queue, weekend work, prepaid fare and no repeat on the following day');

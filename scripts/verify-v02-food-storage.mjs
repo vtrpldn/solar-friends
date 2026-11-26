@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
-import {createWeekend,chooseCamp,PROCESSES,MATERIALS,save,restore,materialCount,sellMaterial,supplyRun} from '../web/v02/weekend/simulation.js';
+import {createWeekend,PROCESSES,MATERIALS,save,restore,materialCount,sellMaterial,supplyRun} from '../web/v02/weekend/simulation.js';
 import {ensureFoodStorage,foodChange,foodStorageStep,validFoodStorage,returnUnsoldFood,freshLots} from '../web/v02/weekend/food-storage.js';
 import {cancelExport,loadExports,settleExports} from '../web/v02/weekend/physical-trade.js';
 import {transact} from '../web/v02/weekend/finances.js';
-const fresh=()=>{const s=createWeekend(42);chooseCamp(s,'entrance');ensureFoodStorage(s);return s;};
+import {village} from './fixtures.mjs';
+const fresh=()=>{const {s}=village({fast:false});ensureFoodStorage(s);return s;};
 const s=fresh();const starting=s.materials.food;const expiry=s.foodStorage.lots.food[0].expires;
 s.time+=500;foodChange(s,'food',12);const removed=foodChange(s,'food',-2);assert.equal(removed[0].expires,expiry,'oldest consumed first');
 s.time=expiry;foodStorageStep(s,PROCESSES);assert.equal(s.materials.food,12,'newer batch survives');assert.equal(s.foodStorage.spoiled.food,starting-2);const scraps=s.materials.scraps;foodStorageStep(s,PROCESSES);assert.equal(s.materials.scraps,scraps,'spoilage counted once');assert(validFoodStorage(s));assert(restore(save(s)));

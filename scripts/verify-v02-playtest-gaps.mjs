@@ -1,10 +1,11 @@
 import {syncInfrastructure} from '../web/v02/weekend/infrastructure.js';
 import assert from 'node:assert/strict';
-import {createWeekend,chooseCamp,save,restore,supplyRun,sellMaterial,MATERIALS,tick,enableFastNavigation,PROJECTS} from '../web/v02/weekend/simulation.js';
+import {save,restore,supplyRun,sellMaterial,MATERIALS,PROJECTS} from '../web/v02/weekend/simulation.js';
+import {village,advance} from './fixtures.mjs';
 import {foodChange,foodPortions,nextMeal,eatMeal,ensureFoodStorage} from '../web/v02/weekend/food-storage.js';
 import {loadExports,transportCost,cargoSize} from '../web/v02/weekend/physical-trade.js';
 import {biologicalStep,biologyLabel,GAME_DAY,validBiology} from '../web/v02/weekend/biological-production.js';
-const fresh=()=>{const s=createWeekend(42);chooseCamp(s,'entrance');return s;};
+const fresh=()=>village({fast:false}).s;
 const s=fresh();ensureFoodStorage(s);
 foodChange(s,'eggs',8);foodChange(s,'milk',2);
 s.foodStorage.lots.eggs[0].expires=100;
@@ -24,11 +25,11 @@ const totals={};for(const policy of ['balanced','conserve','rainfed']){const cro
 assert(totals.balanced>totals.conserve);assert.equal(totals.rainfed,0);assert.equal(biologyLabel('eggs'),'Next collection');assert.equal(biologyLabel('milk'),'Next collection');
 console.log('PASS oldest-food consumption, eggs/milk portions, stock and save conservation, shared return-trip purchase, cargo limits, irrigation choices and animal labels');
 
-const delivery=fresh();enableFastNavigation(delivery);delivery.emergencyFood=false;delivery.materials.stone=8;
+const {s:delivery}=village({emergencyFood:false});delivery.materials.stone=8;
 assert(sellMaterial(delivery,'stone'));assert(supplyRun(delivery,'stone',null,true));assert(supplyRun(delivery,'food'));
 const before=delivery.materials.food;
 for(const r of delivery.people){r.needs={hunger:100,bladder:100,bowels:100,hygiene:100,social:100,fun:100};}
-for(let i=0;i<15000&&delivery.trip;i++)tick(delivery,.1);
+advance(delivery,{seconds:1500,until:()=>!delivery.trip});
 assert(!delivery.trip,'shared trip physically returns and unloads');assert.equal(delivery.materials.food,before+MATERIALS.food.quantity);assert.equal(delivery.trade.orders[0].status,'sold');assert(restore(save(delivery)));
 const {chooseNeed,advanceNeed}=await import('../web/v02/weekend/resident-needs.js');
 const eater=fresh();syncInfrastructure(eater,PROJECTS);foodChange(eater,'food',-eater.materials.food);foodChange(eater,'meals',-eater.materials.meals);foodChange(eater,'eggs',4);

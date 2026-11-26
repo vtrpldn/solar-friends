@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {createWeekend, chooseCamp, route, restore, enableFastNavigation, PROJECTS} from '../web/v02/weekend/simulation.js';
+import {route, restore, enableFastNavigation, PROJECTS} from '../web/v02/weekend/simulation.js';
 import {PathQueue} from '../web/v02/weekend/path-queue.js';
+import {village as fixtureVillage} from './fixtures.mjs';
 
 function countExpansions(state, from, to) {
   let count = 0;
@@ -18,8 +19,7 @@ function countExpansions(state, from, to) {
   }
 }
 
-const s = createWeekend(42);
-chooseCamp(s, 'entrance');
+const s = fixtureVillage({fast: false}).s;
 s.projects.push({id: s.nextId++, key: 'house', x: 40, z: 10, work: PROJECTS.house.work, delivered: 0});
 assert.equal(countExpansions(s, {x: 38, z: 10}, {x: 40, z: 10}), 0);
 assert(route(s, {x: 38, z: 10}, {x: 38, z: 12}), 'nearby open destinations remain reachable');

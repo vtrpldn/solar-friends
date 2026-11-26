@@ -2,11 +2,11 @@ import assert from 'node:assert/strict';
 import {mkdir} from 'node:fs/promises';
 import {launchBrowser} from './browser.mjs';
 import {serve} from './serve.mjs';
-import {createSandbox,planField,plan,PROJECTS,save,restore} from '../web/v02/weekend/simulation.js';
+import {planField,plan,PROJECTS,save,restore} from '../web/v02/weekend/simulation.js';
 import {ensureCultivation} from '../web/v02/weekend/cultivation.js';
-import {SANDBOX_SAVE} from '../web/v02/weekend/modes.js';
+import {village,seedSave} from './fixtures.mjs';
 const out=process.env.FARM_SCREENSHOTS||'/tmp/solar-farming';await mkdir(out,{recursive:true});
-const s=createSandbox(42);assert.equal(planField(s,50,50,[4,4]),'');const field=s.projects.at(-1);
+const {s}=village({sandbox:true,fast:false});assert.equal(planField(s,50,50,[4,4]),'');const field=s.projects.at(-1);
 field.cultivation.beds.forEach((b,i)=>Object.assign(b,{crop:['greens','beans','corn'][i%3],stage:['unprepared','prepared','growing','growing','harvestable','harvested'][i%6],growth:[0,0,.15,.6,1,0][i%6],...(i%6===4?{ripeAt:0}:{})}));
 assert.equal(plan(s,'greenhouse',59,50),'');const greenhouse=s.projects.at(-1);greenhouse.work=PROJECTS.greenhouse.work;ensureCultivation(s,greenhouse).beds.forEach((b,i)=>Object.assign(b,{crop:i?'corn':'beans',stage:'harvestable',growth:1,ripeAt:0}));
 assert.equal(plan(s,'house',50,59),'');s.projects.at(-1).work=PROJECTS.house.work;
@@ -14,7 +14,7 @@ s.people.forEach((r,i)=>{r.x=49+i*2;r.z=55;r.action='idle';r.walk=[];r.target=nu
 s.view={speed:1,paused:true,position:[64,35,64],target:[44,0,40],zoom:1};assert(restore(save(s)));
 const server=await serve(0),browser=await launchBrowser();const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
 try{
- await page.addInitScript(({key,value})=>{if(!sessionStorage.getItem('farm-fixture')){localStorage.setItem(key,value);sessionStorage.setItem('farm-fixture','1');}},{key:SANDBOX_SAVE,value:save(s)});
+ await seedSave(page,s,{mode:'sandbox',mute:false,once:true});
  await page.goto(`http://127.0.0.1:${server.address().port}/v2/?mode=sandbox`);await page.waitForSelector('#build-field',{state:'attached'});await page.waitForTimeout(1500);
  await page.locator('#completed-tasks button').filter({hasText:'Cultivated field'}).first().evaluate(e=>e.click());
  await page.waitForSelector('#farm-inspect-bed');
@@ -44,10 +44,10 @@ try{
  await page.locator('#farm-density').selectOption('1.5');await page.locator('#farm-irrigation').uncheck();
  await page.reload();await page.waitForSelector('#build-field',{state:'attached'});await page.waitForTimeout(500);assert.deepEqual(errors,[]);
  const night=await browser.newPage({viewport:{width:1440,height:900}});night.on('pageerror',e=>errors.push(e.message));s.time=13*60/.45;
- await night.addInitScript(({key,value})=>localStorage.setItem(key,value),{key:SANDBOX_SAVE,value:save(s)});await night.goto(`http://127.0.0.1:${server.address().port}/v2/?mode=sandbox`);await night.waitForTimeout(2000);await night.screenshot({path:`${out}/night.png`});await night.close();assert.deepEqual(errors,[]);
+ await seedSave(night,s,{mode:'sandbox',mute:false});await night.goto(`http://127.0.0.1:${server.address().port}/v2/?mode=sandbox`);await night.waitForTimeout(2000);await night.screenshot({path:`${out}/night.png`});await night.close();assert.deepEqual(errors,[]);
  const expired=await browser.newPage({viewport:{width:1440,height:900}});expired.on('pageerror',e=>errors.push(e.message));
  const oldCrop=structuredClone(s);oldCrop.time=9*3200;Object.assign(oldCrop.projects.find(p=>p.id===field.id).cultivation.beds[0],{crop:'greens',stage:'harvestable',growth:1,ripeAt:0});
- await expired.addInitScript(({key,value})=>localStorage.setItem(key,value),{key:SANDBOX_SAVE,value:save(oldCrop)});
+ await seedSave(expired,oldCrop,{mode:'sandbox',mute:false});
  await expired.goto(`http://127.0.0.1:${server.address().port}/v2/?mode=sandbox`);await expired.waitForSelector('#build-field',{state:'attached'});
  await expired.locator('#completed-tasks button').filter({hasText:'Cultivated field'}).first().evaluate(e=>e.click());await expired.locator('#farm-inspect-bed').click();await expired.waitForSelector('#farm-bed');
  assert.equal(await expired.locator('.farm-stage').innerText(),'Harvest expired');

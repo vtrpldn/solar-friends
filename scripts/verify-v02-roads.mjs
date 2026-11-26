@@ -1,6 +1,5 @@
 import assert from "node:assert/strict";
 import {
-  createSandbox,
   plan,
   route,
   placementError,
@@ -10,9 +9,9 @@ import {
   walkSegmentClear,
   crossingAt,
   tick,
-  enableFastNavigation,
 } from "../web/v02/weekend/simulation.js";
-const s = createSandbox(42);
+import { village } from "./fixtures.mjs";
+const s = village({ sandbox: true, fast: false }).s;
 let site;
 for (let z = 10; z < 65 && !site; z += 2)
   for (let x = 5; x < 23; x++)
@@ -40,7 +39,7 @@ assert.ok(crossingAt(s, site.x + 4, site.z));
 assert.ok(restore(save(s)), "bridge saves");
 s.projects.at(-1).work = 0;
 assert.equal(route(s, right, left), null, "unfinished bridge is not walkable");
-const roads = createSandbox(42);enableFastNavigation(roads);
+const roads = village({ sandbox: true }).s;
 const pads = JSON.stringify(roads.terrainPads);
 for (let x = 50; x < 57; x++) assert.equal(plan(roads, "road", x, 50), "");
 assert.ok(route(roads, { x: 49, z: 50 }, { x: 57, z: 50 }));
@@ -70,8 +69,7 @@ assert.ok(placementError(roads, "bridge", 60, 60), "bridge requires river");
 console.log(
   "PASS: bridge spans dry banks, connects only when complete, safe crossing segments, road placement and persistence without terrain flattening.",
 );
-const storyRoad = createSandbox(42);enableFastNavigation(storyRoad);
-storyRoad.mode = 'story';
+const storyRoad = village({ sandbox: true, story: true }).s;
 const stone = storyRoad.materials.stone, earth = storyRoad.materials.earth;
 assert.equal(plan(storyRoad,'road',40,35),'');
 assert.equal(storyRoad.materials.stone,stone-1);

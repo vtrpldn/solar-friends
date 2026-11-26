@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import {restore,save,tick,enableFastNavigation} from '../web/v02/weekend/simulation.js';
+import {advance} from './fixtures.mjs';
 const raw=fs.readFileSync('docs/balance/evidence/2026-11-17-full-water-carrier-save.json','utf8');
 assert(restore(raw),'recorded state is a valid save');
 // Retain the recorded live assignment: restore deliberately clears worker jobs.
@@ -12,7 +13,7 @@ assert.equal(resident.cargo,false);assert.equal(resident.operation,null);
 assert.equal(op.water.amount,amount,'setting down the carrier preserves every remaining litre');
 assert.deepEqual(op.water.stagedAt,{x:resident.x,z:resident.z});
 const staged=save(s);assert(restore(staged),'staged water survives save/reload');
-for(let i=0;i<32000&&(resident.energy<=35||resident.needs.hunger<=20||resident.needs.bladder<=20||resident.needs.bowels<=20);i++)tick(s,.1);
+advance(s,{seconds:3200,until:()=>!(resident.energy<=35||resident.needs.hunger<=20||resident.needs.bladder<=20||resident.needs.bowels<=20)});
 assert(resident.energy>35&&resident.needs.hunger>20&&resident.needs.bladder>20&&resident.needs.bowels>20,'the actual carrier can eat, toilet and rest');
 assert.equal(op.water.amount,amount,'waiting beside the full reservoir does not discard water');
 const resumed=restore(staged);enableFastNavigation(resumed);
@@ -20,7 +21,7 @@ const waiting=resumed.operations.find(o=>o.id===op.id),node=resumed.infrastructu
 for(const link of resumed.infrastructure.links)if(link.to===node.id&&link.kind==='fresh')link.enabled=false;
 node.water[0]-=1;resumed.infrastructure.account.waterUsed+=1;
 const before=node.water[0];
-for(let i=0;i<20000&&!waiting.done;i++)tick(resumed,.1);
+advance(resumed,{seconds:2000,until:()=>waiting.done});
 assert(waiting.done,'a resident retrieves the staged carrier once capacity becomes available');
 assert(Math.abs(node.water[0]-before-amount)<1e-7,'only the preserved water reaches the destination');
 assert.equal(waiting.water.stagedAt,undefined);

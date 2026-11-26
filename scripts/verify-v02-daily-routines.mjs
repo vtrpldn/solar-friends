@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
-import {createWeekend,chooseCamp,tick,save,restore} from '../web/v02/weekend/simulation.js';
+import {tick,save,restore} from '../web/v02/weekend/simulation.js';
 import {NEED_KEYS,mealTime} from '../web/v02/weekend/resident-needs.js';
+import {village} from './fixtures.mjs';
 const at=hour=>(hour-9)*60/.45;
 function fresh(hour) {
- const s=createWeekend();chooseCamp(s,'clearing');s.time=at(hour);
+ const {s}=village({seed:0,camp:'clearing',fast:false,time:at(hour)});
  s.people.forEach((r,i)=>{r.needs=Object.fromEntries(NEED_KEYS.map(k=>[k,100]));r.energy=90;r.x=30+i;r.z=-10;});
  return s;
 }

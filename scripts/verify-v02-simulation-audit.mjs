@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {createWeekend,chooseCamp,plan,cancelProject,restore,save,PROJECTS,PROCESSES,
+import {plan,cancelProject,restore,save,PROJECTS,PROCESSES,
   productionBlocker,storageCapacity,storedMaterials,queueBedJob,enableFastNavigation,tick} from '../web/v02/weekend/simulation.js';
 import {ensureCultivation} from '../web/v02/weekend/cultivation.js';
 import {kitchenPlan,foodPolicy} from '../web/v02/weekend/food-policy.js';
 import {coolStoredFood} from '../web/v02/weekend/cold-storage.js';
 import {ensureFoodStorage} from '../web/v02/weekend/food-storage.js';
+import {village as camped} from './fixtures.mjs';
 
 const fixture=async name=>restore(await readFile(new URL('../docs/balance/evidence/2026-11-17-'+name+'-save.json',import.meta.url),'utf8'));
 const village=await fixture('final-catalog');
@@ -18,8 +19,7 @@ ensureCultivation(village,garden);
 assert.equal(queueBedJob(village,garden.id,0,'prepare'),'');
 assert.equal(kitchenPlan(village,kitchen,PROCESSES,api).recipe,'meals','preparing a bed has no incoming harvest');
 
-const camp=createWeekend(42);
-chooseCamp(camp,'entrance');
+const {s:camp}=camped({fast:false});
 const cash=camp.money;
 assert.equal(plan(camp,'compost',29,-10),'');
 assert.equal(camp.trip.phase,'boarding');

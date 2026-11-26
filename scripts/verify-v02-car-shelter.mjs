@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict';
-import {createWeekend,chooseCamp,PROJECTS,plan,moveProject,placementError,tick,save,restore,enableFastNavigation,route} from '../web/v02/weekend/simulation.js';
+import {PROJECTS,plan,moveProject,placementError,save,restore,route} from '../web/v02/weekend/simulation.js';
 import {upkeep,upkeepStep,carsSheltered,VEHICLE_WEATHER_DAYS} from '../web/v02/weekend/asset-upkeep.js';
 import {GAME_DAY} from '../web/v02/weekend/biological-production.js';
 import {PARKING_SITE} from '../web/v02/weekend/road-layout.js';
 import {carDoor} from '../web/v02/weekend/town-trip.js';
 import {vehiclePose,ARRIVAL_DURATION} from '../web/v02/weekend/arrival.js';
 import {isBuildOption,buildingCategory} from '../web/v02/weekend/build-categories.js';
+import {village,advance} from './fixtures.mjs';
 
 const def=PROJECTS.carport,{x,z}=PARKING_SITE;
 assert(def&&def.fixedSite&&!def.repeatable,'one shelter on one site');
@@ -16,7 +17,7 @@ for(const index of [0,1]){
  assert(cx>x-.5+.4&&cx<x+def.size[0]-.5-.4&&cz>z-.5+.9&&cz<z+def.size[1]-.5-.9,`car ${index} fits under the roof`);
 }
 
-const s=createWeekend(42);chooseCamp(s,'entrance');enableFastNavigation(s);
+const {s}=village();
 s.money=50000;
 assert.match(placementError(s,'carport',x+6,z+12),/parking clearing/,'only the parking site is accepted');
 assert.match(placementError(s,'carport',x,z,null,1),/parking clearing/,'the roof cannot be turned');
@@ -31,12 +32,12 @@ assert(!carsSheltered(s,PROJECTS),'an unfinished frame gives no cover');
 assert(restore(save(s)),'planned shelter saves');
 
 // Weathering in the open: thirty points a year, with no driving at all.
-const open=createWeekend(7);chooseCamp(open,'entrance');
+const {s:open}=village({seed:7,fast:false});
 upkeep(open).automatic=false;
 upkeepStep(open,PROJECTS,GAME_DAY*VEHICLE_WEATHER_DAYS.open/3);
 assert(Math.abs(upkeep(open).vehicles[0].condition-90)<1e-6&&Math.abs(upkeep(open).vehicles[1].condition-90)<1e-6);
 
-for(let i=0;i<400000&&p.work<def.work;i++)tick(s,.1);
+advance(s,{seconds:40000,until:()=>p.work>=def.work});
 assert(p.work>=def.work,'residents build the shelter');
 assert(carsSheltered(s,PROJECTS));
 for(const index of [0,1])assert(route(s,s.stock,carDoor(index)),`car ${index} door stays reachable under the roof`);

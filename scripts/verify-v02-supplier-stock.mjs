@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
-import {createWeekend,PROJECTS,MATERIALS,save,restore} from '../web/v02/weekend/simulation.js';
+import {PROJECTS,MATERIALS,save,restore} from '../web/v02/weekend/simulation.js';
+import {village} from './fixtures.mjs';
 import {supplierAvailable,supplierError,reserveSupplier,supplierLimit,purchaseCategory} from '../web/v02/weekend/supplier-stock.js';
-const s=createWeekend(42),limit=supplierAvailable(s,'panels',MATERIALS);
+const s=village({camp:false,fast:false}).s,limit=supplierAvailable(s,'panels',MATERIALS);
 assert.equal(limit,8);assert(reserveSupplier(s,{panels:6},MATERIALS));assert.equal(supplierAvailable(s,'panels',MATERIALS),2);
 const before=JSON.stringify(s.suppliers);assert(!reserveSupplier(s,{wood:12,panels:3},MATERIALS));assert.equal(JSON.stringify(s.suppliers),before,'failed mixed order is atomic');
 assert.match(supplierError(s,{panels:3},MATERIALS),/Stock renews tomorrow/);

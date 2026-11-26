@@ -1,12 +1,13 @@
 import assert from 'node:assert/strict';
-import {createWeekend,chooseCamp,tick,save,restore,PROJECTS,requiredLoads,enableFastNavigation,prioritize} from '../web/v02/weekend/simulation.js';
+import {tick,save,restore,PROJECTS,requiredLoads,enableFastNavigation,prioritize} from '../web/v02/weekend/simulation.js';
 import {syncInfrastructure} from '../web/v02/weekend/infrastructure.js';
 import {chooseNeed,advanceNeed,cancelNeed,inviteConversation} from '../web/v02/weekend/resident-needs.js';
 import {PROFILES} from '../web/v02/weekend/resident-personality.js';
 import {wantsConversation,conversationFor,finishPersonalTime,workPreference,noticeAspiration,aspirationStatus} from '../web/v02/weekend/resident-mind.js';
+import {village} from './fixtures.mjs';
 
 function fresh() {
-  const s=createWeekend(42);chooseCamp(s,'entrance');enableFastNavigation(s);
+  const {s}=village();
   s.rainSeen=s.rainResolved=true;syncInfrastructure(s,PROJECTS);
   s.people.forEach((r,i)=>{r.needs={hunger:90,bladder:90,bowels:90,hygiene:90,social:90,fun:90};r.energy=90;r.x=30+i;r.z=25;});
   return s;

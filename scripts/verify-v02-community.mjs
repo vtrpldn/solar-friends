@@ -2,15 +2,8 @@ import assert from "node:assert/strict";
 import * as THREE from "three";
 import { COMMUNITY } from "../web/v02/library/community-defs.js";
 import { createAsset } from "../web/v02/library/catalog.js";
-import {
-  createWeekend,
-  chooseCamp,
-  PROJECTS,
-  requiredLoads,
-  tick,
-  save,
-  restore,
-} from "../web/v02/weekend/simulation.js";
+import { PROJECTS, tick, save, restore } from "../web/v02/weekend/simulation.js";
+import { village, addSite } from "./fixtures.mjs";
 for (const [id, def] of Object.entries(COMMUNITY)) {
   const model = createAsset(id),
     bounds = new THREE.Box3().setFromObject(model, true),
@@ -21,19 +14,10 @@ for (const [id, def] of Object.entries(COMMUNITY)) {
   );
   assert(bounds.min.y >= -0.01, `${id} grounded`);
   assert.deepEqual(PROJECTS[id].materials, def.materials);
-  const s = createWeekend();
-  s.arrivalElapsed = 17;
-  chooseCamp(s, "clearing");
+  const { s } = village({ seed: 0, camp: "clearing", fast: false });
   s.projects = [];
   s.operations = [];
-  s.projects.push({
-    id: s.nextId++,
-    key: id,
-    x: 40,
-    z: 39,
-    work: PROJECTS[id].work,
-    delivered: requiredLoads(id),
-  });
+  addSite(s, id, { x: 40, z: 39 });
   s.people.forEach((r) => {
     r.energy = 85;
     r.mealAt = 10000;

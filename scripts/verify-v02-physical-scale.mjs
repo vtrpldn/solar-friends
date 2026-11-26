@@ -10,7 +10,8 @@ import { ASSETS, createAsset } from '../web/v02/library/catalog.js';
 import { BUILDING_MODELS } from '../web/v02/weekend/building-models.js';
 import { METRES_PER_CELL } from '../web/v02/library/scale.js';
 import { SITE_SPACE, bridgeWidthScale, projectDescription } from '../web/v02/weekend/site-space.js';
-import { createSandbox, footprint, plan, moveProject, placementError, route, walkSegmentClear, PROJECTS, requiredLoads, save, restore } from '../web/v02/weekend/simulation.js';
+import { footprint, plan, moveProject, placementError, route, walkSegmentClear, PROJECTS, save, restore } from '../web/v02/weekend/simulation.js';
+import { village, addSite } from './fixtures.mjs';
 
 assert.equal(METRES_PER_CELL, 2);
 for(const model of BUILDING_MODELS) {
@@ -35,8 +36,8 @@ assert.equal(SITE_SPACE.greenhouse.productiveArea,19.2);
 
 // Real historical save shape: no siteVersion field, all four saved rotations.
 for(let rotation=0;rotation<4;rotation++) {
-  const s=createSandbox(42);
-  s.projects.push({id:s.nextId++,key:'bridge',x:60,z:50,rotation,work:PROJECTS.bridge.work,delivered:requiredLoads("bridge")});
+  const {s}=village({sandbox:true,fast:false});
+  addSite(s,'bridge',{x:60,z:50,rotation});
   const restored=restore(save(s));assert(restored);
   const p=restored.projects[0];
   assert.deepEqual(footprint(p), rotation%2 ? [2,8] : [8,2]);
@@ -49,7 +50,7 @@ for(let rotation=0;rotation<4;rotation++) {
   assert.deepEqual(footprint(restore(save(restored)).projects[0]),footprint(p));
   p.siteVersion=2;assert.equal(restore(save(restored)),null,'unknown layouts are rejected');
 }
-const s=createSandbox(42);
+const {s}=village({sandbox:true,fast:false});
 assert.equal(plan(s,'bridge',6,48), '');
 const p=s.projects[0];assert.equal(p.siteVersion,1);assert.deepEqual(footprint(p),[8,1]);
 assert.equal(bridgeWidthScale(p),1);
