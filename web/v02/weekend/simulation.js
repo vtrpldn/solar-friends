@@ -3023,6 +3023,15 @@ function residentTurn(s, r, i, dt, needApi, pending) {
         }
         if (serviced) continue;
       }
+      constructionTurn(s, r, i, dt, needApi, pending);
+  } while (false);
+}
+
+// The last rung: take or keep a construction job, fetch its loads, carry them and build.
+// Each `continue` ends the turn, as in residentTurn.
+function constructionTurn(s, r, i, dt, needApi, pending) {
+  const {removalsPending, constructionPending, operationsPending, animalCarePending, farmJobsPending} = pending;
+  do {
       let p = r.job != null && s.projects.find(
         (p) => !p.removal && p.id === r.job && !p.pendingMaterials && p.work < PROJECTS[p.key].work,
       );
