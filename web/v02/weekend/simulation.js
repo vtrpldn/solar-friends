@@ -887,133 +887,9 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     op.done = true;
     return false;
   }
-  if (op.water) {
-    const w = op.water,
-      index = liquidIndex(w.kind);
-    if(w.service) {
-      const dest=utilitySpot(s,node,r);r.action='produce';op.status='Servicing sealed waste tanks';
-      if(!dest || !go(s,r,dest))return true;
-      op.work+=dt*useEquipment(s,r,'cleaning-kit',`op:${op.id}`,dt);r.energy=Math.max(0,r.energy-dt*.06);
-      if(op.work>=45){const amount=node.water[2]+node.water[3];node.water[2]=0;node.water[3]=0;sys.account.wasteRemoved=(sys.account.wasteRemoved||0)+amount;op.done=true;r.operation=null;say(s,`${r.name} serviced the sealed waste tanks for off-site treatment.`);}
-      return true;
-    }
-    if (op.phase === "pickup") {
-      // Nobody sets out for water that has nowhere to be poured.
-      if (!r.target && !utilitySpot(s, node, r)) {
-        op.status="Waiting for an accessible work position";
-        (op.accessRetryAt??={})[r.id]=s.time+30;
-        r.operation=null;r.walk=[];r.action='idle';
-        return false;
-      }
-      let start;
-      if (w.from === -1) {
-        start = w.sourcePoint || (w.sourcePoint=nearestRiverAccess(s,r));
-      } else start = utilitySpot(s, sys.nodes[w.from], r);
-      if (!start) return false;
-      op.status = "Walking to collect water";
-      r.action = "fetch-water";
-      if (!go(s, r, start)) return true;
-      const dest = sys.nodes[w.to];
-      w.amount = Math.min(
-        12,
-        dest.capacity[index] - dest.water[index],
-        w.from === -1 ? 12 : sys.nodes[w.from].water[index],
-      );
-      if (w.from === -1){w.amount=extractWater(s,"river",w.amount);sys.account.waterReceived += w.amount;if(w.amount<=1e-8){op.status="River reserve is low; waiting for flow";return true;}}
-      else sys.nodes[w.from].water[index] -= w.amount;
-      useEquipment(s,r,"bucket",`op:${op.id}`,0);
-      op.phase = "deliver";
-      r.target = null;
-    }
-    if(w.stagedAt){
-      r.cargo=false;r.action='fetch-water';op.status='Collecting the sealed carrier beside the reservoir';
-      if(!go(s,r,w.stagedAt))return true;
-      delete w.stagedAt;
-    }
-    useEquipment(s,r,"bucket",`op:${op.id}`,0);
-    op.status = "Carrying water to the reservoir";
-    r.action = "carry";
-    r.cargo = true;
-    const dest = utilitySpot(s, node, r);
-    if (!dest) {
-      // Set the water down. A carrier left holding it could not eat, drink or
-      // rest for as long as the way to the tank stayed shut.
-      op.status="Waiting for an accessible work position";
-      w.stagedAt={x:r.x,z:r.z};(op.accessRetryAt??={})[r.id]=s.time+30;
-      r.cargo=false;r.operation=null;r.target=null;r.walk=[];r.action='idle';
-      return false;
-    }
-  if (!go(s, r, dest)) return true;
-    const n = Math.min(w.amount, node.capacity[index] - node.water[index]);
-    node.water[index] += n;
-    w.amount -= n;
-    if (w.amount > 0.00001) {
-      // Keep the undelivered water physically at the destination without
-      // forcing its carrier to wait through meals, sleep and bathroom breaks.
-      w.stagedAt={x:r.x,z:r.z};
-      r.cargo=false;r.operation=null;r.target=null;
-      op.status = "Destination full; sealed water waits beside the reservoir.";
-      return true;
-    }
-    r.cargo = false;
-    op.done = true;
-    r.operation = null;
-    return true;
-  }
+  if (op.water) return waterOperation(s, r, dt, op, node, sys);
   const recipe = farmRecipe(op,PROCESSES);
-  if (op.phase === "return") {
-    r.action = "carry";
-    r.cargo = true;
-    op.status = op.returnItems ? "Returning usable remains after spoilage" : op.recipe === "solar_upgrade" ? "Returning after installing solar" : "Carrying output to storage";
-    const output=op.returnItems||op.harvestOutput||recipe.output;
-    if(output.wheelbarrow)op.status="Moving the assembled wheelbarrow to storage";
-    const bulk=true;
-    if(bulk){
-      op.haulRemaining??={...output};op.returningToSite??=false;
-      if(op.returningToSite){
-        r.cargo=false;r.action="walk";op.status="Returning for the next production load";
-        // A building may now stand over a felled tree. The cut logs stay
-        // reachable from the nearest open ground beside it.
-        const source=utilitySpot(s,node,r)||(p?.felled&&nearestOpenGround(s,p,r));
-        if(!source){
-          op.status="Waiting for an accessible route to the remaining output";
-          (op.accessRetryAt??={})[r.id]=s.time+30;
-          r.operation=null;r.target=null;r.walk=[];r.action='idle';
-          return false;
-        }
-        if(!go(s,r,source))return true;
-        op.returningToSite=false;r.target=null;
-      }
-    }
-    if (!go(s, r, supplySpot(s, r, i))) return true;
-    const returned=bulk?productionLoad(op.haulRemaining):output;
-    if(bulk&&!Object.keys(returned).length&&Object.values(op.haulRemaining).some(n=>n>0)){
-      op.status="Output exceeds hand-carry capacity";return true;
-    }
-    const total = Object.entries(returned).reduce((a, [id, n]) => a + (id === 'scraps' ? 0 : n), 0);
-    if (storedMaterials(s) + total > storageCapacity(s)) {
-      // Set the load down beside the stores. A carrier who kept hold of it
-      // could not eat, drink or rest for as long as the stores stayed full.
-      op.status = "Storage full; the load waits beside the stores";
-      (op.accessRetryAt??={})[r.id]=s.time+30;
-      r.cargo=false;r.operation=null;r.target=null;r.walk=[];r.action='idle';
-      return true;
-    }
-    for (const [id, n] of Object.entries(returned))
-      changeMaterial(s,id,n,op.foodOutput?.[id]?takeFoodLots(op.foodOutput[id],n):undefined,'production delivery');
-    if(bulk){
-      for(const [id,n]of Object.entries(returned))op.haulRemaining[id]-=n;
-      if(Object.values(op.haulRemaining).some(n=>n>0)){
-        op.returningToSite=true;r.cargo=false;r.target=null;return true;
-      }
-    }
-    op.done = true;
-    r.operation = null;
-    r.cargo = false;
-    if(recipe.equipmentRepair)repairEquipment(s,recipe.equipmentRepair);
-    say(s, op.recipe === "solar_upgrade" ? `Solar upgrade installed at ${projectLabel(p,PROJECTS)}.` : op.farm ? `${projectLabel(p,PROJECTS)}: ${op.farm.action==='harvest'?'harvest':'residues'} from bed ${op.farm.bed+1} delivered to storage.` : `${recipe.name}: supplies delivered to storage from ${projectLabel(p,PROJECTS)}.`);
-    return true;
-  }
+  if (op.phase === "return") return returnOperation(s, r, i, op, node, p, recipe);
 
   if(recipe.craft && craftingBlocker(s,recipe,r)) {op.status=craftingBlocker(s,recipe,r);r.action='blocked';return false;}
   if (op.phase === "pickup") {
@@ -1137,6 +1013,136 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     }
   }
   return true;
+}
+
+// A water job: service sealed tanks, or fetch water and pour it into a reservoir. Returns busy.
+function waterOperation(s, r, dt, op, node, sys) {
+    const w = op.water,
+      index = liquidIndex(w.kind);
+    if(w.service) {
+      const dest=utilitySpot(s,node,r);r.action='produce';op.status='Servicing sealed waste tanks';
+      if(!dest || !go(s,r,dest))return true;
+      op.work+=dt*useEquipment(s,r,'cleaning-kit',`op:${op.id}`,dt);r.energy=Math.max(0,r.energy-dt*.06);
+      if(op.work>=45){const amount=node.water[2]+node.water[3];node.water[2]=0;node.water[3]=0;sys.account.wasteRemoved=(sys.account.wasteRemoved||0)+amount;op.done=true;r.operation=null;say(s,`${r.name} serviced the sealed waste tanks for off-site treatment.`);}
+      return true;
+    }
+    if (op.phase === "pickup") {
+      // Nobody sets out for water that has nowhere to be poured.
+      if (!r.target && !utilitySpot(s, node, r)) {
+        op.status="Waiting for an accessible work position";
+        (op.accessRetryAt??={})[r.id]=s.time+30;
+        r.operation=null;r.walk=[];r.action='idle';
+        return false;
+      }
+      let start;
+      if (w.from === -1) {
+        start = w.sourcePoint || (w.sourcePoint=nearestRiverAccess(s,r));
+      } else start = utilitySpot(s, sys.nodes[w.from], r);
+      if (!start) return false;
+      op.status = "Walking to collect water";
+      r.action = "fetch-water";
+      if (!go(s, r, start)) return true;
+      const dest = sys.nodes[w.to];
+      w.amount = Math.min(
+        12,
+        dest.capacity[index] - dest.water[index],
+        w.from === -1 ? 12 : sys.nodes[w.from].water[index],
+      );
+      if (w.from === -1){w.amount=extractWater(s,"river",w.amount);sys.account.waterReceived += w.amount;if(w.amount<=1e-8){op.status="River reserve is low; waiting for flow";return true;}}
+      else sys.nodes[w.from].water[index] -= w.amount;
+      useEquipment(s,r,"bucket",`op:${op.id}`,0);
+      op.phase = "deliver";
+      r.target = null;
+    }
+    if(w.stagedAt){
+      r.cargo=false;r.action='fetch-water';op.status='Collecting the sealed carrier beside the reservoir';
+      if(!go(s,r,w.stagedAt))return true;
+      delete w.stagedAt;
+    }
+    useEquipment(s,r,"bucket",`op:${op.id}`,0);
+    op.status = "Carrying water to the reservoir";
+    r.action = "carry";
+    r.cargo = true;
+    const dest = utilitySpot(s, node, r);
+    if (!dest) {
+      // Set the water down. A carrier left holding it could not eat, drink or
+      // rest for as long as the way to the tank stayed shut.
+      op.status="Waiting for an accessible work position";
+      w.stagedAt={x:r.x,z:r.z};(op.accessRetryAt??={})[r.id]=s.time+30;
+      r.cargo=false;r.operation=null;r.target=null;r.walk=[];r.action='idle';
+      return false;
+    }
+  if (!go(s, r, dest)) return true;
+    const n = Math.min(w.amount, node.capacity[index] - node.water[index]);
+    node.water[index] += n;
+    w.amount -= n;
+    if (w.amount > 0.00001) {
+      // Keep the undelivered water physically at the destination without
+      // forcing its carrier to wait through meals, sleep and bathroom breaks.
+      w.stagedAt={x:r.x,z:r.z};
+      r.cargo=false;r.operation=null;r.target=null;
+      op.status = "Destination full; sealed water waits beside the reservoir.";
+      return true;
+    }
+    r.cargo = false;
+    op.done = true;
+    r.operation = null;
+    return true;
+}
+
+// Carry a finished job's output back to storage, in hand-carried loads. Returns busy.
+function returnOperation(s, r, i, op, node, p, recipe) {
+    r.action = "carry";
+    r.cargo = true;
+    op.status = op.returnItems ? "Returning usable remains after spoilage" : op.recipe === "solar_upgrade" ? "Returning after installing solar" : "Carrying output to storage";
+    const output=op.returnItems||op.harvestOutput||recipe.output;
+    if(output.wheelbarrow)op.status="Moving the assembled wheelbarrow to storage";
+    const bulk=true;
+    if(bulk){
+      op.haulRemaining??={...output};op.returningToSite??=false;
+      if(op.returningToSite){
+        r.cargo=false;r.action="walk";op.status="Returning for the next production load";
+        // A building may now stand over a felled tree. The cut logs stay
+        // reachable from the nearest open ground beside it.
+        const source=utilitySpot(s,node,r)||(p?.felled&&nearestOpenGround(s,p,r));
+        if(!source){
+          op.status="Waiting for an accessible route to the remaining output";
+          (op.accessRetryAt??={})[r.id]=s.time+30;
+          r.operation=null;r.target=null;r.walk=[];r.action='idle';
+          return false;
+        }
+        if(!go(s,r,source))return true;
+        op.returningToSite=false;r.target=null;
+      }
+    }
+    if (!go(s, r, supplySpot(s, r, i))) return true;
+    const returned=bulk?productionLoad(op.haulRemaining):output;
+    if(bulk&&!Object.keys(returned).length&&Object.values(op.haulRemaining).some(n=>n>0)){
+      op.status="Output exceeds hand-carry capacity";return true;
+    }
+    const total = Object.entries(returned).reduce((a, [id, n]) => a + (id === 'scraps' ? 0 : n), 0);
+    if (storedMaterials(s) + total > storageCapacity(s)) {
+      // Set the load down beside the stores. A carrier who kept hold of it
+      // could not eat, drink or rest for as long as the stores stayed full.
+      op.status = "Storage full; the load waits beside the stores";
+      (op.accessRetryAt??={})[r.id]=s.time+30;
+      r.cargo=false;r.operation=null;r.target=null;r.walk=[];r.action='idle';
+      return true;
+    }
+    for (const [id, n] of Object.entries(returned))
+      changeMaterial(s,id,n,op.foodOutput?.[id]?takeFoodLots(op.foodOutput[id],n):undefined,'production delivery');
+    if(bulk){
+      for(const [id,n]of Object.entries(returned))op.haulRemaining[id]-=n;
+      if(Object.values(op.haulRemaining).some(n=>n>0)){
+        op.returningToSite=true;r.cargo=false;r.target=null;return true;
+      }
+    }
+    op.done = true;
+    r.operation = null;
+    r.cargo = false;
+    if(recipe.equipmentRepair)repairEquipment(s,recipe.equipmentRepair);
+    say(s, op.recipe === "solar_upgrade" ? `Solar upgrade installed at ${projectLabel(p,PROJECTS)}.` : op.farm ? `${projectLabel(p,PROJECTS)}: ${op.farm.action==='harvest'?'harvest':'residues'} from bed ${op.farm.bed+1} delivered to storage.` : `${recipe.name}: supplies delivered to storage from ${projectLabel(p,PROJECTS)}.`);
+    return true;
 }
 export function materialText(id, n) {
   return `${quantityText(id,n)} ${MATERIALS[id].name.replace(/ pieces| packs| bundles/g, "")}`;
@@ -2575,13 +2581,46 @@ function tickUncached(s, dt) {
     return;
   }
   dt = Math.min(dt, 1);
+  const ctx = {dt, sys: null};
+  for (const [, step] of TICK_STEPS) step(s, ctx);
+}
+
+// One game tick, in order. Adding a per-tick behaviour means adding a step here (or calling it from
+// the step it belongs to); each step reads and writes ctx = {dt, sys}.
+const TICK_STEPS = [
+  ['world', worldStep],
+  ['clock', clockStep],
+  ['upkeep', upkeepTickStep],
+  ['infrastructure', infrastructureTickStep],
+  ['crops', cropStep],
+  ['food storage', foodStoreStep],
+  ['delivery', deliveryTickStep],
+  ['sales', salesStep],
+  ['planning', planningStep],
+  ['resident needs', residentNeedsStep],
+  ['trips', tripStep],
+  ['residents', residentsStep],
+];
+
+// Lazily created land and finances; sandbox supplies are topped up every tick.
+function worldStep(s, ctx) {
   ensureNaturalLand(s,PROJECTS);
   ensureFinances(s);
   if (s.mode === "sandbox") sandboxSupplies(s);
+}
+
+// Game time and weather.
+function clockStep(s, ctx) {
+  const {dt} = ctx;
   s.time += dt;
   weatherStep(s,dt);
-  const sys = autoConnectUtilities(s, PROJECTS);
-  // Upkeep can reduce battery capacity and service quality before power is allocated.
+}
+
+// Asset upkeep and the community; sys (the utility network) is shared with later steps.
+// Upkeep can reduce battery capacity and service quality before power is allocated.
+function upkeepTickStep(s, ctx) {
+  const {dt} = ctx;
+  const sys = ctx.sys = autoConnectUtilities(s, PROJECTS);
   const herds=s.projects.filter(p=>p.animalCare).map(p=>[p,p.animalHealth??100]);
   upkeepStep(s, PROJECTS, dt, project => syncProjectNode(sys, project, PROJECTS));
   communityStep(s, dt, PROJECTS, {say, ready: p => p.delivered >= requiredLoads(p)});
@@ -2591,7 +2630,17 @@ function tickUncached(s, dt) {
     if(before>=50&&now<50)say(s,`${projectLabel(p,PROJECTS)}: the animals are going hungry. They need fodder and drinking water every day.`);
     else if(before>0&&now<=0)say(s,`${projectLabel(p,PROJECTS)}: the animals are starving and have stopped producing.`);
   }
-  infrastructureStep(s, PROJECTS, dt, sys);
+}
+
+// Water, power and sanitation networks.
+function infrastructureTickStep(s, ctx) {
+  const {dt} = ctx;
+  infrastructureStep(s, PROJECTS, dt, ctx.sys);
+}
+
+// Biological cycles and fields, with a message when a field's condition changes.
+function cropStep(s, ctx) {
+  const {dt} = ctx;
   biologicalStep(s,dt,useWater);
   cultivationStep(s,dt,useWater,PROJECTS);
   for(const p of s.projects){
@@ -2603,6 +2652,11 @@ function tickUncached(s, dt) {
       p.cropWarning=warning;
     }
   }
+}
+
+// Cooling, spoilage and a message for food lost.
+function foodStoreStep(s, ctx) {
+  const {dt} = ctx;
   coolStoredFood(s,dt);
   const spoiledBefore={...s.foodStorage?.spoiled};
   foodStorageStep(s,PROCESSES,MATERIALS);
@@ -2610,12 +2664,25 @@ function tickUncached(s, dt) {
     const lost=n-(spoiledBefore[id]||0);
     if(lost>0)say(s,`${materialText(id,lost)} spoiled before it could be used.`);
   }
+}
+
+// The supplier truck.
+function deliveryTickStep(s, ctx) {
+  const {dt} = ctx;
   if (s.delivery || s.truckLeaving) {
     const freight = s.delivery || {};
     deliveryStep(s, dt, MATERIALS, changeMaterial, storedMaterials(s), storageCapacity(s));
     if (!s.delivery && freight.shipments) say(s, "The supplier truck unloaded the ordered building materials.");
   }
+}
+
+// Automatic surplus sales, once a game second.
+function salesStep(s, ctx) {
   if(s.time>=(s.nextAutomaticSale||0)){automaticSales(s);sellFoodSurplus(s);s.nextAutomaticSale=s.time+1;}
+}
+
+// Village planners. checkSupplies is read once, before maintainFood moves nextFoodCheck.
+function planningStep(s, ctx) {
   arrangePlantingSeeds(s);
   const checkSupplies = s.time >= (s.nextFoodCheck || 0);
   if (checkSupplies) scheduleFarmWork(s);
@@ -2624,6 +2691,11 @@ function tickUncached(s, dt) {
   maintainWater(s);
   manageKitchens(s,PROJECTS,PROCESSES,{blocker:productionBlocker,queue:queueProduction,stored:storedMaterials,capacity:storageCapacity});
   if (checkSupplies) startAutonomousWork(s,PROCESSES,PROJECTS,autonomyApi);
+}
+
+// Needs decay, aspirations, tiredness and bedtime for every resident.
+function residentNeedsStep(s, ctx) {
+  const {dt} = ctx;
   for (const [i,r] of s.people.entries()) {
     if(atTownJob(r))continue;
     decayNeeds(s,r,i,dt);
@@ -2640,25 +2712,11 @@ function tickUncached(s, dt) {
     }
   }
   s.infrastructure.hungry = s.people.some(r=>r.needs.hunger<15);
-  const needApi = {
-    route: (r,point)=>route(s,r,point),
-    go: (r,point)=>go(s,r,point),
-    serviceSpot: (node,r)=>utilitySpot(s,node,r),
-    camp: ()=>campLocation(s)||s.stock,
-    river: (r)=>nearestRiverAccess(s,r),
-    groundSpot: (r,center,index,privateBreak=false)=>{
-      const radius=privateBreak?6:1;
-      for(let ring=radius;ring<=radius+2;ring++)for(let j=0;j<12;j++) {
-        const angle=(j+index)*Math.PI/6;
-        const point={x:Math.round(center.x+Math.cos(angle)*ring),z:Math.round(center.z+Math.sin(angle)*ring)};
-        if(point.x<CELL_MIN+2 || point.x>CELL_MAX-2 || point.z<CELL_MIN+2 || point.z>CELL_MAX-2 || occupied(s,point.x,point.z))continue;
-        if(privateBreak && (riverBankAt(point.x,point.z,5,s.landSeed) || Math.hypot(point.x-s.stock.x,point.z-s.stock.z)<5))continue;
-        if(s.people.some(p=>p!==r && !atTownJob(p) && ((p.needTask && Math.hypot(p.needTask.target.x-point.x,p.needTask.target.z-point.z)<.8) || Math.hypot(p.x-point.x,p.z-point.z)<.7)))continue;
-        if(route(s,r,point))return point;
-      }
-      return null;
-    },
-  };
+}
+
+// Blueprint pickups, exports and town trips: boarding, driving, unloading.
+function tripStep(s, ctx) {
+  const {dt} = ctx;
   dispatchBlueprintPickup(s);
   for(const trip of activeTrips(s))if(trip.phase==='boarding')loadExports(s,trip);
   if(activeTrips(s).length<2 && pendingExports(s).some(o=>!o.holdForPickup) && dispatchReady(s,true) && s.time>=(s.trade?.dispatchAt||0)) supplyRun(s,pendingExports(s)[0].material,null,true);
@@ -2737,339 +2795,390 @@ function tickUncached(s, dt) {
     }
   }
   if(!s.trip&&s.secondTrip){s.trip=s.secondTrip;s.secondTrip=null;}
+}
+
+// Each resident's turn: the priority ladder from urgent needs to construction.
+function residentsStep(s, ctx) {
+  const {dt} = ctx;
+  const needApi = {
+    route: (r,point)=>route(s,r,point),
+    go: (r,point)=>go(s,r,point),
+    serviceSpot: (node,r)=>utilitySpot(s,node,r),
+    camp: ()=>campLocation(s)||s.stock,
+    river: (r)=>nearestRiverAccess(s,r),
+    groundSpot: (r,center,index,privateBreak=false)=>{
+      const radius=privateBreak?6:1;
+      for(let ring=radius;ring<=radius+2;ring++)for(let j=0;j<12;j++) {
+        const angle=(j+index)*Math.PI/6;
+        const point={x:Math.round(center.x+Math.cos(angle)*ring),z:Math.round(center.z+Math.sin(angle)*ring)};
+        if(point.x<CELL_MIN+2 || point.x>CELL_MAX-2 || point.z<CELL_MIN+2 || point.z>CELL_MAX-2 || occupied(s,point.x,point.z))continue;
+        if(privateBreak && (riverBankAt(point.x,point.z,5,s.landSeed) || Math.hypot(point.x-s.stock.x,point.z-s.stock.z)<5))continue;
+        if(s.people.some(p=>p!==r && !atTownJob(p) && ((p.needTask && Math.hypot(p.needTask.target.x-point.x,p.needTask.target.z-point.z)<.8) || Math.hypot(p.x-point.x,p.z-point.z)<.7)))continue;
+        if(route(s,r,point))return point;
+      }
+      return null;
+    },
+  };
   // Residents can finish orders during this pass. Skip absent categories and recheck live orders before assigning them.
   const removalsPending = s.projects.some(p => p.removal);
   const constructionPending = removalsPending || s.projects.some(p => p.work < PROJECTS[p.key].work);
   const operationsPending = s.operations?.some(o => !o.done);
   const animalCarePending = s.upkeep?.jobs.some(job => job.care && !job.done);
   const farmJobsPending = operationsPending && s.operations.some(op => !op.done && !op.waitingSeeds && op.phase !== 'growing' && isFarmWork(s,op));
-  for (const [i, r] of s.people.entries()) {
-    if(downtimeInvalid(s,r,PROJECTS)){clearDowntime(r);r.walk=[];r.target=null;}
-    if(r.downtime && (r.job!=null || r.operation!=null || r.linkJob!=null || r.needTask || r.cargo || r.tentPhase || r.sleepUntil || r.outsideWork || r.action==='town'))clearDowntime(r);
-    if (r.action === "town") continue;
-    if(atTownJob(r)){outsideWorkStep(s,r,dt,go,say);continue;}
-    const canDrink=r.needs.hydration<10&&Object.values(s.infrastructure.nodes).some(n=>{
-      if(!n.enabled||n.water[0]<.5||['coop','goat_pasture'].includes(n.kind))return false;
-      const spot=utilitySpot(s,n,r);return spot&&route(s,r,spot);
-    });
-    const urgent=Math.min(r.needs.bladder,r.needs.bowels)<10 || canDrink || (r.needs.hunger<15 && foodPortions(s)>=1);
-    if((r.sleepUntil || r.tentPhase==='inside') && urgent) {
-      if(r.sleepUntil)r.resumeSleepUntil=r.sleepUntil;
-      r.sleepUntil=null;
-      if(r.tentPhase){r.tentPhase='exit';r.tentAt=s.time;}
-      else {r.action='idle';r.walk=[];r.target=null;}
-    }
-    if(r.resumeSleepUntil && !r.needTask && !r.tentPhase && !r.cargo && !urgent && Math.min(r.needs.bladder,r.needs.bowels,r.needs.hydration)>30 && (r.needs.hunger>30 || foodPortions(s)<1)) {
-      if(r.resumeSleepUntil>s.time){r.sleepUntil=r.resumeSleepUntil;r.action='rest';r.walk=[];r.target=null;}
-      r.resumeSleepUntil=null;
-    }
-    if (!r.sleepUntil) chooseNeed(s,r,i,needApi);
-    if (r.tentPhase) {
-      r.action = "rest";
-      if (r.tentPhase === "enter" && s.time - r.tentAt >= 1.5)
-        r.tentPhase = "inside";
-      if (r.tentPhase === "inside") {
-        r.energy = Math.min(100, r.energy + dt * (r.sleepUntil ? .13 : .45));
-        const recovered = recoveryEnergy(s, r, constructionPending);
-        if ((r.sleepUntil ? s.time >= r.sleepUntil : r.energy >= recovered) || s.stage === "evening") {
-          r.sleepUntil=null;
-          r.tentPhase = "exit";
-          r.tentAt = s.time;
-        }
-      }
-      if (r.tentPhase === "exit" && s.time - r.tentAt >= 1.5) {
-        r.tentPhase = null;
-        r.restSite = null;
-        r.action = "idle";
-      }
-      continue;
-    }
-    // Leisure is interruptible: a newly available task beats finishing a stroll.
-    if (
-      s.stage === "playing" &&
-      !r.job &&
-      r.operation == null &&
-      r.linkJob == null &&
-      !r.needTask &&
-      r.energy >= 25 &&
-      [
-        "idle",
-        "relax",
-        "look",
-        "stretch",
-        "chat",
-        "stroll",
-        "breathe",
-      ].includes(r.action) &&
-      constructionPending && availableProject(s, r)
-    ) {
-      r.walk = [];
-      r.target = null;
-      clearDowntime(r);
-    }
-    if (r.energy < 25 && r.job && !r.cargo && !r.needTask) {
-      r.walk=[]; r.target=null; r.job=null; r.supplyGoal=null;
-    }
-    if (r.dayShiftBooked || r.favourBooked) startOutsideWork(s,r,route);
-    if (r.walk.length) {
-      const next = r.walk[0],
-        dx = next.x - r.x,
-        dz = next.z - r.z,
-        d = Math.hypot(dx, dz),
-        desiredSpeed =
-          (r.cargo ? 0.72 : 0.95) *
-          (r.cargo && s.equipment?.loans[r.id]?.item === "bucket" ? useEquipment(s,r,"bucket",s.equipment.loans[r.id].task,dt) : 1) *
-          (0.92 + i * 0.035) *
-          (r.energy < 35 ? 0.8 : 1),
-        braking = r.walk.length === 1 ? Math.max(0.25, Math.min(1, d * 2)) : 1;
-      r.moveSpeed = Math.min(
-        desiredSpeed * braking,
-        (r.moveSpeed || 0) + dt * 1.8,
-      );
-      const nearby = s.people.filter(
-        (other) =>
-          other !== r &&
-          other.action !== "town" && !atTownJob(other) &&
-          Math.hypot(other.x - r.x, other.z - r.z) < 0.75,
-      );
-      const step = dt * r.moveSpeed * (nearby.length ? 0.65 : 1);
-      const travel = Math.min(step, d);
-      const candidate = {
-        x: r.x + (d ? (dx / d) * travel : 0),
-        z: r.z + (d ? (dz / d) * travel : 0),
-      };
-      // A step that reaches the waypoint lands on it; sidestepping there orbits forever at large steps.
-      if (d > 0.1 && travel < d && nearby.length) {
-        const sidestep = {
-          x: candidate.x + (dz / d) * dt * 0.18,
-          z: candidate.z - (dx / d) * dt * 0.18,
-        };
-        if (
-          walkSegmentClear(s, r, sidestep) &&
-          walkSegmentClear(s, sidestep, next)
-        ) {
-          candidate.x = sidestep.x;
-          candidate.z = sidestep.z;
-        }
-      }
-      if (walkSegmentClear(s, r, candidate)) {
-        r.x = candidate.x;
-        r.z = candidate.z;
-        if (Math.hypot(r.x - next.x, r.z - next.z) < 0.015) r.walk.shift();
-      } else {
-        r.walk = route(s, r, r.target || next) || [];
-      }
-      r.energy = Math.max(0, r.energy - dt * 0.025);
-      continue;
-    }
-    r.moveSpeed = 0;
-    if (r.outsideWork) {
-      if (!advanceNeed(s,r,dt,needApi)) outsideWorkStep(s,r,dt,go,say);
-      continue;
-    }
-    if (s.stage === "evening") {
-      r.action = "meal";
-      go(s, r, restSpot(s, i));
-      continue;
-    }
-    if (advanceNeed(s,r,dt,needApi)) continue;
-    if (
-      !r.cargo && (r.sleepUntil || r.energy < 25 ||
-      (r.action === "rest" &&
-        r.energy <
-          recoveryEnergy(s, r, constructionPending)))
-    ) {
-      r.action = "rest";
-      r.job = null;
-      r.workSpot = null;
-      r.cargo = false;
-      chooseRestingPlace(s, r, i);
-      if (go(s, r, restingDoor(s, i))) {
-        r.tentPhase = "enter";
-        r.tentAt = s.time;
-        r.walk = [];
-        r.target = null;
-      }
-      continue;
-    }
-    if (s.unpack && unpackStep(s, r, dt)) continue;
-    if (
-      r.operation &&
-      s.operations?.some(
-        (o) =>
-          o.id === r.operation &&
-          !o.done &&
-          (o.phase === "return" || (o.water && o.phase === "deliver")),
-      )
-    ) {
-      if (operationalWork(s, r, i, dt)) continue;
-    }
-    if (!r.cargo && !r.operation && !r.outsideWork && !r.removalJob && r.action !== 'service') {
-      if (animalCarePending && performUpkeep(s,r,dt,go,changeMaterial,MATERIALS,carDoor,useWater,workSpot,true)) continue;
-      if (farmJobsPending && operationalWork(s,r,i,dt,false,'farm')) continue;
-    }
-    // Finish an assigned batch before reconsidering work categories. Otherwise
-    // changing availability can shuffle the reserved slots on every tick.
-    if (removalsPending && r.energy >= 25 && removalStep(s,r,dt,{defs:PROJECTS,recipes:PROCESSES,workSpot,go,stored:storedMaterials,capacity:storageCapacity,change:changeMaterial,invalidate:invalidateNavigation,say,placement:placementError,grade:gradeFoundation})) continue;
-    if (r.outsideJobEnabled && !r.dayShiftBooked && startOutsideWork(s,r,route)) {
-      outsideWorkStep(s,r,dt,go,say);
-      continue;
-    }
-    if(r.energy>=25&&performUpkeep(s,r,dt,go,changeMaterial,MATERIALS,carDoor,useWater,workSpot))continue;
-    const activeOperation = operationsPending && s.operations.find(o => o.id === r.operation && !o.done);
-    if(activeOperation && !r.job && operationalWork(s,r,i,dt,false,workGroup(activeOperation,PROCESSES))) continue;
-    // Needs and completed carrying trips always win. Reserve available people,
-    // not fixed residents who might be asleep, for essential and income work.
-    const priorities = economyPolicies(s).work;
-    if (operationsPending) {
-      const ready = s.people.filter(a => a.energy >= 25 && !a.tentPhase && !a.sleepUntil && !a.needTask && !a.cargo && a.action !== 'town' && !a.outsideWork);
-      const slot = ready.indexOf(r);
-      const essentialSlots = priorities.essentialWorkers ?? 1;
-      const essential = slot >= 0 && slot < essentialSlots;
-      const producer = slot >= 0 && slot >= essentialSlots && slot < essentialSlots + (priorities.productionWorkers ?? 1);
-      const groups = ['food', 'maintenance', 'production'].sort((a,b) => (priorities[b] ?? 2) - (priorities[a] ?? 2));
-      let serviced = false;
-      for (const group of groups) {
-        const urgent = group === 'food' && (s.infrastructure.hungry || s.infrastructure.thirst);
-        const reserved = group === 'production' ? producer : essential;
-        if (!r.cargo && (urgent || reserved || (priorities[group] ?? 2) > (priorities.construction ?? 2)) && operationalWork(s, r, i, dt, false, group)) {
-          serviced = true;
-          break;
-        }
-      }
-      if (serviced) continue;
-    }
-    let p = r.job != null && s.projects.find(
-      (p) => !p.removal && p.id === r.job && !p.pendingMaterials && p.work < PROJECTS[p.key].work,
-    );
-    if (!p) {
-      r.job = null;
-      r.workSpot = null;
-      r.cargo = false;
-      p = constructionPending && availableProject(s, r);
-      if (p) {
-        r.operation=null;
-        r.workSpot = workSpot(s, r, p);
-        r.job = p.id;
-        clearDowntime(r);
-        r.lookAt = null;
-        r.supplyGoal = null;
-        r.target = null;
-      }
-    }
-    if (!p) {
-      if (operationalWork(s, r, i, dt)) continue;
-      idleActivity(s, r, i, dt, {
-        ...needApi,catalog:PROJECTS,
-        projectSpot:(p,resident)=>leisureSpot(s,resident,p),
-        center:p=>({x:p.x+(footprint(p)[0]-1)/2,z:p.z+(footprint(p)[1]-1)/2}),
-        sheltered:kind=>['shed','rain-shelter'].includes(kind)||!!COMMUNITY[kind]?.sheltered,
+  const pending = {removalsPending, constructionPending, operationsPending, animalCarePending, farmJobsPending};
+  for (const [i, r] of s.people.entries()) residentTurn(s, r, i, dt, needApi, pending);
+}
+
+// One resident's turn. The rungs are tried in order and each `continue` ends the turn: the body is
+// a one-pass do…while so the ladder reads exactly as it did inside the residents loop.
+function residentTurn(s, r, i, dt, needApi, pending) {
+  const {removalsPending, constructionPending, operationsPending, animalCarePending, farmJobsPending} = pending;
+  do {
+      if(downtimeInvalid(s,r,PROJECTS)){clearDowntime(r);r.walk=[];r.target=null;}
+      if(r.downtime && (r.job!=null || r.operation!=null || r.linkJob!=null || r.needTask || r.cargo || r.tentPhase || r.sleepUntil || r.outsideWork || r.action==='town'))clearDowntime(r);
+      if (r.action === "town") continue;
+      if(atTownJob(r)){outsideWorkStep(s,r,dt,go,say);continue;}
+      const canDrink=r.needs.hydration<10&&Object.values(s.infrastructure.nodes).some(n=>{
+        if(!n.enabled||n.water[0]<.5||['coop','goat_pasture'].includes(n.kind))return false;
+        const spot=utilitySpot(s,n,r);return spot&&route(s,r,spot);
       });
-      // Leisure restores fun and social needs; it does not substitute for sleep.
-      continue;
-    }
-    if (!r.workSpot || occupied(s, r.workSpot.x, r.workSpot.z))
-      r.workSpot = workSpot(s, r, p);
-    if (!r.workSpot) {
-      r.job = null;
-      continue;
-    }
-    const dest = r.workSpot;
-    const loads = requiredLoads(p);
-    // Reserved supplies begin at the receiving stockpile. Storage only helps
-    // after a resident physically stages a larger batch there.
-    const transit = s.people.filter(other => other.job === p.id && other.cargo);
-    const inTransit = transit.reduce((n,other) => n + carriedLoads(other), 0);
-    const remaining = Math.max(0, loads - p.delivered - (p.staged || 0) - inTransit);
-    let depot = s.projects.find(other => other.id === p.depot && other.work >= PROJECTS[other.key].work);
-    if (!depot && !(p.staged > 0)) {
-      depot = s.projects.filter(other => other.id !== p.id && STORAGE_KINDS.includes(PROJECTS[other.key].kind) && other.work >= PROJECTS[other.key].work &&
-        Math.hypot(other.x-p.x,other.z-p.z) < 8 &&
-        Math.hypot(other.x-s.stock.x,other.z-s.stock.z)+Math.hypot(other.x-p.x,other.z-p.z) < Math.hypot(p.x-s.stock.x,p.z-s.stock.z)*1.35)
-        .sort((a,b)=>Math.hypot(a.x-p.x,a.z-p.z)-Math.hypot(b.x-p.x,b.z-p.z))
-        .find(other=>workSpot(s,r,other));
-      p.depot = depot?.id;
-    }
-    if (!r.cargo && p.delivered < loads) {
-      const staged = (p.staged || 0) > 0 && depot;
-      if (!staged && !remaining) {
-        r.job=null; r.workSpot=null; r.action='idle'; r.target=null;
-        continue;
+      const urgent=Math.min(r.needs.bladder,r.needs.bowels)<10 || canDrink || (r.needs.hunger<15 && foodPortions(s)>=1);
+      if((r.sleepUntil || r.tentPhase==='inside') && urgent) {
+        if(r.sleepUntil)r.resumeSleepUntil=r.sleepUntil;
+        r.sleepUntil=null;
+        if(r.tentPhase){r.tentPhase='exit';r.tentAt=s.time;}
+        else {r.action='idle';r.walk=[];r.target=null;}
       }
-      r.action = 'collect';
-      const source = staged ? workSpot(s,r,depot) : supplySpot(s,r,i);
-      if (!source) { r.job=null; continue; }
-      const sourceId=staged ? depot.id : 0;
-      if(r.supplySource!==sourceId){r.supplyGoal=null;r.walk=[];r.target=null;}
-      r.supplySource=sourceId;
-      if (!r.supplyGoal) r.supplyGoal=source;
-      if (go(s,r,r.supplyGoal)) {
-        r.haulLoads = Math.min(staged ? 2 : depot ? 4 : 1, staged ? p.staged : remaining);
-        r.haulStage = staged || !depot ? 'site' : 'storage';
-        if(staged) p.staged-=r.haulLoads;
-        r.supplyGoal=null; r.cargo=true; r.target=null;
+      if(r.resumeSleepUntil && !r.needTask && !r.tentPhase && !r.cargo && !urgent && Math.min(r.needs.bladder,r.needs.bowels,r.needs.hydration)>30 && (r.needs.hunger>30 || foodPortions(s)<1)) {
+        if(r.resumeSleepUntil>s.time){r.sleepUntil=r.resumeSleepUntil;r.action='rest';r.walk=[];r.target=null;}
+        r.resumeSleepUntil=null;
       }
-      continue;
-    }
-    r.action = r.cargo ? 'carry' : 'walk';
-    const delivery = r.cargo && r.haulStage==='storage' && depot ? workSpot(s,r,depot) : dest;
-    if(!delivery || !go(s,r,delivery)) continue;
-    if(r.cargo) {
-      if(r.haulStage==='storage' && depot) p.staged=(p.staged||0)+carriedLoads(r);
-      else p.delivered=Math.min(loads,p.delivered+carriedLoads(r));
-      r.cargo=false; r.haulLoads=0; r.haulStage=null;
-      r.target=null;
-      if(p.delivered<loads) continue;
-    }
-    if (p.delivered < loads || r.energy < 25) continue;
-    r.action = "build";
-    const before = p.work;
-    p.work = Math.min(
-      PROJECTS[p.key].work,
-      p.work +
-        dt *
-          workMultiplier(r,p.key) *
-          crewEfficiency(s.people.filter(other=>other.job===p.id&&other.action==='build').length) *
-          useEquipment(s,r,"carpentry-tools",`job:${p.id}`,dt,PROJECTS[p.key].work) *
-          (s.opening &&
-          !s.opening.complete &&
-          s.rain &&
-          !openingProgress(s, PROJECTS).shelter
-            ? 0.8
-            : 1) *
-          (r.needs.hunger<15 ? 0.65 : 1),
-    );
-    r.work += dt;
-    r.energy = Math.max(0, r.energy - dt * 0.16);
-    if (before < PROJECTS[p.key].work && p.work >= PROJECTS[p.key].work) {
-      invalidateNavigation(s);
-      if (s.opening && !s.opening.complete) {
-        const progress = openingProgress(s, PROJECTS);
-        for (const [key, line] of Object.entries({
-          gathering:
-            "Luz: Somewhere to sit together. This is starting to feel like our place.",
-          shelter:
-            "Nina: A dry place to take a break. We can stop rushing when the rain comes.",
-          supplies:
-            "Bento: Tools and supplies are protected. We can save the rest of our money for tomorrow.",
-        })) {
-          if (progress[key] && !s.opening[key]) {
-            s.opening[key] = true;
-            say(s, line);
+      if (!r.sleepUntil) chooseNeed(s,r,i,needApi);
+      if (r.tentPhase) {
+        r.action = "rest";
+        if (r.tentPhase === "enter" && s.time - r.tentAt >= 1.5)
+          r.tentPhase = "inside";
+        if (r.tentPhase === "inside") {
+          r.energy = Math.min(100, r.energy + dt * (r.sleepUntil ? .13 : .45));
+          const recovered = recoveryEnergy(s, r, constructionPending);
+          if ((r.sleepUntil ? s.time >= r.sleepUntil : r.energy >= recovered) || s.stage === "evening") {
+            r.sleepUntil=null;
+            r.tentPhase = "exit";
+            r.tentAt = s.time;
           }
         }
+        if (r.tentPhase === "exit" && s.time - r.tentAt >= 1.5) {
+          r.tentPhase = null;
+          r.restSite = null;
+          r.action = "idle";
+        }
+        continue;
       }
-      say(
-        s,
-        `${PROJECTS[p.key].name} is ready. ${p.key === "gathering" ? "Somewhere to sit together at last." : p.key === "shelter" ? "A roof for our first night." : p.key === "water" ? "Water close at hand." : PROJECTS[p.key].kind === "eco_toilet" ? "A little privacy goes a long way." : "Ready for the community to use."}`,
+      // Leisure is interruptible: a newly available task beats finishing a stroll.
+      if (
+        s.stage === "playing" &&
+        !r.job &&
+        r.operation == null &&
+        r.linkJob == null &&
+        !r.needTask &&
+        r.energy >= 25 &&
+        [
+          "idle",
+          "relax",
+          "look",
+          "stretch",
+          "chat",
+          "stroll",
+          "breathe",
+        ].includes(r.action) &&
+        constructionPending && availableProject(s, r)
+      ) {
+        r.walk = [];
+        r.target = null;
+        clearDowntime(r);
+      }
+      if (r.energy < 25 && r.job && !r.cargo && !r.needTask) {
+        r.walk=[]; r.target=null; r.job=null; r.supplyGoal=null;
+      }
+      if (r.dayShiftBooked || r.favourBooked) startOutsideWork(s,r,route);
+      if (r.walk.length) {
+        const next = r.walk[0],
+          dx = next.x - r.x,
+          dz = next.z - r.z,
+          d = Math.hypot(dx, dz),
+          desiredSpeed =
+            (r.cargo ? 0.72 : 0.95) *
+            (r.cargo && s.equipment?.loans[r.id]?.item === "bucket" ? useEquipment(s,r,"bucket",s.equipment.loans[r.id].task,dt) : 1) *
+            (0.92 + i * 0.035) *
+            (r.energy < 35 ? 0.8 : 1),
+          braking = r.walk.length === 1 ? Math.max(0.25, Math.min(1, d * 2)) : 1;
+        r.moveSpeed = Math.min(
+          desiredSpeed * braking,
+          (r.moveSpeed || 0) + dt * 1.8,
+        );
+        const nearby = s.people.filter(
+          (other) =>
+            other !== r &&
+            other.action !== "town" && !atTownJob(other) &&
+            Math.hypot(other.x - r.x, other.z - r.z) < 0.75,
+        );
+        const step = dt * r.moveSpeed * (nearby.length ? 0.65 : 1);
+        const travel = Math.min(step, d);
+        const candidate = {
+          x: r.x + (d ? (dx / d) * travel : 0),
+          z: r.z + (d ? (dz / d) * travel : 0),
+        };
+        // A step that reaches the waypoint lands on it; sidestepping there orbits forever at large steps.
+        if (d > 0.1 && travel < d && nearby.length) {
+          const sidestep = {
+            x: candidate.x + (dz / d) * dt * 0.18,
+            z: candidate.z - (dx / d) * dt * 0.18,
+          };
+          if (
+            walkSegmentClear(s, r, sidestep) &&
+            walkSegmentClear(s, sidestep, next)
+          ) {
+            candidate.x = sidestep.x;
+            candidate.z = sidestep.z;
+          }
+        }
+        if (walkSegmentClear(s, r, candidate)) {
+          r.x = candidate.x;
+          r.z = candidate.z;
+          if (Math.hypot(r.x - next.x, r.z - next.z) < 0.015) r.walk.shift();
+        } else {
+          r.walk = route(s, r, r.target || next) || [];
+        }
+        r.energy = Math.max(0, r.energy - dt * 0.025);
+        continue;
+      }
+      r.moveSpeed = 0;
+      if (r.outsideWork) {
+        if (!advanceNeed(s,r,dt,needApi)) outsideWorkStep(s,r,dt,go,say);
+        continue;
+      }
+      if (s.stage === "evening") {
+        r.action = "meal";
+        go(s, r, restSpot(s, i));
+        continue;
+      }
+      if (advanceNeed(s,r,dt,needApi)) continue;
+      if (
+        !r.cargo && (r.sleepUntil || r.energy < 25 ||
+        (r.action === "rest" &&
+          r.energy <
+            recoveryEnergy(s, r, constructionPending)))
+      ) {
+        r.action = "rest";
+        r.job = null;
+        r.workSpot = null;
+        r.cargo = false;
+        chooseRestingPlace(s, r, i);
+        if (go(s, r, restingDoor(s, i))) {
+          r.tentPhase = "enter";
+          r.tentAt = s.time;
+          r.walk = [];
+          r.target = null;
+        }
+        continue;
+      }
+      if (s.unpack && unpackStep(s, r, dt)) continue;
+      if (
+        r.operation &&
+        s.operations?.some(
+          (o) =>
+            o.id === r.operation &&
+            !o.done &&
+            (o.phase === "return" || (o.water && o.phase === "deliver")),
+        )
+      ) {
+        if (operationalWork(s, r, i, dt)) continue;
+      }
+      if (!r.cargo && !r.operation && !r.outsideWork && !r.removalJob && r.action !== 'service') {
+        if (animalCarePending && performUpkeep(s,r,dt,go,changeMaterial,MATERIALS,carDoor,useWater,workSpot,true)) continue;
+        if (farmJobsPending && operationalWork(s,r,i,dt,false,'farm')) continue;
+      }
+      // Finish an assigned batch before reconsidering work categories. Otherwise
+      // changing availability can shuffle the reserved slots on every tick.
+      if (removalsPending && r.energy >= 25 && removalStep(s,r,dt,{defs:PROJECTS,recipes:PROCESSES,workSpot,go,stored:storedMaterials,capacity:storageCapacity,change:changeMaterial,invalidate:invalidateNavigation,say,placement:placementError,grade:gradeFoundation})) continue;
+      if (r.outsideJobEnabled && !r.dayShiftBooked && startOutsideWork(s,r,route)) {
+        outsideWorkStep(s,r,dt,go,say);
+        continue;
+      }
+      if(r.energy>=25&&performUpkeep(s,r,dt,go,changeMaterial,MATERIALS,carDoor,useWater,workSpot))continue;
+      const activeOperation = operationsPending && s.operations.find(o => o.id === r.operation && !o.done);
+      if(activeOperation && !r.job && operationalWork(s,r,i,dt,false,workGroup(activeOperation,PROCESSES))) continue;
+      // Needs and completed carrying trips always win. Reserve available people,
+      // not fixed residents who might be asleep, for essential and income work.
+      const priorities = economyPolicies(s).work;
+      if (operationsPending) {
+        const ready = s.people.filter(a => a.energy >= 25 && !a.tentPhase && !a.sleepUntil && !a.needTask && !a.cargo && a.action !== 'town' && !a.outsideWork);
+        const slot = ready.indexOf(r);
+        const essentialSlots = priorities.essentialWorkers ?? 1;
+        const essential = slot >= 0 && slot < essentialSlots;
+        const producer = slot >= 0 && slot >= essentialSlots && slot < essentialSlots + (priorities.productionWorkers ?? 1);
+        const groups = ['food', 'maintenance', 'production'].sort((a,b) => (priorities[b] ?? 2) - (priorities[a] ?? 2));
+        let serviced = false;
+        for (const group of groups) {
+          const urgent = group === 'food' && (s.infrastructure.hungry || s.infrastructure.thirst);
+          const reserved = group === 'production' ? producer : essential;
+          if (!r.cargo && (urgent || reserved || (priorities[group] ?? 2) > (priorities.construction ?? 2)) && operationalWork(s, r, i, dt, false, group)) {
+            serviced = true;
+            break;
+          }
+        }
+        if (serviced) continue;
+      }
+      constructionTurn(s, r, i, dt, needApi, pending);
+  } while (false);
+}
+
+// The last rung: take or keep a construction job, fetch its loads, carry them and build.
+// Each `continue` ends the turn, as in residentTurn.
+function constructionTurn(s, r, i, dt, needApi, pending) {
+  const {removalsPending, constructionPending, operationsPending, animalCarePending, farmJobsPending} = pending;
+  do {
+      let p = r.job != null && s.projects.find(
+        (p) => !p.removal && p.id === r.job && !p.pendingMaterials && p.work < PROJECTS[p.key].work,
       );
-    }
-  }
+      if (!p) {
+        r.job = null;
+        r.workSpot = null;
+        r.cargo = false;
+        p = constructionPending && availableProject(s, r);
+        if (p) {
+          r.operation=null;
+          r.workSpot = workSpot(s, r, p);
+          r.job = p.id;
+          clearDowntime(r);
+          r.lookAt = null;
+          r.supplyGoal = null;
+          r.target = null;
+        }
+      }
+      if (!p) {
+        if (operationalWork(s, r, i, dt)) continue;
+        idleActivity(s, r, i, dt, {
+          ...needApi,catalog:PROJECTS,
+          projectSpot:(p,resident)=>leisureSpot(s,resident,p),
+          center:p=>({x:p.x+(footprint(p)[0]-1)/2,z:p.z+(footprint(p)[1]-1)/2}),
+          sheltered:kind=>['shed','rain-shelter'].includes(kind)||!!COMMUNITY[kind]?.sheltered,
+        });
+        // Leisure restores fun and social needs; it does not substitute for sleep.
+        continue;
+      }
+      if (!r.workSpot || occupied(s, r.workSpot.x, r.workSpot.z))
+        r.workSpot = workSpot(s, r, p);
+      if (!r.workSpot) {
+        r.job = null;
+        continue;
+      }
+      const dest = r.workSpot;
+      const loads = requiredLoads(p);
+      // Reserved supplies begin at the receiving stockpile. Storage only helps
+      // after a resident physically stages a larger batch there.
+      const transit = s.people.filter(other => other.job === p.id && other.cargo);
+      const inTransit = transit.reduce((n,other) => n + carriedLoads(other), 0);
+      const remaining = Math.max(0, loads - p.delivered - (p.staged || 0) - inTransit);
+      let depot = s.projects.find(other => other.id === p.depot && other.work >= PROJECTS[other.key].work);
+      if (!depot && !(p.staged > 0)) {
+        depot = s.projects.filter(other => other.id !== p.id && STORAGE_KINDS.includes(PROJECTS[other.key].kind) && other.work >= PROJECTS[other.key].work &&
+          Math.hypot(other.x-p.x,other.z-p.z) < 8 &&
+          Math.hypot(other.x-s.stock.x,other.z-s.stock.z)+Math.hypot(other.x-p.x,other.z-p.z) < Math.hypot(p.x-s.stock.x,p.z-s.stock.z)*1.35)
+          .sort((a,b)=>Math.hypot(a.x-p.x,a.z-p.z)-Math.hypot(b.x-p.x,b.z-p.z))
+          .find(other=>workSpot(s,r,other));
+        p.depot = depot?.id;
+      }
+      if (!r.cargo && p.delivered < loads) {
+        const staged = (p.staged || 0) > 0 && depot;
+        if (!staged && !remaining) {
+          r.job=null; r.workSpot=null; r.action='idle'; r.target=null;
+          continue;
+        }
+        r.action = 'collect';
+        const source = staged ? workSpot(s,r,depot) : supplySpot(s,r,i);
+        if (!source) { r.job=null; continue; }
+        const sourceId=staged ? depot.id : 0;
+        if(r.supplySource!==sourceId){r.supplyGoal=null;r.walk=[];r.target=null;}
+        r.supplySource=sourceId;
+        if (!r.supplyGoal) r.supplyGoal=source;
+        if (go(s,r,r.supplyGoal)) {
+          r.haulLoads = Math.min(staged ? 2 : depot ? 4 : 1, staged ? p.staged : remaining);
+          r.haulStage = staged || !depot ? 'site' : 'storage';
+          if(staged) p.staged-=r.haulLoads;
+          r.supplyGoal=null; r.cargo=true; r.target=null;
+        }
+        continue;
+      }
+      r.action = r.cargo ? 'carry' : 'walk';
+      const delivery = r.cargo && r.haulStage==='storage' && depot ? workSpot(s,r,depot) : dest;
+      if(!delivery || !go(s,r,delivery)) continue;
+      if(r.cargo) {
+        if(r.haulStage==='storage' && depot) p.staged=(p.staged||0)+carriedLoads(r);
+        else p.delivered=Math.min(loads,p.delivered+carriedLoads(r));
+        r.cargo=false; r.haulLoads=0; r.haulStage=null;
+        r.target=null;
+        if(p.delivered<loads) continue;
+      }
+      if (p.delivered < loads || r.energy < 25) continue;
+      r.action = "build";
+      const before = p.work;
+      p.work = Math.min(
+        PROJECTS[p.key].work,
+        p.work +
+          dt *
+            workMultiplier(r,p.key) *
+            crewEfficiency(s.people.filter(other=>other.job===p.id&&other.action==='build').length) *
+            useEquipment(s,r,"carpentry-tools",`job:${p.id}`,dt,PROJECTS[p.key].work) *
+            (s.opening &&
+            !s.opening.complete &&
+            s.rain &&
+            !openingProgress(s, PROJECTS).shelter
+              ? 0.8
+              : 1) *
+            (r.needs.hunger<15 ? 0.65 : 1),
+      );
+      r.work += dt;
+      r.energy = Math.max(0, r.energy - dt * 0.16);
+      if (before < PROJECTS[p.key].work && p.work >= PROJECTS[p.key].work) {
+        invalidateNavigation(s);
+        if (s.opening && !s.opening.complete) {
+          const progress = openingProgress(s, PROJECTS);
+          for (const [key, line] of Object.entries({
+            gathering:
+              "Luz: Somewhere to sit together. This is starting to feel like our place.",
+            shelter:
+              "Nina: A dry place to take a break. We can stop rushing when the rain comes.",
+            supplies:
+              "Bento: Tools and supplies are protected. We can save the rest of our money for tomorrow.",
+          })) {
+            if (progress[key] && !s.opening[key]) {
+              s.opening[key] = true;
+              say(s, line);
+            }
+          }
+        }
+        say(
+          s,
+          `${PROJECTS[p.key].name} is ready. ${p.key === "gathering" ? "Somewhere to sit together at last." : p.key === "shelter" ? "A roof for our first night." : p.key === "water" ? "Water close at hand." : PROJECTS[p.key].kind === "eco_toilet" ? "A little privacy goes a long way." : "Ready for the community to use."}`,
+        );
+      }
+  } while (false);
 }
 export function save(s) {
   return JSON.stringify(s);
 }
 export function restore(text) {
+  return restoreWithReason(text).state;
+}
+// Why a save was rejected: the first failed check, or the exception. restore() returns only the state.
+export function restoreWithReason(text) {
+  let reason = '';
+  const fail = why => {reason = why; return null;};
+  const state = restoreState(text, fail);
+  return {state, reason: state ? '' : reason || 'unknown'};
+}
+function restoreState(text, fail) {
   try {
     const s = JSON.parse(text);
     if (
@@ -3080,7 +3189,7 @@ export function restore(text) {
       !Array.isArray(s.projects) ||
       s.projects.length > 128 * 128
     )
-      return null;
+      return fail('shape: version, stage, five residents or project count');
     for(const r of s.people)if(r?.removalJob!==undefined&&!s.projects.some(p=>p?.id===r.removalJob))delete r.removalJob;
     if(Array.isArray(s.operations)&&s.infrastructure?.nodes){
       s.operations=s.operations.filter(op=>{
@@ -3090,11 +3199,11 @@ export function restore(text) {
         return false;
       });
     }
-    if(activeTrips(s).some(t=>t.boardingFare!==undefined && (t.phase!=='boarding'||t.boardingFare!==transportCost({...s,deliveryOnly:false}))))return null;
-    if(!validWeather(s)||!validHydrology(s)||!validAnimalCare(s,PROJECTS))return null;
+    if(activeTrips(s).some(t=>t.boardingFare!==undefined && (t.phase!=='boarding'||t.boardingFare!==transportCost({...s,deliveryOnly:false}))))return fail('trip boarding fare');
+    if(!validWeather(s))return fail('weather');if(!validHydrology(s))return fail('hydrology');if(!validAnimalCare(s,PROJECTS))return fail('animal care');
     ensureHydrology(s);
     if(s.weather===undefined)weatherStep(s);
-    if(!validGathering(s))return null;
+    if(!validGathering(s))return fail('gathering');
     restoreHomeAssignments(s);
     repairFootfall(s);
     retireUntreatedWater(s);
@@ -3102,7 +3211,7 @@ export function restore(text) {
     // Saves predating narrow footbridges retain their exact 8×2 occupancy,
     // centre, rotations and deck width. New plans explicitly write version 1.
     for (const project of s.projects) {
-      if (!project || !validSiteVersion(project)) return null;
+      if (!project || !validSiteVersion(project)) return fail('project site version');
       if (project.key === 'bridge') project.siteVersion ??= 0;
     }
     // Retired reclaimed-parts economy: remove obsolete stock, sites and jobs.
@@ -3128,11 +3237,11 @@ export function restore(text) {
         (s.opening.complete !== undefined &&
           typeof s.opening.complete !== "boolean"))
     )
-      return null;
+      return fail('opening');
     if (s.mode !== undefined && s.mode !== "sandbox" && s.mode !== "story")
-      return null;
+      return fail('mode');
     if (s.instantBuild !== undefined && typeof s.instantBuild !== "boolean")
-      return null;
+      return fail('instantBuild');
     s.terrainPads ??= [];
     if (
       !Array.isArray(s.terrainPads) ||
@@ -3155,22 +3264,22 @@ export function restore(text) {
           [p.left, p.right, p.top, p.bottom].some((n) => n % 2 !== 0))),
       )
     )
-      return null;
+      return fail('terrain pads');
     s.elevationSeed ??= 0;
     if (
       !Number.isInteger(s.elevationSeed) ||
       s.elevationSeed < 0 ||
       s.elevationSeed > 0xffffffff
     )
-      return null;
+      return fail('elevationSeed');
     s.landSeed ??= 0;
     if (
       !Number.isInteger(s.landSeed) ||
       s.landSeed < 0 ||
       s.landSeed > 0xffffffff
     )
-      return null;
-    if(s.worldSettings!==undefined){if(!validSettings(s.worldSettings))return null;registerWorld(s.landSeed,s.worldSettings);}
+      return fail('landSeed');
+    if(s.worldSettings!==undefined){if(!validSettings(s.worldSettings))return fail('world settings');registerWorld(s.landSeed,s.worldSettings);}
     const fresh = createWeekend();
     s.arrivalElapsed ??= ARRIVAL_DURATION;
     if (
@@ -3178,35 +3287,35 @@ export function restore(text) {
       s.arrivalElapsed < 0 ||
       s.arrivalElapsed > ARRIVAL_DURATION
     )
-      return null;
-    if(s.arrivalAnimating!==undefined && typeof s.arrivalAnimating!=="boolean") return null;
+      return fail('arrivalElapsed');
+    if(s.arrivalAnimating!==undefined && typeof s.arrivalAnimating!=="boolean") return fail('arrivalAnimating');
     if (s.stage === "arrival" && !s.arrivalAnimating) s.arrivalElapsed = ARRIVAL_DURATION;
     if (
       ["rain", "rainSeen", "rainResolved", "meal"].some(
         (k) => typeof s[k] !== "boolean",
       )
     )
-      return null;
+      return fail('rain or meal flags');
     if (
       s.stage === "arrival" &&
       (s.projects.some(p=>!p.natural) || s.camp !== null || s.trip)
     )
-      return null;
+      return fail('arrival stage has buildings, camp or trip');
     if (
       !Number.isInteger(s.nextId) ||
       s.nextId <= Math.max(0, ...s.projects.map((p) => p.id))
     )
-      return null;
+      return fail('nextId');
     if (s.stage !== 'arrival' && !(s.camp === 'custom'
       ? s.campSite && [s.campSite.x,s.campSite.z].every(v=>Number.isInteger(v)&&v>=CELL_MIN&&v<=CELL_MAX) &&
         (s.campSite.rotation===undefined || [0,1,2,3].includes(s.campSite.rotation))
-      : CAMPS.some(c=>c.id===s.camp))) return null;
+      : CAMPS.some(c=>c.id===s.camp))) return fail('camp site');
     if (s.unpack !== undefined) {
       const u = s.unpack, pad = u?.pad;
       if (!u || s.stage === 'arrival' || !s.camp || !Array.isArray(u.delivered) || u.delivered.length >= CAMP_LOADS.length ||
         new Set(u.delivered).size !== u.delivered.length || u.delivered.some(k=>!Number.isInteger(k)||k<0||k>=CAMP_LOADS.length) ||
         (pad !== null && (!pad || typeof pad !== 'object' || ['left','right','top','bottom','height'].some(k=>!Number.isFinite(pad[k])))))
-        return null;
+        return fail('unpacking');
     }
     if (s.materials)
       for (const id of Object.keys(MATERIALS))
@@ -3217,9 +3326,9 @@ export function restore(text) {
         .filter((id) => id !== "wood")
         .some((id) => !Number.isInteger(s.materials[id]) || s.materials[id] < 0)
     )
-      return null;
+      return fail('materials');
     for (const k of ["time", "money", "wood", "nextId"])
-      if (!Number.isFinite(s[k]) || s[k] < 0) return null;
+      if (!Number.isFinite(s[k]) || s[k] < 0) return fail('time, money, wood or nextId');
     if (
       !s.stock ||
       !Number.isInteger(s.stock.x) ||
@@ -3229,11 +3338,11 @@ export function restore(text) {
       s.stock.z < CELL_MIN ||
       s.stock.z > CELL_MAX
     )
-      return null;
+      return fail('stock pile position');
     migrateItemProjects(s);
     if(s.biologyVersion===undefined){for(const p of s.projects)if(PROJECTS[p.key]?.kind==='orchard')p.orchardEstablished=true;s.biologyVersion=2;}
-    if(s.biologyVersion!==2)return null;
-    if(!captureProjectMaterials(s,PROJECTS,MATERIALS))return null;
+    if(s.biologyVersion!==2)return fail('biologyVersion');
+    if(!captureProjectMaterials(s,PROJECTS,MATERIALS))return fail('project materials');
     // Older saves counted a pair/trio as one item; preserve the actual animals.
     if (s.livestockUnits === undefined) {
       s.materials.goats *= 2;
@@ -3246,11 +3355,11 @@ export function restore(text) {
       }
       s.livestockUnits = 1;
     }
-    if (s.livestockUnits !== 1) return null;
+    if (s.livestockUnits !== 1) return fail('livestockUnits');
     for(const op of s.operations||[]) {
       if(PROCESSES[op.recipe]?.craft && op.work>PROCESSES[op.recipe].work)op.work=PROCESSES[op.recipe].work;
     }
-    if(!validEquipment(s))return null;
+    if(!validEquipment(s))return fail('equipment');
     // Restore releases tools to shared storage; continuing jobs borrow again.
     equipmentState(s).loans={};
     // Homes in older saves already paid for their rooftop equipment.
@@ -3264,19 +3373,19 @@ export function restore(text) {
       }
       s.homeEnergyVersion = 1;
     }
-    if(!migrateConstructionLabor(s,PROJECTS))return null;
+    if(!migrateConstructionLabor(s,PROJECTS))return fail('construction labor migration');
     for (const p of s.projects) {
-      if((p.coldStorage!==undefined&&typeof p.coldStorage!=='boolean')||(p.coolingEnabled!==undefined&&typeof p.coolingEnabled!=='boolean')||(p.coldStorage&&PROJECTS[p.key]?.kind!=='kitchen'))return null;
+      if((p.coldStorage!==undefined&&typeof p.coldStorage!=='boolean')||(p.coolingEnabled!==undefined&&typeof p.coolingEnabled!=='boolean')||(p.coldStorage&&PROJECTS[p.key]?.kind!=='kitchen'))return fail('cold storage flags');
       const recipe = {...projectMaterials(p,PROJECTS), ...(p.solarUpgrade ? Object.fromEntries(['panels','batteries','electrical'].map(id=>[id,Math.ceil(PROJECTS[p.key].size[0]/2)])) : {})};
       if (p.pendingMaterials && (p.work !== 0 || p.delivered !== 0 ||
           !Object.keys(p.pendingMaterials).length || Object.entries(p.pendingMaterials).some(([id,n]) =>
-            !Number.isInteger(n) || n <= 0 || !recipe[id] || n > recipe[id]))) return null;
+            !Number.isInteger(n) || n <= 0 || !recipe[id] || n > recipe[id]))) return fail('pending materials');
     }
     for(const trip of activeTrips(s)){
-    if (trip?.project !== undefined && !s.projects.some(p => p.id === trip.project && p.pendingMaterials)) return null;
+    if (trip?.project !== undefined && !s.projects.some(p => p.id === trip.project && p.pendingMaterials)) return fail('trip project');
     if (trip?.projects !== undefined && (!Array.isArray(trip.projects) ||
         !trip.projects.includes(trip.project) || new Set(trip.projects).size !== trip.projects.length ||
-        trip.projects.some(id=>!s.projects.some(p=>p.id===id && p.pendingMaterials)))) return null;
+        trip.projects.some(id=>!s.projects.some(p=>p.id===id && p.pendingMaterials)))) return fail('trip projects');
     }
     const ids = new Set(),
       keys = new Set();
@@ -3303,13 +3412,13 @@ export function restore(text) {
         (p.depot !== undefined && (!Number.isInteger(p.depot) || !s.projects.some(other => other.id === p.depot && STORAGE_KINDS.includes(PROJECTS[other.key].kind)))) ||
         p.delivered > requiredLoads(p)
       )
-        return null;
+        return fail('project fields');
       ids.add(p.id);
       keys.add(p.key);
       // Existing buildings are not new blueprints: later neighbours, roads and
       // terraforming must not invalidate an otherwise well-formed saved village.
       if (![p.x,p.z].every(Number.isInteger) || p.x<CELL_MIN || p.z<CELL_MIN ||
-          p.x+footprint(p)[0]>CELL_MAX+1 || p.z+footprint(p)[1]>CELL_MAX+1) return null;
+          p.x+footprint(p)[0]>CELL_MAX+1 || p.z+footprint(p)[1]>CELL_MAX+1) return fail('project position');
     }
     for(const p of s.projects)ensureAnimalCare(s,p,PROJECTS[p.key].kind);
     for (let i = 0; i < 5; i++) {
@@ -3324,14 +3433,14 @@ export function restore(text) {
         r.energy < 0 ||
         r.energy > 100
       )
-        return null;
-      if (r.work < 0 || (r.drinkingWater!==undefined&&(!Number.isFinite(r.drinkingWater)||r.drinkingWater<0||r.drinkingWater>10))) return null;
+        return fail('resident position or energy');
+      if (r.work < 0 || (r.drinkingWater!==undefined&&(!Number.isFinite(r.drinkingWater)||r.drinkingWater<0||r.drinkingWater>10))) return fail('resident work or drinking water');
       for (const k of ["washTime", "cleanedAtWork", "toiletAt", "toiletTime"])
         if (r[k] !== undefined && (!Number.isFinite(r[k]) || r[k] < 0))
-          return null;
-      if (r.lastMealAt!==undefined && (!Number.isFinite(r.lastMealAt) || r.lastMealAt<0 || r.lastMealAt>s.time)) return null;
-      if (!validNeeds(r) || !validCraftSkills(r) || !validMind(r,fresh.people,s.time)) return null;
-      if(r.friendships!==undefined && (!r.friendships || typeof r.friendships!=='object' || Array.isArray(r.friendships) || Object.entries(r.friendships).some(([id,value])=>id===r.id || !fresh.people.some(p=>p.id===id) || !Number.isFinite(value) || value<0 || value>100))) return null;
+          return fail('resident wash/toilet times');
+      if (r.lastMealAt!==undefined && (!Number.isFinite(r.lastMealAt) || r.lastMealAt<0 || r.lastMealAt>s.time)) return fail('resident lastMealAt');
+      if (!validNeeds(r)) return fail('resident needs'); if (!validCraftSkills(r)) return fail('resident craft skills'); if (!validMind(r,fresh.people,s.time)) return fail('resident mind');
+      if(r.friendships!==undefined && (!r.friendships || typeof r.friendships!=='object' || Array.isArray(r.friendships) || Object.entries(r.friendships).some(([id,value])=>id===r.id || !fresh.people.some(p=>p.id===id) || !Number.isFinite(value) || value<0 || value>100))) return fail('resident friendships');
       ensureNeeds(r,i);
       if (r.cargo && r.haulStage === 'site' && r.haulLoads && r.job) {
         const project=s.projects.find(p=>p.id===r.job);
@@ -3356,7 +3465,7 @@ export function restore(text) {
       if (r.unpack !== undefined) {
         const job = r.unpack;
         if (!job || !Number.isInteger(job.load) || job.load < 0 || job.load >= CAMP_LOADS.length ||
-          !["fetch", "carry"].includes(job.phase) || !Number.isFinite(job.wait) || job.wait < 0) return null;
+          !["fetch", "carry"].includes(job.phase) || !Number.isFinite(job.wait) || job.wait < 0) return fail('resident unpack job');
         if (!s.unpack || s.unpack.delivered.includes(job.load) ||
           s.people.some((other, j) => j < i && other.unpack?.load === job.load)) delete r.unpack;
       }
@@ -3367,7 +3476,7 @@ export function restore(text) {
           r.tentAt > s.time ||
           !s.camp)
       )
-        return null;
+        return fail('resident tent phase');
       if (
         r.restSite != null &&
         !s.projects.some(
@@ -3378,7 +3487,7 @@ export function restore(text) {
               p.key.startsWith("canvas-tent")),
         )
       )
-        return null;
+        return fail('resident rest site');
       r.washSite = null;
       r.toiletSite = null;
       r.toiletTime = 0;
@@ -3386,8 +3495,8 @@ export function restore(text) {
         activeTrips(s).some(t=>t.person===r.id) ? "town" : r.tentPhase ? "rest" : "idle";
       r.name = fresh.people[i].name;
     }
-    if(s.secondTrip&&(!s.trip||s.secondTrip.person===s.trip.person||s.secondTrip.vehicle===s.trip.vehicle))return null;
-    if (s.nextTripVehicle !== undefined && ![0, 1].includes(s.nextTripVehicle)) return null;
+    if(s.secondTrip&&(!s.trip||s.secondTrip.person===s.trip.person||s.secondTrip.vehicle===s.trip.vehicle))return fail('second trip');
+    if (s.nextTripVehicle !== undefined && ![0, 1].includes(s.nextTripVehicle)) return fail('nextTripVehicle');
     for(const trip of activeTrips(s)) {
     if (
       trip &&
@@ -3398,7 +3507,7 @@ export function restore(text) {
         trip.left > (trip.duration||TRIP_DURATION) ||
         (trip.duration!==undefined && ![45,55,110,...['nearby','drive','remote'].map(townDuration)].includes(trip.duration)))
     )
-      return null;
+      return fail('trip fields');
     if (trip) {
       trip.vehicle ??= 0;
       trip.phase ??= trip.left > DRIVE_DURATION ? "away" : "inbound";
@@ -3408,19 +3517,41 @@ export function restore(text) {
           trip.phase,
         )
       )
-        return null;
+        return fail('trip vehicle or phase');
       const r = s.people.find((r) => r.id === trip.person);
       r.cargo = trip.phase === "unloading";
     }
     }
-    if(s.expansionReserve!==undefined&&(!Number.isFinite(s.expansionReserve)||s.expansionReserve<0||s.expansionReserve>100000))return null;
-    if(s.foodReserveDays!==undefined&&(!Number.isFinite(s.foodReserveDays)||s.foodReserveDays<0||s.foodReserveDays>7))return null;
+    if(s.expansionReserve!==undefined&&(!Number.isFinite(s.expansionReserve)||s.expansionReserve<0||s.expansionReserve>100000))return fail('expansionReserve');
+    if(s.foodReserveDays!==undefined&&(!Number.isFinite(s.foodReserveDays)||s.foodReserveDays<0||s.foodReserveDays>7))return fail('foodReserveDays');
     if(s.foodPurchases!==undefined && (!s.foodPurchases || !Number.isSafeInteger(s.foodPurchases.day) || s.foodPurchases.day<0 ||
-      !Number.isFinite(s.foodPurchases.spent) || s.foodPurchases.spent<0 || s.foodPurchases.spent>100000))return null;
-    if(s.foodPurchaseBudget!==undefined&&(!Number.isFinite(s.foodPurchaseBudget)||s.foodPurchaseBudget<0||s.foodPurchaseBudget>100000))return null;
+      !Number.isFinite(s.foodPurchases.spent) || s.foodPurchases.spent<0 || s.foodPurchases.spent>100000))return fail('foodPurchases');
+    if(s.foodPurchaseBudget!==undefined&&(!Number.isFinite(s.foodPurchaseBudget)||s.foodPurchaseBudget<0||s.foodPurchaseBudget>100000))return fail('foodPurchaseBudget');
     if(s.foodStorage?.lots)for(const id of Object.keys(CROPS))if(s.foodStorage.lots[id]===undefined&&s.materials[id]===0)s.foodStorage.lots[id]=[];
     refreshSandboxFood(s);
-    if (!validFoodPolicy(s) || !validAnimalCare(s,PROJECTS) || !validHydrology(s) || !validWeather(s) || !validCultivation(s) || !validSuppliers(s,MATERIALS) || !validMaterialLedger(s,MATERIALS) || !validProductionHauling(s,PROCESSES) || !validLogisticsPolicy(s) || !validRemovals(s,PROJECTS,MATERIALS) || !validDelivery(s,MATERIALS) || !validUpkeep(s) || !validBiology(s,PROCESSES) || !validOutsideWork(s) || !validCommunity(s,PROJECTS) || !validFoodStorage(s,PROCESSES,MATERIALS) || !validProductionAccounting(s,PROCESSES) || !validInfrastructure(s) || !validatePolicies(s,MATERIALS) || !validTrade(s,MATERIALS) || !validFinances(s)) return null;
+    for (const [name, valid] of [
+      ['FoodPolicy', () => validFoodPolicy(s)],
+      ['AnimalCare', () => validAnimalCare(s,PROJECTS)],
+      ['Hydrology', () => validHydrology(s)],
+      ['Weather', () => validWeather(s)],
+      ['Cultivation', () => validCultivation(s)],
+      ['Suppliers', () => validSuppliers(s,MATERIALS)],
+      ['MaterialLedger', () => validMaterialLedger(s,MATERIALS)],
+      ['ProductionHauling', () => validProductionHauling(s,PROCESSES)],
+      ['LogisticsPolicy', () => validLogisticsPolicy(s)],
+      ['Removals', () => validRemovals(s,PROJECTS,MATERIALS)],
+      ['Delivery', () => validDelivery(s,MATERIALS)],
+      ['Upkeep', () => validUpkeep(s)],
+      ['Biology', () => validBiology(s,PROCESSES)],
+      ['OutsideWork', () => validOutsideWork(s)],
+      ['Community', () => validCommunity(s,PROJECTS)],
+      ['FoodStorage', () => validFoodStorage(s,PROCESSES,MATERIALS)],
+      ['ProductionAccounting', () => validProductionAccounting(s,PROCESSES)],
+      ['Infrastructure', () => validInfrastructure(s)],
+      ['policies', () => validatePolicies(s,MATERIALS)],
+      ['Trade', () => validTrade(s,MATERIALS)],
+      ['Finances', () => validFinances(s)],
+    ]) if (!valid()) return fail(name);
     if (
       s.infrastructure &&
       Object.values(s.infrastructure.nodes).some(
@@ -3435,7 +3566,7 @@ export function restore(text) {
           ),
       )
     )
-      return null;
+      return fail('infrastructure node without a finished building');
     if (
       s.operations &&
       (!Array.isArray(s.operations) ||
@@ -3459,7 +3590,7 @@ export function restore(text) {
                 (o.water.stagedAt!==undefined&&(!o.water.stagedAt||!Number.isFinite(o.water.stagedAt.x)||!Number.isFinite(o.water.stagedAt.z)||o.phase!=='deliver')))),
         ))
     )
-      return null;
+      return fail('operations');
     // Retire old repeat policies without cancelling paid or in-flight work.
     for(const p of s.projects){if(p.repeat)delete p.productionStatus;delete p.repeat;delete p.stockTarget;}
     // Residents cook for themselves by default; a later player choice is kept.
@@ -3471,7 +3602,7 @@ export function restore(text) {
       (event.time === null || Number.isFinite(event.time) && event.time >= 0) && Number.isInteger(event.count) && event.count > 0).slice(0,48);
     else delete s.events;
     return s;
-  } catch {
-    return null;
+  } catch (error) {
+    return fail(`threw: ${error.message}`);
   }
 }
