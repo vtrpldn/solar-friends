@@ -2799,6 +2799,47 @@ function frame(now) {
   if(fieldEdge!==selectedFieldEdge){if(selectedFieldEdge){selectedFieldEdge.material.color.set('#b5a16c');selectedFieldEdge.material.opacity=.65;}if(fieldEdge){fieldEdge.material.color.set('#3b6545');fieldEdge.material.opacity=1;}selectedFieldEdge=fieldEdge;}
   selectionOutline.visible = !!selectedModel && !placing && !fieldEdge;
   if (selectionOutline.visible) { selectedModel.updateWorldMatrix(true, true); selectionOutline.setFromObject(selectedModel); }
+  animateBuildings(dt);
+  placeVehicles(dt, visual, arrivalTime);
+  animateResidents(dt, visual, arrivalTime);
+  visitors.update(s, visual.time, paused ? 0 : dt * speed);
+  foliageWind.update(!paused && !document.hidden ? dt : 0);
+  riverTime+=!paused && !document.hidden ? dt : 0;
+  river.update(riverTime);
+  rainMesh.visible = s.rain;
+  if (s.rain) {
+    for (let i = 0; i < 600; i++) {
+      rainPoints[i * 3 + 1] -= dt * 12;
+      if (rainPoints[i * 3 + 1] < 0) rainPoints[i * 3 + 1] = 20;
+    }
+    drops.attributes.position.needsUpdate = true;
+  }
+  updateSunlight(visual.time, dt);
+  if (now - lastUI > 450) {
+    if (s.log[0] !== latestMessage) {
+      latestMessage = s.log[0];
+      if (!placing) message(latestMessage);
+    }
+    renderUI();
+    lastUI = now;
+  }
+  if (!document.hidden && now - lastSave > 3000) {
+    persist();
+    lastSave = now;
+  }
+  updateSkyAndShadows(now, dt, visual);
+  updateUtilityLighting();
+  lenses.update(now);
+  accessPreview.visible=!!placing&&(ghost.visible||!!wireframe?.visible);
+  const rendered = !paused || s.rain || cameraChanged || now < renderUntil || renderOwed || livedPreview;
+  if (rendered) { renderPaintedView(scene, camera, atmosphere); renderOwed = false; }
+  lastVisualTime = visual.time;
+  recordPerformance(now, visual.time, rendered);
+  requestAnimationFrame(frame);
+}
+
+// Animals and fire in their buildings, and the camp entrance.
+function animateBuildings(dt) {
   if (!paused && !document.hidden) animalTime += dt * speed;
   for (const [id, entry] of buildings)
     if (entry.animals.length)
@@ -2806,6 +2847,10 @@ function frame(now) {
   for (const [id, entry] of buildings)
     if (entry.fire) animateFire(entry.fire, animalTime + id * 2.73);
   entrance.position.copy(world(s.stock.x, s.stock.z));
+}
+
+// Cars at the camp or on the road, and the supplier truck.
+function placeVehicles(dt, visual, arrivalTime) {
   for (const [index, vehicle] of vehicles.entries()) {
       const current=activeTrips(s).find(t=>t.vehicle===index);
       const trip=current&&{...current,left:current.left+(s.time-visual.time)};
@@ -2814,6 +2859,10 @@ function frame(now) {
     }
   if (truckPreview && !s.delivery && !s.truckLeaving) s.delivery = { material: "stone", quantity: MATERIALS.stone.quantity, left: TRUCK_DRIVE, duration: 800 };
   updateTruck(s.time - visual.time, dt);
+}
+
+// Residents: position, pose, carried items and labels, from the interpolated state.
+function animateResidents(dt, visual, arrivalTime) {
   for (const [i, r] of s.people.entries()) {
     const g = actors[i];
     if(s.arrivalAnimating){
@@ -3010,31 +3059,10 @@ function frame(now) {
       paused ? 0 : dt * speed,
     );
   }
-  visitors.update(s, visual.time, paused ? 0 : dt * speed);
-  foliageWind.update(!paused && !document.hidden ? dt : 0);
-  riverTime+=!paused && !document.hidden ? dt : 0;
-  river.update(riverTime);
-  rainMesh.visible = s.rain;
-  if (s.rain) {
-    for (let i = 0; i < 600; i++) {
-      rainPoints[i * 3 + 1] -= dt * 12;
-      if (rainPoints[i * 3 + 1] < 0) rainPoints[i * 3 + 1] = 20;
-    }
-    drops.attributes.position.needsUpdate = true;
-  }
-  updateSunlight(visual.time, dt);
-  if (now - lastUI > 450) {
-    if (s.log[0] !== latestMessage) {
-      latestMessage = s.log[0];
-      if (!placing) message(latestMessage);
-    }
-    renderUI();
-    lastUI = now;
-  }
-  if (!document.hidden && now - lastSave > 3000) {
-    persist();
-    lastSave = now;
-  }
+}
+
+// Fog, clouds and the sun's shadow volume follow the camera.
+function updateSkyAndShadows(now, dt, visual) {
   fitTerrainCamera(camera, controls.target, scene.fog);
   scene.fog.near -= 62;
   scene.fog.far = scene.fog.near + 155;
@@ -3058,14 +3086,6 @@ function frame(now) {
   Object.assign(sun.shadow.camera, { left: -shadowExtent, right: shadowExtent,
     top: shadowExtent, bottom: -shadowExtent, near: 1, far: 900 });
   sun.shadow.camera.updateProjectionMatrix();
-  updateUtilityLighting();
-  lenses.update(now);
-  accessPreview.visible=!!placing&&(ghost.visible||!!wireframe?.visible);
-  const rendered = !paused || s.rain || cameraChanged || now < renderUntil || renderOwed || livedPreview;
-  if (rendered) { renderPaintedView(scene, camera, atmosphere); renderOwed = false; }
-  lastVisualTime = visual.time;
-  recordPerformance(now, visual.time, rendered);
-  requestAnimationFrame(frame);
 }
 $("selection").tabIndex = -1;
 $("selection").setAttribute('aria-labelledby', 'selected-name');
