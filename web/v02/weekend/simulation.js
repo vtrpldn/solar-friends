@@ -2575,13 +2575,46 @@ function tickUncached(s, dt) {
     return;
   }
   dt = Math.min(dt, 1);
+  const ctx = {dt, sys: null};
+  for (const [, step] of TICK_STEPS) step(s, ctx);
+}
+
+// One game tick, in order. Adding a per-tick behaviour means adding a step here (or calling it from
+// the step it belongs to); each step reads and writes ctx = {dt, sys}.
+const TICK_STEPS = [
+  ['world', worldStep],
+  ['clock', clockStep],
+  ['upkeep', upkeepTickStep],
+  ['infrastructure', infrastructureTickStep],
+  ['crops', cropStep],
+  ['food storage', foodStoreStep],
+  ['delivery', deliveryTickStep],
+  ['sales', salesStep],
+  ['planning', planningStep],
+  ['resident needs', residentNeedsStep],
+  ['trips', tripStep],
+  ['residents', residentsStep],
+];
+
+// Lazily created land and finances; sandbox supplies are topped up every tick.
+function worldStep(s, ctx) {
   ensureNaturalLand(s,PROJECTS);
   ensureFinances(s);
   if (s.mode === "sandbox") sandboxSupplies(s);
+}
+
+// Game time and weather.
+function clockStep(s, ctx) {
+  const {dt} = ctx;
   s.time += dt;
   weatherStep(s,dt);
-  const sys = autoConnectUtilities(s, PROJECTS);
-  // Upkeep can reduce battery capacity and service quality before power is allocated.
+}
+
+// Asset upkeep and the community; sys (the utility network) is shared with later steps.
+// Upkeep can reduce battery capacity and service quality before power is allocated.
+function upkeepTickStep(s, ctx) {
+  const {dt} = ctx;
+  const sys = ctx.sys = autoConnectUtilities(s, PROJECTS);
   const herds=s.projects.filter(p=>p.animalCare).map(p=>[p,p.animalHealth??100]);
   upkeepStep(s, PROJECTS, dt, project => syncProjectNode(sys, project, PROJECTS));
   communityStep(s, dt, PROJECTS, {say, ready: p => p.delivered >= requiredLoads(p)});
@@ -2591,7 +2624,17 @@ function tickUncached(s, dt) {
     if(before>=50&&now<50)say(s,`${projectLabel(p,PROJECTS)}: the animals are going hungry. They need fodder and drinking water every day.`);
     else if(before>0&&now<=0)say(s,`${projectLabel(p,PROJECTS)}: the animals are starving and have stopped producing.`);
   }
-  infrastructureStep(s, PROJECTS, dt, sys);
+}
+
+// Water, power and sanitation networks.
+function infrastructureTickStep(s, ctx) {
+  const {dt} = ctx;
+  infrastructureStep(s, PROJECTS, dt, ctx.sys);
+}
+
+// Biological cycles and fields, with a message when a field's condition changes.
+function cropStep(s, ctx) {
+  const {dt} = ctx;
   biologicalStep(s,dt,useWater);
   cultivationStep(s,dt,useWater,PROJECTS);
   for(const p of s.projects){
@@ -2603,6 +2646,11 @@ function tickUncached(s, dt) {
       p.cropWarning=warning;
     }
   }
+}
+
+// Cooling, spoilage and a message for food lost.
+function foodStoreStep(s, ctx) {
+  const {dt} = ctx;
   coolStoredFood(s,dt);
   const spoiledBefore={...s.foodStorage?.spoiled};
   foodStorageStep(s,PROCESSES,MATERIALS);
@@ -2610,12 +2658,25 @@ function tickUncached(s, dt) {
     const lost=n-(spoiledBefore[id]||0);
     if(lost>0)say(s,`${materialText(id,lost)} spoiled before it could be used.`);
   }
+}
+
+// The supplier truck.
+function deliveryTickStep(s, ctx) {
+  const {dt} = ctx;
   if (s.delivery || s.truckLeaving) {
     const freight = s.delivery || {};
     deliveryStep(s, dt, MATERIALS, changeMaterial, storedMaterials(s), storageCapacity(s));
     if (!s.delivery && freight.shipments) say(s, "The supplier truck unloaded the ordered building materials.");
   }
+}
+
+// Automatic surplus sales, once a game second.
+function salesStep(s, ctx) {
   if(s.time>=(s.nextAutomaticSale||0)){automaticSales(s);sellFoodSurplus(s);s.nextAutomaticSale=s.time+1;}
+}
+
+// Village planners. checkSupplies is read once, before maintainFood moves nextFoodCheck.
+function planningStep(s, ctx) {
   arrangePlantingSeeds(s);
   const checkSupplies = s.time >= (s.nextFoodCheck || 0);
   if (checkSupplies) scheduleFarmWork(s);
@@ -2624,6 +2685,11 @@ function tickUncached(s, dt) {
   maintainWater(s);
   manageKitchens(s,PROJECTS,PROCESSES,{blocker:productionBlocker,queue:queueProduction,stored:storedMaterials,capacity:storageCapacity});
   if (checkSupplies) startAutonomousWork(s,PROCESSES,PROJECTS,autonomyApi);
+}
+
+// Needs decay, aspirations, tiredness and bedtime for every resident.
+function residentNeedsStep(s, ctx) {
+  const {dt} = ctx;
   for (const [i,r] of s.people.entries()) {
     if(atTownJob(r))continue;
     decayNeeds(s,r,i,dt);
@@ -2640,25 +2706,11 @@ function tickUncached(s, dt) {
     }
   }
   s.infrastructure.hungry = s.people.some(r=>r.needs.hunger<15);
-  const needApi = {
-    route: (r,point)=>route(s,r,point),
-    go: (r,point)=>go(s,r,point),
-    serviceSpot: (node,r)=>utilitySpot(s,node,r),
-    camp: ()=>campLocation(s)||s.stock,
-    river: (r)=>nearestRiverAccess(s,r),
-    groundSpot: (r,center,index,privateBreak=false)=>{
-      const radius=privateBreak?6:1;
-      for(let ring=radius;ring<=radius+2;ring++)for(let j=0;j<12;j++) {
-        const angle=(j+index)*Math.PI/6;
-        const point={x:Math.round(center.x+Math.cos(angle)*ring),z:Math.round(center.z+Math.sin(angle)*ring)};
-        if(point.x<CELL_MIN+2 || point.x>CELL_MAX-2 || point.z<CELL_MIN+2 || point.z>CELL_MAX-2 || occupied(s,point.x,point.z))continue;
-        if(privateBreak && (riverBankAt(point.x,point.z,5,s.landSeed) || Math.hypot(point.x-s.stock.x,point.z-s.stock.z)<5))continue;
-        if(s.people.some(p=>p!==r && !atTownJob(p) && ((p.needTask && Math.hypot(p.needTask.target.x-point.x,p.needTask.target.z-point.z)<.8) || Math.hypot(p.x-point.x,p.z-point.z)<.7)))continue;
-        if(route(s,r,point))return point;
-      }
-      return null;
-    },
-  };
+}
+
+// Blueprint pickups, exports and town trips: boarding, driving, unloading.
+function tripStep(s, ctx) {
+  const {dt} = ctx;
   dispatchBlueprintPickup(s);
   for(const trip of activeTrips(s))if(trip.phase==='boarding')loadExports(s,trip);
   if(activeTrips(s).length<2 && pendingExports(s).some(o=>!o.holdForPickup) && dispatchReady(s,true) && s.time>=(s.trade?.dispatchAt||0)) supplyRun(s,pendingExports(s)[0].material,null,true);
@@ -2737,6 +2789,30 @@ function tickUncached(s, dt) {
     }
   }
   if(!s.trip&&s.secondTrip){s.trip=s.secondTrip;s.secondTrip=null;}
+}
+
+// Each resident's turn: the priority ladder from urgent needs to construction.
+function residentsStep(s, ctx) {
+  const {dt} = ctx;
+  const needApi = {
+    route: (r,point)=>route(s,r,point),
+    go: (r,point)=>go(s,r,point),
+    serviceSpot: (node,r)=>utilitySpot(s,node,r),
+    camp: ()=>campLocation(s)||s.stock,
+    river: (r)=>nearestRiverAccess(s,r),
+    groundSpot: (r,center,index,privateBreak=false)=>{
+      const radius=privateBreak?6:1;
+      for(let ring=radius;ring<=radius+2;ring++)for(let j=0;j<12;j++) {
+        const angle=(j+index)*Math.PI/6;
+        const point={x:Math.round(center.x+Math.cos(angle)*ring),z:Math.round(center.z+Math.sin(angle)*ring)};
+        if(point.x<CELL_MIN+2 || point.x>CELL_MAX-2 || point.z<CELL_MIN+2 || point.z>CELL_MAX-2 || occupied(s,point.x,point.z))continue;
+        if(privateBreak && (riverBankAt(point.x,point.z,5,s.landSeed) || Math.hypot(point.x-s.stock.x,point.z-s.stock.z)<5))continue;
+        if(s.people.some(p=>p!==r && !atTownJob(p) && ((p.needTask && Math.hypot(p.needTask.target.x-point.x,p.needTask.target.z-point.z)<.8) || Math.hypot(p.x-point.x,p.z-point.z)<.7)))continue;
+        if(route(s,r,point))return point;
+      }
+      return null;
+    },
+  };
   // Residents can finish orders during this pass. Skip absent categories and recheck live orders before assigning them.
   const removalsPending = s.projects.some(p => p.removal);
   const constructionPending = removalsPending || s.projects.some(p => p.work < PROJECTS[p.key].work);
