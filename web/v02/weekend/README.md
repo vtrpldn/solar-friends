@@ -1,6 +1,6 @@
 # Solar Friends v2 gameplay
 
-Updated 2026-11-09. Public and local route: `/v2/`. The source folder remains `web/v02/weekend/`.
+Updated 2026-11-25. Public and local route: `/v2/`. The source folder remains `web/v02/weekend/`.
 
 ## Why
 
@@ -62,13 +62,13 @@ Sandbox replenishes supplies and offers optional instant buildings while residen
 
 ## Implementation and checks
 
-- `simulation.js`: state, commands, construction, production and scheduling.
+- `simulation.js`: state, commands, construction, production and scheduling. One tick runs `TICK_STEPS` in order; each resident's turn is `residentTurn`, ending in `constructionTurn`. `restoreWithReason()` names the check that rejected a save.
 - `catalog-rules.js`: material and recipe definitions; `economy-policies.js`: reserves, sales and work settings.
-- `game.js`: scene and game interaction; `management.js` and `economy-controls.js`: planning screens.
+- `game.js`: scene and game interaction. `renderUI` calls one render function per HUD area; `frame` calls one function per kind of animation. `url-flags.js` lists every URL flag and preview scene. `management.js` (screens declared in `SCREENS`) and `economy-controls.js`: planning screens.
 - `resident-needs.js`: needs; `resident-personality.js`: authored identities; `resident-mind.js`: invitations, preferences, thoughts and saved memories; shared `../residents/` code: rigs/animation.
-- `lab-worker.js` / `lab-runner.js`: isolated acceleration with fixed simulation steps.
+- `lab.js`, `lab-debug.js`, `lab-worker.js` / `lab-runner.js`: the isolated accelerated lab with fixed simulation steps.
 
-Run the targeted verification commands listed in the [root README](../../../README.md). The [68-type catalog playthrough](../../../docs/playtests/2026-11-08-regular-catalog.md) records actual construction through normal gameplay. The [three-day replay](../../../docs/balance/2026-11-08-economy.md) checks subsequent policy changes. Neither proves balance for every biome, seed or layout.
+Verify changes with `npm run check:quick` while iterating and `npm run check:changed` before pushing; see [AGENTS.md](../../../AGENTS.md). The [68-type catalog playthrough](../../../docs/playtests/2026-11-08-regular-catalog.md) records actual construction through normal gameplay. The [three-day replay](../../../docs/balance/2026-11-08-economy.md) checks subsequent policy changes. Neither proves balance for every biome, seed or layout.
 
 Resident behavior checks: `node scripts/verify-v02-resident-agency.mjs`. Desktop profile checks: `node scripts/verify-v02-resident-agency-browser.mjs` (optionally set `SOLAR_EVIDENCE_DIR` for screenshots). Both also run in CI.
 

@@ -39,7 +39,7 @@ The long tests exposed and fixed rest/hauling and camp-access deadlocks, unaffor
 - Money pays suppliers, services and outside labor when explicitly contracted. It does not disappear merely because friends assemble a building.
 - Keep sandbox convenient and isolate its exemptions from normal accounting.
 - Start with simple local trade; defer loans, inflation, detailed taxes, legal permitting, speculative markets and multiplayer ownership.
-- Preserve v1 code and authored 3D assets. No resident creator or mandatory quest campaign.
+- Preserve authored 3D assets. No resident creator or mandatory quest campaign.
 
 ## Stage 0 — Reference scenario and baseline measurements
 

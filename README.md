@@ -24,7 +24,7 @@ The game is plain JavaScript and needs no build step to run. `npm run build:site
 - Story uses resources, money for purchases and utility bills, resident labor and autonomous needs. Sandbox has separate saves, replenishing supplies and optional instant construction.
 - New-game settings control biome, terrain, water, resource abundance, starting savings/supplies and town distance. Procedural maps are 128×128 cells; three Brazilian biomes are available.
 - Construction uses physical materials, hauling and assembly. Residents drive to town for purchases. Blueprint auto-buy is optional; roads also require construction.
-- Local extraction, selected tree cutting, cultivation, manufacturing, farming and individual animals support the economy. Water collection/treatment, sanitation, grid electricity and renewable generation support the village.
+- Local extraction, selected tree cutting, cultivation, manufacturing, farming and individual animals support the economy. Water collection and storage, sanitation, grid electricity and renewable generation support the village.
 - Resources → **Village work & trade** configures protected surplus sales, work priorities and reserved workers. Production sites have stock targets. Residents still meet their needs first.
 - Named saves, recovery/export, management dialogs, resource trends, terrain tools, rotatable placement previews and contextual building controls support planning.
 - The UI reflows for smaller and shorter windows. Desktop remains the primary platform; current layout checks cover 800×600, 1000×750 and 1280×720, not touch or phone gameplay.

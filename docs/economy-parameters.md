@@ -79,7 +79,7 @@ New villages keep R$100 aside when quoting blueprint auto-buy. Finances exposes 
 - Garden/greenhouse edible yield is 2 kg/m². New orchard first production takes two favorable years; timber requires paid replanting stock after harvest.
 - Carried production is limited to 30 kg / 0.12 m³ per journey. Local buyers have named, bounded daily demand and disclosed lower second-band prices.
 - Battery charging retains 90% of incoming surplus. Conversion losses are separately counted; existing stored energy is not discounted each tick. Discharge is represented by usable capacity, without another loss multiplier.
-- A passive tank has separate 250 L clean / 250 L untreated compartments; a cistern has 1,000 L of each. Their sum is total modeled volume. The river pump moves up to 600 L/hour at 0.18 kW while active; pipe/storage capacity and groundwater recharge can limit actual delivery. These are engineering assumptions, not certified equipment curves. Existing water quantities remain unchanged when capacity increases.
+- Tanks and cisterns store clean water only: the capacity that used to be a separate untreated compartment now holds clean water, and saved villages are migrated the same way. The river pump moves up to 600 L/hour at 0.18 kW while active; pipe/storage capacity and groundwater recharge can limit actual delivery. These are engineering assumptions, not certified equipment curves. Existing water quantities remain unchanged when capacity increases.
 - Pumps need replacement after 10 years, roofs after 20, panels after 25. Replacement consumes actual equipment/roof materials and 13.5 resident-hours, within the same daily materials allowance. Battery replacement remains at eight years. Lifetime assumptions do not promise real-world warranties.
 
 
