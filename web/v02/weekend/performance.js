@@ -1,6 +1,7 @@
+import {query} from './url-flags.js';
 // Opt-in, visible diagnostics. Frame timing includes browser scheduling and GPU stalls.
 export function performanceReadout(renderer) {
-  if (!new URLSearchParams(location.search).has("performance")) return () => {};
+  if (!query.has("performance")) return () => {};
   const output = document.createElement("output");
   output.style.cssText =
     "position:fixed;bottom:65px;right:18px;background:#183b2eea;color:#fff;padding:10px;border-radius:6px;font:12px monospace;z-index:20";

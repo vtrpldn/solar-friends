@@ -1,4 +1,5 @@
 import { brl } from "./money.js";
+import {query} from './url-flags.js';
 import { DREAM_LIGHTS, lightingAt } from "./dream-lighting.js";
 import {createPaintedView, paintVillageModel, villageClouds} from "./painted-village.js";
 import {createGroundWear} from './ground-wear.js';
@@ -156,56 +157,56 @@ import {
   placementError,
 } from "./simulation.js";
 const $ = (id) => document.getElementById(id),
-  SAVE = saveKey(new URLSearchParams(location.search).get("mode"));
-const scalePreview = new URLSearchParams(location.search).has("scale-preview");
-const previewCollection = new URLSearchParams(location.search).get("scale-preview");
+  SAVE = saveKey(query.get("mode"));
+const scalePreview = query.has("scale-preview");
+const previewCollection = query.get("scale-preview");
 // &look=x,z centres a scale preview on a cell, e.g. ?scale-preview=farm&look=58,70.
-const previewLook = (([x, z]) => Number.isFinite(x) && Number.isFinite(z) ? {x, z} : null)((new URLSearchParams(location.search).get("look") || "").split(",").map(Number));
+const previewLook = (([x, z]) => Number.isFinite(x) && Number.isFinite(z) ? {x, z} : null)((query.get("look") || "").split(",").map(Number));
 const dreamPreview = previewCollection === "dream" || previewCollection === "lived";
 // The lived-in look is the game's look. The catalog preview can still switch it
 // off with ?look=plain to compare against the plain ground.
-const livedLook = !(dreamPreview && new URLSearchParams(location.search).get("look") === "plain");
+const livedLook = !(dreamPreview && query.get("look") === "plain");
 // The preview drifts its clouds while paused; a paused village holds still.
 const livedPreview = dreamPreview && livedLook;
 let fixedLighting = livedPreview ? DREAM_LIGHTS.clear : dreamPreview ? DREAM_LIGHTS.opal : null;
 let previewCycle = false;
-const wildlifePreview = new URLSearchParams(location.search).has("wildlife-preview");
-const downtimePreview = new URLSearchParams(location.search).has("downtime-preview");
-const needsPreview = new URLSearchParams(location.search).has("needs-preview");
-const utilitiesPreview = needsPreview || downtimePreview || new URLSearchParams(location.search).has(
+const wildlifePreview = query.has("wildlife-preview");
+const downtimePreview = query.has("downtime-preview");
+const needsPreview = query.has("needs-preview");
+const utilitiesPreview = needsPreview || downtimePreview || query.has(
   "utilities-preview",
-) || new URLSearchParams(location.search).has("truck-preview");
-const restPreview = new URLSearchParams(location.search).has("rest-preview");
+) || query.has("truck-preview");
+const restPreview = query.has("rest-preview");
 // ?truck-preview loops a full supplier delivery in the unsaved utilities scene.
-const truckPreview = new URLSearchParams(location.search).has("truck-preview");
+const truckPreview = query.has("truck-preview");
 const arrivalPreview =
   scalePreview ||
   naturePreview ||
   wildlifePreview ||
   utilitiesPreview ||
   restPreview ||
-  new URLSearchParams(location.search).has("arrival-preview");
-let s = naturePreview ? createSandbox(Number(new URLSearchParams(location.search).get("land-seed")) >>> 0 || 7) : scalePreview ? createScalePreview(false,new URLSearchParams(location.search).get("scale-preview"),new URLSearchParams(location.search).get("biome")) : utilitiesPreview
+  query.has("arrival-preview");
+let s = naturePreview ? createSandbox(Number(query.get("land-seed")) >>> 0 || 7) : scalePreview ? createScalePreview(false,query.get("scale-preview"),query.get("biome")) : utilitiesPreview
   ? createUtilitiesPreview(
-      new URLSearchParams(location.search).has("interactions"),
-      Number(new URLSearchParams(location.search).get("land-seed")) >>> 0,
+      query.has("interactions"),
+      Number(query.get("land-seed")) >>> 0,
     )
-  : new URLSearchParams(location.search).get("mode") === "sandbox"
+  : query.get("mode") === "sandbox"
     ? createSandbox(freshLandSeed())
     : createWeekend(arrivalPreview ? 0 : freshLandSeed());
-if(!arrivalPreview || new URLSearchParams(location.search).has('arrival-preview')) beginArrival(s);
+if(!arrivalPreview || query.has('arrival-preview')) beginArrival(s);
 // Optional frozen lighting comparison, only in the unsaved utilities scene.
 const lightingPreview =
-  utilitiesPreview && new URLSearchParams(location.search).has("lighting-hour");
+  utilitiesPreview && query.has("lighting-hour");
 if (lightingPreview) {
   const hour = Number(
-    new URLSearchParams(location.search).get("lighting-hour"),
+    query.get("lighting-hour"),
   );
   s.time =
     (((Number.isFinite(hour) ? Math.max(0, Math.min(24, hour)) : 12) + 24 - 9) *
       60) /
     0.45;
-  s.rain = new URLSearchParams(location.search).has("lighting-rain");
+  s.rain = query.has("lighting-rain");
 }
 if (needsPreview) {
   s.time=200;s.rain=false;s.rainSeen=true;s.rainResolved=true;
@@ -928,7 +929,7 @@ function focus(c) {
   camera.updateProjectionMatrix();
   controls.update();
 }
-focus(natureFocus ? natureFocus[naturePreviewFocus] || natureFocus.deposits : truckPreview ? s.stock : scalePreview ? (previewLook||(previewCollection==="farm"?{x:53,z:54}:new URLSearchParams(location.search).get("scale-preview")==="new-homes"?{x:62,z:53}:new URLSearchParams(location.search).get("scale-preview")==="homes"?{x:63,z:52}:{x:56,z:57})) : s.arrivalAnimating ? s.stock : campLocation(s));
+focus(natureFocus ? natureFocus[naturePreviewFocus] || natureFocus.deposits : truckPreview ? s.stock : scalePreview ? (previewLook||(previewCollection==="farm"?{x:53,z:54}:query.get("scale-preview")==="new-homes"?{x:62,z:53}:query.get("scale-preview")==="homes"?{x:63,z:52}:{x:56,z:57})) : s.arrivalAnimating ? s.stock : campLocation(s));
 if (savedView) {
   camera.position.fromArray(savedView.position);
   controls.target.fromArray(savedView.target);
@@ -1171,7 +1172,7 @@ let farmingUI=installFarmingUI({state:()=>s,selected:()=>selected,scene,hit,cont
 campUI = installCampUI({state:()=>s,scene,campGroup,actors,world,hit,camera,message,persist,
   finish:model=>{paintVillageModel(model);return compactModel(model);},
   placing:()=>!!placing||!!openPanel||farmingUI.placingField(),
-  refresh:()=>{uiSignature='';renderUI();},
+  refresh:()=>{refreshUI();},
 });
 $("world").addEventListener("pointerdown", (e) => {
   down = { x: e.clientX, y: e.clientY };
@@ -1376,7 +1377,7 @@ $("cancel-project").onclick = () => {
   const error = cancelProject(s, selected);
   if (!error) { selected = null; syncBuildings(); persist(); }
   message(error || s.log[0]);
-  uiSignature = ''; renderUI();
+  refreshUI();
 };
 let controlsWasPaused = false;
 $("copy-diagnostics").onclick = async () => {
@@ -1411,7 +1412,7 @@ $("priority").onclick = () => {
   message(s.log[0]);
   renderUI();
 };
-for(const mode of ["salvage","demolish"])$(mode+"-building").onclick=()=>{const error=removeProject(s,selected,mode);message(error||"Resident dismantling queued.");uiSignature="";renderUI();};
+for(const mode of ["salvage","demolish"])$(mode+"-building").onclick=()=>{const error=removeProject(s,selected,mode);message(error||"Resident dismantling queued.");refreshUI();};
 $("move").onclick = () => {
   const p = s.projects.find((p) => p.id === selected);
   if (p) startPlacement(p.key, p.id);
@@ -1450,8 +1451,7 @@ $("undo-road").onclick = () => {
   roadHistory.pop();
   lastRoad = entry.lastRoad;
   syncBuildings();
-  uiSignature = "";
-  renderUI();
+  refreshUI();
   persist();
   if (roadHistory.length) roadHistory.at(-1).after = JSON.stringify(s);
   $("undo-road").disabled = !roadHistory.length;
@@ -1490,7 +1490,7 @@ function stepBack(e) {
     selected = null;
     // A panel hidden behind the selection goes with it: one visible layer per press.
     if (openPanel) setPanel(null);
-    else { uiSignature = ''; renderUI(); }
+    else { refreshUI(); }
     focusWorld();
   } else focusWorld();
 }
@@ -1734,8 +1734,7 @@ $("skip-form").onsubmit = async event => {
     resetPace(pace);
     previousMotion = captureMotion(s);
     previous = performance.now();
-    uiSignature = '';
-    renderUI();
+    refreshUI();
     persist();
     $("skip-start").disabled = false;
     $("skip-days").disabled = false;
@@ -1776,8 +1775,7 @@ $("main-menu").onclick = () => {
 $("auto-buy").onclick=()=>{s.autoBuy=s.autoBuy===false;uiSignature='';persist();renderUI();};
 $("sandbox-instant").onclick = () => {
   s.instantBuild = s.instantBuild === false;
-  uiSignature = "";
-  renderUI();
+  refreshUI();
   persist();
 };
 $("restart").onclick = askReset;
@@ -1824,6 +1822,8 @@ const actionText = {
 };
 const resourceTrends = createResourceTrends();
 let uiSignature = "", expandedResident = null, residentTab = "Overview";
+// Redraw the HUD now, even if nothing in its signature changed.
+function refreshUI() { uiSignature = ""; renderUI(); }
 let management;
 function refillSelect(id, options) {
   const el = $(id),
@@ -2071,8 +2071,7 @@ function setPanel(panel) {
   $("terrain-panel").hidden = panel !== "terrain-panel";
   if (panel) selected = null;
   document.body.dataset.tray = panel === "build" ? "open" : "closed";
-  uiSignature = "";
-  renderUI();
+  refreshUI();
   if (panel && panel !== previousPanel) focusPanel(panel);
   else if (!panel && previousPanel && previousPanel !== 'people') {
     // The dialog restores focus itself; trays hand it back to their opener.
@@ -2095,7 +2094,7 @@ document
 $("people").addEventListener('close',()=>{
   releasePause(residentsWasPaused);
   if(openPanel==='people')openPanel=null;
-  uiSignature='';renderUI();
+  refreshUI();
 });
 $("toggle-build-list").onclick = () => setPanel(null);
 filterBuildings();
@@ -2332,7 +2331,7 @@ function renderUI() {
     const pick=document.createElement('button');pick.className='resident-picker';
     pick.setAttribute('aria-pressed',String(chosen));pick.setAttribute('aria-label',`View ${r.name}`);
     pick.append(portrait,name,status,energy);
-    pick.onclick=()=>{expandedResident=r.id;uiSignature='';renderUI();$("roster").querySelector(`[data-resident="${r.id}"] button`)?.focus();};
+    pick.onclick=()=>{expandedResident=r.id;refreshUI();$("roster").querySelector(`[data-resident="${r.id}"] button`)?.focus();};
     div.append(pick);
     if(chosen){
       const detail=document.createElement('section');detail.className='resident-profile';
@@ -2359,13 +2358,13 @@ function renderUI() {
       if (jobProject) {
         const viewJob = document.createElement('button');
         viewJob.textContent = `View project · ${projectLabel(jobProject, PROJECTS)}`;
-        viewJob.onclick = () => { setPanel(null); selected = jobProject.id; focus(jobProject); uiSignature = ''; renderUI(); };
+        viewJob.onclick = () => { setPanel(null); selected = jobProject.id; focus(jobProject); refreshUI(); };
         detail.append(viewJob);
       }
       const tabs=document.createElement('nav');tabs.className='resident-tabs';tabs.setAttribute('aria-label','Profile sections');
       for(const label of ['Overview','Story','Skills','Relationships']){
         const tab=document.createElement('button');tab.textContent=label;tab.setAttribute('aria-pressed',String(residentTab===label));
-        tab.onclick=()=>{residentTab=label;uiSignature='';renderUI();[...$('resident-detail').querySelectorAll('button[aria-pressed]')].find(b=>b.textContent===label)?.focus();};tabs.append(tab);
+        tab.onclick=()=>{residentTab=label;refreshUI();[...$('resident-detail').querySelectorAll('button[aria-pressed]')].find(b=>b.textContent===label)?.focus();};tabs.append(tab);
       }
       detail.append(tabs);
       const paragraph=(text,kind='p')=>{const el=document.createElement(kind);el.textContent=text;detail.append(el);};
@@ -2568,8 +2567,7 @@ management = createManagement({
   beforeOpen: () => { if (placing) cancel(); },
   state: () => s,
   refresh: () => {
-    uiSignature = "";
-    renderUI();
+    refreshUI();
     persist();
   },
   inspect: (id) => {
@@ -2577,8 +2575,7 @@ management = createManagement({
     const p = s.projects.find((p) => p.id === id);
     if (p) focus(p);
     if(p?.cultivation)farmingUI.open();
-    uiSignature = "";
-    renderUI();
+    refreshUI();
   },
   notify: message,
   isPaused: () => paused,
@@ -2595,8 +2592,7 @@ $("supplies").onclick = (event) => {
   if (button) management.open(button.dataset.panel);
 };
 $("purchase").onchange = () => {
-  uiSignature = "";
-  renderUI();
+  refreshUI();
 };
 renderUI();
 // The land takes the keys from the first press; panels take focus when opened.

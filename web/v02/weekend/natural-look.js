@@ -8,8 +8,8 @@ import {riverBankAt} from './river-layout.js';
 import {accessRoadAt} from './road-layout.js';
 import {CELL_MIN, CELL_MAX} from './map-size.js';
 import {DAY} from './weather.js';
+import {query} from './url-flags.js';
 
-const query = new URLSearchParams(globalThis.location?.search || '');
 export const naturePreview = query.has('nature-preview');
 // ?nature=plain falls back to the earlier catalog models, for comparison.
 export const natureLook = query.get('nature') !== 'plain';
