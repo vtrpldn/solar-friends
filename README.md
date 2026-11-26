@@ -47,20 +47,18 @@ The playable game is JavaScript with Three.js rendering. `simulation.js` owns se
 ## Validation and deployment
 
 ```sh
-node scripts/verify-v02-economy-policies.mjs
-node scripts/verify-v02-economic-recovery.mjs
-node scripts/verify-v02-urgent-needs.mjs
-node scripts/verify-v02-playtest-fixes.mjs
-node scripts/verify-v02-lab.mjs
+npm run check:quick     # while iterating: checks that own the changed files plus a smoke set, seconds
+npm run check:changed   # before pushing: every check whose imports reach the changed files
+npm run check           # the whole default tier
 npm run build:site
 git diff --check
 ```
 
-`npm run check:changed` runs, in parallel, only the `verify-*` checks whose imports reach the files you changed (every browser check when game files changed) and reports all failures together. `npm run check` runs the default tier the same way; add words to filter by name (`npm run check -- needs trade`), `--no-browser` to skip Playwright checks, or `--list` to preview the selection and each script's tier.
+All three run checks in parallel and report every failure together. `--quick` picks the changed check itself, same-named `verify-v02-<module>*` checks and checks importing a changed module directly; the hubs (`simulation.js`, `game.js`, `management.js`, `index.html`) select only the smoke set. `--changed` follows imports transitively, so a change to any simulation module selects most of the suite, and every browser check runs when game files change. Add words to filter by name (`npm run check -- needs trade`), `--no-browser` to skip Playwright checks, or `--list` to preview the selection and each script's tier.
 
-The suite has two tiers. Scripts whose first line is `// check-tier: soak` play days or weeks of game time; `npm run check` skips them and says how many it skipped, `npm run check -- --soak` adds them and `--soak-only` runs just those. CI runs the default tier on every pull request and push, and the soak tier on every push to `main` and nightly. Browser checks get Chromium from `scripts/browser.mjs`: one shared instance under `npm run check` (`--private-browsers` turns that off), a private one when a script is run on its own; `SOLAR_RENDERER=swiftshader` reproduces CI's software WebGL locally. Only one check run works at a time on a machine: a run started from another worktree waits for the current one to finish (`--no-lock` runs alongside it anyway).
+The suite has two tiers. Scripts whose leading comment is `// check-tier: soak` play days or weeks of game time; `npm run check` skips them and says how many it skipped, `npm run check -- --soak` adds them and `--soak-only` runs just those. CI runs the default tier on pull requests and pushes to `main`, and the soak tier on every push to `main` and nightly. Browser checks get Chromium from `scripts/browser.mjs`: one shared instance under `npm run check` (`--private-browsers` turns that off), a private one when a script is run on its own; `SOLAR_RENDERER=swiftshader` reproduces CI's software WebGL locally. Only one check run works at a time on a machine: a run started from another worktree waits for the current one to finish (`--no-lock` runs alongside it anyway).
 
-Choose additional `scripts/verify-v02-*.mjs` checks for the changed subsystem. Historical checks may encode older design assumptions; investigate failures rather than claiming the entire suite passes. The recovery replay uses an existing normal-game save and automated ticks; it is not a manual browser playthrough. UI changes need rendered browser checks.
+Historical checks may encode older design assumptions; investigate failures rather than claiming the entire suite passes. The recovery replay uses an existing normal-game save and automated ticks; it is not a manual browser playthrough. UI changes need rendered browser checks.
 
 Netlify deploys `main` through the GitHub integration using `netlify.toml`. A push is not proof of publication: verify the deployed files and live UI after the build finishes. Never merge a PR without explicit approval.
 

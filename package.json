@@ -6,6 +6,7 @@
     "dev": "node scripts/dev.mjs",
     "dev:serve": "node scripts/serve.mjs",
     "check": "node scripts/check.mjs",
+    "check:quick": "node scripts/check.mjs --quick --syntax",
     "check:changed": "node scripts/check.mjs --changed --syntax",
     "build:site": "node scripts/build-site.mjs"
   },

@@ -2,7 +2,8 @@
 // failure, and can limit itself to the scripts affected by the files you changed.
 //
 //   npm run check                 every verify-* script, in parallel
-//   npm run check -- --changed    only scripts whose imports reach changed files
+//   npm run check -- --changed    only scripts whose imports reach changed files (run before pushing)
+//   npm run check -- --quick      the inner loop: checks that own the changed files, plus a smoke set
 //   npm run check -- needs trade  only scripts whose name contains a word
 //   npm run check -- --soak       also the multi-day simulation soaks (--soak-only: just those)
 //   options: --jobs N  --fail-fast  --no-browser  --syntax  --base REF  --browser-jobs N  --no-retry
@@ -52,7 +53,8 @@ async function facts(file){
 async function reach(file,seen=new Set()){
   if(seen.has(file))return seen;seen.add(file);
   const own=await facts(file);
-  for(const next of own.mentions)seen.add(next);
+  // A mentioned script (a path string it spawns, serves or imports) is followed like an import.
+  for(const next of own.mentions){if(/\.m?js$/.test(next))await reach(next,seen);else seen.add(next);}
   for(const next of own.imports)await reach(next,seen);
   return seen;
 }
@@ -92,6 +94,33 @@ if(flag('--changed')){
   }
   console.log(`${changed.length} changed file${changed.length===1?'':'s'} → ${selected.length} of ${scripts.length} checks`);
   scripts=selected;
+}
+// The inner loop. Import reach is right before landing but picks most of the suite for any
+// simulation change, so --quick takes only the checks that own a changed file: the check itself,
+// same-named checks (verify-v02-<stem>*), and checks importing the file directly. Hubs that
+// nearly every check imports select nothing by import; the smoke set stands in for them.
+const SMOKE=['verify-v02-basic-needs.mjs','verify-v02-consistency.mjs','verify-v02-modes.mjs','verify-v02-save-slots.mjs','verify-v02-keyboard-shortcuts.mjs','verify-v02-economy-policies.mjs','verify-v02-building-services.mjs','verify-v02-autonomous-work.mjs','verify-v02-food-storage.mjs','verify-v02-water-sources.mjs','verify-v02-construction-progress.mjs','verify-v02-town-trip.mjs'];
+const SMOKE_BROWSER=['verify-v02-basic-needs-browser.mjs'];
+const HUBS=new Set(['simulation.js','game.js','management.js','index.html'].map(file=>`web/v02/weekend/${file}`));
+let quickNote='';
+if(flag('--quick')){
+  const changed=changedFiles(),owned=new Set();
+  const ui=changed.some(file=>file.startsWith('web/v02/')&&(/\.(css|html)$/.test(file)||/(^|\/)(game|management|[\w-]+-ui)\.js$/.test(file)));
+  for(const file of changed){
+    const base=path.basename(file);
+    if(file.startsWith('scripts/')&&pattern.test(base)){if(scripts.includes(base))owned.add(base);continue;}
+    if(!/\.m?js$/.test(file)||HUBS.has(file))continue;
+    const prefix=`verify-v02-${base.replace(/\.m?js$/,'')}`,absolute=path.resolve(root,file);
+    for(const name of scripts){
+      if(name.startsWith(prefix)&&/^[-.]/.test(name.slice(prefix.length)))owned.add(name);
+      const own=await facts(path.resolve('scripts',name));
+      if(own.imports.includes(absolute)||own.mentions.includes(absolute))owned.add(name);
+    }
+  }
+  const smoke=new Set([...SMOKE,...(ui?SMOKE_BROWSER:[])].filter(name=>scripts.includes(name)&&!owned.has(name)));
+  scripts=scripts.filter(name=>owned.has(name)||smoke.has(name));
+  quickNote=`quick: ${owned.size} owned + ${smoke.size} smoke for ${changed.length} changed file${changed.length===1?'':'s'}; run npm run check:changed before pushing`;
+  console.log(quickNote);
 }
 // Soaks are skipped by default, never silently: the run says how many it left out.
 const selected=scripts,soaks=scripts.filter(name=>tier.get(name)==='soak');
@@ -242,3 +271,4 @@ if(flaky.length)console.log(`\nPassed only when run alone (load-sensitive): ${fl
 const total=results.reduce((sum,result)=>sum+result.ms,0);
 console.log(`\n${results.length-failed.length} passed, ${failed.length} failed in ${seconds(performance.now()-started).trim()} (${seconds(total).trim()} of work)`);
 if(failed.length){console.log(`Failed: ${failed.map(failure=>failure.name).join(' ')}`);process.exitCode=1;}
+if(quickNote)console.log(quickNote);
