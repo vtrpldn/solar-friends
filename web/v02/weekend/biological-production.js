@@ -46,9 +46,10 @@ export function beginBiology(s,op,r){
  r.operation=null;r.cargo=false;r.action='idle';r.target=null;r.walk=[];return true;
 }
 export const CROP_CARE={wood:{kind:"supply-0",area:36,liters:36},bamboo:{kind:"supply-1",area:16,liters:24},baby_greens:{kind:"garden",area:8,liters:24},vegetables:{kind:"garden",area:16,liters:48},greenhouse:{kind:"greenhouse",area:24,liters:48},fruit:{kind:"orchard",area:64,liters:32},bananas:{kind:"grove",area:32,liters:48},coffee:{kind:"coffee",area:144,liters:72}};
-export function biologicalStep(s,dt,useWater){
+// `projects` lets the caller leave out sites that never hold soil (see wild-land.js).
+export function biologicalStep(s,dt,useWater,projects=s.projects||[]){
  const active=new Set((s.operations||[]).filter(o=>!o.done&&o.phase==='growing'&&CROP_CARE[o.recipe]).map(o=>o.site));
- for(const p of s.projects||[])if(!p.cultivation&&p.soilFertility!==undefined&&!active.has(p.id))p.soilFertility=Math.min(1,p.soilFertility+dt/(180*GAME_DAY));
+ for(const p of projects)if(!p.cultivation&&p.soilFertility!==undefined&&!active.has(p.id))p.soilFertility=Math.min(1,p.soilFertility+dt/(180*GAME_DAY));
  for(const op of s.operations||[]){
   if(op.done||!(op.phase==='growing'||op.phase==='process'&&op.ripeAt!==undefined))continue;
   const native=nativeFor(s,op.recipe),care=CROP_CARE[op.recipe],crop=care&&native?{...care,liters:care.liters*native.water}:care,site=s.projects?.find(p=>p.id===op.site);

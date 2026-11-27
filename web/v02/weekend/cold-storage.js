@@ -1,8 +1,9 @@
+import {nodeIndex} from './wild-land.js';
 import {materialMeasure} from './material-measures.js';
 import {ensureFoodStorage,FOOD_DAYS} from './food-storage.js';
 export const COLD_STORAGE={litres:80,kw:.08,agingRate:.25};
 export function coolingStatus(s){
- const nodes=Object.values(s.infrastructure?.nodes||{}).filter(n=>n.coldStorage);
+ const nodes=(s.infrastructure?.nodes?nodeIndex(s.infrastructure).live:[]).filter(n=>n.coldStorage);
  const powered=nodes.filter(n=>n.enabled&&n.coolingEnabled!==false&&n.power>.99);
  const occupied=Object.entries(s.foodStorage?.lots||{}).reduce((n,[id,lots])=>n+lots.filter(l=>l.chilled).reduce((a,l)=>a+l.n*materialMeasure(id).m3*1000,0),0);
  return {installed:nodes.length,powered:powered.length,capacity:powered.length*COLD_STORAGE.litres,occupied};

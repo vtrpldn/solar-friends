@@ -1,6 +1,8 @@
 import {hydrologyStep,extractWater,rainCatchments,captureRain} from './hydrology.js';
 import {solarFactor} from './weather.js';
 import {projectMaterials} from './project-materials.js';
+import {landIndex, nodeIndex, wildShortcuts, WILD_KIND} from './wild-land.js';
+export {nodeIndex};
 import {serviceFactor} from "./asset-upkeep.js";
 import {GRID_TARIFF,ECONOMY_REFERENCE} from "./economy-reference.js";
 import {COLD_STORAGE} from './cold-storage.js';
@@ -114,13 +116,14 @@ export function ensureInfrastructure(s) {
   return sys;
 }
 export function syncProjectNode(sys, p, defs) {
-  if (p.work < defs[p.key].work) return;
-  const kind = defs[p.key].kind || p.key;
+  const def = defs[p.key];
+  if (p.work < def.work) return;
+  const kind = def.kind || p.key;
   const batteryHealth=Math.max(.8,1-(p.batteryAgeDays||0)/(8*365)*.2);
   const materials = projectMaterials(p, defs);
   const defaultBatteries = kind === "solar_farm" || kind === "hydro" || kind === "supply-6" ? 1 : 0;
   const battery = (materials?.batteries ?? defaultBatteries) * 4 * batteryHealth;
-  sys.nodes[p.id] ??= {
+  const node = sys.nodes[p.id] ??= {
     id: p.id,
     kind,
     x: p.x,
@@ -132,7 +135,6 @@ export function syncProjectNode(sys, p, defs) {
     enabled: true,
     power: 0,
   };
-  const node=sys.nodes[p.id];
   if(kind === "water-storage" || kind === "well")node.maintainFresh ??= true;
   if (kind === "home" && node.capacity[3] === 0) node.capacity = [...CAPACITY.home];
   // Greywater-only sites (kitchen, wash station) fill up too: left alone, a
@@ -181,15 +183,23 @@ export function retireUntreatedWater(s) {
   }
   sys.waterVersion = 2;
 }
+const syncedLands = new WeakMap(), syncedNodes = new WeakMap();
 export function syncInfrastructure(s, defs) {
   const sys = ensureInfrastructure(s);
-  for (const p of s.projects) syncProjectNode(sys, p, defs);
+  // Wild trees are synced once; after that only a change to the project list brings them back.
+  const land = landIndex(s, defs), settled = syncedLands.get(sys.nodes) === land;
+  for (const p of settled ? land.tended : s.projects) syncProjectNode(sys, p, defs);
+  if (!settled) syncedLands.set(sys.nodes, land);
   // Old saves may contain a passive structure disabled by the former blanket
   // switch. Restore its availability now that it no longer has such a control.
-  for (const node of Object.values(sys.nodes))
-    if (!hasPowerService(sys,node)) node.enabled = true;
+  const index = nodeIndex(sys), seen = syncedNodes.get(sys.nodes) === index;
+  for (const node of seen ? index.live : index.all)
+    if (node.enabled !== true && !hasPowerService(sys, node)) node.enabled = true;
+  if (!seen) syncedNodes.set(sys.nodes, index);
   return sys;
 }
+// The index syncInfrastructure just used; only good until anything else touches the nodes.
+export const syncedNodeIndex = sys => syncedNodes.get(sys.nodes);
 export function connect(s, defs, kind, from, to) {
   const sys = syncInfrastructure(s, defs),
     a = sys.nodes[from],
@@ -268,11 +278,12 @@ const WATER_PROCESSOR_KINDS = new Set([
 // Node kinds and active power links determine which sites process utilities
 // and their service order. Equipment and available water change within that order.
 const utilityNetworks = new WeakMap();
-function utilityNetwork(sys, nodes) {
-  const cached = utilityNetworks.get(sys);
+function utilityNetwork(sys, index) {
+  const cached = utilityNetworks.get(sys), nodes = index.all;
   const powerLinks = sys.links.filter(l => l.kind === 'power' && l.enabled && l.work >= l.required);
-  if (cached && nodes.length === cached.nodes.length && powerLinks.length === cached.links.length &&
-      nodes.every((n,i) => n === cached.nodes[i] && n.id === cached.ids[i] && n.kind === cached.kinds[i]) &&
+  // The same index means the same nodes in the same order; only a live node's kind can differ.
+  if (cached && cached.index === index && powerLinks.length === cached.links.length &&
+      index.live.every((n,i) => n.id === cached.ids[i] && n.kind === cached.kinds[i]) &&
       powerLinks.every((l,i) => l.from === cached.links[i].from && l.to === cached.links[i].to)) {
     return cached;
   }
@@ -303,8 +314,8 @@ function utilityNetwork(sys, nodes) {
     components.push({component, demandOrder, passive});
   }
   const waterProcessors = nodes.filter(n => WATER_PROCESSOR_KINDS.has(n.kind)).sort((a, b) => a.id - b.id);
-  const network = {nodes, ids: nodes.map(n => n.id), kinds: nodes.map(n => n.kind),
-    links: powerLinks.map(l => ({from:l.from, to:l.to})), components, waterProcessors};
+  const network = {index, ids: index.live.map(n => n.id), kinds: index.live.map(n => n.kind),
+    links: powerLinks.map(l => ({from:l.from, to:l.to})), components, active: components, settled: false, waterProcessors};
   utilityNetworks.set(sys, network);
   return network;
 }
@@ -316,15 +327,19 @@ export function infrastructureStep(s, defs, dt, sys = syncInfrastructure(s, defs
   );
   hydrologyStep(s,dt);
   sys.grid.importing = 0;
-  const nodes = Object.values(sys.nodes);
-  const {components, waterProcessors} = utilityNetwork(sys, nodes);
-  for (const {component, demandOrder, passive} of components) {
+  const index = nodeIndex(sys), nodes = index.all;
+  const network = utilityNetwork(sys, index), {waterProcessors} = network;
+  // A wild tree standing alone is written once per network and then left out (see wild-land.js).
+  const settling = !network.settled && wildShortcuts();
+  for (const part of network.active) {
+    const {component, demandOrder, passive} = part;
     const site = component[0];
     if (passive && site.battery === 0 && site.charge === 0 && !site.coldStorage) {
       site.generation = 0;
       site.demand = 0;
       site.power = site.enabled ? 1 : 0;
       site.connected = false;
+      if (settling && site.kind === WILD_KIND) part.quiet = true;
       continue;
     }
     let generation = 0,
@@ -393,6 +408,7 @@ export function infrastructureStep(s, defs, dt, sys = syncInfrastructure(s, defs
       n.connected = component.length > 1;
     }
   }
+  if (settling) { network.active = network.active.filter(part => !part.quiet); network.settled = true; }
   const catchments = rainCatchments(s, defs, waterProcessors);
   for (const n of waterProcessors) {
     if(n.enabled && n.kind==='groundwater-well') {

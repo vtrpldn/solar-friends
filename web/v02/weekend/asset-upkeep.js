@@ -1,6 +1,7 @@
 import { brl } from "./money.js";
 import {ANIMAL_RATIONS,animalStep,ensureAnimalCare} from './animal-care.js';
 import {projectMaterials} from './project-materials.js';
+import {tendedProjects} from './wild-land.js';
 import {activeTrips} from "./trip-state.js";
 import {CROP_CARE,GAME_DAY} from './biological-production.js';
 // Inspection/service intervals are engineering assumptions, not warranties.
@@ -11,6 +12,13 @@ for (const crop of Object.values(CROP_CARE)) {
  if (!cropByKind.has(crop.kind)) cropByKind.set(crop.kind, crop);
 }
 const REPLACEMENT_YEARS={'water-pump':10,well:10,solar_farm:25,home:20,shed:20,warehouse:20,kitchen:20};
+// Kinds upkeepStep has anything to do for; a battery or a solar upgrade is checked per building.
+const upkeepKinds=new Map();
+const upkeepKind=kind=>{
+ let known=upkeepKinds.get(kind);
+ if(known===undefined)upkeepKinds.set(kind,known=!!(INTERVALS[kind]||REPLACEMENT_YEARS[kind]||cropByKind.has(kind)||ANIMAL_RATIONS[kind]));
+ return known;
+};
 export const ANIMAL_CARE=ANIMAL_RATIONS;
 export function upkeep(s){return s.upkeep??={version:1,automatic:true,dailyBudget:100,day:-1,used:0,vehicles:[{condition:100,km:0},{condition:100,km:0}],jobs:[]};}
 export function assetCondition(p){return p.condition??100;}
@@ -23,7 +31,10 @@ export function recordVehicleDistance(s,index,km){const v=upkeep(s).vehicles[ind
 export function upkeepStep(s, defs, dt, refreshAsset) {
  if(s.mode==='sandbox')return;const u=upkeep(s),day=Math.floor((540+s.time*.45)/1440);
  if(u.day!==day){u.day=day;u.used=0;u.restockSpent=0;}
- for(const p of s.projects){const d=defs[p.key],interval=INTERVALS[d.kind];if(p.removal||p.work<d.work)continue;
+ for(const p of tendedProjects(s,defs)){const d=defs[p.key];if(p.removal||p.work<d.work)continue;
+  // Loose natural resources and plain structures need no upkeep at all.
+  if(!upkeepKind(d.kind)&&!p.solarUpgrade&&!(projectMaterials(p,defs)?.batteries>0))continue;
+  const interval=INTERVALS[d.kind];
   if(REPLACEMENT_YEARS[d.kind]){
    p.assetAgeDays=(p.assetAgeDays||0)+dt/GAME_DAY;
    if(u.automatic&&p.assetAgeDays>=REPLACEMENT_YEARS[d.kind]*365&&!u.jobs.some(j=>j.target===p.id&&!j.done)){

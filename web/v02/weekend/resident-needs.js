@@ -22,11 +22,12 @@ export function needMeters(r) {
  const n=ensureNeeds(r);
  return [['Energy',r.energy],['Hydration',n.hydration],['Hunger',n.hunger],['Toilet',Math.min(n.bladder,n.bowels)],['Hygiene',n.hygiene],['Social',n.social],['Fun',n.fun]];
 }
+const DECAYING_NEEDS=NEED_KEYS.filter(k=>k!=='hydration');
 export function decayNeeds(s,r,i,dt) {
  const n=ensureNeeds(r,i), working=['build','produce','install','carry','collect'].includes(r.action);
  const rates={hunger:.055,bladder:.12,bowels:.047,hygiene:working?.075:.018,social:.035,fun:working?.055:.025};
  hydrationStep(s,r,dt);
- for(const key of NEED_KEYS.filter(k=>k!=='hydration'))n[key]=clamp(n[key]-rates[key]*dt*(r.tentPhase==='inside'?.35:1)*(profileFor(r).rates[key]||1));
+ for(const key of DECAYING_NEEDS)n[key]=clamp(n[key]-rates[key]*dt*(r.tentPhase==='inside'?.35:1)*(profileFor(r).rates[key]||1));
  if(r.tentPhase==='inside') {n.fun=clamp(n.fun+dt*.04);return;}
 }
 const ACTION={hydration:'drink',hunger:'eat',bladder:'toilet',bowels:'toilet',hygiene:'wash',social:'chat',fun:'play',gather:'chat'};
