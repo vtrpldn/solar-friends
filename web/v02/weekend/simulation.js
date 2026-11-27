@@ -711,6 +711,22 @@ function bedHandsFull(s, r, {removalsPending, constructionPending}) {
   return removalsPending || !!(constructionPending && availableProject(s, r));
 }
 
+// Work with a roof over it, which rain does not stop.
+function isIndoorWork(s, op) {
+  if (op.water) return false;
+  const site = s.projects.find(p => p.id === op.site);
+  return !!site && (site.key === 'greenhouse' || ['kitchen','workshop'].includes(PROJECTS[site.key].kind) || !!PROCESSES[op.recipe]?.craft);
+}
+// Residents stop taking new work after dusk and while it rains. Arrival is the
+// exception: until the camp has somewhere to sit, a roof and covered stores they keep going.
+export const WORKDAY_START = 6, WORKDAY_END = 19;
+export function offDuty(s) {
+  const o = s.opening;
+  if (s.stage !== 'playing' || (o && !o.complete && !(o.gathering && o.shelter && o.supplies))) return null;
+  const hour = (9 + s.time * .45 / 60) % 24;
+  return hour >= WORKDAY_END || hour < WORKDAY_START ? 'evening' : s.rain ? 'rain' : null;
+}
+
 const foodRecipesByKind = new Map();
 for (const [id, recipe] of Object.entries(PROCESSES)) {
   if (!foodRecipesByKind.has(recipe.kind) && Object.keys(recipe.output).some(id => FOOD_SERVINGS[id])) {
@@ -811,7 +827,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     );
   const eligible = (op) => {
     if ((op.accessRetryAt?.[r.id]||0)>s.time) return false;
-    if (op.done || op.waitingSeeds || op.phase==='growing' || reserved(op) || (waterOnly && !op.water) || (group === 'farm' ? !isFarmWork(s,op) : group === 'farm-pressing' ? !isFarmWork(s,op) || isBedTending(op) : group && workGroup(op,PROCESSES)!==group)) return false;
+    if (op.done || op.waitingSeeds || op.phase==='growing' || reserved(op) || (waterOnly && !op.water) || (group === 'farm' ? !isFarmWork(s,op) : group === 'farm-pressing' ? !isFarmWork(s,op) || isBedTending(op) : group === 'indoor' ? !isIndoorWork(s,op) : group && workGroup(op,PROCESSES)!==group)) return false;
     if(op.water?.stagedAt){
       const destination=sys.nodes[op.site],index=liquidIndex(op.water.kind);
       if(!destination||destination.capacity[index]-destination.water[index]<=.00001)return false;
@@ -2855,7 +2871,7 @@ function residentsStep(s, ctx) {
   const operationsPending = s.operations?.some(o => !o.done);
   const animalCarePending = s.upkeep?.jobs.some(job => job.care && !job.done);
   const farmJobsPending = operationsPending && s.operations.some(op => !op.done && !op.waitingSeeds && op.phase !== 'growing' && isFarmWork(s,op));
-  const pending = {removalsPending, constructionPending, operationsPending, animalCarePending, farmJobsPending};
+  const pending = {removalsPending, constructionPending, operationsPending, animalCarePending, farmJobsPending, offDuty: offDuty(s)};
   for (const [i, r] of s.people.entries()) residentTurn(s, r, i, dt, needApi, pending);
 }
 
@@ -2904,6 +2920,12 @@ function residentTurn(s, r, i, dt, needApi, pending) {
         }
         continue;
       }
+      // Going off duty turns an empty-handed resident back from the job they were walking to.
+      if (!pending.offDuty) delete r.offDuty;
+      else if (!r.offDuty) {
+        r.offDuty = true;
+        if (!r.cargo && !r.needTask && !r.outsideWork && !r.removalJob && !r.downtime && r.action !== 'service' && !r.dayShiftBooked && !r.favourBooked) { r.walk = []; r.target = null; }
+      }
       // Leisure is interruptible: a newly available task beats finishing a stroll.
       if (
         s.stage === "playing" &&
@@ -2921,7 +2943,7 @@ function residentTurn(s, r, i, dt, needApi, pending) {
           "stroll",
           "breathe",
         ].includes(r.action) &&
-        constructionPending && availableProject(s, r)
+        !pending.offDuty && constructionPending && availableProject(s, r)
       ) {
         r.walk = [];
         r.target = null;
@@ -3024,6 +3046,16 @@ function residentTurn(s, r, i, dt, needApi, pending) {
       ) {
         if (operationalWork(s, r, i, dt)) continue;
       }
+      // Off duty: what is in hand was finished above. Animals, a hungry or thirsty village
+      // and, in rain, work under a roof still get done; everything else waits.
+      if (pending.offDuty && !r.cargo && !r.outsideWork && !r.removalJob && r.action !== 'service') {
+        if (animalCarePending && performUpkeep(s,r,dt,go,changeMaterial,MATERIALS,carDoor,useWater,workSpot,true)) continue;
+        if (operationsPending && (s.infrastructure.hungry || s.infrastructure.thirst) && operationalWork(s,r,i,dt,false,'food')) continue;
+        if (operationsPending && pending.offDuty === 'rain' && operationalWork(s,r,i,dt,false,'indoor')) continue;
+        r.job = null; r.workSpot = null; r.supplyGoal = null; r.operation = null; r.linkJob = null;
+        relax(s, r, i, dt, needApi);
+        continue;
+      }
       if (!r.cargo && !r.operation && !r.outsideWork && !r.removalJob && r.action !== 'service') {
         if (animalCarePending && performUpkeep(s,r,dt,go,changeMaterial,MATERIALS,carDoor,useWater,workSpot,true)) continue;
         // Ripe crops, thirsty beds and animals cannot wait. Preparing and planting can:
@@ -3065,6 +3097,15 @@ function residentTurn(s, r, i, dt, needApi, pending) {
   } while (false);
 }
 
+function relax(s, r, i, dt, needApi) {
+  idleActivity(s, r, i, dt, {
+    ...needApi,catalog:PROJECTS,
+    projectSpot:(p,resident)=>leisureSpot(s,resident,p),
+    center:p=>({x:p.x+(footprint(p)[0]-1)/2,z:p.z+(footprint(p)[1]-1)/2}),
+    sheltered:kind=>['shed','rain-shelter'].includes(kind)||!!COMMUNITY[kind]?.sheltered,
+  });
+}
+
 // The last rung: take or keep a construction job, fetch its loads, carry them and build.
 // Each `continue` ends the turn, as in residentTurn.
 function constructionTurn(s, r, i, dt, needApi, pending) {
@@ -3090,12 +3131,7 @@ function constructionTurn(s, r, i, dt, needApi, pending) {
       }
       if (!p) {
         if (operationalWork(s, r, i, dt)) continue;
-        idleActivity(s, r, i, dt, {
-          ...needApi,catalog:PROJECTS,
-          projectSpot:(p,resident)=>leisureSpot(s,resident,p),
-          center:p=>({x:p.x+(footprint(p)[0]-1)/2,z:p.z+(footprint(p)[1]-1)/2}),
-          sheltered:kind=>['shed','rain-shelter'].includes(kind)||!!COMMUNITY[kind]?.sheltered,
-        });
+        relax(s, r, i, dt, needApi);
         // Leisure restores fun and social needs; it does not substitute for sleep.
         continue;
       }

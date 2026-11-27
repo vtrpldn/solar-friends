@@ -61,7 +61,8 @@ const afterFesta=s.community.goodwill;
 // Weekend course: the teacher stays with the class and the fees reach savings.
 assert.equal(planEvent(s,'course',{site:classroom.id,day:12,teacher:'nina'},PROJECTS),'');
 assert.match(planError(s,'course',{site:classroom.id,day:13,teacher:'luz'},PROJECTS),/within a fortnight/);
-until(12,11);const course=s.community.events.find(e=>e.kind==='course');assert(course.here>=2&&course.here<=12);assert.equal(communityVisitors(s).length,course.here);
+until(12,11);s.people.find(r=>r.id==='nina').energy=100; // A rested teacher: this is about the course, not her nap.
+const course=s.community.events.find(e=>e.kind==='course');assert(course.here>=2&&course.here<=12);assert.equal(communityVisitors(s).length,course.here);
 until(12,15.2);assert.match(history().text,/Course finished: \d+ participants/);assert(Math.abs(s.community.goodwill-(afterFesta+1))<.01);
 assert.match(planError(s,'course',{site:classroom.id,day:19,teacher:'luz'},PROJECTS),/one course a fortnight/);
 console.log('PASS planning rules, mutirão work and debt, returned favour, weekly roda, festa and a taught course in a living village');
