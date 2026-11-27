@@ -701,6 +701,16 @@ function isFarmWork(s,op) {
   return op.farm || Object.hasOwn(CROP_CARE,op.recipe) || ['eggs','milk','honey','gather-wild-forage'].includes(op.recipe);
 }
 
+// Bed work that loses nothing by waiting a day: everything except bringing in a ripe crop.
+const isBedTending = op => !!op.farm && op.farm.action !== 'harvest';
+// True when enough residents already tend beds and this one has building or clearing to do instead.
+function bedHandsFull(s, r, {removalsPending, constructionPending}) {
+  const tending = s.people.filter(other => other !== r && !['rest','town'].includes(other.action) &&
+    s.operations.some(op => op.id === other.operation && !op.done && isBedTending(op))).length;
+  if (tending < Math.max(1, Math.floor(s.people.length / 2))) return false;
+  return removalsPending || !!(constructionPending && availableProject(s, r));
+}
+
 const foodRecipesByKind = new Map();
 for (const [id, recipe] of Object.entries(PROCESSES)) {
   if (!foodRecipesByKind.has(recipe.kind) && Object.keys(recipe.output).some(id => FOOD_SERVINGS[id])) {
@@ -801,7 +811,7 @@ function operationalWork(s, r, i, dt, waterOnly = false, group = null) {
     );
   const eligible = (op) => {
     if ((op.accessRetryAt?.[r.id]||0)>s.time) return false;
-    if (op.done || op.waitingSeeds || op.phase==='growing' || reserved(op) || (waterOnly && !op.water) || (group === 'farm' ? !isFarmWork(s,op) : group && workGroup(op,PROCESSES)!==group)) return false;
+    if (op.done || op.waitingSeeds || op.phase==='growing' || reserved(op) || (waterOnly && !op.water) || (group === 'farm' ? !isFarmWork(s,op) : group === 'farm-pressing' ? !isFarmWork(s,op) || isBedTending(op) : group && workGroup(op,PROCESSES)!==group)) return false;
     if(op.water?.stagedAt){
       const destination=sys.nodes[op.site],index=liquidIndex(op.water.kind);
       if(!destination||destination.capacity[index]-destination.water[index]<=.00001)return false;
@@ -3004,7 +3014,9 @@ function residentTurn(s, r, i, dt, needApi, pending) {
       }
       if (!r.cargo && !r.operation && !r.outsideWork && !r.removalJob && r.action !== 'service') {
         if (animalCarePending && performUpkeep(s,r,dt,go,changeMaterial,MATERIALS,carDoor,useWater,workSpot,true)) continue;
-        if (farmJobsPending && operationalWork(s,r,i,dt,false,'farm')) continue;
+        // Ripe crops, thirsty beds and animals cannot wait. Preparing and planting can:
+        // while building or clearing is waiting, only part of the village tends beds.
+        if (farmJobsPending && operationalWork(s,r,i,dt,false,bedHandsFull(s,r,pending) ? 'farm-pressing' : 'farm')) continue;
       }
       // Finish an assigned batch before reconsidering work categories. Otherwise
       // changing availability can shuffle the reserved slots on every tick.

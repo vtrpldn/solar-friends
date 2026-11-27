@@ -106,3 +106,18 @@ autonomous.economyPolicies={sales:{},work:{food:0,maintenance:0,production:0,con
 advance(autonomous,{seconds:4000,until:()=>autonomous.operations?.some(op=>op.farm?.action==='harvest'&&op.done)});
 assert(autonomous.operations.some(op=>op.farm?.action==='harvest'&&op.done),'residents prepare, plant, harvest and deliver without player orders');
 assert(field.cultivation.beds.some(b=>b.exportedKg>0));
+
+// A large field must not take the whole village: routine bed work leaves hands for building.
+const {s:shared}=village({sandbox:true});
+assert.equal(planField(shared,50,50,[6,6]),'');
+shared.instantBuild=false;
+let sharedSite=false;
+for(let z=40;z<=64&&!sharedSite;z++)for(let x=40;x<=64&&!sharedSite;x++)sharedSite=plan(shared,'gathering',x,z)==='';
+assert(sharedSite,'a building site beside the field');
+shared.materials.greens_seed=200;
+const gathering=shared.projects.at(-1),untouched=()=>shared.projects.find(p=>p.key==='field').cultivation.beds.filter(b=>b.stage==='unprepared').length;
+advance(shared,{seconds:3200,until:()=>gathering.work>=PROJECTS.gathering.work});
+assert(gathering.work>=PROJECTS.gathering.work,'the building is finished within a day despite a field full of bed work');
+assert(untouched()>0,'the building did not wait for the whole field');
+assert(untouched()<36,'bed work carried on beside the building');
+console.log('PASS a field full of bed work leaves residents free to build');
