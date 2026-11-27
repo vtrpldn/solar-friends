@@ -41,6 +41,7 @@ import { migrateItemProjects } from "./items.js";
 import {economyPolicies,workGroup,salePreview,validatePolicies} from './economy-policies.js';
 import {ensureFinances,recordMoney,transact,validFinances} from './finances.js';
 import {registerNaturalProjects,ensureNaturalLand} from './natural-resources.js';
+import {landIndex,tendedProjects,wildShortcuts,WILD_KIND} from './wild-land.js';
 import { STORAGE_KINDS, crewLimit, carriedLoads, crewEfficiency } from "./construction-logistics.js";
 import {registerWorld,validSettings,townDuration,waterFactor} from './world-settings.js';
 import {depositCapacity} from './land-layout.js';
@@ -60,6 +61,7 @@ import { OPENING_PROJECTS, openingProgress } from "./opening.js";
 import { COMMUNITY } from "../library/community-defs.js";
 import {
   ensureInfrastructure,
+  nodeIndex,
   syncProjectNode,
   syncInfrastructure,
   infrastructureStep,
@@ -751,7 +753,7 @@ export function maintainWater(s) {
     if(n.water[0]>=recipe.water)continue;
     if(n.capacity[0])queueWater(s,waterSource(sys,n),n.id);
   }
-  for(const p of s.projects){
+  for(const p of tendedProjects(s,PROJECTS)){
     const n=sys.nodes[p.id];if(!n||!n.enabled||!n.capacity[0]||n.water[0]>=Math.min(12,n.capacity[0]*.5)||s.operations?.some(o=>!o.done&&o.water&&o.site===p.id))continue;
     const growing=p.cultivation?.beds.some(b=>b.irrigation&&['growing','harvestable'].includes(b.stage)&&!harvestExpired(b,s.time))||s.operations?.some(o=>!o.done&&o.site===p.id&&CROP_CARE[o.recipe]&&['growing','process'].includes(o.phase)&&p.irrigationPolicy!=='rainfed');
     if(growing)queueWater(s,waterSource(sys,n),p.id);
@@ -759,7 +761,7 @@ export function maintainWater(s) {
   for(const job of s.upkeep?.jobs||[]){const care=ANIMAL_CARE[job.care],n=sys.nodes[job.target];if(!care||job.done||!n||n.water[0]>=care.water||s.operations?.some(o=>!o.done&&o.water&&o.site===n.id))continue;
     const source=Object.values(sys.nodes).filter(a=>a.id!==n.id&&a.water[0]>=1).sort((a,b)=>Math.hypot(a.x-n.x,a.z-n.z)-Math.hypot(b.x-n.x,b.z-n.z))[0];if(source)queueWater(s,source.id,n.id,'fresh');
   }
-  for(const n of Object.values(sys.nodes)) {
+  for(const n of nodeIndex(sys).live) {
     if(n.maintainFresh && n.capacity[0] && n.water[0]<drinkingReserve(s,n)-Math.min(12,drinkingReserve(s,n)*.25) &&
       !s.operations?.some(o=>!o.done && o.water && o.site===n.id)) queueWater(s,waterSource(sys,n),n.id);
     if(n.maintainSanitation && [2,3].some(i=>n.capacity[i]>0 && n.water[i]>=n.capacity[i]*.5))queueSanitation(s,n.id);
@@ -1961,10 +1963,15 @@ function prepareNavigation(s){
   const campSignature=JSON.stringify([s.landSeed,s.worldSettings,s.camp,s.campSite]);
   let cache=navigationCaches.get(s);
   let same=cache?.campSignature===campSignature&&cache.projects.length===s.projects.length;
+  // The same land means the same project objects as last time, and a wild tree can only have been felled.
+  const land=landIndex(s,PROJECTS),known=same&&cache.land===land;
   if(same)for(let i=0;i<s.projects.length;i++){
-    const p=s.projects[i],old=cache.projects[i],size=projectSiteSize(p);
+    const p=s.projects[i],old=cache.projects[i];
+    if(known&&old.wild&&old.work===p.work&&old.felled===p.felled)continue;
+    const size=projectSiteSize(p);
     if(old.id!==p.id||old.key!==p.key||old.x!==p.x||old.z!==p.z||old.rotation!==p.rotation||old.felled!==p.felled||old.cultivated!==!!p.cultivation||old.complete!==(p.work>=PROJECTS[p.key].work)||old.w!==size[0]||old.d!==size[1]){same=false;break;}
   }
+  if(same)cache.land=land;
   if(!same){
     const obstacles=new Map();
     for(const p of s.projects){
@@ -1976,7 +1983,7 @@ function prepareNavigation(s){
           }
       }
     }
-    cache={campSignature,projects:s.projects.map(p=>{const [w,d]=projectSiteSize(p);return {id:p.id,key:p.key,x:p.x,z:p.z,rotation:p.rotation,felled:p.felled,cultivated:!!p.cultivation,complete:p.work>=PROJECTS[p.key].work,w,d};}),state:s,cells:new Map(),terrain:new Map(),routes:new Map(),roads:new Map(),obstacles,camp:blockedCamp(s)};navigationCaches.set(s,cache);
+    cache={campSignature,land,projects:s.projects.map(p=>{const [w,d]=projectSiteSize(p);return {wild:wildShortcuts()&&PROJECTS[p.key].kind===WILD_KIND,work:p.work,id:p.id,key:p.key,x:p.x,z:p.z,rotation:p.rotation,felled:p.felled,cultivated:!!p.cultivation,complete:p.work>=PROJECTS[p.key].work,w,d};}),state:s,cells:new Map(),terrain:new Map(),routes:new Map(),roads:new Map(),obstacles,camp:blockedCamp(s)};navigationCaches.set(s,cache);
   }
   return cache;
 }
@@ -2621,7 +2628,8 @@ function clockStep(s, ctx) {
 function upkeepTickStep(s, ctx) {
   const {dt} = ctx;
   const sys = ctx.sys = autoConnectUtilities(s, PROJECTS);
-  const herds=s.projects.filter(p=>p.animalCare).map(p=>[p,p.animalHealth??100]);
+  const herds=[];
+  for(const p of tendedProjects(s,PROJECTS))if(p.animalCare)herds.push([p,p.animalHealth??100]);
   upkeepStep(s, PROJECTS, dt, project => syncProjectNode(sys, project, PROJECTS));
   communityStep(s, dt, PROJECTS, {say, ready: p => p.delivered >= requiredLoads(p)});
   // Animals going without feed or water are easy to miss; say so as it happens.
@@ -2641,9 +2649,9 @@ function infrastructureTickStep(s, ctx) {
 // Biological cycles and fields, with a message when a field's condition changes.
 function cropStep(s, ctx) {
   const {dt} = ctx;
-  biologicalStep(s,dt,useWater);
+  biologicalStep(s,dt,useWater,tendedProjects(s,PROJECTS));
   cultivationStep(s,dt,useWater,PROJECTS);
-  for(const p of s.projects){
+  for(const p of tendedProjects(s,PROJECTS)){
     const beds=p.cultivation?.beds;
     if(!beds)continue;
     const warning=beds.some(b=>b.stage==='failed')?'failed':beds.some(b=>harvestExpired(b,s.time))?'expired':beds.some(b=>['growing','harvestable'].includes(b.stage)&&(b.droughtDamage||0)>0)?'damaged':beds.some(b=>['growing','harvestable'].includes(b.stage)&&b.moisture<.2)?'wilting':'healthy';

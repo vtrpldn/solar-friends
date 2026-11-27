@@ -28,6 +28,7 @@ The playable game is `web/v02/weekend/` (served at `/v2/`; the folder name is hi
   - **Resident behaviour:** each resident's turn is `residentTurn`, a priority ladder in which each `continue` ends the turn. Construction is its last rung, `constructionTurn`.
   - **Production jobs:** `operationalWork`, with `waterOperation` and `returnOperation` split out.
   - **Saves:** `restore()` returns null for a bad save. `restoreWithReason()` says which check failed, so use it when a save won't load. Add a validator to the named list near the end of `restoreState`, and old-save migrations beside the others.
+  - **Per-tick loops skip wild trees:** a new plot is hundreds of trees and a handful of anything else, so loops over projects and utility nodes use `tendedProjects()` and `nodeIndex().live` from `wild-land.js`. Its header lists what that assumes about trees; `verify-v02-wild-land.mjs` plays villages with the shortcuts on and off and compares the saves.
   - Subsystems live in their own modules (`weather.js`, `cultivation.js`, `infrastructure.js`…). They must never import `simulation.js`; there are no import cycles.
 - **Presentation** (`game.js`, one big module whose top-level variables are shared state).
   - **HUD:** `renderUI` calls one `render…` function per HUD area. Add a new area as its own function and call it there; `refreshUI()` forces a redraw.
@@ -51,6 +52,7 @@ npm run build:site
 - Only one check run works at a time on this machine. A run from another worktree waits, which is normal. Run a single check with `node scripts/<name>.mjs`.
 - UI changes need a rendered look. Use the browser checks, and for HUD refactors `node scripts/ui-snapshot.mjs --record/--compare`.
 - Simulation refactors must be proven byte-identical with `node scripts/golden-sim.mjs --record` before and `--compare` after (`--quick` for a fast pass).
+- Advance days speed: `node scripts/benchmark-v02-advance-days.mjs --record artifacts/advance-days.json` before a change and `--compare` after. It also says whether the final save is the same.
 - New checks build their state with `scripts/fixtures.mjs`: `village()`, `addSite()`, `advance()`, `advanceUntil()`, `seedSave()`. Checks about the arrival, opening or camp choice build their own.
 - A failing historical check may encode an older design decision. Investigate it before changing or deleting it, and say which you did.
 

@@ -1,15 +1,20 @@
-import { syncInfrastructure, POWER_LOAD } from "./infrastructure.js";
+import { syncInfrastructure, syncedNodeIndex, POWER_LOAD } from "./infrastructure.js";
 const signatures = new WeakMap();
 // Connections are part of a finished building, not separate construction jobs.
 export function autoConnectUtilities(s, defs) {
   const sys = syncInfrastructure(s, defs),
-    nodes = Object.values(sys.nodes);
+    index = syncedNodeIndex(sys),
+    nodes = index.all;
   const previous = signatures.get(sys);
-  if (previous?.length === nodes.length && nodes.every((node,i) => {
-    const old = previous[i];
-    return node.id === old.id && node.kind === old.kind && node.x === old.x && node.z === old.z;
-  })) return sys;
-  signatures.set(sys, nodes.map(({id, kind, x, z}) => ({id, kind, x, z})));
+  const unchanged = (node, old) => node.id === old.id && node.kind === old.kind && node.x === old.x && node.z === old.z;
+  // The same index means the same nodes as last time, and a wild tree does not move.
+  if (previous?.index === index
+    ? index.live.every((node,i) => unchanged(node, previous.nodes[index.at[i]]))
+    : previous?.nodes.length === nodes.length && nodes.every((node,i) => unchanged(node, previous.nodes[i]))) {
+    previous.index = index;
+    return sys;
+  }
+  signatures.set(sys, {index, nodes: nodes.map(({id, kind, x, z}) => ({id, kind, x, z}))});
   const wanted = [];
   const add = (kind, a, b) => {
     if (

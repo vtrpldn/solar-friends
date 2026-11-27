@@ -1,3 +1,4 @@
+import {tendedProjects} from './wild-land.js';
 import {rainfallRate} from './weather.js';
 import {cropStress,validCropStress} from './crop-stress.js';
 import {materialMass} from './material-measures.js';
@@ -93,7 +94,7 @@ export function finishFarmJob(s,p,op){
  op.harvestOutput=output;
 }
 export function cultivationStep(s,dt,useWater,defs){
- for(const p of s.projects){
+ for(const p of tendedProjects(s,defs)){
   if(p.work<(defs[p.key]?.work||0))continue;
   const farm=ensureCultivation(s,p);if(!farm)continue;
   // Bounded steps make evaporation and decomposition stable across fast-forward.
