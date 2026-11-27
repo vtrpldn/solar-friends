@@ -25,6 +25,7 @@ The playable game is `web/v02/weekend/` (served at `/v2/`; the folder name is hi
 
 - **Simulation** (`simulation.js`, headless, deterministic: no randomness or clock reads).
   - **Per-tick behaviour:** one tick runs `TICK_STEPS` in order, sharing `ctx = {dt, sys}`. Add a step there, or call your subsystem from the step it belongs to. A before/after message diff stays inside one step.
+  - **Slow steps:** steps marked `SLOW` in `TICK_STEPS` (upkeep, utilities, crops, stores, planners) run every tick in play, but Advance days hands them a whole game second every tenth tick (`tick(s, dt, slowDt)`). A slow step must give the same result either way, near enough; anything a resident needs within the same tenth of a second belongs in a step that is not slow.
   - **Resident behaviour:** each resident's turn is `residentTurn`, a priority ladder in which each `continue` ends the turn. Construction is its last rung, `constructionTurn`.
   - **Production jobs:** `operationalWork`, with `waterOperation` and `returnOperation` split out.
   - **Saves:** `restore()` returns null for a bad save. `restoreWithReason()` says which check failed, so use it when a save won't load. Add a validator to the named list near the end of `restoreState`, and old-save migrations beside the others.

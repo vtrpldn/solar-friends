@@ -2,7 +2,8 @@
 //
 //   node scripts/benchmark-v02-advance-days.mjs --record artifacts/advance-days.json   before a change
 //   node scripts/benchmark-v02-advance-days.mjs --compare artifacts/advance-days.json  after it
-//   options: --exact <days> (default 5)  --fast <days> (default 30)  --runs <n> (default 3, best is kept)
+//   options: --paced <days> (default 5, the dialog's normal pace)  --fast <days> (default 30)
+//            --exact <days> (default 0: every system every tick, as normal play)  --runs <n> (default 3, best is kept)
 //
 // Each run also hashes the final save, so a behaviour-preserving optimisation must report "same".
 // Timings move with machine load: compare runs taken close together and trust the best of several.
@@ -14,7 +15,7 @@ import {skipDays} from '../web/v02/weekend/time-skip.js';
 
 const args = process.argv.slice(2), option = (name, fallback) => {const i = args.indexOf(name); return i < 0 ? fallback : args[i + 1];};
 const runs = Number(option('--runs', 3));
-const MODES = [{name: 'exact', fast: false, days: Number(option('--exact', 5))}, {name: 'fast', fast: true, days: Number(option('--fast', 30))}];
+const MODES = [{name: 'paced', days: Number(option('--paced', 5))}, {name: 'fast', fast: true, days: Number(option('--fast', 30))}, {name: 'exact', exact: true, days: Number(option('--exact', 0))}];
 
 function newVillage() {
   const s = createWeekend(42);
@@ -30,7 +31,7 @@ for (const mode of MODES) {
   let best = Infinity, hash, steps;
   for (let run = 0; run < runs; run++) {
     const s = newVillage(), started = performance.now();
-    ({steps} = await skipDays(s, mode.days, {fast: mode.fast, yieldControl: () => {}}));
+    ({steps} = await skipDays(s, mode.days, {fast: mode.fast, exact: mode.exact, yieldControl: () => {}}));
     best = Math.min(best, performance.now() - started);
     const now = createHash('sha256').update(save(s)).digest('hex').slice(0, 16);
     if (hash && hash !== now) throw Error(`${mode.name}: two runs of the same skip ended in different saves`);

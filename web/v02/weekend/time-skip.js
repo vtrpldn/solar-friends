@@ -21,9 +21,12 @@ function createYielder() {
   };
 }
 
-// Exact advances match simulationFrame. Fast advances use the largest step tick supports.
+// Residents take the same short steps as simulationFrame while the village's slow systems
+// (upkeep, utilities, crops, stores, planners) catch up once a game second. `exact` steps
+// everything every tick, as normal play does. Fast advances use the largest step tick supports.
+const SLOW_EVERY = 10;
 export async function skipDays(state, days, {
-  fast = false, progress = () => {}, cancelled = () => false,
+  fast = false, exact = false, progress = () => {}, cancelled = () => false,
   yieldControl,
   now = () => performance.now(),
 } = {}) {
@@ -31,6 +34,7 @@ export async function skipDays(state, days, {
   if (state.stage === 'arrival' || state.arrivalAnimating) throw new Error('Finish arriving first.');
   const stepSeconds = fast ? 1 : .1;
   const total = Math.round(days * DAY / stepSeconds);
+  const paced = !fast && !exact;
   let steps = 0;
   const yielder = yieldControl ? {yieldControl} : createYielder();
   try {
@@ -39,10 +43,12 @@ export async function skipDays(state, days, {
       await yielder.yieldControl();
       if (cancelled()) break;
       const started = now();
+      // A paced batch ends on a whole game second, so stopping leaves no slow time owed.
       do {
-        tick(state, stepSeconds);
+        if (paced) tick(state, stepSeconds, (steps + 1) % SLOW_EVERY ? 0 : 1);
+        else tick(state, stepSeconds);
         steps++;
-      } while (steps < total && now() - started < 12);
+      } while (steps < total && (now() - started < 12 || (paced && steps % SLOW_EVERY)));
       progress(steps / total);
     }
     return {steps, completed: steps === total};

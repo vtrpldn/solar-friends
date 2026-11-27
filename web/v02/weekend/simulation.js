@@ -2576,17 +2576,21 @@ export function endWeekend(s) {
   say(s, "Tools down. Our first meal on our own land.");
   return true;
 }
-export function tick(s,dt){
+// slowDt is the time handed to the SLOW steps below. Normal play leaves it alone, so every step
+// advances by dt. Advance days passes 0 on most ticks and a whole game second on every tenth:
+// residents keep their short steps while upkeep, utilities, crops, stores and planners catch up
+// once a second.
+export function tick(s,dt,slowDt=dt){
   // Nobody has set foot on the land until the arrival is over.
   const before=s.stage==='arrival'||s.arrivalAnimating?null:footfallBefore(s);
-  try { return tickWithNavigation(s,dt); } finally { releaseEquipment(s); if(before&&dt>0)recordFootfall(s,before,dt); }
+  try { return tickWithNavigation(s,dt,slowDt); } finally { releaseEquipment(s); if(before&&dt>0)recordFootfall(s,before,dt); }
 }
-function tickWithNavigation(s,dt){
-  if(!fastNavigationStates.has(s))return tickUncached(s,dt);
+function tickWithNavigation(s,dt,slowDt){
+  if(!fastNavigationStates.has(s))return tickUncached(s,dt,slowDt);
   const previous=activeNavigation;activeNavigation=prepareNavigation(s);
-  try{return tickUncached(s,dt);}finally{activeNavigation=previous;}
+  try{return tickUncached(s,dt,slowDt);}finally{activeNavigation=previous;}
 }
-function tickUncached(s, dt) {
+function tickUncached(s, dt, slowDt) {
   if (!Number.isFinite(dt) || dt <= 0) return;
   if(s.arrivalAnimating){
     s.arrivalElapsed=Math.min(ARRIVAL_DURATION,s.arrivalElapsed+Math.min(dt,1));
@@ -2598,22 +2602,30 @@ function tickUncached(s, dt) {
     return;
   }
   dt = Math.min(dt, 1);
+  // The slow steps create the utility system the others read, so a village's first tick runs them.
+  slowDt = Number.isFinite(slowDt) && slowDt >= 0 && s.infrastructure ? Math.min(slowDt, 1) : dt;
   const ctx = {dt, sys: null};
-  for (const [, step] of TICK_STEPS) step(s, ctx);
+  for (const [, step, slow] of TICK_STEPS) {
+    if (slow && !slowDt) continue;
+    ctx.dt = slow ? slowDt : dt;
+    step(s, ctx);
+  }
 }
 
 // One game tick, in order. Adding a per-tick behaviour means adding a step here (or calling it from
-// the step it belongs to); each step reads and writes ctx = {dt, sys}.
+// the step it belongs to); each step reads and writes ctx = {dt, sys}. A SLOW step may be handed a
+// whole game second at once (see tick), so it must not depend on running every tick.
+const SLOW = true;
 const TICK_STEPS = [
   ['world', worldStep],
   ['clock', clockStep],
-  ['upkeep', upkeepTickStep],
-  ['infrastructure', infrastructureTickStep],
-  ['crops', cropStep],
-  ['food storage', foodStoreStep],
+  ['upkeep', upkeepTickStep, SLOW],
+  ['infrastructure', infrastructureTickStep, SLOW],
+  ['crops', cropStep, SLOW],
+  ['food storage', foodStoreStep, SLOW],
   ['delivery', deliveryTickStep],
   ['sales', salesStep],
-  ['planning', planningStep],
+  ['planning', planningStep, SLOW],
   ['resident needs', residentNeedsStep],
   ['trips', tripStep],
   ['residents', residentsStep],

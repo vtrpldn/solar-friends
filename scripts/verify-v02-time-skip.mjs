@@ -23,7 +23,7 @@ for (const days of [1,2]) {
   }
   for(let i=0;i<days*DAY/.1;i++)tick(natural,.1);
   let yields=0;
-  await skipDays(skipped,days,{yieldControl:async()=>{yields++;}});
+  await skipDays(skipped,days,{exact:true,yieldControl:async()=>{yields++;}});
   if (days === 1) {
     assert(finished(skipped, 'gathering'), 'residents finish the queued gathering site during the skip');
     assert(skipped.people.some(r => r.work > 0));
@@ -33,6 +33,14 @@ for (const days of [1,2]) {
   assert(yields>1,'long skips yield for UI updates');
   assert(restore(save(skipped)),'advanced village can be loaded');
 }
+// The dialog's default pace: residents step as in play, slow systems once a game second.
+const pacedVillage = fresh();
+assert.equal(plan(pacedVillage, 'gathering', 29, 35), '');
+const pacedStart = pacedVillage.time;
+assert.deepEqual(await skipDays(pacedVillage, 2, {yieldControl:async()=>{}}), {steps:2*DAY/.1, completed:true});
+assert(Math.abs(pacedVillage.time-pacedStart-2*DAY)<1e-6);
+assert(finished(pacedVillage, 'gathering'), 'residents finish the queued gathering site during a paced skip');
+assert(restore(save(pacedVillage)), 'paced simulation produces a loadable save');
 const fastVillage = fresh();
 assert.equal(plan(fastVillage, 'gathering', 29, 35), '');
 const fastStart = fastVillage.time;
@@ -44,7 +52,11 @@ assert(restore(save(fastVillage)), 'fast simulation produces a loadable save');
 
 const s=fresh();let stop=false;
 const result=await skipDays(s,1,{now:(()=>{let n=0;return()=>n+=13;})(),progress:f=>{if(f>0)stop=true;},cancelled:()=>stop,yieldControl:async()=>{}});
-assert.equal(result.steps,1);assert.equal(result.completed,false);
+// A paced skip stops on a whole game second (ten steps), so no slow-system time is left owed.
+assert.equal(result.steps,10);assert.equal(result.completed,false);
+stop=false;
+const exactStop=await skipDays(fresh(),1,{exact:true,now:(()=>{let n=0;return()=>n+=13;})(),progress:f=>{if(f>0)stop=true;},cancelled:()=>stop,yieldControl:async()=>{}});
+assert.equal(exactStop.steps,1);
 for(const days of [0,-1,1.5,366,NaN,Infinity])await assert.rejects(skipDays(s,days),RangeError);
 await assert.rejects(skipDays(createWeekend(42),1),/arriving/);
 console.log('PASS: one- and two-day full-state parity, save reload, yielding, cancellation, and input/arrival guards.');
