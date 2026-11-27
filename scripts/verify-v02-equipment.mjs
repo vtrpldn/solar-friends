@@ -57,6 +57,8 @@ console.log('PASS: exclusive shared borrowing, needs release, wear, manual/autom
 
 function constructionRun(withTools) {
  const state=fresh(); state.materials['carpentry-tools']=withTools?1:0;
+ state.time=600; // Dry weather: rain stops building.
+
  const build={id:state.nextId++,key:'shelter',x:35,z:32,work:0,delivered:requiredLoads('shelter')};state.projects.push(build);
  for(const [i,r]of state.people.entries()){r.x=35+i*.1;r.z=31;r.energy=100;for(const key of Object.keys(r.needs))r.needs[key]=100;}
  let borrowed=false;
