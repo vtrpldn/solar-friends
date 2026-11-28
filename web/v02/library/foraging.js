@@ -31,9 +31,15 @@ export function forageModel(kind,depleted=false){
    for(let j=0;j<4;j++){const dx=(j-1.5)*.13,h=depleted?.12:.35+((i+j)%4)*.13;beam(g,[x,.02,z],[x+dx,h,z+.1],.025,j%2?'leaf':'leafLight');}
    if(!depleted){beam(g,[x,.05,z],[x+.06,.85,z],.018,'timberLight');crown(x+.06,.83,z,.1,'earth',[.5,1.7,.5]);}
   }
+ }else if(kind==='saplings'){
+  // Knee-high young trees; once dug, the holes and a couple of the smallest remain.
+  for(let i=0;i<(depleted?2:6);i++){const a=i*2.4,r=.12+(i%3)*.11,x=Math.cos(a)*r,z=Math.sin(a)*r,h=depleted?.22:.4+(i%3)*.2;
+   beam(g,[x,0,z],[x+.02,h,z],.018,'timber');crown(x+.02,h,z,h*.3,i%2?'leafLight':'leaf',[1,.8,1]);
+   crown(x+.08,h*.7,z+.05,h*.2,'leaf',[1,.7,1]);}
+  if(depleted)for(let i=0;i<3;i++)crown(Math.cos(i*2.1+1)*.28,.02,Math.sin(i*2.1+1)*.28,.1,'earth',[1,.3,1]);
  }else if(kind==='stone'){
   for(let i=0;i<(depleted?2:11);i++){const r=.13+(i%3)*.07;crown(Math.sin(i*2.4)*1.2,r*.55,Math.cos(i*4.1)*.6,r,'stone',[1.3,.75,1]);}
  }
  return g;
 }
-export const FORAGING_ASSETS=['fruit','wood','bamboo','grass','stone'].flatMap(kind=>[false,true].map(depleted=>({id:`forage-${kind}${depleted?'-gathered':''}`,name:`Wild gathering · ${kind}${depleted?' · gathered':''}`,category:'Gathering',type:'Vegetation',footprint:['fruit','bamboo'].includes(kind)?[2,2]:[2,1],revision:1,legacy:[],build:()=>forageModel(kind,depleted),description:'Local gathering patch in the shared low-poly palette and human scale.'})));
+export const FORAGING_ASSETS=['fruit','wood','bamboo','grass','stone','saplings'].flatMap(kind=>[false,true].map(depleted=>({id:`forage-${kind}${depleted?'-gathered':''}`,name:`Wild gathering · ${kind}${depleted?' · gathered':''}`,category:'Gathering',type:'Vegetation',footprint:['fruit','bamboo'].includes(kind)?[2,2]:kind==='saplings'?[1,1]:[2,1],revision:1,legacy:[],build:()=>forageModel(kind,depleted),description:'Local gathering patch in the shared low-poly palette and human scale.'})));

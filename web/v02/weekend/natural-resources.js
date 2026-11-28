@@ -1,5 +1,5 @@
 import {unrotatedSiteSize} from './site-space.js';
-import {GATHERING} from './gathering.js';
+import {GATHERING,GROVE_REACH} from './gathering.js';
 import {landRandom,landParameters} from './land-layout.js';
 import {settingsFor,richnessFactor,BIOMES} from './world-settings.js';
 import {riverBankAt,riverCenter,riverWidth} from './river-layout.js';
@@ -13,7 +13,7 @@ export function registerNaturalProjects(defs){
  for(const key of ['supply-2','supply-3'])Object.assign(defs[key],{natural:true,name:key==='supply-3'?'Stone outcrop':'Earth deposit',asset:key==='supply-3'?'natural-stone':'natural-earth',size:[4,3],description:'A large natural deposit. Residents extract finite local materials here; deposits cannot be placed, copied or moved.'});
 }
 export function ensureNaturalLand(s,defs){
- if((s.naturalLandVersion&&s.gatheringLandVersion) || !s.landSeed)return;
+ if((s.naturalLandVersion&&s.gatheringLandVersion&&s.seedlingLandVersion) || !s.landSeed)return;
  const random=landRandom(s.landSeed^0x8e4b192),settings=settingsFor(s.landSeed);
  const species=BIOMES[settings.biome].trees.filter(id=>TREE_SPECIES[id]);
  const add=(key,x,z)=>{
@@ -23,7 +23,7 @@ export function ensureNaturalLand(s,defs){
    for(let dx=-1;dx<=w;dx++)for(let dz=-1;dz<=d;dz++)if(riverBankAt(x+dx,z+dz,1,s.landSeed)||accessRoadAt(x+dx,z+dz,2))return false;
    if(s.projects.some(p=>{
      // Trees in a grove stand in neighbouring cells; everything else keeps clear.
-     const gap=defs[key].kind==='wild-tree'&&defs[p.key].kind==='wild-tree'?0:2;
+     const gap=defs[p.key].kind==='wild-tree'&&(defs[key].kind==='wild-tree'||GATHERING[key]?.grove)?0:2;
      const size=p.key==='field'?(p.fieldSize||defs[p.key].size):unrotatedSiteSize(p,defs[p.key].size);
      const [pw,pd]=(p.rotation||0)%2?[...size].reverse():size;
      return !p.felled&&x<p.x+pw+gap&&x+w+gap>p.x&&z<p.z+pd+gap&&z+d+gap>p.z;
@@ -86,7 +86,7 @@ export function ensureNaturalLand(s,defs){
  }
  if(!s.gatheringLandVersion){
   for(const [key,d] of Object.entries(GATHERING)){
-   if(!d.biomes.includes(settings.biome))continue;
+   if(!d.biomes.includes(settings.biome)||d.grove)continue;
    const sites=[...candidates].sort((a,b)=>(b.jitter+b.moisture*(key==='wild-bamboo'?2:.3))-(a.jitter+a.moisture*(key==='wild-bamboo'?2:.3)));
    let count=0;for(const p of sites)if(Math.hypot(p.x-s.stock.x,p.z-s.stock.z)<28&&add(key,p.x,p.z)){count++;break;}
    for(const p of sites){if(count>=Math.max(2,Math.round(3*richnessFactor(settings.resources))))break;if(add(key,p.x,p.z))count++;}
@@ -94,4 +94,25 @@ export function ensureNaturalLand(s,defs){
   s.gatheringLandVersion=1;
  }
  s.naturalLandVersion=1;
+ // Seedling patches sit in a free cell beside the trees still standing, so a
+ // village saved before they existed gets them from the groves it has left.
+ // Their own random stream keeps that the same whatever ran above.
+ if(!s.seedlingLandVersion){
+  const pick=landRandom(s.landSeed^0x5eed11),trees=s.projects.filter(p=>p.natural&&!p.felled&&defs[p.key].kind==='wild-tree');
+  const order=trees.map(p=>({p,at:pick()})).sort((a,b)=>a.at-b.at).map(o=>o.p);
+  const company=p=>trees.filter(q=>Math.abs(q.x-p.x)<=GROVE_REACH&&Math.abs(q.z-p.z)<=GROVE_REACH).length;
+  const placed=[],want=Math.max(3,Math.round(4*richnessFactor(settings.resources)));
+  const beside=(p,near)=>{
+   if(placed.length>=want||near&&Math.hypot(p.x-s.stock.x,p.z-s.stock.z)>=28||company(p)<4||placed.some(q=>Math.hypot(q.x-p.x,q.z-p.z)<12))return;
+   // The most open neighbouring cell: seedlings come up at the sunny edge, where they can also be seen.
+   const crowd=([dx,dz])=>trees.filter(q=>Math.abs(q.x-p.x-dx)<=1&&Math.abs(q.z-p.z-dz)<=1).length;
+   const cells=[[1,0],[0,1],[-1,0],[0,-1],[1,1],[-1,1],[1,-1],[-1,-1]].map((c,i)=>({c,i,n:crowd(c)})).sort((a,b)=>a.n-b.n||a.i-b.i);
+   if(cells[0].n>2)return;
+   for(const {c:[dx,dz]} of cells)if(add('wild-seedlings',p.x+dx,p.z+dz)){placed.push(p);return;}
+  };
+  // One within a short walk of the supplies first, then the rest across the land.
+  for(const p of order){if(placed.length)break;beside(p,true);}
+  for(const p of order)beside(p,false);
+  s.seedlingLandVersion=1;
+ }
 }

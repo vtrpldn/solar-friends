@@ -20,6 +20,8 @@ const originals=JSON.stringify(old.projects);ensureNaturalLand(old,PROJECTS);ass
 for(const [key,d] of Object.entries(GATHERING)){
  let {s}=village({emergencyFood:false});s.naturalLandVersion=s.gatheringLandVersion=1;s.rainSeen=s.rainResolved=true;
  let p={id:s.nextId++,key,x:s.stock.x+4,z:s.stock.z+4,work:1,delivered:0,natural:true};s.projects.push(p);
+ // Seedlings only come up beside a standing tree.
+ if(d.grove)s.projects.push({id:s.nextId++,key:'wild-jequitiba',x:p.x+1,z:p.z,work:1,delivered:0,natural:true});
  const recipe=`gather-${key}`,resource=Object.keys(d.output)[0],before=materialCount(s,resource);assert.equal(queueProduction(s,p.id,recipe),'');assert(productionBlocker(s,p.id,recipe),'duplicate job prevented');
  let carried=false,reloaded=false;
  for(let i=0;i<20000&&!s.operations[0].done;i++){tick(s,.1);if(s.people.some(r=>r.cargo)){carried=true;if(!reloaded){s=restore(save(s));assert(s,'mid-haul save valid');enableFastNavigation(s);reloaded=true;}}}

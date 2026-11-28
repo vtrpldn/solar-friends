@@ -633,13 +633,24 @@
       "physicalBasis": "Engineering pack estimate; equipment specifications vary"
     },
     "tree_starts": {
-      "name": "Timber seedlings",
+      "name": "Tree seedlings",
       "canonicalUnit": "units",
       "canonicalPerSavedUnit": 1,
       "retailPackSavedUnits": 4,
       "retailPackPriceReais": 40,
       "kg": 2,
       "m3": 0.01,
+      "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
+      "physicalBasis": "Engineering pack estimate; equipment specifications vary"
+    },
+    "saplings": {
+      "name": "Nursery saplings",
+      "canonicalUnit": "units",
+      "canonicalPerSavedUnit": 1,
+      "retailPackSavedUnits": null,
+      "retailPackPriceReais": 0,
+      "kg": 4,
+      "m3": 0.02,
       "priceBasis": "Authored engineering/scenario estimate; no matching local quote verified",
       "physicalBasis": "Engineering pack estimate; equipment specifications vary"
     },
@@ -784,6 +795,11 @@
       },
       "compost": {
         "days": 60,
+        "window": null,
+        "seasonal": false
+      },
+      "saplings": {
+        "days": 180,
         "window": null,
         "seasonal": false
       },
@@ -1009,6 +1025,17 @@
       },
       "residentHours": 0.3,
       "growthDays": 60,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "saplings": {
+      "input": {
+        "tree_starts": 4
+      },
+      "output": {
+        "saplings": 4
+      },
+      "residentHours": 0.45,
+      "growthDays": 180,
       "basis": "Authored aggregate transformation; named mass losses tracked separately"
     },
     "wood": {
@@ -1505,6 +1532,15 @@
         "fodder": 6
       },
       "residentHours": 0.4125,
+      "growthDays": 0,
+      "basis": "Authored aggregate transformation; named mass losses tracked separately"
+    },
+    "gather-wild-seedlings": {
+      "input": {},
+      "output": {
+        "tree_starts": 2
+      },
+      "residentHours": 0.525,
       "growthDays": 0,
       "basis": "Authored aggregate transformation; named mass losses tracked separately"
     },

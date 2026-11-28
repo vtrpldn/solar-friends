@@ -129,7 +129,8 @@ const extraMaterials = {
   compost: ["Mature compost", 4, 8, 64],
   scraps: ["Organic residues", 4, 0, 0],
   seedlings: ["Vegetable seedlings", 4, 8, 24],
-  tree_starts: ["Timber seedlings", 2, 4, 40],
+  tree_starts: ["Tree seedlings", 2, 4, 40],
+  saplings: ["Nursery saplings", 2, 0, 0],
   bamboo_starts: ["Bamboo starts", 2, 4, 80],
   coffee_starts: ["Coffee seedlings", 10, 10, 60],
   coffee: ["Dried coffee", 4, 10, 600],
@@ -233,7 +234,7 @@ export function expandProjects(projects) {
         : COMMUNITY[model.id]?.category || category,
       repeatable: true,
       description:
-        ({coffee:'A cash crop, not food. About forty coffee shrubs under shade trees give their first crop after about three good growing years, later where the dry season is long, and roughly one a year after that: 24 kg of dried coffee, picked and sun-dried here by residents. Dried coffee keeps, and the town café buys it.',carport:'An open timber shelter with a lean-to roof, built over the two parking spaces. Cars left in the open weather in sun and rain and need a service about once a year even when they are not driven; under this roof they weather three times more slowly. It stands where the cars park and cannot be moved.',
+        ({'seedling-bench':'A shaded potting bench. Residents pot four tree seedlings here and grow them on for 180 days into nursery saplings. An orchard planned while four saplings are in the stores is planted with them instead of bought seedlings, and bears 180 days sooner.',coffee:'A cash crop, not food. About forty coffee shrubs under shade trees give their first crop after about three good growing years, later where the dry season is long, and roughly one a year after that: 24 kg of dried coffee, picked and sun-dried here by residents. Dried coffee keeps, and the town café buys it.',carport:'An open timber shelter with a lean-to roof, built over the two parking spaces. Cars left in the open weather in sun and rain and need a service about once a year even when they are not driven; under this roof they weather three times more slowly. It stands where the cars park and cannot be moved.',
           'supply-5':'A hand-saw workbench. Residents turn felled raw wood into timber, then saw timber into planks. They also weave baskets, fit garden-tool handles, make crates, assemble wheelbarrows with purchased parts, and repair shared equipment. No electricity required.', 'well':'A cistern storing 2,000 liters of water. Collects rainwater from nearby roofs and takes water piped from a pump. No power needed.', 'groundwater-well':'A covered groundwater well. Recharges up to 8 liters of water per hour (less in dry conditions), storing 40. Residents carry it to tanks by hand, or a nearby pump draws it; no electricity needed.',
           'water-pump':'An electric intake beside a river or within 6 cells of a completed water well. Draws up to 600 liters of water per hour and pipes it to cisterns, tanks and gardens. Requires power; well recharge can limit supply.'}[model.id]) ||
         COMMUNITY[model.id]?.description ||
@@ -316,6 +317,14 @@ export const PROCESSES = {
     output: { compost: 2 },
     kind: "compost",
     work: 40,
+  },
+  // Six months on the bench; an orchard planted with them skips those months.
+  saplings: {
+    name: "Raise tree seedlings into saplings",
+    input: { tree_starts: 4 },
+    output: { saplings: 4 },
+    kind: "seedling-bench",
+    work: 60,
   },
   wood: {
     name: "Grow and harvest timber",

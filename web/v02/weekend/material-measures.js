@@ -19,7 +19,7 @@ export const MATERIAL_UNITS=Object.freeze({
  milk:['liter milk (rounded mass)',1,.002],honey:['kg honey',1,.002],fodder:['kg dry fodder',1,.002],
  compost:['kg compost',1,.002],scraps:['kg organic residues',1,.002],
  coffee:['kg dried coffee',1,.0015],coffee_starts:['coffee seedling',.3,.002],
- seedlings:['seedling pack',2,.01],tree_starts:['tree seedling',2,.01],bamboo_starts:['bamboo start',2,.01],
+ seedlings:['seedling pack',2,.01],tree_starts:['tree seedling',2,.01],saplings:['nursery sapling',4,.02],bamboo_starts:['bamboo start',2,.01],
 });
 export function materialMeasure(id){
  const unit=MATERIAL_UNITS[id];if(!unit)throw new Error(`Missing material measurement: ${id}`);

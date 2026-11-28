@@ -8,7 +8,7 @@ import {harvestExpired,CROPS,fieldSizeValid,bedLayout,bedWorld,ensureCultivation
 import {foodPolicy,validFoodPolicy,manageKitchens} from './food-policy.js';
 import {startAutonomousWork,autonomousWorkPlan} from './autonomous-work.js';
 import {pantryForecast,foodSurplus} from './food-planning.js';
-import {registerGathering,gatheringStatus,gatheringState,validGathering} from './gathering.js';
+import {registerGathering,gatheringStatus,gatheringState,validGathering,groveGone} from './gathering.js';
 import {biologyLabel} from './biological-production.js';
 import {foodPortions,FOOD_SERVINGS} from './food-storage.js';
 import {quantityText} from './material-measures.js';
@@ -22,7 +22,7 @@ import {orderDelivery,deliveryStep,validDelivery} from "./deliveries.js";
 import {activeTrips,uncollectedProjects} from "./trip-state.js";
 import {upkeepStep,performUpkeep,recordVehicleDistance,validUpkeep,serviceParts,ANIMAL_CARE} from "./asset-upkeep.js";
 import {tripEstimate,STARTING_CAPITAL} from "./economy-reference.js";
-import {GAME_DAY,CROP_CARE,BIOLOGY,beginBiology,biologicalStep,harvestOutput,validBiology} from "./biological-production.js";
+import {GAME_DAY,CROP_CARE,BIOLOGY,beginBiology,biologicalStep,harvestOutput,validBiology,nurseryBill} from "./biological-production.js";
 import {atTownJob, dayShiftDue, startOutsideWork, outsideWorkStep, validOutsideWork} from "./outside-work.js";
 import {communityStep, validCommunity} from "./village-life.js";
 import {coolStoredFood} from './cold-storage.js';
@@ -477,6 +477,7 @@ export function productionBlocker(s, site, recipe) {
   if ((p.readyAt || 0) > s.time)
     return def.gathering ? gatheringStatus(s,p) : `Growing: ready in ${Math.ceil((p.readyAt-s.time)*.45)} game minutes.`;
   if(def.gatherLimit&&(p.extracted||0)>=def.gatherLimit)return 'This patch has been gathered out.';
+  if(def.gathering&&groveGone(s,p))return gatheringStatus(s,p);
   if (def.deposit && (p.extracted || 0) >= depositCapacity(s.landSeed,p,def))
     return "This deposit is exhausted.";
   const input={...def.input,...(recipe==='wood'&&p.harvestCount?{tree_starts:4}:{})};
@@ -1175,6 +1176,12 @@ function returnOperation(s, r, i, op, node, p, recipe) {
 export function materialText(id, n) {
   return `${quantityText(id,n)} ${MATERIALS[id].name.replace(/ pieces| packs| bundles/g, "")}`;
 }
+// What a newly planned project will draw from the stores. An orchard is planted
+// with nursery-raised saplings when the village has enough of them.
+export function planMaterials(s, key) {
+  const bill = PROJECTS[key].materials;
+  return s?.mode === "sandbox" ? bill : nurseryBill(bill, PROJECTS[key].kind, materialCount(s, "saplings"));
+}
 export function recipeText(key) {
   return Object.entries(PROJECTS[key].materials)
     .map(([id, n]) => materialText(id, n))
@@ -1185,14 +1192,14 @@ export function materialCount(s, id) {
 }
 export function missingMaterials(s, key) {
   if (s.mode === "sandbox") return [];
-  return Object.entries(PROJECTS[key].materials)
+  return Object.entries(planMaterials(s, key))
     .filter(([id, n]) => materialCount(s, id) < n)
     .map(([id, n]) => materialText(id, n - materialCount(s, id)));
 }
 export function blueprintPurchase(s, key, count = 1) {
   const items = {};
   let cost = 0;
-  if (s.mode !== "sandbox") for (const [id, required] of Object.entries(PROJECTS[key].materials)) {
+  if (s.mode !== "sandbox") for (const [id, required] of Object.entries(planMaterials(s, key))) {
     const missing = Math.max(0, required * count - materialCount(s, id));
     if (!missing) continue;
     if(s.autoBuy===false)return {items:{},cost:0,error:'Auto-buy is off. Gather or purchase the missing materials first.'};
@@ -1693,6 +1700,7 @@ export function plan(s, key, x, z, rotation = 0) {
     return "Already planned. Select it to change priority or move it.";
   const error = placementError(s, key, x, z, null, rotation);
   if (error) return error;
+  const bill = planMaterials(s, key);
   const purchase = blueprintPurchase(s, key);
   if (purchase.error) return purchase.error;
   if(!reserveSupplier(s,purchase.items,MATERIALS))return supplierError(s,purchase.items,MATERIALS);
@@ -1712,7 +1720,7 @@ export function plan(s, key, x, z, rotation = 0) {
       r.target = null;
     }
   for (const [id, n] of Object.entries(
-    s.mode === "sandbox" ? {} : def.materials,
+    s.mode === "sandbox" ? {} : bill,
   )) {
     const reserved = n - (purchase.items[id] || 0);
     changeMaterial(s,id,-reserved,undefined,'construction reservation');
@@ -1728,7 +1736,7 @@ export function plan(s, key, x, z, rotation = 0) {
     z,
     rotation,
     ...(key === "bridge" ? {siteVersion: 1} : {}),
-    billOfMaterials:{...def.materials},
+    billOfMaterials:{...bill},
     work: instant ? def.work : 0,
     delivered: s.mode === "sandbox" ? requiredLoads(key) : 0,
     ...(Object.keys(purchase.items).length ? {pendingMaterials: purchase.items,supplierDay:Math.floor((540+s.time*.45)/1440)} : {}),

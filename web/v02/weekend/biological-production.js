@@ -9,11 +9,23 @@ export const BIOLOGY={
  fruit:{days:120,window:14,seasonal:true,establish:610},bananas:{days:270,window:14,seasonal:true},
  wood:{days:6*365,window:Infinity,seasonal:true,plantingFraction:.1},bamboo:{days:365,window:Infinity,seasonal:true},
  compost:{days:60,window:Infinity,seasonal:false},
+ // Tree seedlings grown on at the seedling bench; see NURSERY_HEAD_START.
+ saplings:{days:180,window:Infinity,seasonal:false},
  eggs:{days:3,window:3,seasonal:false},milk:{days:1,window:1,seasonal:false},
  honey:{days:90,window:30,seasonal:true},
   // About one crop a year; the first after three favourable growing years, which a long dry season stretches towards four.
  coffee:{days:330,window:21,seasonal:true,establish:730},
 };
+// A sapling that has spent its nursery months on the bench has done that much of
+// its establishment already: an orchard planted with them bears that much sooner.
+export const NURSERY_HEAD_START=BIOLOGY.saplings.days;
+// The bill a newly planned site draws: saplings in place of bought tree
+// seedlings when the stores hold enough for the whole planting.
+export function nurseryBill(bill,kind,saplings){
+ if(kind!=='orchard'||!bill.tree_starts||!(saplings>=bill.tree_starts))return bill;
+ const {tree_starts,...rest}=bill;return {...rest,saplings:tree_starts};
+}
+const nurseryRaised=site=>!!site?.billOfMaterials?.saplings;
 export function seasonAt(time){
  const day=(304+(540+time*.45)/1440)%365;
  return ['Summer','Autumn','Winter','Spring'][Math.floor(((day+31)%365)/91.25)];
@@ -34,14 +46,14 @@ export const NATIVE_ORCHARDS={
 };
 export const orchardPlanting=s=>NATIVE_ORCHARDS[s?.worldSettings?.biome]||null;
 const nativeFor=(s,recipe)=>recipe==='fruit'?orchardPlanting(s):null;
-export function biologyLabel(recipe){return ['eggs','milk','honey'].includes(recipe)?'Next collection':recipe==='compost'?'Composting':'Growing';}
+export function biologyLabel(recipe){return ['eggs','milk','honey'].includes(recipe)?'Next collection':recipe==='compost'?'Composting':recipe==='saplings'?'Growing on':'Growing';}
 export const IRRIGATION_POLICIES={balanced:'Balanced · maintain 75% soil moisture',conserve:'Conserve water · maintain 40% soil moisture',rainfed:'Rain-fed · no stored water'};
 export function beginBiology(s,op,r){
  if(['eggs','milk'].includes(op.recipe)&&s.mode!=='sandbox')return false;
  const b=BIOLOGY[op.recipe];if(!b||op.planted||s.mode==='sandbox')return false;
  op.planted=true;op.phase='growing';op.growthRemaining=b.days*GAME_DAY;
  const site=s.projects?.find(p=>p.id===op.site);
- if(b.establish&&site&&!site.orchardEstablished){op.establishmentDays=b.establish;op.growthRemaining+=b.establish*GAME_DAY;site.orchardEstablished=true;}
+ if(b.establish&&site&&!site.orchardEstablished){op.establishmentDays=b.establish-(nurseryRaised(site)?NURSERY_HEAD_START:0);op.growthRemaining+=op.establishmentDays*GAME_DAY;site.orchardEstablished=true;}
  op.status=`${biologyLabel(op.recipe)}: ${b.days} game days before collection work`;
  r.operation=null;r.cargo=false;r.action='idle';r.target=null;r.walk=[];return true;
 }
@@ -85,7 +97,7 @@ export function biologyText(recipe,s){const b=BIOLOGY[recipe],native=nativeFor(s
 export function validBiology(s,recipes){if(!(s.projects||[]).every(p=>p.irrigationPolicy===undefined||Object.hasOwn(IRRIGATION_POLICIES,p.irrigationPolicy)))return false;if(!(s.projects||[]).every(p=>[p.soilMoisture,p.soilFertility].every(n=>n===undefined||(Number.isFinite(n)&&n>=0&&n<=1))))return false;if(!(s.projects||[]).every(p=>(p.starterSeedlingsUsed===undefined||typeof p.starterSeedlingsUsed==='boolean')&&(p.orchardEstablished===undefined||typeof p.orchardEstablished==='boolean')&&(p.harvestCount===undefined||(Number.isInteger(p.harvestCount)&&p.harvestCount>=0))))return false;return (s.operations||[]).every(o=>{
  if(!validCropStress(o))return false;
  if(o.farm)return true;
- if(o.establishmentDays!==undefined&&o.establishmentDays!==BIOLOGY[o.recipe]?.establish)return false;
+ if(o.establishmentDays!==undefined&&![0,NURSERY_HEAD_START].includes(BIOLOGY[o.recipe]?.establish-o.establishmentDays))return false;
  if(o.planted!==undefined&&typeof o.planted!=='boolean')return false;
  if(o.phase==='growing'&&(!BIOLOGY[o.recipe]||!o.planted||!Number.isFinite(o.growthRemaining)))return false;
  if(o.growthRemaining!==undefined&&(!BIOLOGY[o.recipe]||!Number.isFinite(o.growthRemaining)||o.growthRemaining<0||o.growthRemaining>(BIOLOGY[o.recipe].days+(o.establishmentDays||0))*GAME_DAY))return false;
