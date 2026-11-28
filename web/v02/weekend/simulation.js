@@ -41,7 +41,7 @@ import { migrateItemProjects } from "./items.js";
 import {economyPolicies,workGroup,salePreview,validatePolicies} from './economy-policies.js';
 import {ensureFinances,recordMoney,transact,validFinances} from './finances.js';
 import {registerNaturalProjects,ensureNaturalLand} from './natural-resources.js';
-import {landIndex,tendedProjects,wildShortcuts,WILD_KIND} from './wild-land.js';
+import {landIndex,tendedProjects,wildShortcuts,WILD_KIND,savedNodes,restoreWildNodes} from './wild-land.js';
 import { STORAGE_KINDS, crewLimit, carriedLoads, crewEfficiency } from "./construction-logistics.js";
 import {registerWorld,validSettings,townDuration,waterFactor} from './world-settings.js';
 import {depositCapacity} from './land-layout.js';
@@ -3234,7 +3234,8 @@ function constructionTurn(s, r, i, dt, needApi, pending) {
   } while (false);
 }
 export function save(s) {
-  return JSON.stringify(s);
+  // Resting wild-tree nodes are rebuilt on load (see wild-land.js).
+  return JSON.stringify(s.infrastructure?.nodes ? {...s, infrastructure: {...s.infrastructure, nodes: savedNodes(s, PROJECTS)}} : s);
 }
 export function restore(text) {
   return restoreWithReason(text).state;
@@ -3258,6 +3259,7 @@ function restoreState(text, fail) {
       s.projects.length > 128 * 128
     )
       return fail('shape: version, stage, five residents or project count');
+    restoreWildNodes(s, PROJECTS);
     for(const r of s.people)if(r?.removalJob!==undefined&&!s.projects.some(p=>p?.id===r.removalJob))delete r.removalJob;
     if(Array.isArray(s.operations)&&s.infrastructure?.nodes){
       s.operations=s.operations.filter(op=>{

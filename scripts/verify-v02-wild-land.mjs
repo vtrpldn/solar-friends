@@ -57,4 +57,26 @@ for (const [name, build] of Object.entries(SCENARIOS)) {
     assert.equal(landIndex(fast.s, PROJECTS).tended.length, fast.s.projects.length - trees.length);
   }
 }
+
+// Saves leave out resting wild-tree nodes and restore rebuilds them.
+{
+  const {s} = play(SCENARIOS['new village'], true);
+  const text = save(s), saved = JSON.parse(text).infrastructure.nodes, live = s.infrastructure.nodes;
+  const missing = Object.keys(live).filter(id => !saved[id]);
+  assert(missing.length > 100, 'a new village saves without its tree nodes');
+  assert(missing.every(id => live[id].kind === WILD_KIND), 'only wild-tree nodes are left out of a save');
+  assert(text.length < JSON.stringify(s).length / 2, 'tree nodes were most of the save');
+  const loaded = restore(text);
+  assert(loaded, 'a save without tree nodes loads');
+  assert(JSON.stringify(loaded.infrastructure.nodes) === JSON.stringify(live), 'loading rebuilds exactly the nodes that were left out');
+  // A tree node that carries anything is kept.
+  const odd = live[missing[0]];
+  odd.water[0] = 3;
+  assert(JSON.parse(save(s)).infrastructure.nodes[odd.id], 'a tree node holding water stays in the save');
+  odd.water[0] = 0;
+  const again = restore(save(loaded));
+  enableFastNavigation(loaded); enableFastNavigation(again);
+  for (let i = 0; i < 2000; i++) { tick(loaded, 1); tick(again, 1); }
+  assert(save(again) === save(loaded), 'a village plays on the same after one more save and load');
+}
 console.log('Wild-tree shortcuts leave every scenario unchanged.');
